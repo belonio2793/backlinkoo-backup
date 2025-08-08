@@ -519,10 +519,10 @@ const CreativeAssetsShowcase: React.FC<{
 
   const brandAssets = [
     {
-      name: 'Backlink Logo',
+      name: 'Premium Logo Suite',
       size: '1024x1024',
       format: 'PNG',
-      description: 'Primary brand logo',
+      description: 'High-end primary brand logo',
       category: 'brand',
       preview: (
         <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden aspect-square shadow-2xl flex items-center justify-center">
