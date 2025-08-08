@@ -541,7 +541,7 @@ const Index = () => {
                 </span>
                 <span className="flex items-center gap-1">
                   <Zap className="h-4 w-4" />
-                  Launch Q2 2024
+                  Coming Soon
                 </span>
                 <span className="flex items-center gap-1">
                   <Shield className="h-4 w-4" />
