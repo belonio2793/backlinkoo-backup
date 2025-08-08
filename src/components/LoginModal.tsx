@@ -22,6 +22,7 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
   const [isLoading, setIsLoading] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
+  const [activeTab, setActiveTab] = useState<"login" | "signup">(defaultTab);
 
   const { toast } = useToast();
 
@@ -99,11 +100,11 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
               <Infinity className="h-8 w-8 text-primary" />
             </div>
             <DialogTitle className="text-2xl font-bold text-foreground" role="banner">
-              {defaultTab === "signup" ? "Get Started" : "Welcome Back"}
+              {activeTab === "signup" ? "Get Started" : "Welcome Back"}
             </DialogTitle>
             {pendingAction && (
               <p className="text-sm text-muted-foreground mt-2">
-                {defaultTab === "signup"
+                {activeTab === "signup"
                   ? `Create an account to access ${pendingAction}`
                   : `Sign in to access ${pendingAction}`
                 }
@@ -164,6 +165,7 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
             onSignInStart={onClose}
             onForgotPassword={() => setShowForgotPassword(true)}
             defaultTab={defaultTab}
+            onTabChange={setActiveTab}
           />
         )}
       </DialogContent>
