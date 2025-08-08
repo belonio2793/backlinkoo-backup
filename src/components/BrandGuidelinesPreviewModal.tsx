@@ -527,7 +527,7 @@ export function BrandGuidelinesPreviewModal({ isOpen, onClose }: BrandGuidelines
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto p-8">
-            {pages[currentPage].content}
+            {currentPageData.content}
           </div>
 
           {/* Navigation Footer */}
