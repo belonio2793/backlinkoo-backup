@@ -25,6 +25,14 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
+  // Update email and step when initialEmail changes
+  useEffect(() => {
+    if (initialEmail && initialEmail !== email) {
+      setEmail(initialEmail);
+      setStep('signup');
+    }
+  }, [initialEmail]);
+
   const handleEmailSubmit = () => {
     if (!email || !email.includes('@')) {
       toast({
