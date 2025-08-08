@@ -71,9 +71,11 @@ export class RealRankTracker {
     }
   }
 
-  private static async performRankCheck(params: RankTrackingParams, startTime: number): Promise<RealRankingResult> {
+  private static async performRankCheck(params: RankTrackingParams, startTime: number, retryCount = 0): Promise<RealRankingResult> {
+    const maxRetries = 2;
+
     try {
-      console.log('🚀 Starting REAL rank tracking:', params);
+      console.log('🚀 Starting REAL rank tracking:', params, retryCount > 0 ? `(retry ${retryCount})` : '');
 
       // Call our Netlify function for server-side scraping with timeout
       const controller = new AbortController();
