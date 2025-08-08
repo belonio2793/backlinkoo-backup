@@ -795,37 +795,6 @@ const CreativeAssetsShowcase: React.FC<{
         </div>
       </div>
 
-      {/* BRAND ASSETS SECTION */}
-      <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 rounded-3xl p-10 border border-blue-500/20 shadow-2xl relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-transparent to-cyan-500/10"></div>
-        <div className="relative">
-          <div className="flex items-center gap-6 mb-10">
-            <div className="p-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl shadow-xl">
-              <FileText className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <h4 className="text-3xl font-black text-white mb-2">Brand Assets</h4>
-              <p className="text-blue-200 text-xl">Professional brand elements for consistent marketing</p>
-            </div>
-            <div className="ml-auto flex items-center gap-2">
-              <Star className="h-6 w-6 text-yellow-400 animate-pulse" />
-              <Crown className="h-6 w-6 text-blue-400" />
-              <Sparkles className="h-6 w-6 text-cyan-400 animate-pulse" />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
-            {brandAssets.map((asset) => (
-              <AssetCard
-                key={asset.name}
-                asset={asset}
-                onDownload={handleDownload}
-                onPreview={handlePreview}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* Asset Preview Modal */}
       {showPreviewModal && currentPreviewAsset && (
