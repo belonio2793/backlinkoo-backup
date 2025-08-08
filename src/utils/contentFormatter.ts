@@ -473,12 +473,16 @@ export class ContentFormatter {
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
 
-      // First protect our generated HTML by temporarily replacing it
-      .replace(/<(\/?)strong([^>]*)>/g, '___STRONG_TAG_$1___$2___END___')
-      .replace(/<(\/?)em([^>]*)>/g, '___EM_TAG_$1___$2___END___')
-      .replace(/<(\/?)h([1-6])([^>]*)>/g, '___H$2_TAG_$1___$3___END___')
-      .replace(/<(\/?)p([^>]*)>/g, '___P_TAG_$1___$2___END___')
-      .replace(/<(\/?)a([^>]*)>/g, '___A_TAG_$1___$2___END___')
+      // First protect our generated HTML by temporarily replacing it with unique markers
+      .replace(/<(\/?)strong(\s[^>]*)?>/gi, 'HTMLTAG_STRONG_$1_$2_ENDTAG')
+      .replace(/<(\/?)em(\s[^>]*)?>/gi, 'HTMLTAG_EM_$1_$2_ENDTAG')
+      .replace(/<(\/?)h([1-6])(\s[^>]*)?>/gi, 'HTMLTAG_H$2_$1_$3_ENDTAG')
+      .replace(/<(\/?)p(\s[^>]*)?>/gi, 'HTMLTAG_P_$1_$2_ENDTAG')
+      .replace(/<(\/?)a(\s[^>]*)?>/gi, 'HTMLTAG_A_$1_$2_ENDTAG')
+      .replace(/<(\/?)ul(\s[^>]*)?>/gi, 'HTMLTAG_UL_$1_$2_ENDTAG')
+      .replace(/<(\/?)ol(\s[^>]*)?>/gi, 'HTMLTAG_OL_$1_$2_ENDTAG')
+      .replace(/<(\/?)li(\s[^>]*)?>/gi, 'HTMLTAG_LI_$1_$2_ENDTAG')
+      .replace(/<(\/?)blockquote(\s[^>]*)?>/gi, 'HTMLTAG_BLOCKQUOTE_$1_$2_ENDTAG')
 
       // Now decode entities safely
       .replace(/&amp;/g, '&')
@@ -486,11 +490,15 @@ export class ContentFormatter {
       .replace(/&gt;/g, '>')
 
       // Restore our protected HTML tags
-      .replace(/___STRONG_TAG_(\/?)___([^_]*)___END___/g, '<$1strong$2>')
-      .replace(/___EM_TAG_(\/?)___([^_]*)___END___/g, '<$1em$2>')
-      .replace(/___H([1-6])_TAG_(\/?)___([^_]*)___END___/g, '<$2h$1$3>')
-      .replace(/___P_TAG_(\/?)___([^_]*)___END___/g, '<$1p$2>')
-      .replace(/___A_TAG_(\/?)___([^_]*)___END___/g, '<$1a$2>')
+      .replace(/HTMLTAG_STRONG_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1strong$2>')
+      .replace(/HTMLTAG_EM_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1em$2>')
+      .replace(/HTMLTAG_H([1-6])_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$2h$1$3>')
+      .replace(/HTMLTAG_P_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1p$2>')
+      .replace(/HTMLTAG_A_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1a$2>')
+      .replace(/HTMLTAG_UL_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1ul$2>')
+      .replace(/HTMLTAG_OL_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1ol$2>')
+      .replace(/HTMLTAG_LI_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1li$2>')
+      .replace(/HTMLTAG_BLOCKQUOTE_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1blockquote$2>')
 
       // Normalize quotes
       .replace(/[\u2018\u2019]/g, "'")
