@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-type ModalType = 
-  | 'login' 
-  | 'signup' 
-  | 'premium' 
-  | 'savePost' 
-  | 'pricing' 
+type ModalType =
+  | 'login'
+  | 'signup'
+  | 'premium'
+  | 'savePost'
+  | 'pricing'
   | 'claim'
+  | 'waitlist'
   | null;
 
 interface ModalState {
