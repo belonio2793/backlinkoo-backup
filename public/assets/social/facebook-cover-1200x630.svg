@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="fbBg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1e40af"/>
+      <stop offset="50%" style="stop-color:#7c3aed"/>
+      <stop offset="100%" style="stop-color:#f97316"/>
+    </linearGradient>
+    <filter id="fbGlow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#fbBg)"/>
+  
+  <!-- Decorative elements -->
+  <circle cx="1100" cy="100" r="80" fill="white" opacity="0.1"/>
+  <circle cx="100" cy="530" r="60" fill="white" opacity="0.15"/>
+  <circle cx="1000" cy="500" r="100" fill="white" opacity="0.08"/>
+  
+  <!-- Logo -->
+  <g transform="translate(100, 200)">
+    <path d="M0 50 C0 22, 22 0, 50 0 C78 0, 100 22, 100 50 C100 78, 78 100, 50 100 C78 100, 100 122, 100 150 C100 178, 78 200, 50 200 C22 200, 0 178, 0 150 C0 122, 22 100, 50 100 C22 100, 0 78, 0 50 Z" 
+          fill="white" 
+          filter="url(#fbGlow)"
+          stroke="rgba(255,255,255,0.3)" 
+          stroke-width="2"/>
+    <circle cx="50" cy="50" r="10" fill="rgba(255,255,255,0.9)"/>
+    <circle cx="50" cy="150" r="10" fill="rgba(255,255,255,0.9)"/>
+  </g>
+  
+  <!-- Main Content -->
+  <text x="300" y="280" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" filter="url(#fbGlow)">
+    Backlink ∞
+  </text>
+  <text x="300" y="320" font-family="Arial, sans-serif" font-size="24" font-weight="normal" fill="rgba(255,255,255,0.9)">
+    SEO Tools Suite - Affiliate Program
+  </text>
+  
+  <!-- Value Proposition -->
+  <text x="300" y="400" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="#fbbf24" filter="url(#fbGlow)">
+    Earn Up to 35% Commission
+  </text>
+  <text x="300" y="440" font-family="Arial, sans-serif" font-size="20" font-weight="normal" fill="white">
+    Join 1000+ Successful Affiliates Worldwide
+  </text>
+  
+  <!-- CTA Section -->
+  <rect x="300" y="480" width="300" height="60" rx="30" fill="white" opacity="0.95"/>
+  <text x="450" y="505" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#1e40af" text-anchor="middle">
+    START EARNING TODAY
+  </text>
+  <text x="450" y="525" font-family="Arial, sans-serif" font-size="14" font-weight="normal" fill="#7c3aed" text-anchor="middle">
+    Free to join • No experience required
+  </text>
+  
+  <!-- Features -->
+  <g transform="translate(750, 200)">
+    <circle cx="30" cy="30" r="25" fill="white" opacity="0.9"/>
+    <text x="30" y="37" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#2563eb" text-anchor="middle">$</text>
+    <text x="80" y="25" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">Up to 35%</text>
+    <text x="80" y="42" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.8)">Recurring Commission</text>
+    
+    <circle cx="30" cy="100" r="25" fill="white" opacity="0.9"/>
+    <text x="30" y="107" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#2563eb" text-anchor="middle">30d</text>
+    <text x="80" y="95" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">Cookie Tracking</text>
+    <text x="80" y="112" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.8)">Extended Attribution</text>
+    
+    <circle cx="30" cy="170" r="25" fill="white" opacity="0.9"/>
+    <text x="30" y="177" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#2563eb" text-anchor="middle">∞</text>
+    <text x="80" y="165" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">Premium Tools</text>
+    <text x="80" y="182" font-family="Arial, sans-serif" font-size="12" fill="rgba(255,255,255,0.8)">Marketing Assets</text>
+  </g>
+</svg>
