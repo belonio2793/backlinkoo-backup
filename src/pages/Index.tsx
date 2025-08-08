@@ -535,7 +535,7 @@ const Index = () => {
                   value={waitlistEmail}
                   onChange={(e) => setWaitlistEmail(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === 'Enter' && waitlistEmail.trim()) {
+                    if (e.key === 'Enter') {
                       openWaitlistModal({ initialEmail: waitlistEmail.trim() });
                     }
                   }}
