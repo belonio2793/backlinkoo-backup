@@ -91,10 +91,13 @@ export default function ScrapePage() {
       }
     } catch (error) {
       console.error('Scraping error:', error);
-      setError(error instanceof Error ? error.message : 'An unknown error occurred');
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      setError(`Scraping failed: ${errorMessage}`);
       toast({
         title: "Scraping Failed",
-        description: "Please try again or contact support if the issue persists",
+        description: errorMessage.includes('404')
+          ? "The email scraper service is not available. Please try again later."
+          : "Please try again or contact support if the issue persists",
         variant: "destructive"
       });
     } finally {
