@@ -45,6 +45,9 @@ export default function ScrapePage() {
     setTotalPages(0);
 
     try {
+      // Simulate progress updates
+      setScrapingProgress(10);
+
       const response = await fetch('/.netlify/functions/email-scraper', {
         method: 'POST',
         headers: {
@@ -57,52 +60,34 @@ export default function ScrapePage() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const reader = response.body?.getReader();
-      if (!reader) {
-        throw new Error('No response body reader available');
+      setScrapingProgress(50);
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
       }
 
-      const decoder = new TextDecoder();
-      let buffer = '';
+      if (data.success) {
+        // Update progress
+        setScrapingProgress(100);
+        setTotalPages(data.totalPages);
+        setCurrentPage(data.totalPages);
 
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
+        // Add emails to the list
+        const emailList = data.emails.map(emailData => ({
+          email: emailData.email,
+          domain: emailData.domain,
+          source: emailData.source,
+          timestamp: new Date()
+        }));
 
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
+        setEmails(emailList);
 
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6));
-              
-              if (data.type === 'progress') {
-                setScrapingProgress(data.progress);
-                setCurrentPage(data.currentPage || 0);
-                setTotalPages(data.totalPages || 0);
-              } else if (data.type === 'email') {
-                setEmails(prev => [...prev, {
-                  email: data.email,
-                  domain: data.domain,
-                  source: data.source,
-                  timestamp: new Date()
-                }]);
-              } else if (data.type === 'complete') {
-                setScrapingProgress(100);
-                toast({
-                  title: "Scraping Complete",
-                  description: `Found ${data.totalEmails} emails from ${data.totalPages} pages`,
-                });
-              } else if (data.type === 'error') {
-                setError(data.message);
-              }
-            } catch (e) {
-              console.error('Error parsing stream data:', e);
-            }
-          }
-        }
+        toast({
+          title: "Scraping Complete",
+          description: `Found ${data.totalEmails} emails from ${data.totalPages} pages`,
+        });
       }
     } catch (error) {
       console.error('Scraping error:', error);
