@@ -1119,11 +1119,20 @@ export async function generateAsset(name: string): Promise<string> {
     case 'Twitter Header':
       return generator.generateTwitterHeader();
     case 'Backlink Logo':
+    case 'Premium Logo Suite':
       return generator.generateBacklinkLogo();
     case 'Logo + Tagline':
+    case 'Professional Wordmark':
       return generator.generateLogoWithTagline();
     case 'Icon Only':
+    case 'App Icon Collection':
       return generator.generateIconOnly();
+    case 'Affiliate Badge Set':
+      return generator.generateAffiliateBadge();
+    case 'Social Media Kit':
+      return generator.generateSocialMediaKit();
+    case 'Presentation Template':
+      return generator.generatePresentationTemplate();
     default:
       // Enhanced fallback - create a custom asset based on name
       return generator.generateLeaderboardBanner();
