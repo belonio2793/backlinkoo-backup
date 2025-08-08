@@ -575,32 +575,35 @@ export function EnhancedUnifiedPaymentModal({
     </div>
   );
 
-  const renderAuth = () => (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <h3 className="text-2xl font-bold">Sign In Required</h3>
-        <p className="text-muted-foreground">
-          Sign in to your account or create a new one to continue with your purchase.
-        </p>
+  const renderAuth = () => {
+    const selection = getFinalSelection();
+    return (
+      <div className="space-y-6">
+        <CheckoutAuthForm
+          onAuthSuccess={handleAuthSuccess}
+          defaultTab="signup"
+          orderSummary={selection ? {
+            credits: selection.type === 'credits' ? selection.credits : undefined,
+            price: selection.price,
+            planName: selection.type === 'premium' ? selection.plan.name :
+                     (showCustomCredits ? `Custom ${customCredits} Credits` :
+                      creditPlans.find(p => p.id === selectedCreditPlan)?.name)
+          } : undefined}
+        />
+
+        <div className="flex justify-center pt-4 border-t">
+          <Button
+            variant="outline"
+            onClick={() => setCurrentStep('selection')}
+            className="flex items-center gap-2"
+          >
+            <ArrowRight className="h-4 w-4 rotate-180" />
+            Back to Selection
+          </Button>
+        </div>
       </div>
-      
-      <AuthFormTabs
-        onAuthSuccess={handleAuthSuccess}
-        defaultTab="signup"
-      />
-      
-      <div className="flex justify-center">
-        <Button 
-          variant="outline" 
-          onClick={() => setCurrentStep('selection')}
-          className="flex items-center gap-2"
-        >
-          <ArrowRight className="h-4 w-4 rotate-180" />
-          Back to Selection
-        </Button>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderPayment = () => {
     const selection = getFinalSelection();
