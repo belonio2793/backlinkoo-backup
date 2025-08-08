@@ -36,7 +36,6 @@ import {
   Shield
 } from 'lucide-react';
 import { RotatingText } from './RotatingText';
-import { LoginModal } from './LoginModal';
 
 
 /**
