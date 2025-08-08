@@ -3,6 +3,10 @@
  * Simplified service that directly calls OpenAI without complex templates
  */
 
+import { LocalDevAPI } from '@/services/localDevAPI';
+import { environmentVariablesService } from '@/services/environmentVariablesService';
+import { blogService } from '@/services/blogService';
+
 interface BlogRequest {
   keyword: string;
   anchorText: string;
