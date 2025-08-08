@@ -5,7 +5,8 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { DirectOpenAIService } from '@/services/directOpenAI';
 import { AnimatedBlogHeadline } from '@/components/AnimatedBlogHeadline';
-import { RealTimeBlogStatus } from '@/components/blog/RealTimeBlogStatus';
+import { BlogGenerationETA } from '@/components/blog/BlogGenerationETA';
+import { ExitIntentPopup } from '@/components/ExitIntentPopup';
 import { Loader2, Link, Target, Hash, Sparkles, Zap, Star, Rocket, Search, MousePointer, ExternalLink, Key, Crosshair, Globe } from 'lucide-react';
 
 interface BlogFormProps {
@@ -17,6 +18,8 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
   const [keyword, setKeyword] = useState('');
   const [anchorText, setAnchorText] = useState('');
   const [targetUrl, setTargetUrl] = useState('');
+  const [showExitPopup, setShowExitPopup] = useState(false);
+  const [generatedPostTitle, setGeneratedPostTitle] = useState('');
   const { toast } = useToast();
 
   // Auto-format URL to add protocol if missing
@@ -92,17 +95,28 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
       });
 
       if (result.success) {
-        onContentGenerated(result);
+        setGeneratedPostTitle(result.title || 'Your Blog Post');
 
-        toast({
-          title: "Blog Post Generated!",
-          description: `Your blog post "${result.title}" is now live at ${result.blogUrl}`,
-        });
+        // Show exit popup after a short delay
+        setTimeout(() => {
+          setShowExitPopup(true);
+        }, 1000);
 
-        // Reset form
-        setKeyword('');
-        setAnchorText('');
-        setTargetUrl('');
+        // Redirect after showing the blog post details
+        setTimeout(() => {
+          onContentGenerated(result);
+
+          toast({
+            title: "Blog Post Generated!",
+            description: `Your blog post "${result.title}" is now live at ${result.blogUrl}`,
+          });
+
+          // Reset form
+          setKeyword('');
+          setAnchorText('');
+          setTargetUrl('');
+          setGeneratedPostTitle('');
+        }, 3000);
       } else {
         throw new Error(result.error || 'Blog generation failed');
       }
@@ -227,14 +241,15 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             </Button>
           </div>
 
-          {/* Estimated Time and Account Prompt - Moved below button */}
+          {/* Estimated Time and Account Prompt - Enhanced warning */}
           <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-inner">
             <div className="text-center">
               <p className="text-sm font-semibold text-amber-800 mb-1">
                 ⏱️ Estimated time: 30-60 seconds
               </p>
               <p className="text-xs text-amber-700">
-                You will be redirected to your blog post. Create an account to claim it before it gets deleted.
+                <span className="font-semibold">Warning:</span> You will be redirected to your blog post.
+                Create an account to prevent it from being deleted in 24 hours!
               </p>
             </div>
           </div>
@@ -251,10 +266,21 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
         </div>
       </div>
 
-      {/* Real-time Blog Generation Status Tracker */}
-      <RealTimeBlogStatus
+      {/* Blog Generation ETA Display */}
+      <BlogGenerationETA
         isVisible={isGenerating}
-        isGenerating={isGenerating}
+        estimatedTime={45}
+        onComplete={() => {
+          // ETA complete - actual generation continues in background
+        }}
+      />
+
+      {/* Exit Intent Popup */}
+      <ExitIntentPopup
+        isVisible={showExitPopup}
+        onClose={() => setShowExitPopup(false)}
+        postTitle={generatedPostTitle}
+        timeRemaining="24 hours"
       />
     </div>
   );
