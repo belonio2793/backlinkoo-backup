@@ -252,14 +252,6 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
         </div>
       </div>
 
-      {/* Blog Generation ETA Display */}
-      <BlogGenerationETA
-        isVisible={isGenerating}
-        estimatedTime={45}
-        onComplete={() => {
-          // ETA complete - actual generation continues in background
-        }}
-      />
 
     </div>
   );
