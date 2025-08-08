@@ -135,8 +135,8 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
   };
 
   const handleClose = () => {
-    setStep(initialEmail ? 'signup' : 'email');
-    setEmail(initialEmail);
+    setStep(effectiveInitialEmail ? 'signup' : 'email');
+    setEmail(effectiveInitialEmail);
     setPassword('');
     setFullName('');
     setIsLoading(false);
