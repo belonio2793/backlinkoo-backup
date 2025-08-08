@@ -3,9 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle2, ExternalLink, Copy, ArrowRight, Plus, BarChart3, Crown, Star, Gift, Zap, Timer, AlertTriangle } from 'lucide-react';
-import { IrresistibleAccountTrigger } from './IrresistibleAccountTrigger';
-import { ExitIntentTrigger, useExitIntent } from './ExitIntentTrigger';
-import { ExtremeScarcityTrigger } from './ExtremeScarcityTrigger';
+import { TriggerOrchestrator } from './TriggerOrchestrator';
 import { Badge } from '@/components/ui/badge';
 
 interface MinimalisticSuccessSectionProps {
@@ -31,13 +29,7 @@ export function MinimalisticSuccessSection({
 }: MinimalisticSuccessSectionProps) {
   const { toast } = useToast();
   const [showTrigger, setShowTrigger] = useState(false);
-  const [showSecondaryTrigger, setShowSecondaryTrigger] = useState(false);
-  const [showFinalTrigger, setShowFinalTrigger] = useState(false);
-  const [showExitIntent, setShowExitIntent] = useState(false);
-  const [showExtremeScarcity, setShowExtremeScarcity] = useState(false);
-  const [triggerCount, setTriggerCount] = useState(0);
-  const [hasShownExitIntent, setHasShownExitIntent] = useState(false);
-  const [timeRemaining, setTimeRemaining] = useState<{ hours: number; minutes: number; seconds: number } | null>(null);
+  const [showOrchestrator, setShowOrchestrator] = useState(false);
 
   console.log('🎯 MinimalisticSuccessSection props:', {
     publishedUrl,
@@ -69,71 +61,13 @@ export function MinimalisticSuccessSection({
     }
   };
 
-  // Show progressive trigger warnings for guest users
+  // Show orchestrated trigger system for guest users
   useEffect(() => {
     if (!currentUser) {
-      // First trigger after 5 seconds
-      const timer1 = setTimeout(() => {
-        if (triggerCount === 0) {
-          setShowTrigger(true);
-          setTriggerCount(1);
-        }
-      }, 5000);
-
-      // Second trigger after 30 seconds if they dismiss the first
-      const timer2 = setTimeout(() => {
-        if (triggerCount === 1) {
-          setShowSecondaryTrigger(true);
-          setTriggerCount(2);
-        }
-      }, 30000);
-
-      // Final trigger after 60 seconds
-      const timer3 = setTimeout(() => {
-        if (triggerCount === 2) {
-          setShowFinalTrigger(true);
-          setTriggerCount(3);
-        }
-      }, 60000);
-
-      // Extreme scarcity trigger after 90 seconds
-      const timer4 = setTimeout(() => {
-        if (triggerCount === 3) {
-          setShowExtremeScarcity(true);
-          setTriggerCount(4);
-        }
-      }, 90000);
-
-      return () => {
-        clearTimeout(timer1);
-        clearTimeout(timer2);
-        clearTimeout(timer3);
-        clearTimeout(timer4);
-      };
+      setShowOrchestrator(true);
     }
-  }, [currentUser, triggerCount]);
+  }, [currentUser]);
 
-  const handleTriggerDismiss = () => {
-    setShowTrigger(false);
-    // Show next trigger after a delay
-    setTimeout(() => {
-      if (triggerCount === 1) {
-        setShowSecondaryTrigger(true);
-        setTriggerCount(2);
-      }
-    }, 15000);
-  };
-
-  const handleSecondaryTriggerDismiss = () => {
-    setShowSecondaryTrigger(false);
-    // Show final trigger after a delay
-    setTimeout(() => {
-      if (triggerCount === 2) {
-        setShowFinalTrigger(true);
-        setTriggerCount(3);
-      }
-    }, 20000);
-  };
 
   const handleDefaultSignUp = () => {
     if (onSignUp) {
@@ -151,39 +85,6 @@ export function MinimalisticSuccessSection({
     }
   };
 
-  // Exit intent detection for non-authenticated users
-  useExitIntent(() => {
-    if (!currentUser && !hasShownExitIntent) {
-      setShowExitIntent(true);
-      setHasShownExitIntent(true);
-    }
-  });
-
-  // Calculate real-time remaining for extreme trigger
-  useEffect(() => {
-    if (!currentUser && generatedPost?.expires_at) {
-      const updateTime = () => {
-        const expires = new Date(generatedPost.expires_at);
-        const now = new Date();
-        const diffMs = expires.getTime() - now.getTime();
-
-        if (diffMs <= 0) {
-          setTimeRemaining(null);
-          return;
-        }
-
-        const hours = Math.floor(diffMs / (1000 * 60 * 60));
-        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
-
-        setTimeRemaining({ hours, minutes, seconds });
-      };
-
-      updateTime();
-      const interval = setInterval(updateTime, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [currentUser, generatedPost?.expires_at]);
 
   return (
     <Card className="border-0 shadow-sm bg-white">
@@ -401,93 +302,17 @@ export function MinimalisticSuccessSection({
           </div>
         )}
 
-        {/* Irresistible Trigger Modals */}
-        {showTrigger && !currentUser && (
-          <IrresistibleAccountTrigger
+        {/* Orchestrated Trigger System */}
+        {showOrchestrator && (
+          <TriggerOrchestrator
+            isGuestUser={!currentUser}
             blogPostTitle={generatedPost?.title || `Complete Guide to ${primaryKeyword}`}
             targetUrl={targetUrl}
             expiresAt={generatedPost?.expires_at}
-            onSignUp={() => {
-              setShowTrigger(false);
-              handleDefaultSignUp();
-            }}
-            onLogin={() => {
-              setShowTrigger(false);
-              handleDefaultLogin();
-            }}
-            onDismiss={handleTriggerDismiss}
-          />
-        )}
-
-        {showSecondaryTrigger && !currentUser && (
-          <IrresistibleAccountTrigger
-            blogPostTitle={generatedPost?.title || `Complete Guide to ${primaryKeyword}`}
-            targetUrl={targetUrl}
-            expiresAt={generatedPost?.expires_at}
-            onSignUp={() => {
-              setShowSecondaryTrigger(false);
-              handleDefaultSignUp();
-            }}
-            onLogin={() => {
-              setShowSecondaryTrigger(false);
-              handleDefaultLogin();
-            }}
-            onDismiss={handleSecondaryTriggerDismiss}
-          />
-        )}
-
-        {showFinalTrigger && !currentUser && (
-          <IrresistibleAccountTrigger
-            blogPostTitle={generatedPost?.title || `Complete Guide to ${primaryKeyword}`}
-            targetUrl={targetUrl}
-            expiresAt={generatedPost?.expires_at}
-            onSignUp={() => {
-              setShowFinalTrigger(false);
-              handleDefaultSignUp();
-            }}
-            onLogin={() => {
-              setShowFinalTrigger(false);
-              handleDefaultLogin();
-            }}
-            onDismiss={() => setShowFinalTrigger(false)}
-          />
-        )}
-
-        {/* Exit Intent Trigger */}
-        {showExitIntent && !currentUser && (
-          <ExitIntentTrigger
-            onSignUp={() => {
-              setShowExitIntent(false);
-              handleDefaultSignUp();
-            }}
-            onLogin={() => {
-              setShowExitIntent(false);
-              handleDefaultLogin();
-            }}
-            onStay={() => setShowExitIntent(false)}
-            contentTitle={generatedPost?.title || `Complete Guide to ${primaryKeyword}`}
-            contentValue={"$862"}
-          />
-        )}
-
-        {/* Extreme Scarcity Trigger */}
-        {showExtremeScarcity && !currentUser && (
-          <ExtremeScarcityTrigger
-            onSignUp={() => {
-              setShowExtremeScarcity(false);
-              handleDefaultSignUp();
-            }}
-            onLogin={() => {
-              setShowExtremeScarcity(false);
-              handleDefaultLogin();
-            }}
-            onClose={() => setShowExtremeScarcity(false)}
-            contentValue={"$862"}
-            timeRemaining={timeRemaining && timeRemaining.hours ?
-              `${String(timeRemaining.hours).padStart(2, '0')}:${String(timeRemaining.minutes).padStart(2, '0')}:${String(timeRemaining.seconds).padStart(2, '0')}` :
-              "23:47:32"
-            }
-            postTitle={generatedPost?.title || `Complete Guide to ${primaryKeyword}`}
+            onSignUp={handleDefaultSignUp}
+            onLogin={handleDefaultLogin}
+            userName="Friend"
+            triggerIntensity="extreme"
           />
         )}
       </CardContent>
