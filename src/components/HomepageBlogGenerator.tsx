@@ -11,13 +11,13 @@ import { productionBlogGenerator } from '@/services/productionBlogGenerator';
 import { errorLogger, ErrorSeverity, ErrorCategory } from '@/services/errorLoggingService';
 import BlogGenerationError from './BlogGenerationError';
 import { supabase } from '@/integrations/supabase/client';
-import { SavePostSignupPopup } from './SavePostSignupPopup';
 import { GenerationSequence } from './GenerationSequence';
 import { InteractiveContentGenerator } from './InteractiveContentGenerator';
 import { MultiBlogGenerator } from './MultiBlogGenerator';
 import { ClaimTrialPostDialog } from './ClaimTrialPostDialog';
 import { AdaptiveProgressIndicator } from './AdaptiveProgressIndicator';
 import { MinimalisticSuccessSection } from './MinimalisticSuccessSection';
+import { useSavePostModal, useAuthModal } from '@/contexts/ModalContext';
 import {
   Sparkles,
   Link2,
