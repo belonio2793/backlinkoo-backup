@@ -45,7 +45,11 @@ import {
   ArrowUpRight,
   CheckCircle,
   AlertCircle,
-  Info
+  Info,
+  BookOpen,
+  Palette,
+  Type,
+  Layout
 } from 'lucide-react';
 
 const SafeAffiliateProgram: React.FC = () => {
@@ -1041,7 +1045,7 @@ Link in bio: ${referralUrl}
         // Page 3
         {
           type: "Process Reveal",
-          content: `🔍 HOW I BUILD 30+ BACKLINKS/MONTH\n\nStep 1: Log into Backlink ∞\nStep 2: Set targeting parameters\nStep 3: Let AI do the work\nStep 4: Watch links roll in ��\n\nIt's that simple!\n\nLink in bio: ${referralUrl}\n\n#ProcessReveal #SEOHacks`,
+          content: `🔍 HOW I BUILD 30+ BACKLINKS/MONTH\n\nStep 1: Log into Backlink ∞\nStep 2: Set targeting parameters\nStep 3: Let AI do the work\nStep 4: Watch links roll in 🚀\n\nIt's that simple!\n\nLink in bio: ${referralUrl}\n\n#ProcessReveal #SEOHacks`,
           engagement: "Very High",
           audience: "Process learners"
         },
@@ -1060,7 +1064,7 @@ Link in bio: ${referralUrl}
         // Page 4
         {
           type: "Feature Friday",
-          content: `🌟 FEATURE FRIDAY 🌟\n\nSpotlight: Backlink ∞'s AI Outreach\n\n✨ Writes personalized emails\n✨ Finds perfect prospects\n✨ Follows up automatically\n✨ Tracks everything\n\nIt's like having a team of experts! ����\n\nLink in bio: ${referralUrl}\n\n#FeatureFriday #AITools`,
+          content: `🌟 FEATURE FRIDAY 🌟\n\nSpotlight: Backlink ∞'s AI Outreach\n\n✨ Writes personalized emails\n✨ Finds perfect prospects\n✨ Follows up automatically\n✨ Tracks everything\n\nIt's like having a team of experts! 🤖\n\nLink in bio: ${referralUrl}\n\n#FeatureFriday #AITools`,
           engagement: "High",
           audience: "Feature enthusiasts"
         },
@@ -1079,7 +1083,7 @@ Link in bio: ${referralUrl}
         // Page 5
         {
           type: "Myth Buster",
-          content: `🚫 MYTH BUSTER ALERT 🚫\n\nMyth: "AI can't do personalized outreach"\n\nReality: Backlink ∞'s AI writes better emails than most humans! 🤖\n\nPersonalization ���\nContext awareness ✅\nHigh response rates ✅\n\nLink in bio: ${referralUrl}\n\n#MythBuster #AIFacts`,
+          content: `🚫 MYTH BUSTER ALERT 🚫\n\nMyth: "AI can't do personalized outreach"\n\nReality: Backlink ∞'s AI writes better emails than most humans! 🤖\n\nPersonalization ✅\nContext awareness ✅\nHigh response rates ✅\n\nLink in bio: ${referralUrl}\n\n#MythBuster #AIFacts`,
           engagement: "High",
           audience: "Myth busters"
         },
@@ -1091,7 +1095,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Growth Hack",
-          content: `🚨 GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️⃣ Technical SEO ✅\n3️⃣ High-quality backlinks ✅\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
+          content: `🚨 GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️⃣ Technical SEO ✅\n3️⃣ High-quality backlinks ���\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
           engagement: "Very High",
           audience: "Growth hackers"
         },
@@ -1175,7 +1179,7 @@ Timestamps in description: ${referralUrl}`,
         },
         {
           type: "Before vs After",
-          content: `�� DRAMATIC BEFORE & AFTER: My website's transformation using Backlink ∞.
+          content: `📈 DRAMATIC BEFORE & AFTER: My website's transformation using Backlink ∞.
 
 Traffic charts, ranking improvements, and revenue growth - all the data revealed!
 
@@ -1185,7 +1189,7 @@ ${referralUrl}`,
         },
         {
           type: "Step by Step",
-          content: `��� COMPLETE GUIDE: Setting up your first Backlink ∞ campaign (Beginner friendly).
+          content: `📚 COMPLETE GUIDE: Setting up your first Backlink ∞ campaign (Beginner friendly).
 
 Follow along as I walk through every single step with zero experience assumed:
 
@@ -1248,13 +1252,13 @@ Here's the math: ${referralUrl}`,
         },
         {
           type: "Update Video",
-          content: `�� MAJOR UPDATE: New Backlink ∞ features that will blow your mind! AI improvements, better targeting, and automation upgrades that change everything: ${referralUrl}`,
+          content: `🔥 MAJOR UPDATE: New Backlink ∞ features that will blow your mind! AI improvements, better targeting, and automation upgrades that change everything: ${referralUrl}`,
           engagement: "High",
           audience: "Update watchers"
         },
         {
           type: "Behind the Scenes",
-          content: `�� BEHIND THE SCENES: My entire link building operation revealed. See exactly how I manage multiple Backlink ∞ campaigns and scale to 6-figure results: ${referralUrl}`,
+          content: `🎬 BEHIND THE SCENES: My entire link building operation revealed. See exactly how I manage multiple Backlink ∞ campaigns and scale to 6-figure results: ${referralUrl}`,
           engagement: "Very High",
           audience: "BTS enthusiasts"
         },
@@ -1353,41 +1357,6 @@ Here's the math: ${referralUrl}`,
     }
   };
 
-  const previewAsset = (name: string, dataUrl: string) => {
-    const newWindow = window.open('', '_blank');
-    if (newWindow) {
-      newWindow.document.write(`
-        <html>
-          <head>
-            <title>${name} - Preview</title>
-            <style>
-              body {
-                margin: 0;
-                padding: 20px;
-                background: #f3f4f6;
-                font-family: Arial, sans-serif;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-              }
-              img {
-                max-width: 100%;
-                height: auto;
-                border: 1px solid #d1d5db;
-                background: white;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-              }
-              h1 { color: #111827; margin-bottom: 20px; }
-            </style>
-          </head>
-          <body>
-            <h1>${name} - Preview</h1>
-            <img src="${dataUrl}" alt="${name}" />
-          </body>
-        </html>
-      `);
-    }
-  };
 
   const getEmailTemplate = (templateType: string, referralUrl: string) => {
     const templates: Record<string, any[]> = {
@@ -1874,11 +1843,11 @@ Here's the math: ${referralUrl}`,
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="bg-blue-100 p-2 rounded-lg">
-                <span className="text-blue-600 text-xl">∞</span>
+                <span className="text-blue-600 text-xl">BL</span>
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Affiliate Dashboard</h1>
-                <p className="text-gray-600">Welcome back, {user.email?.split('@')[0]}! ���</p>
+                <p className="text-gray-600">Welcome back, {user.email?.split('@')[0]}! 🎉</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -2028,12 +1997,12 @@ Here's the math: ${referralUrl}`,
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={`https://backlinkoo.com/pricing?ref=${affiliateData.affiliate_code}`}
+                  value={`https://backlinkoo.com/#pricing?ref=${affiliateData.affiliate_code}`}
                   readOnly
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
                 />
                 <button
-                  onClick={() => copyToClipboard(`https://backlinkoo.com/pricing?ref=${affiliateData.affiliate_code}`)}
+                  onClick={() => copyToClipboard(`https://backlinkoo.com/#pricing?ref=${affiliateData.affiliate_code}`)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
                   📋 Copy
@@ -2041,23 +2010,208 @@ Here's the math: ${referralUrl}`,
               </div>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-sm font-medium text-gray-700">Free Trial Link</label>
-                <span className="text-xs text-gray-500">Low barrier entry</span>
+          </div>
+        </div>
+
+        {/* Brand Guidelines Section */}
+        <div className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 rounded-xl shadow-lg border border-purple-200 p-8 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-3 rounded-lg">
+                <BookOpen className="h-6 w-6 text-white" />
               </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={`https://backlinkoo.com/trial?ref=${affiliateData.affiliate_code}`}
-                  readOnly
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
-                />
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">📘 Brand Guidelines</h2>
+                <p className="text-gray-600">Official brand identity & visual standards</p>
+              </div>
+            </div>
+            <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2">
+              ✨ Featured Resource
+            </Badge>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* PDF Preview */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-lg border-2 border-purple-200 shadow-md overflow-hidden">
+                <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Comprehensive Brand Guidelines</h3>
+                    <span className="text-purple-100 text-sm">v1.0 • 2025</span>
+                  </div>
+                  <p className="text-purple-100 text-sm mt-1">The definitive guide to our brand identity, visual language, and communication standards</p>
+                </div>
+
+                {/* Preview Content */}
+                <div className="p-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
+                      <Palette className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                      <h4 className="font-semibold text-sm">Brand Identity</h4>
+                      <p className="text-xs text-gray-600">Logo & Guidelines</p>
+                    </div>
+                    <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <Layout className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                      <h4 className="font-semibold text-sm">Visual Language</h4>
+                      <p className="text-xs text-gray-600">Colors & Patterns</p>
+                    </div>
+                    <div className="text-center p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                      <Type className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
+                      <h4 className="font-semibold text-sm">SEO Academy</h4>
+                      <p className="text-xs text-gray-600">Education Standards</p>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                      <Globe className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                      <h4 className="font-semibold text-sm">Global Standards</h4>
+                      <p className="text-xs text-gray-600">Communication</p>
+                    </div>
+                  </div>
+
+                  {/* Table of Contents Preview */}
+                  <div className="bg-gray-50 rounded-lg p-4 border">
+                    <h4 className="font-semibold text-gray-900 mb-3">📋 Table of Contents</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between items-center py-1 border-b border-gray-200">
+                        <span className="text-gray-700">1. Brand Overview & Mission</span>
+                        <span className="text-gray-500">3</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1 border-b border-gray-200">
+                        <span className="text-gray-700">2. Logo Guidelines & Usage</span>
+                        <span className="text-gray-500">4</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1 border-b border-gray-200">
+                        <span className="text-gray-700">3. Color Palette & Guidelines</span>
+                        <span className="text-gray-500">6</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1 border-b border-gray-200">
+                        <span className="text-gray-700">4. Typography System</span>
+                        <span className="text-gray-500">8</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1 border-b border-gray-200">
+                        <span className="text-gray-700">5. Visual Elements & Patterns</span>
+                        <span className="text-gray-500">10</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1">
+                        <span className="text-gray-700">+ 5 more sections...</span>
+                        <span className="text-gray-500">22 pages total</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Download & Info Panel */}
+            <div className="space-y-6">
+              {/* Download Section */}
+              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">📥 Download Guidelines</h3>
+
+                <div className="space-y-4">
+                  <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+                    <div className="flex items-center gap-3 mb-2">
+                      <FileText className="h-5 w-5 text-purple-600" />
+                      <span className="font-medium text-gray-900">Complete PDF Guide</span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">11 pages • High-resolution • Vector graphics</p>
+                    <button
+                      onClick={() => {
+                        // Create a download link for the PDF
+                        const link = document.createElement('a');
+                        link.href = '/brand-guidelines.pdf';
+                        link.download = 'Backlink-Infinity-Brand-Guidelines-v1.0.pdf';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
+                        if (toast) {
+                          toast({
+                            title: "Download Started",
+                            description: "Brand Guidelines PDF is being downloaded",
+                          });
+                        }
+                      }}
+                      className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download PDF (2.4 MB)
+                    </button>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 rounded-lg border">
+                    <h4 className="font-medium text-gray-900 mb-2">Quick Access</h4>
+                    <div className="space-y-2 text-sm">
+                      <button
+                        onClick={() => copyToClipboard('#2563eb')}
+                        className="w-full text-left p-2 hover:bg-white rounded border transition-colors flex items-center justify-between"
+                      >
+                        <span>Primary Blue</span>
+                        <span className="font-mono text-xs bg-blue-100 px-2 py-1 rounded">#2563eb</span>
+                      </button>
+                      <button
+                        onClick={() => copyToClipboard('#8b5cf6')}
+                        className="w-full text-left p-2 hover:bg-white rounded border transition-colors flex items-center justify-between"
+                      >
+                        <span>Purple Accent</span>
+                        <span className="font-mono text-xs bg-purple-100 px-2 py-1 rounded">#8b5cf6</span>
+                      </button>
+                      <button
+                        onClick={() => copyToClipboard('Inter')}
+                        className="w-full text-left p-2 hover:bg-white rounded border transition-colors flex items-center justify-between"
+                      >
+                        <span>Primary Font</span>
+                        <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">Inter</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Key Information */}
+              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">ℹ️ Usage Guidelines</h3>
+
+                <div className="space-y-4 text-sm">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-gray-900">Do's:</p>
+                      <ul className="text-gray-600 mt-1 space-y-1">
+                        <li>• Use provided assets as-is</li>
+                        <li>• Maintain proper spacing</li>
+                        <li>• Follow color guidelines</li>
+                        <li>• Include affiliate tracking</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-gray-900">Don'ts:</p>
+                      <ul className="text-gray-600 mt-1 space-y-1">
+                        <li>• Modify logo proportions</li>
+                        <li>• Use unauthorized colors</li>
+                        <li>• Add effects to assets</li>
+                        <li>• Make false claims</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact for Custom Assets */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200 p-4">
+                <h4 className="font-semibold text-green-900 mb-2">🎨 Need Custom Assets?</h4>
+                <p className="text-sm text-green-800 mb-3">
+                  High-performing affiliates can request custom promotional materials from our design team.
+                </p>
                 <button
-                  onClick={() => copyToClipboard(`https://backlinkoo.com/trial?ref=${affiliateData.affiliate_code}`)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+                  onClick={() => window.open('mailto:brand@backlinkoo.com?subject=Custom Asset Request - Affiliate Program', '_blank')}
+                  className="w-full bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
                 >
-                  📋 Copy
+                  <Mail className="h-4 w-4" />
+                  Contact Design Team
                 </button>
               </div>
             </div>
@@ -2541,10 +2695,10 @@ Here's the math: ${referralUrl}`,
                         <div className="relative h-full flex items-center justify-between px-6">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-                              <span className="text-lg font-bold text-gray-900">∞</span>
+                              <span className="text-lg font-bold text-gray-900">BL</span>
                             </div>
                             <div>
-                              <div className="text-white font-bold text-lg">Backlink ∞</div>
+                              <div className="text-white font-bold text-lg">Backlink</div>
                               <div className="text-blue-100 text-xs">Automated Link Building</div>
                             </div>
                           </div>
@@ -2566,9 +2720,9 @@ Here's the math: ${referralUrl}`,
                         <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent"></div>
                         <div className="relative h-full flex flex-col items-center justify-center text-center p-6">
                           <div className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mb-4 animate-pulse-glow">
-                            <span className="text-2xl font-bold text-gray-900">∞</span>
+                            <span className="text-2xl font-bold text-gray-900">BL</span>
                           </div>
-                          <h3 className="text-white font-bold text-xl mb-2">Backlink ∞</h3>
+                          <h3 className="text-white font-bold text-xl mb-2">Backlink</h3>
                           <p className="text-blue-100 text-sm mb-4">The Smart Way to Build<br/>High-Quality Backlinks</p>
                           <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-4 py-2 rounded-full font-bold text-sm mb-3">
                             300% Faster Results
@@ -2589,9 +2743,9 @@ Here's the math: ${referralUrl}`,
                         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
                         <div className="relative h-full flex flex-col items-center text-center p-4">
                           <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mb-3 mt-4">
-                            <span className="text-lg font-bold text-gray-900">∞</span>
+                            <span className="text-lg font-bold text-gray-900">BL</span>
                           </div>
-                          <h3 className="text-white font-bold text-sm mb-2">Backlink ∞</h3>
+                          <h3 className="text-white font-bold text-sm mb-2">Backlink</h3>
                           <div className="flex-1 flex flex-col justify-center space-y-3">
                             <div className="bg-white/10 backdrop-blur rounded p-2">
                               <div className="text-yellow-300 text-xs font-bold">🎯 High-DA</div>
@@ -2622,9 +2776,9 @@ Here's the math: ${referralUrl}`,
                         </div>
                         <div className="relative h-full flex flex-col items-center text-center p-6">
                           <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 mt-8 border-4 border-yellow-400">
-                            <span className="text-xl font-bold text-purple-600">∞</span>
+                            <span className="text-xl font-bold text-purple-600">BL</span>
                           </div>
-                          <h3 className="text-white font-bold text-lg mb-2">Backlink ∞</h3>
+                          <h3 className="text-white font-bold text-lg mb-2">Backlink</h3>
                           <p className="text-purple-100 text-sm mb-6">I just increased my<br/>organic traffic by<br/><span className="text-yellow-300 font-bold text-xl">300%!</span></p>
                           <div className="flex-1 flex flex-col justify-center">
                             <div className="bg-white/20 backdrop-blur rounded-full px-4 py-2 mb-3">
@@ -2737,7 +2891,7 @@ Here's the math: ${referralUrl}`,
                   {/* SPECTACULAR CREATIVE ASSETS SHOWCASE */}
                   <CreativeAssetsShowcase
                     onDownload={downloadAsset}
-                    onPreview={previewAsset}
+                    onPreview={() => {}}
                   />
 
                   {/* Temporarily keeping the original structure for reference */}
@@ -2797,13 +2951,6 @@ Here's the math: ${referralUrl}`,
                               >
                                 <Download className="h-3 w-3 mr-1" />
                                 Download
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => previewAsset(banner.name, banner.preview)}
-                              >
-                                <Eye className="h-3 w-3" />
                               </Button>
                             </div>
                           </div>
@@ -2867,13 +3014,6 @@ Here's the math: ${referralUrl}`,
                                 <Download className="h-3 w-3 mr-1" />
                                 Download
                               </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => previewAsset(graphic.name, graphic.preview)}
-                              >
-                                <Eye className="h-3 w-3" />
-                              </Button>
                             </div>
                           </div>
                         ))}
@@ -2889,7 +3029,7 @@ Here's the math: ${referralUrl}`,
                       <div className="space-y-3">
                         {[
                           {
-                            name: 'Backlink ∞ Logo',
+                            name: 'Backlink Logo',
                             type: 'PNG',
                             use: 'General use',
                             preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDIwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IndoaXRlIi8+PGNpcmNsZSBjeD0iNDAiIGN5PSI1MCIgcj0iMjAiIGZpbGw9IiMyNTYzZWIiLz48dGV4dCB4PSI0MCIgeT0iNTciIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7iiJ88L3RleHQ+PHRleHQgeD0iMTIwIiB5PSI1NyIgZmlsbD0iIzExMTgyNyIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QmFja2xpbms8L3RleHQ+PC9zdmc+'
@@ -2935,13 +3075,6 @@ Here's the math: ${referralUrl}`,
                               >
                                 <Download className="h-3 w-3 mr-1" />
                                 Download
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => previewAsset(asset.name, asset.preview)}
-                              >
-                                <Eye className="h-3 w-3" />
                               </Button>
                             </div>
                           </div>

@@ -519,9 +519,9 @@ const CreativeAssetsShowcase: React.FC<{
 
   const brandAssets = [
     {
-      name: 'Backlink ∞ Logo',
+      name: 'Backlink Logo',
       size: '1024x1024',
-      format: 'SVG',
+      format: 'PNG',
       description: 'Primary brand logo',
       category: 'brand',
       preview: (
@@ -538,7 +538,7 @@ const CreativeAssetsShowcase: React.FC<{
     {
       name: 'Logo + Tagline',
       size: '1920x1080',
-      format: 'SVG',
+      format: 'PNG',
       description: 'Logo with tagline combination',
       category: 'brand',
       preview: (
