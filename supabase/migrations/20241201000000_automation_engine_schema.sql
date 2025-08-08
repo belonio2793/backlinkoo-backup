@@ -3,7 +3,7 @@
 
 -- Campaign Management Tables
 CREATE TABLE IF NOT EXISTS automation_campaigns (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     priority TEXT CHECK (priority IN ('low', 'medium', 'high', 'critical')) DEFAULT 'medium',
     status TEXT CHECK (status IN ('queued', 'processing', 'paused', 'completed', 'failed')) DEFAULT 'queued',
@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS automation_campaigns (
 
 -- Link Opportunities Discovery
 CREATE TABLE IF NOT EXISTS link_opportunities (
-    id TEXT PRIMARY KEY,
-    campaign_id TEXT REFERENCES automation_campaigns(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    campaign_id UUID REFERENCES automation_campaigns(id) ON DELETE CASCADE,
     url TEXT NOT NULL,
     type TEXT NOT NULL,
     discovery_method TEXT NOT NULL,
@@ -48,9 +48,9 @@ CREATE TABLE IF NOT EXISTS link_opportunities (
 
 -- Content Generation Requests
 CREATE TABLE IF NOT EXISTS content_requests (
-    id TEXT PRIMARY KEY,
-    campaign_id TEXT REFERENCES automation_campaigns(id) ON DELETE CASCADE,
-    opportunity_id TEXT REFERENCES link_opportunities(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    campaign_id UUID REFERENCES automation_campaigns(id) ON DELETE CASCADE,
+    opportunity_id UUID REFERENCES link_opportunities(id) ON DELETE CASCADE,
     type TEXT NOT NULL,
     context JSONB NOT NULL,
     requirements JSONB NOT NULL,
@@ -65,10 +65,10 @@ CREATE TABLE IF NOT EXISTS content_requests (
 
 -- Posted Links Tracking
 CREATE TABLE IF NOT EXISTS posted_links (
-    id TEXT PRIMARY KEY,
-    campaign_id TEXT REFERENCES automation_campaigns(id) ON DELETE CASCADE,
-    opportunity_id TEXT REFERENCES link_opportunities(id) ON DELETE CASCADE,
-    content_request_id TEXT REFERENCES content_requests(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    campaign_id UUID REFERENCES automation_campaigns(id) ON DELETE CASCADE,
+    opportunity_id UUID REFERENCES link_opportunities(id) ON DELETE CASCADE,
+    content_request_id UUID REFERENCES content_requests(id) ON DELETE CASCADE,
     posted_url TEXT NOT NULL,
     anchor_text TEXT,
     link_url TEXT NOT NULL,
@@ -87,8 +87,8 @@ CREATE TABLE IF NOT EXISTS posted_links (
 
 -- Error Logging and Recovery
 CREATE TABLE IF NOT EXISTS error_logs (
-    id TEXT PRIMARY KEY,
-    campaign_id TEXT,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    campaign_id UUID,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     component TEXT NOT NULL,
     operation TEXT NOT NULL,
@@ -106,8 +106,8 @@ CREATE TABLE IF NOT EXISTS error_logs (
 
 -- Analytics and Metrics
 CREATE TABLE IF NOT EXISTS campaign_analytics (
-    id TEXT PRIMARY KEY,
-    campaign_id TEXT REFERENCES automation_campaigns(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    campaign_id UUID REFERENCES automation_campaigns(id) ON DELETE CASCADE,
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
     time_range JSONB NOT NULL,
     metrics JSONB NOT NULL,
@@ -125,7 +125,7 @@ CREATE TABLE IF NOT EXISTS campaign_analytics (
 
 -- System Health Monitoring
 CREATE TABLE IF NOT EXISTS health_checks (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     component TEXT NOT NULL,
     status TEXT CHECK (status IN ('healthy', 'degraded', 'unhealthy', 'unknown')) DEFAULT 'unknown',
     response_time INTEGER DEFAULT 0,
@@ -137,7 +137,7 @@ CREATE TABLE IF NOT EXISTS health_checks (
 
 -- Rate Limiting and Anti-Detection
 CREATE TABLE IF NOT EXISTS rate_limits (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     resource_type TEXT NOT NULL,
     resource_id TEXT NOT NULL,
     limit_type TEXT NOT NULL,
@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS processing_nodes (
 -- Campaign Performance Metrics (Time Series)
 CREATE TABLE IF NOT EXISTS campaign_metrics_timeseries (
     id BIGSERIAL PRIMARY KEY,
-    campaign_id TEXT REFERENCES automation_campaigns(id) ON DELETE CASCADE,
+    campaign_id UUID REFERENCES automation_campaigns(id) ON DELETE CASCADE,
     timestamp TIMESTAMPTZ DEFAULT NOW(),
     metrics_type TEXT NOT NULL,
     value DECIMAL(15,4) NOT NULL,
@@ -205,7 +205,7 @@ CREATE TABLE IF NOT EXISTS campaign_metrics_timeseries (
 
 -- Alert Rules and Notifications
 CREATE TABLE IF NOT EXISTS alert_rules (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name TEXT NOT NULL,
     condition JSONB NOT NULL,
     severity TEXT CHECK (severity IN ('low', 'medium', 'high', 'critical')) DEFAULT 'medium',
@@ -218,10 +218,10 @@ CREATE TABLE IF NOT EXISTS alert_rules (
 
 -- Notification Log
 CREATE TABLE IF NOT EXISTS notifications (
-    id TEXT PRIMARY KEY,
-    alert_rule_id TEXT REFERENCES alert_rules(id) ON DELETE CASCADE,
-    campaign_id TEXT,
-    error_id TEXT,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    alert_rule_id UUID REFERENCES alert_rules(id) ON DELETE CASCADE,
+    campaign_id UUID,
+    error_id UUID,
     channel_type TEXT NOT NULL,
     recipient TEXT NOT NULL,
     subject TEXT,
@@ -235,7 +235,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 -- Content Templates and Learning Data
 CREATE TABLE IF NOT EXISTS content_templates (
-    id TEXT PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     content_type TEXT NOT NULL,
     template TEXT NOT NULL,
     variables TEXT[],
@@ -259,8 +259,8 @@ CREATE TABLE IF NOT EXISTS ml_training_data (
 
 -- Competitor Analysis Data
 CREATE TABLE IF NOT EXISTS competitor_analysis (
-    id TEXT PRIMARY KEY,
-    campaign_id TEXT REFERENCES automation_campaigns(id) ON DELETE CASCADE,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    campaign_id UUID REFERENCES automation_campaigns(id) ON DELETE CASCADE,
     competitor_url TEXT NOT NULL,
     analysis_data JSONB NOT NULL,
     backlink_data JSONB,
@@ -437,7 +437,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Function to update campaign progress
-CREATE OR REPLACE FUNCTION update_campaign_progress(campaign_id_param TEXT) RETURNS void AS $$
+CREATE OR REPLACE FUNCTION update_campaign_progress(campaign_id_param UUID) RETURNS void AS $$
 DECLARE
     total_target INTEGER;
     links_generated INTEGER;
@@ -491,7 +491,7 @@ CREATE TRIGGER posted_links_progress_trigger
     EXECUTE FUNCTION trigger_update_campaign_progress();
 
 -- Function to generate analytics summaries
-CREATE OR REPLACE FUNCTION generate_campaign_summary(campaign_id_param TEXT) RETURNS JSONB AS $$
+CREATE OR REPLACE FUNCTION generate_campaign_summary(campaign_id_param UUID) RETURNS JSONB AS $$
 DECLARE
     summary JSONB;
 BEGIN
@@ -520,9 +520,6 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Remove cron job that may not be available in Supabase
--- SELECT cron.schedule('cleanup-automation-data', '0 2 * * *', 'SELECT cleanup_old_data();');
-
 -- Initial data for user agents
 INSERT INTO user_agents (user_agent, browser, version, os, device_type) VALUES
 ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', 'Chrome', '120.0', 'Windows', 'desktop'),
@@ -545,21 +542,21 @@ ON CONFLICT (id) DO NOTHING;
 -- Initial alert rules
 INSERT INTO alert_rules (id, name, condition, severity, channels) VALUES
 (
-    'high-error-rate',
+    gen_random_uuid(),
     'High Error Rate Detected',
     '{"metric": "error_count", "operator": "gt", "threshold": 10, "timeWindow": 300, "frequency": 10}',
     'high',
     '[{"type": "email", "target": "alerts@company.com", "priority": "high"}]'
 ),
 (
-    'critical-system-failure',
+    gen_random_uuid(),
     'Critical System Failure',
     '{"metric": "critical_errors", "operator": "gt", "threshold": 1, "timeWindow": 60, "frequency": 1}',
     'critical',
     '[{"type": "email", "target": "oncall@company.com", "priority": "urgent"}, {"type": "slack", "target": "#alerts", "priority": "urgent"}]'
 ),
 (
-    'capacity-threshold',
+    gen_random_uuid(),
     'System Capacity Threshold',
     '{"metric": "capacity_usage", "operator": "gt", "threshold": 90, "timeWindow": 300, "frequency": 1}',
     'medium',
