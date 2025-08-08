@@ -620,47 +620,47 @@ export function BeautifulBlogPost() {
             {/* Article Header */}
             <header className="text-center mb-16 relative">
 
-              {/* Deletion Warning - Above Status Badges */}
+              {/* Content Preservation Notice - Subtle and Professional */}
               {!blogPost.claimed && blogPost.expires_at && (
                 <div className="mb-8">
-                  <div className="beautiful-warning max-w-2xl mx-auto p-6 shadow-lg border-l-4 border-red-500 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg">
-                    <div className="flex items-center justify-center gap-3 text-red-800 mb-4">
-                      <Timer className="h-6 w-6 animate-pulse" />
-                      <span className="text-xl font-bold">
-                        🚨 DELETION IN: {getTimeRemaining(blogPost.expires_at)} 🚨
+                  <div className="max-w-2xl mx-auto p-6 bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200 rounded-xl shadow-sm">
+                    <div className="flex items-center justify-center gap-3 text-slate-700 mb-4">
+                      <Timer className="h-5 w-5 text-slate-500" />
+                      <span className="text-lg font-medium">
+                        Content expires in {getTimeRemaining(blogPost.expires_at)}
                       </span>
                     </div>
-                    <p className="text-red-700 text-center font-semibold mb-4">
-                      This post will be <span className="text-red-900 font-black">PERMANENTLY DELETED</span> when the timer expires. and <span className="text-red-900 font-black">No recovery.</span>
+                    <p className="text-slate-600 text-center mb-4 leading-relaxed">
+                      This content will be archived when the timer expires. Claim ownership to preserve it permanently and gain full editorial control.
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                      <Button
-                        onClick={() => setShowKillerWarning(true)}
-                        className="bg-red-600 hover:bg-red-700 text-white font-bold animate-pulse"
-                      >
-                        <AlertTriangle className="mr-2 h-4 w-4" />
-                        �� SAVE FROM DELETION!
-                      </Button>
-
                       {user ? (
                         <Button
                           onClick={() => setShowClaimModal(true)}
-                          className="bg-green-600 hover:bg-green-700 text-white font-bold"
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
                         >
                           <Crown className="mr-2 h-4 w-4" />
-                          Claim Now (Logged In)
+                          Claim Ownership
                         </Button>
                       ) : (
                         <Button
                           onClick={() => setShowClaimModal(true)}
-                          variant="outline"
-                          className="border-blue-500 text-blue-600 hover:bg-blue-50 font-bold"
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
                         >
                           <Crown className="mr-2 h-4 w-4" />
-                          Login to Claim
+                          Sign In to Claim
                         </Button>
                       )}
+
+                      <Button
+                        onClick={() => setShowKillerWarning(true)}
+                        variant="outline"
+                        className="border-slate-300 text-slate-700 hover:bg-slate-50 font-medium"
+                      >
+                        <Shield className="mr-2 h-4 w-4" />
+                        Learn More
+                      </Button>
                     </div>
                   </div>
                 </div>
