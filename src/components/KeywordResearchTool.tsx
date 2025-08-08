@@ -475,7 +475,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "FK", name: "Falkland Islands", flag: "🇫🇰" },
     { code: "FM", name: "Micronesia", flag: "🇫🇲" },
     { code: "FO", name: "Faroe Islands", flag: "🇫🇴" },
-    { code: "FR", name: "France", flag: "🇫����" },
+    { code: "FR", name: "France", flag: "🇫🇷" },
     { code: "GA", name: "Gabon", flag: "🇬🇦" },
     { code: "GB", name: "United Kingdom", flag: "🇬🇧" },
     { code: "GD", name: "Grenada", flag: "🇬🇩" },
@@ -932,8 +932,10 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
-                  {keywords[0]?.dataSources?.includes('Local_Estimation')
-                    ? 'Demo data for testing - configure API keys for real search volume data'
+                  {keywords[0]?.dataSources?.includes('Free_APIs')
+                    ? '🚀 Real-time data from Google Autocomplete, Trends analysis, and SERP intelligence - completely free!'
+                    : keywords[0]?.dataSources?.includes('Local_Estimation')
+                    ? 'Demo data for testing - try the free research above for real data'
                     : 'Search volume data from multiple reliable SEO data sources'
                   }
                 </p>
