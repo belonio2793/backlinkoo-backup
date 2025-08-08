@@ -302,8 +302,8 @@ export function BlogPreview({ content }: BlogPreviewProps) {
         </CardHeader>
         <CardContent>
           {viewMode === 'preview' ? (
-            <div 
-              className="prose max-w-none"
+            <div
+              className="prose max-w-none blog-content prose-strong:font-bold prose-strong:text-foreground [&_strong]:font-bold"
               dangerouslySetInnerHTML={{ __html: content.content }}
             />
           ) : (
