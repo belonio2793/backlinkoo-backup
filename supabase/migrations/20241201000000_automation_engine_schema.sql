@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS content_requests (
 CREATE TABLE IF NOT EXISTS posted_links (
     id TEXT PRIMARY KEY,
     campaign_id TEXT REFERENCES automation_campaigns(id) ON DELETE CASCADE,
-    opportunity_id UUID REFERENCES link_opportunities(id) ON DELETE CASCADE,
+    opportunity_id TEXT REFERENCES link_opportunities(id) ON DELETE CASCADE,
     content_request_id TEXT REFERENCES content_requests(id) ON DELETE CASCADE,
     posted_url TEXT NOT NULL,
     anchor_text TEXT,
