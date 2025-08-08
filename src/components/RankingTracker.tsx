@@ -5,11 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { TrendingUp, Search, CheckCircle, XCircle, Clock, Trash2, AlertTriangle, Link, Eye, Plus, Save, ExternalLink, Target, Zap, Globe } from "lucide-react";
+import { TrendingUp, Search, CheckCircle, XCircle, Clock, Trash2, AlertTriangle, Link, Eye, Plus, Save, ExternalLink, Target, Zap, Globe, Server, Activity } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FreeRankTracker } from "@/services/freeRankTracker";
+import { RealRankTracker } from "@/services/realRankTracker";
 
 interface RankingResult {
   keyword: string;
@@ -470,7 +470,7 @@ export const RankingTracker = () => {
               <Zap className="h-5 w-5 text-purple-600" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-purple-900 mb-1">🧠 Intelligent Rank Simulation</h3>
+              <h3 className="font-semibold text-purple-900 mb-1">�� Intelligent Rank Simulation</h3>
               <p className="text-sm text-purple-800 mb-3">
                 Smart ranking analysis using realistic competitor data and intelligent position estimation. Browser limitations prevent direct Google access, so we provide accurate simulations instead.
               </p>
