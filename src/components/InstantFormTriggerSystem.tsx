@@ -10,7 +10,7 @@ import {
   TrendingUp, 
   Users, 
   X,
-  Fire,
+  Flame,
   Skull,
   Heart,
   Eye,
@@ -119,7 +119,7 @@ export function InstantFormTriggerSystem({
           <Card className="border-4 border-red-500 bg-red-600 text-white shadow-2xl">
             <CardContent className="p-4 text-center">
               <div className="flex items-center gap-3">
-                <Fire className="h-8 w-8 animate-spin" />
+                <Flame className="h-8 w-8 animate-spin" />
                 <div>
                   <div className="font-black text-lg">🔥 CONTENT GENERATED! 🔥</div>
                   <div className="text-sm">Analyzing SEO potential...</div>
