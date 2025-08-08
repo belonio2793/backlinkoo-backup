@@ -1,7 +1,10 @@
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { CheckCircle2, ExternalLink, Copy, ArrowRight, Plus, BarChart3 } from 'lucide-react';
+import { CheckCircle2, ExternalLink, Copy, ArrowRight, Plus, BarChart3, Crown, Star, Gift, Zap, Timer, AlertTriangle } from 'lucide-react';
+import { TriggerOrchestrator } from './TriggerOrchestrator';
+import { Badge } from '@/components/ui/badge';
 
 interface MinimalisticSuccessSectionProps {
   publishedUrl: string;
@@ -10,6 +13,8 @@ interface MinimalisticSuccessSectionProps {
   targetUrl: string;
   currentUser: any;
   onCreateAnother?: () => void;
+  onSignUp?: () => void;
+  onLogin?: () => void;
 }
 
 export function MinimalisticSuccessSection({
@@ -18,9 +23,13 @@ export function MinimalisticSuccessSection({
   primaryKeyword,
   targetUrl,
   currentUser,
-  onCreateAnother
+  onCreateAnother,
+  onSignUp,
+  onLogin
 }: MinimalisticSuccessSectionProps) {
   const { toast } = useToast();
+  const [showTrigger, setShowTrigger] = useState(false);
+  const [showOrchestrator, setShowOrchestrator] = useState(false);
 
   console.log('🎯 MinimalisticSuccessSection props:', {
     publishedUrl,
@@ -42,7 +51,40 @@ export function MinimalisticSuccessSection({
 
   const handleViewPost = () => {
     window.open(blogUrl, '_blank');
+
+    // Trigger first warning for non-authenticated users after they view the post
+    if (!currentUser && triggerCount === 0) {
+      setTimeout(() => {
+        setShowTrigger(true);
+        setTriggerCount(1);
+      }, 2000);
+    }
   };
+
+  // Show orchestrated trigger system for guest users
+  useEffect(() => {
+    if (!currentUser) {
+      setShowOrchestrator(true);
+    }
+  }, [currentUser]);
+
+
+  const handleDefaultSignUp = () => {
+    if (onSignUp) {
+      onSignUp();
+    } else {
+      window.location.href = '/signup';
+    }
+  };
+
+  const handleDefaultLogin = () => {
+    if (onLogin) {
+      onLogin();
+    } else {
+      window.location.href = '/login';
+    }
+  };
+
 
   return (
     <Card className="border-0 shadow-sm bg-white">
@@ -174,23 +216,104 @@ export function MinimalisticSuccessSection({
           </Button>
         </div>
 
-        {/* Next Steps */}
+        {/* Enhanced Next Steps for Non-Authenticated Users */}
         {!currentUser && (
-          <div className="mt-6 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                <ArrowRight className="h-3 w-3 text-amber-600" />
+          <div className="space-y-4 mt-6">
+            {/* Primary Warning */}
+            <div className="p-6 bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-xl">
+              <div className="flex items-start gap-4">
+                <div className="p-2 bg-red-100 rounded-full animate-pulse">
+                  <AlertTriangle className="h-5 w-5 text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge className="bg-red-500 text-white text-xs font-bold animate-pulse">
+                      🚨 URGENT WARNING
+                    </Badge>
+                    <Badge className="bg-orange-500 text-white text-xs">
+                      24 HOURS LEFT
+                    </Badge>
+                  </div>
+                  <h3 className="font-bold text-red-800 text-lg mb-2">
+                    Your $297 Backlink Will Be DELETED Forever!
+                  </h3>
+                  <p className="text-red-700 text-sm mb-3">
+                    This professional-grade content will vanish in 24 hours unless you create a free account.
+                    Don't lose your valuable SEO investment!
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button
+                      onClick={handleDefaultSignUp}
+                      className="bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 text-white font-bold"
+                    >
+                      <Gift className="h-4 w-4 mr-2" />
+                      🎁 Save FREE Forever (30 sec)
+                    </Button>
+                    <Button
+                      onClick={handleDefaultLogin}
+                      variant="outline"
+                      className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                    >
+                      Already Have Account? Login
+                    </Button>
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-sm font-medium text-amber-800">
-                  Want to keep this backlink forever?
-                </p>
-                <p className="text-sm text-amber-700 mt-1">
-                  Register your account to make this backlink permanent and create unlimited posts.
+            </div>
+
+            {/* Value Proposition */}
+            <div className="p-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
+              <div className="text-center">
+                <h4 className="font-semibold text-blue-800 mb-2 flex items-center justify-center gap-2">
+                  <Crown className="h-4 w-4" />
+                  FREE Account = $597 Worth of Premium Features
+                </h4>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-2 text-sm">
+                  <div className="flex items-center gap-1 text-blue-700">
+                    <Star className="h-3 w-3 text-yellow-500" />
+                    <span>Unlimited backlinks</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-blue-700">
+                    <Zap className="h-3 w-3 text-orange-500" />
+                    <span>Instant publishing</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-blue-700">
+                    <BarChart3 className="h-3 w-3 text-green-500" />
+                    <span>Analytics dashboard</span>
+                  </div>
+                </div>
+                <p className="text-xs text-blue-600 mt-2 font-medium">
+                  🎯 Normally $97/month • FREE today only
                 </p>
               </div>
             </div>
+
+            {/* Countdown Element */}
+            {generatedPost?.expires_at && (
+              <div className="p-3 bg-yellow-50 border border-yellow-300 rounded-lg text-center">
+                <div className="flex items-center justify-center gap-2 text-yellow-800">
+                  <Timer className="h-4 w-4 animate-pulse" />
+                  <span className="font-bold text-sm">
+                    Content expires in: {new Date(generatedPost.expires_at).toLocaleTimeString()}
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
+        )}
+
+        {/* Orchestrated Trigger System */}
+        {showOrchestrator && (
+          <TriggerOrchestrator
+            isGuestUser={!currentUser}
+            blogPostTitle={generatedPost?.title || `Complete Guide to ${primaryKeyword}`}
+            targetUrl={targetUrl}
+            expiresAt={generatedPost?.expires_at}
+            onSignUp={handleDefaultSignUp}
+            onLogin={handleDefaultLogin}
+            userName="Friend"
+            triggerIntensity="extreme"
+          />
         )}
       </CardContent>
     </Card>

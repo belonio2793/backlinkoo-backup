@@ -17,6 +17,8 @@ import { MultiBlogGenerator } from './MultiBlogGenerator';
 import { ClaimTrialPostDialog } from './ClaimTrialPostDialog';
 import { AdaptiveProgressIndicator } from './AdaptiveProgressIndicator';
 import { MinimalisticSuccessSection } from './MinimalisticSuccessSection';
+import { InstantFormTriggerSystem, useInstantFormTrigger } from './InstantFormTriggerSystem';
+import { FloatingConversionNotifications } from './FloatingConversionNotifications';
 import { useSavePostModal, useAuthModal } from '@/contexts/ModalContext';
 import {
   Sparkles,
@@ -67,9 +69,74 @@ export function HomepageBlogGenerator() {
   const { toast } = useToast();
   const { currentUser, isCheckingAuth, isLoggedIn, isGuest, authChecked } = useAuthStatus();
 
+  // Instant trigger system for aggressive conversion popups
+  const { formData, shouldTrigger, triggerConversion, resetTrigger } = useInstantFormTrigger();
+  const [showFloatingNotifications, setShowFloatingNotifications] = useState(false);
+  const [formProgress, setFormProgress] = useState({
+    hasKeyword: false,
+    hasUrl: false,
+    hasAnchor: false
+  });
+
   // Unified modal management
   const { openSavePostModal, hasActiveModal: hasSavePostModal } = useSavePostModal();
   const { openLoginModal, hasActiveModal: hasAuthModal } = useAuthModal();
+
+  // Handle signup/login from instant triggers
+  const handleInstantSignUp = () => {
+    resetTrigger();
+    setShowFloatingNotifications(false);
+    // Store context for post-signup flow
+    localStorage.setItem('form_trigger_context', JSON.stringify({
+      keyword: primaryKeyword,
+      targetUrl: targetUrl,
+      anchorText: anchorText,
+      timestamp: Date.now()
+    }));
+    window.location.href = '/signup';
+  };
+
+  const handleInstantLogin = () => {
+    resetTrigger();
+    setShowFloatingNotifications(false);
+    localStorage.setItem('form_trigger_context', JSON.stringify({
+      keyword: primaryKeyword,
+      targetUrl: targetUrl,
+      anchorText: anchorText,
+      timestamp: Date.now()
+    }));
+    window.location.href = '/login';
+  };
+
+  // Monitor form changes for INSTANT HYPER-AGGRESSIVE TRIGGERS
+  useEffect(() => {
+    const progress = {
+      hasKeyword: primaryKeyword.length > 2, // Trigger after 3 characters
+      hasUrl: targetUrl.length > 7, // Trigger after "https://"
+      hasAnchor: anchorText.length > 0
+    };
+
+    setFormProgress(progress);
+
+    // IMMEDIATE floating notifications for guest users when they start typing
+    if (!currentUser && (progress.hasKeyword || progress.hasUrl)) {
+      setShowFloatingNotifications(true);
+    }
+
+    // INSTANT conversion trigger when form gets substantial content
+    if (!currentUser && progress.hasKeyword && progress.hasUrl) {
+      // Small delay to let them finish typing
+      const triggerTimeout = setTimeout(() => {
+        triggerConversion({
+          keyword: primaryKeyword,
+          targetUrl: targetUrl,
+          anchorText: anchorText
+        });
+      }, 2000); // 2 second delay after they fill both fields
+
+      return () => clearTimeout(triggerTimeout);
+    }
+  }, [primaryKeyword, targetUrl, anchorText, currentUser, triggerConversion]);
 
   // ENTERPRISE DEBUG & MONITORING
   useEffect(() => {
@@ -174,7 +241,7 @@ export function HomepageBlogGenerator() {
 
       // Fallback to ChatGPT generator if needed (though this should be reliable)
       if (!result.success) {
-        console.log('⚠️ Self-contained generator failed, trying ChatGPT fallback...');
+        console.log('⚠��� Self-contained generator failed, trying ChatGPT fallback...');
         result = await chatGPTBlogGenerator.generateAndPublishBlog(
           blogInput,
           currentUser?.id
@@ -567,7 +634,7 @@ export function HomepageBlogGenerator() {
                       variant="outline"
                       size="sm"
                       className="border-amber-600 text-amber-700 hover:bg-amber-100"
-                      onClick={() => setShowLoginModal(true)}
+                      onClick={() => window.location.href = '/login'}
                     >
                       Login / Register
                     </Button>
@@ -798,7 +865,7 @@ export function HomepageBlogGenerator() {
               </Card>
             )
           ) : (
-            // Success state - Minimalistic design
+            // Success state - Minimalistic design with enhanced triggers
             <MinimalisticSuccessSection
               publishedUrl={publishedUrl}
               generatedPost={generatedPost}
@@ -806,10 +873,59 @@ export function HomepageBlogGenerator() {
               targetUrl={targetUrl}
               currentUser={currentUser}
               onCreateAnother={resetForm}
+              onSignUp={() => {
+                // Store current context for post-signup redirect
+                localStorage.setItem('post_signup_context', JSON.stringify({
+                  action: 'claim_generated_post',
+                  postId: generatedPost?.id,
+                  postSlug: generatedPost?.slug,
+                  postTitle: generatedPost?.title,
+                  targetUrl: targetUrl,
+                  publishedUrl: publishedUrl,
+                  timestamp: Date.now()
+                }));
+
+                // Navigate to signup
+                window.location.href = '/signup';
+              }}
+              onLogin={() => {
+                // Store current context for post-login redirect
+                localStorage.setItem('post_login_context', JSON.stringify({
+                  action: 'claim_generated_post',
+                  postId: generatedPost?.id,
+                  postSlug: generatedPost?.slug,
+                  postTitle: generatedPost?.title,
+                  targetUrl: targetUrl,
+                  publishedUrl: publishedUrl,
+                  timestamp: Date.now()
+                }));
+
+                // Navigate to login
+                window.location.href = '/login';
+              }}
             />
           )}
         </div>
       </div>
+
+      {/* INSTANT FORM TRIGGER SYSTEM - AGGRESSIVE CONVERSION POPUPS */}
+      {shouldTrigger && (
+        <InstantFormTriggerSystem
+          formData={formData}
+          onSignUp={handleInstantSignUp}
+          onLogin={handleInstantLogin}
+          isGuestUser={!currentUser}
+        />
+      )}
+
+      {/* FLOATING CONVERSION NOTIFICATIONS - SHOWS DURING FORM FILLING */}
+      <FloatingConversionNotifications
+        isVisible={showFloatingNotifications && !currentUser && !isGenerating}
+        onSignUp={handleInstantSignUp}
+        onLogin={handleInstantLogin}
+        onClose={() => setShowFloatingNotifications(false)}
+        formProgress={formProgress}
+      />
 
       {/* Modals are now managed by UnifiedModalManager */}
     </div>
