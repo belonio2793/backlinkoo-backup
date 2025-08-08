@@ -337,16 +337,102 @@
   font-family: 'Georgia', serif;
 }
 
+/* Enhanced bullet point formatting */
 .beautiful-prose ul, .beautiful-prose ol {
   margin: 2rem 0;
-  padding-left: 2rem;
+  padding-left: 0;
+  list-style: none;
 }
 
-.beautiful-prose li {
-  margin: 0.75rem 0;
+.beautiful-prose ul li, .beautiful-prose ol li {
+  position: relative;
+  margin: 1rem 0;
+  padding: 0.75rem 0 0.75rem 3rem;
   font-size: 1.125rem;
   line-height: 1.7;
   color: rgb(55, 65, 81);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.02), rgba(147, 51, 234, 0.02));
+  border-radius: 0.5rem;
+  border-left: 3px solid rgba(59, 130, 246, 0.3);
+  transition: all 0.3s ease;
+}
+
+.beautiful-prose ul li:hover, .beautiful-prose ol li:hover {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(147, 51, 234, 0.05));
+  border-left-color: rgb(59, 130, 246);
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+}
+
+/* Custom bullet points for unordered lists */
+.beautiful-prose ul li::before {
+  content: '';
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  background: linear-gradient(135deg, rgb(59, 130, 246), rgb(147, 51, 234));
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+/* Custom numbers for ordered lists */
+.beautiful-prose ol {
+  counter-reset: list-counter;
+}
+
+.beautiful-prose ol li {
+  counter-increment: list-counter;
+}
+
+.beautiful-prose ol li::before {
+  content: counter(list-counter);
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  background: linear-gradient(135deg, rgb(59, 130, 246), rgb(147, 51, 234));
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.875rem;
+  font-weight: 600;
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+}
+
+/* Nested lists */
+.beautiful-prose ul ul, .beautiful-prose ol ol,
+.beautiful-prose ul ol, .beautiful-prose ol ul {
+  margin: 0.5rem 0;
+  padding-left: 1.5rem;
+}
+
+.beautiful-prose ul ul li, .beautiful-prose ol ol li,
+.beautiful-prose ul ol li, .beautiful-prose ol ul li {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0 0.5rem 2.5rem;
+  font-size: 1rem;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.02), rgba(168, 85, 247, 0.02));
+  border-left-color: rgba(99, 102, 241, 0.3);
+}
+
+.beautiful-prose ul ul li::before {
+  width: 6px;
+  height: 6px;
+  background: linear-gradient(135deg, rgb(99, 102, 241), rgb(168, 85, 247));
+}
+
+.beautiful-prose ol ol li::before {
+  width: 20px;
+  height: 20px;
+  background: linear-gradient(135deg, rgb(99, 102, 241), rgb(168, 85, 247));
+  font-size: 0.75rem;
 }
 
 .beautiful-prose code {
