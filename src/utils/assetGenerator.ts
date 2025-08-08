@@ -1059,6 +1059,288 @@ export class AssetGenerator {
     return this.canvas.toDataURL('image/png');
   }
 
+  async generateAffiliateBadge(): Promise<string> {
+    const width = 800;
+    const height = 600;
+    this.setupCanvas(width, height);
+
+    // Create professional badge background
+    const gradient = this.ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, '#064e3b');
+    gradient.addColorStop(0.5, '#047857');
+    gradient.addColorStop(1, '#0f766e');
+
+    this.ctx.fillStyle = gradient;
+    this.fillRoundedRect(0, 0, width, height, 24);
+
+    // Add background pattern
+    this.ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    for (let i = 0; i < 40; i++) {
+      const x = Math.random() * width;
+      const y = Math.random() * height;
+      this.ctx.beginPath();
+      this.ctx.arc(x, y, Math.random() * 3 + 1, 0, Math.PI * 2);
+      this.ctx.fill();
+    }
+
+    // Crown icon background
+    const crownGradient = this.ctx.createRadialGradient(400, 180, 0, 400, 180, 50);
+    crownGradient.addColorStop(0, '#fbbf24');
+    crownGradient.addColorStop(1, '#f59e0b');
+
+    this.ctx.fillStyle = crownGradient;
+    this.ctx.beginPath();
+    this.ctx.arc(400, 180, 40, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    // Crown icon (simplified)
+    this.ctx.fillStyle = '#0f172a';
+    this.ctx.font = 'bold 30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText('👑', 400, 190);
+
+    // Official Partner badge
+    const badgeGradient = this.ctx.createLinearGradient(250, 240, 550, 280);
+    badgeGradient.addColorStop(0, '#10b981');
+    badgeGradient.addColorStop(1, '#059669');
+
+    this.ctx.fillStyle = badgeGradient;
+    this.fillRoundedRect(250, 240, 300, 50, 25);
+
+    this.ctx.fillStyle = '#0f172a';
+    this.ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.fillText('OFFICIAL PARTNER', 400, 272);
+
+    // Brand name
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.fillText('Backlink ∞', 400, 340);
+
+    this.ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.fillStyle = '#a7f3d0';
+    this.ctx.fillText('Authorized Affiliate', 400, 380);
+
+    // Stats boxes
+    const stats = [
+      { label: '20%', desc: 'Commission', x: 280 },
+      { label: '24/7', desc: 'Support', x: 520 }
+    ];
+
+    stats.forEach(stat => {
+      this.ctx.fillStyle = 'rgba(255,255,255,0.1)';
+      this.fillRoundedRect(stat.x - 60, 420, 120, 80, 12);
+
+      this.ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+      this.ctx.lineWidth = 2;
+      this.strokeRoundedRect(stat.x - 60, 420, 120, 80, 12);
+
+      this.ctx.fillStyle = '#fbbf24';
+      this.ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      this.ctx.fillText(stat.label, stat.x, 450);
+
+      this.ctx.fillStyle = 'white';
+      this.ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      this.ctx.fillText(stat.desc, stat.x, 480);
+    });
+
+    return this.canvas.toDataURL('image/png');
+  }
+
+  async generateSocialMediaKit(): Promise<string> {
+    const width = 1200;
+    const height = 1200;
+    this.setupCanvas(width, height);
+
+    // Create social media background
+    const gradient = this.ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, '#312e81');
+    gradient.addColorStop(0.3, '#7c3aed');
+    gradient.addColorStop(0.7, '#ec4899');
+    gradient.addColorStop(1, '#be185d');
+
+    this.ctx.fillStyle = gradient;
+    this.fillRoundedRect(0, 0, width, height, 32);
+
+    // Add floating particles
+    this.addGlowingDots([
+      { x: 200, y: 200, radius: 8, color: '#fbbf24' },
+      { x: 1000, y: 300, radius: 6, color: '#06b6d4' },
+      { x: 300, y: 900, radius: 4, color: '#ec4899' },
+      { x: 900, y: 800, radius: 10, color: '#10b981' }
+    ]);
+
+    // Main profile circle
+    const profileGradient = this.ctx.createRadialGradient(600, 400, 0, 600, 400, 120);
+    profileGradient.addColorStop(0, '#ec4899');
+    profileGradient.addColorStop(0.5, '#7c3aed');
+    profileGradient.addColorStop(1, '#3730a3');
+
+    this.ctx.fillStyle = profileGradient;
+    this.ctx.beginPath();
+    this.ctx.arc(600, 400, 100, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    // Profile border
+    this.ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+    this.ctx.lineWidth = 8;
+    this.ctx.beginPath();
+    this.ctx.arc(600, 400, 100, 0, Math.PI * 2);
+    this.ctx.stroke();
+
+    // Infinity symbol
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = 'bold 80px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText('∞', 600, 430);
+
+    // Username
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = 'bold 54px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.fillText('@BacklinkInfinity', 600, 580);
+
+    // Description
+    this.ctx.fillStyle = '#e879f9';
+    this.ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.fillText('🚀 AI Link Building', 600, 640);
+
+    this.ctx.fillStyle = '#c084fc';
+    this.ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.fillText('10K+ SEO Professionals • Partner Program', 600, 680);
+
+    // Social stats
+    const socialStats = [
+      { label: '15.2K', desc: 'Followers', x: 400 },
+      { label: '2.8K', desc: 'Partners', x: 600 },
+      { label: '500%', desc: 'ROI Avg', x: 800 }
+    ];
+
+    socialStats.forEach(stat => {
+      this.ctx.fillStyle = stat.label === '15.2K' ? '#fbbf24' : stat.label === '2.8K' ? '#10b981' : '#3b82f6';
+      this.ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      this.ctx.fillText(stat.label, stat.x, 780);
+
+      this.ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      this.ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      this.ctx.fillText(stat.desc, stat.x, 810);
+    });
+
+    return this.canvas.toDataURL('image/png');
+  }
+
+  async generatePresentationTemplate(): Promise<string> {
+    const width = 1920;
+    const height = 1080;
+    this.setupCanvas(width, height);
+
+    // Create corporate background
+    const gradient = this.ctx.createLinearGradient(0, 0, width, height);
+    gradient.addColorStop(0, '#111827');
+    gradient.addColorStop(0.5, '#1f2937');
+    gradient.addColorStop(1, '#111827');
+
+    this.ctx.fillStyle = gradient;
+    this.fillRoundedRect(0, 0, width, height, 0);
+
+    // Add subtle grid
+    this.ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+    this.ctx.lineWidth = 1;
+    for (let x = 100; x < width; x += 100) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(x, 0);
+      this.ctx.lineTo(x, height);
+      this.ctx.stroke();
+    }
+    for (let y = 100; y < height; y += 100) {
+      this.ctx.beginPath();
+      this.ctx.moveTo(0, y);
+      this.ctx.lineTo(width, y);
+      this.ctx.stroke();
+    }
+
+    // Header section
+    const logoGradient = this.ctx.createRadialGradient(150, 150, 0, 150, 150, 60);
+    logoGradient.addColorStop(0, '#3b82f6');
+    logoGradient.addColorStop(1, '#7c3aed');
+
+    this.ctx.fillStyle = logoGradient;
+    this.ctx.beginPath();
+    this.ctx.arc(150, 150, 48, 0, Math.PI * 2);
+    this.ctx.fill();
+
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText('∞', 150, 170);
+
+    // Company name and title
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.textAlign = 'left';
+    this.ctx.fillText('Backlink ∞', 220, 140);
+
+    this.ctx.fillStyle = '#9ca3af';
+    this.ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.fillText('Enterprise Link Building Platform', 220, 180);
+
+    // Date and type
+    this.ctx.fillStyle = '#9ca3af';
+    this.ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.textAlign = 'right';
+    this.ctx.fillText('Partner Presentation', width - 100, 140);
+
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.fillText('2025 Overview', width - 100, 180);
+
+    // Main content sections
+    this.ctx.fillStyle = 'white';
+    this.ctx.font = 'bold 54px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.textAlign = 'left';
+    this.ctx.fillText('Revenue Growth', 100, 380);
+
+    // Bullet points
+    const bulletPoints = [
+      'Partner Revenue: +180%',
+      'Active Affiliates: 10,000+',
+      'Avg Commission: 20-35%'
+    ];
+
+    bulletPoints.forEach((point, index) => {
+      const y = 450 + (index * 60);
+
+      // Bullet dot
+      this.ctx.fillStyle = index === 0 ? '#10b981' : index === 1 ? '#3b82f6' : '#fbbf24';
+      this.ctx.beginPath();
+      this.ctx.arc(150, y - 10, 8, 0, Math.PI * 2);
+      this.ctx.fill();
+
+      // Text
+      this.ctx.fillStyle = '#d1d5db';
+      this.ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      this.ctx.fillText(point, 180, y);
+    });
+
+    // Right side highlight box
+    this.ctx.fillStyle = 'rgba(59,130,246,0.2)';
+    this.fillRoundedRect(1200, 350, 600, 300, 20);
+
+    this.ctx.strokeStyle = 'rgba(59,130,246,0.3)';
+    this.ctx.lineWidth = 3;
+    this.strokeRoundedRect(1200, 350, 600, 300, 20);
+
+    // Highlight content
+    this.ctx.fillStyle = '#60a5fa';
+    this.ctx.font = 'bold 72px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText('$2.3M', 1500, 460);
+
+    this.ctx.fillStyle = '#d1d5db';
+    this.ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    this.ctx.fillText('Total Partner Payouts', 1500, 500);
+
+    return this.canvas.toDataURL('image/png');
+  }
+
   private setupCanvas(width: number, height: number) {
     this.canvas.width = width;
     this.canvas.height = height;
