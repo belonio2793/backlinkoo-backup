@@ -12,6 +12,7 @@ interface WaitlistModalProps {
   onClose: () => void;
   initialEmail?: string;
   modalProps?: any;
+  onSuccess?: () => void;
 }
 
 export const WaitlistModal: React.FC<WaitlistModalProps> = ({
