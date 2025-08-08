@@ -248,7 +248,10 @@ export default function BacklinkAutomation() {
         if (step > 20 && addedOpportunities < demoOpportunities.length) {
           const opportunitiesToAdd = Math.min(3, demoOpportunities.length - addedOpportunities);
           for (let i = 0; i < opportunitiesToAdd; i++) {
-            setLinkOpportunities(prev => [...prev, demoOpportunities[addedOpportunities + i]]);
+            const opportunityToAdd = demoOpportunities[addedOpportunities + i];
+            if (opportunityToAdd && opportunityToAdd.id && opportunityToAdd.type) {
+              setLinkOpportunities(prev => [...prev, opportunityToAdd]);
+            }
           }
           addedOpportunities += opportunitiesToAdd;
         }
