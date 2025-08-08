@@ -276,9 +276,9 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
                 </div>
 
                 {/* Right Form */}
-                <div className="bg-white rounded-3xl p-8 shadow-2xl">
+                <div className="bg-white rounded-3xl p-8 shadow-2xl waitlist-slide-up waitlist-hover-lift">
                   <div className="text-center mb-8">
-                    <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4">
+                    <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mb-4 waitlist-pulse">
                       <Rocket className="w-8 h-8 text-white" />
                     </div>
                     <h2 className="text-2xl font-bold text-gray-900 mb-2">Secure Your Spot</h2>
