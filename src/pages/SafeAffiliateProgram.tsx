@@ -14,6 +14,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Badge } from '../components/ui/badge';
 import { Progress } from '../components/ui/progress';
+import { BrandGuidelinesPreviewModal } from '../components/BrandGuidelinesPreviewModal';
 import {
   Copy,
   Download,
@@ -68,6 +69,7 @@ const SafeAffiliateProgram: React.FC = () => {
   const [selectedEmailTemplate, setSelectedEmailTemplate] = useState('professional');
   const [customMessage, setCustomMessage] = useState('');
   const [trackingTimeRange, setTrackingTimeRange] = useState('7d');
+  const [showBrandGuidelinesPreview, setShowBrandGuidelinesPreview] = useState(false);
   const [socialPage, setSocialPage] = useState(0);
   const [emailPage, setEmailPage] = useState(0);
 
@@ -1057,7 +1059,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Quick Win",
-          content: `⚡ QUICK WIN WEDNESDAY ⚡\n\nWant an instant SEO boost?\n\nStart building quality backlinks TODAY with Backlink ∞\n\nNo experience needed 🎯\nResults in 30 days ✅\nFree trial available 🆓\n\nLink in bio: ${referralUrl}\n\n#QuickWin #SEOBoost`,
+          content: `⚡ QUICK WIN WEDNESDAY ⚡\n\nWant an instant SEO boost?\n\nStart building quality backlinks TODAY with Backlink ���\n\nNo experience needed 🎯\nResults in 30 days ✅\nFree trial available 🆓\n\nLink in bio: ${referralUrl}\n\n#QuickWin #SEOBoost`,
           engagement: "High",
           audience: "Quick results"
         },
@@ -1095,7 +1097,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Growth Hack",
-          content: `🚨 GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️⃣ Technical SEO ✅\n3️⃣ High-quality backlinks ���\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
+          content: `🚨 GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️⃣ Technical SEO ���\n3️⃣ High-quality backlinks ���\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
           engagement: "Very High",
           audience: "Growth hackers"
         },
@@ -1121,7 +1123,7 @@ Link in bio: ${referralUrl}
         // Page 7
         {
           type: "Grateful Thursday",
-          content: `🙏 GRATEFUL THURSDAY 🙏\n\nToday I'm grateful for:\n\n✨ Amazing tools like Backlink ∞\n✨ The opportunity to grow online\n✨ This incredible community\n✨ Your support and engagement\n\nWhat are you grateful for?\n\nLink in bio: ${referralUrl}\n\n#GratefulThursday #Blessed`,
+          content: `�� GRATEFUL THURSDAY 🙏\n\nToday I'm grateful for:\n\n✨ Amazing tools like Backlink ∞\n✨ The opportunity to grow online\n✨ This incredible community\n✨ Your support and engagement\n\nWhat are you grateful for?\n\nLink in bio: ${referralUrl}\n\n#GratefulThursday #Blessed`,
           engagement: "High",
           audience: "Grateful hearts"
         },
@@ -1133,7 +1135,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Final Push",
-          content: `🎯 FINAL CALL 🎯\n\nIf you're serious about SEO success:\n\n⏰ Don't wait another day\n⏰ Every moment counts\n⚠️ Your competitors aren't waiting\n⏰ Start building links NOW\n\nBacklink ∞ = Your secret weapon! 🚀\n\nLink in bio: ${referralUrl}\n\n#FinalCall #TakeAction`,
+          content: `🎯 FINAL CALL 🎯\n\nIf you're serious about SEO success:\n\n⏰ Don't wait another day\n�� Every moment counts\n⚠️ Your competitors aren't waiting\n⏰ Start building links NOW\n\nBacklink ∞ = Your secret weapon! 🚀\n\nLink in bio: ${referralUrl}\n\n#FinalCall #TakeAction`,
           engagement: "High",
           audience: "Action takers"
         }
@@ -2114,28 +2116,39 @@ Here's the math: ${referralUrl}`,
                       <span className="font-medium text-gray-900">Complete PDF Guide</span>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">11 pages • High-resolution • Vector graphics</p>
-                    <button
-                      onClick={() => {
-                        // Create a download link for the PDF
-                        const link = document.createElement('a');
-                        link.href = '/brand-guidelines.pdf';
-                        link.download = 'Backlink-Infinity-Brand-Guidelines-v1.0.pdf';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
 
-                        if (toast) {
-                          toast({
-                            title: "Download Started",
-                            description: "Brand Guidelines PDF is being downloaded",
-                          });
-                        }
-                      }}
-                      className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2"
-                    >
-                      <Download className="h-4 w-4" />
-                      Download PDF (2.4 MB)
-                    </button>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => setShowBrandGuidelinesPreview(true)}
+                        className="w-full bg-white border-2 border-purple-600 text-purple-600 px-4 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-all duration-200 flex items-center justify-center gap-2"
+                      >
+                        <Eye className="h-4 w-4" />
+                        Preview Guidelines
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          // Create a download link for the PDF
+                          const link = document.createElement('a');
+                          link.href = '/brand-guidelines.pdf';
+                          link.download = 'Backlink-Infinity-Brand-Guidelines-v1.0.pdf';
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+
+                          if (toast) {
+                            toast({
+                              title: "Download Started",
+                              description: "Brand Guidelines PDF is being downloaded",
+                            });
+                          }
+                        }}
+                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2"
+                      >
+                        <Download className="h-4 w-4" />
+                        Download PDF (2.4 MB)
+                      </button>
+                    </div>
                   </div>
 
                   <div className="p-4 bg-gray-50 rounded-lg border">
@@ -3159,6 +3172,12 @@ Here's the math: ${referralUrl}`,
         </div>
       </div>
       <Footer />
+
+      {/* Brand Guidelines Preview Modal */}
+      <BrandGuidelinesPreviewModal
+        isOpen={showBrandGuidelinesPreview}
+        onClose={() => setShowBrandGuidelinesPreview(false)}
+      />
     </div>
   );
 };

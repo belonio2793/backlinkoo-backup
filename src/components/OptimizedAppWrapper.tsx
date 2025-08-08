@@ -67,6 +67,9 @@ import {
   LazyGuestDashboard,
   LazyClaimSystemDebug,
   LazySEOOptimizedBlogGenerator,
+  LazyScrapePage,
+  LazyBacklinkAutomation,
+  LazyAdminCampaignManager,
   LazyOpenAITest,
   LazySystemTest,
   LazyPaymentTest,
@@ -184,6 +187,12 @@ export const OptimizedAppWrapper = () => {
             </Suspense>
           } />
 
+          <Route path="/admin/campaigns" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyAdminCampaignManager />
+            </Suspense>
+          } />
+
           <Route path="/admin/payment-test" element={
             <Suspense fallback={<PageLoader />}>
               <LazyPaymentTest />
@@ -244,6 +253,8 @@ export const OptimizedAppWrapper = () => {
           } />
 
           {/* Feature routes - lazy loaded */}
+          <Route path="/scrape" element={<LazyScrapePage />} />
+          <Route path="/backlink-automation" element={<LazyBacklinkAutomation />} />
           <Route path="/campaign/:campaignId" element={
             <InstantEmailVerificationGuard>
               <LazyCampaignDeliverables />
