@@ -92,7 +92,7 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
 
   return (
     <Dialog open={isOpen} onOpenChange={resetAndClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-lg">
         <DialogHeader>
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-4">
