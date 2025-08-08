@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
+import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
 
 // Import our enterprise engines
 import { CampaignQueueManager, type CampaignConfig, type QueuedCampaign, type CampaignDeletionResult } from '@/services/automationEngine/CampaignQueueManager';
@@ -474,8 +475,12 @@ export default function BacklinkAutomation() {
 
   const pauseCampaign = async (campaignId: string) => {
     try {
+      // Use campaign service for backend call
+      await campaignService.pauseCampaign(campaignId);
+
+      // Also pause in queue manager
       await queueManager.pauseCampaign(campaignId);
-      
+
       setCampaigns(prev => prev.map(c =>
         c.id === campaignId ? { ...c, status: 'paused' as const } : c
       ));
@@ -486,6 +491,14 @@ export default function BacklinkAutomation() {
       });
     } catch (error) {
       console.error('Failed to pause campaign:', error);
+
+      await errorEngine.handleError(error as Error, {
+        component: 'campaign_pause',
+        operation: 'pause_campaign',
+        severity: 'medium',
+        metadata: { campaignId }
+      });
+
       toast({
         title: "Pause Failed",
         description: "Could not pause the campaign. Please try again.",
@@ -496,8 +509,12 @@ export default function BacklinkAutomation() {
 
   const resumeCampaign = async (campaignId: string) => {
     try {
+      // Use campaign service for backend call
+      await campaignService.resumeCampaign(campaignId);
+
+      // Also resume in queue manager
       await queueManager.resumeCampaign(campaignId);
-      
+
       setCampaigns(prev => prev.map(c =>
         c.id === campaignId ? { ...c, status: 'active' as const, lastActive: new Date() } : c
       ));
@@ -508,6 +525,14 @@ export default function BacklinkAutomation() {
       });
     } catch (error) {
       console.error('Failed to resume campaign:', error);
+
+      await errorEngine.handleError(error as Error, {
+        component: 'campaign_resume',
+        operation: 'resume_campaign',
+        severity: 'medium',
+        metadata: { campaignId }
+      });
+
       toast({
         title: "Resume Failed",
         description: "Could not resume the campaign. Please try again.",
@@ -548,36 +573,31 @@ export default function BacklinkAutomation() {
     setDeleteDialogOpen(true);
   };
 
-  const handleDeleteConfirm = async (campaignId: string, options: any) => {
+  const handleDeleteConfirm = async (campaignId: string, options: CampaignDeletionOptions) => {
     setIsDeleting(true);
 
     try {
-      // Call the backend API for deletion
-      const response = await fetch('/.netlify/functions/backlink-campaigns', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}` // Adjust based on your auth implementation
-        },
-        body: JSON.stringify({
-          action: 'delete',
-          campaignId,
-          forceDelete: options.forceDelete,
-          reason: options.reason
-        })
-      });
+      // Validate campaign before deletion
+      const validation = await campaignService.validateCampaignForDeletion(campaignId);
 
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to delete campaign');
+      if (!validation.canDelete) {
+        throw new Error(`Cannot delete campaign: ${validation.warnings.join(', ')}`);
       }
 
-      // Also delete from queue manager
-      const queueDeletionResult: CampaignDeletionResult = await queueManager.deleteCampaign(
-        campaignId,
-        options.forceDelete
-      );
+      // Use the campaign service for deletion
+      const result = await campaignService.deleteCampaign(campaignId, options);
+
+      // Also delete from queue manager with proper error handling
+      let queueDeletionResult: CampaignDeletionResult | null = null;
+      try {
+        queueDeletionResult = await queueManager.deleteCampaign(
+          campaignId,
+          options.forceDelete
+        );
+      } catch (queueError) {
+        console.warn('Queue deletion failed but backend deletion succeeded:', queueError);
+        // Continue with the process as backend deletion was successful
+      }
 
       // Remove from local state
       setCampaigns(prev => prev.filter(c => c.id !== campaignId));
@@ -589,24 +609,57 @@ export default function BacklinkAutomation() {
         usedCapacity: Math.max(0, prev.usedCapacity - 1)
       }));
 
+      // Update real-time metrics
+      setRealTimeMetrics(prev => ({
+        ...prev,
+        campaignsActive: campaigns.filter(c => c.id !== campaignId && c.status === 'active').length
+      }));
+
+      // Show success message with detailed information
       toast({
         title: "Campaign Deleted Successfully",
         description: result.deletionSummary ?
           `Campaign "${result.deletionSummary.campaignName}" has been deleted with ${result.deletionSummary.linksArchived} links archived.` :
-          "Campaign has been permanently deleted.",
+          "Campaign has been permanently deleted with all related data cleaned up.",
       });
 
-      // Log successful deletion for monitoring
+      // Log comprehensive deletion information
       console.log('Campaign deletion completed:', {
         campaignId,
+        timestamp: new Date().toISOString(),
         backendResult: result,
         queueResult: queueDeletionResult,
-        timestamp: new Date().toISOString()
+        options,
+        validationWarnings: validation.warnings
       });
 
     } catch (error) {
       console.error('Campaign deletion failed:', error);
 
+      // Enhanced error handling with specific error types
+      let errorMessage = "An unexpected error occurred during deletion.";
+      let errorTitle = "Campaign Deletion Failed";
+
+      if (error instanceof Error) {
+        const apiError = error as CampaignApiError;
+
+        if (apiError.requiresConfirmation) {
+          errorTitle = "Confirmation Required";
+          errorMessage = apiError.message + " Please use force delete if you want to proceed.";
+        } else if (apiError.statusCode === 404) {
+          errorTitle = "Campaign Not Found";
+          errorMessage = "The campaign may have already been deleted or you don't have permission to delete it.";
+        } else if (apiError.statusCode === 409) {
+          errorTitle = "Cannot Delete Active Campaign";
+          errorMessage = apiError.details || "Please pause the campaign first or use force delete option.";
+        } else if (apiError.supportInfo) {
+          errorMessage = `${apiError.message} Support reference: ${apiError.supportInfo.errorCode}`;
+        } else {
+          errorMessage = apiError.message;
+        }
+      }
+
+      // Log error to error handling engine
       await errorEngine.handleError(error as Error, {
         component: 'campaign_deletion',
         operation: 'delete_campaign',
@@ -614,17 +667,22 @@ export default function BacklinkAutomation() {
         metadata: {
           campaignId,
           forceDelete: options.forceDelete,
-          reason: options.reason
+          reason: options.reason,
+          confirmationText: options.confirmationText,
+          archiveLinks: options.archiveLinks,
+          errorType: (error as CampaignApiError).statusCode ? 'api_error' : 'unknown_error',
+          statusCode: (error as CampaignApiError).statusCode
         }
       });
 
       toast({
-        title: "Campaign Deletion Failed",
-        description: error instanceof Error ? error.message : "An unexpected error occurred during deletion.",
+        title: errorTitle,
+        description: errorMessage,
         variant: "destructive"
       });
 
-      throw error; // Re-throw to prevent dialog from closing
+      // Re-throw to prevent dialog from closing on error
+      throw error;
     } finally {
       setIsDeleting(false);
     }
