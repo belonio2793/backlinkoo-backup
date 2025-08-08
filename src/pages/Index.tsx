@@ -1145,6 +1145,13 @@ const Index = () => {
       {/* Footer */}
       <Footer />
 
+      {/* Waitlist Modal */}
+      <WaitlistModal
+        isOpen={isWaitlistOpen}
+        onClose={closeWaitlistModal}
+        initialEmail={waitlistEmail}
+      />
+
       {/* Modals are now managed by UnifiedModalManager */}
     </div>
   );
