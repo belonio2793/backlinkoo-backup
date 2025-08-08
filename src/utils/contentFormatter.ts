@@ -621,21 +621,27 @@ export class ContentFormatter {
    */
   static preProcessMalformedHtml(content: string): string {
     return content
-      // Fix the exact malformed pattern we're seeing: missing < bracket
+      // Fix the EXACT patterns we see in the DOM:
+
+      // 1. Fix "strong&gt;text" pattern (missing opening < and closing tag)
+      .replace(/(\s*)strong&gt;([^<>\n]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+
+      // 2. Fix "&lt;" at start of content
+      .replace(/(\s*)&lt;(\s*)/gi, '$1<$2')
+
+      // 3. Fix pattern with class: "strong class="..." missing opening <
       .replace(/(\s*)strong\s+class="[^"]*"&gt;([^<>\n&]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
 
-      // Fix patterns where both brackets are present but encoded
+      // 4. Fix fully encoded strong tags
       .replace(/&lt;strong\s+class="[^"]*"&gt;([^<&]+)&lt;\/strong&gt;/gi, '<strong class="font-bold text-inherit">$1</strong>')
 
-      // Fix any HTML tag missing its opening bracket
-      .replace(/(\s*)((?:strong|em|h[1-6]|p|a)\s+(?:class|style|id)="[^"]*")&gt;/gi, '$1<$2>')
+      // 5. Fix standalone &lt; and &gt; that appear as text
+      .replace(/(\s+)&lt;(\s+)/g, '$1<$2')
+      .replace(/(\s+)&gt;(\s+)/g, '$1>$2')
 
-      // Fix orphaned closing tags
-      .replace(/&lt;\/(strong|em|h[1-6]|p|a)&gt;/gi, '</$1>')
-
-      // Clean up any stray encoded brackets at the start of lines
+      // 6. Remove stray encoded brackets at line starts
       .replace(/^\s*&gt;/gm, '')
-      .replace(/^\s*&lt;/gm, '');
+      .replace(/^\s*&lt;(?!\w)/gm, '');
   }
 
   /**
