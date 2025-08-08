@@ -9,7 +9,7 @@ import {
   TrendingDown, 
   Users, 
   X,
-  Fire,
+  Flame,
   Skull,
   Heart,
   Eye,
@@ -229,7 +229,7 @@ export function ExtremeScarcityTrigger({
             >
               <Crown className="mr-3 h-6 w-6" />
               🛡️ SAVE MY CONTENT NOW (FREE)
-              <Fire className="ml-3 h-6 w-6" />
+              <Flame className="ml-3 h-6 w-6" />
             </Button>
 
             <Button
