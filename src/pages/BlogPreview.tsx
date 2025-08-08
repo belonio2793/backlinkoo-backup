@@ -294,9 +294,9 @@ export function BlogPreview() {
 
           {/* Blog Post Content */}
           <article className="prose prose-lg max-w-none">
-            <div 
+            <div
               dangerouslySetInnerHTML={{ __html: blogPost.content }}
-              className="prose-headings:text-foreground prose-p:text-foreground prose-a:text-blue-600 prose-strong:text-foreground prose-em:text-foreground prose-li:text-foreground"
+              className="blog-content prose-headings:text-foreground prose-p:text-foreground prose-a:text-blue-600 prose-strong:font-bold prose-strong:text-foreground prose-em:text-foreground prose-li:text-foreground [&_strong]:font-bold"
             />
           </article>
 

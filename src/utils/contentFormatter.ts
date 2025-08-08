@@ -245,7 +245,7 @@ export class ContentFormatter {
       })
       // Convert **text** patterns at start of line to <h2> tags (standalone bold headings)
       .replace(/^\*\*([^*]+?)\*\*(?=\s*\n|$)/gmi, '<h2>$1</h2>')
-      // Convert remaining **text** to <strong> tags (inline bold)
+      // Convert remaining **text** to <strong> tags (inline bold) - use simpler markup initially
       .replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>')
       // Convert *text* to <em> tags (italic)
       .replace(/\*([^*]+?)\*/g, '<em>$1</em>')
@@ -257,7 +257,20 @@ export class ContentFormatter {
         if (/^[A-Z]\.\s*[A-Za-z\s]{0,15}$/.test(content.trim())) {
           return `<p><strong>${content}</strong></p>`;
         }
-        return `<h2>${content}</h2>`;
+
+        // Fix content that contains HTML entities or malformed patterns
+        const cleanContent = content
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/^\s*<\s*$/, '') // Remove standalone <
+          .replace(/^\s*>\s*$/, '') // Remove standalone >
+          .trim();
+
+        if (!cleanContent) {
+          return ''; // Remove empty headings
+        }
+
+        return `<h2>${cleanContent}</h2>`;
       })
       // Convert # headings to h1
       .replace(/^# (.+)$/gm, '<h1>$1</h1>')
@@ -470,11 +483,15 @@ export class ContentFormatter {
 
       // Fix common HTML issues
       .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
+
+      // VERY CONSERVATIVE HTML entity decoding to prevent corruption
+      .replace(/&amp;(?!lt;|gt;|amp;|quot;|#\d)/g, '&')
+
+      // Don't decode &lt; and &gt; in sanitizeContent at all!
+      // Let our specialized fixing functions handle these cases
+      // This prevents corruption of our generated HTML tags
 
       // Normalize quotes
       .replace(/[\u2018\u2019]/g, "'")
@@ -611,6 +628,103 @@ export class ContentFormatter {
   }
 
   /**
+   * Pre-process content to fix specific malformed patterns before main processing
+   */
+  static preProcessMalformedHtml(content: string): string {
+    return content
+      // CRITICAL: Fix malformed markdown headings that will cause DOM issues
+      // Pattern: ## <strong>Title</strong> or ## &lt;strong&gt;Title&lt;/strong&gt;
+      .replace(/^##\s*&lt;strong[^&>]*&gt;([^&<]+)&lt;\/strong&gt;\s*$/gm, '## $1')
+      .replace(/^##\s*<strong[^>]*>([^<]+)<\/strong>\s*$/gm, '## $1')
+
+      // Fix the EXACT patterns we see in the DOM:
+
+      // 1. Fix "strong&gt;text" pattern (missing opening < and closing tag)
+      .replace(/(\s*)strong&gt;([^<>\n]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+
+      // 2. Fix "&lt;" at start of content
+      .replace(/(\s*)&lt;(\s*)/gi, '$1<$2')
+
+      // 3. Fix pattern with class: "strong class="..." missing opening <
+      .replace(/(\s*)strong\s+class="[^"]*"&gt;([^<>\n&]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+
+      // 4. Fix fully encoded strong tags
+      .replace(/&lt;strong\s+class="[^"]*"&gt;([^<&]+)&lt;\/strong&gt;/gi, '<strong class="font-bold text-inherit">$1</strong>')
+
+      // 5. Fix standalone &lt; and &gt; that appear as text
+      .replace(/(\s+)&lt;(\s+)/g, '$1<$2')
+      .replace(/(\s+)&gt;(\s+)/g, '$1>$2')
+
+      // 6. Remove stray encoded brackets at line starts
+      .replace(/^\s*&gt;/gm, '')
+      .replace(/^\s*&lt;(?!\w)/gm, '');
+  }
+
+  /**
+   * Clean up any HTML that's being displayed as text instead of rendered
+   */
+  static fixDisplayedHtmlAsText(content: string): string {
+    // Final aggressive fix for HTML displaying as text
+    return content
+      // Fix the most common broken patterns from the DOM:
+
+      // 1. "strong&gt;text" -> "<strong>text</strong>"
+      .replace(/(\s*)strong&gt;([^<>\n&]+?)(?=\s|$|\n)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+
+      // 2. "&lt;" at start of lines or content
+      .replace(/(^|\s)&lt;/gm, '$1<')
+
+      // 3. "strong class="..."&gt;text" -> "<strong class="...">text</strong>"
+      .replace(/(\s*)strong\s+class="[^"]*"&gt;([^<>\n&]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+
+      // 4. Standalone &gt; that should be >
+      .replace(/&gt;(?=\s|$)/g, '>')
+
+      // 5. Any remaining encoded HTML tags
+      .replace(/&lt;(\/?(?:strong|em|h[1-6]|p|a|ul|ol|li|blockquote|span|div)[^&>]*)&gt;/gi, '<$1>')
+
+      // 6. Fix malformed opening tags missing <
+      .replace(/(\s*)([a-zA-Z]+)\s+(class|style|id)="[^"]*"&gt;/gi, '$1<$2 $3>')
+
+      // 7. Clean up any remaining stray entities
+      .replace(/(\s+)&lt;(\s+)/g, '$1<$2')
+      .replace(/(\s+)&gt;(\s+)/g, '$1>$2')
+      .replace(/^&gt;\s*/gm, '')
+      .replace(/^\s*&lt;(?!\w)/gm, '')
+
+      // 8. Final pass: fix any text that looks like HTML
+      .replace(/(\s+)(strong|em|h[1-6]|p|a|span|div)&gt;([^<>&\n]+)/gi, '$1<$2 class="font-bold text-inherit">$3</$2>');
+  }
+
+  /**
+   * Ultra-aggressive final fix for the exact DOM patterns we see
+   */
+  static fixDOMDisplayIssues(content: string): string {
+    return content
+      // CRITICAL FIX: The exact broken pattern from DOM
+      // <h2>&lt;</h2><p> strong&gt;Hook Introduction...</p> -> <h2>Hook Introduction...</h2>
+      .replace(/<h([1-6])[^>]*>&lt;<\/h[1-6]>\s*<p[^>]*>\s*strong&gt;([^<]+?)<\/p>/gi, '<h$1><strong>$2</strong></h$1>')
+
+      // Fix standalone strong&gt; patterns
+      .replace(/(\s*)strong&gt;([^<>\n&]+?)(?=\s*<|\s*$|\n)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+
+      // Fix &lt; in headings
+      .replace(/<h([1-6])[^>]*>&lt;<\/h[1-6]>/gi, '')
+
+      // Fix stray &lt; and &gt;
+      .replace(/(^|\n|\s)&lt;/g, '$1<')
+      .replace(/(\s)&gt;(\s)/g, '$1>$2')
+      .replace(/^&gt;/gm, '')
+
+      // Ensure proper strong tag structure
+      .replace(/<strong([^>]*)>([^<]+?)(?!<\/strong>)/gi, '<strong$1>$2</strong>')
+
+      // Fix broken HTML entities
+      .replace(/&lt;(\w+)/g, '<$1')
+      .replace(/(\w+)&gt;/g, '$1>');
+  }
+
+  /**
    * Final post-processing cleanup to catch patterns that slip through
    */
   static postProcessCleanup(content: string): string {
@@ -619,6 +733,13 @@ export class ContentFormatter {
       .replace(/&amp;lt;/g, '<')
       .replace(/&amp;gt;/g, '>')
       .replace(/&amp;amp;/g, '&')
+
+      // CRITICAL: Fix the broken heading pattern we see in DOM
+      // Pattern: <h2>&lt;</h2><p> strong&gt;Hook Introduction...</p>
+      .replace(/<h([1-6])[^>]*>&lt;<\/h[1-6]>\s*<p[^>]*>\s*strong&gt;([^<]+?)<\/p>/gi, '<h$1><strong>$2</strong></h$1>')
+
+      // Also handle without the strong tag
+      .replace(/<h([1-6])[^>]*>&lt;<\/h[1-6]>\s*<p[^>]*>\s*([^<]+?)<\/p>/gi, '<h$1>$2</h$1>')
 
       // Handle the exact pattern showing in DOM: ## &lt; <p>h2&gt;Pro Tip</p>
       .replace(/##\s*&lt;\s*<p[^>]*>\s*h[1-6]\s*&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
@@ -716,6 +837,21 @@ export class ContentFormatter {
           return `<h${level}>${cleanText}</h${level}>`;
         }
         return ''; // Remove empty headings
+      })
+
+      // Fix any remaining malformed strong tag patterns that might show as text
+      .replace(/strong\s+class="font-bold\s+text-inherit"&gt;([^<]+)/gi, '<strong class="font-bold text-inherit">$1</strong>')
+      .replace(/&lt;strong\s+class="font-bold\s+text-inherit"&gt;([^<]+)&lt;\/strong&gt;/gi, '<strong class="font-bold text-inherit">$1</strong>')
+      .replace(/&lt;strong([^&>]*)&gt;([^<]+)&lt;\/strong&gt;/gi, '<strong$1>$2</strong>')
+
+      // Ensure all strong tags have proper classes for bold styling (safer approach)
+      .replace(/<strong>/gi, '<strong class="font-bold text-inherit">')
+      .replace(/<strong(\s+[^>]*?)>/gi, (match, attrs) => {
+        // If it already has classes, don't override
+        if (attrs.includes('class=')) {
+          return match;
+        }
+        return `<strong class="font-bold text-inherit"${attrs}>`;
       });
   }
 }

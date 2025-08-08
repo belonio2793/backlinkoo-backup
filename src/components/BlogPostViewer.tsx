@@ -281,12 +281,22 @@ export function BlogPostViewer() {
 
             {/* Blog Content */}
             <div
-              className="prose prose-lg max-w-none
+              className="prose prose-lg max-w-none blog-content
                 prose-a:text-blue-600 prose-a:font-medium prose-a:no-underline hover:prose-a:underline
-                prose-strong:font-bold prose-headings:font-bold
-                [&_a]:text-blue-600 [&_a]:opacity-100 [&_a]:font-medium [&_a]:no-underline hover:[&_a]:underline"
+                prose-strong:font-bold prose-strong:text-foreground prose-headings:font-bold
+                [&_a]:text-blue-600 [&_a]:opacity-100 [&_a]:font-medium [&_a]:no-underline hover:[&_a]:underline
+                [&_strong]:font-bold [&_strong]:text-foreground"
               dangerouslySetInnerHTML={{
-                __html: ContentFormatter.formatBlogContent(blogPost.content || '', blogPost.title)
+                __html: ContentFormatter.fixDOMDisplayIssues(
+                  ContentFormatter.fixDisplayedHtmlAsText(
+                    ContentFormatter.formatBlogContent(
+                      ContentFormatter.sanitizeContent(
+                        ContentFormatter.preProcessMalformedHtml(blogPost.content || '')
+                      ),
+                      blogPost.title
+                    )
+                  )
+                )
               }}
             />
 

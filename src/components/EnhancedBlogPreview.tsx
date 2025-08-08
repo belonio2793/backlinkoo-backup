@@ -223,9 +223,18 @@ export function EnhancedBlogPreview({
                   
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: ContentFormatter.formatBlogContent(content.content || '', content.title)
+                      __html: ContentFormatter.fixDOMDisplayIssues(
+                        ContentFormatter.fixDisplayedHtmlAsText(
+                          ContentFormatter.formatBlogContent(
+                            ContentFormatter.sanitizeContent(
+                              ContentFormatter.preProcessMalformedHtml(content.content || '')
+                            ),
+                            content.title
+                          )
+                        )
+                      )
                     }}
-                    className="prose prose-lg max-w-none
+                    className="prose prose-lg max-w-none blog-content
                       prose-headings:text-foreground prose-headings:font-bold
                       prose-p:text-foreground prose-p:leading-relaxed
                       prose-a:text-blue-600 prose-a:font-medium prose-a:no-underline hover:prose-a:underline
@@ -233,7 +242,8 @@ export function EnhancedBlogPreview({
                       prose-em:text-foreground
                       prose-li:text-foreground
                       prose-h1:text-2xl prose-h2:text-xl prose-h3:text-lg
-                      [&_a]:text-blue-600 [&_a]:opacity-100 [&_a]:font-medium [&_a]:no-underline hover:[&_a]:underline"
+                      [&_a]:text-blue-600 [&_a]:opacity-100 [&_a]:font-medium [&_a]:no-underline hover:[&_a]:underline
+                      [&_strong]:font-bold [&_strong]:text-foreground"
                   />
                 </article>
 

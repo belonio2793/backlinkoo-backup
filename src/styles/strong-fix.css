@@ -1,0 +1,82 @@
+/* Strong Tags Fix for Blog Posts */
+
+/* Ensure strong tags are always bold across all blog content areas */
+.prose strong,
+.prose-content strong,
+.blog-content strong,
+.modern-blog-content strong,
+.beautiful-blog-content strong,
+.beautiful-prose strong,
+.article-content strong,
+.enhanced-blog-content strong,
+strong {
+  font-weight: 700 !important;
+  color: inherit;
+}
+
+/* Specific fixes for prose areas */
+.prose .prose-strong,
+.prose strong,
+[class*="prose"] strong {
+  font-weight: 700 !important;
+  color: inherit;
+}
+
+/* Blog post content specific strong styling */
+.blog-post-content strong,
+.post-content strong,
+div[dangerouslySetInnerHTML] strong {
+  font-weight: 700 !important;
+  color: inherit;
+}
+
+/* Ensure strong tags in headings are properly bold */
+h1 strong,
+h2 strong,
+h3 strong,
+h4 strong,
+h5 strong,
+h6 strong {
+  font-weight: 800 !important;
+}
+
+/* Override any conflicting Tailwind utilities */
+.font-normal strong,
+.font-light strong,
+.font-medium strong {
+  font-weight: 700 !important;
+}
+
+/* Ensure strong tags work in all possible blog rendering contexts */
+.beautiful-blog-wrapper strong,
+.beautiful-card strong,
+article strong,
+main strong {
+  font-weight: 700 !important;
+}
+
+/* Dark mode support for strong tags */
+@media (prefers-color-scheme: dark) {
+  .prose strong,
+  .blog-content strong,
+  strong {
+    color: inherit;
+    font-weight: 700 !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  strong {
+    font-weight: 900 !important;
+    color: inherit;
+  }
+}
+
+/* Print styles for strong tags */
+@media print {
+  strong {
+    font-weight: 700 !important;
+    color: black !important;
+  }
+}
