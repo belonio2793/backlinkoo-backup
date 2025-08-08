@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Download, X, Palette, Type, Layout, Globe, Target, 
-  Users, Zap, Shield, CheckCircle, Eye
+import {
+  Download, X, Palette, Type, Layout, Globe, Target,
+  Users, Zap, Shield, CheckCircle, Eye, ChevronLeft,
+  ChevronRight, FileText, Image, Briefcase, Settings
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -16,6 +17,7 @@ interface BrandGuidelinesPreviewModalProps {
 
 export function BrandGuidelinesPreviewModal({ isOpen, onClose }: BrandGuidelinesPreviewModalProps) {
   const { toast } = useToast();
+  const [currentPage, setCurrentPage] = useState(0);
 
   const downloadPDF = () => {
     const link = document.createElement('a');
