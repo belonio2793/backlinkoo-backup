@@ -423,8 +423,8 @@ export function AuthFormTabs({
         </form>
       </TabsContent>
 
-      <TabsContent value="signup">
-        <form onSubmit={handleSignup} className={spacingClass}>
+      <TabsContent value="signup" className="mt-0">
+        <form onSubmit={handleSignup} className={`${spacingClass} mt-4`}>
           <div className="space-y-2">
             <Label htmlFor="first-name">First Name</Label>
             <Input
