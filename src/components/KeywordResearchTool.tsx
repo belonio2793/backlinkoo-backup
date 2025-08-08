@@ -415,7 +415,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "AU", name: "Australia", flag: "🇦🇺" },
     { code: "AW", name: "Aruba", flag: "🇦🇼" },
     { code: "AX", name: "Åland Islands", flag: "🇦🇽" },
-    { code: "AZ", name: "Azerbaijan", flag: "��🇿" },
+    { code: "AZ", name: "Azerbaijan", flag: "🇦🇿" },
     { code: "BA", name: "Bosnia and Herzegovina", flag: "🇧🇦" },
     { code: "BB", name: "Barbados", flag: "🇧🇧" },
     { code: "BD", name: "Bangladesh", flag: "🇧🇩" },
@@ -436,7 +436,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "BV", name: "Bouvet Island", flag: "🇧🇻" },
     { code: "BW", name: "Botswana", flag: "🇧🇼" },
     { code: "BY", name: "Belarus", flag: "🇧🇾" },
-    { code: "BZ", name: "Belize", flag: "🇧🇿" },
+    { code: "BZ", name: "Belize", flag: "���🇿" },
     { code: "CA", name: "Canada", flag: "🇨🇦" },
     { code: "CC", name: "Cocos Islands", flag: "🇨🇨" },
     { code: "CD", name: "Democratic Republic of the Congo", flag: "🇨🇩" },
@@ -519,7 +519,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "KH", name: "Cambodia", flag: "🇰🇭" },
     { code: "KI", name: "Kiribati", flag: "🇰🇮" },
     { code: "KM", name: "Comoros", flag: "🇰🇲" },
-    { code: "KN", name: "Saint Kitts and Nevis", flag: "��🇳" },
+    { code: "KN", name: "Saint Kitts and Nevis", flag: "🇰🇳" },
     { code: "KP", name: "North Korea", flag: "🇰🇵" },
     { code: "KR", name: "South Korea", flag: "🇰🇷" },
     { code: "KW", name: "Kuwait", flag: "🇰🇼" },
@@ -561,7 +561,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "MZ", name: "Mozambique", flag: "🇲🇿" },
     { code: "NA", name: "Namibia", flag: "🇳🇦" },
     { code: "NC", name: "New Caledonia", flag: "🇳🇨" },
-    { code: "NE", name: "Niger", flag: "🇳��" },
+    { code: "NE", name: "Niger", flag: "🇳🇪" },
     { code: "NF", name: "Norfolk Island", flag: "🇳🇫" },
     { code: "NG", name: "Nigeria", flag: "🇳🇬" },
     { code: "NI", name: "Nicaragua", flag: "🇳🇮" },
@@ -582,7 +582,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "PM", name: "Saint Pierre and Miquelon", flag: "🇵🇲" },
     { code: "PN", name: "Pitcairn", flag: "🇵🇳" },
     { code: "PR", name: "Puerto Rico", flag: "🇵🇷" },
-    { code: "PS", name: "Palestine", flag: "���🇸" },
+    { code: "PS", name: "Palestine", flag: "🇵��" },
     { code: "PT", name: "Portugal", flag: "🇵🇹" },
     { code: "PW", name: "Palau", flag: "🇵🇼" },
     { code: "PY", name: "Paraguay", flag: "🇵🇾" },
@@ -603,7 +603,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "SJ", name: "Svalbard and Jan Mayen", flag: "🇸🇯" },
     { code: "SK", name: "Slovakia", flag: "🇸🇰" },
     { code: "SL", name: "Sierra Leone", flag: "🇸🇱" },
-    { code: "SM", name: "San Marino", flag: "🇸����" },
+    { code: "SM", name: "San Marino", flag: "🇸🇲" },
     { code: "SN", name: "Senegal", flag: "🇸🇳" },
     { code: "SO", name: "Somalia", flag: "🇸🇴" },
     { code: "SR", name: "Suriname", flag: "🇸🇷" },
@@ -877,7 +877,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
                 disabled={isSearching || !searchTerm.trim()}
                 className="h-11 px-8 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
               >
-                {isSearching ? "Researching..." : "Research Keywords"}
+{isSearching ? "Analyzing..." : "🆓 Free Research"}
                 <Search className="h-4 w-4 ml-2" />
               </Button>
             </div>
