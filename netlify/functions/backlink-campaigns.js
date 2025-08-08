@@ -48,14 +48,17 @@ exports.handler = async (event, context) => {
             socialProfiles: false,
             contactForms: false
           },
-          createdAt: new Date(Date.now() - 86400000 * 7), // 7 days ago
-          lastActive: new Date()
+          createdAt: new Date(Date.now() - 86400000 * 7).toISOString(), // 7 days ago
+          lastActive: new Date().toISOString()
         }
       ];
 
       return {
         statusCode: 200,
-        headers,
+        headers: {
+          ...headers,
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
           success: true,
           campaigns: demoCampaigns
