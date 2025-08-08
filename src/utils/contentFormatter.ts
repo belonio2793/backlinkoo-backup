@@ -468,37 +468,17 @@ export class ContentFormatter {
       .replace(/^\s*#{1,6}\s*&lt;[^&>]*&gt;\s*$/gm, '') // Remove headings that are just ## &lt;tag&gt;
       .replace(/^\s*#{1,6}\s*$/gm, '') // Remove empty headings like just ##
 
-      // Fix common HTML issues - decode entities in content but preserve valid HTML tags
+      // Fix common HTML issues
       .replace(/&nbsp;/g, ' ')
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
 
-      // First protect our generated HTML by temporarily replacing it with unique markers
-      .replace(/<(\/?)strong(\s[^>]*)?>/gi, 'HTMLTAG_STRONG_$1_$2_ENDTAG')
-      .replace(/<(\/?)em(\s[^>]*)?>/gi, 'HTMLTAG_EM_$1_$2_ENDTAG')
-      .replace(/<(\/?)h([1-6])(\s[^>]*)?>/gi, 'HTMLTAG_H$2_$1_$3_ENDTAG')
-      .replace(/<(\/?)p(\s[^>]*)?>/gi, 'HTMLTAG_P_$1_$2_ENDTAG')
-      .replace(/<(\/?)a(\s[^>]*)?>/gi, 'HTMLTAG_A_$1_$2_ENDTAG')
-      .replace(/<(\/?)ul(\s[^>]*)?>/gi, 'HTMLTAG_UL_$1_$2_ENDTAG')
-      .replace(/<(\/?)ol(\s[^>]*)?>/gi, 'HTMLTAG_OL_$1_$2_ENDTAG')
-      .replace(/<(\/?)li(\s[^>]*)?>/gi, 'HTMLTAG_LI_$1_$2_ENDTAG')
-      .replace(/<(\/?)blockquote(\s[^>]*)?>/gi, 'HTMLTAG_BLOCKQUOTE_$1_$2_ENDTAG')
-
-      // Now decode entities safely
+      // Decode HTML entities but be careful with < and >
       .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-
-      // Restore our protected HTML tags
-      .replace(/HTMLTAG_STRONG_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1strong$2>')
-      .replace(/HTMLTAG_EM_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1em$2>')
-      .replace(/HTMLTAG_H([1-6])_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$2h$1$3>')
-      .replace(/HTMLTAG_P_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1p$2>')
-      .replace(/HTMLTAG_A_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1a$2>')
-      .replace(/HTMLTAG_UL_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1ul$2>')
-      .replace(/HTMLTAG_OL_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1ol$2>')
-      .replace(/HTMLTAG_LI_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1li$2>')
-      .replace(/HTMLTAG_BLOCKQUOTE_(\/?)_(\s[^_]*)?_ENDTAG/gi, '<$1blockquote$2>')
+      // Only decode &lt; and &gt; that are NOT part of valid HTML tags
+      // This is a simpler approach - just fix the specific issues we see
+      .replace(/&lt;(?=\s|$)/g, '<')  // Decode &lt; only if followed by space or end
+      .replace(/&gt;(?=\s|$)/g, '>') // Decode &gt; only if followed by space or end
 
       // Normalize quotes
       .replace(/[\u2018\u2019]/g, "'")
