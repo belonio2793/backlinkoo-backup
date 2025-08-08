@@ -465,7 +465,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "GA", name: "Gabon", flag: "🇬🇦" },
     { code: "GB", name: "United Kingdom", flag: "🇬🇧" },
     { code: "GD", name: "Grenada", flag: "🇬🇩" },
-    { code: "GE", name: "Georgia", flag: "🇬����" },
+    { code: "GE", name: "Georgia", flag: "🇬🇪" },
     { code: "GF", name: "French Guiana", flag: "🇬🇫" },
     { code: "GG", name: "Guernsey", flag: "🇬🇬" },
     { code: "GH", name: "Ghana", flag: "🇬🇭" },
@@ -869,9 +869,14 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
                   <CardTitle className="text-xl">Keyword Opportunities</CardTitle>
                   <div className="flex items-center gap-2">
                     <Badge variant="outline" className="text-sm bg-blue-50 text-blue-700 border-blue-200">
-                      Multi-API Data
+                      {keywords[0]?.dataSources?.includes('Local_Estimation') ? 'Demo Data' : 'Multi-API Data'}
                     </Badge>
                     <Badge variant="outline" className="text-sm">{keywords.length} results</Badge>
+                    {keywords[0]?.dataSources?.includes('Local_Estimation') && (
+                      <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
+                        Configure APIs for real data
+                      </Badge>
+                    )}
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
