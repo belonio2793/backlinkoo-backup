@@ -116,9 +116,9 @@ async function scrapePageEmails(url, timeout = 10000) {
   }
 }
 
-// Helper function to send server-sent events
-function sendSSE(response, data) {
-  response.write(`data: ${JSON.stringify(data)}\n\n`);
+// Helper function to collect results
+function collectResult(results, data) {
+  results.push(data);
 }
 
 exports.handler = async (event, context) => {
