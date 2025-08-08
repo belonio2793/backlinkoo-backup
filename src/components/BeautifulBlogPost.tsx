@@ -1188,37 +1188,45 @@ export function BeautifulBlogPost() {
 
               {/* Benefits section */}
               <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl p-6">
-                <h3 className="font-semibold text-xl mb-4 text-center">Why This System Works</h3>
-                <div className="grid md:grid-cols-2 gap-6">
+                <h3 className="font-semibold text-xl mb-6 text-center">Why This System Works</h3>
+                <div className="grid md:grid-cols-2 gap-4">
                   <div className="space-y-3">
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex items-start gap-4 group hover:bg-white/50 p-3 rounded-lg transition-colors">
+                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                        <Sparkles className="w-4 h-4 text-white" />
+                      </div>
                       <div>
-                        <h4 className="font-medium">Quality Content</h4>
-                        <p className="text-sm text-gray-600">AI creates professional, engaging content that meets high standards.</p>
+                        <h4 className="font-semibold text-gray-900 mb-1">Quality Content</h4>
+                        <p className="text-sm text-gray-600 leading-relaxed">AI creates professional, engaging content that meets high standards.</p>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex items-start gap-4 group hover:bg-white/50 p-3 rounded-lg transition-colors">
+                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                        <Globe className="w-4 h-4 text-white" />
+                      </div>
                       <div>
-                        <h4 className="font-medium">Fair Distribution</h4>
-                        <p className="text-sm text-gray-600">Time limits ensure content doesn't sit unused while giving fair access.</p>
+                        <h4 className="font-semibold text-gray-900 mb-1">Fair Distribution</h4>
+                        <p className="text-sm text-gray-600 leading-relaxed">Time limits ensure content doesn't sit unused while giving fair access.</p>
                       </div>
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex items-start gap-4 group hover:bg-white/50 p-3 rounded-lg transition-colors">
+                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                        <Crown className="w-4 h-4 text-white" />
+                      </div>
                       <div>
-                        <h4 className="font-medium">Full Control</h4>
-                        <p className="text-sm text-gray-600">Once claimed, you own it completely - edit, customize, and use as needed.</p>
+                        <h4 className="font-semibold text-gray-900 mb-1">Full Control</h4>
+                        <p className="text-sm text-gray-600 leading-relaxed">Once claimed, you own it completely - edit, customize, and use as needed.</p>
                       </div>
                     </div>
-                    <div className="flex items-start gap-3">
-                      <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex items-start gap-4 group hover:bg-white/50 p-3 rounded-lg transition-colors">
+                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+                        <Zap className="w-4 h-4 text-white" />
+                      </div>
                       <div>
-                        <h4 className="font-medium">Resource Efficiency</h4>
-                        <p className="text-sm text-gray-600">Automatic cleanup prevents database bloat while preserving valuable content.</p>
+                        <h4 className="font-semibold text-gray-900 mb-1">Resource Efficiency</h4>
+                        <p className="text-sm text-gray-600 leading-relaxed">Automatic cleanup prevents database bloat while preserving valuable content.</p>
                       </div>
                     </div>
                   </div>
