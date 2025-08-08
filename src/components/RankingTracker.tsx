@@ -162,7 +162,7 @@ export const RankingTracker = () => {
     }
 
     try {
-      console.log('🚀 Starting REAL rank tracking for:', { url, keyword });
+      console.log('���� Starting REAL rank tracking for:', { url, keyword });
 
       // Use the real rank tracker with server-side scraping
       const result = await RealRankTracker.checkRanking({
@@ -587,7 +587,7 @@ export const RankingTracker = () => {
                         {checkingProgress[0]}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Generating intelligent ranking simulation based on keyword analysis...
+                        Performing live Google search and analyzing real-time results...
                       </div>
                     </div>
                   </div>
