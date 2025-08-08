@@ -83,27 +83,39 @@ export class RealRankTracker {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Cache-Control': 'no-cache',
         },
         body: JSON.stringify({
           targetUrl: params.targetUrl,
           keyword: params.keyword,
           country: params.country || 'US',
           device: params.device || 'desktop',
-          numResults: params.numResults || 100
+          numResults: params.numResults || 100,
+          timestamp: Date.now() // Add timestamp to prevent caching issues
         }),
         signal: controller.signal
       });
 
       clearTimeout(timeoutId);
 
-      // Ensure response is not already consumed
-      if (response.bodyUsed) {
-        console.error('❌ Response body already consumed');
-        throw new Error('Response body stream already read');
+      // Check if response is valid and not consumed
+      if (!response) {
+        throw new Error('No response received from server');
       }
 
-      // Read response body once and handle both success/error cases
-      const responseText = await response.text();
+      if (response.bodyUsed) {
+        console.error('❌ Response body already consumed, creating fresh request');
+        throw new Error('Response body stream already read - will retry');
+      }
+
+      // Clone response for safety (in case of multiple reads)
+      let responseText: string;
+      try {
+        responseText = await response.text();
+      } catch (streamError) {
+        console.error('❌ Error reading response stream:', streamError);
+        throw new Error('Failed to read response stream');
+      }
 
       if (!response.ok) {
         console.error('❌ Server function error:', response.status, responseText);
