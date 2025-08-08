@@ -77,16 +77,36 @@ export default function BacklinkAutomation() {
 
   const loadCampaigns = async () => {
     try {
+      console.log('Loading campaigns...');
       const response = await fetch('/.netlify/functions/backlink-campaigns', {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', response.headers);
+
       if (response.ok) {
-        const data = await response.json();
-        setCampaigns(data.campaigns || []);
+        const responseText = await response.text();
+        console.log('Response text:', responseText);
+
+        try {
+          const data = JSON.parse(responseText);
+          setCampaigns(data.campaigns || []);
+        } catch (parseError) {
+          console.error('JSON parse error:', parseError);
+          console.error('Response was:', responseText);
+          // Set empty campaigns on parse error
+          setCampaigns([]);
+        }
+      } else {
+        const errorText = await response.text();
+        console.error('HTTP error:', response.status, errorText);
+        setCampaigns([]);
       }
     } catch (error) {
       console.error('Error loading campaigns:', error);
+      setCampaigns([]);
     }
   };
 
