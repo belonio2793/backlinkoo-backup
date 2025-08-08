@@ -619,12 +619,21 @@ export class ContentFormatter {
    */
   static preProcessMalformedHtml(content: string): string {
     return content
-      // Fix the exact malformed pattern we're seeing in the DOM
-      .replace(/(\s*)strong\s+class="font-bold\s+text-inherit"&gt;([^<>\n&]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
-      // Fix other similar patterns
+      // Fix the exact malformed pattern we're seeing: missing < bracket
       .replace(/(\s*)strong\s+class="[^"]*"&gt;([^<>\n&]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
-      // Fix pattern where both brackets are encoded
-      .replace(/&lt;strong\s+class="[^"]*"&gt;([^<&]+)&lt;\/strong&gt;/gi, '<strong class="font-bold text-inherit">$1</strong>');
+
+      // Fix patterns where both brackets are present but encoded
+      .replace(/&lt;strong\s+class="[^"]*"&gt;([^<&]+)&lt;\/strong&gt;/gi, '<strong class="font-bold text-inherit">$1</strong>')
+
+      // Fix any HTML tag missing its opening bracket
+      .replace(/(\s*)((?:strong|em|h[1-6]|p|a)\s+(?:class|style|id)="[^"]*")&gt;/gi, '$1<$2>')
+
+      // Fix orphaned closing tags
+      .replace(/&lt;\/(strong|em|h[1-6]|p|a)&gt;/gi, '</$1>')
+
+      // Clean up any stray encoded brackets at the start of lines
+      .replace(/^\s*&gt;/gm, '')
+      .replace(/^\s*&lt;/gm, '');
   }
 
   /**
