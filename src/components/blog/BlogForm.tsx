@@ -5,7 +5,6 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { DirectOpenAIService } from '@/services/directOpenAI';
 import { AnimatedBlogHeadline } from '@/components/AnimatedBlogHeadline';
-import { BlogGenerationETA } from '@/components/blog/BlogGenerationETA';
 import { Loader2, Link, Target, Hash, Sparkles, Zap, Star, Rocket, Search, MousePointer, ExternalLink, Key, Crosshair, Globe } from 'lucide-react';
 
 interface BlogFormProps {
