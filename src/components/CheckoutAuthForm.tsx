@@ -162,11 +162,11 @@ export function CheckoutAuthForm({
     setIsLoading(true);
 
     try {
-      const result = await AuthService.signUp(
-        trimmedEmail,
-        trimmedPassword,
-        trimmedFirstName
-      );
+      const result = await AuthService.signUp({
+        email: trimmedEmail,
+        password: trimmedPassword,
+        firstName: trimmedFirstName
+      });
 
       if (result.success && result.user) {
         toast({
