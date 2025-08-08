@@ -648,36 +648,36 @@ export class ContentFormatter {
    * Clean up any HTML that's being displayed as text instead of rendered
    */
   static fixDisplayedHtmlAsText(content: string): string {
-    // Fix HTML that's displaying as text instead of being rendered
+    // Final aggressive fix for HTML displaying as text
     return content
-      // PRIMARY FIX: The exact pattern we're seeing in the DOM
+      // Fix the most common broken patterns from the DOM:
+
+      // 1. "strong&gt;text" -> "<strong>text</strong>"
+      .replace(/(\s*)strong&gt;([^<>\n&]+?)(?=\s|$|\n)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+
+      // 2. "&lt;" at start of lines or content
+      .replace(/(^|\s)&lt;/gm, '$1<')
+
+      // 3. "strong class="..."&gt;text" -> "<strong class="...">text</strong>"
       .replace(/(\s*)strong\s+class="[^"]*"&gt;([^<>\n&]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
 
-      // Fix cases where only the closing bracket is encoded
-      .replace(/(\s*)<strong\s+class="[^"]*"&gt;([^<>\n&]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+      // 4. Standalone &gt; that should be >
+      .replace(/&gt;(?=\s|$)/g, '>')
 
-      // Fix fully encoded strong tags
-      .replace(/&lt;strong\s+class="[^"]*"&gt;([^<&]+)&lt;\/strong&gt;/gi, '<strong class="font-bold text-inherit">$1</strong>')
-
-      // Fix pattern where tags are partially broken
-      .replace(/strong\s+class="[^"]*">\s*([^<>\n&]+)/gi, '<strong class="font-bold text-inherit">$1</strong>')
-
-      // Fix any HTML tag displaying as text (missing opening bracket)
-      .replace(/(\s*)([a-zA-Z]+)\s+([^>]*?)&gt;(?!\s*<)/gi, (match, space, tag, attrs) => {
-        if (attrs.includes('=')) {
-          return `${space}<${tag} ${attrs}>`;
-        }
-        return match;
-      })
-
-      // Fix encoded HTML tags
+      // 5. Any remaining encoded HTML tags
       .replace(/&lt;(\/?(?:strong|em|h[1-6]|p|a|ul|ol|li|blockquote|span|div)[^&>]*)&gt;/gi, '<$1>')
 
-      // Clean up stray encoded brackets
+      // 6. Fix malformed opening tags missing <
+      .replace(/(\s*)([a-zA-Z]+)\s+(class|style|id)="[^"]*"&gt;/gi, '$1<$2 $3>')
+
+      // 7. Clean up any remaining stray entities
+      .replace(/(\s+)&lt;(\s+)/g, '$1<$2')
+      .replace(/(\s+)&gt;(\s+)/g, '$1>$2')
       .replace(/^&gt;\s*/gm, '')
-      .replace(/^\s*&gt;(?=\s)/gm, '')
-      .replace(/&gt;(?=\s*[\n\r])/gm, '')
-      .replace(/(?:^|\s)&lt;(?=\s|$)/gm, '');
+      .replace(/^\s*&lt;(?!\w)/gm, '')
+
+      // 8. Final pass: fix any text that looks like HTML
+      .replace(/(\s+)(strong|em|h[1-6]|p|a|span|div)&gt;([^<>&\n]+)/gi, '$1<$2 class="font-bold text-inherit">$3</$2>');
   }
 
   /**
