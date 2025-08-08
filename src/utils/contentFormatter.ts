@@ -473,14 +473,12 @@ export class ContentFormatter {
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
 
-      // Very careful HTML entity decoding to preserve our generated HTML
+      // VERY CONSERVATIVE HTML entity decoding to prevent corruption
       .replace(/&amp;(?!lt;|gt;|amp;|quot;|#\d)/g, '&')
 
-      // Only decode &lt; and &gt; in very specific safe contexts
-      .replace(/&lt;(?=\s+[^a-zA-Z])/g, '<')  // Decode only if followed by space + non-letter
-      .replace(/&gt;(?=\s+[^a-zA-Z])/g, '>') // Decode only if followed by space + non-letter
-      .replace(/&lt;(?=\s*$)/g, '<')  // Decode at end of line
-      .replace(/&gt;(?=\s*$)/g, '>') // Decode at end of line
+      // Don't decode &lt; and &gt; in sanitizeContent at all!
+      // Let our specialized fixing functions handle these cases
+      // This prevents corruption of our generated HTML tags
 
       // Normalize quotes
       .replace(/[\u2018\u2019]/g, "'")
