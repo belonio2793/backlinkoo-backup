@@ -722,6 +722,11 @@ export class ContentFormatter {
         return ''; // Remove empty headings
       })
 
+      // Fix any remaining malformed strong tag patterns that might show as text
+      .replace(/strong\s+class="font-bold\s+text-inherit"&gt;([^<]+)/gi, '<strong class="font-bold text-inherit">$1</strong>')
+      .replace(/&lt;strong\s+class="font-bold\s+text-inherit"&gt;([^<]+)&lt;\/strong&gt;/gi, '<strong class="font-bold text-inherit">$1</strong>')
+      .replace(/&lt;strong([^&>]*)&gt;([^<]+)&lt;\/strong&gt;/gi, '<strong$1>$2</strong>')
+
       // Ensure all strong tags have proper classes for bold styling
       .replace(/<strong([^>]*)>/gi, (match, attrs) => {
         // If it already has classes, don't override, otherwise add font-bold
