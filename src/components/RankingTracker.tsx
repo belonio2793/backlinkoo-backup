@@ -560,7 +560,7 @@ export const RankingTracker = () => {
                 disabled={isChecking || !url.trim() || !keyword.trim()}
                 className="min-w-[180px] h-11 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
               >
-{isChecking ? "Analyzing..." : "🧠 Simulate Ranking"}
+{isChecking ? "Scanning Google..." : "🚀 Check Real Rankings"}
                 <Search className="h-4 w-4 ml-2" />
               </Button>
               
