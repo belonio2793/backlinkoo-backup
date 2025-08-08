@@ -1147,6 +1147,7 @@ const Index = () => {
         isOpen={isWaitlistOpen}
         onClose={closeWaitlistModal}
         initialEmail={waitlistEmail}
+        modalProps={currentModal.type === 'waitlist' ? currentModal.props : undefined}
       />
 
       {/* Modals are now managed by UnifiedModalManager */}
