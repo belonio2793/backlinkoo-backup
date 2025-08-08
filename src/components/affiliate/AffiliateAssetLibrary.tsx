@@ -247,9 +247,9 @@ export const AffiliateAssetLibrary: React.FC<AffiliateAssetLibraryProps> = ({
             type: 'social',
             category: 'social',
             dimensions: '1080x1080',
-            fileUrl: '/api/assets/instagram_square.png',
-            previewUrl: '/api/assets/preview/instagram_square.png',
-            description: 'Instagram-optimized square post design',
+            fileUrl: '/assets/social/instagram-post-1080x1080.svg',
+            previewUrl: '/assets/social/instagram-post-1080x1080.svg',
+            description: 'Instagram-optimized square post design with affiliate messaging',
             downloadCount: 1234,
             isPopular: true,
             customizable: true
