@@ -498,20 +498,35 @@ export function AuthFormTabs({
 
           <Button
             type="submit"
-            className={`w-full ${inputHeight} ${isLoading ? 'bg-primary/80' : ''}`}
-            disabled={!signupEmail || !signupPassword || !confirmPassword || !firstName}
+            className={`w-full ${inputHeight}`}
+            disabled={!signupEmail || !signupPassword || !confirmPassword || !firstName || isLoading}
           >
-            <CheckCircle className="h-4 w-4 mr-2" />
-            {showTrialUpgrade ? "Upgrade Trial" : "Create Account"}
+            {isLoading ? (
+              <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <CheckCircle className="h-4 w-4 mr-2" />
+            )}
+            {isLoading ? "Creating Account..." : (showTrialUpgrade ? "Upgrade Trial" : "Create Account")}
           </Button>
-        </form>
 
-        {/* Testimonials for signup tab */}
-        {!isCompact && (
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <CompactTestimonials />
+          <div className="flex items-center justify-center gap-1 text-center">
+            <Button
+              type="button"
+              variant="link"
+              className="text-sm text-muted-foreground p-0 h-auto"
+              onClick={() => window.open('/auth-diagnostic', '_blank')}
+            >
+              Need help signing up?
+            </Button>
           </div>
-        )}
+
+          {/* Testimonials for signup tab */}
+          {!isCompact && (
+            <div className="mt-6">
+              <CompactTestimonials />
+            </div>
+          )}
+        </form>
       </TabsContent>
     </Tabs>
   );
