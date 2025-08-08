@@ -147,12 +147,19 @@ export class RealRankTracker {
           console.log('🌐 Network error - unable to reach server');
         } else if (error.message.includes('Server error')) {
           console.log('🖥️ Server-side error occurred');
-        } else if (error.message.includes('body stream already read') || error.message.includes('Failed to read response stream')) {
+        } else if (
+          error.message.includes('body stream') ||
+          error.message.includes('already read') ||
+          error.message.includes('stream') ||
+          error.name === 'TypeError' && error.message.includes('body')
+        ) {
           console.log('🔄 Request stream conflict detected');
           if (retryCount < maxRetries) {
             console.log(`🔄 Retrying request (${retryCount + 1}/${maxRetries})...`);
             await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Exponential backoff
             return this.performRankCheck(params, startTime, retryCount + 1);
+          } else {
+            console.log('🔄 Max retries reached for stream error');
           }
         }
       }
