@@ -615,6 +615,21 @@ export class ContentFormatter {
   }
 
   /**
+   * Clean up any HTML that's being displayed as text instead of rendered
+   */
+  static fixDisplayedHtmlAsText(content: string): string {
+    return content
+      // Fix strong tags that are showing as text
+      .replace(/strong\s+class="[^"]*"&gt;([^<&]+)/gi, '<strong class="font-bold text-inherit">$1</strong>')
+      .replace(/&lt;strong\s+class="[^"]*"&gt;([^<&]+)&lt;\/strong&gt;/gi, '<strong class="font-bold text-inherit">$1</strong>')
+      // Fix any other malformed HTML showing as text
+      .replace(/&lt;(\/?[a-zA-Z][^&>]*)&gt;/gi, '<$1>')
+      // Remove any orphaned &gt; that appears at the start of content
+      .replace(/^&gt;\s*/gm, '')
+      .replace(/^\s*&gt;/gm, '');
+  }
+
+  /**
    * Final post-processing cleanup to catch patterns that slip through
    */
   static postProcessCleanup(content: string): string {
