@@ -167,11 +167,11 @@ export function AuthFormTabs({
     setLoadingMessage("Creating your account...");
 
     try {
-      const result = await AuthService.signUp(
-        trimmedEmail,
-        trimmedPassword,
-        trimmedFirstName
-      );
+      const result = await AuthService.signUp({
+        email: trimmedEmail,
+        password: trimmedPassword,
+        firstName: trimmedFirstName
+      });
 
       if (result.success && result.user) {
         toast({
@@ -256,7 +256,7 @@ export function AuthFormTabs({
                 <Input
                   id="login-password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
+                  placeholder="•••���••••"
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   className={inputHeight}
