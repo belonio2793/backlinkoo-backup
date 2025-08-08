@@ -133,36 +133,65 @@ export default function BacklinkAutomation() {
     }
 
     try {
-      const newCampaign: Campaign = {
-        id: `camp_${Date.now()}`,
+      const campaignData = {
         name: campaignName,
-        targetUrl: targetUrl,
+        target_url: targetUrl,
         keywords: keywords.split(',').map(k => k.trim()),
-        status: 'active',
-        progress: 0,
-        linksGenerated: 0,
-        linkStrategy,
-        createdAt: new Date(),
-        lastActive: new Date()
+        anchor_texts: anchorTexts.split(',').map(a => a.trim()).filter(a => a),
+        daily_limit: dailyLimit,
+        strategy_blog_comments: linkStrategy.blogComments,
+        strategy_forum_profiles: linkStrategy.forumProfiles,
+        strategy_web2_platforms: linkStrategy.web2Platforms,
+        strategy_social_profiles: linkStrategy.socialProfiles,
+        strategy_contact_forms: linkStrategy.contactForms
       };
 
-      // For demo mode, just add the campaign locally
-      setCampaigns(prev => [...prev, newCampaign]);
-      setActiveCampaign(newCampaign);
-
-      // Start the link discovery simulation
-      startLinkDiscovery(newCampaign);
-
-      toast({
-        title: "Campaign Created",
-        description: `${campaignName} campaign started successfully (Demo Mode)`,
+      const response = await fetch('/.netlify/functions/backlink-campaigns', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+        },
+        body: JSON.stringify({
+          action: 'create',
+          campaign: campaignData
+        })
       });
 
-      // Reset form
-      setCampaignName('');
-      setTargetUrl('');
-      setKeywords('');
-      setAnchorTexts('');
+      if (response.ok) {
+        const data = await response.json();
+        const newCampaign: Campaign = {
+          id: data.campaign.id,
+          name: campaignName,
+          targetUrl: targetUrl,
+          keywords: keywords.split(',').map(k => k.trim()),
+          status: 'active',
+          progress: 0,
+          linksGenerated: 0,
+          linkStrategy,
+          createdAt: new Date(),
+          lastActive: new Date()
+        };
+
+        setCampaigns(prev => [...prev, newCampaign]);
+        setActiveCampaign(newCampaign);
+
+        // Start the link discovery process
+        startLinkDiscovery(newCampaign);
+
+        toast({
+          title: "Campaign Created",
+          description: `${campaignName} campaign started successfully`,
+        });
+
+        // Reset form
+        setCampaignName('');
+        setTargetUrl('');
+        setKeywords('');
+        setAnchorTexts('');
+      } else {
+        throw new Error(`Failed to create campaign: ${response.status}`);
+      }
 
     } catch (error) {
       console.error('Error creating campaign:', error);
