@@ -164,12 +164,12 @@ export const KeywordResearchTool = () => {
   // Advanced keyword research with geographic and competition analysis
   const performKeywordResearch = async (searchTerm: string) => {
     console.log('Starting keyword research for:', searchTerm);
-    
+
     try {
       const { data, error } = await supabase.functions.invoke('seo-analysis', {
         body: {
           type: 'advanced_keyword_research',
-          data: { 
+          data: {
             keyword: searchTerm,
             country: selectedCountry,
             city: selectedCity,
@@ -180,19 +180,210 @@ export const KeywordResearchTool = () => {
 
       if (error) {
         console.error('Supabase function error:', error);
-        throw new Error(error.message || 'Failed to perform keyword research');
+        // Fall back to local keyword research
+        return generateLocalKeywordData(searchTerm);
       }
 
       if (!data) {
-        throw new Error('No data returned from keyword research');
+        console.log('No data returned from API, using local fallback');
+        return generateLocalKeywordData(searchTerm);
       }
 
       console.log('Keyword research successful:', data);
       return data;
     } catch (error) {
-      console.error('Error in performKeywordResearch:', error);
-      throw error;
+      console.error('Error in performKeywordResearch, using local fallback:', error);
+      // Fall back to local keyword research
+      return generateLocalKeywordData(searchTerm);
     }
+  };
+
+  // Local fallback keyword research when APIs are unavailable
+  const generateLocalKeywordData = (baseKeyword: string) => {
+    console.log('Generating local keyword data for:', baseKeyword);
+
+    const keywordVariations = generateKeywordVariations(baseKeyword);
+    const keywords = keywordVariations.map(keyword => ({
+      keyword,
+      searchVolume: generateRealisticSearchVolume(keyword),
+      difficulty: generateRealisticDifficulty(keyword),
+      cpc: generateRealisticCPC(keyword),
+      trend: ['up', 'down', 'stable'][Math.floor(Math.random() * 3)] as 'up' | 'down' | 'stable',
+      competition: generateRealisticCompetition(keyword),
+      searchEngine: 'google' as const,
+      location: selectedCity || countries.find(c => c.code === selectedCountry)?.name || 'Global',
+      competitorCount: Math.floor(Math.random() * 50) + 20,
+      topCompetitors: generateTopCompetitors(keyword)
+    }));
+
+    const serpResults = generateLocalSerpResults(baseKeyword);
+
+    const aiInsights = generateLocalInsights(baseKeyword, keywords, selectedCountry);
+
+    return {
+      keywords,
+      serpResults,
+      aiInsights,
+      dataQuality: {
+        score: 1.5,
+        sources: ['Local_Estimation'],
+        confidence: 'low' as const,
+        usingGoogleAdsApi: false,
+        apiType: 'Local Fallback (Demo Data)'
+      }
+    };
+  };
+
+  // Generate realistic search volume based on keyword characteristics
+  const generateRealisticSearchVolume = (keyword: string) => {
+    const words = keyword.split(' ');
+    const length = words.length;
+
+    // Longer keywords typically have lower search volume
+    let baseVolume = 10000;
+    if (length >= 4) baseVolume = 2000;
+    else if (length >= 3) baseVolume = 5000;
+    else if (length >= 2) baseVolume = 8000;
+
+    // Check for commercial intent keywords
+    const commercialWords = ['buy', 'best', 'review', 'price', 'cost', 'cheap', 'discount', 'deal'];
+    const hasCommercialIntent = commercialWords.some(word => keyword.toLowerCase().includes(word));
+    if (hasCommercialIntent) baseVolume *= 1.5;
+
+    // Add some randomness but keep it realistic
+    const variance = Math.random() * 0.6 + 0.7; // 0.7 to 1.3 multiplier
+    return Math.floor(baseVolume * variance);
+  };
+
+  // Generate realistic difficulty based on keyword characteristics
+  const generateRealisticDifficulty = (keyword: string) => {
+    const words = keyword.split(' ');
+    const length = words.length;
+
+    // Longer keywords are typically easier to rank for
+    let baseDifficulty = 50;
+    if (length >= 4) baseDifficulty = 25;
+    else if (length >= 3) baseDifficulty = 35;
+    else if (length >= 2) baseDifficulty = 45;
+    else baseDifficulty = 65; // Single words are harder
+
+    // Add randomness
+    const variance = Math.random() * 30 - 15; // -15 to +15
+    return Math.max(1, Math.min(100, Math.floor(baseDifficulty + variance)));
+  };
+
+  // Generate realistic CPC
+  const generateRealisticCPC = (keyword: string) => {
+    const commercialWords = ['buy', 'price', 'cost', 'insurance', 'loan', 'lawyer', 'attorney'];
+    const hasHighValueKeywords = commercialWords.some(word => keyword.toLowerCase().includes(word));
+
+    let baseCPC = 1.0;
+    if (hasHighValueKeywords) baseCPC = 3.0;
+
+    const variance = Math.random() * 2; // 0 to 2x multiplier
+    return +(baseCPC * (0.5 + variance)).toFixed(2);
+  };
+
+  // Generate realistic competition level
+  const generateRealisticCompetition = (keyword: string) => {
+    const words = keyword.split(' ');
+    if (words.length >= 4) return 'low' as const;
+    if (words.length >= 3) return 'medium' as const;
+    return 'high' as const;
+  };
+
+  // Generate keyword variations
+  const generateKeywordVariations = (baseKeyword: string) => {
+    const variations = [
+      baseKeyword,
+      `${baseKeyword} tool`,
+      `${baseKeyword} software`,
+      `best ${baseKeyword}`,
+      `${baseKeyword} guide`,
+      `${baseKeyword} tips`,
+      `${baseKeyword} strategy`,
+      `${baseKeyword} services`,
+      `free ${baseKeyword}`,
+      `${baseKeyword} tutorial`,
+      `how to ${baseKeyword}`,
+      `${baseKeyword} for beginners`
+    ];
+
+    return variations.slice(0, 8); // Return 8 variations
+  };
+
+  // Generate top competitors
+  const generateTopCompetitors = (keyword: string) => {
+    const competitors = [
+      'wikipedia.org',
+      'youtube.com',
+      'reddit.com',
+      'medium.com',
+      'hubspot.com',
+      'moz.com',
+      'searchengineland.com',
+      'semrush.com'
+    ];
+
+    // Return 3-5 random competitors
+    const count = Math.floor(Math.random() * 3) + 3;
+    return competitors.sort(() => Math.random() - 0.5).slice(0, count);
+  };
+
+  // Generate local SERP results
+  const generateLocalSerpResults = (keyword: string) => {
+    const domains = [
+      'wikipedia.org',
+      'youtube.com',
+      'reddit.com',
+      'medium.com',
+      'hubspot.com',
+      'moz.com',
+      'searchengineland.com',
+      'semrush.com',
+      'ahrefs.com',
+      'backlinko.com'
+    ];
+
+    return domains.slice(0, 10).map((domain, index) => ({
+      position: index + 1,
+      url: `https://${domain}/${keyword.replace(/\s+/g, '-').toLowerCase()}`,
+      title: `${keyword} - Complete Guide | ${domain.split('.')[0].toUpperCase()}`,
+      description: `Learn everything about ${keyword}. This comprehensive guide covers all aspects of ${keyword} including best practices, tools, and strategies.`,
+      domain: domain,
+      domainAuthority: Math.floor(Math.random() * 40) + 60, // 60-100 for top sites
+      pageAuthority: Math.floor(Math.random() * 30) + 50, // 50-80
+      backlinks: Math.floor(Math.random() * 50000) + 10000,
+      estimatedTraffic: Math.floor(Math.random() * 100000) + 20000,
+      socialShares: Math.floor(Math.random() * 5000) + 1000
+    }));
+  };
+
+  // Generate local AI insights
+  const generateLocalInsights = (keyword: string, keywords: any[], country: string) => {
+    return `## SEO Analysis for "${keyword}" (Demo Mode)
+
+🔍 **Search Intent Analysis**
+The keyword "${keyword}" shows ${keywords[0]?.competition} competition with an estimated ${keywords[0]?.searchVolume.toLocaleString()} monthly searches. This indicates ${keywords[0]?.competition === 'low' ? 'good opportunity for ranking' : keywords[0]?.competition === 'medium' ? 'moderate competition requiring quality content' : 'high competition requiring strong authority'}.
+
+📊 **Competition Strategy**
+- Target difficulty: ${keywords[0]?.difficulty}/100
+- Estimated CPC: $${keywords[0]?.cpc}
+- Competition level: ${keywords[0]?.competition}
+
+💡 **Content Recommendations**
+1. Create comprehensive, in-depth content covering all aspects of ${keyword}
+2. Target long-tail variations like "${keywords[1]?.keyword}" and "${keywords[2]?.keyword}"
+3. Focus on user intent and provide actionable insights
+4. Include multimedia content (images, videos, infographics)
+
+🌍 **Geographic Targeting (${country})**
+Consider local search patterns and cultural preferences for ${country}. Optimize for local search terms and regional variations.
+
+⚠️ **Note**: This is demo data. For accurate keyword research with real search volumes, competition data, and AI insights, please configure API keys in your environment variables:
+- OPENAI_API_KEY (for AI analysis)
+- SERP_API_KEY (for search results)
+- DATAFORSEO_API_LOGIN & DATAFORSEO_API_PASSWORD (for accurate search volumes)`;
   };
 
   const countries = [
@@ -274,7 +465,7 @@ export const KeywordResearchTool = () => {
     { code: "GA", name: "Gabon", flag: "🇬🇦" },
     { code: "GB", name: "United Kingdom", flag: "🇬🇧" },
     { code: "GD", name: "Grenada", flag: "🇬🇩" },
-    { code: "GE", name: "Georgia", flag: "🇬🇪" },
+    { code: "GE", name: "Georgia", flag: "🇬����" },
     { code: "GF", name: "French Guiana", flag: "🇬🇫" },
     { code: "GG", name: "Guernsey", flag: "🇬🇬" },
     { code: "GH", name: "Ghana", flag: "🇬🇭" },
