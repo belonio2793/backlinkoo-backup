@@ -223,12 +223,14 @@ export function EnhancedBlogPreview({
                   
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: ContentFormatter.fixDisplayedHtmlAsText(
-                        ContentFormatter.formatBlogContent(
-                          ContentFormatter.sanitizeContent(
-                            ContentFormatter.preProcessMalformedHtml(content.content || '')
-                          ),
-                          content.title
+                      __html: ContentFormatter.fixDOMDisplayIssues(
+                        ContentFormatter.fixDisplayedHtmlAsText(
+                          ContentFormatter.formatBlogContent(
+                            ContentFormatter.sanitizeContent(
+                              ContentFormatter.preProcessMalformedHtml(content.content || '')
+                            ),
+                            content.title
+                          )
                         )
                       )
                     }}
