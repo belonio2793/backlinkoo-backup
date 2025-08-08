@@ -386,8 +386,6 @@ Generate content so valuable that readers feel they've discovered insider knowle
    */
   private static async generateWithLocalAPI(request: BlogRequest): Promise<BlogResponse> {
     try {
-      const { LocalDevAPI } = await import('@/services/localDevAPI');
-
       const result = await LocalDevAPI.generateBlogPost({
         keyword: request.keyword,
         anchorText: request.anchorText,
