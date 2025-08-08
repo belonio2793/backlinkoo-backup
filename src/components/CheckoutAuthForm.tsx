@@ -118,10 +118,10 @@ export function CheckoutAuthForm({
     e.preventDefault();
     if (isLoading) return;
 
-    const trimmedEmail = signupEmail.trim();
-    const trimmedPassword = signupPassword.trim();
-    const trimmedConfirmPassword = confirmPassword.trim();
-    const trimmedFirstName = firstName.trim();
+    const trimmedEmail = (signupEmail || "").trim();
+    const trimmedPassword = (signupPassword || "").trim();
+    const trimmedConfirmPassword = (confirmPassword || "").trim();
+    const trimmedFirstName = (firstName || "").trim();
 
     if (!trimmedEmail || !trimmedPassword || !trimmedConfirmPassword || !trimmedFirstName) {
       toast({
