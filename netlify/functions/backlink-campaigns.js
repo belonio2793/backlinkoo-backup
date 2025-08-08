@@ -1,9 +1,11 @@
+const { createClient } = require('@supabase/supabase-js');
+
 // Backlink Campaign Management Function
 exports.handler = async (event, context) => {
   // CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Content-Type': 'application/json'
   };
@@ -16,6 +18,20 @@ exports.handler = async (event, context) => {
       body: '',
     };
   }
+
+  // Initialize Supabase client
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ error: 'Supabase configuration missing' }),
+    };
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
   try {
     let requestBody = {};
@@ -31,38 +47,47 @@ exports.handler = async (event, context) => {
       }
     }
 
+    // Get user from Authorization header
+    const authHeader = event.headers.authorization;
+    let user = null;
+
+    if (authHeader && authHeader.startsWith('Bearer ')) {
+      const token = authHeader.substring(7);
+      const { data: userData } = await supabase.auth.getUser(token);
+      user = userData.user;
+    }
+
     if (event.httpMethod === 'GET') {
-      // Return existing campaigns (demo data for now)
-      const demoCampaigns = [
-        {
-          id: 'demo_campaign_1',
-          name: 'SEO Authority Building',
-          targetUrl: 'https://example.com',
-          keywords: ['SEO', 'digital marketing', 'backlinks'],
-          status: 'active',
-          progress: 65,
-          linksGenerated: 127,
-          linkStrategy: {
-            blogComments: true,
-            forumProfiles: true,
-            web2Platforms: true,
-            socialProfiles: false,
-            contactForms: false
-          },
-          createdAt: new Date(Date.now() - 86400000 * 7).toISOString(), // 7 days ago
-          lastActive: new Date().toISOString()
-        }
-      ];
+      if (!user) {
+        return {
+          statusCode: 401,
+          headers,
+          body: JSON.stringify({ error: 'Authentication required' }),
+        };
+      }
+
+      // Get user's campaigns
+      const { data: campaigns, error } = await supabase
+        .from('backlink_campaigns')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Database error:', error);
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({ error: 'Failed to fetch campaigns' }),
+        };
+      }
 
       return {
         statusCode: 200,
-        headers: {
-          ...headers,
-          'Content-Type': 'application/json'
-        },
+        headers,
         body: JSON.stringify({
           success: true,
-          campaigns: demoCampaigns
+          campaigns: campaigns || []
         }),
       };
     }
