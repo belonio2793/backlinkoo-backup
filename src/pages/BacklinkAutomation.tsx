@@ -16,17 +16,18 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
+import {
   Infinity, Zap, Shield, Clock, TrendingUp, ExternalLink, Settings,
   BarChart3, Globe, MessageSquare, UserPlus, Mail, FileText,
   Play, Pause, Stop, Target, Search, Bot, AlertTriangle,
   Activity, Users, Database, Server, Brain, Eye,
-  CheckCircle, XCircle, Clock3, Loader2, ArrowUp, ArrowDown
+  CheckCircle, XCircle, Clock3, Loader2, ArrowUp, ArrowDown, Trash2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
 
 // Import our enterprise engines
-import { CampaignQueueManager, type CampaignConfig, type QueuedCampaign } from '@/services/automationEngine/CampaignQueueManager';
+import { CampaignQueueManager, type CampaignConfig, type QueuedCampaign, type CampaignDeletionResult } from '@/services/automationEngine/CampaignQueueManager';
 import { LinkDiscoveryEngine, type DiscoveryConfig, type LinkOpportunity } from '@/services/automationEngine/LinkDiscoveryEngine';
 import { AnalyticsEngine, type CampaignAnalytics, type TimeRange } from '@/services/automationEngine/AnalyticsEngine';
 import { ContentGenerationEngine, type ContentContext, type ContentRequirements } from '@/services/automationEngine/ContentGenerationEngine';
@@ -104,6 +105,9 @@ export default function BacklinkAutomation() {
   const [analytics, setAnalytics] = useState<CampaignAnalytics | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTab, setSelectedTab] = useState('campaigns');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [campaignToDelete, setCampaignToDelete] = useState<Campaign | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
@@ -539,6 +543,98 @@ export default function BacklinkAutomation() {
     }
   };
 
+  const handleDeleteClick = (campaign: Campaign) => {
+    setCampaignToDelete(campaign);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async (campaignId: string, options: any) => {
+    setIsDeleting(true);
+
+    try {
+      // Call the backend API for deletion
+      const response = await fetch('/.netlify/functions/backlink-campaigns', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('access_token')}` // Adjust based on your auth implementation
+        },
+        body: JSON.stringify({
+          action: 'delete',
+          campaignId,
+          forceDelete: options.forceDelete,
+          reason: options.reason
+        })
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to delete campaign');
+      }
+
+      // Also delete from queue manager
+      const queueDeletionResult: CampaignDeletionResult = await queueManager.deleteCampaign(
+        campaignId,
+        options.forceDelete
+      );
+
+      // Remove from local state
+      setCampaigns(prev => prev.filter(c => c.id !== campaignId));
+
+      // Update system metrics
+      setSystemMetrics(prev => ({
+        ...prev,
+        activeCampaigns: campaigns.filter(c => c.id !== campaignId && c.status === 'active').length,
+        usedCapacity: Math.max(0, prev.usedCapacity - 1)
+      }));
+
+      toast({
+        title: "Campaign Deleted Successfully",
+        description: result.deletionSummary ?
+          `Campaign "${result.deletionSummary.campaignName}" has been deleted with ${result.deletionSummary.linksArchived} links archived.` :
+          "Campaign has been permanently deleted.",
+      });
+
+      // Log successful deletion for monitoring
+      console.log('Campaign deletion completed:', {
+        campaignId,
+        backendResult: result,
+        queueResult: queueDeletionResult,
+        timestamp: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('Campaign deletion failed:', error);
+
+      await errorEngine.handleError(error as Error, {
+        component: 'campaign_deletion',
+        operation: 'delete_campaign',
+        severity: 'high',
+        metadata: {
+          campaignId,
+          forceDelete: options.forceDelete,
+          reason: options.reason
+        }
+      });
+
+      toast({
+        title: "Campaign Deletion Failed",
+        description: error instanceof Error ? error.message : "An unexpected error occurred during deletion.",
+        variant: "destructive"
+      });
+
+      throw error; // Re-throw to prevent dialog from closing
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setCampaignToDelete(null);
+  };
+
   const getStatusIcon = (status: Campaign['status']) => {
     switch (status) {
       case 'active':
@@ -883,6 +979,15 @@ export default function BacklinkAutomation() {
                               ) : null}
                               <Button size="sm" variant="outline" onClick={() => loadCampaignAnalytics(campaign.id)}>
                                 <BarChart3 className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDeleteClick(campaign)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 hover:border-red-300"
+                                title="Delete Campaign"
+                              >
+                                <Trash2 className="h-3 w-3" />
                               </Button>
                             </div>
                           </div>
@@ -1242,6 +1347,15 @@ export default function BacklinkAutomation() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Delete Campaign Dialog */}
+        <DeleteCampaignDialog
+          isOpen={deleteDialogOpen}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          campaign={campaignToDelete}
+          isDeleting={isDeleting}
+        />
       </div>
     </div>
   );
