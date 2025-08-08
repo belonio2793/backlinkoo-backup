@@ -378,7 +378,180 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Backlink ∞ Automation - Coming Soon Section */}
+      <section className="py-16 px-4 md:px-6 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5"></div>
+        <div className="relative max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <div className="flex items-center justify-center gap-3 mb-6">
+              <div className="relative">
+                <Infinity className="h-8 w-8 text-blue-600" />
+                <Zap className="h-4 w-4 text-orange-500 absolute -top-1 -right-1 animate-pulse" />
+              </div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-orange-500 bg-clip-text text-transparent">
+                  Backlink ∞ Automation
+                </h2>
+                <Badge className="bg-gradient-to-r from-orange-500 to-red-500 text-white animate-pulse">
+                  Coming Soon
+                </Badge>
+              </div>
+            </div>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+              The world's most advanced AI-powered link building automation platform.
+              Discover and create thousands of contextual backlinks across the entire web with zero manual effort.
+            </p>
+          </div>
 
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+            {/* Left side - Features */}
+            <div className="space-y-8">
+              <div className="space-y-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-full bg-blue-100">
+                    <Search className="h-6 w-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">Internet-Scale Discovery</h3>
+                    <p className="text-gray-600">AI crawls the entire web to find relevant link opportunities on blogs, forums, and Web 2.0 platforms</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-full bg-purple-100">
+                    <Sparkles className="h-6 w-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">AI Content Generation</h3>
+                    <p className="text-gray-600">Contextual comments, profiles, and posts generated automatically for natural link placement</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-full bg-green-100">
+                    <Activity className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">Autonomous Campaigns</h3>
+                    <p className="text-gray-600">Set it and forget it - campaigns run indefinitely with intelligent drip-feeding and rotation</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <div className="p-3 rounded-full bg-orange-100">
+                    <Shield className="h-6 w-6 text-orange-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">Safe & Natural</h3>
+                    <p className="text-gray-600">Advanced algorithms ensure natural patterns and Google guideline compliance</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right side - Preview Dashboard */}
+            <div className="relative">
+              <div className="bg-white rounded-2xl shadow-2xl border p-6 transform rotate-2 hover:rotate-0 transition-transform duration-300">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 bg-red-400 rounded-full"></div>
+                  <div className="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                  <div className="flex-1 bg-gray-100 rounded text-center text-xs py-1 text-gray-500">
+                    backlink-automation.app
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                    <div>
+                      <div className="font-semibold text-sm">Campaign: Brand Authority</div>
+                      <div className="text-xs text-gray-500">Target: yoursite.com</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-2xl font-bold text-blue-600">1,247</div>
+                      <div className="text-xs text-gray-500">Links Built</div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Blog Comments</span>
+                      <span className="text-green-600">342 posted</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full w-3/4"></div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Forum Profiles</span>
+                      <span className="text-green-600">156 created</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full w-1/2"></div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>Web 2.0 Posts</span>
+                      <span className="text-green-600">89 published</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2">
+                      <div className="bg-gradient-to-r from-purple-500 to-pink-500 h-2 rounded-full w-1/3"></div>
+                    </div>
+                  </div>
+
+                  <div className="text-center pt-4">
+                    <div className="text-xs text-gray-500 mb-2">Next batch in 2h 34m</div>
+                    <div className="flex items-center justify-center gap-1">
+                      <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                      <span className="text-xs text-green-600">Active Campaign</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Call to Action */}
+          <div className="text-center">
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border shadow-lg max-w-2xl mx-auto">
+              <h3 className="text-2xl font-bold mb-4">Be the First to Experience Link Building Revolution</h3>
+              <p className="text-gray-600 mb-6">
+                Join our exclusive waitlist and get early access to the most powerful automated link building system ever created.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto mb-6">
+                <input
+                  type="email"
+                  placeholder="Enter your email for early access"
+                  className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none"
+                />
+                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3">
+                  Join Waitlist
+                </Button>
+              </div>
+
+              <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
+                <span className="flex items-center gap-1">
+                  <Users className="h-4 w-4" />
+                  2,847 in queue
+                </span>
+                <span className="flex items-center gap-1">
+                  <Zap className="h-4 w-4" />
+                  Launch Q2 2024
+                </span>
+                <span className="flex items-center gap-1">
+                  <Shield className="h-4 w-4" />
+                  50% Early Bird Discount
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Trial Conversion Section */}
       {showTrialUpgrade && (
