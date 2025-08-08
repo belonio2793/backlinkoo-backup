@@ -36,10 +36,6 @@ export class DirectOpenAIService {
     try {
       console.log('🚀 Starting direct blog generation...');
 
-      // Import services statically to avoid dynamic import issues
-      const { LocalDevAPI } = await import('@/services/localDevAPI');
-      const { environmentVariablesService } = await import('@/services/environmentVariablesService');
-
       // Check if we should use local dev API
       if (LocalDevAPI.shouldUseMockAPI()) {
         console.log('🧪 Using local development API...');
