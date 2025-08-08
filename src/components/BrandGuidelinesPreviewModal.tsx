@@ -476,16 +476,23 @@ export function BrandGuidelinesPreviewModal({ isOpen, onClose }: BrandGuidelines
   ];
 
   const nextPage = () => {
-    if (currentPage < pages.length - 1) {
+    if (pages && currentPage < pages.length - 1) {
       setCurrentPage(currentPage + 1);
     }
   };
 
   const prevPage = () => {
-    if (currentPage > 0) {
+    if (pages && currentPage > 0) {
       setCurrentPage(currentPage - 1);
     }
   };
+
+  // Safety check for current page
+  const currentPageData = pages && pages[currentPage] ? pages[currentPage] : null;
+
+  if (!currentPageData) {
+    return null; // Don't render if page data is not available
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
