@@ -45,7 +45,11 @@ import {
   ArrowUpRight,
   CheckCircle,
   AlertCircle,
-  Info
+  Info,
+  BookOpen,
+  Palette,
+  Type,
+  Layout
 } from 'lucide-react';
 
 const SafeAffiliateProgram: React.FC = () => {
@@ -1123,7 +1127,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Industry Update",
-          content: `📰 INDUSTRY UPDATE 📰\n\nLatest SEO trends:\n\n🔥 AI-powered link building\n🔥 Quality over quantity\n🔥 Automated outreach\n🔥 Data-driven strategies\n\nBacklink ∞ covers all of these! 💯\n\nLink in bio: ${referralUrl}\n\n#IndustryUpdate #SEOTrends`,
+          content: `📰 INDUSTRY UPDATE 📰\n\nLatest SEO trends:\n\n🔥 AI-powered link building\n🔥 Quality over quantity\n🔥 Automated outreach\n🔥 Data-driven strategies\n\nBacklink ∞ covers all of these! ���\n\nLink in bio: ${referralUrl}\n\n#IndustryUpdate #SEOTrends`,
           engagement: "Medium",
           audience: "Industry watchers"
         },
@@ -2041,6 +2045,211 @@ Here's the math: ${referralUrl}`,
               </div>
             </div>
 
+          </div>
+        </div>
+
+        {/* Brand Guidelines Section */}
+        <div className="bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 rounded-xl shadow-lg border border-purple-200 p-8 mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-3 rounded-lg">
+                <BookOpen className="h-6 w-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">📘 Brand Guidelines</h2>
+                <p className="text-gray-600">Official brand identity & visual standards</p>
+              </div>
+            </div>
+            <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-2">
+              ✨ Featured Resource
+            </Badge>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* PDF Preview */}
+            <div className="lg:col-span-2">
+              <div className="bg-white rounded-lg border-2 border-purple-200 shadow-md overflow-hidden">
+                <div className="bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold">Comprehensive Brand Guidelines</h3>
+                    <span className="text-purple-100 text-sm">v1.0 • 2025</span>
+                  </div>
+                  <p className="text-purple-100 text-sm mt-1">The definitive guide to our brand identity, visual language, and communication standards</p>
+                </div>
+
+                {/* Preview Content */}
+                <div className="p-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200">
+                      <Palette className="h-8 w-8 text-purple-600 mx-auto mb-2" />
+                      <h4 className="font-semibold text-sm">Brand Identity</h4>
+                      <p className="text-xs text-gray-600">Logo & Guidelines</p>
+                    </div>
+                    <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <Layout className="h-8 w-8 text-blue-600 mx-auto mb-2" />
+                      <h4 className="font-semibold text-sm">Visual Language</h4>
+                      <p className="text-xs text-gray-600">Colors & Patterns</p>
+                    </div>
+                    <div className="text-center p-4 bg-indigo-50 rounded-lg border border-indigo-200">
+                      <Type className="h-8 w-8 text-indigo-600 mx-auto mb-2" />
+                      <h4 className="font-semibold text-sm">SEO Academy</h4>
+                      <p className="text-xs text-gray-600">Education Standards</p>
+                    </div>
+                    <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                      <Globe className="h-8 w-8 text-green-600 mx-auto mb-2" />
+                      <h4 className="font-semibold text-sm">Global Standards</h4>
+                      <p className="text-xs text-gray-600">Communication</p>
+                    </div>
+                  </div>
+
+                  {/* Table of Contents Preview */}
+                  <div className="bg-gray-50 rounded-lg p-4 border">
+                    <h4 className="font-semibold text-gray-900 mb-3">📋 Table of Contents</h4>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between items-center py-1 border-b border-gray-200">
+                        <span className="text-gray-700">1. Brand Overview & Mission</span>
+                        <span className="text-gray-500">3</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1 border-b border-gray-200">
+                        <span className="text-gray-700">2. Logo Guidelines & Usage</span>
+                        <span className="text-gray-500">4</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1 border-b border-gray-200">
+                        <span className="text-gray-700">3. Color Palette & Guidelines</span>
+                        <span className="text-gray-500">6</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1 border-b border-gray-200">
+                        <span className="text-gray-700">4. Typography System</span>
+                        <span className="text-gray-500">8</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1 border-b border-gray-200">
+                        <span className="text-gray-700">5. Visual Elements & Patterns</span>
+                        <span className="text-gray-500">10</span>
+                      </div>
+                      <div className="flex justify-between items-center py-1">
+                        <span className="text-gray-700">+ 5 more sections...</span>
+                        <span className="text-gray-500">22 pages total</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Download & Info Panel */}
+            <div className="space-y-6">
+              {/* Download Section */}
+              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">📥 Download Guidelines</h3>
+
+                <div className="space-y-4">
+                  <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
+                    <div className="flex items-center gap-3 mb-2">
+                      <FileText className="h-5 w-5 text-purple-600" />
+                      <span className="font-medium text-gray-900">Complete PDF Guide</span>
+                    </div>
+                    <p className="text-sm text-gray-600 mb-3">11 pages • High-resolution • Vector graphics</p>
+                    <button
+                      onClick={() => {
+                        // Create a download link for the PDF
+                        const link = document.createElement('a');
+                        link.href = '/brand-guidelines.pdf';
+                        link.download = 'Backlink-Infinity-Brand-Guidelines-v1.0.pdf';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+
+                        if (toast) {
+                          toast({
+                            title: "Download Started",
+                            description: "Brand Guidelines PDF is being downloaded",
+                          });
+                        }
+                      }}
+                      className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2"
+                    >
+                      <Download className="h-4 w-4" />
+                      Download PDF (2.4 MB)
+                    </button>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 rounded-lg border">
+                    <h4 className="font-medium text-gray-900 mb-2">Quick Access</h4>
+                    <div className="space-y-2 text-sm">
+                      <button
+                        onClick={() => copyToClipboard('#2563eb')}
+                        className="w-full text-left p-2 hover:bg-white rounded border transition-colors flex items-center justify-between"
+                      >
+                        <span>Primary Blue</span>
+                        <span className="font-mono text-xs bg-blue-100 px-2 py-1 rounded">#2563eb</span>
+                      </button>
+                      <button
+                        onClick={() => copyToClipboard('#8b5cf6')}
+                        className="w-full text-left p-2 hover:bg-white rounded border transition-colors flex items-center justify-between"
+                      >
+                        <span>Purple Accent</span>
+                        <span className="font-mono text-xs bg-purple-100 px-2 py-1 rounded">#8b5cf6</span>
+                      </button>
+                      <button
+                        onClick={() => copyToClipboard('Inter')}
+                        className="w-full text-left p-2 hover:bg-white rounded border transition-colors flex items-center justify-between"
+                      >
+                        <span>Primary Font</span>
+                        <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">Inter</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Key Information */}
+              <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">ℹ️ Usage Guidelines</h3>
+
+                <div className="space-y-4 text-sm">
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-gray-900">Do's:</p>
+                      <ul className="text-gray-600 mt-1 space-y-1">
+                        <li>• Use provided assets as-is</li>
+                        <li>• Maintain proper spacing</li>
+                        <li>• Follow color guidelines</li>
+                        <li>• Include affiliate tracking</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-red-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="font-medium text-gray-900">Don'ts:</p>
+                      <ul className="text-gray-600 mt-1 space-y-1">
+                        <li>• Modify logo proportions</li>
+                        <li>• Use unauthorized colors</li>
+                        <li>• Add effects to assets</li>
+                        <li>• Make false claims</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact for Custom Assets */}
+              <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border border-green-200 p-4">
+                <h4 className="font-semibold text-green-900 mb-2">🎨 Need Custom Assets?</h4>
+                <p className="text-sm text-green-800 mb-3">
+                  High-performing affiliates can request custom promotional materials from our design team.
+                </p>
+                <button
+                  onClick={() => window.open('mailto:brand@backlinkoo.com?subject=Custom Asset Request - Affiliate Program', '_blank')}
+                  className="w-full bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-2"
+                >
+                  <Mail className="h-4 w-4" />
+                  Contact Design Team
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
