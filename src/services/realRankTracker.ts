@@ -103,7 +103,18 @@ export class RealRankTracker {
 
     } catch (error) {
       console.error('❌ Real rank tracking failed:', error);
-      
+
+      // Handle specific error types
+      if (error instanceof Error) {
+        if (error.name === 'AbortError') {
+          console.log('⏰ Request timed out after 30 seconds');
+        } else if (error.message.includes('Failed to fetch')) {
+          console.log('🌐 Network error - unable to reach server');
+        } else if (error.message.includes('Server error')) {
+          console.log('🖥️ Server-side error occurred');
+        }
+      }
+
       // Fallback to client-side simulation
       console.log('🔄 Falling back to client-side intelligent simulation');
       return this.generateClientFallback(params, Date.now() - startTime);
