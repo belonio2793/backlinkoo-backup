@@ -716,6 +716,15 @@ export class ContentFormatter {
           return `<h${level}>${cleanText}</h${level}>`;
         }
         return ''; // Remove empty headings
+      })
+
+      // Ensure all strong tags have proper classes for bold styling
+      .replace(/<strong([^>]*)>/gi, (match, attrs) => {
+        // If it already has classes, don't override, otherwise add font-bold
+        if (attrs.includes('class=')) {
+          return match;
+        }
+        return `<strong class="font-bold text-inherit"${attrs}>`;
       });
   }
 }
