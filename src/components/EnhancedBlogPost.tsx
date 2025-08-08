@@ -483,7 +483,9 @@ export function EnhancedBlogPost() {
               dangerouslySetInnerHTML={{
                 __html: ContentFormatter.fixDisplayedHtmlAsText(
                   ContentFormatter.formatBlogContent(
-                    ContentFormatter.sanitizeContent(blogPost.content || ''),
+                    ContentFormatter.sanitizeContent(
+                      ContentFormatter.preProcessMalformedHtml(blogPost.content || '')
+                    ),
                     blogPost.title
                   )
                 )
