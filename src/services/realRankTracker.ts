@@ -144,6 +144,8 @@ export class RealRankTracker {
           console.log('🌐 Network error - unable to reach server');
         } else if (error.message.includes('Server error')) {
           console.log('🖥️ Server-side error occurred');
+        } else if (error.message.includes('body stream already read')) {
+          console.log('🔄 Request stream conflict - retrying with fresh request');
         }
       }
 
