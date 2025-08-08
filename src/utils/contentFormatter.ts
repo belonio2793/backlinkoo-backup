@@ -683,20 +683,25 @@ export class ContentFormatter {
    */
   static fixDOMDisplayIssues(content: string): string {
     return content
-      // Fix "strong&gt;Hook Introduction: The Rise of a Digital Phenomenon" type patterns
+      // CRITICAL FIX: The exact broken pattern from DOM
+      // <h2>&lt;</h2><p> strong&gt;Hook Introduction...</p> -> <h2>Hook Introduction...</h2>
+      .replace(/<h([1-6])[^>]*>&lt;<\/h[1-6]>\s*<p[^>]*>\s*strong&gt;([^<]+?)<\/p>/gi, '<h$1><strong>$2</strong></h$1>')
+
+      // Fix standalone strong&gt; patterns
       .replace(/(\s*)strong&gt;([^<>\n&]+?)(?=\s*<|\s*$|\n)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
 
-      // Fix "&lt;" appearing at start of content or lines
-      .replace(/(^|\n|\s)&lt;/g, '$1<')
+      // Fix &lt; in headings
+      .replace(/<h([1-6])[^>]*>&lt;<\/h[1-6]>/gi, '')
 
-      // Fix any remaining encoded brackets in wrong places
+      // Fix stray &lt; and &gt;
+      .replace(/(^|\n|\s)&lt;/g, '$1<')
       .replace(/(\s)&gt;(\s)/g, '$1>$2')
       .replace(/^&gt;/gm, '')
 
       // Ensure proper strong tag structure
-      .replace(/<strong([^>]*)>([^<]+)(?!<\/strong>)/gi, '<strong$1>$2</strong>')
+      .replace(/<strong([^>]*)>([^<]+?)(?!<\/strong>)/gi, '<strong$1>$2</strong>')
 
-      // Fix broken HTML entities displaying as text
+      // Fix broken HTML entities
       .replace(/&lt;(\w+)/g, '<$1')
       .replace(/(\w+)&gt;/g, '$1>');
   }
