@@ -120,6 +120,17 @@ export function BeautifulBlogPost() {
     };
   }, [blogPost, user]);
 
+  // Automatic 3-second popup for unclaimed posts
+  useEffect(() => {
+    if (!blogPost || blogPost.claimed || user) return;
+
+    const timer = setTimeout(() => {
+      setShowExitPopup(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [blogPost, user]);
+
   // Client-side cleanup of malformed content after rendering
   useEffect(() => {
     const cleanupMalformedContent = () => {
@@ -770,7 +781,7 @@ export function BeautifulBlogPost() {
                                 <p className="text-sm">
                                   Permanently delete this post. As the owner, you have full permission to remove it at any time.
                                 </p>
-                                <p className="text-xs text-red-400">⚠����� This action cannot be undone</p>
+                                <p className="text-xs text-red-400">⚠��� This action cannot be undone</p>
                               </div>
                             </TooltipContent>
                           </Tooltip>
@@ -815,7 +826,7 @@ export function BeautifulBlogPost() {
                             <p className="text-sm">
                               Delete this unclaimed post. Anyone can delete unclaimed posts to help clean up content.
                             </p>
-                            <p className="text-xs text-red-400">⚠️ This action cannot be undone</p>
+                            <p className="text-xs text-red-400">⚠�� This action cannot be undone</p>
                           </div>
                         </TooltipContent>
                       </Tooltip>
