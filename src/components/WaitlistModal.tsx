@@ -465,7 +465,7 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
 
               <div className="space-y-6 max-w-2xl mx-auto">
                 <h2 className="text-4xl md:text-5xl font-bold mb-4">
-                  🎉 Welcome to the Elite!
+                  🎉 <span className="waitlist-gradient-text">Welcome to the Elite!</span>
                 </h2>
                 <p className="text-xl text-green-100 leading-relaxed">
                   Congratulations! You've successfully joined the Backlink ∞ Automation exclusive waitlist. 
