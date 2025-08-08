@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/services/authService";
-import { AuthFormTabs } from "@/components/shared/AuthFormTabs";
+import { CleanAuthForm } from "@/components/shared/CleanAuthForm";
 import { validateEmail } from "@/utils/authValidation";
 import { Mail, RefreshCw, Infinity } from "lucide-react";
 import { LiveUserActivity } from "./SocialProofElements";
