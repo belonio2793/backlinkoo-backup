@@ -536,11 +536,6 @@ export function EnhancedBlogForm({ onContentGenerated }: EnhancedBlogFormProps) 
         </CardContent>
       </Card>
 
-      {/* Real-time Blog Generation Status Tracker */}
-      <RealTimeBlogStatus
-        isVisible={isGenerating}
-        isGenerating={isGenerating}
-      />
     </div>
   );
 }
