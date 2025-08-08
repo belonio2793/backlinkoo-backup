@@ -6,7 +6,6 @@ import { useToast } from '@/hooks/use-toast';
 import { DirectOpenAIService } from '@/services/directOpenAI';
 import { AnimatedBlogHeadline } from '@/components/AnimatedBlogHeadline';
 import { BlogGenerationETA } from '@/components/blog/BlogGenerationETA';
-import { ExitIntentPopup } from '@/components/ExitIntentPopup';
 import { Loader2, Link, Target, Hash, Sparkles, Zap, Star, Rocket, Search, MousePointer, ExternalLink, Key, Crosshair, Globe } from 'lucide-react';
 
 interface BlogFormProps {
@@ -18,8 +17,6 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
   const [keyword, setKeyword] = useState('');
   const [anchorText, setAnchorText] = useState('');
   const [targetUrl, setTargetUrl] = useState('');
-  const [showExitPopup, setShowExitPopup] = useState(false);
-  const [generatedPostTitle, setGeneratedPostTitle] = useState('');
   const { toast } = useToast();
 
   // Auto-format URL to add protocol if missing
@@ -95,28 +92,17 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
       });
 
       if (result.success) {
-        setGeneratedPostTitle(result.title || 'Your Blog Post');
+        onContentGenerated(result);
 
-        // Show exit popup after a short delay
-        setTimeout(() => {
-          setShowExitPopup(true);
-        }, 1000);
+        toast({
+          title: "Blog Post Generated!",
+          description: `Your blog post "${result.title}" is now live at ${result.blogUrl}`,
+        });
 
-        // Redirect after showing the blog post details
-        setTimeout(() => {
-          onContentGenerated(result);
-
-          toast({
-            title: "Blog Post Generated!",
-            description: `Your blog post "${result.title}" is now live at ${result.blogUrl}`,
-          });
-
-          // Reset form
-          setKeyword('');
-          setAnchorText('');
-          setTargetUrl('');
-          setGeneratedPostTitle('');
-        }, 3000);
+        // Reset form
+        setKeyword('');
+        setAnchorText('');
+        setTargetUrl('');
       } else {
         throw new Error(result.error || 'Blog generation failed');
       }
@@ -275,13 +261,6 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
         }}
       />
 
-      {/* Exit Intent Popup */}
-      <ExitIntentPopup
-        isVisible={showExitPopup}
-        onClose={() => setShowExitPopup(false)}
-        postTitle={generatedPostTitle}
-        timeRemaining="24 hours"
-      />
     </div>
   );
 }
