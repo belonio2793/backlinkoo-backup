@@ -1142,7 +1142,7 @@ Link in bio: ${referralUrl}
         // Page 1
         {
           type: "Tutorial",
-          content: `🎥 NEW VIDEO: "How I Built 500+ High-Quality Backlinks in 30 Days" - featuring Backlink ∞'s automated platform.
+          content: `🎥 NEW VIDEO: "How I Built 500+ High-Quality Backlinks in 30 Days" - featuring Backlink ���'s automated platform.
 
 This tool is a game-changer for SEO!
 
@@ -1843,7 +1843,7 @@ Here's the math: ${referralUrl}`,
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <div className="bg-blue-100 p-2 rounded-lg">
-                <span className="text-blue-600 text-xl">∞</span>
+                <span className="text-blue-600 text-xl">BL</span>
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Affiliate Dashboard</h1>
@@ -3103,7 +3103,7 @@ Here's the math: ${referralUrl}`,
                           <li>• Don't alter colors, fonts, or proportions</li>
                           <li>• Don't add effects or filters to logos</li>
                           <li>• Don't use assets for competing services</li>
-                          <li>• Don't make false or misleading claims</li>
+                          <li>��� Don't make false or misleading claims</li>
                           <li>• Don't use outdated brand materials</li>
                         </ul>
                       </div>
