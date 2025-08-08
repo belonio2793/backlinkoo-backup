@@ -304,9 +304,9 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
                       </div>
                     </div>
 
-                    <Button 
+                    <Button
                       onClick={handleEmailSubmit}
-                      className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl shadow-lg hover:shadow-xl transition-all"
+                      className="w-full h-14 text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 rounded-xl shadow-lg hover:shadow-xl transition-all waitlist-glow-button"
                       disabled={!email}
                     >
                       Continue to Registration
