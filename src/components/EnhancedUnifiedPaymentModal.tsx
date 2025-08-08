@@ -12,7 +12,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { AuthFormTabs } from '@/components/shared/AuthFormTabs';
+import { CheckoutAuthForm } from '@/components/CheckoutAuthForm';
 import { paymentConfigService } from '@/services/paymentConfigService';
 import { paymentIntegrationService } from '@/services/paymentIntegrationService';
 import {
