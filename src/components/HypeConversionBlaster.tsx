@@ -9,7 +9,7 @@ import {
   TrendingUp, 
   Users, 
   X,
-  Fire,
+  Flame,
   Skull,
   Heart,
   Eye,
@@ -54,7 +54,7 @@ export function HypeConversionBlaster({
 
   const hypePhases = [
     {
-      icon: Fire,
+      icon: Flame,
       title: "🔥 HOLY SH*T! YOUR CONTENT IS FIRE! 🔥",
       subtitle: "This is THE CONTENT that will DEMOLISH your competition!",
       description: "Your blog post about '{keyword}' is SO GOOD it's going to make your competitors CRY! This is exactly the type of content that goes VIRAL and gets MASSIVE rankings!",
@@ -174,7 +174,7 @@ export function HypeConversionBlaster({
               
               {/* Floating elements */}
               <div className="absolute top-4 left-4 animate-bounce">
-                <Fire className="h-8 w-8 text-yellow-300" />
+                <Flame className="h-8 w-8 text-yellow-300" />
               </div>
               <div className="absolute top-4 right-4 animate-bounce" style={{ animationDelay: '0.5s' }}>
                 <Rocket className="h-8 w-8 text-blue-300" />
