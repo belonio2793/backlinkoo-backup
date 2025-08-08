@@ -90,7 +90,7 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
       // Add to waitlist table (optional - for tracking)
       if (authData.user) {
         try {
-          await supabase
+          const { error: waitlistError } = await supabase
             .from('waitlist')
             .upsert({
               user_id: authData.user.id,
@@ -100,8 +100,14 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
               status: 'pending',
               created_at: new Date().toISOString()
             });
+
+          if (waitlistError) {
+            console.warn('Waitlist tracking failed (table may not exist):', waitlistError);
+          } else {
+            console.log('✅ Added to waitlist tracking');
+          }
         } catch (waitlistError) {
-          console.warn('Waitlist table insertion failed:', waitlistError);
+          console.warn('⚠️ Waitlist table insertion failed:', waitlistError);
           // Don't fail the signup if waitlist table doesn't exist
         }
       }
