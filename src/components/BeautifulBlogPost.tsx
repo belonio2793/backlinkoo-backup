@@ -46,6 +46,7 @@ import type { Tables } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
 import { maskEmail } from '@/utils/emailMasker';
 import { SEOScoreDisplay } from '@/components/SEOScoreDisplay';
+import { KillerDeletionWarning } from '@/components/KillerDeletionWarning';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -67,6 +68,7 @@ export function BeautifulBlogPost() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [showClaimModal, setShowClaimModal] = useState(false);
+  const [showKillerWarning, setShowKillerWarning] = useState(false);
 
   // Use premium SEO score logic
   const { effectiveScore, isPremiumScore } = usePremiumSEOScore(blogPost);
@@ -911,18 +913,78 @@ export function BeautifulBlogPost() {
 
             {/* Post Information Section */}
             <div className="mt-12 space-y-6">
-              {/* Expiration Warning */}
+              {/* ENHANCED EXPIRATION WARNING WITH KILLER DELETION ALERT */}
               {!blogPost.claimed && blogPost.expires_at && (
-                <div className="beautiful-warning max-w-2xl mx-auto p-6 shadow-sm">
-                  <div className="flex items-center justify-center gap-3 text-amber-800 mb-2">
-                    <Timer className="h-5 w-5" />
-                    <span className="text-lg font-semibold">
-                      ⏰ {getTimeRemaining(blogPost.expires_at)}
-                    </span>
+                <div className="space-y-4">
+                  {/* Enhanced Timer Warning */}
+                  <div className="beautiful-warning max-w-2xl mx-auto p-6 shadow-lg border-l-4 border-red-500 bg-gradient-to-r from-red-50 to-orange-50">
+                    <div className="flex items-center justify-center gap-3 text-red-800 mb-4">
+                      <Timer className="h-6 w-6 animate-pulse" />
+                      <span className="text-xl font-bold">
+                        🚨 DELETION IN: {getTimeRemaining(blogPost.expires_at)} 🚨
+                      </span>
+                    </div>
+                    <p className="text-red-700 text-center font-semibold mb-4">
+                      This post will be <span className="text-red-900 font-black">PERMANENTLY DELETED</span> when the timer expires.
+                      <span className="text-red-900 font-black">NO RECOVERY POSSIBLE!</span>
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Button
+                        onClick={() => setShowKillerWarning(true)}
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold animate-pulse"
+                      >
+                        <AlertTriangle className="mr-2 h-4 w-4" />
+                        🚨 SAVE FROM DELETION!
+                      </Button>
+
+                      {user ? (
+                        <Button
+                          onClick={() => setShowClaimModal(true)}
+                          className="bg-green-600 hover:bg-green-700 text-white font-bold"
+                        >
+                          <Crown className="mr-2 h-4 w-4" />
+                          Claim Now (Logged In)
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => setShowClaimModal(true)}
+                          variant="outline"
+                          className="border-blue-500 text-blue-600 hover:bg-blue-50 font-bold"
+                        >
+                          <Crown className="mr-2 h-4 w-4" />
+                          Login to Claim
+                        </Button>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-amber-700 text-center">
-                    This post will be automatically deleted when the timer expires. Claim it to save permanently!
-                  </p>
+
+                  {/* Real-time danger alerts based on time remaining */}
+                  {(() => {
+                    const timeLeft = getTimeRemaining(blogPost.expires_at);
+                    const [hours] = timeLeft.split(':').map(Number);
+                    if (hours <= 1) {
+                      return (
+                        <div className="max-w-2xl mx-auto bg-red-600 text-white p-4 rounded-lg animate-pulse border-4 border-yellow-400">
+                          <div className="text-center font-black text-lg">
+                            💀 CRITICAL: LESS THAN 1 HOUR REMAINING! 💀
+                          </div>
+                          <div className="text-center text-sm mt-2">
+                            Your content is entering the DEATH ZONE!
+                          </div>
+                        </div>
+                      );
+                    } else if (hours <= 6) {
+                      return (
+                        <div className="max-w-2xl mx-auto bg-orange-600 text-white p-4 rounded-lg animate-pulse">
+                          <div className="text-center font-bold">
+                            ⚠️ WARNING: Content expires in {hours} hours!
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
               )}
 
@@ -1034,6 +1096,24 @@ export function BeautifulBlogPost() {
         postTitle={cleanTitle(blogPost?.title || '')}
         postSlug={slug || ''}
       />
+
+      {/* KILLER DELETION WARNING POPUP */}
+      {showKillerWarning && blogPost.expires_at && (
+        <KillerDeletionWarning
+          onSaveContent={() => {
+            setShowKillerWarning(false);
+            setShowClaimModal(true);
+          }}
+          onLogin={() => {
+            setShowKillerWarning(false);
+            setShowClaimModal(true);
+          }}
+          timeRemaining={getTimeRemaining(blogPost.expires_at)}
+          contentTitle={blogPost.title}
+          targetUrl={blogPost.target_url || 'your website'}
+          onClose={() => setShowKillerWarning(false)}
+        />
+      )}
 
       <Footer />
       </div>
