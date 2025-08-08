@@ -666,7 +666,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
       
       console.log('KeywordResearchTool: Search results:', data);
       
-      // Process keywords data
+      // Process keywords data (both API and local fallback)
       if (data.keywords && Array.isArray(data.keywords)) {
         const processedKeywords: KeywordData[] = data.keywords.map((kw: any) => ({
           keyword: kw.keyword || searchTerm,
@@ -678,9 +678,10 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
           searchEngine: 'google',
           location: selectedCity || countries.find(c => c.code === selectedCountry)?.name || 'Global',
           competitorCount: kw.competitorCount || Math.floor(Math.random() * 100) + 10,
-          topCompetitors: kw.topCompetitors || []
+          topCompetitors: kw.topCompetitors || [],
+          dataSources: data.dataQuality?.sources || ['Unknown']
         }));
-        
+
         setKeywords(processedKeywords);
       } else {
         // Fallback to single keyword if no array provided
@@ -694,7 +695,8 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
           searchEngine: 'google',
           location: selectedCity || countries.find(c => c.code === selectedCountry)?.name || 'Global',
           competitorCount: Math.floor(Math.random() * 100) + 10,
-          topCompetitors: []
+          topCompetitors: [],
+          dataSources: ['Local_Estimation']
         };
         setKeywords([fallbackKeyword]);
       }
