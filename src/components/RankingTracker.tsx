@@ -685,6 +685,12 @@ export const RankingTracker = () => {
                             <div className="text-xs text-muted-foreground space-y-1">
                               <div>Backlinks: {data.backlinks.toLocaleString()}</div>
                               <div>Checked: {data.lastChecked}</div>
+                              {data.confidence && (
+                                <div>Confidence: {data.confidence.toUpperCase()}</div>
+                              )}
+                              {data.processingTime && (
+                                <div>Processed: {data.processingTime}ms</div>
+                              )}
                             </div>
                             
                             {data.errors && data.errors.length > 0 && (
