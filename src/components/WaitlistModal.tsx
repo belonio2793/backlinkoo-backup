@@ -13,12 +13,12 @@ interface WaitlistModalProps {
   initialEmail?: string;
 }
 
-export const WaitlistModal: React.FC<WaitlistModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  initialEmail = '' 
+export const WaitlistModal: React.FC<WaitlistModalProps> = ({
+  isOpen,
+  onClose,
+  initialEmail = ''
 }) => {
-  const [step, setStep] = useState<'email' | 'signup' | 'success'>('email');
+  const [step, setStep] = useState<'email' | 'signup' | 'success'>(initialEmail ? 'signup' : 'email');
   const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
