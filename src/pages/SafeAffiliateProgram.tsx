@@ -1059,7 +1059,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Quick Win",
-          content: `⚡ QUICK WIN WEDNESDAY ⚡\n\nWant an instant SEO boost?\n\nStart building quality backlinks TODAY with Backlink ∞\n\nNo experience needed 🎯\nResults in 30 days ✅\nFree trial available 🆓\n\nLink in bio: ${referralUrl}\n\n#QuickWin #SEOBoost`,
+          content: `⚡ QUICK WIN WEDNESDAY ⚡\n\nWant an instant SEO boost?\n\nStart building quality backlinks TODAY with Backlink ���\n\nNo experience needed 🎯\nResults in 30 days ✅\nFree trial available 🆓\n\nLink in bio: ${referralUrl}\n\n#QuickWin #SEOBoost`,
           engagement: "High",
           audience: "Quick results"
         },
@@ -1097,7 +1097,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Growth Hack",
-          content: `🚨 GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️⃣ Technical SEO ✅\n3️⃣ High-quality backlinks ���\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
+          content: `🚨 GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️⃣ Technical SEO ���\n3️⃣ High-quality backlinks ���\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
           engagement: "Very High",
           audience: "Growth hackers"
         },
@@ -1135,7 +1135,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Final Push",
-          content: `🎯 FINAL CALL 🎯\n\nIf you're serious about SEO success:\n\n⏰ Don't wait another day\n⏰ Every moment counts\n⚠️ Your competitors aren't waiting\n⏰ Start building links NOW\n\nBacklink ∞ = Your secret weapon! 🚀\n\nLink in bio: ${referralUrl}\n\n#FinalCall #TakeAction`,
+          content: `🎯 FINAL CALL 🎯\n\nIf you're serious about SEO success:\n\n⏰ Don't wait another day\n�� Every moment counts\n⚠️ Your competitors aren't waiting\n⏰ Start building links NOW\n\nBacklink ∞ = Your secret weapon! 🚀\n\nLink in bio: ${referralUrl}\n\n#FinalCall #TakeAction`,
           engagement: "High",
           audience: "Action takers"
         }
@@ -3172,6 +3172,12 @@ Here's the math: ${referralUrl}`,
         </div>
       </div>
       <Footer />
+
+      {/* Brand Guidelines Preview Modal */}
+      <BrandGuidelinesPreviewModal
+        isOpen={showBrandGuidelinesPreview}
+        onClose={() => setShowBrandGuidelinesPreview(false)}
+      />
     </div>
   );
 };
