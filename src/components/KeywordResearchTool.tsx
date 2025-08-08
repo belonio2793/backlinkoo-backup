@@ -461,7 +461,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "FJ", name: "Fiji", flag: "🇫🇯" },
     { code: "FK", name: "Falkland Islands", flag: "🇫🇰" },
     { code: "FM", name: "Micronesia", flag: "🇫🇲" },
-    { code: "FO", name: "Faroe Islands", flag: "🇫🇴" },
+    { code: "FO", name: "Faroe Islands", flag: "🇫���" },
     { code: "FR", name: "France", flag: "🇫🇷" },
     { code: "GA", name: "Gabon", flag: "🇬🇦" },
     { code: "GB", name: "United Kingdom", flag: "🇬🇧" },
@@ -745,6 +745,40 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
 
   return (
     <div className="space-y-8 animate-fade-in">
+      {/* API Configuration Notice */}
+      <Card className="border-2 border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-orange-100">
+              <Globe className="h-5 w-5 text-orange-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-orange-900 mb-1">Keyword Research - Demo Mode</h3>
+              <p className="text-sm text-orange-800 mb-3">
+                You're currently seeing demo data. For real search volumes, competition analysis, and AI insights, configure these API keys in your environment:
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-orange-200">
+                  <span className="font-medium text-orange-900">OPENAI_API_KEY</span>
+                  <span className="text-orange-700">- AI insights</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-orange-200">
+                  <span className="font-medium text-orange-900">SERP_API_KEY</span>
+                  <span className="text-orange-700">- Search results</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-orange-200">
+                  <span className="font-medium text-orange-900">DATAFORSEO_API_*</span>
+                  <span className="text-orange-700">- Search volumes</span>
+                </div>
+              </div>
+              <p className="text-xs text-orange-700 mt-2">
+                💡 Set these in your Netlify environment variables or deployment platform for production use.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Enhanced Search Interface */}
       <Card className="border-0 shadow-sm">
         <CardContent className="p-6">
