@@ -798,7 +798,7 @@ export function HomepageBlogGenerator() {
               </Card>
             )
           ) : (
-            // Success state - Minimalistic design
+            // Success state - Minimalistic design with enhanced triggers
             <MinimalisticSuccessSection
               publishedUrl={publishedUrl}
               generatedPost={generatedPost}
@@ -806,6 +806,36 @@ export function HomepageBlogGenerator() {
               targetUrl={targetUrl}
               currentUser={currentUser}
               onCreateAnother={resetForm}
+              onSignUp={() => {
+                // Store current context for post-signup redirect
+                localStorage.setItem('post_signup_context', JSON.stringify({
+                  action: 'claim_generated_post',
+                  postId: generatedPost?.id,
+                  postSlug: generatedPost?.slug,
+                  postTitle: generatedPost?.title,
+                  targetUrl: targetUrl,
+                  publishedUrl: publishedUrl,
+                  timestamp: Date.now()
+                }));
+
+                // Navigate to signup
+                window.location.href = '/signup';
+              }}
+              onLogin={() => {
+                // Store current context for post-login redirect
+                localStorage.setItem('post_login_context', JSON.stringify({
+                  action: 'claim_generated_post',
+                  postId: generatedPost?.id,
+                  postSlug: generatedPost?.slug,
+                  postTitle: generatedPost?.title,
+                  targetUrl: targetUrl,
+                  publishedUrl: publishedUrl,
+                  timestamp: Date.now()
+                }));
+
+                // Navigate to login
+                window.location.href = '/login';
+              }}
             />
           )}
         </div>
