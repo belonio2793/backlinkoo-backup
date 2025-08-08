@@ -70,6 +70,7 @@ export function BeautifulBlogPost() {
   const [isLiked, setIsLiked] = useState(false);
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [showKillerWarning, setShowKillerWarning] = useState(false);
+  const [showSystemExplanation, setShowSystemExplanation] = useState(false);
 
   // Use premium SEO score logic
   const { effectiveScore, isPremiumScore } = usePremiumSEOScore(blogPost);
