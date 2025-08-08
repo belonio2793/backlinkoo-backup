@@ -273,19 +273,14 @@ export default function BacklinkAutomation() {
 
   const pauseCampaign = async (campaignId: string) => {
     try {
-      await fetch('/.netlify/functions/backlink-campaigns', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'pause', campaignId })
-      });
-      
-      setCampaigns(prev => prev.map(c => 
+      // For demo mode, just update local state
+      setCampaigns(prev => prev.map(c =>
         c.id === campaignId ? { ...c, status: 'paused' as const } : c
       ));
-      
+
       toast({
         title: "Campaign Paused",
-        description: "Link building has been paused",
+        description: "Link building has been paused (Demo Mode)",
       });
     } catch (error) {
       console.error('Error pausing campaign:', error);
@@ -294,19 +289,14 @@ export default function BacklinkAutomation() {
 
   const resumeCampaign = async (campaignId: string) => {
     try {
-      await fetch('/.netlify/functions/backlink-campaigns', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'resume', campaignId })
-      });
-      
-      setCampaigns(prev => prev.map(c => 
+      // For demo mode, just update local state
+      setCampaigns(prev => prev.map(c =>
         c.id === campaignId ? { ...c, status: 'active' as const } : c
       ));
-      
+
       toast({
         title: "Campaign Resumed",
-        description: "Link building has been resumed",
+        description: "Link building has been resumed (Demo Mode)",
       });
     } catch (error) {
       console.error('Error resuming campaign:', error);
