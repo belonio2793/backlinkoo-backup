@@ -422,8 +422,8 @@ export function AuthFormTabs({
         </form>
       </TabsContent>
 
-      <TabsContent value="signup">
-        <form onSubmit={handleSignup} className={spacingClass}>
+      <TabsContent value="signup" className="space-y-0">
+        <div className={isCompact ? "space-y-3" : "space-y-4"}>
           <div className="space-y-2">
             <Label htmlFor="first-name">First Name</Label>
             <Input
@@ -498,6 +498,7 @@ export function AuthFormTabs({
 
           <Button
             type="submit"
+            onClick={handleSignup}
             className={`w-full ${inputHeight}`}
             disabled={!signupEmail || !signupPassword || !confirmPassword || !firstName || isLoading}
           >
@@ -526,7 +527,7 @@ export function AuthFormTabs({
               <CompactTestimonials />
             </div>
           )}
-        </form>
+        </div>
       </TabsContent>
     </Tabs>
   );
