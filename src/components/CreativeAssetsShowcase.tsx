@@ -525,12 +525,33 @@ const CreativeAssetsShowcase: React.FC<{
       description: 'High-end primary brand logo',
       category: 'brand',
       preview: (
-        <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden aspect-square shadow-2xl flex items-center justify-center">
-          <div className="w-40 h-40 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
-            <span className="text-6xl font-black text-gray-900">∞</span>
-          </div>
-          <div className="absolute bottom-6 left-6 right-6 text-center">
-            <h3 className="text-white font-black text-3xl drop-shadow-xl">Backlink</h3>
+        <div className="relative bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 rounded-2xl overflow-hidden aspect-square shadow-2xl">
+          {/* Background elements */}
+          <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/10 via-transparent to-purple-500/10"></div>
+          <div className="absolute top-8 right-8 w-4 h-4 bg-yellow-400 rounded-full animate-ping"></div>
+          <div className="absolute bottom-12 left-12 w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></div>
+
+          {/* Main logo container */}
+          <div className="relative h-full flex flex-col items-center justify-center p-8">
+            {/* Premium logo circle with multiple gradients */}
+            <div className="relative mb-6">
+              <div className="w-48 h-48 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-2xl relative">
+                <div className="absolute inset-2 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full"></div>
+                <div className="relative z-10">
+                  <span className="text-7xl font-black text-gray-900 drop-shadow-lg">∞</span>
+                </div>
+              </div>
+              {/* Glow ring */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 blur-xl opacity-30 scale-110"></div>
+            </div>
+
+            {/* Brand name with premium styling */}
+            <div className="text-center">
+              <h3 className="text-white font-black text-5xl drop-shadow-2xl mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                Backlink ∞
+              </h3>
+              <div className="bg-gradient-to-r from-yellow-400 to-orange-500 h-1 w-32 mx-auto rounded-full"></div>
+            </div>
           </div>
         </div>
       )
