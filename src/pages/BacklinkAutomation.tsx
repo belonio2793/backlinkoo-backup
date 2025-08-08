@@ -303,7 +303,9 @@ export default function BacklinkAutomation() {
     }
   };
 
-  const getLinkTypeIcon = (type: string) => {
+  const getLinkTypeIcon = (type: string | undefined) => {
+    if (!type) return <Link className="h-4 w-4" />;
+
     switch (type) {
       case 'blog_comment': return <MessageSquare className="h-4 w-4" />;
       case 'forum_profile': return <UserPlus className="h-4 w-4" />;
@@ -314,7 +316,8 @@ export default function BacklinkAutomation() {
     }
   };
 
-  const formatLinkType = (type: string) => {
+  const formatLinkType = (type: string | undefined) => {
+    if (!type) return 'Unknown Type';
     return type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
