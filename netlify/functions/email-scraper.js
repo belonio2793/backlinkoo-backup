@@ -123,23 +123,30 @@ function sendSSE(response, data) {
 
 exports.handler = async (event, context) => {
   // Set CORS headers
-  response.setHeader('Access-Control-Allow-Origin', '*');
-  response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  response.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-  
-  if (request.method === 'OPTIONS') {
-    response.status(200).end();
-    return;
+  const headers = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers,
+      body: ''
+    };
   }
-  
-  if (request.method !== 'POST') {
-    return response.status(405).json({ error: 'Method not allowed' });
+
+  if (event.httpMethod !== 'POST') {
+    return {
+      statusCode: 405,
+      headers,
+      body: JSON.stringify({ error: 'Method not allowed' })
+    };
   }
-  
-  // Set up Server-Sent Events
-  response.setHeader('Content-Type', 'text/event-stream');
-  response.setHeader('Cache-Control', 'no-cache');
-  response.setHeader('Connection', 'keep-alive');
+
+  // For streaming responses, we'll return JSON chunks instead of SSE
+  headers['Content-Type'] = 'application/json';
   
   try {
     const { keyword } = JSON.parse(request.body);
