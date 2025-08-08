@@ -30,11 +30,11 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
 
   // Update email and step when initialEmail changes
   useEffect(() => {
-    if (initialEmail && initialEmail !== email) {
-      setEmail(initialEmail);
+    if (effectiveInitialEmail && effectiveInitialEmail !== email) {
+      setEmail(effectiveInitialEmail);
       setStep('signup');
     }
-  }, [initialEmail]);
+  }, [effectiveInitialEmail, modalProps]);
 
   const handleEmailSubmit = () => {
     if (!email || !email.includes('@')) {
