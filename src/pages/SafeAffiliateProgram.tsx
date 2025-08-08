@@ -69,6 +69,7 @@ const SafeAffiliateProgram: React.FC = () => {
   const [selectedEmailTemplate, setSelectedEmailTemplate] = useState('professional');
   const [customMessage, setCustomMessage] = useState('');
   const [trackingTimeRange, setTrackingTimeRange] = useState('7d');
+  const [showBrandGuidelinesPreview, setShowBrandGuidelinesPreview] = useState(false);
   const [socialPage, setSocialPage] = useState(0);
   const [emailPage, setEmailPage] = useState(0);
 
@@ -1122,7 +1123,7 @@ Link in bio: ${referralUrl}
         // Page 7
         {
           type: "Grateful Thursday",
-          content: `🙏 GRATEFUL THURSDAY 🙏\n\nToday I'm grateful for:\n\n✨ Amazing tools like Backlink ∞\n✨ The opportunity to grow online\n✨ This incredible community\n✨ Your support and engagement\n\nWhat are you grateful for?\n\nLink in bio: ${referralUrl}\n\n#GratefulThursday #Blessed`,
+          content: `�� GRATEFUL THURSDAY 🙏\n\nToday I'm grateful for:\n\n✨ Amazing tools like Backlink ∞\n✨ The opportunity to grow online\n✨ This incredible community\n✨ Your support and engagement\n\nWhat are you grateful for?\n\nLink in bio: ${referralUrl}\n\n#GratefulThursday #Blessed`,
           engagement: "High",
           audience: "Grateful hearts"
         },
