@@ -200,9 +200,7 @@ CREATE TABLE IF NOT EXISTS campaign_metrics_timeseries (
     timestamp TIMESTAMPTZ DEFAULT NOW(),
     metrics_type TEXT NOT NULL,
     value DECIMAL(15,4) NOT NULL,
-    metadata JSONB,
-    INDEX(campaign_id, timestamp),
-    INDEX(campaign_id, metrics_type, timestamp)
+    metadata JSONB
 );
 
 -- Alert Rules and Notifications
