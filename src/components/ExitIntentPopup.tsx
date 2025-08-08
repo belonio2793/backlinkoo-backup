@@ -69,7 +69,7 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
           </div>
           
           <CardTitle className="text-xl font-semibold text-gray-900">
-            Don't Lose Your Blog Post!
+            Don't Lose This Content!
           </CardTitle>
         </CardHeader>
 
