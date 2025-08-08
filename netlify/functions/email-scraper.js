@@ -121,7 +121,7 @@ function sendSSE(response, data) {
   response.write(`data: ${JSON.stringify(data)}\n\n`);
 }
 
-export default async function handler(request, response) {
+exports.handler = async (event, context) => {
   // Set CORS headers
   response.setHeader('Access-Control-Allow-Origin', '*');
   response.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
