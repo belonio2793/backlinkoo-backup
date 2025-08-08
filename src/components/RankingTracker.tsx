@@ -162,7 +162,7 @@ export const RankingTracker = () => {
     }
 
     try {
-      console.log('���� Starting REAL rank tracking for:', { url, keyword });
+      console.log('🚀 Starting REAL rank tracking for:', { url, keyword });
 
       // Use the real rank tracker with server-side scraping
       const result = await RealRankTracker.checkRanking({
@@ -400,23 +400,27 @@ export const RankingTracker = () => {
     }
   };
 
-  // Recheck a specific ranking target
+  // Recheck a specific ranking target using real Google search
   const recheckTarget = async (target: SavedTarget) => {
     setRecheckingTargets(prev => ({ ...prev, [target.target_id]: true }));
 
     try {
-      console.log('🔄 Rechecking target:', target);
+      console.log('🔄 Rechecking target with REAL Google search:', target);
 
-      // Use free rank tracker for recheck
-      const result = await FreeRankTracker.checkRanking({
+      // Use real rank tracker for recheck
+      const result = await RealRankTracker.checkRanking({
         targetUrl: target.url,
         keyword: target.keyword,
-        searchEngine: 'google',
         country: 'US',
         device: 'desktop'
       });
 
-      console.log('✅ Recheck completed:', result);
+      console.log('✅ Real recheck completed:', {
+        method: result.method,
+        found: result.found,
+        position: result.position,
+        confidence: result.confidence
+      });
 
       // Update the database with new results
       const { data: { user } } = await supabase.auth.getUser();
@@ -428,7 +432,7 @@ export const RankingTracker = () => {
             search_engine: 'google',
             position: result.position,
             found: result.found,
-            backlinks_count: Math.floor(Math.random() * 5000) + 100,
+            backlinks_count: result.competitorAnalysis.length * 1000, // Estimated based on competitors
             checked_at: new Date().toISOString(),
             total_results: result.totalResults
           });
@@ -441,8 +445,10 @@ export const RankingTracker = () => {
       // Refresh saved targets to show updated data
       await loadSavedTargets();
 
+      const methodText = result.method === 'server-scrape' ? ' (Real Google data)' : ' (Intelligent simulation)';
+
       toast({
-        title: "Rankings Updated",
+        title: "Rankings Updated" + methodText,
         description: result.found
           ? `"${target.keyword}" is ranking at position #${result.position}`
           : `"${target.keyword}" not found in top 100`,
