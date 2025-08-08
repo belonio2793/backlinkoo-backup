@@ -64,13 +64,22 @@ export class RealRankTracker {
         })
       });
 
+      // Read response body once and handle both success/error cases
+      const responseText = await response.text();
+
       if (!response.ok) {
-        const errorData = await response.text();
-        console.error('❌ Server function error:', response.status, errorData);
-        throw new Error(`Server error: ${response.status}`);
+        console.error('❌ Server function error:', response.status, responseText);
+        throw new Error(`Server error: ${response.status} - ${responseText}`);
       }
 
-      const result: RealRankingResult = await response.json();
+      // Parse the successful response
+      let result: RealRankingResult;
+      try {
+        result = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('❌ Failed to parse response JSON:', parseError);
+        throw new Error('Invalid response format from server');
+      }
       const processingTime = Date.now() - startTime;
       
       console.log('✅ Real rank tracking completed:', {
