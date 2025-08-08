@@ -499,8 +499,8 @@ export function AuthFormTabs({
 
           <Button
             type="submit"
-            className={`w-full ${inputHeight} ${isLoading ? 'bg-primary/80' : ''}`}
-            disabled={!signupEmail || !signupPassword || !confirmPassword || !firstName}
+            className={`w-full ${inputHeight} ${isLoading ? 'bg-primary/80' : ''} mt-2`}
+            disabled={!signupEmail || !signupPassword || !confirmPassword || !firstName || isLoading}
           >
             <CheckCircle className="h-4 w-4 mr-2" />
             {showTrialUpgrade ? "Upgrade Trial" : "Create Account"}
