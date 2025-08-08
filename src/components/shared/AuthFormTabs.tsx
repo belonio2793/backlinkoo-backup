@@ -20,6 +20,7 @@ interface AuthFormTabsProps {
   onForgotPassword?: () => void;
   className?: string;
   defaultTab?: "login" | "signup";
+  onTabChange?: (tab: "login" | "signup") => void;
 }
 
 export function AuthFormTabs({
@@ -29,7 +30,8 @@ export function AuthFormTabs({
   isCompact = false,
   onForgotPassword,
   className = "",
-  defaultTab
+  defaultTab,
+  onTabChange
 }: AuthFormTabsProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +39,12 @@ export function AuthFormTabs({
   const [activeTab, setActiveTab] = useState<"login" | "signup">(
     defaultTab || "login"
   );
+
+  const handleTabChange = (value: string) => {
+    const newTab = value as "login" | "signup";
+    setActiveTab(newTab);
+    onTabChange?.(newTab);
+  };
 
   // Form states
   const [loginEmail, setLoginEmail] = useState("");
@@ -326,7 +334,7 @@ export function AuthFormTabs({
 
   return (
     <div className={`w-full ${className}`}>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
         <TabsList className="grid w-full grid-cols-2 mb-6">
           <TabsTrigger value="login">Sign In</TabsTrigger>
           <TabsTrigger value="signup">
