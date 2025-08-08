@@ -506,7 +506,7 @@ export function BrandGuidelinesPreviewModal({ isOpen, onClose }: BrandGuidelines
                   📘 Brand Guidelines Preview
                 </DialogTitle>
                 <p className="text-purple-100 mt-1">
-                  {pages[currentPage].title} - Page {currentPage + 1} of {pages.length}
+                  {currentPageData.title} - Page {currentPage + 1} of {pages.length}
                 </p>
               </div>
               <div className="flex items-center gap-3">
