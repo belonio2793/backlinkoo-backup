@@ -145,11 +145,11 @@ export const RankingTracker = () => {
   // Free ranking check using direct Google search
   const performEnhancedRankingCheck = async (url: string, keyword: string) => {
     const progressMessages = [
-      '🔍 Searching Google for your keyword...',
-      '📄 Parsing search results...',
-      '🎯 Looking for your website...',
-      '📊 Analyzing competition...',
-      '✨ Finalizing results...'
+      '🧠 Analyzing keyword characteristics...',
+      '🏆 Identifying realistic competitors...',
+      '🎯 Estimating your website position...',
+      '📊 Calculating competition metrics...',
+      '✨ Generating intelligent results...'
     ];
 
     // Show progress messages
@@ -542,7 +542,7 @@ export const RankingTracker = () => {
                 disabled={isChecking || !url.trim() || !keyword.trim()}
                 className="min-w-[180px] h-11 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
               >
-{isChecking ? "Analyzing..." : "🧠 Simulate Ranking"}
+{isChecking ? "Analyzing..." : "���� Simulate Ranking"}
                 <Search className="h-4 w-4 ml-2" />
               </Button>
               
