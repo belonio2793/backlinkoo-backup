@@ -171,7 +171,7 @@ export const RankingTracker = () => {
         device: 'desktop'
       });
 
-      console.log('✅ Free rank tracking completed:', result);
+      console.log('�� Free rank tracking completed:', result);
 
       // Convert to expected format
       const results = {
@@ -505,7 +505,7 @@ export const RankingTracker = () => {
                 disabled={isChecking || !url.trim() || !keyword.trim()}
                 className="min-w-[180px] h-11 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
               >
-                {isChecking ? "Analyzing Rankings..." : "Check Rankings"}
+{isChecking ? "Scanning Google..." : "🚀 Free Rank Check"}
                 <Search className="h-4 w-4 ml-2" />
               </Button>
               
