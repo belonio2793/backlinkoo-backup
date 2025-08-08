@@ -1,0 +1,51 @@
+{
+  "brandColors": {
+    "primary": {
+      "name": "Backlink Blue",
+      "hex": "#2563eb",
+      "rgb": "rgb(37, 99, 235)",
+      "hsl": "hsl(217, 91%, 53%)",
+      "usage": "Primary brand color, CTAs, links"
+    },
+    "secondary": {
+      "name": "Innovation Purple", 
+      "hex": "#7c3aed",
+      "rgb": "rgb(124, 58, 237)",
+      "hsl": "hsl(258, 90%, 58%)",
+      "usage": "Secondary elements, gradients"
+    },
+    "accent": {
+      "name": "Energy Orange",
+      "hex": "#f97316", 
+      "rgb": "rgb(249, 115, 22)",
+      "hsl": "hsl(24, 95%, 53%)",
+      "usage": "Highlights, success states, badges"
+    },
+    "neutral": {
+      "gray900": "#0f172a",
+      "gray600": "#475569", 
+      "gray300": "#cbd5e1",
+      "gray100": "#f1f5f9",
+      "white": "#ffffff"
+    },
+    "success": "#10b981",
+    "warning": "#f59e0b", 
+    "error": "#ef4444"
+  },
+  "gradients": {
+    "primary": "linear-gradient(90deg, #2563eb 0%, #7c3aed 50%, #f97316 100%)",
+    "subtle": "linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%)"
+  },
+  "brandGuidelines": {
+    "doUse": [
+      "Use the primary color for main CTAs and navigation",
+      "Maintain contrast ratios above 4.5:1 for accessibility",
+      "Use the gradient for hero sections and highlights"
+    ],
+    "dontUse": [
+      "Don't use colors outside the defined palette",
+      "Don't use the logo on busy backgrounds without proper contrast",
+      "Don't modify the gradient proportions"
+    ]
+  }
+}
