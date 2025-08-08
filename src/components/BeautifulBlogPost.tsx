@@ -1121,6 +1121,183 @@ export function BeautifulBlogPost() {
         />
       )}
 
+      {/* Beautiful System Explanation Modal */}
+      {showSystemExplanation && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-white/20 p-2 rounded-lg">
+                    <Shield className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">How Our Content System Works</h2>
+                    <p className="text-blue-100 mt-1">Understanding content ownership and preservation</p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => setShowSystemExplanation(false)}
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:bg-white/20 rounded-full"
+                >
+                  <XCircle className="h-6 w-6" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-8">
+              {/* Step-by-step explanation */}
+              <div className="grid md:grid-cols-3 gap-6">
+                {/* Step 1 */}
+                <div className="text-center space-y-4">
+                  <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
+                    <Sparkles className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Content Created</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    AI generates high-quality blog content that's immediately available for viewing and sharing.
+                  </p>
+                </div>
+
+                {/* Step 2 */}
+                <div className="text-center space-y-4">
+                  <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
+                    <Timer className="h-8 w-8 text-orange-600" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Grace Period</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Content is available for a limited time, giving users the opportunity to claim valuable pieces.
+                  </p>
+                </div>
+
+                {/* Step 3 */}
+                <div className="text-center space-y-4">
+                  <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
+                    <Crown className="h-8 w-8 text-green-600" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Ownership</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Claiming gives you permanent ownership, full editorial control, and protection from deletion.
+                  </p>
+                </div>
+              </div>
+
+              {/* Benefits section */}
+              <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl p-6">
+                <h3 className="font-semibold text-xl mb-4 text-center">Why This System Works</h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium">Quality Content</h4>
+                        <p className="text-sm text-gray-600">AI creates professional, engaging content that meets high standards.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium">Fair Distribution</h4>
+                        <p className="text-sm text-gray-600">Time limits ensure content doesn't sit unused while giving fair access.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium">Full Control</h4>
+                        <p className="text-sm text-gray-600">Once claimed, you own it completely - edit, customize, and use as needed.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <h4 className="font-medium">Resource Efficiency</h4>
+                        <p className="text-sm text-gray-600">Automatic cleanup prevents database bloat while preserving valuable content.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* What happens when you claim */}
+              <div className="border border-blue-200 rounded-xl p-6 bg-blue-50/50">
+                <h3 className="font-semibold text-xl mb-4 flex items-center gap-2">
+                  <Crown className="h-6 w-6 text-blue-600" />
+                  What Happens When You Claim
+                </h3>
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span>Content becomes permanently yours - no more expiration timer</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span>Gain full editorial access to modify, update, and customize</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span>Protected from deletion by other users</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span>Access to advanced SEO and analytics features</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                    <span>Ability to unclaim and release back to the community if desired</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Call to action */}
+              <div className="text-center space-y-4">
+                <p className="text-gray-600">
+                  Ready to claim this content and make it yours?
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  {user ? (
+                    <Button
+                      onClick={() => {
+                        setShowSystemExplanation(false);
+                        setShowClaimModal(true);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                    >
+                      <Crown className="mr-2 h-4 w-4" />
+                      Claim This Content
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => {
+                        setShowSystemExplanation(false);
+                        setShowClaimModal(true);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                    >
+                      <Crown className="mr-2 h-4 w-4" />
+                      Sign In to Claim
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => setShowSystemExplanation(false)}
+                    variant="outline"
+                    className="border-slate-300 text-slate-700 hover:bg-slate-50 font-medium"
+                  >
+                    Continue Reading
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <Footer />
       </div>
     </TooltipProvider>
