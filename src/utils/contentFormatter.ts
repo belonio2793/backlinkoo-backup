@@ -770,9 +770,10 @@ export class ContentFormatter {
       .replace(/&lt;strong\s+class="font-bold\s+text-inherit"&gt;([^<]+)&lt;\/strong&gt;/gi, '<strong class="font-bold text-inherit">$1</strong>')
       .replace(/&lt;strong([^&>]*)&gt;([^<]+)&lt;\/strong&gt;/gi, '<strong$1>$2</strong>')
 
-      // Ensure all strong tags have proper classes for bold styling
-      .replace(/<strong([^>]*)>/gi, (match, attrs) => {
-        // If it already has classes, don't override, otherwise add font-bold
+      // Ensure all strong tags have proper classes for bold styling (safer approach)
+      .replace(/<strong>/gi, '<strong class="font-bold text-inherit">')
+      .replace(/<strong(\s+[^>]*?)>/gi, (match, attrs) => {
+        // If it already has classes, don't override
         if (attrs.includes('class=')) {
           return match;
         }
