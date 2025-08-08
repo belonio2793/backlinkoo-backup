@@ -286,33 +286,67 @@ export default function BacklinkAutomation() {
 
   const pauseCampaign = async (campaignId: string) => {
     try {
-      // For demo mode, just update local state
-      setCampaigns(prev => prev.map(c =>
-        c.id === campaignId ? { ...c, status: 'paused' as const } : c
-      ));
-
-      toast({
-        title: "Campaign Paused",
-        description: "Link building has been paused (Demo Mode)",
+      const response = await fetch('/.netlify/functions/backlink-campaigns', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+        },
+        body: JSON.stringify({ action: 'pause', campaignId })
       });
+
+      if (response.ok) {
+        setCampaigns(prev => prev.map(c =>
+          c.id === campaignId ? { ...c, status: 'paused' as const } : c
+        ));
+
+        toast({
+          title: "Campaign Paused",
+          description: "Link building has been paused",
+        });
+      } else {
+        throw new Error(`Failed to pause campaign: ${response.status}`);
+      }
     } catch (error) {
       console.error('Error pausing campaign:', error);
+      toast({
+        title: "Error",
+        description: "Failed to pause campaign. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
   const resumeCampaign = async (campaignId: string) => {
     try {
-      // For demo mode, just update local state
-      setCampaigns(prev => prev.map(c =>
-        c.id === campaignId ? { ...c, status: 'active' as const } : c
-      ));
-
-      toast({
-        title: "Campaign Resumed",
-        description: "Link building has been resumed (Demo Mode)",
+      const response = await fetch('/.netlify/functions/backlink-campaigns', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('supabase.auth.token')}`
+        },
+        body: JSON.stringify({ action: 'resume', campaignId })
       });
+
+      if (response.ok) {
+        setCampaigns(prev => prev.map(c =>
+          c.id === campaignId ? { ...c, status: 'active' as const } : c
+        ));
+
+        toast({
+          title: "Campaign Resumed",
+          description: "Link building has been resumed",
+        });
+      } else {
+        throw new Error(`Failed to resume campaign: ${response.status}`);
+      }
     } catch (error) {
       console.error('Error resuming campaign:', error);
+      toast({
+        title: "Error",
+        description: "Failed to resume campaign. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
