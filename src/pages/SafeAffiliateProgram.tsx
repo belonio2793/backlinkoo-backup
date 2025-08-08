@@ -2116,28 +2116,39 @@ Here's the math: ${referralUrl}`,
                       <span className="font-medium text-gray-900">Complete PDF Guide</span>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">11 pages • High-resolution • Vector graphics</p>
-                    <button
-                      onClick={() => {
-                        // Create a download link for the PDF
-                        const link = document.createElement('a');
-                        link.href = '/brand-guidelines.pdf';
-                        link.download = 'Backlink-Infinity-Brand-Guidelines-v1.0.pdf';
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
 
-                        if (toast) {
-                          toast({
-                            title: "Download Started",
-                            description: "Brand Guidelines PDF is being downloaded",
-                          });
-                        }
-                      }}
-                      className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2"
-                    >
-                      <Download className="h-4 w-4" />
-                      Download PDF (2.4 MB)
-                    </button>
+                    <div className="space-y-2">
+                      <button
+                        onClick={() => setShowBrandGuidelinesPreview(true)}
+                        className="w-full bg-white border-2 border-purple-600 text-purple-600 px-4 py-3 rounded-lg font-semibold hover:bg-purple-50 transition-all duration-200 flex items-center justify-center gap-2"
+                      >
+                        <Eye className="h-4 w-4" />
+                        Preview Guidelines
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          // Create a download link for the PDF
+                          const link = document.createElement('a');
+                          link.href = '/brand-guidelines.pdf';
+                          link.download = 'Backlink-Infinity-Brand-Guidelines-v1.0.pdf';
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+
+                          if (toast) {
+                            toast({
+                              title: "Download Started",
+                              description: "Brand Guidelines PDF is being downloaded",
+                            });
+                          }
+                        }}
+                        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all duration-200 flex items-center justify-center gap-2"
+                      >
+                        <Download className="h-4 w-4" />
+                        Download PDF (2.4 MB)
+                      </button>
+                    </div>
                   </div>
 
                   <div className="p-4 bg-gray-50 rounded-lg border">
