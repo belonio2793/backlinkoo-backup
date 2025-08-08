@@ -43,7 +43,7 @@ import { InlineAuthForm } from "@/components/InlineAuthForm";
 import { TrialConversionBanner } from "@/components/TrialConversionBanner";
 import { QuickTrialUpgrade } from "@/components/QuickTrialUpgrade";
 import { TrialConversionService } from "@/services/trialConversionService";
-import { useAuthModal, usePremiumModal, useWaitlistModal } from "@/contexts/ModalContext";
+import { useAuthModal, usePremiumModal, useWaitlistModal, useModal } from "@/contexts/ModalContext";
 import { WaitlistModal } from "@/components/WaitlistModal";
 
 
