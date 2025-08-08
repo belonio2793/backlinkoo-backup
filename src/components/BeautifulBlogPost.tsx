@@ -134,9 +134,43 @@ export function BeautifulBlogPost() {
   // Client-side cleanup of malformed content after rendering
   useEffect(() => {
     const cleanupMalformedContent = () => {
-      // Fix malformed HTML that might still appear in the DOM
+      // CRITICAL: Fix the exact broken heading pattern we see in DOM
+      // Pattern: <h2>&lt;</h2> followed by <p> strong&gt;Hook Introduction...</p>
 
-      // 1. Fix text nodes that contain "strong&gt;"
+      const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+      headings.forEach(heading => {
+        if (heading.textContent?.trim() === '<' || heading.innerHTML?.includes('&lt;')) {
+          const nextElement = heading.nextElementSibling;
+
+          if (nextElement?.tagName === 'P') {
+            const pContent = nextElement.textContent || '';
+
+            // Check if the paragraph contains the malformed strong pattern
+            if (pContent.includes('strong>') || pContent.includes('strong&gt;')) {
+              // Extract the actual content
+              const content = pContent
+                .replace(/^\s*strong&gt;/, '')
+                .replace(/^\s*strong>/, '')
+                .trim();
+
+              if (content) {
+                // Create a proper heading with the content
+                const newHeading = document.createElement(heading.tagName.toLowerCase());
+                const strongElement = document.createElement('strong');
+                strongElement.className = 'font-bold text-inherit';
+                strongElement.textContent = content;
+                newHeading.appendChild(strongElement);
+
+                // Replace both the malformed heading and paragraph
+                heading.parentNode?.replaceChild(newHeading, heading);
+                nextElement.remove();
+              }
+            }
+          }
+        }
+      });
+
+      // Fix any remaining text nodes with malformed patterns
       const walker = document.createTreeWalker(
         document.body,
         NodeFilter.SHOW_TEXT,
@@ -178,7 +212,7 @@ export function BeautifulBlogPost() {
         }
       });
 
-      // 2. Fix elements that contain "&lt;" as text content
+      // Fix elements that contain encoded content
       const elementsWithEncodedContent = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li');
       elementsWithEncodedContent.forEach(element => {
         if (element.textContent?.includes('&lt;') || element.textContent?.includes('&gt;')) {
@@ -191,7 +225,7 @@ export function BeautifulBlogPost() {
         }
       });
 
-      // 3. Clean up corrupted style attributes
+      // Clean up corrupted style attributes
       const elementsWithStyle = document.querySelectorAll('[style*="&lt;"]');
       elementsWithStyle.forEach(element => {
         if (element instanceof HTMLElement) {
