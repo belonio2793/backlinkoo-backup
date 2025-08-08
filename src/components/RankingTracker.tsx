@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { TrendingUp, Search, CheckCircle, XCircle, Clock, Trash2, AlertTriangle, Link, Eye, Plus, Save, ExternalLink, Target } from "lucide-react";
+import { TrendingUp, Search, CheckCircle, XCircle, Clock, Trash2, AlertTriangle, Link, Eye, Plus, Save, ExternalLink, Target, Zap, Globe } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { FreeRankTracker } from "@/services/freeRankTracker";
 
 interface RankingResult {
   keyword: string;
