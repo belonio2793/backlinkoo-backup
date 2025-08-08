@@ -39,16 +39,42 @@ export interface RankTrackingParams {
 }
 
 export class RealRankTracker {
-  
+  private static activeRequests = new Map<string, Promise<RealRankingResult>>();
+
   /**
    * Check real Google rankings using server-side scraping
    */
   static async checkRanking(params: RankTrackingParams): Promise<RealRankingResult> {
     const startTime = Date.now();
-    
+
+    // Create a unique key for request deduplication
+    const requestKey = `${params.targetUrl}-${params.keyword}-${params.country || 'US'}`;
+
+    // If there's already an active request for this exact same parameters, return that promise
+    if (this.activeRequests.has(requestKey)) {
+      console.log('🔄 Reusing active request for:', requestKey);
+      return this.activeRequests.get(requestKey)!;
+    }
+
+    // Create new request promise
+    const requestPromise = this.performRankCheck(params, startTime);
+
+    // Store the promise to prevent duplicate requests
+    this.activeRequests.set(requestKey, requestPromise);
+
+    try {
+      const result = await requestPromise;
+      return result;
+    } finally {
+      // Clean up the active request when done
+      this.activeRequests.delete(requestKey);
+    }
+  }
+
+  private static async performRankCheck(params: RankTrackingParams, startTime: number): Promise<RealRankingResult> {
     try {
       console.log('🚀 Starting REAL rank tracking:', params);
-      
+
       // Call our Netlify function for server-side scraping with timeout
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
@@ -69,6 +95,12 @@ export class RealRankTracker {
       });
 
       clearTimeout(timeoutId);
+
+      // Ensure response is not already consumed
+      if (response.bodyUsed) {
+        console.error('❌ Response body already consumed');
+        throw new Error('Response body stream already read');
+      }
 
       // Read response body once and handle both success/error cases
       const responseText = await response.text();
