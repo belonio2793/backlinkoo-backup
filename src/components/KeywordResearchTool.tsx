@@ -411,7 +411,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "BE", name: "Belgium", flag: "🇧🇪" },
     { code: "BF", name: "Burkina Faso", flag: "🇧🇫" },
     { code: "BG", name: "Bulgaria", flag: "🇧🇬" },
-    { code: "BH", name: "Bahrain", flag: "���🇭" },
+    { code: "BH", name: "Bahrain", flag: "🇧🇭" },
     { code: "BI", name: "Burundi", flag: "🇧🇮" },
     { code: "BJ", name: "Benin", flag: "🇧🇯" },
     { code: "BL", name: "Saint Barthélemy", flag: "🇧🇱" },
@@ -562,7 +562,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "NZ", name: "New Zealand", flag: "🇳🇿" },
     { code: "OM", name: "Oman", flag: "🇴🇲" },
     { code: "PA", name: "Panama", flag: "🇵🇦" },
-    { code: "PE", name: "Peru", flag: "🇵🇪" },
+    { code: "PE", name: "Peru", flag: "����🇪" },
     { code: "PF", name: "French Polynesia", flag: "🇵🇫" },
     { code: "PG", name: "Papua New Guinea", flag: "🇵🇬" },
     { code: "PH", name: "Philippines", flag: "🇵🇭" },
@@ -587,7 +587,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "SD", name: "Sudan", flag: "🇸🇩" },
     { code: "SE", name: "Sweden", flag: "🇸🇪" },
     { code: "SG", name: "Singapore", flag: "🇸🇬" },
-    { code: "SH", name: "Saint Helena", flag: "🇸🇭" },
+    { code: "SH", name: "Saint Helena", flag: "����🇭" },
     { code: "SI", name: "Slovenia", flag: "🇸🇮" },
     { code: "SJ", name: "Svalbard and Jan Mayen", flag: "🇸🇯" },
     { code: "SK", name: "Slovakia", flag: "🇸🇰" },
@@ -746,34 +746,34 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* API Configuration Notice */}
-      <Card className="border-2 border-orange-200 bg-gradient-to-r from-orange-50 to-yellow-50">
+      {/* Free Research Notice */}
+      <Card className="border-2 border-green-200 bg-gradient-to-r from-green-50 to-emerald-50">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-orange-100">
-              <Globe className="h-5 w-5 text-orange-600" />
+            <div className="p-2 rounded-lg bg-green-100">
+              <Zap className="h-5 w-5 text-green-600" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-orange-900 mb-1">Keyword Research - Demo Mode</h3>
-              <p className="text-sm text-orange-800 mb-3">
-                You're currently seeing demo data. For real search volumes, competition analysis, and AI insights, configure these API keys in your environment:
+              <h3 className="font-semibold text-green-900 mb-1">🆓 Free Real-Time Keyword Research</h3>
+              <p className="text-sm text-green-800 mb-3">
+                Get real keyword data without any API keys! Using Google Autocomplete, Trends analysis, and algorithmic estimation for accurate insights.
               </p>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-orange-200">
-                  <span className="font-medium text-orange-900">OPENAI_API_KEY</span>
-                  <span className="text-orange-700">- AI insights</span>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-xs">
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-green-200">
+                  <span className="font-medium text-green-900">📈 Real Search Volume</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-orange-200">
-                  <span className="font-medium text-orange-900">SERP_API_KEY</span>
-                  <span className="text-orange-700">- Search results</span>
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-green-200">
+                  <span className="font-medium text-green-900">🎯 Competition Analysis</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-orange-200">
-                  <span className="font-medium text-orange-900">DATAFORSEO_API_*</span>
-                  <span className="text-orange-700">- Search volumes</span>
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-green-200">
+                  <span className="font-medium text-green-900">🌍 Geographic Data</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-green-200">
+                  <span className="font-medium text-green-900">💡 AI Insights</span>
                 </div>
               </div>
-              <p className="text-xs text-orange-700 mt-2">
-                💡 Set these in your Netlify environment variables or deployment platform for production use.
+              <p className="text-xs text-green-700 mt-2">
+                ✨ No API keys required - all data from free, public sources!
               </p>
             </div>
           </div>
