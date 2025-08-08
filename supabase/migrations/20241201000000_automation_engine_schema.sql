@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS link_opportunities (
 CREATE TABLE IF NOT EXISTS content_requests (
     id TEXT PRIMARY KEY,
     campaign_id TEXT REFERENCES automation_campaigns(id) ON DELETE CASCADE,
-    opportunity_id TEXT REFERENCES link_opportunities(id) ON DELETE CASCADE,
+    opportunity_id UUID REFERENCES link_opportunities(id) ON DELETE CASCADE,
     type TEXT NOT NULL,
     context JSONB NOT NULL,
     requirements JSONB NOT NULL,
