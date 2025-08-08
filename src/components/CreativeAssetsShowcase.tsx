@@ -563,14 +563,39 @@ const CreativeAssetsShowcase: React.FC<{
       description: 'Corporate logo with professional tagline',
       category: 'brand',
       preview: (
-        <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden aspect-video shadow-2xl flex flex-col items-center justify-center p-8">
-          <div className="flex items-center gap-6 mb-4">
-            <div className="w-20 h-20 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-xl">
-              <span className="text-3xl font-black text-gray-900">∞</span>
+        <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 rounded-2xl overflow-hidden aspect-video shadow-2xl">
+          {/* Subtle grid pattern */}
+          <div className="absolute inset-0 opacity-10" style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
+            backgroundSize: '30px 30px'
+          }}></div>
+
+          {/* Main content */}
+          <div className="relative h-full flex items-center justify-center p-12">
+            <div className="text-center">
+              {/* Logo and brand name combination */}
+              <div className="flex items-center justify-center gap-8 mb-6">
+                <div className="w-24 h-24 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-2xl relative">
+                  <span className="text-4xl font-black text-gray-900">∞</span>
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 blur-lg opacity-30 scale-125"></div>
+                </div>
+                <div>
+                  <h3 className="text-white font-black text-6xl drop-shadow-2xl bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent">
+                    Backlink ∞
+                  </h3>
+                  <div className="bg-gradient-to-r from-transparent via-yellow-400 to-transparent h-1 w-full mt-2"></div>
+                </div>
+              </div>
+
+              {/* Professional tagline */}
+              <p className="text-gray-300 text-3xl font-bold mb-4">
+                Enterprise AI Link Building Platform
+              </p>
+              <p className="text-blue-300 text-xl font-medium max-w-2xl mx-auto leading-relaxed">
+                Trusted by 10,000+ SEO professionals worldwide for automated, high-authority backlink acquisition
+              </p>
             </div>
-            <h3 className="text-white font-black text-5xl drop-shadow-xl">Backlink</h3>
           </div>
-          <p className="text-gray-300 text-2xl font-bold text-center">Automated Link Building Platform</p>
         </div>
       )
     },
