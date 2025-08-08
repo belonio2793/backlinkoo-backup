@@ -94,9 +94,9 @@ export const AffiliateAssetLibrary: React.FC<AffiliateAssetLibraryProps> = ({
             type: 'banner',
             category: 'banners',
             dimensions: '728x90',
-            fileUrl: '/api/assets/banner_728x90_blue.png',
-            previewUrl: '/api/assets/preview/banner_728x90_blue.png',
-            description: 'Professional leaderboard banner with high conversion rate',
+            fileUrl: '/assets/banners/affiliate-banner-728x90.svg',
+            previewUrl: '/assets/banners/affiliate-banner-728x90.svg',
+            description: 'Professional leaderboard banner with affiliate messaging and high conversion rate',
             downloadCount: 1247,
             isPopular: true,
             customizable: true
