@@ -25,6 +25,7 @@ import {
   CheckCircle2,
   Timer,
   User,
+  Shield,
   ShieldCheck,
   XCircle,
   Bookmark,
@@ -69,6 +70,7 @@ export function BeautifulBlogPost() {
   const [isLiked, setIsLiked] = useState(false);
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [showKillerWarning, setShowKillerWarning] = useState(false);
+  const [showSystemExplanation, setShowSystemExplanation] = useState(false);
 
   // Use premium SEO score logic
   const { effectiveScore, isPremiumScore } = usePremiumSEOScore(blogPost);
@@ -619,7 +621,53 @@ export function BeautifulBlogPost() {
             
             {/* Article Header */}
             <header className="text-center mb-16 relative">
-              
+
+              {/* Content Preservation Notice - Subtle and Professional */}
+              {!blogPost.claimed && blogPost.expires_at && (
+                <div className="mb-8">
+                  <div className="max-w-2xl mx-auto p-6 bg-gradient-to-r from-slate-50 to-blue-50 border border-slate-200 rounded-xl shadow-sm">
+                    <div className="flex items-center justify-center gap-3 text-slate-700 mb-4">
+                      <Timer className="h-5 w-5 text-slate-500" />
+                      <span className="text-lg font-medium">
+                        Content expires in {getTimeRemaining(blogPost.expires_at)}
+                      </span>
+                    </div>
+                    <p className="text-slate-600 text-center mb-4 leading-relaxed">
+                      This content will be archived when the timer expires. Claim ownership to preserve it permanently and gain full editorial control.
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      {user ? (
+                        <Button
+                          onClick={() => setShowClaimModal(true)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                        >
+                          <Crown className="mr-2 h-4 w-4" />
+                          Claim Ownership
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => setShowClaimModal(true)}
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                        >
+                          <Crown className="mr-2 h-4 w-4" />
+                          Sign In to Claim
+                        </Button>
+                      )}
+
+                      <Button
+                        onClick={() => setShowSystemExplanation(true)}
+                        variant="outline"
+                        className="border-slate-300 text-slate-700 hover:bg-slate-50 font-medium"
+                      >
+                        <Shield className="mr-2 h-4 w-4" />
+                        How it Works
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Status Badges */}
               <div className="flex items-center justify-center gap-3 mb-8">
                 {blogPost.claimed ? (
@@ -701,7 +749,7 @@ export function BeautifulBlogPost() {
                                 <p className="text-sm">
                                   Permanently delete this post. As the owner, you have full permission to remove it at any time.
                                 </p>
-                                <p className="text-xs text-red-400">⚠️ This action cannot be undone</p>
+                                <p className="text-xs text-red-400">⚠��� This action cannot be undone</p>
                               </div>
                             </TooltipContent>
                           </Tooltip>
@@ -916,48 +964,6 @@ export function BeautifulBlogPost() {
               {/* ENHANCED EXPIRATION WARNING WITH KILLER DELETION ALERT */}
               {!blogPost.claimed && blogPost.expires_at && (
                 <div className="space-y-4">
-                  {/* Enhanced Timer Warning */}
-                  <div className="beautiful-warning max-w-2xl mx-auto p-6 shadow-lg border-l-4 border-red-500 bg-gradient-to-r from-red-50 to-orange-50">
-                    <div className="flex items-center justify-center gap-3 text-red-800 mb-4">
-                      <Timer className="h-6 w-6 animate-pulse" />
-                      <span className="text-xl font-bold">
-                        🚨 DELETION IN: {getTimeRemaining(blogPost.expires_at)} 🚨
-                      </span>
-                    </div>
-                    <p className="text-red-700 text-center font-semibold mb-4">
-                      This post will be <span className="text-red-900 font-black">PERMANENTLY DELETED</span> when the timer expires.
-                      <span className="text-red-900 font-black">NO RECOVERY POSSIBLE!</span>
-                    </p>
-
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                      <Button
-                        onClick={() => setShowKillerWarning(true)}
-                        className="bg-red-600 hover:bg-red-700 text-white font-bold animate-pulse"
-                      >
-                        <AlertTriangle className="mr-2 h-4 w-4" />
-                        🚨 SAVE FROM DELETION!
-                      </Button>
-
-                      {user ? (
-                        <Button
-                          onClick={() => setShowClaimModal(true)}
-                          className="bg-green-600 hover:bg-green-700 text-white font-bold"
-                        >
-                          <Crown className="mr-2 h-4 w-4" />
-                          Claim Now (Logged In)
-                        </Button>
-                      ) : (
-                        <Button
-                          onClick={() => setShowClaimModal(true)}
-                          variant="outline"
-                          className="border-blue-500 text-blue-600 hover:bg-blue-50 font-bold"
-                        >
-                          <Crown className="mr-2 h-4 w-4" />
-                          Login to Claim
-                        </Button>
-                      )}
-                    </div>
-                  </div>
 
                   {/* Real-time danger alerts based on time remaining */}
                   {(() => {
@@ -1113,6 +1119,216 @@ export function BeautifulBlogPost() {
           targetUrl={blogPost.target_url || 'your website'}
           onClose={() => setShowKillerWarning(false)}
         />
+      )}
+
+      {/* Beautiful System Explanation Modal */}
+      {showSystemExplanation && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="bg-white/20 p-2 rounded-lg">
+                    <Shield className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <h2 className="text-2xl font-bold">How Our Content System Works</h2>
+                    <p className="text-blue-100 mt-1">Understanding content ownership and preservation</p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => setShowSystemExplanation(false)}
+                  variant="ghost"
+                  size="icon"
+                  className="text-white hover:bg-white/20 rounded-full"
+                >
+                  <XCircle className="h-6 w-6" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 space-y-8">
+              {/* Step-by-step explanation */}
+              <div className="grid md:grid-cols-3 gap-6">
+                {/* Step 1 */}
+                <div className="text-center space-y-4">
+                  <div className="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
+                    <Sparkles className="h-8 w-8 text-blue-600" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Content Created</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    AI generates high-quality blog content that's immediately available for viewing and sharing.
+                  </p>
+                </div>
+
+                {/* Step 2 */}
+                <div className="text-center space-y-4">
+                  <div className="bg-orange-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
+                    <Timer className="h-8 w-8 text-orange-600" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Grace Period</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Content is available for a limited time, giving users the opportunity to claim valuable pieces.
+                  </p>
+                </div>
+
+                {/* Step 3 */}
+                <div className="text-center space-y-4">
+                  <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto">
+                    <Crown className="h-8 w-8 text-green-600" />
+                  </div>
+                  <h3 className="font-semibold text-lg">Ownership</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    Claiming gives you permanent ownership, full editorial control, and protection from deletion.
+                  </p>
+                </div>
+              </div>
+
+              {/* Benefits section */}
+              <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl p-6">
+                <h3 className="font-semibold text-xl mb-6 text-center">Why This System Works</h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-4 group hover:bg-white/50 p-3 rounded-lg transition-colors">
+                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center">
+                        <Sparkles className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">Quality Content</h4>
+                        <p className="text-sm text-gray-600 leading-relaxed">AI creates professional, engaging content that meets high standards.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4 group hover:bg-white/50 p-3 rounded-lg transition-colors">
+                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center">
+                        <Globe className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">Fair Distribution</h4>
+                        <p className="text-sm text-gray-600 leading-relaxed">Time limits ensure content doesn't sit unused while giving fair access.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-4 group hover:bg-white/50 p-3 rounded-lg transition-colors">
+                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
+                        <Crown className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">Full Control</h4>
+                        <p className="text-sm text-gray-600 leading-relaxed">Once claimed, you own it completely - edit, customize, and use as needed.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4 group hover:bg-white/50 p-3 rounded-lg transition-colors">
+                      <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center">
+                        <Zap className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 mb-1">Resource Efficiency</h4>
+                        <p className="text-sm text-gray-600 leading-relaxed">Automatic cleanup prevents database bloat while preserving valuable content.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* What happens when you claim */}
+              <div className="border border-blue-200 rounded-xl p-6 bg-blue-50/50">
+                <h3 className="font-semibold text-xl mb-6 flex items-center gap-2">
+                  <Crown className="h-6 w-6 text-blue-600" />
+                  What Happens When You Claim
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4 group hover:bg-white/60 p-3 rounded-lg transition-colors">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mt-0.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900 block">Permanent Ownership</span>
+                      <span className="text-sm text-gray-600">Content becomes permanently yours - no more expiration timer</span>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4 group hover:bg-white/60 p-3 rounded-lg transition-colors">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mt-0.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900 block">Full Editorial Control</span>
+                      <span className="text-sm text-gray-600">Gain complete access to modify, update, and customize content</span>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4 group hover:bg-white/60 p-3 rounded-lg transition-colors">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mt-0.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900 block">Deletion Protection</span>
+                      <span className="text-sm text-gray-600">Protected from deletion by other users</span>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4 group hover:bg-white/60 p-3 rounded-lg transition-colors">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center mt-0.5">
+                      <TrendingUp className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900 block">Advanced Features</span>
+                      <span className="text-sm text-gray-600">Access to premium SEO tools and detailed analytics</span>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4 group hover:bg-white/60 p-3 rounded-lg transition-colors">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center mt-0.5">
+                      <XCircle className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900 block">Flexible Release</span>
+                      <span className="text-sm text-gray-600">Option to unclaim and release back to the community when desired</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Call to action */}
+              <div className="text-center space-y-4">
+                <p className="text-gray-600">
+                  Ready to claim this content and make it yours?
+                </p>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  {user ? (
+                    <Button
+                      onClick={() => {
+                        setShowSystemExplanation(false);
+                        setShowClaimModal(true);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                    >
+                      <Crown className="mr-2 h-4 w-4" />
+                      Claim This Content
+                    </Button>
+                  ) : (
+                    <Button
+                      onClick={() => {
+                        setShowSystemExplanation(false);
+                        setShowClaimModal(true);
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-medium"
+                    >
+                      <Crown className="mr-2 h-4 w-4" />
+                      Sign In to Claim
+                    </Button>
+                  )}
+                  <Button
+                    onClick={() => setShowSystemExplanation(false)}
+                    variant="outline"
+                    className="border-slate-300 text-slate-700 hover:bg-slate-50 font-medium"
+                  >
+                    Continue Reading
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       <Footer />
