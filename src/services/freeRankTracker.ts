@@ -63,14 +63,21 @@ export class FreeRankTracker {
       
       console.log('🎯 Target domain:', targetDomain);
       
-      // Perform the search and get results
+      // Perform the search and get results (or intelligent simulation)
       const searchResults = await this.performGoogleSearch(keyword, country, language, device, location);
-      
+
       // Find the target website in results
       const rankingInfo = this.findTargetInResults(searchResults.results, normalizedUrl, targetDomain);
-      
+
       // Generate competitor analysis
       const competitorAnalysis = this.analyzeCompetitors(searchResults.results, targetDomain);
+
+      console.log('🎯 Ranking analysis completed:', {
+        found: rankingInfo.found,
+        position: rankingInfo.position,
+        totalResults: searchResults.totalResults,
+        competitors: competitorAnalysis.length
+      });
       
       return {
         keyword,
