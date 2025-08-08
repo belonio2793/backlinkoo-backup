@@ -149,106 +149,96 @@ exports.handler = async (event, context) => {
   headers['Content-Type'] = 'application/json';
   
   try {
-    const { keyword } = JSON.parse(request.body);
-    
+    const { keyword } = JSON.parse(event.body);
+
     if (!keyword || typeof keyword !== 'string') {
-      sendSSE(response, { type: 'error', message: 'Valid keyword is required' });
-      response.end();
-      return;
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Valid keyword is required' })
+      };
     }
-    
+
     const trimmedKeyword = keyword.trim();
     if (trimmedKeyword.length < 2) {
-      sendSSE(response, { type: 'error', message: 'Keyword must be at least 2 characters long' });
-      response.end();
-      return;
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Keyword must be at least 2 characters long' })
+      };
     }
-    
-    // Start scraping process
-    sendSSE(response, { type: 'progress', progress: 0, message: 'Starting email scraping...' });
-    
+
     // Step 1: Search for URLs
-    sendSSE(response, { type: 'progress', progress: 10, message: 'Searching for relevant websites...' });
     const urls = await searchUrls(trimmedKeyword, 3);
-    
+
     if (urls.length === 0) {
-      sendSSE(response, { type: 'error', message: 'No websites found for the given keyword' });
-      response.end();
-      return;
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({
+          success: true,
+          message: 'No websites found for the given keyword',
+          emails: [],
+          totalPages: 0
+        })
+      };
     }
-    
-    sendSSE(response, { 
-      type: 'progress', 
-      progress: 20, 
-      message: `Found ${urls.length} websites to scrape`,
-      totalPages: urls.length
-    });
-    
+
     // Step 2: Scrape emails from each URL
     const allEmails = new Map(); // Use Map to avoid duplicates
-    let completedPages = 0;
-    
+
     // Process URLs in batches to avoid overwhelming the target servers
     const batchSize = 3;
     for (let i = 0; i < urls.length; i += batchSize) {
       const batch = urls.slice(i, i + batchSize);
-      
+
       const batchPromises = batch.map(async (url) => {
         const emails = await scrapePageEmails(url);
-        completedPages++;
-        
-        const progressPercent = 20 + (completedPages / urls.length) * 70;
-        sendSSE(response, { 
-          type: 'progress', 
-          progress: progressPercent,
-          currentPage: completedPages,
-          totalPages: urls.length,
-          message: `Scraped ${url}` 
-        });
-        
-        // Send each found email immediately
+
+        // Collect unique emails
         emails.forEach(emailData => {
           const emailKey = emailData.email;
           if (!allEmails.has(emailKey)) {
             allEmails.set(emailKey, emailData);
-            sendSSE(response, { 
-              type: 'email', 
-              email: emailData.email,
-              domain: emailData.domain,
-              source: emailData.source
-            });
           }
         });
-        
+
         return emails;
       });
-      
+
       await Promise.allSettled(batchPromises);
-      
+
       // Add delay between batches to be respectful
       if (i + batchSize < urls.length) {
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
     }
-    
-    // Step 3: Complete
-    const totalEmails = allEmails.size;
-    sendSSE(response, { 
-      type: 'complete', 
-      progress: 100,
-      totalEmails,
-      totalPages: urls.length,
-      message: `Scraping complete! Found ${totalEmails} unique emails from ${urls.length} websites.`
-    });
-    
+
+    // Step 3: Return results
+    const emailArray = Array.from(allEmails.values());
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        success: true,
+        keyword: trimmedKeyword,
+        totalEmails: emailArray.length,
+        totalPages: urls.length,
+        emails: emailArray,
+        message: `Scraping complete! Found ${emailArray.length} unique emails from ${urls.length} websites.`
+      })
+    };
+
   } catch (error) {
     console.error('Error in email scraper:', error);
-    sendSSE(response, { 
-      type: 'error', 
-      message: error.message || 'An unexpected error occurred during scraping'
-    });
-  } finally {
-    response.end();
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({
+        error: error.message || 'An unexpected error occurred during scraping'
+      })
+    };
   }
 }
 
