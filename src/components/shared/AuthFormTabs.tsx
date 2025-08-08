@@ -56,20 +56,10 @@ export function AuthFormTabs({
 
   const { toast } = useToast();
 
-
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLoading) return;
 
-    console.log('🔐 Login attempt with:', {
-      email: loginEmail,
-      hasPassword: !!loginPassword,
-      emailLength: loginEmail.length,
-      passwordLength: loginPassword.length
-    });
-
-    // Trim whitespace from inputs
     const trimmedEmail = loginEmail.trim();
     const trimmedPassword = loginPassword.trim();
 
@@ -84,61 +74,47 @@ export function AuthFormTabs({
 
     if (!validateEmail(trimmedEmail)) {
       toast({
-        title: "Invalid email format",
+        title: "Invalid email",
         description: "Please enter a valid email address.",
         variant: "destructive",
       });
       return;
     }
 
-    if (trimmedPassword.length < 6) {
-      toast({
-        title: "Password too short",
-        description: "Password must be at least 6 characters long.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    // Close modal immediately when sign in is clicked
-    onSignInStart?.();
-
     setIsLoading(true);
-    setLoadingMessage('Authenticating...');
-    const currentEmail = trimmedEmail;
-    const currentPassword = trimmedPassword;
+    setLoadingMessage("Signing you in...");
 
     try {
-      const result = await AuthService.signIn({
-        email: currentEmail,
-        password: currentPassword,
-      });
+      const result = await AuthService.signIn(trimmedEmail, trimmedPassword);
 
-      if (result.success) {
+      if (result.success && result.user) {
         toast({
           title: "Welcome back!",
-          description: `Signing in as ${currentEmail}`,
+          description: "You've been signed in successfully.",
         });
+
+        // Clear form
+        setLoginEmail("");
+        setLoginPassword("");
+
         onAuthSuccess?.(result.user);
       } else {
-        // Use the formatted error message from AuthService
         toast({
           title: "Sign in failed",
-          description: result.error || "Please check your credentials and try again.",
+          description: result.error || "Invalid email or password.",
           variant: "destructive",
         });
       }
-    } catch (error: any) {
-      // This should rarely happen since AuthService handles most errors
-      console.error('🚨 Unexpected login error:', error);
+    } catch (error) {
+      console.error('Login error:', error);
       toast({
-        title: "Connection error",
-        description: "Unable to connect to authentication service. Please check your internet connection and try again.",
+        title: "Sign in failed",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
-      setLoadingMessage('');
+      setLoadingMessage("");
     }
   };
 
@@ -146,157 +122,78 @@ export function AuthFormTabs({
     e.preventDefault();
     if (isLoading) return;
 
-    // Validate all fields
-    const emailValidation = validateEmail(signupEmail);
-    const passwordValidation = validatePassword(signupPassword);
-    const nameValidation = validateRequired(firstName, "First name");
+    const trimmedEmail = signupEmail.trim();
+    const trimmedPassword = signupPassword.trim();
+    const trimmedConfirmPassword = confirmPassword.trim();
+    const trimmedFirstName = firstName.trim();
 
-    if (!emailValidation) {
+    if (!trimmedEmail || !trimmedPassword || !trimmedConfirmPassword || !trimmedFirstName) {
       toast({
-        title: "Invalid email format",
+        title: "Missing information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!validateEmail(trimmedEmail)) {
+      toast({
+        title: "Invalid email",
         description: "Please enter a valid email address.",
         variant: "destructive",
       });
       return;
     }
 
-    if (!passwordValidation.isValid) {
+    if (!validatePassword(trimmedPassword)) {
       toast({
-        title: "Password requirements not met",
-        description: passwordValidation.message,
+        title: "Weak password",
+        description: "Password must be at least 6 characters long.",
         variant: "destructive",
       });
       return;
     }
 
-    if (signupPassword !== confirmPassword) {
+    if (trimmedPassword !== trimmedConfirmPassword) {
       toast({
         title: "Passwords don't match",
-        description: "Please make sure your passwords match.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!nameValidation.isValid) {
-      toast({
-        title: "Required field missing",
-        description: nameValidation.message,
+        description: "Please make sure both passwords are the same.",
         variant: "destructive",
       });
       return;
     }
 
     setIsLoading(true);
-
-    // Show loading notification
-    toast({
-      title: showTrialUpgrade ? "Upgrading your trial..." : "Creating your account...",
-      description: "Please wait while we set up your account.",
-    });
+    setLoadingMessage("Creating your account...");
 
     try {
-      // Use trial conversion service if we're upgrading a trial
-      if (showTrialUpgrade && TrialConversionService.hasConvertibleTrialPosts()) {
-        const conversionResult = await TrialConversionService.convertTrialToAccount(
-          signupEmail,
-          signupPassword,
-          firstName.trim()
-        );
+      const result = await AuthService.signUp(
+        trimmedEmail,
+        trimmedPassword,
+        trimmedFirstName
+      );
 
-        if (conversionResult.success) {
-          const convertedCount = conversionResult.convertedPosts || 0;
-          toast({
-            title: "Trial upgraded successfully!",
-            description: convertedCount > 0
-              ? `Your account is ready and ${convertedCount} trial post${convertedCount > 1 ? 's have' : ' has'} been converted to permanent.`
-              : "Your account is ready! You can now create permanent backlinks.",
-          });
-
-          // Check for claim intent
-          const claimIntent = localStorage.getItem('claim_intent');
-          if (claimIntent) {
-            try {
-              const intent = JSON.parse(claimIntent);
-              localStorage.removeItem('claim_intent');
-
-              toast({
-                title: "Continuing with your claim...",
-                description: `Processing your request to claim "${intent.postTitle}"`,
-              });
-
-              window.location.href = `/blog/${intent.postSlug}`;
-              return;
-            } catch (error) {
-              console.warn('Failed to parse claim intent:', error);
-              localStorage.removeItem('claim_intent');
-            }
-          }
-
-          onAuthSuccess?.(conversionResult.user);
-        } else {
-          toast({
-            title: "Upgrade failed",
-            description: conversionResult.error || "Failed to upgrade trial account.",
-            variant: "destructive",
-          });
-        }
-      } else {
-        // Use standard AuthService for signup
-        const result = await AuthService.signUp({
-          email: signupEmail.trim(),
-          password: signupPassword,
-          firstName: firstName.trim(),
+      if (result.success && result.user) {
+        toast({
+          title: "Account created!",
+          description: "Welcome! Your account has been created successfully.",
         });
 
-        if (result.success) {
-          if (result.requiresEmailVerification) {
-            toast({
-              title: "Account created! Check your email",
-              description: "We've sent you a confirmation link to verify your account. Please check your email and spam folder.",
-            });
-          } else {
-            toast({
-              title: "Account created and verified!",
-              description: "Your account has been created and your email is already verified. You can now sign in.",
-            });
-          }
+        // Clear form
+        setSignupEmail("");
+        setSignupPassword("");
+        setConfirmPassword("");
+        setFirstName("");
 
-          if (result.user?.email_confirmed_at) {
-            // Check for claim intent
-            const claimIntent = localStorage.getItem('claim_intent');
-            if (claimIntent) {
-              try {
-                const intent = JSON.parse(claimIntent);
-                localStorage.removeItem('claim_intent');
+        onAuthSuccess?.(result.user);
+      } else {
+        let errorTitle = "Sign up failed";
+        let errorMessage = result.error || "Unable to create account. Please try again.";
 
-                toast({
-                  title: "Continuing with your claim...",
-                  description: `Processing your request to claim "${intent.postTitle}"`,
-                });
-
-                window.location.href = `/blog/${intent.postSlug}`;
-                return;
-              } catch (error) {
-                console.warn('Failed to parse claim intent:', error);
-                localStorage.removeItem('claim_intent');
-              }
-            }
-
-            onAuthSuccess?.(result.user);
-          } else {
-            // Auto-switch to login tab immediately after successful signup
-            setActiveTab("login");
-            setLoginEmail(signupEmail); // Pre-fill email for easy login
-          }
-
-        } else {
-          let errorTitle = "Sign up failed";
-          let errorMessage = result.error || "An error occurred during sign up.";
-
-          if (result.error?.includes("already registered") || result.error?.includes("already exists")) {
-            errorTitle = "Account already exists";
-            errorMessage = "An account with this email already exists. Please try signing in instead.";
+        if (result.error?.includes("already registered") || result.error?.includes("already exists")) {
+          errorTitle = "Account already exists";
+          errorMessage = "An account with this email already exists. Please sign in instead.";
+          if (setActiveTab) {
             setActiveTab("login");
             setLoginEmail(signupEmail);
           }
@@ -327,201 +224,210 @@ export function AuthFormTabs({
     }
   };
 
-
-
   const inputHeight = isCompact ? "h-9" : "";
   const spacingClass = isCompact ? "space-y-3" : "space-y-4";
 
   return (
-          <div className="space-y-2">
-            <Label htmlFor="login-email">Email</Label>
-            <Input
-              id="login-email"
-              type="email"
-              placeholder="your@email.com"
-              value={loginEmail}
-              onChange={(e) => setLoginEmail(e.target.value)}
-              className={inputHeight}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="login-password">Password</Label>
-            <div className="relative">
+    <div className={className}>
+      <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="login">Sign In</TabsTrigger>
+          <TabsTrigger value="signup">Sign Up</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="login">
+          <form onSubmit={handleLogin} className={spacingClass}>
+            <div className="space-y-2">
+              <Label htmlFor="login-email">Email</Label>
               <Input
-                id="login-password"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
+                id="login-email"
+                type="email"
+                placeholder="your@email.com"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
                 className={inputHeight}
                 required
               />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className={`absolute right-0 top-0 ${isCompact ? 'h-9 w-9' : 'h-full'} px-3 py-2 hover:bg-transparent`}
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
             </div>
-          </div>
 
-          <Button
-            type="submit"
-            className={`w-full ${inputHeight}`}
-            disabled={!loginEmail || !loginPassword || isLoading}
-          >
-            {isLoading ? (
-              <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Shield className="h-4 w-4 mr-2" />
-            )}
-            {isLoading ? (loadingMessage || "Signing In...") : "Sign In"}
-          </Button>
-
-          <div className="flex items-center justify-center gap-1 text-center">
-            {onForgotPassword && (
-              <>
+            <div className="space-y-2">
+              <Label htmlFor="login-password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="login-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  className={inputHeight}
+                  required
+                />
                 <Button
                   type="button"
-                  variant="link"
-                  className="text-sm text-muted-foreground p-0 h-auto"
-                  onClick={onForgotPassword}
+                  variant="ghost"
+                  size="icon"
+                  className={`absolute right-0 top-0 ${isCompact ? 'h-9 w-9' : 'h-full'} px-3 py-2 hover:bg-transparent`}
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  Forgot your password?
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </Button>
-                <span className="text-sm text-muted-foreground">•</span>
-              </>
-            )}
-            <Button
-              type="button"
-              variant="link"
-              className="text-sm text-muted-foreground p-0 h-auto"
-              onClick={() => window.open('/auth-diagnostic', '_blank')}
-            >
-              Having trouble signing in?
-            </Button>
-          </div>
-
-          {/* Testimonial banner for login */}
-          {!isCompact && (
-            <div className="mt-6">
-              <TestimonialBanner />
+              </div>
             </div>
-          )}
-        </form>
-      </TabsContent>
-          <div className="space-y-2">
-            <Label htmlFor="first-name">First Name</Label>
-            <Input
-              id="first-name"
-              type="text"
-              placeholder="John"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className={inputHeight}
-              required
-            />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="signup-email">Email</Label>
-            <Input
-              id="signup-email"
-              type="email"
-              placeholder="your@email.com"
-              value={signupEmail}
-              onChange={(e) => setSignupEmail(e.target.value)}
-              className={inputHeight}
-              required
-            />
-          </div>
+            <Button
+              type="submit"
+              className={`w-full ${inputHeight}`}
+              disabled={!loginEmail || !loginPassword || isLoading}
+            >
+              {isLoading ? (
+                <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Shield className="h-4 w-4 mr-2" />
+              )}
+              {isLoading ? (loadingMessage || "Signing In...") : "Sign In"}
+            </Button>
 
-          <div className="space-y-2">
-            <Label htmlFor="signup-password">Password</Label>
-            <div className="relative">
+            <div className="flex items-center justify-center gap-1 text-center">
+              {onForgotPassword && (
+                <>
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-sm text-muted-foreground p-0 h-auto"
+                    onClick={onForgotPassword}
+                  >
+                    Forgot your password?
+                  </Button>
+                  <span className="text-sm text-muted-foreground">•</span>
+                </>
+              )}
+              <Button
+                type="button"
+                variant="link"
+                className="text-sm text-muted-foreground p-0 h-auto"
+                onClick={() => window.open('/auth-diagnostic', '_blank')}
+              >
+                Having trouble signing in?
+              </Button>
+            </div>
+
+            {!isCompact && (
+              <div className="mt-6">
+                <TestimonialBanner />
+              </div>
+            )}
+          </form>
+        </TabsContent>
+
+        <TabsContent value="signup">
+          <form onSubmit={handleSignup} className={spacingClass}>
+            <div className="space-y-2">
+              <Label htmlFor="first-name">First Name</Label>
               <Input
-                id="signup-password"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                value={signupPassword}
-                onChange={(e) => setSignupPassword(e.target.value)}
+                id="first-name"
+                type="text"
+                placeholder="John"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 className={inputHeight}
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="signup-email">Email</Label>
+              <Input
+                id="signup-email"
+                type="email"
+                placeholder="your@email.com"
+                value={signupEmail}
+                onChange={(e) => setSignupEmail(e.target.value)}
+                className={inputHeight}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="signup-password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="signup-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={signupPassword}
+                  onChange={(e) => setSignupPassword(e.target.value)}
+                  className={inputHeight}
+                  required
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className={`absolute right-0 top-0 ${isCompact ? 'h-9 w-9' : 'h-full'} px-3 py-2 hover:bg-transparent`}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              {!isCompact && (
+                <div className="text-xs text-muted-foreground">
+                  Password must be at least 6 characters long
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                placeholder="••••••••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={inputHeight}
+                required
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className={`w-full ${inputHeight}`}
+              disabled={!signupEmail || !signupPassword || !confirmPassword || !firstName || isLoading}
+            >
+              {isLoading ? (
+                <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <CheckCircle className="h-4 w-4 mr-2" />
+              )}
+              {isLoading ? "Creating Account..." : (showTrialUpgrade ? "Upgrade Trial" : "Create Account")}
+            </Button>
+
+            <div className="flex items-center justify-center gap-1 text-center">
               <Button
                 type="button"
-                variant="ghost"
-                size="icon"
-                className={`absolute right-0 top-0 ${isCompact ? 'h-9 w-9' : 'h-full'} px-3 py-2 hover:bg-transparent`}
-                onClick={() => setShowPassword(!showPassword)}
+                variant="link"
+                className="text-sm text-muted-foreground p-0 h-auto"
+                onClick={() => window.open('/auth-diagnostic', '_blank')}
               >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                Need help signing up?
               </Button>
             </div>
+
             {!isCompact && (
-              <div className="text-xs text-muted-foreground">
-                Password must be at least 6 characters long
+              <div className="mt-6">
+                <CompactTestimonials />
               </div>
             )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirm Password</Label>
-            <Input
-              id="confirm-password"
-              type="password"
-              placeholder="••••••••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className={inputHeight}
-              required
-            />
-          </div>
-
-          <Button
-            type="submit"
-            disabled={!signupEmail || !signupPassword || !confirmPassword || !firstName || isLoading}
-          >
-            {isLoading ? (
-              <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <CheckCircle className="h-4 w-4 mr-2" />
-            )}
-            {isLoading ? "Creating Account..." : (showTrialUpgrade ? "Upgrade Trial" : "Create Account")}
-          </Button>
-
-          <div className="flex items-center justify-center gap-1 text-center">
-            <Button
-              type="button"
-              variant="link"
-              className="text-sm text-muted-foreground p-0 h-auto"
-              onClick={() => window.open('/auth-diagnostic', '_blank')}
-            >
-              Need help signing up?
-            </Button>
-          </div>
-
-          {/* Testimonials for signup tab */}
-          {!isCompact && (
-            <div className="mt-6">
-              <CompactTestimonials />
-            </div>
-          )}
-        </form>
-      </TabsContent>
+          </form>
+        </TabsContent>
       </Tabs>
     </div>
   );
