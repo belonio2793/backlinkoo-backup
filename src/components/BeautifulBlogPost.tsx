@@ -893,8 +893,9 @@ export function BeautifulBlogPost() {
                   dangerouslySetInnerHTML={{
                     __html: ContentFormatter.postProcessCleanup(
                       ContentFormatter.addSectionSpacing(
-                        ContentFormatter.sanitizeContent(
-                          ContentFormatter.formatBlogContent(blogPost.content || '', blogPost.title)
+                        ContentFormatter.formatBlogContent(
+                          ContentFormatter.sanitizeContent(blogPost.content || ''),
+                          blogPost.title
                         )
                       )
                     )
