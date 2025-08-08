@@ -334,8 +334,8 @@ export function AuthFormTabs({
           </TabsTrigger>
         </TabsList>
 
-      <TabsContent value="login">
-        <form onSubmit={handleLogin} className={spacingClass}>
+      <TabsContent value="login" className="mt-0">
+        <form onSubmit={handleLogin} className={`${spacingClass} mt-4`}>
           <div className="space-y-2">
             <Label htmlFor="login-email">Email</Label>
             <Input
