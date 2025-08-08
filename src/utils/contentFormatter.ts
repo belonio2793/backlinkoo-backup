@@ -468,13 +468,15 @@ export class ContentFormatter {
       .replace(/^\s*#{1,6}\s*&lt;[^&>]*&gt;\s*$/gm, '') // Remove headings that are just ## &lt;tag&gt;
       .replace(/^\s*#{1,6}\s*$/gm, '') // Remove empty headings like just ##
 
-      // Fix common HTML issues
+      // Fix common HTML issues - but preserve our generated HTML tags
       .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
+      // Only decode entities that are NOT part of our generated HTML
+      .replace(/&amp;(?![lg]t;)/g, '&') // Only decode &amp; if not followed by lt; or gt;
+      // Carefully decode < and > only when they're not part of valid HTML tags
+      .replace(/&lt;(?![a-zA-Z\/])/g, '<') // Only decode &lt; if not followed by letter or /
+      .replace(/&gt;(?!\s*[a-zA-Z<])/g, '>') // Only decode &gt; if not followed by space+letter or <
 
       // Normalize quotes
       .replace(/[\u2018\u2019]/g, "'")
