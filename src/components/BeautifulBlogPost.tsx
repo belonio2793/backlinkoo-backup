@@ -430,7 +430,7 @@ export function BeautifulBlogPost() {
         if (result.success) {
           setBlogPost(result.post!);
           toast({
-            title: "Success! 🎉",
+            title: "Success! ��",
             description: "You've successfully claimed this post!",
           });
         } else {
@@ -532,7 +532,7 @@ export function BeautifulBlogPost() {
               <Sparkles className="absolute inset-0 m-auto h-6 w-6 text-primary animate-pulse" />
             </div>
             <p className="text-lg font-medium bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Loading beautiful content...
+              Loading...
             </p>
           </div>
         </div>
