@@ -468,7 +468,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "GD", name: "Grenada", flag: "🇬🇩" },
     { code: "GE", name: "Georgia", flag: "🇬🇪" },
     { code: "GF", name: "French Guiana", flag: "🇬🇫" },
-    { code: "GG", name: "Guernsey", flag: "���🇬" },
+    { code: "GG", name: "Guernsey", flag: "🇬🇬" },
     { code: "GH", name: "Ghana", flag: "🇬🇭" },
     { code: "GI", name: "Gibraltar", flag: "🇬🇮" },
     { code: "GL", name: "Greenland", flag: "🇬🇱" },
@@ -614,7 +614,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "TO", name: "Tonga", flag: "🇹🇴" },
     { code: "TR", name: "Turkey", flag: "🇹🇷" },
     { code: "TT", name: "Trinidad and Tobago", flag: "🇹🇹" },
-    { code: "TV", name: "Tuvalu", flag: "🇹����" },
+    { code: "TV", name: "Tuvalu", flag: "🇹🇻" },
     { code: "TW", name: "Taiwan", flag: "🇹🇼" },
     { code: "TZ", name: "Tanzania", flag: "🇹🇿" },
     { code: "UA", name: "Ukraine", flag: "🇺🇦" },
@@ -883,7 +883,10 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Search volume data from multiple reliable SEO data sources
+                  {keywords[0]?.dataSources?.includes('Local_Estimation')
+                    ? 'Demo data for testing - configure API keys for real search volume data'
+                    : 'Search volume data from multiple reliable SEO data sources'
+                  }
                 </p>
               </CardHeader>
               <CardContent>
