@@ -425,6 +425,40 @@ export const RankingTracker = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
+      {/* Free Rank Tracking Notice */}
+      <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-lg bg-blue-100">
+              <Zap className="h-5 w-5 text-blue-600" />
+            </div>
+            <div className="flex-1">
+              <h3 className="font-semibold text-blue-900 mb-1">🚀 Free Real-Time Rank Tracking</h3>
+              <p className="text-sm text-blue-800 mb-3">
+                Direct Google search analysis - no API keys required! Get instant ranking positions by scanning Google search results in real-time.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-xs">
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-blue-200">
+                  <span className="font-medium text-blue-900">🔍 Live Google Search</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-blue-200">
+                  <span className="font-medium text-blue-900">📊 Competition Analysis</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-blue-200">
+                  <span className="font-medium text-blue-900">🌍 Geographic Targeting</span>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-blue-200">
+                  <span className="font-medium text-blue-900">💡 Instant Results</span>
+                </div>
+              </div>
+              <p className="text-xs text-blue-700 mt-2">
+                ✨ Real search results from Google - completely free and accurate!
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Enhanced Results Display */}
       <Tabs defaultValue="recent" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
