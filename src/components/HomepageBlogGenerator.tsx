@@ -11,13 +11,13 @@ import { productionBlogGenerator } from '@/services/productionBlogGenerator';
 import { errorLogger, ErrorSeverity, ErrorCategory } from '@/services/errorLoggingService';
 import BlogGenerationError from './BlogGenerationError';
 import { supabase } from '@/integrations/supabase/client';
-import { SavePostSignupPopup } from './SavePostSignupPopup';
 import { GenerationSequence } from './GenerationSequence';
 import { InteractiveContentGenerator } from './InteractiveContentGenerator';
 import { MultiBlogGenerator } from './MultiBlogGenerator';
 import { ClaimTrialPostDialog } from './ClaimTrialPostDialog';
 import { AdaptiveProgressIndicator } from './AdaptiveProgressIndicator';
 import { MinimalisticSuccessSection } from './MinimalisticSuccessSection';
+import { useSavePostModal, useAuthModal } from '@/contexts/ModalContext';
 import {
   Sparkles,
   Link2,
@@ -36,7 +36,6 @@ import {
   Shield
 } from 'lucide-react';
 import { RotatingText } from './RotatingText';
-import { LoginModal } from './LoginModal';
 
 
 /**
@@ -63,12 +62,14 @@ export function HomepageBlogGenerator() {
   const [blogPostId, setBlogPostId] = useState<string>('');
 
   // UI state
-  const [showSignupPopup, setShowSignupPopup] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const [generationError, setGenerationError] = useState<Error | string | null>(null);
 
   const { toast } = useToast();
   const { currentUser, isCheckingAuth, isLoggedIn, isGuest, authChecked } = useAuthStatus();
+
+  // Unified modal management
+  const { openSavePostModal, hasActiveModal: hasSavePostModal } = useSavePostModal();
+  const { openLoginModal, hasActiveModal: hasAuthModal } = useAuthModal();
 
   // ENTERPRISE DEBUG & MONITORING
   useEffect(() => {
@@ -382,10 +383,15 @@ export function HomepageBlogGenerator() {
         localStorage.setItem('trial_blog_posts', JSON.stringify(trialPosts));
       }
 
-      // Show signup popup for guest users after a delay
-      if (isGuest) {
+      // Show signup popup for guest users after a delay - only if no other modal is active
+      if (isGuest && !hasAuthModal && !hasSavePostModal) {
         setTimeout(() => {
-          setShowSignupPopup(true);
+          openSavePostModal({
+            blogPostId: blogPost?.id,
+            blogPostUrl: publishedUrl || `https://backlinkoo.com/blog/${blogPost?.slug}`,
+            blogPostTitle: blogPost?.title,
+            timeRemaining: 86400 // 24 hours
+          });
         }, 3000); // Show popup after 3 seconds
       }
 
@@ -805,29 +811,7 @@ export function HomepageBlogGenerator() {
         </div>
       </div>
 
-      <SavePostSignupPopup
-        isOpen={showSignupPopup}
-        onClose={() => setShowSignupPopup(false)}
-        blogPostId={blogPostId}
-        blogPostUrl={publishedUrl}
-        blogPostTitle={generatedPost?.title}
-        onSignupSuccess={(user) => {
-          setShowSignupPopup(false);
-          window.location.reload();
-        }}
-        timeRemaining={86400}
-      />
-
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onAuthSuccess={(user) => {
-          setShowLoginModal(false);
-          // Navigate to dashboard after successful auth
-          window.location.href = '/dashboard';
-        }}
-        defaultTab="login"
-      />
+      {/* Modals are now managed by UnifiedModalManager */}
     </div>
   );
 }

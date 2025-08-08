@@ -10,6 +10,8 @@ import { InstantAuthProvider } from "@/components/InstantAuth";
 import { EnhancedErrorBoundary } from "@/components/EnhancedErrorBoundary";
 import { DatabaseHealthLogger } from "@/components/DatabaseHealthLogger";
 import { PremiumPopupProvider } from "@/components/PremiumPopupProvider";
+import { ModalProvider } from "@/contexts/ModalContext";
+import { UnifiedModalManager } from "@/components/UnifiedModalManager";
 import { affiliateService } from "@/services/affiliateService";
 
 // Lightweight initialization for better performance
@@ -53,14 +55,17 @@ const App = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <InstantAuthProvider>
-          <Toaster />
-          <Sonner />
-          <GlobalNotifications />
-          <BrowserRouter>
-            <PremiumPopupProvider>
-              <OptimizedAppWrapper />
-            </PremiumPopupProvider>
-          </BrowserRouter>
+          <ModalProvider>
+            <Toaster />
+            <Sonner />
+            <GlobalNotifications />
+            <BrowserRouter>
+              <PremiumPopupProvider>
+                <OptimizedAppWrapper />
+                <UnifiedModalManager />
+              </PremiumPopupProvider>
+            </BrowserRouter>
+          </ModalProvider>
         </InstantAuthProvider>
       </TooltipProvider>
     </QueryClientProvider>

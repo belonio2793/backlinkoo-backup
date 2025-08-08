@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/services/authService";
-import { AuthFormTabs } from "@/components/shared/AuthFormTabs";
+import { CleanAuthForm } from "@/components/shared/CleanAuthForm";
 import { validateEmail } from "@/utils/authValidation";
 import { Mail, RefreshCw, Infinity } from "lucide-react";
 import { LiveUserActivity } from "./SocialProofElements";
@@ -93,7 +93,6 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
 
   return (
     <Dialog open={isOpen} onOpenChange={resetAndClose}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="text-center">
             <div className="flex items-center justify-center gap-2 mb-4">
@@ -160,7 +159,7 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
             </div>
           </form>
         ) : (
-          <AuthFormTabs
+          <CleanAuthForm
             onAuthSuccess={handleAuthSuccess}
             onSignInStart={onClose}
             onForgotPassword={() => setShowForgotPassword(true)}

@@ -20,18 +20,16 @@ interface AuthFormTabsProps {
   onForgotPassword?: () => void;
   className?: string;
   defaultTab?: "login" | "signup";
-  onTabChange?: (tab: "login" | "signup") => void;
 }
 
-export function AuthFormTabs({
+export function AuthFormTabsFixed({
   onAuthSuccess,
   onSignInStart,
   showTrialUpgrade = false,
   isCompact = false,
   onForgotPassword,
   className = "",
-  defaultTab,
-  onTabChange
+  defaultTab
 }: AuthFormTabsProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -39,12 +37,6 @@ export function AuthFormTabs({
   const [activeTab, setActiveTab] = useState<"login" | "signup">(
     defaultTab || "login"
   );
-
-  const handleTabChange = (value: string) => {
-    const newTab = value as "login" | "signup";
-    setActiveTab(newTab);
-    onTabChange?.(newTab);
-  };
 
   // Form states
   const [loginEmail, setLoginEmail] = useState("");
@@ -55,8 +47,6 @@ export function AuthFormTabs({
   const [firstName, setFirstName] = useState("");
 
   const { toast } = useToast();
-
-
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -327,201 +317,214 @@ export function AuthFormTabs({
     }
   };
 
-
-
   const inputHeight = isCompact ? "h-9" : "";
   const spacingClass = isCompact ? "space-y-3" : "space-y-4";
 
   return (
-          <div className="space-y-2">
-            <Label htmlFor="login-email">Email</Label>
-            <Input
-              id="login-email"
-              type="email"
-              placeholder="your@email.com"
-              value={loginEmail}
-              onChange={(e) => setLoginEmail(e.target.value)}
-              className={inputHeight}
-              required
-            />
-          </div>
+    <div className="w-full transform-none" style={{ transform: 'none' }}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className={`w-full ${className}`}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="login">Sign In</TabsTrigger>
+          <TabsTrigger value="signup">
+            {showTrialUpgrade ? "Upgrade" : "Create Account"}
+          </TabsTrigger>
+        </TabsList>
 
-          <div className="space-y-2">
-            <Label htmlFor="login-password">Password</Label>
-            <div className="relative">
+        <TabsContent value="login" className="transform-none" style={{ transform: 'none' }}>
+          <form onSubmit={handleLogin} className={spacingClass}>
+            <div className="space-y-2">
+              <Label htmlFor="login-email">Email</Label>
               <Input
-                id="login-password"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
+                id="login-email"
+                type="email"
+                placeholder="your@email.com"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
                 className={inputHeight}
                 required
               />
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className={`absolute right-0 top-0 ${isCompact ? 'h-9 w-9' : 'h-full'} px-3 py-2 hover:bg-transparent`}
-                onClick={() => setShowPassword(!showPassword)}
-              >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
-              </Button>
             </div>
-          </div>
 
-          <Button
-            type="submit"
-            className={`w-full ${inputHeight}`}
-            disabled={!loginEmail || !loginPassword || isLoading}
-          >
-            {isLoading ? (
-              <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <Shield className="h-4 w-4 mr-2" />
-            )}
-            {isLoading ? (loadingMessage || "Signing In...") : "Sign In"}
-          </Button>
-
-          <div className="flex items-center justify-center gap-1 text-center">
-            {onForgotPassword && (
-              <>
+            <div className="space-y-2">
+              <Label htmlFor="login-password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="login-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  className={inputHeight}
+                  required
+                />
                 <Button
                   type="button"
-                  variant="link"
-                  className="text-sm text-muted-foreground p-0 h-auto"
-                  onClick={onForgotPassword}
+                  variant="ghost"
+                  size="icon"
+                  className={`absolute right-0 top-0 ${isCompact ? 'h-9 w-9' : 'h-full'} px-3 py-2 hover:bg-transparent`}
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  Forgot your password?
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </Button>
-                <span className="text-sm text-muted-foreground">•</span>
-              </>
-            )}
-            <Button
-              type="button"
-              variant="link"
-              className="text-sm text-muted-foreground p-0 h-auto"
-              onClick={() => window.open('/auth-diagnostic', '_blank')}
-            >
-              Having trouble signing in?
-            </Button>
-          </div>
-
-          {/* Testimonial banner for login */}
-          {!isCompact && (
-            <div className="mt-6">
-              <TestimonialBanner />
+              </div>
             </div>
-          )}
-        </form>
-      </TabsContent>
-          <div className="space-y-2">
-            <Label htmlFor="first-name">First Name</Label>
-            <Input
-              id="first-name"
-              type="text"
-              placeholder="John"
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className={inputHeight}
-              required
-            />
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="signup-email">Email</Label>
-            <Input
-              id="signup-email"
-              type="email"
-              placeholder="your@email.com"
-              value={signupEmail}
-              onChange={(e) => setSignupEmail(e.target.value)}
-              className={inputHeight}
-              required
-            />
-          </div>
+            <Button
+              type="submit"
+              className={`w-full ${inputHeight}`}
+              disabled={!loginEmail || !loginPassword || isLoading}
+            >
+              {isLoading ? (
+                <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Shield className="h-4 w-4 mr-2" />
+              )}
+              {isLoading ? (loadingMessage || "Signing In...") : "Sign In"}
+            </Button>
 
-          <div className="space-y-2">
-            <Label htmlFor="signup-password">Password</Label>
-            <div className="relative">
+            <div className="flex items-center justify-center gap-1 text-center">
+              {onForgotPassword && (
+                <>
+                  <Button
+                    type="button"
+                    variant="link"
+                    className="text-sm text-muted-foreground p-0 h-auto"
+                    onClick={onForgotPassword}
+                  >
+                    Forgot your password?
+                  </Button>
+                  <span className="text-sm text-muted-foreground">•</span>
+                </>
+              )}
+              <Button
+                type="button"
+                variant="link"
+                className="text-sm text-muted-foreground p-0 h-auto"
+                onClick={() => window.open('/auth-diagnostic', '_blank')}
+              >
+                Having trouble signing in?
+              </Button>
+            </div>
+
+            {/* Testimonial banner for login */}
+            {!isCompact && (
+              <div className="mt-6">
+                <TestimonialBanner />
+              </div>
+            )}
+          </form>
+        </TabsContent>
+
+        <TabsContent value="signup" className="transform-none" style={{ transform: 'none' }}>
+          <form onSubmit={handleSignup} className={spacingClass}>
+            <div className="space-y-2">
+              <Label htmlFor="first-name">First Name</Label>
               <Input
-                id="signup-password"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                value={signupPassword}
-                onChange={(e) => setSignupPassword(e.target.value)}
+                id="first-name"
+                type="text"
+                placeholder="John"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
                 className={inputHeight}
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="signup-email">Email</Label>
+              <Input
+                id="signup-email"
+                type="email"
+                placeholder="your@email.com"
+                value={signupEmail}
+                onChange={(e) => setSignupEmail(e.target.value)}
+                className={inputHeight}
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="signup-password">Password</Label>
+              <div className="relative">
+                <Input
+                  id="signup-password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={signupPassword}
+                  onChange={(e) => setSignupPassword(e.target.value)}
+                  className={inputHeight}
+                  required
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className={`absolute right-0 top-0 ${isCompact ? 'h-9 w-9' : 'h-full'} px-3 py-2 hover:bg-transparent`}
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+              {!isCompact && (
+                <div className="text-xs text-muted-foreground">
+                  Password must be at least 6 characters long
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="confirm-password">Confirm Password</Label>
+              <Input
+                id="confirm-password"
+                type="password"
+                placeholder="••••••••••••••"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className={inputHeight}
+                required
+              />
+            </div>
+
+            <Button
+              type="submit"
+              className={`w-full ${inputHeight}`}
+              disabled={!signupEmail || !signupPassword || !confirmPassword || !firstName || isLoading}
+            >
+              {isLoading ? (
+                <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <CheckCircle className="h-4 w-4 mr-2" />
+              )}
+              {isLoading ? "Creating Account..." : (showTrialUpgrade ? "Upgrade Trial" : "Create Account")}
+            </Button>
+
+            <div className="flex items-center justify-center gap-1 text-center">
               <Button
                 type="button"
-                variant="ghost"
-                size="icon"
-                className={`absolute right-0 top-0 ${isCompact ? 'h-9 w-9' : 'h-full'} px-3 py-2 hover:bg-transparent`}
-                onClick={() => setShowPassword(!showPassword)}
+                variant="link"
+                className="text-sm text-muted-foreground p-0 h-auto"
+                onClick={() => window.open('/auth-diagnostic', '_blank')}
               >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                Need help signing up?
               </Button>
             </div>
+
+            {/* Testimonials for signup tab */}
             {!isCompact && (
-              <div className="text-xs text-muted-foreground">
-                Password must be at least 6 characters long
+              <div className="mt-6">
+                <CompactTestimonials />
               </div>
             )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="confirm-password">Confirm Password</Label>
-            <Input
-              id="confirm-password"
-              type="password"
-              placeholder="••••••••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className={inputHeight}
-              required
-            />
-          </div>
-
-          <Button
-            type="submit"
-            disabled={!signupEmail || !signupPassword || !confirmPassword || !firstName || isLoading}
-          >
-            {isLoading ? (
-              <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            ) : (
-              <CheckCircle className="h-4 w-4 mr-2" />
-            )}
-            {isLoading ? "Creating Account..." : (showTrialUpgrade ? "Upgrade Trial" : "Create Account")}
-          </Button>
-
-          <div className="flex items-center justify-center gap-1 text-center">
-            <Button
-              type="button"
-              variant="link"
-              className="text-sm text-muted-foreground p-0 h-auto"
-              onClick={() => window.open('/auth-diagnostic', '_blank')}
-            >
-              Need help signing up?
-            </Button>
-          </div>
-
-          {/* Testimonials for signup tab */}
-          {!isCompact && (
-            <div className="mt-6">
-              <CompactTestimonials />
-            </div>
-          )}
-        </form>
-      </TabsContent>
+          </form>
+        </TabsContent>
       </Tabs>
     </div>
   );

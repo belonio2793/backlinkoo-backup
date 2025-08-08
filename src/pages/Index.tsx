@@ -39,11 +39,11 @@ import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/services/authService";
 
-import { LoginModal } from "@/components/LoginModal";
 import { InlineAuthForm } from "@/components/InlineAuthForm";
 import { TrialConversionBanner } from "@/components/TrialConversionBanner";
 import { QuickTrialUpgrade } from "@/components/QuickTrialUpgrade";
 import { TrialConversionService } from "@/services/trialConversionService";
+import { useAuthModal, usePremiumModal } from "@/contexts/ModalContext";
 
 
 
@@ -57,8 +57,9 @@ const Index = () => {
   const [selectedPlan, setSelectedPlan] = useState<'starter_100' | 'starter_200' | 'starter_300'>('starter_200');
   const [customCredits, setCustomCredits] = useState<number>(0);
   const [isCustomPackage, setIsCustomPackage] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [loginModalTab, setLoginModalTab] = useState<"login" | "signup">("login");
+  // Unified modal management
+  const { openLoginModal, openSignupModal } = useAuthModal();
+  const { openPremiumModal } = usePremiumModal();
 
   const [useProductionGenerator, setUseProductionGenerator] = useState(false);
   const [showTrialUpgrade, setShowTrialUpgrade] = useState(false);
@@ -296,8 +297,7 @@ const Index = () => {
                         className="bg-amber-600 hover:bg-amber-700 text-white"
                       />
                       <Button variant="ghost" onClick={() => {
-                        setLoginModalTab("login");
-                        setShowLoginModal(true);
+                        openLoginModal();
                       }} className="font-medium text-sm px-3 py-1">
                         Sign In
                       </Button>
@@ -306,16 +306,14 @@ const Index = () => {
                     <>
                       <Button variant="ghost" onClick={() => {
                         console.log('Sign In button clicked');
-                        setLoginModalTab("login");
-                        setShowLoginModal(true);
+                        openLoginModal();
                       }} className="font-medium text-sm px-3 py-1">
                         Sign In
                       </Button>
 
                       <Button onClick={() => {
                         console.log('Get Started button clicked');
-                        setLoginModalTab("signup");
-                        setShowLoginModal(true);
+                        openSignupModal();
                       }} className="font-medium text-sm px-3 py-1">
                         Create Account
                       </Button>
@@ -566,8 +564,7 @@ const Index = () => {
                 </li>
               </ul>
               <Button onClick={() => {
-                setLoginModalTab("login");
-                setShowLoginModal(true);
+                openLoginModal();
               }} className="font-medium">
                 Explore Dashboard
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -644,8 +641,7 @@ const Index = () => {
                 </li>
               </ul>
               <Button onClick={() => {
-                setLoginModalTab("login");
-                setShowLoginModal(true);
+                openLoginModal();
               }} className="font-medium">
                 Research Keywords
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -688,8 +684,7 @@ const Index = () => {
                 </li>
               </ul>
               <Button onClick={() => {
-                setLoginModalTab("login");
-                setShowLoginModal(true);
+                openLoginModal();
               }} className="font-medium">
                 Track Rankings
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -765,8 +760,7 @@ const Index = () => {
                 </li>
               </ul>
               <Button onClick={() => {
-                setLoginModalTab("login");
-                setShowLoginModal(true);
+                openLoginModal();
               }} className="font-medium">
                 Join Community
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -957,25 +951,7 @@ const Index = () => {
       {/* Footer */}
       <Footer />
 
-      {/* Login Modal */}
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onAuthSuccess={(user) => {
-          console.log('🎉 Index: Auth success, user:', user?.email);
-
-          // Close modal immediately
-          setShowLoginModal(false);
-
-          // Update user state
-          setUser(user);
-
-          // Navigate to dashboard instantly
-          console.log('🚀 Index: Navigating to dashboard instantly');
-          navigate('/dashboard');
-        }}
-        defaultTab={loginModalTab}
-      />
+      {/* Modals are now managed by UnifiedModalManager */}
     </div>
   );
 };
