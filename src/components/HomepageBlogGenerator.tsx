@@ -62,12 +62,14 @@ export function HomepageBlogGenerator() {
   const [blogPostId, setBlogPostId] = useState<string>('');
 
   // UI state
-  const [showSignupPopup, setShowSignupPopup] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
   const [generationError, setGenerationError] = useState<Error | string | null>(null);
 
   const { toast } = useToast();
   const { currentUser, isCheckingAuth, isLoggedIn, isGuest, authChecked } = useAuthStatus();
+
+  // Unified modal management
+  const { openSavePostModal, hasActiveModal: hasSavePostModal } = useSavePostModal();
+  const { openLoginModal, hasActiveModal: hasAuthModal } = useAuthModal();
 
   // ENTERPRISE DEBUG & MONITORING
   useEffect(() => {
