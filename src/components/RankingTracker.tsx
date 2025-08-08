@@ -636,6 +636,18 @@ export const RankingTracker = () => {
                               Best Position: #{result.overallBest}
                             </Badge>
                           )}
+                          {result.searchEngines.google.method === 'server-scrape' && (
+                            <Badge variant="outline" className="text-xs bg-green-50 text-green-700 border-green-200">
+                              <Server className="w-3 h-3 mr-1" />
+                              Real Data
+                            </Badge>
+                          )}
+                          {result.searchEngines.google.method === 'simulation' && (
+                            <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
+                              <Activity className="w-3 h-3 mr-1" />
+                              Simulation
+                            </Badge>
+                          )}
                         </div>
                       </div>
                       
