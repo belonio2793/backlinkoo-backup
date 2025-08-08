@@ -114,12 +114,12 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
           </div>
 
           <div className="space-y-3">
-            <Button 
+            <Button
               onClick={handleCreateAccount}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3"
             >
               <Zap className="h-4 w-4 mr-2" />
-              Create Free Account & Claim Post
+              Save This Content Forever
             </Button>
             
             <Button 
