@@ -4,6 +4,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { CheckCircle2, ExternalLink, Copy, ArrowRight, Plus, BarChart3, Crown, Star, Gift, Zap, Timer, AlertTriangle } from 'lucide-react';
 import { IrresistibleAccountTrigger } from './IrresistibleAccountTrigger';
+import { ExitIntentTrigger, useExitIntent } from './ExitIntentTrigger';
+import { ExtremeScarcityTrigger } from './ExtremeScarcityTrigger';
 import { Badge } from '@/components/ui/badge';
 
 interface MinimalisticSuccessSectionProps {
@@ -31,7 +33,11 @@ export function MinimalisticSuccessSection({
   const [showTrigger, setShowTrigger] = useState(false);
   const [showSecondaryTrigger, setShowSecondaryTrigger] = useState(false);
   const [showFinalTrigger, setShowFinalTrigger] = useState(false);
+  const [showExitIntent, setShowExitIntent] = useState(false);
+  const [showExtremeScarcity, setShowExtremeScarcity] = useState(false);
   const [triggerCount, setTriggerCount] = useState(0);
+  const [hasShownExitIntent, setHasShownExitIntent] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState<{ hours: number; minutes: number; seconds: number } | null>(null);
 
   console.log('🎯 MinimalisticSuccessSection props:', {
     publishedUrl,
@@ -90,10 +96,19 @@ export function MinimalisticSuccessSection({
         }
       }, 60000);
 
+      // Extreme scarcity trigger after 90 seconds
+      const timer4 = setTimeout(() => {
+        if (triggerCount === 3) {
+          setShowExtremeScarcity(true);
+          setTriggerCount(4);
+        }
+      }, 90000);
+
       return () => {
         clearTimeout(timer1);
         clearTimeout(timer2);
         clearTimeout(timer3);
+        clearTimeout(timer4);
       };
     }
   }, [currentUser, triggerCount]);
@@ -135,6 +150,40 @@ export function MinimalisticSuccessSection({
       window.location.href = '/login';
     }
   };
+
+  // Exit intent detection for non-authenticated users
+  useExitIntent(() => {
+    if (!currentUser && !hasShownExitIntent) {
+      setShowExitIntent(true);
+      setHasShownExitIntent(true);
+    }
+  });
+
+  // Calculate real-time remaining for extreme trigger
+  useEffect(() => {
+    if (!currentUser && generatedPost?.expires_at) {
+      const updateTime = () => {
+        const expires = new Date(generatedPost.expires_at);
+        const now = new Date();
+        const diffMs = expires.getTime() - now.getTime();
+
+        if (diffMs <= 0) {
+          setTimeRemaining(null);
+          return;
+        }
+
+        const hours = Math.floor(diffMs / (1000 * 60 * 60));
+        const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diffMs % (1000 * 60)) / 1000);
+
+        setTimeRemaining({ hours, minutes, seconds });
+      };
+
+      updateTime();
+      const interval = setInterval(updateTime, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [currentUser, generatedPost?.expires_at]);
 
   return (
     <Card className="border-0 shadow-sm bg-white">
@@ -401,6 +450,44 @@ export function MinimalisticSuccessSection({
               handleDefaultLogin();
             }}
             onDismiss={() => setShowFinalTrigger(false)}
+          />
+        )}
+
+        {/* Exit Intent Trigger */}
+        {showExitIntent && !currentUser && (
+          <ExitIntentTrigger
+            onSignUp={() => {
+              setShowExitIntent(false);
+              handleDefaultSignUp();
+            }}
+            onLogin={() => {
+              setShowExitIntent(false);
+              handleDefaultLogin();
+            }}
+            onStay={() => setShowExitIntent(false)}
+            contentTitle={generatedPost?.title || `Complete Guide to ${primaryKeyword}`}
+            contentValue={"$862"}
+          />
+        )}
+
+        {/* Extreme Scarcity Trigger */}
+        {showExtremeScarcity && !currentUser && (
+          <ExtremeScarcityTrigger
+            onSignUp={() => {
+              setShowExtremeScarcity(false);
+              handleDefaultSignUp();
+            }}
+            onLogin={() => {
+              setShowExtremeScarcity(false);
+              handleDefaultLogin();
+            }}
+            onClose={() => setShowExtremeScarcity(false)}
+            contentValue={"$862"}
+            timeRemaining={timeRemaining && timeRemaining.hours ?
+              `${String(timeRemaining.hours).padStart(2, '0')}:${String(timeRemaining.minutes).padStart(2, '0')}:${String(timeRemaining.seconds).padStart(2, '0')}` :
+              "23:47:32"
+            }
+            postTitle={generatedPost?.title || `Complete Guide to ${primaryKeyword}`}
           />
         )}
       </CardContent>
