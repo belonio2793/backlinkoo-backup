@@ -468,18 +468,29 @@ export class ContentFormatter {
       .replace(/^\s*#{1,6}\s*&lt;[^&>]*&gt;\s*$/gm, '') // Remove headings that are just ## &lt;tag&gt;
       .replace(/^\s*#{1,6}\s*$/gm, '') // Remove empty headings like just ##
 
-      // Fix common HTML issues CAREFULLY to preserve generated HTML
+      // Fix common HTML issues - decode entities in content but preserve valid HTML tags
       .replace(/&nbsp;/g, ' ')
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
 
-      // Handle &amp; carefully - decode but preserve HTML structure
-      .replace(/&amp;(?!lt;|gt;|amp;|quot;|#)/g, '&')
+      // First protect our generated HTML by temporarily replacing it
+      .replace(/<(\/?)strong([^>]*)>/g, '___STRONG_TAG_$1___$2___END___')
+      .replace(/<(\/?)em([^>]*)>/g, '___EM_TAG_$1___$2___END___')
+      .replace(/<(\/?)h([1-6])([^>]*)>/g, '___H$2_TAG_$1___$3___END___')
+      .replace(/<(\/?)p([^>]*)>/g, '___P_TAG_$1___$2___END___')
+      .replace(/<(\/?)a([^>]*)>/g, '___A_TAG_$1___$2___END___')
 
-      // Handle &lt; and &gt; very carefully to not break our generated HTML
-      // Only decode when they're clearly not part of HTML tags
-      .replace(/&lt;(?!\s*\/?\s*[a-zA-Z]+[^>]*>)/g, '<')
-      .replace(/(?<!<[^>]*)&gt;(?![^<]*>)/g, '>')
+      // Now decode entities safely
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+
+      // Restore our protected HTML tags
+      .replace(/___STRONG_TAG_(\/?)___([^_]*)___END___/g, '<$1strong$2>')
+      .replace(/___EM_TAG_(\/?)___([^_]*)___END___/g, '<$1em$2>')
+      .replace(/___H([1-6])_TAG_(\/?)___([^_]*)___END___/g, '<$2h$1$3>')
+      .replace(/___P_TAG_(\/?)___([^_]*)___END___/g, '<$1p$2>')
+      .replace(/___A_TAG_(\/?)___([^_]*)___END___/g, '<$1a$2>')
 
       // Normalize quotes
       .replace(/[\u2018\u2019]/g, "'")
