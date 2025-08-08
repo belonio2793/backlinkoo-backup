@@ -223,9 +223,11 @@ export function EnhancedBlogPreview({
                   
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: ContentFormatter.formatBlogContent(
-                        ContentFormatter.sanitizeContent(content.content || ''),
-                        content.title
+                      __html: ContentFormatter.fixDisplayedHtmlAsText(
+                        ContentFormatter.formatBlogContent(
+                          ContentFormatter.sanitizeContent(content.content || ''),
+                          content.title
+                        )
                       )
                     }}
                     className="prose prose-lg max-w-none blog-content
