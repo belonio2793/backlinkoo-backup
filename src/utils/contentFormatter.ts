@@ -618,29 +618,30 @@ export class ContentFormatter {
    * Clean up any HTML that's being displayed as text instead of rendered
    */
   static fixDisplayedHtmlAsText(content: string): string {
-    return content
-      // Fix the specific malformed pattern: strong class="font-bold text-inherit"&gt;text
-      .replace(/(\s*)strong\s+class="font-bold\s+text-inherit"&gt;([^<\n]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
-      .replace(/(\s*)strong\s+class="[^"]*"&gt;([^<\n]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+    // First, let's fix the most common malformed patterns
+    let fixed = content
+      // Fix the EXACT pattern we're seeing: missing opening < bracket
+      .replace(/(\s*)strong\s+class="font-bold\s+text-inherit"&gt;([^<>\n]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+      .replace(/(\s*)strong\s+class="[^"]*"&gt;([^<>\n]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
 
-      // Fix fully encoded strong tags
+      // Fix the pattern where the opening < is encoded but closing > is not
       .replace(/&lt;strong\s+class="[^"]*"&gt;([^<&]+)&lt;\/strong&gt;/gi, '<strong class="font-bold text-inherit">$1</strong>')
 
-      // Fix any other malformed HTML showing as text (opening tag missing <)
-      .replace(/(\s*)([a-zA-Z]+)\s+([^&>]*?)&gt;/gi, (match, space, tag, attrs) => {
-        // Only fix if it looks like HTML attributes
-        if (attrs.includes('=') || attrs.includes('class') || attrs.includes('style')) {
-          return `${space}<${tag} ${attrs}>`;
-        }
-        return match;
-      })
+      // Fix mixed encoding patterns
+      .replace(/strong\s+class="[^"]*">\s*([^<\n]+)/gi, '<strong class="font-bold text-inherit">$1</strong>')
 
-      // Fix any other malformed HTML with encoded entities
-      .replace(/&lt;(\/?[a-zA-Z][^&>]*)&gt;/gi, '<$1>')
+      // Fix completely malformed HTML tags missing opening bracket
+      .replace(/(\s*)([a-zA-Z]+)\s+(class|style|id)="[^"]*"&gt;/gi, '$1<$2 $3>')
 
-      // Remove any orphaned &gt; that appears at the start of content
+      // Fix any remaining encoded HTML tags
+      .replace(/&lt;(\/?(?:strong|em|h[1-6]|p|a|ul|ol|li|blockquote)[^&>]*)&gt;/gi, '<$1>')
+
+      // Clean up orphaned symbols
       .replace(/^&gt;\s*/gm, '')
-      .replace(/^\s*&gt;/gm, '');
+      .replace(/^\s*&gt;/gm, '')
+      .replace(/&gt;(?=\s*$)/gm, '');
+
+    return fixed;
   }
 
   /**
