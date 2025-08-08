@@ -614,6 +614,118 @@ const CreativeAssetsShowcase: React.FC<{
           <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/10 rounded-2xl"></div>
         </div>
       )
+    },
+    {
+      name: 'Affiliate Badge Set',
+      size: '800x600',
+      format: 'PNG',
+      description: 'Partner & affiliate identification badges',
+      category: 'brand',
+      preview: (
+        <div className="relative bg-gradient-to-br from-emerald-900 via-green-800 to-teal-900 rounded-2xl overflow-hidden shadow-2xl" style={{ aspectRatio: '4/3' }}>
+          <div className="relative h-full flex flex-col items-center justify-center p-6 text-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mb-4 shadow-xl">
+              <span className="text-2xl">👑</span>
+            </div>
+            <div className="bg-gradient-to-r from-emerald-400 to-green-400 text-gray-900 px-6 py-3 rounded-full font-black text-xl mb-3 shadow-xl">
+              OFFICIAL PARTNER
+            </div>
+            <h4 className="text-white font-black text-2xl mb-2">Backlink ∞</h4>
+            <p className="text-emerald-200 text-lg font-bold mb-4">Authorized Affiliate</p>
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div className="bg-white/10 rounded-lg p-3 backdrop-blur">
+                <div className="text-yellow-300 font-black text-lg">20%</div>
+                <div className="text-white text-sm">Commission</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-3 backdrop-blur">
+                <div className="text-green-300 font-black text-lg">24/7</div>
+                <div className="text-white text-sm">Support</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      name: 'Social Media Kit',
+      size: '1200x1200',
+      format: 'PNG',
+      description: 'Profile picture & cover optimized',
+      category: 'brand',
+      preview: (
+        <div className="relative bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 rounded-2xl overflow-hidden aspect-square shadow-2xl">
+          <div className="relative h-full flex flex-col items-center justify-center p-8 text-center">
+            <div className="relative mb-6">
+              <div className="w-32 h-32 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-full flex items-center justify-center shadow-2xl relative">
+                <span className="text-5xl font-black text-white">∞</span>
+                <div className="absolute inset-0 rounded-full border-4 border-white/30"></div>
+              </div>
+            </div>
+            <h3 className="text-white font-black text-3xl mb-2 drop-shadow-xl">@BacklinkInfinity</h3>
+            <p className="text-purple-200 text-lg font-bold mb-4">🚀 AI Link Building</p>
+            <p className="text-indigo-200 text-sm font-medium mb-4">10K+ SEO Professionals</p>
+            <div className="flex items-center gap-4 text-sm">
+              <div className="text-center">
+                <div className="text-yellow-300 font-black">15.2K</div>
+                <div className="text-white/80">Followers</div>
+              </div>
+              <div className="text-center">
+                <div className="text-green-300 font-black">2.8K</div>
+                <div className="text-white/80">Partners</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      name: 'Presentation Template',
+      size: '1920x1080',
+      format: 'PNG',
+      description: 'Professional slide & pitch deck ready',
+      category: 'brand',
+      preview: (
+        <div className="relative bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 rounded-2xl overflow-hidden aspect-video shadow-2xl">
+          <div className="relative h-full p-8">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <span className="text-xl font-black text-white">∞</span>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-xl">Backlink ∞</h3>
+                  <p className="text-gray-400 text-sm">Enterprise Link Building Platform</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-gray-400 text-sm">Partner Presentation</div>
+                <div className="text-white text-lg font-semibold">2025 Overview</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-8 h-32">
+              <div>
+                <h2 className="text-white font-black text-2xl mb-4">Revenue Growth</h2>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                    <span className="text-gray-300 text-sm">Partner Revenue: +180%</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                    <span className="text-gray-300 text-sm">Active Affiliates: 10,000+</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-lg p-4 border border-blue-500/30">
+                  <div className="text-blue-300 text-3xl font-black mb-2">$2.3M</div>
+                  <div className="text-gray-300 text-sm">Total Partner Payouts</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
     }
   ];
 
