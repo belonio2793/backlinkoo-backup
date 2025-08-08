@@ -80,8 +80,39 @@ export default function BacklinkAutomation() {
     return () => clearTimeout(timer);
   }, []);
 
+  const testConnection = async () => {
+    try {
+      const response = await fetch('/.netlify/functions/test-backlink', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log('Connection test successful:', data);
+        return true;
+      } else {
+        console.error('Connection test failed:', response.status);
+        return false;
+      }
+    } catch (error) {
+      console.error('Connection test error:', error);
+      return false;
+    }
+  };
+
   const loadCampaigns = async () => {
     try {
+      console.log('Testing connection first...');
+      const connectionOk = await testConnection();
+
+      if (!connectionOk) {
+        console.log('Connection test failed, using fallback data');
+        // Use fallback demo data if connection fails
+        setCampaigns([]);
+        return;
+      }
+
       console.log('Loading campaigns...');
       const response = await fetch('/.netlify/functions/backlink-campaigns', {
         method: 'GET',
@@ -89,29 +120,46 @@ export default function BacklinkAutomation() {
       });
 
       console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
 
       if (response.ok) {
         const responseText = await response.text();
-        console.log('Response text:', responseText);
+        console.log('Response received, length:', responseText.length);
 
         try {
           const data = JSON.parse(responseText);
           setCampaigns(data.campaigns || []);
+          console.log('Campaigns loaded successfully:', data.campaigns?.length || 0);
         } catch (parseError) {
           console.error('JSON parse error:', parseError);
-          console.error('Response was:', responseText);
-          // Set empty campaigns on parse error
+          console.error('Response was:', responseText.substring(0, 200) + '...');
           setCampaigns([]);
+
+          toast({
+            title: "Backend Service Unavailable",
+            description: "Using demo mode. Some features may be limited.",
+            variant: "destructive"
+          });
         }
       } else {
         const errorText = await response.text();
-        console.error('HTTP error:', response.status, errorText);
+        console.error('HTTP error:', response.status, errorText.substring(0, 200));
         setCampaigns([]);
+
+        toast({
+          title: "Service Temporarily Unavailable",
+          description: "Please try again in a few moments.",
+          variant: "destructive"
+        });
       }
     } catch (error) {
       console.error('Error loading campaigns:', error);
       setCampaigns([]);
+
+      toast({
+        title: "Connection Error",
+        description: "Unable to connect to backend services.",
+        variant: "destructive"
+      });
     }
   };
 
