@@ -20,6 +20,7 @@ interface AuthFormTabsProps {
   onForgotPassword?: () => void;
   className?: string;
   defaultTab?: "login" | "signup";
+  onTabChange?: (tab: "login" | "signup") => void;
 }
 
 export function AuthFormTabs({
@@ -29,7 +30,8 @@ export function AuthFormTabs({
   isCompact = false,
   onForgotPassword,
   className = "",
-  defaultTab
+  defaultTab,
+  onTabChange
 }: AuthFormTabsProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -37,6 +39,12 @@ export function AuthFormTabs({
   const [activeTab, setActiveTab] = useState<"login" | "signup">(
     defaultTab || "login"
   );
+
+  const handleTabChange = (value: string) => {
+    const newTab = value as "login" | "signup";
+    setActiveTab(newTab);
+    onTabChange?.(newTab);
+  };
 
   // Form states
   const [loginEmail, setLoginEmail] = useState("");
@@ -325,17 +333,6 @@ export function AuthFormTabs({
   const spacingClass = isCompact ? "space-y-3" : "space-y-4";
 
   return (
-    <div className="w-full transform-none isolate" style={{ transform: 'none !important' }}>
-      <Tabs value={activeTab} onValueChange={setActiveTab} className={`w-full ${className}`}>
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="login">Sign In</TabsTrigger>
-        <TabsTrigger value="signup">
-          {showTrialUpgrade ? "Upgrade" : "Create Account"}
-        </TabsTrigger>
-      </TabsList>
-
-      <TabsContent value="login" className="transform-none" style={{ transform: 'none' }}>
-        <form onSubmit={handleLogin} className={spacingClass}>
           <div className="space-y-2">
             <Label htmlFor="login-email">Email</Label>
             <Input
@@ -422,9 +419,6 @@ export function AuthFormTabs({
           )}
         </form>
       </TabsContent>
-
-      <TabsContent value="signup" className="transform-none" style={{ transform: 'none' }}>
-        <form onSubmit={handleSignup} className={spacingClass}>
           <div className="space-y-2">
             <Label htmlFor="first-name">First Name</Label>
             <Input
@@ -499,7 +493,6 @@ export function AuthFormTabs({
 
           <Button
             type="submit"
-            className={`w-full ${inputHeight}`}
             disabled={!signupEmail || !signupPassword || !confirmPassword || !firstName || isLoading}
           >
             {isLoading ? (
