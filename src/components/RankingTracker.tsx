@@ -462,34 +462,34 @@ export const RankingTracker = () => {
 
   return (
     <div className="space-y-8 animate-fade-in">
-      {/* Free Rank Tracking Notice */}
-      <Card className="border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-indigo-50">
+      {/* Real Rank Tracking Notice */}
+      <Card className="border-2 border-emerald-200 bg-gradient-to-r from-emerald-50 to-green-50">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-purple-100">
-              <Zap className="h-5 w-5 text-purple-600" />
+            <div className="p-2 rounded-lg bg-emerald-100">
+              <Server className="h-5 w-5 text-emerald-600" />
             </div>
             <div className="flex-1">
-              <h3 className="font-semibold text-purple-900 mb-1">�� Intelligent Rank Simulation</h3>
-              <p className="text-sm text-purple-800 mb-3">
-                Smart ranking analysis using realistic competitor data and intelligent position estimation. Browser limitations prevent direct Google access, so we provide accurate simulations instead.
+              <h3 className="font-semibold text-emerald-900 mb-1">🚀 Real Google Rank Tracking</h3>
+              <p className="text-sm text-emerald-800 mb-3">
+                Server-side Google search scraping with real-time position detection. Get actual ranking positions by scanning live Google search results through our backend infrastructure.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-xs">
-                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-purple-200">
-                  <span className="font-medium text-purple-900">🧠 Smart Simulation</span>
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-emerald-200">
+                  <span className="font-medium text-emerald-900">🔍 Live Google Scraping</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-purple-200">
-                  <span className="font-medium text-purple-900">🏆 Realistic Competitors</span>
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-emerald-200">
+                  <span className="font-medium text-emerald-900">🎯 Exact Positions</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-purple-200">
-                  <span className="font-medium text-purple-900">📊 Position Analysis</span>
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-emerald-200">
+                  <span className="font-medium text-emerald-900">🏆 Real Competitors</span>
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-purple-200">
-                  <span className="font-medium text-purple-900">⚡ Instant Results</span>
+                <div className="flex items-center gap-2 px-3 py-2 bg-white/60 rounded border border-emerald-200">
+                  <span className="font-medium text-emerald-900">🌍 Global Targeting</span>
                 </div>
               </div>
-              <p className="text-xs text-purple-700 mt-2">
-                💡 For real-time Google scanning, use our server-side API or browser extensions!
+              <p className="text-xs text-emerald-700 mt-2">
+                ⚡ Powered by server-side infrastructure - no browser limitations!
               </p>
             </div>
           </div>
