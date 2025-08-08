@@ -61,6 +61,10 @@ const Index = () => {
   // Unified modal management
   const { openLoginModal, openSignupModal } = useAuthModal();
   const { openPremiumModal } = usePremiumModal();
+  const { openWaitlistModal, closeWaitlistModal, isWaitlistOpen } = useWaitlistModal();
+
+  // Waitlist state
+  const [waitlistEmail, setWaitlistEmail] = useState('');
 
   const [useProductionGenerator, setUseProductionGenerator] = useState(false);
   const [showTrialUpgrade, setShowTrialUpgrade] = useState(false);
