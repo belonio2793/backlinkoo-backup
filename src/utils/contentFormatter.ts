@@ -640,30 +640,36 @@ export class ContentFormatter {
    * Clean up any HTML that's being displayed as text instead of rendered
    */
   static fixDisplayedHtmlAsText(content: string): string {
-    // First, let's fix the most common malformed patterns
-    let fixed = content
-      // Fix the EXACT pattern we're seeing: missing opening < bracket
-      .replace(/(\s*)strong\s+class="font-bold\s+text-inherit"&gt;([^<>\n]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
-      .replace(/(\s*)strong\s+class="[^"]*"&gt;([^<>\n]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+    // Fix HTML that's displaying as text instead of being rendered
+    return content
+      // PRIMARY FIX: The exact pattern we're seeing in the DOM
+      .replace(/(\s*)strong\s+class="[^"]*"&gt;([^<>\n&]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
 
-      // Fix the pattern where the opening < is encoded but closing > is not
+      // Fix cases where only the closing bracket is encoded
+      .replace(/(\s*)<strong\s+class="[^"]*"&gt;([^<>\n&]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+
+      // Fix fully encoded strong tags
       .replace(/&lt;strong\s+class="[^"]*"&gt;([^<&]+)&lt;\/strong&gt;/gi, '<strong class="font-bold text-inherit">$1</strong>')
 
-      // Fix mixed encoding patterns
-      .replace(/strong\s+class="[^"]*">\s*([^<\n]+)/gi, '<strong class="font-bold text-inherit">$1</strong>')
+      // Fix pattern where tags are partially broken
+      .replace(/strong\s+class="[^"]*">\s*([^<>\n&]+)/gi, '<strong class="font-bold text-inherit">$1</strong>')
 
-      // Fix completely malformed HTML tags missing opening bracket
-      .replace(/(\s*)([a-zA-Z]+)\s+(class|style|id)="[^"]*"&gt;/gi, '$1<$2 $3>')
+      // Fix any HTML tag displaying as text (missing opening bracket)
+      .replace(/(\s*)([a-zA-Z]+)\s+([^>]*?)&gt;(?!\s*<)/gi, (match, space, tag, attrs) => {
+        if (attrs.includes('=')) {
+          return `${space}<${tag} ${attrs}>`;
+        }
+        return match;
+      })
 
-      // Fix any remaining encoded HTML tags
-      .replace(/&lt;(\/?(?:strong|em|h[1-6]|p|a|ul|ol|li|blockquote)[^&>]*)&gt;/gi, '<$1>')
+      // Fix encoded HTML tags
+      .replace(/&lt;(\/?(?:strong|em|h[1-6]|p|a|ul|ol|li|blockquote|span|div)[^&>]*)&gt;/gi, '<$1>')
 
-      // Clean up orphaned symbols
+      // Clean up stray encoded brackets
       .replace(/^&gt;\s*/gm, '')
-      .replace(/^\s*&gt;/gm, '')
-      .replace(/&gt;(?=\s*$)/gm, '');
-
-    return fixed;
+      .replace(/^\s*&gt;(?=\s)/gm, '')
+      .replace(/&gt;(?=\s*[\n\r])/gm, '')
+      .replace(/(?:^|\s)&lt;(?=\s|$)/gm, '');
   }
 
   /**
