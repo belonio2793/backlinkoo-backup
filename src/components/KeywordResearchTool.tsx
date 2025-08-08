@@ -475,7 +475,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "FK", name: "Falkland Islands", flag: "🇫🇰" },
     { code: "FM", name: "Micronesia", flag: "🇫🇲" },
     { code: "FO", name: "Faroe Islands", flag: "🇫🇴" },
-    { code: "FR", name: "France", flag: "🇫🇷" },
+    { code: "FR", name: "France", flag: "🇫����" },
     { code: "GA", name: "Gabon", flag: "🇬🇦" },
     { code: "GB", name: "United Kingdom", flag: "🇬🇧" },
     { code: "GD", name: "Grenada", flag: "🇬🇩" },
@@ -517,7 +517,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "JP", name: "Japan", flag: "🇯🇵" },
     { code: "KE", name: "Kenya", flag: "🇰🇪" },
     { code: "KG", name: "Kyrgyzstan", flag: "🇰🇬" },
-    { code: "KH", name: "Cambodia", flag: "��🇭" },
+    { code: "KH", name: "Cambodia", flag: "🇰🇭" },
     { code: "KI", name: "Kiribati", flag: "🇰🇮" },
     { code: "KM", name: "Comoros", flag: "🇰🇲" },
     { code: "KN", name: "Saint Kitts and Nevis", flag: "🇰🇳" },
@@ -538,7 +538,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "LV", name: "Latvia", flag: "🇱🇻" },
     { code: "LY", name: "Libya", flag: "🇱🇾" },
     { code: "MA", name: "Morocco", flag: "🇲🇦" },
-    { code: "MC", name: "Monaco", flag: "🇲����" },
+    { code: "MC", name: "Monaco", flag: "🇲🇨" },
     { code: "MD", name: "Moldova", flag: "🇲🇩" },
     { code: "ME", name: "Montenegro", flag: "🇲🇪" },
     { code: "MF", name: "Saint Martin", flag: "🇲🇫" },
@@ -918,13 +918,15 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-xl">Keyword Opportunities</CardTitle>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-sm bg-blue-50 text-blue-700 border-blue-200">
-                      {keywords[0]?.dataSources?.includes('Local_Estimation') ? 'Demo Data' : 'Multi-API Data'}
+                    <Badge variant="outline" className="text-sm bg-green-50 text-green-700 border-green-200">
+                      {keywords[0]?.dataSources?.includes('Free_APIs') ? '🆓 Free Real-Time Data' :
+                       keywords[0]?.dataSources?.includes('Local_Estimation') ? 'Demo Data' : 'Multi-API Data'}
                     </Badge>
                     <Badge variant="outline" className="text-sm">{keywords.length} results</Badge>
-                    {keywords[0]?.dataSources?.includes('Local_Estimation') && (
-                      <Badge variant="outline" className="text-xs bg-orange-50 text-orange-700 border-orange-200">
-                        Configure APIs for real data
+                    {keywords[0]?.dataSources?.includes('Free_APIs') && (
+                      <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">
+                        <Zap className="w-3 h-3 mr-1" />
+                        Live from Google
                       </Badge>
                     )}
                   </div>
