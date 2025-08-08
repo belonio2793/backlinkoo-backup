@@ -25,6 +25,7 @@ import {
   CheckCircle2,
   Timer,
   User,
+  Shield,
   ShieldCheck,
   XCircle,
   Bookmark,
