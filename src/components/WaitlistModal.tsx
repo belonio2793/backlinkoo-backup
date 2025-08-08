@@ -11,6 +11,7 @@ interface WaitlistModalProps {
   isOpen: boolean;
   onClose: () => void;
   initialEmail?: string;
+  modalProps?: any;
 }
 
 export const WaitlistModal: React.FC<WaitlistModalProps> = ({
