@@ -811,29 +811,7 @@ export function HomepageBlogGenerator() {
         </div>
       </div>
 
-      <SavePostSignupPopup
-        isOpen={showSignupPopup}
-        onClose={() => setShowSignupPopup(false)}
-        blogPostId={blogPostId}
-        blogPostUrl={publishedUrl}
-        blogPostTitle={generatedPost?.title}
-        onSignupSuccess={(user) => {
-          setShowSignupPopup(false);
-          window.location.reload();
-        }}
-        timeRemaining={86400}
-      />
-
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onAuthSuccess={(user) => {
-          setShowLoginModal(false);
-          // Navigate to dashboard after successful auth
-          window.location.href = '/dashboard';
-        }}
-        defaultTab="login"
-      />
+      {/* Modals are now managed by UnifiedModalManager */}
     </div>
   );
 }
