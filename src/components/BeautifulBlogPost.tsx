@@ -1227,30 +1227,55 @@ export function BeautifulBlogPost() {
 
               {/* What happens when you claim */}
               <div className="border border-blue-200 rounded-xl p-6 bg-blue-50/50">
-                <h3 className="font-semibold text-xl mb-4 flex items-center gap-2">
+                <h3 className="font-semibold text-xl mb-6 flex items-center gap-2">
                   <Crown className="h-6 w-6 text-blue-600" />
                   What Happens When You Claim
                 </h3>
-                <div className="space-y-3 text-sm">
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                    <span>Content becomes permanently yours - no more expiration timer</span>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-4 group hover:bg-white/60 p-3 rounded-lg transition-colors">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center mt-0.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900 block">Permanent Ownership</span>
+                      <span className="text-sm text-gray-600">Content becomes permanently yours - no more expiration timer</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                    <span>Gain full editorial access to modify, update, and customize</span>
+                  <div className="flex items-start gap-4 group hover:bg-white/60 p-3 rounded-lg transition-colors">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-green-500 to-green-600 rounded-full flex items-center justify-center mt-0.5">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900 block">Full Editorial Control</span>
+                      <span className="text-sm text-gray-600">Gain complete access to modify, update, and customize content</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                    <span>Protected from deletion by other users</span>
+                  <div className="flex items-start gap-4 group hover:bg-white/60 p-3 rounded-lg transition-colors">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full flex items-center justify-center mt-0.5">
+                      <ShieldCheck className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900 block">Deletion Protection</span>
+                      <span className="text-sm text-gray-600">Protected from deletion by other users</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                    <span>Access to advanced SEO and analytics features</span>
+                  <div className="flex items-start gap-4 group hover:bg-white/60 p-3 rounded-lg transition-colors">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-orange-500 to-orange-600 rounded-full flex items-center justify-center mt-0.5">
+                      <TrendingUp className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900 block">Advanced Features</span>
+                      <span className="text-sm text-gray-600">Access to premium SEO tools and detailed analytics</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                    <span>Ability to unclaim and release back to the community if desired</span>
+                  <div className="flex items-start gap-4 group hover:bg-white/60 p-3 rounded-lg transition-colors">
+                    <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full flex items-center justify-center mt-0.5">
+                      <XCircle className="w-3.5 h-3.5 text-white" />
+                    </div>
+                    <div>
+                      <span className="font-medium text-gray-900 block">Flexible Release</span>
+                      <span className="text-sm text-gray-600">Option to unclaim and release back to the community when desired</span>
+                    </div>
                   </div>
                 </div>
               </div>
