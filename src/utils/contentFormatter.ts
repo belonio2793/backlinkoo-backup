@@ -679,6 +679,29 @@ export class ContentFormatter {
   }
 
   /**
+   * Ultra-aggressive final fix for the exact DOM patterns we see
+   */
+  static fixDOMDisplayIssues(content: string): string {
+    return content
+      // Fix "strong&gt;Hook Introduction: The Rise of a Digital Phenomenon" type patterns
+      .replace(/(\s*)strong&gt;([^<>\n&]+?)(?=\s*<|\s*$|\n)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+
+      // Fix "&lt;" appearing at start of content or lines
+      .replace(/(^|\n|\s)&lt;/g, '$1<')
+
+      // Fix any remaining encoded brackets in wrong places
+      .replace(/(\s)&gt;(\s)/g, '$1>$2')
+      .replace(/^&gt;/gm, '')
+
+      // Ensure proper strong tag structure
+      .replace(/<strong([^>]*)>([^<]+)(?!<\/strong>)/gi, '<strong$1>$2</strong>')
+
+      // Fix broken HTML entities displaying as text
+      .replace(/&lt;(\w+)/g, '<$1')
+      .replace(/(\w+)&gt;/g, '$1>');
+  }
+
+  /**
    * Final post-processing cleanup to catch patterns that slip through
    */
   static postProcessCleanup(content: string): string {
