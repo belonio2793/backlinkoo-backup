@@ -760,8 +760,7 @@ const Index = () => {
                 </li>
               </ul>
               <Button onClick={() => {
-                setLoginModalTab("login");
-                setShowLoginModal(true);
+                openLoginModal();
               }} className="font-medium">
                 Join Community
                 <ArrowRight className="ml-2 h-4 w-4" />
