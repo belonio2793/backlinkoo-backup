@@ -241,7 +241,3 @@ exports.handler = async (event, context) => {
     };
   }
 }
-
-export const config = {
-  type: 'experimental-edge',
-};
