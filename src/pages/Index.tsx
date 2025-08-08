@@ -62,6 +62,7 @@ const Index = () => {
   const { openLoginModal, openSignupModal } = useAuthModal();
   const { openPremiumModal } = usePremiumModal();
   const { openWaitlistModal, closeWaitlistModal, isWaitlistOpen } = useWaitlistModal();
+  const { currentModal } = useModal();
 
   // Waitlist state
   const [waitlistEmail, setWaitlistEmail] = useState('');
