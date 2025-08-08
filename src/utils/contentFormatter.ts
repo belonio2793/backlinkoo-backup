@@ -257,7 +257,20 @@ export class ContentFormatter {
         if (/^[A-Z]\.\s*[A-Za-z\s]{0,15}$/.test(content.trim())) {
           return `<p><strong>${content}</strong></p>`;
         }
-        return `<h2>${content}</h2>`;
+
+        // Fix content that contains HTML entities or malformed patterns
+        const cleanContent = content
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/^\s*<\s*$/, '') // Remove standalone <
+          .replace(/^\s*>\s*$/, '') // Remove standalone >
+          .trim();
+
+        if (!cleanContent) {
+          return ''; // Remove empty headings
+        }
+
+        return `<h2>${cleanContent}</h2>`;
       })
       // Convert # headings to h1
       .replace(/^# (.+)$/gm, '<h1>$1</h1>')
