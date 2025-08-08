@@ -1127,7 +1127,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Industry Update",
-          content: `📰 INDUSTRY UPDATE 📰\n\nLatest SEO trends:\n\n🔥 AI-powered link building\n🔥 Quality over quantity\n🔥 Automated outreach\n🔥 Data-driven strategies\n\nBacklink ∞ covers all of these! ���\n\nLink in bio: ${referralUrl}\n\n#IndustryUpdate #SEOTrends`,
+          content: `📰 INDUSTRY UPDATE 📰\n\nLatest SEO trends:\n\n🔥 AI-powered link building\n🔥 Quality over quantity\n🔥 Automated outreach\n🔥 Data-driven strategies\n\nBacklink ∞ covers all of these! 💯\n\nLink in bio: ${referralUrl}\n\n#IndustryUpdate #SEOTrends`,
           engagement: "Medium",
           audience: "Industry watchers"
         },
@@ -1357,41 +1357,6 @@ Here's the math: ${referralUrl}`,
     }
   };
 
-  const previewAsset = (name: string, dataUrl: string) => {
-    const newWindow = window.open('', '_blank');
-    if (newWindow) {
-      newWindow.document.write(`
-        <html>
-          <head>
-            <title>${name} - Preview</title>
-            <style>
-              body {
-                margin: 0;
-                padding: 20px;
-                background: #f3f4f6;
-                font-family: Arial, sans-serif;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-              }
-              img {
-                max-width: 100%;
-                height: auto;
-                border: 1px solid #d1d5db;
-                background: white;
-                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-              }
-              h1 { color: #111827; margin-bottom: 20px; }
-            </style>
-          </head>
-          <body>
-            <h1>${name} - Preview</h1>
-            <img src="${dataUrl}" alt="${name}" />
-          </body>
-        </html>
-      `);
-    }
-  };
 
   const getEmailTemplate = (templateType: string, referralUrl: string) => {
     const templates: Record<string, any[]> = {
@@ -2926,7 +2891,7 @@ Here's the math: ${referralUrl}`,
                   {/* SPECTACULAR CREATIVE ASSETS SHOWCASE */}
                   <CreativeAssetsShowcase
                     onDownload={downloadAsset}
-                    onPreview={previewAsset}
+                    onPreview={() => {}}
                   />
 
                   {/* Temporarily keeping the original structure for reference */}
@@ -2986,13 +2951,6 @@ Here's the math: ${referralUrl}`,
                               >
                                 <Download className="h-3 w-3 mr-1" />
                                 Download
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => previewAsset(banner.name, banner.preview)}
-                              >
-                                <Eye className="h-3 w-3" />
                               </Button>
                             </div>
                           </div>
@@ -3056,13 +3014,6 @@ Here's the math: ${referralUrl}`,
                                 <Download className="h-3 w-3 mr-1" />
                                 Download
                               </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => previewAsset(graphic.name, graphic.preview)}
-                              >
-                                <Eye className="h-3 w-3" />
-                              </Button>
                             </div>
                           </div>
                         ))}
@@ -3124,13 +3075,6 @@ Here's the math: ${referralUrl}`,
                               >
                                 <Download className="h-3 w-3 mr-1" />
                                 Download
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => previewAsset(asset.name, asset.preview)}
-                              >
-                                <Eye className="h-3 w-3" />
                               </Button>
                             </div>
                           </div>
