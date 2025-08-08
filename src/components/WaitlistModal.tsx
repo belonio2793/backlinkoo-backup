@@ -331,6 +331,9 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
 
         {step === 'signup' && (
           <div className="p-8 md:p-12">
+            <VisuallyHidden>
+              <DialogTitle>Join Backlink Infinity Automation Waitlist - Account Creation</DialogTitle>
+            </VisuallyHidden>
             <div className="max-w-2xl mx-auto">
               {/* Header */}
               <div className="text-center mb-10">
