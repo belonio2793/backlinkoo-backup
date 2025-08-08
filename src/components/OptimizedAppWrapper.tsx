@@ -187,6 +187,12 @@ export const OptimizedAppWrapper = () => {
             </Suspense>
           } />
 
+          <Route path="/admin/campaigns" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyAdminCampaignManager />
+            </Suspense>
+          } />
+
           <Route path="/admin/payment-test" element={
             <Suspense fallback={<PageLoader />}>
               <LazyPaymentTest />
