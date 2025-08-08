@@ -165,33 +165,24 @@ export default function BacklinkAutomation() {
         lastActive: new Date()
       };
 
-      const response = await fetch('/.netlify/functions/backlink-campaigns', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'create',
-          campaign: newCampaign,
-          anchorTexts: anchorTexts.split(',').map(a => a.trim()),
-          dailyLimit
-        })
+      // For demo mode, just add the campaign locally
+      setCampaigns(prev => [...prev, newCampaign]);
+      setActiveCampaign(newCampaign);
+
+      // Start the link discovery simulation
+      startLinkDiscovery(newCampaign);
+
+      toast({
+        title: "Campaign Created",
+        description: `${campaignName} campaign started successfully (Demo Mode)`,
       });
 
-      if (response.ok) {
-        setCampaigns(prev => [...prev, newCampaign]);
-        setActiveCampaign(newCampaign);
-        startLinkDiscovery(newCampaign);
-        
-        toast({
-          title: "Campaign Created",
-          description: `${campaignName} campaign started successfully`,
-        });
+      // Reset form
+      setCampaignName('');
+      setTargetUrl('');
+      setKeywords('');
+      setAnchorTexts('');
 
-        // Reset form
-        setCampaignName('');
-        setTargetUrl('');
-        setKeywords('');
-        setAnchorTexts('');
-      }
     } catch (error) {
       console.error('Error creating campaign:', error);
       toast({
