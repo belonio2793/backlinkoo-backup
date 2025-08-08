@@ -10,7 +10,6 @@ import { useToast } from '@/hooks/use-toast';
 import { DirectOpenAIService } from '@/services/directOpenAI';
 import { APIStatusIndicator } from '@/components/shared/APIStatusIndicator';
 import { AnimatedBlogHeadline } from '@/components/AnimatedBlogHeadline';
-import { RealTimeBlogStatus } from '@/components/blog/RealTimeBlogStatus';
 import { 
   Loader2, 
   Link, 
@@ -536,11 +535,6 @@ export function EnhancedBlogForm({ onContentGenerated }: EnhancedBlogFormProps) 
         </CardContent>
       </Card>
 
-      {/* Real-time Blog Generation Status Tracker */}
-      <RealTimeBlogStatus
-        isVisible={isGenerating}
-        isGenerating={isGenerating}
-      />
     </div>
   );
 }

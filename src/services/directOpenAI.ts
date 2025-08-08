@@ -3,6 +3,10 @@
  * Simplified service that directly calls OpenAI without complex templates
  */
 
+import { LocalDevAPI } from '@/services/localDevAPI';
+import { environmentVariablesService } from '@/services/environmentVariablesService';
+import { blogService } from '@/services/blogService';
+
 interface BlogRequest {
   keyword: string;
   anchorText: string;
@@ -33,14 +37,12 @@ export class DirectOpenAIService {
       console.log('🚀 Starting direct blog generation...');
 
       // Check if we should use local dev API
-      const { LocalDevAPI } = await import('@/services/localDevAPI');
       if (LocalDevAPI.shouldUseMockAPI()) {
         console.log('🧪 Using local development API...');
         return await this.generateWithLocalAPI(request);
       }
 
       // Check if OpenAI API key is configured (but allow Netlify functions to handle it)
-      const { environmentVariablesService } = await import('@/services/environmentVariablesService');
       const clientApiKey = await environmentVariablesService.getOpenAIKey();
 
       // Don't fail if no local API key - Netlify functions might have it configured
@@ -349,7 +351,7 @@ Generate content so valuable that readers feel they've discovered insider knowle
    */
   private static async saveBlogPost(blogData: any): Promise<string> {
     try {
-      // Use the blog service for proper database handling
+      // Import blog service
       const { blogService } = await import('@/services/blogService');
 
       const blogPostData = {
@@ -384,8 +386,6 @@ Generate content so valuable that readers feel they've discovered insider knowle
    */
   private static async generateWithLocalAPI(request: BlogRequest): Promise<BlogResponse> {
     try {
-      const { LocalDevAPI } = await import('@/services/localDevAPI');
-
       const result = await LocalDevAPI.generateBlogPost({
         keyword: request.keyword,
         anchorText: request.anchorText,
@@ -451,11 +451,8 @@ Generate content so valuable that readers feel they've discovered insider knowle
    * Save blog post data using the blog service
    */
   private static async saveBlogPostData(blogData: any) {
-    const { blogService } = await import('@/services/blogService');
-
     // Clean up old posts before creating new ones
     try {
-      const { LocalDevAPI } = await import('@/services/localDevAPI');
       await LocalDevAPI.cleanupInvalidPosts();
     } catch (error) {
       console.warn('Cleanup warning:', error);
