@@ -1142,7 +1142,7 @@ Link in bio: ${referralUrl}
         // Page 1
         {
           type: "Tutorial",
-          content: `🎥 NEW VIDEO: "How I Built 500+ High-Quality Backlinks in 30 Days" - featuring Backlink ���'s automated platform.
+          content: `🎥 NEW VIDEO: "How I Built 500+ High-Quality Backlinks in 30 Days" - featuring Backlink ∞'s automated platform.
 
 This tool is a game-changer for SEO!
 
@@ -2695,10 +2695,10 @@ Here's the math: ${referralUrl}`,
                         <div className="relative h-full flex items-center justify-between px-6">
                           <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center">
-                              <span className="text-lg font-bold text-gray-900">∞</span>
+                              <span className="text-lg font-bold text-gray-900">BL</span>
                             </div>
                             <div>
-                              <div className="text-white font-bold text-lg">Backlink ∞</div>
+                              <div className="text-white font-bold text-lg">Backlink</div>
                               <div className="text-blue-100 text-xs">Automated Link Building</div>
                             </div>
                           </div>
@@ -2720,9 +2720,9 @@ Here's the math: ${referralUrl}`,
                         <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/5 to-transparent"></div>
                         <div className="relative h-full flex flex-col items-center justify-center text-center p-6">
                           <div className="w-16 h-16 bg-yellow-400 rounded-full flex items-center justify-center mb-4 animate-pulse-glow">
-                            <span className="text-2xl font-bold text-gray-900">∞</span>
+                            <span className="text-2xl font-bold text-gray-900">BL</span>
                           </div>
-                          <h3 className="text-white font-bold text-xl mb-2">Backlink ∞</h3>
+                          <h3 className="text-white font-bold text-xl mb-2">Backlink</h3>
                           <p className="text-blue-100 text-sm mb-4">The Smart Way to Build<br/>High-Quality Backlinks</p>
                           <div className="bg-gradient-to-r from-yellow-400 to-orange-400 text-gray-900 px-4 py-2 rounded-full font-bold text-sm mb-3">
                             300% Faster Results
@@ -2743,9 +2743,9 @@ Here's the math: ${referralUrl}`,
                         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent"></div>
                         <div className="relative h-full flex flex-col items-center text-center p-4">
                           <div className="w-12 h-12 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center mb-3 mt-4">
-                            <span className="text-lg font-bold text-gray-900">∞</span>
+                            <span className="text-lg font-bold text-gray-900">BL</span>
                           </div>
-                          <h3 className="text-white font-bold text-sm mb-2">Backlink ∞</h3>
+                          <h3 className="text-white font-bold text-sm mb-2">Backlink</h3>
                           <div className="flex-1 flex flex-col justify-center space-y-3">
                             <div className="bg-white/10 backdrop-blur rounded p-2">
                               <div className="text-yellow-300 text-xs font-bold">🎯 High-DA</div>
@@ -2776,9 +2776,9 @@ Here's the math: ${referralUrl}`,
                         </div>
                         <div className="relative h-full flex flex-col items-center text-center p-6">
                           <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mb-4 mt-8 border-4 border-yellow-400">
-                            <span className="text-xl font-bold text-purple-600">∞</span>
+                            <span className="text-xl font-bold text-purple-600">BL</span>
                           </div>
-                          <h3 className="text-white font-bold text-lg mb-2">Backlink ∞</h3>
+                          <h3 className="text-white font-bold text-lg mb-2">Backlink</h3>
                           <p className="text-purple-100 text-sm mb-6">I just increased my<br/>organic traffic by<br/><span className="text-yellow-300 font-bold text-xl">300%!</span></p>
                           <div className="flex-1 flex flex-col justify-center">
                             <div className="bg-white/20 backdrop-blur rounded-full px-4 py-2 mb-3">
@@ -3029,7 +3029,7 @@ Here's the math: ${referralUrl}`,
                       <div className="space-y-3">
                         {[
                           {
-                            name: 'Backlink ∞ Logo',
+                            name: 'Backlink Logo',
                             type: 'PNG',
                             use: 'General use',
                             preview: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDIwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjIwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IndoaXRlIi8+PGNpcmNsZSBjeD0iNDAiIGN5PSI1MCIgcj0iMjAiIGZpbGw9IiMyNTYzZWIiLz48dGV4dCB4PSI0MCIgeT0iNTciIGZpbGw9IndoaXRlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTYiIGZvbnQtd2VpZ2h0PSJib2xkIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj7iiJ88L3RleHQ+PHRleHQgeD0iMTIwIiB5PSI1NyIgZmlsbD0iIzExMTgyNyIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjI0IiBmb250LXdlaWdodD0iYm9sZCIgdGV4dC1hbmNob3I9Im1pZGRsZSI+QmFja2xpbms8L3RleHQ+PC9zdmc+'
@@ -3103,7 +3103,7 @@ Here's the math: ${referralUrl}`,
                           <li>• Don't alter colors, fonts, or proportions</li>
                           <li>• Don't add effects or filters to logos</li>
                           <li>• Don't use assets for competing services</li>
-                          <li>��� Don't make false or misleading claims</li>
+                          <li>• Don't make false or misleading claims</li>
                           <li>• Don't use outdated brand materials</li>
                         </ul>
                       </div>
