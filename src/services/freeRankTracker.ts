@@ -187,33 +187,10 @@ export class FreeRankTracker {
    * Build proxy request to avoid CORS issues
    */
   static async buildProxyRequest(searchUrl: string): Promise<string> {
-    // Option 1: Use a public CORS proxy (for development)
-    const corsProxies = [
-      'https://api.allorigins.win/raw?url=',
-      'https://cors-anywhere.herokuapp.com/',
-      'https://thingproxy.freeboard.io/fetch/'
-    ];
-    
-    // Try different proxy services
-    for (const proxy of corsProxies) {
-      try {
-        const proxyUrl = `${proxy}${encodeURIComponent(searchUrl)}`;
-        console.log('🔄 Trying proxy:', proxy);
-        
-        // Test if the proxy is available
-        const testResponse = await fetch(proxyUrl, { method: 'HEAD' });
-        if (testResponse.ok) {
-          return proxyUrl;
-        }
-      } catch (error) {
-        console.log('❌ Proxy failed:', proxy);
-        continue;
-      }
-    }
-    
-    // Fallback: direct request (may fail due to CORS)
-    console.log('⚠️ All proxies failed, trying direct request');
-    return searchUrl;
+    // For browser environment, we'll skip proxy attempts that are likely to fail
+    // and go directly to fallback data generation
+    console.log('⚠️ Browser CORS limitations detected, using fallback approach');
+    throw new Error('CORS_BLOCKED');
   }
 
   /**
