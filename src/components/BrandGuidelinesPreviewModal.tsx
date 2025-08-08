@@ -537,7 +537,7 @@ export function BrandGuidelinesPreviewModal({ isOpen, onClose }: BrandGuidelines
                 <Button
                   variant="outline"
                   onClick={prevPage}
-                  disabled={currentPage === 0}
+                  disabled={!pages || currentPage === 0}
                   className="flex items-center gap-2"
                 >
                   <ChevronLeft className="h-4 w-4" />
@@ -546,7 +546,7 @@ export function BrandGuidelinesPreviewModal({ isOpen, onClose }: BrandGuidelines
                 <Button
                   variant="outline"
                   onClick={nextPage}
-                  disabled={currentPage === pages.length - 1}
+                  disabled={!pages || currentPage === pages.length - 1}
                   className="flex items-center gap-2"
                 >
                   Next
