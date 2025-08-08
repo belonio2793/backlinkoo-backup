@@ -254,7 +254,7 @@ export const OptimizedAppWrapper = () => {
 
           {/* Feature routes - lazy loaded */}
           <Route path="/scrape" element={<LazyScrapePage />} />
-          <Route path="/backlink-automation" element={<LazyBacklinkAutomation />} />
+          <Route path="/automation" element={<LazyBacklinkAutomation />} />
           <Route path="/campaign/:campaignId" element={
             <InstantEmailVerificationGuard>
               <LazyCampaignDeliverables />
