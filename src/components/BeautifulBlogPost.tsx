@@ -134,39 +134,64 @@ export function BeautifulBlogPost() {
   // Client-side cleanup of malformed content after rendering
   useEffect(() => {
     const cleanupMalformedContent = () => {
-      // Find and fix the exact pattern: <h2>&lt;</h2> followed by <p> h2&gt;Pro Tip </p>
-      const headings = document.querySelectorAll('h2, h3, h4, h5, h6');
+      // Fix malformed HTML that might still appear in the DOM
 
-      headings.forEach(heading => {
-        if (heading.textContent?.trim() === '<') {
-          const nextElement = heading.nextElementSibling;
-          if (nextElement?.tagName === 'P' && nextElement.textContent?.includes('h2>Pro Tip')) {
-            // Replace both elements with a proper Pro Tip heading
-            const newHeading = document.createElement('h2');
-            newHeading.textContent = 'Pro Tip';
-            heading.parentNode?.replaceChild(newHeading, heading);
-            nextElement.remove();
-          } else if (nextElement?.tagName === 'P' && nextElement.textContent?.match(/h[1-6]>/)) {
-            // Handle other similar patterns
-            const text = nextElement.textContent.replace(/h[1-6]>/, '').trim();
-            if (text) {
-              const newHeading = document.createElement('h2');
-              newHeading.textContent = text;
-              heading.parentNode?.replaceChild(newHeading, heading);
-              nextElement.remove();
-            } else {
-              // Remove empty malformed elements
-              heading.remove();
-              nextElement.remove();
-            }
-          } else {
-            // Remove standalone < headings
-            heading.remove();
+      // 1. Fix text nodes that contain "strong&gt;"
+      const walker = document.createTreeWalker(
+        document.body,
+        NodeFilter.SHOW_TEXT,
+        null,
+        false
+      );
+
+      const textNodesToFix: Text[] = [];
+      let node: Text | null;
+
+      while (node = walker.nextNode() as Text) {
+        if (node.textContent?.includes('strong&gt;') ||
+            node.textContent?.includes('&lt;') ||
+            node.textContent?.includes('&gt;')) {
+          textNodesToFix.push(node);
+        }
+      }
+
+      textNodesToFix.forEach(textNode => {
+        if (!textNode.parentElement) return;
+
+        let content = textNode.textContent || '';
+
+        // Fix the exact patterns we see
+        content = content
+          .replace(/strong&gt;([^<>&\n]+)/gi, '<strong class="font-bold text-inherit">$1</strong>')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>');
+
+        if (content !== textNode.textContent) {
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = content;
+
+          // Replace the text node with the corrected HTML
+          while (tempDiv.firstChild) {
+            textNode.parentElement.insertBefore(tempDiv.firstChild, textNode);
+          }
+          textNode.remove();
+        }
+      });
+
+      // 2. Fix elements that contain "&lt;" as text content
+      const elementsWithEncodedContent = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li');
+      elementsWithEncodedContent.forEach(element => {
+        if (element.textContent?.includes('&lt;') || element.textContent?.includes('&gt;')) {
+          const content = element.innerHTML
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>');
+          if (content !== element.innerHTML) {
+            element.innerHTML = content;
           }
         }
       });
 
-      // Clean up corrupted style attributes
+      // 3. Clean up corrupted style attributes
       const elementsWithStyle = document.querySelectorAll('[style*="&lt;"]');
       elementsWithStyle.forEach(element => {
         if (element instanceof HTMLElement) {
@@ -178,6 +203,8 @@ export function BeautifulBlogPost() {
     // Run cleanup after content loads
     if (blogPost) {
       setTimeout(cleanupMalformedContent, 100);
+      // Run again after a longer delay to catch any late-loading content
+      setTimeout(cleanupMalformedContent, 1000);
     }
   }, [blogPost]);
 
