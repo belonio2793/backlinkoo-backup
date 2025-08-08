@@ -100,24 +100,13 @@ export class RealRankTracker {
 
       clearTimeout(timeoutId);
 
-      // Check if response is valid and not consumed
+      // Check if response is valid
       if (!response) {
         throw new Error('No response received from server');
       }
 
-      if (response.bodyUsed) {
-        console.error('❌ Response body already consumed, creating fresh request');
-        throw new Error('Response body stream already read - will retry');
-      }
-
-      // Clone response for safety (in case of multiple reads)
-      let responseText: string;
-      try {
-        responseText = await response.text();
-      } catch (streamError) {
-        console.error('❌ Error reading response stream:', streamError);
-        throw new Error('Failed to read response stream');
-      }
+      // Read response body - let any stream errors bubble up naturally
+      const responseText = await response.text();
 
       if (!response.ok) {
         console.error('❌ Server function error:', response.status, responseText);
