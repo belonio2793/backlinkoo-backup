@@ -374,7 +374,7 @@ export function BeautifulBlogPost() {
           // Try a more direct approach for development/admin purposes
           if (process.env.NODE_ENV === 'development' || user?.email?.includes('admin')) {
             try {
-              console.log('🔧 Attempting direct admin delete...');
+              console.log('�� Attempting direct admin delete...');
               // For development or admin users, try to delete without RLS checks
               const { error: adminError } = await supabase.rpc('delete_blog_post_admin', { post_slug: slug });
 
@@ -895,7 +895,9 @@ export function BeautifulBlogPost() {
                       ContentFormatter.postProcessCleanup(
                         ContentFormatter.addSectionSpacing(
                           ContentFormatter.formatBlogContent(
-                            ContentFormatter.sanitizeContent(blogPost.content || ''),
+                            ContentFormatter.sanitizeContent(
+                              ContentFormatter.preProcessMalformedHtml(blogPost.content || '')
+                            ),
                             blogPost.title
                           )
                         )
