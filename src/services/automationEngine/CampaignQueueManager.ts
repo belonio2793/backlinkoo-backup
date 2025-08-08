@@ -100,6 +100,20 @@ export interface AntiDetectionConfig {
   maxActionsPerIp: number;
 }
 
+export interface CampaignDeletionResult {
+  success: boolean;
+  campaignId: string;
+  deletedFromQueue: boolean;
+  stoppedProcessing: boolean;
+  cleanupOperations: {
+    queueRemoval: boolean;
+    nodeCleanup: boolean;
+    resourceRelease: boolean;
+  };
+  message: string;
+  warnings?: string[];
+}
+
 export class CampaignQueueManager {
   private static instance: CampaignQueueManager;
   private processingNodes: Map<string, ProcessingNode> = new Map();
@@ -313,6 +327,148 @@ export class CampaignQueueManager {
     return true;
   }
 
+  /**
+   * Safely delete a campaign with comprehensive cleanup
+   * @param campaignId - The campaign ID to delete
+   * @param forceDelete - Whether to force delete even if processing
+   * @returns Deletion result with detailed cleanup information
+   */
+  public async deleteCampaign(campaignId: string, forceDelete: boolean = false): Promise<CampaignDeletionResult> {
+    const campaign = this.queue.find(c => c.id === campaignId);
+    const warnings: string[] = [];
+    
+    let deletedFromQueue = false;
+    let stoppedProcessing = false;
+    let cleanupOperations = {
+      queueRemoval: false,
+      nodeCleanup: false,
+      resourceRelease: false
+    };
+
+    try {
+      // Check if campaign exists in queue
+      if (!campaign) {
+        // Campaign not in queue, but might exist in database
+        const { data: dbCampaign } = await supabase
+          .from('automation_campaigns')
+          .select('status')
+          .eq('id', campaignId)
+          .single();
+
+        if (!dbCampaign) {
+          return {
+            success: false,
+            campaignId,
+            deletedFromQueue: false,
+            stoppedProcessing: false,
+            cleanupOperations,
+            message: 'Campaign not found in queue or database'
+          };
+        }
+
+        // Campaign exists in DB but not in queue - clean up DB record
+        await supabase
+          .from('automation_campaigns')
+          .delete()
+          .eq('id', campaignId);
+
+        return {
+          success: true,
+          campaignId,
+          deletedFromQueue: false,
+          stoppedProcessing: false,
+          cleanupOperations: { queueRemoval: true, nodeCleanup: false, resourceRelease: true },
+          message: 'Campaign removed from database (was not in active queue)'
+        };
+      }
+
+      // Safety check for active processing
+      if (campaign.status === 'processing' && !forceDelete) {
+        return {
+          success: false,
+          campaignId,
+          deletedFromQueue: false,
+          stoppedProcessing: false,
+          cleanupOperations,
+          message: 'Cannot delete processing campaign without force flag. Use forceDelete=true to override.',
+          warnings: ['Campaign is currently being processed']
+        };
+      }
+
+      // Stop processing if campaign is active
+      if (campaign.status === 'processing' && campaign.processingNode) {
+        const node = this.processingNodes.get(campaign.processingNode);
+        if (node) {
+          await node.stopCampaign(campaignId);
+          stoppedProcessing = true;
+          cleanupOperations.nodeCleanup = true;
+          warnings.push('Stopped active processing on node ' + campaign.processingNode);
+        }
+      }
+
+      // Remove from queue
+      const queueIndex = this.queue.findIndex(c => c.id === campaignId);
+      if (queueIndex !== -1) {
+        this.queue.splice(queueIndex, 1);
+        deletedFromQueue = true;
+        cleanupOperations.queueRemoval = true;
+      }
+
+      // Delete from database
+      const { error: dbDeleteError } = await supabase
+        .from('automation_campaigns')
+        .delete()
+        .eq('id', campaignId);
+
+      if (dbDeleteError) {
+        // Rollback queue removal if DB deletion failed
+        if (deletedFromQueue && campaign) {
+          this.queue.push(campaign);
+          cleanupOperations.queueRemoval = false;
+        }
+        
+        throw new Error(`Database deletion failed: ${dbDeleteError.message}`);
+      }
+
+      cleanupOperations.resourceRelease = true;
+
+      // Log successful deletion
+      await supabase
+        .from('campaign_deletion_logs')
+        .insert({
+          campaign_id: campaignId,
+          deleted_at: new Date().toISOString(),
+          deletion_type: 'queue_manager',
+          force_delete: forceDelete,
+          was_processing: campaign.status === 'processing',
+          processing_node: campaign.processingNode || null
+        });
+
+      return {
+        success: true,
+        campaignId,
+        deletedFromQueue,
+        stoppedProcessing,
+        cleanupOperations,
+        message: 'Campaign deleted successfully with full cleanup',
+        warnings: warnings.length > 0 ? warnings : undefined
+      };
+
+    } catch (error) {
+      console.error('Campaign deletion error:', error);
+      
+      return {
+        success: false,
+        campaignId,
+        deletedFromQueue,
+        stoppedProcessing,
+        cleanupOperations,
+        message: `Deletion failed: ${error.message}`,
+        warnings
+      };
+    }
+  }
+
   public getCampaignStatus(campaignId: string): QueuedCampaign | null {
     return this.queue.find(c => c.id === campaignId) || null;
   }
@@ -431,6 +587,23 @@ export class ProcessingNode {
     if (campaign) {
       // Signal the processor to pause
       campaign.status = 'paused';
+    }
+  }
+
+  /**
+   * Forcefully stop a campaign on this node
+   * @param campaignId - Campaign to stop
+   */
+  public async stopCampaign(campaignId: string): Promise<void> {
+    const campaign = this.activeCampaigns.get(campaignId);
+    if (campaign) {
+      campaign.status = 'failed';
+      campaign.errorMessage = 'Campaign stopped by deletion request';
+      campaign.completedAt = new Date();
+      
+      // Cleanup resources
+      this.activeCampaigns.delete(campaignId);
+      this.currentLoad = Math.max(0, this.currentLoad - 1);
     }
   }
 
