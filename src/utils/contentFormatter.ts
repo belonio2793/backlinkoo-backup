@@ -615,6 +615,19 @@ export class ContentFormatter {
   }
 
   /**
+   * Pre-process content to fix specific malformed patterns before main processing
+   */
+  static preProcessMalformedHtml(content: string): string {
+    return content
+      // Fix the exact malformed pattern we're seeing in the DOM
+      .replace(/(\s*)strong\s+class="font-bold\s+text-inherit"&gt;([^<>\n&]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+      // Fix other similar patterns
+      .replace(/(\s*)strong\s+class="[^"]*"&gt;([^<>\n&]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+      // Fix pattern where both brackets are encoded
+      .replace(/&lt;strong\s+class="[^"]*"&gt;([^<&]+)&lt;\/strong&gt;/gi, '<strong class="font-bold text-inherit">$1</strong>');
+  }
+
+  /**
    * Clean up any HTML that's being displayed as text instead of rendered
    */
   static fixDisplayedHtmlAsText(content: string): string {
