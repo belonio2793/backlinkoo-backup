@@ -586,24 +586,26 @@ export default function BacklinkAutomation() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {linkOpportunities.map((opportunity) => (
+                    {linkOpportunities
+                      .filter(opportunity => opportunity && opportunity.id && opportunity.type) // Filter out invalid entries
+                      .map((opportunity) => (
                       <div key={opportunity.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             {getLinkTypeIcon(opportunity.type)}
-                            <span className="font-medium truncate max-w-md">{opportunity.url}</span>
+                            <span className="font-medium truncate max-w-md">{opportunity.url || 'Unknown URL'}</span>
                             <Badge variant="outline" className="text-xs">
                               {formatLinkType(opportunity.type)}
                             </Badge>
                           </div>
                           <div className="flex items-center gap-4 text-xs text-gray-500">
-                            <span>Authority: {opportunity.authority}/100</span>
-                            <span>Relevance: {opportunity.relevanceScore}/100</span>
-                            <Badge 
+                            <span>Authority: {opportunity.authority || 0}/100</span>
+                            <span>Relevance: {opportunity.relevanceScore || 0}/100</span>
+                            <Badge
                               variant={opportunity.status === 'posted' ? 'default' : 'secondary'}
                               className="text-xs"
                             >
-                              {opportunity.status}
+                              {opportunity.status || 'pending'}
                             </Badge>
                           </div>
                         </div>
