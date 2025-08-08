@@ -600,10 +600,10 @@ const CreativeAssetsShowcase: React.FC<{
       )
     },
     {
-      name: 'Icon Only',
+      name: 'App Icon Collection',
       size: '512x512',
       format: 'PNG',
-      description: 'Standalone icon version',
+      description: 'Modern app icon with variants',
       category: 'brand',
       preview: (
         <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden aspect-square shadow-2xl flex items-center justify-center">
