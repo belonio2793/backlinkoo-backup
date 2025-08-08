@@ -619,7 +619,53 @@ export function BeautifulBlogPost() {
             
             {/* Article Header */}
             <header className="text-center mb-16 relative">
-              
+
+              {/* Deletion Warning - Above Status Badges */}
+              {!blogPost.claimed && blogPost.expires_at && (
+                <div className="mb-8">
+                  <div className="beautiful-warning max-w-2xl mx-auto p-6 shadow-lg border-l-4 border-red-500 bg-gradient-to-r from-red-50 to-orange-50 rounded-lg">
+                    <div className="flex items-center justify-center gap-3 text-red-800 mb-4">
+                      <Timer className="h-6 w-6 animate-pulse" />
+                      <span className="text-xl font-bold">
+                        🚨 DELETION IN: {getTimeRemaining(blogPost.expires_at)} 🚨
+                      </span>
+                    </div>
+                    <p className="text-red-700 text-center font-semibold mb-4">
+                      This post will be <span className="text-red-900 font-black">PERMANENTLY DELETED</span> when the timer expires. and <span className="text-red-900 font-black">No recovery.</span>
+                    </p>
+
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <Button
+                        onClick={() => setShowKillerWarning(true)}
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold animate-pulse"
+                      >
+                        <AlertTriangle className="mr-2 h-4 w-4" />
+                        �� SAVE FROM DELETION!
+                      </Button>
+
+                      {user ? (
+                        <Button
+                          onClick={() => setShowClaimModal(true)}
+                          className="bg-green-600 hover:bg-green-700 text-white font-bold"
+                        >
+                          <Crown className="mr-2 h-4 w-4" />
+                          Claim Now (Logged In)
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => setShowClaimModal(true)}
+                          variant="outline"
+                          className="border-blue-500 text-blue-600 hover:bg-blue-50 font-bold"
+                        >
+                          <Crown className="mr-2 h-4 w-4" />
+                          Login to Claim
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Status Badges */}
               <div className="flex items-center justify-center gap-3 mb-8">
                 {blogPost.claimed ? (
