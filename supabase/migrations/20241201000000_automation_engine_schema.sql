@@ -283,10 +283,12 @@ CREATE INDEX IF NOT EXISTS idx_link_opportunities_authority ON link_opportunitie
 CREATE INDEX IF NOT EXISTS idx_link_opportunities_discovered_at ON link_opportunities(discovered_at);
 
 CREATE INDEX IF NOT EXISTS idx_content_requests_campaign_id ON content_requests(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_content_requests_opportunity_id ON content_requests(opportunity_id);
 CREATE INDEX IF NOT EXISTS idx_content_requests_status ON content_requests(status);
 CREATE INDEX IF NOT EXISTS idx_content_requests_created_at ON content_requests(created_at);
 
 CREATE INDEX IF NOT EXISTS idx_posted_links_campaign_id ON posted_links(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_posted_links_opportunity_id ON posted_links(opportunity_id);
 CREATE INDEX IF NOT EXISTS idx_posted_links_status ON posted_links(status);
 CREATE INDEX IF NOT EXISTS idx_posted_links_posted_at ON posted_links(posted_at);
 
@@ -306,6 +308,11 @@ CREATE INDEX IF NOT EXISTS idx_rate_limits_window_start ON rate_limits(window_st
 
 CREATE INDEX IF NOT EXISTS idx_processing_nodes_status ON processing_nodes(status);
 CREATE INDEX IF NOT EXISTS idx_processing_nodes_region ON processing_nodes(region);
+
+CREATE INDEX IF NOT EXISTS idx_campaign_metrics_timeseries_campaign_id ON campaign_metrics_timeseries(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_campaign_metrics_timeseries_timestamp ON campaign_metrics_timeseries(timestamp);
+CREATE INDEX IF NOT EXISTS idx_campaign_metrics_timeseries_campaign_timestamp ON campaign_metrics_timeseries(campaign_id, timestamp);
+CREATE INDEX IF NOT EXISTS idx_campaign_metrics_timeseries_campaign_type_timestamp ON campaign_metrics_timeseries(campaign_id, metrics_type, timestamp);
 
 -- Row Level Security (RLS) Policies
 ALTER TABLE automation_campaigns ENABLE ROW LEVEL SECURITY;
@@ -513,8 +520,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- Scheduled cleanup job (to be run by pg_cron or external scheduler)
-SELECT cron.schedule('cleanup-automation-data', '0 2 * * *', 'SELECT cleanup_old_data();');
+-- Remove cron job that may not be available in Supabase
+-- SELECT cron.schedule('cleanup-automation-data', '0 2 * * *', 'SELECT cleanup_old_data();');
 
 -- Initial data for user agents
 INSERT INTO user_agents (user_agent, browser, version, os, device_type) VALUES
