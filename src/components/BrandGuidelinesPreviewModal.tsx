@@ -19,6 +19,13 @@ export function BrandGuidelinesPreviewModal({ isOpen, onClose }: BrandGuidelines
   const { toast } = useToast();
   const [currentPage, setCurrentPage] = useState(0);
 
+  // Reset page when modal opens
+  React.useEffect(() => {
+    if (isOpen) {
+      setCurrentPage(0);
+    }
+  }, [isOpen]);
+
   const downloadPDF = () => {
     const link = document.createElement('a');
     link.href = '/brand-guidelines.pdf';
