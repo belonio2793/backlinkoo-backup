@@ -287,7 +287,10 @@ export function BlogPostViewer() {
                 [&_a]:text-blue-600 [&_a]:opacity-100 [&_a]:font-medium [&_a]:no-underline hover:[&_a]:underline
                 [&_strong]:font-bold [&_strong]:text-foreground"
               dangerouslySetInnerHTML={{
-                __html: ContentFormatter.formatBlogContent(blogPost.content || '', blogPost.title)
+                __html: ContentFormatter.formatBlogContent(
+                  ContentFormatter.sanitizeContent(blogPost.content || ''),
+                  blogPost.title
+                )
               }}
             />
 
