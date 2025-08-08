@@ -42,6 +42,9 @@ export const LazyGuestDashboard = lazy(() => import('@/components/GuestDashboard
 // SEO-optimized blog components
 export const LazySEOOptimizedBlogGenerator = lazy(() => import('@/pages/SEOBlogGenerator'));
 
+// Email scraping component
+export const LazyScrapePage = lazy(() => import('@/pages/ScrapePage'));
+
 // API Testing components
 export const LazyOpenAITest = lazy(() => import('@/pages/OpenAITest'));
 export const LazySystemTest = lazy(() => import('@/components/SystemTest').then(module => ({ default: module.SystemTest })));
