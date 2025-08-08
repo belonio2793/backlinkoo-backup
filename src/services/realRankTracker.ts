@@ -49,7 +49,10 @@ export class RealRankTracker {
     try {
       console.log('🚀 Starting REAL rank tracking:', params);
       
-      // Call our Netlify function for server-side scraping
+      // Call our Netlify function for server-side scraping with timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch('/.netlify/functions/rank-checker', {
         method: 'POST',
         headers: {
@@ -61,8 +64,11 @@ export class RealRankTracker {
           country: params.country || 'US',
           device: params.device || 'desktop',
           numResults: params.numResults || 100
-        })
+        }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       // Read response body once and handle both success/error cases
       const responseText = await response.text();
