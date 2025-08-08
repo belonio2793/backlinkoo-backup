@@ -542,7 +542,7 @@ export const RankingTracker = () => {
                 disabled={isChecking || !url.trim() || !keyword.trim()}
                 className="min-w-[180px] h-11 bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 hover-scale"
               >
-{isChecking ? "Analyzing..." : "���� Simulate Ranking"}
+{isChecking ? "Analyzing..." : "🧠 Simulate Ranking"}
                 <Search className="h-4 w-4 ml-2" />
               </Button>
               
@@ -569,7 +569,7 @@ export const RankingTracker = () => {
                         {checkingProgress[0]}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Scanning Google search results in real-time...
+                        Generating intelligent ranking simulation based on keyword analysis...
                       </div>
                     </div>
                   </div>
