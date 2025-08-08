@@ -453,11 +453,8 @@ Generate content so valuable that readers feel they've discovered insider knowle
    * Save blog post data using the blog service
    */
   private static async saveBlogPostData(blogData: any) {
-    const { blogService } = await import('@/services/blogService');
-
     // Clean up old posts before creating new ones
     try {
-      const { LocalDevAPI } = await import('@/services/localDevAPI');
       await LocalDevAPI.cleanupInvalidPosts();
     } catch (error) {
       console.warn('Cleanup warning:', error);
