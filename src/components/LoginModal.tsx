@@ -159,7 +159,7 @@ export function LoginModal({ isOpen, onClose, onAuthSuccess, defaultTab = "login
             </div>
           </form>
         ) : (
-          <AuthFormTabs
+          <CleanAuthForm
             onAuthSuccess={handleAuthSuccess}
             onSignInStart={onClose}
             onForgotPassword={() => setShowForgotPassword(true)}
