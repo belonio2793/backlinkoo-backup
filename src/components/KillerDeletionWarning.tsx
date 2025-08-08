@@ -11,7 +11,7 @@ import {
   X,
   Skull,
   Bomb,
-  Fire,
+  Flame,
   Zap,
   Crown,
   Gift,
@@ -67,7 +67,7 @@ export function KillerDeletionWarning({
       urgency: "EXPLOSIVE DANGER"
     },
     {
-      icon: Fire,
+      icon: Flame,
       title: "🔥 CONTENT INFERNO! 🔥",
       subtitle: "BURNING EVERYTHING TO ASHES",
       message: "Your content is being consumed by DIGITAL FLAMES! Once it burns, there's NO resurrection, NO recovery, NO second chances!",
@@ -167,7 +167,7 @@ export function KillerDeletionWarning({
                 <Bomb className="h-8 w-8 text-orange-300" />
               </div>
               <div className="absolute bottom-2 left-1/4 animate-bounce" style={{ animationDelay: '1s' }}>
-                <Fire className="h-6 w-6 text-yellow-400" />
+                <Flame className="h-6 w-6 text-yellow-400" />
               </div>
               <div className="absolute bottom-2 right-1/4 animate-bounce" style={{ animationDelay: '1.5s' }}>
                 <Siren className="h-6 w-6 text-red-400" />
@@ -354,7 +354,7 @@ export function KillerDeletionWarning({
               {/* FINAL MANIPULATION */}
               <div className="mt-8 p-6 bg-black/50 rounded-xl border-4 border-red-500">
                 <div className="text-red-400 font-black text-xl mb-2 animate-emergency-flash">
-                  ���️ POINT OF NO RETURN: This content will NEVER exist again!
+                  ⚠️ POINT OF NO RETURN: This content will NEVER exist again!
                 </div>
                 <div className="text-white text-sm">
                   Once deleted, this exact combination of words, this perfect SEO structure, 
