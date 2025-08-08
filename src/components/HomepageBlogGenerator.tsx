@@ -383,10 +383,15 @@ export function HomepageBlogGenerator() {
         localStorage.setItem('trial_blog_posts', JSON.stringify(trialPosts));
       }
 
-      // Show signup popup for guest users after a delay
-      if (isGuest) {
+      // Show signup popup for guest users after a delay - only if no other modal is active
+      if (isGuest && !hasAuthModal && !hasSavePostModal) {
         setTimeout(() => {
-          setShowSignupPopup(true);
+          openSavePostModal({
+            blogPostId: blogPost?.id,
+            blogPostUrl: publishedUrl || `https://backlinkoo.com/blog/${blogPost?.slug}`,
+            blogPostTitle: blogPost?.title,
+            timeRemaining: 86400 // 24 hours
+          });
         }, 3000); // Show popup after 3 seconds
       }
 
