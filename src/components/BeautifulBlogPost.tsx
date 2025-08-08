@@ -48,6 +48,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { maskEmail } from '@/utils/emailMasker';
 import { SEOScoreDisplay } from '@/components/SEOScoreDisplay';
 import { KillerDeletionWarning } from '@/components/KillerDeletionWarning';
+import { ExitIntentPopup } from '@/components/ExitIntentPopup';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -71,6 +72,7 @@ export function BeautifulBlogPost() {
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [showKillerWarning, setShowKillerWarning] = useState(false);
   const [showSystemExplanation, setShowSystemExplanation] = useState(false);
+  const [showExitPopup, setShowExitPopup] = useState(false);
 
   // Use premium SEO score logic
   const { effectiveScore, isPremiumScore } = usePremiumSEOScore(blogPost);
@@ -98,6 +100,36 @@ export function BeautifulBlogPost() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Exit intent detection for unclaimed posts
+  useEffect(() => {
+    if (!blogPost || blogPost.claimed || user) return;
+
+    let isExiting = false;
+
+    const handleMouseLeave = (e: MouseEvent) => {
+      if (e.clientY <= 0 && !isExiting) {
+        isExiting = true;
+        setShowExitPopup(true);
+      }
+    };
+
+    document.addEventListener('mouseleave', handleMouseLeave);
+    return () => {
+      document.removeEventListener('mouseleave', handleMouseLeave);
+    };
+  }, [blogPost, user]);
+
+  // Automatic 3-second popup for unclaimed posts
+  useEffect(() => {
+    if (!blogPost || blogPost.claimed || user) return;
+
+    const timer = setTimeout(() => {
+      setShowExitPopup(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, [blogPost, user]);
 
   // Client-side cleanup of malformed content after rendering
   useEffect(() => {
@@ -794,7 +826,7 @@ export function BeautifulBlogPost() {
                             <p className="text-sm">
                               Delete this unclaimed post. Anyone can delete unclaimed posts to help clean up content.
                             </p>
-                            <p className="text-xs text-red-400">⚠️ This action cannot be undone</p>
+                            <p className="text-xs text-red-400">⚠�� This action cannot be undone</p>
                           </div>
                         </TooltipContent>
                       </Tooltip>
@@ -1120,6 +1152,14 @@ export function BeautifulBlogPost() {
           onClose={() => setShowKillerWarning(false)}
         />
       )}
+
+      {/* Exit Intent Popup */}
+      <ExitIntentPopup
+        isVisible={showExitPopup}
+        onClose={() => setShowExitPopup(false)}
+        postTitle={cleanTitle(blogPost?.title || '')}
+        timeRemaining={blogPost?.expires_at ? getTimeRemaining(blogPost.expires_at) : '24 hours'}
+      />
 
       {/* Beautiful System Explanation Modal */}
       {showSystemExplanation && (
