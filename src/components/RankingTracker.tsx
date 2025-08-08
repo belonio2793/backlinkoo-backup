@@ -355,10 +355,13 @@ export const RankingTracker = () => {
         .map((r: any) => `${r.engine} (#${r.position})`)
         .join(', ');
 
+      const methodText = analysisData.method === 'server-scrape' ? ' (Real Google Data)' :
+                        analysisData.method === 'simulation' ? ' (Intelligent Simulation)' : '';
+
       toast({
-        title: "🎉 Rank Check Complete",
+        title: "🎉 Rank Check Complete" + methodText,
         description: foundSummary
-          ? `Found on: ${foundSummary}`
+          ? `Found on: ${foundSummary}${analysisData.confidence ? ` - ${analysisData.confidence.toUpperCase()} confidence` : ''}`
           : "Not found in top 100 results - try different keywords or improve SEO",
       });
 
