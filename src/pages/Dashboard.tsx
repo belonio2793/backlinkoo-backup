@@ -655,7 +655,7 @@ const Dashboard = () => {
     // Handle hash-based navigation for specific sections
     if (hash === 'keyword-research') return 'keyword-research';
     if (hash === 'rank-tracker') return 'rank-tracker';
-    if (hash === 'backlink-automation') return 'seo-tools';
+    if (hash === 'automation') return 'seo-tools';
 
     return urlParams.get('tab') || "overview";
   });
@@ -665,7 +665,7 @@ const Dashboard = () => {
 
     // Handle hash-based navigation for specific sections
     if (hash === 'keyword-research' || hash === 'rank-tracker') return 'dashboard';
-    if (hash === 'backlink-automation') return 'seo-tools';
+    if (hash === 'automation') return 'seo-tools';
 
     return urlParams.get('section') || "dashboard";
   });
@@ -686,7 +686,7 @@ const Dashboard = () => {
       } else if (hash === 'rank-tracker') {
         setActiveSection('dashboard');
         setActiveTab('rank-tracker');
-      } else if (hash === 'backlink-automation') {
+      } else if (hash === 'automation') {
         setActiveSection('seo-tools');
       }
     };
