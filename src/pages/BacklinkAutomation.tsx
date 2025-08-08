@@ -582,12 +582,12 @@ export default function BacklinkAutomation() {
             )}
 
             {/* Link Opportunities */}
-            {linkOpportunities.length > 0 && (
+            {Array.isArray(linkOpportunities) && linkOpportunities.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Target className="h-5 w-5" />
-                    Link Opportunities ({linkOpportunities.length})
+                    Link Opportunities ({linkOpportunities.filter(o => o && o.id).length})
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
