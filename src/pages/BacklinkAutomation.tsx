@@ -93,33 +93,86 @@ export default function BacklinkAutomation() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        const campaigns = data.campaigns.map((campaign: any) => ({
-          ...campaign,
-          createdAt: new Date(campaign.created_at),
-          lastActive: new Date(campaign.last_active_at || campaign.updated_at)
-        }));
-        setCampaigns(campaigns);
-        console.log('Production campaigns loaded successfully:', campaigns.length);
+        const responseText = await response.text();
+
+        // Check if response is HTML (function not found)
+        if (responseText.startsWith('<!DOCTYPE') || responseText.startsWith('<html')) {
+          console.log('Backend function not available, using demo mode');
+          loadDemoCampaigns();
+          return;
+        }
+
+        try {
+          const data = JSON.parse(responseText);
+          const campaigns = data.campaigns.map((campaign: any) => ({
+            ...campaign,
+            createdAt: new Date(campaign.created_at),
+            lastActive: new Date(campaign.last_active_at || campaign.updated_at)
+          }));
+          setCampaigns(campaigns);
+          console.log('Production campaigns loaded successfully:', campaigns.length);
+        } catch (parseError) {
+          console.log('Failed to parse response, using demo mode');
+          loadDemoCampaigns();
+        }
       } else {
-        console.error('Failed to load campaigns:', response.status);
-        setCampaigns([]);
-        toast({
-          title: "Unable to Load Campaigns",
-          description: "Please try refreshing the page or contact support.",
-          variant: "destructive"
-        });
+        console.log('Backend not available, using demo mode');
+        loadDemoCampaigns();
       }
 
     } catch (error) {
-      console.error('Error loading campaigns:', error);
-      setCampaigns([]);
-      toast({
-        title: "Connection Error",
-        description: "Unable to connect to campaign service.",
-        variant: "destructive"
-      });
+      console.log('Connection failed, using demo mode:', error);
+      loadDemoCampaigns();
     }
+  };
+
+  const loadDemoCampaigns = () => {
+    const demoCampaigns: Campaign[] = [
+      {
+        id: 'demo_campaign_1',
+        name: 'SEO Authority Building',
+        targetUrl: 'https://example.com',
+        keywords: ['SEO', 'digital marketing', 'backlinks'],
+        status: 'active',
+        progress: 65,
+        linksGenerated: 127,
+        linkStrategy: {
+          blogComments: true,
+          forumProfiles: true,
+          web2Platforms: true,
+          socialProfiles: false,
+          contactForms: false
+        },
+        createdAt: new Date(Date.now() - 86400000 * 7), // 7 days ago
+        lastActive: new Date()
+      },
+      {
+        id: 'demo_campaign_2',
+        name: 'Brand Awareness Campaign',
+        targetUrl: 'https://mybrand.com',
+        keywords: ['brand marketing', 'online presence', 'digital strategy'],
+        status: 'paused',
+        progress: 32,
+        linksGenerated: 89,
+        linkStrategy: {
+          blogComments: true,
+          forumProfiles: false,
+          web2Platforms: true,
+          socialProfiles: true,
+          contactForms: false
+        },
+        createdAt: new Date(Date.now() - 86400000 * 3), // 3 days ago
+        lastActive: new Date(Date.now() - 86400000 * 1) // 1 day ago
+      }
+    ];
+
+    setCampaigns(demoCampaigns);
+    console.log('Demo campaigns loaded successfully');
+
+    toast({
+      title: "Demo Mode Active",
+      description: "Backend services unavailable. Using demonstration data.",
+    });
   };
 
   const createCampaign = async () => {
