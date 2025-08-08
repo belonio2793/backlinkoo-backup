@@ -32,15 +32,17 @@ export class DirectOpenAIService {
     try {
       console.log('🚀 Starting direct blog generation...');
 
-      // Check if we should use local dev API
+      // Import services statically to avoid dynamic import issues
       const { LocalDevAPI } = await import('@/services/localDevAPI');
+      const { environmentVariablesService } = await import('@/services/environmentVariablesService');
+
+      // Check if we should use local dev API
       if (LocalDevAPI.shouldUseMockAPI()) {
         console.log('🧪 Using local development API...');
         return await this.generateWithLocalAPI(request);
       }
 
       // Check if OpenAI API key is configured (but allow Netlify functions to handle it)
-      const { environmentVariablesService } = await import('@/services/environmentVariablesService');
       const clientApiKey = await environmentVariablesService.getOpenAIKey();
 
       // Don't fail if no local API key - Netlify functions might have it configured
@@ -349,7 +351,7 @@ Generate content so valuable that readers feel they've discovered insider knowle
    */
   private static async saveBlogPost(blogData: any): Promise<string> {
     try {
-      // Use the blog service for proper database handling
+      // Import blog service
       const { blogService } = await import('@/services/blogService');
 
       const blogPostData = {
