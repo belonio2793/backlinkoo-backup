@@ -110,7 +110,7 @@ const CreativeAssetsShowcase: React.FC<{
   const handlePreview = async (name: string, preview: string) => {
     try {
       // Find the asset details
-      const asset = [...displayBanners, ...brandAssets].find(a => a.name === name);
+      const asset = [...displayBanners, ...socialAssets, ...brandAssets].find(a => a.name === name);
       if (asset) {
         // Generate high-quality asset for preview
         const dataUrl = await generateAsset(asset.name);
