@@ -619,11 +619,25 @@ export class ContentFormatter {
    */
   static fixDisplayedHtmlAsText(content: string): string {
     return content
-      // Fix strong tags that are showing as text
-      .replace(/strong\s+class="[^"]*"&gt;([^<&]+)/gi, '<strong class="font-bold text-inherit">$1</strong>')
+      // Fix the specific malformed pattern: strong class="font-bold text-inherit"&gt;text
+      .replace(/(\s*)strong\s+class="font-bold\s+text-inherit"&gt;([^<\n]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+      .replace(/(\s*)strong\s+class="[^"]*"&gt;([^<\n]+)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+
+      // Fix fully encoded strong tags
       .replace(/&lt;strong\s+class="[^"]*"&gt;([^<&]+)&lt;\/strong&gt;/gi, '<strong class="font-bold text-inherit">$1</strong>')
-      // Fix any other malformed HTML showing as text
+
+      // Fix any other malformed HTML showing as text (opening tag missing <)
+      .replace(/(\s*)([a-zA-Z]+)\s+([^&>]*?)&gt;/gi, (match, space, tag, attrs) => {
+        // Only fix if it looks like HTML attributes
+        if (attrs.includes('=') || attrs.includes('class') || attrs.includes('style')) {
+          return `${space}<${tag} ${attrs}>`;
+        }
+        return match;
+      })
+
+      // Fix any other malformed HTML with encoded entities
       .replace(/&lt;(\/?[a-zA-Z][^&>]*)&gt;/gi, '<$1>')
+
       // Remove any orphaned &gt; that appears at the start of content
       .replace(/^&gt;\s*/gm, '')
       .replace(/^\s*&gt;/gm, '');
