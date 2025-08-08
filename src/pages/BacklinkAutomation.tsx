@@ -740,8 +740,13 @@ export default function BacklinkAutomation() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6">
-      <div className="max-w-8xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      {/* Header */}
+      <ToolsHeader user={user} currentTool="automation" />
+
+      {/* Main Content */}
+      <div className="p-6">
+        <div className="max-w-8xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3 mb-4">
@@ -1420,7 +1425,11 @@ export default function BacklinkAutomation() {
           campaign={campaignToDelete}
           isDeleting={isDeleting}
         />
+        </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }
