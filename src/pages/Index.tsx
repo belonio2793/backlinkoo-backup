@@ -641,8 +641,7 @@ const Index = () => {
                 </li>
               </ul>
               <Button onClick={() => {
-                setLoginModalTab("login");
-                setShowLoginModal(true);
+                openLoginModal();
               }} className="font-medium">
                 Research Keywords
                 <ArrowRight className="ml-2 h-4 w-4" />
