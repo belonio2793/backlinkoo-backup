@@ -1,0 +1,160 @@
+/* Waitlist Modal Animations */
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-soft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+/* Apply animations */
+.waitlist-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.waitlist-pulse {
+  animation: pulse-soft 2s ease-in-out infinite;
+}
+
+.waitlist-slide-up {
+  animation: slide-up 0.6s ease-out;
+}
+
+.waitlist-bounce {
+  animation: bounce-in 0.8s ease-out;
+}
+
+.waitlist-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background-size: 200px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Hover effects */
+.waitlist-hover-lift {
+  transition: all 0.3s ease;
+}
+
+.waitlist-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+/* Gradient text animation */
+.waitlist-gradient-text {
+  background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradient-shift 4s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Success confetti effect */
+.waitlist-confetti {
+  position: relative;
+  overflow: hidden;
+}
+
+.waitlist-confetti::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 2px, transparent 2px);
+  background-size: 20px 20px;
+  animation: confetti-fall 3s linear infinite;
+}
+
+@keyframes confetti-fall {
+  0% {
+    transform: translateY(-100%) rotate(0deg);
+  }
+  100% {
+    transform: translateY(100%) rotate(360deg);
+  }
+}
+
+/* Button glow effect */
+.waitlist-glow-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.waitlist-glow-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transition: left 0.5s;
+}
+
+.waitlist-glow-button:hover::before {
+  left: 100%;
+}

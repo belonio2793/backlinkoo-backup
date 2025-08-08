@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
 
-type ModalType = 
-  | 'login' 
-  | 'signup' 
-  | 'premium' 
-  | 'savePost' 
-  | 'pricing' 
+type ModalType =
+  | 'login'
+  | 'signup'
+  | 'premium'
+  | 'savePost'
+  | 'pricing'
   | 'claim'
+  | 'waitlist'
   | null;
 
 interface ModalState {
@@ -104,11 +105,22 @@ export function usePremiumModal() {
 
 export function useSavePostModal() {
   const { openModal, closeModal, isModalOpen, hasActiveModal } = useModal();
-  
+
   return {
     openSavePostModal: (props?: any) => openModal('savePost', props),
     closeSavePostModal: closeModal,
     isSavePostOpen: isModalOpen('savePost'),
+    hasActiveModal
+  };
+}
+
+export function useWaitlistModal() {
+  const { openModal, closeModal, isModalOpen, hasActiveModal } = useModal();
+
+  return {
+    openWaitlistModal: (props?: any) => openModal('waitlist', props),
+    closeWaitlistModal: closeModal,
+    isWaitlistOpen: isModalOpen('waitlist'),
     hasActiveModal
   };
 }

@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1080" width="1080" height="1080">
+  <defs>
+    <linearGradient id="instaBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea"/>
+      <stop offset="100%" style="stop-color:#764ba2"/>
+    </linearGradient>
+    <filter id="textGlow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1080" height="1080" fill="url(#instaBg)"/>
+  
+  <!-- Decorative Pattern -->
+  <circle cx="200" cy="200" r="100" fill="white" opacity="0.05"/>
+  <circle cx="880" cy="880" r="150" fill="white" opacity="0.05"/>
+  <circle cx="880" cy="200" r="80" fill="white" opacity="0.08"/>
+  
+  <!-- Main Logo -->
+  <g transform="translate(440, 300)">
+    <path d="M0 50 C0 22, 22 0, 50 0 C78 0, 100 22, 100 50 C100 78, 78 100, 50 100 C78 100, 100 122, 100 150 C100 178, 78 200, 50 200 C22 200, 0 178, 0 150 C0 122, 22 100, 50 100 C22 100, 0 78, 0 50 Z" 
+          fill="white" 
+          filter="url(#textGlow)"
+          stroke="rgba(255,255,255,0.3)" 
+          stroke-width="2"/>
+    <circle cx="50" cy="50" r="10" fill="rgba(255,255,255,0.9)"/>
+    <circle cx="50" cy="150" r="10" fill="rgba(255,255,255,0.9)"/>
+  </g>
+  
+  <!-- Company Name -->
+  <text x="540" y="580" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="white" text-anchor="middle" filter="url(#textGlow)">
+    Backlink ∞
+  </text>
+  <text x="540" y="620" font-family="Arial, sans-serif" font-size="24" font-weight="normal" fill="rgba(255,255,255,0.9)" text-anchor="middle">
+    SEO Tools Suite
+  </text>
+  
+  <!-- Value Proposition -->
+  <text x="540" y="700" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#fbbf24" text-anchor="middle" filter="url(#textGlow)">
+    Earn Up to 35% Commission
+  </text>
+  <text x="540" y="740" font-family="Arial, sans-serif" font-size="20" font-weight="normal" fill="white" text-anchor="middle">
+    Join 1000+ Successful Affiliates
+  </text>
+  
+  <!-- CTA -->
+  <rect x="340" y="800" width="400" height="80" rx="40" fill="white" opacity="0.95"/>
+  <text x="540" y="830" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1e40af" text-anchor="middle">
+    START EARNING TODAY
+  </text>
+  <text x="540" y="855" font-family="Arial, sans-serif" font-size="16" font-weight="normal" fill="#7c3aed" text-anchor="middle">
+    No experience required
+  </text>
+  
+  <!-- Bottom branding -->
+  <text x="540" y="1000" font-family="Arial, sans-serif" font-size="18" font-weight="normal" fill="rgba(255,255,255,0.7)" text-anchor="middle">
+    #AffiliateProgram #SEOTools #PassiveIncome
+  </text>
+</svg>

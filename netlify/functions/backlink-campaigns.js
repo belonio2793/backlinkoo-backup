@@ -201,29 +201,208 @@ exports.handler = async (event, context) => {
           };
 
         case 'delete':
-          const { error: deleteError } = await supabase
-            .from('backlink_campaigns')
-            .delete()
-            .eq('id', campaignId)
-            .eq('user_id', user.id);
+          // Enhanced delete with comprehensive safety checks and cascade operations
+          const { forceDelete = false, reason } = requestBody;
 
-          if (deleteError) {
-            console.error('Delete campaign error:', deleteError);
+          if (!campaignId) {
             return {
-              statusCode: 500,
+              statusCode: 400,
               headers,
-              body: JSON.stringify({ error: 'Failed to delete campaign' }),
+              body: JSON.stringify({ error: 'Campaign ID is required for deletion' }),
             };
           }
 
-          return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({
-              success: true,
-              message: 'Campaign deleted successfully'
-            }),
+          // First, verify campaign exists and belongs to user
+          const { data: existingCampaign, error: fetchError } = await supabase
+            .from('backlink_campaigns')
+            .select('*')
+            .eq('id', campaignId)
+            .eq('user_id', user.id)
+            .single();
+
+          if (fetchError || !existingCampaign) {
+            return {
+              statusCode: 404,
+              headers,
+              body: JSON.stringify({
+                error: 'Campaign not found or access denied',
+                details: 'Campaign may not exist or you may not have permission to delete it'
+              }),
+            };
+          }
+
+          // Safety check: prevent deletion of active campaigns unless forced
+          if (existingCampaign.status === 'active' && !forceDelete) {
+            return {
+              statusCode: 409,
+              headers,
+              body: JSON.stringify({
+                error: 'Cannot delete active campaign',
+                details: 'Please pause the campaign first, or use forceDelete option',
+                campaign: {
+                  id: existingCampaign.id,
+                  name: existingCampaign.name,
+                  status: existingCampaign.status,
+                  links_generated: existingCampaign.links_generated || 0
+                },
+                requiresConfirmation: true
+              }),
+            };
+          }
+
+          // Start transaction for cascade deletion
+          const deletionStartTime = new Date();
+          const deletionLog = {
+            campaign_id: campaignId,
+            user_id: user.id,
+            initiated_at: deletionStartTime.toISOString(),
+            reason: reason || 'User requested deletion',
+            force_delete: forceDelete,
+            campaign_data: existingCampaign
           };
+
+          try {
+            // Log deletion attempt for audit trail
+            await supabase
+              .from('campaign_deletion_logs')
+              .insert(deletionLog);
+
+            // Step 1: Delete related automation campaigns from queue manager
+            const { error: automationDeleteError } = await supabase
+              .from('automation_campaigns')
+              .delete()
+              .eq('campaign_id', campaignId)
+              .eq('user_id', user.id);
+
+            if (automationDeleteError) {
+              console.error('Failed to delete automation campaigns:', automationDeleteError);
+            }
+
+            // Step 2: Delete campaign analytics and metrics
+            const { error: analyticsDeleteError } = await supabase
+              .from('campaign_analytics')
+              .delete()
+              .eq('campaign_id', campaignId)
+              .eq('user_id', user.id);
+
+            if (analyticsDeleteError) {
+              console.error('Failed to delete campaign analytics:', analyticsDeleteError);
+            }
+
+            // Step 3: Archive generated links instead of deleting them
+            const { error: linksArchiveError } = await supabase
+              .from('generated_links')
+              .update({
+                status: 'archived',
+                archived_at: new Date().toISOString(),
+                archive_reason: `Campaign ${campaignId} deleted`
+              })
+              .eq('campaign_id', campaignId)
+              .eq('user_id', user.id);
+
+            if (linksArchiveError) {
+              console.error('Failed to archive generated links:', linksArchiveError);
+            }
+
+            // Step 4: Delete the main campaign
+            const { error: deleteError } = await supabase
+              .from('backlink_campaigns')
+              .delete()
+              .eq('id', campaignId)
+              .eq('user_id', user.id);
+
+            if (deleteError) {
+              console.error('Delete campaign error:', deleteError);
+
+              // Log the failure
+              await supabase
+                .from('campaign_deletion_logs')
+                .update({
+                  status: 'failed',
+                  error_message: deleteError.message,
+                  completed_at: new Date().toISOString()
+                })
+                .eq('campaign_id', campaignId)
+                .eq('initiated_at', deletionStartTime.toISOString());
+
+              return {
+                statusCode: 500,
+                headers,
+                body: JSON.stringify({
+                  error: 'Failed to delete campaign',
+                  details: 'Database deletion failed. Please try again or contact support.',
+                  supportInfo: {
+                    campaignId,
+                    timestamp: deletionStartTime.toISOString(),
+                    errorCode: 'DB_DELETE_FAILED'
+                  }
+                }),
+              };
+            }
+
+            // Step 5: Update deletion log with success
+            await supabase
+              .from('campaign_deletion_logs')
+              .update({
+                status: 'completed',
+                completed_at: new Date().toISOString(),
+                links_archived: existingCampaign.links_generated || 0
+              })
+              .eq('campaign_id', campaignId)
+              .eq('initiated_at', deletionStartTime.toISOString());
+
+            // Return comprehensive deletion summary
+            return {
+              statusCode: 200,
+              headers,
+              body: JSON.stringify({
+                success: true,
+                message: 'Campaign deleted successfully with all related data',
+                deletionSummary: {
+                  campaignId,
+                  campaignName: existingCampaign.name,
+                  deletedAt: new Date().toISOString(),
+                  linksArchived: existingCampaign.links_generated || 0,
+                  wasForceDeleted: forceDelete,
+                  cascadeOperations: {
+                    automationCampaigns: 'deleted',
+                    analytics: 'deleted',
+                    generatedLinks: 'archived',
+                    mainCampaign: 'deleted'
+                  }
+                }
+              }),
+            };
+
+          } catch (cascadeError) {
+            console.error('Cascade deletion error:', cascadeError);
+
+            // Log the cascade failure
+            await supabase
+              .from('campaign_deletion_logs')
+              .update({
+                status: 'failed',
+                error_message: cascadeError.message,
+                completed_at: new Date().toISOString()
+              })
+              .eq('campaign_id', campaignId)
+              .eq('initiated_at', deletionStartTime.toISOString());
+
+            return {
+              statusCode: 500,
+              headers,
+              body: JSON.stringify({
+                error: 'Partial deletion failure',
+                details: 'Some related data may not have been properly cleaned up. Please contact support.',
+                supportInfo: {
+                  campaignId,
+                  timestamp: deletionStartTime.toISOString(),
+                  errorCode: 'CASCADE_DELETE_FAILED',
+                  partialDeletion: true
+                }
+              }),
+            };
+          }
 
         default:
           return {

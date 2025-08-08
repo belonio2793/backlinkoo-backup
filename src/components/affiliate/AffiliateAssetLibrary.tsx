@@ -94,9 +94,9 @@ export const AffiliateAssetLibrary: React.FC<AffiliateAssetLibraryProps> = ({
             type: 'banner',
             category: 'banners',
             dimensions: '728x90',
-            fileUrl: '/api/assets/banner_728x90_blue.png',
-            previewUrl: '/api/assets/preview/banner_728x90_blue.png',
-            description: 'Professional leaderboard banner with high conversion rate',
+            fileUrl: '/assets/banners/affiliate-banner-728x90.svg',
+            previewUrl: '/assets/banners/affiliate-banner-728x90.svg',
+            description: 'Professional leaderboard banner with affiliate messaging and high conversion rate',
             downloadCount: 1247,
             isPopular: true,
             customizable: true
@@ -191,6 +191,62 @@ export const AffiliateAssetLibrary: React.FC<AffiliateAssetLibraryProps> = ({
         ]
       },
       {
+        id: 'brand',
+        name: 'Brand Assets',
+        description: 'Official logos, brand guidelines, and identity assets',
+        icon: Award,
+        assets: [
+          {
+            id: 'brand_logo_primary',
+            name: 'Primary Logo (SVG)',
+            type: 'brand',
+            category: 'brand',
+            dimensions: '200x60',
+            fileUrl: '/assets/logos/backlink-logo-primary.svg',
+            previewUrl: '/assets/logos/backlink-logo-primary.svg',
+            description: 'Primary brand logo with gradient colors - SVG format',
+            downloadCount: 3456,
+            isPopular: true,
+            customizable: false
+          },
+          {
+            id: 'brand_logo_white',
+            name: 'White Logo (SVG)',
+            type: 'brand',
+            category: 'brand',
+            dimensions: '200x60',
+            fileUrl: '/assets/logos/backlink-logo-white.svg',
+            previewUrl: '/assets/logos/backlink-logo-white.svg',
+            description: 'White version for dark backgrounds - SVG format',
+            downloadCount: 2987,
+            isPopular: true,
+            customizable: false
+          },
+          {
+            id: 'brand_guidelines',
+            name: 'Brand Guidelines PDF',
+            type: 'brand',
+            category: 'brand',
+            fileUrl: '/brand-guidelines.pdf',
+            description: 'Complete brand identity guidelines and usage instructions',
+            downloadCount: 1234,
+            customizable: false,
+            isNew: true
+          },
+          {
+            id: 'brand_colors',
+            name: 'Brand Color Palette',
+            type: 'brand',
+            category: 'brand',
+            fileUrl: '/assets/brand-kit/brand-colors.json',
+            previewUrl: '/assets/brand-kit/brand-colors.json',
+            description: 'Official brand colors with hex codes, RGB values, and usage guidelines',
+            downloadCount: 987,
+            customizable: false
+          }
+        ]
+      },
+      {
         id: 'social',
         name: 'Social Media',
         description: 'Social media posts and graphics',
@@ -202,9 +258,9 @@ export const AffiliateAssetLibrary: React.FC<AffiliateAssetLibraryProps> = ({
             type: 'social',
             category: 'social',
             dimensions: '1080x1080',
-            fileUrl: '/api/assets/instagram_square.png',
-            previewUrl: '/api/assets/preview/instagram_square.png',
-            description: 'Instagram-optimized square post design',
+            fileUrl: '/assets/social/instagram-post-1080x1080.svg',
+            previewUrl: '/assets/social/instagram-post-1080x1080.svg',
+            description: 'Instagram-optimized square post design with affiliate messaging',
             downloadCount: 1234,
             isPopular: true,
             customizable: true
@@ -215,9 +271,9 @@ export const AffiliateAssetLibrary: React.FC<AffiliateAssetLibraryProps> = ({
             type: 'social',
             category: 'social',
             dimensions: '1200x630',
-            fileUrl: '/api/assets/facebook_cover.png',
-            previewUrl: '/api/assets/preview/facebook_cover.png',
-            description: 'Facebook cover image with call-to-action',
+            fileUrl: '/assets/social/facebook-cover-1200x630.svg',
+            previewUrl: '/assets/social/facebook-cover-1200x630.svg',
+            description: 'Professional Facebook cover with affiliate program benefits',
             downloadCount: 789,
             customizable: true
           },
@@ -351,6 +407,90 @@ export const AffiliateAssetLibrary: React.FC<AffiliateAssetLibraryProps> = ({
             <Zap className="w-4 h-4 mr-2" />
             Request Custom Asset
           </Button>
+        </div>
+      </div>
+
+      {/* Brand Assets Highlight */}
+      <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-orange-50 rounded-xl p-6 border border-blue-200">
+        <div className="flex items-center gap-3 mb-4">
+          <Award className="w-8 h-8 text-blue-600" />
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Official Brand Assets</h2>
+            <p className="text-gray-600">Download official logos, brand guidelines, and identity assets</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                <img src="/assets/logos/backlink-logo-primary.svg" alt="Primary Logo" className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Primary Logo</h3>
+                <p className="text-sm text-gray-600">SVG format</p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              className="w-full"
+              onClick={() => {
+                const brandAsset = assets.find(cat => cat.id === 'brand')?.assets.find(asset => asset.id === 'brand_logo_primary');
+                if (brandAsset) downloadAsset(brandAsset);
+              }}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+          </div>
+
+          <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 bg-gray-900 rounded-lg flex items-center justify-center">
+                <img src="/assets/logos/backlink-logo-white.svg" alt="White Logo" className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">White Logo</h3>
+                <p className="text-sm text-gray-600">For dark backgrounds</p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                const brandAsset = assets.find(cat => cat.id === 'brand')?.assets.find(asset => asset.id === 'brand_logo_white');
+                if (brandAsset) downloadAsset(brandAsset);
+              }}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+          </div>
+
+          <div className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                <Palette className="w-6 h-6 text-purple-600" />
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">Brand Colors</h3>
+                <p className="text-sm text-gray-600">Color palette & guidelines</p>
+              </div>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full"
+              onClick={() => {
+                const brandAsset = assets.find(cat => cat.id === 'brand')?.assets.find(asset => asset.id === 'brand_colors');
+                if (brandAsset) downloadAsset(brandAsset);
+              }}
+            >
+              <Download className="w-4 h-4 mr-2" />
+              Download
+            </Button>
+          </div>
         </div>
       </div>
 

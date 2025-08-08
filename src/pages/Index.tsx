@@ -43,7 +43,8 @@ import { InlineAuthForm } from "@/components/InlineAuthForm";
 import { TrialConversionBanner } from "@/components/TrialConversionBanner";
 import { QuickTrialUpgrade } from "@/components/QuickTrialUpgrade";
 import { TrialConversionService } from "@/services/trialConversionService";
-import { useAuthModal, usePremiumModal } from "@/contexts/ModalContext";
+import { useAuthModal, usePremiumModal, useWaitlistModal, useModal } from "@/contexts/ModalContext";
+import { WaitlistModal } from "@/components/WaitlistModal";
 
 
 
@@ -60,6 +61,11 @@ const Index = () => {
   // Unified modal management
   const { openLoginModal, openSignupModal } = useAuthModal();
   const { openPremiumModal } = usePremiumModal();
+  const { openWaitlistModal, closeWaitlistModal, isWaitlistOpen } = useWaitlistModal();
+  const { currentModal } = useModal();
+
+  // Waitlist state
+  const [waitlistEmail, setWaitlistEmail] = useState('');
 
   const [useProductionGenerator, setUseProductionGenerator] = useState(false);
   const [showTrialUpgrade, setShowTrialUpgrade] = useState(false);
@@ -527,9 +533,21 @@ const Index = () => {
                 <input
                   type="email"
                   placeholder="Enter your email for early access"
+                  value={waitlistEmail}
+                  onChange={(e) => setWaitlistEmail(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      openWaitlistModal({ initialEmail: waitlistEmail.trim() });
+                    }
+                  }}
                   className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none"
                 />
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3">
+                <Button
+                  onClick={() => {
+                    openWaitlistModal({ initialEmail: waitlistEmail.trim() });
+                  }}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3"
+                >
                   Join Waitlist
                 </Button>
               </div>
@@ -1123,6 +1141,15 @@ const Index = () => {
 
       {/* Footer */}
       <Footer />
+
+      {/* Waitlist Modal */}
+      <WaitlistModal
+        isOpen={isWaitlistOpen}
+        onClose={closeWaitlistModal}
+        initialEmail={waitlistEmail}
+        modalProps={currentModal.type === 'waitlist' ? currentModal.props : undefined}
+        onSuccess={() => setWaitlistEmail('')}
+      />
 
       {/* Modals are now managed by UnifiedModalManager */}
     </div>

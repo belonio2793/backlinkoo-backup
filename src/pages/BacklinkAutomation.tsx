@@ -16,17 +16,22 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { 
+import {
   Infinity, Zap, Shield, Clock, TrendingUp, ExternalLink, Settings,
   BarChart3, Globe, MessageSquare, UserPlus, Mail, FileText,
   Play, Pause, Stop, Target, Search, Bot, AlertTriangle,
   Activity, Users, Database, Server, Brain, Eye,
-  CheckCircle, XCircle, Clock3, Loader2, ArrowUp, ArrowDown
+  CheckCircle, XCircle, Clock3, Loader2, ArrowUp, ArrowDown, Trash2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import ToolsHeader from '@/components/shared/ToolsHeader';
+import { Footer } from '@/components/Footer';
+import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
+import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
 
 // Import our enterprise engines
-import { CampaignQueueManager, type CampaignConfig, type QueuedCampaign } from '@/services/automationEngine/CampaignQueueManager';
+import { CampaignQueueManager, type CampaignConfig, type QueuedCampaign, type CampaignDeletionResult } from '@/services/automationEngine/CampaignQueueManager';
 import { LinkDiscoveryEngine, type DiscoveryConfig, type LinkOpportunity } from '@/services/automationEngine/LinkDiscoveryEngine';
 import { AnalyticsEngine, type CampaignAnalytics, type TimeRange } from '@/services/automationEngine/AnalyticsEngine';
 import { ContentGenerationEngine, type ContentContext, type ContentRequirements } from '@/services/automationEngine/ContentGenerationEngine';
@@ -79,6 +84,9 @@ interface RealTimeMetrics {
 }
 
 export default function BacklinkAutomation() {
+  // Auth Hook
+  const { user } = useAuth();
+
   // State Management
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [activeCampaign, setActiveCampaign] = useState<Campaign | null>(null);
@@ -104,6 +112,9 @@ export default function BacklinkAutomation() {
   const [analytics, setAnalytics] = useState<CampaignAnalytics | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTab, setSelectedTab] = useState('campaigns');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [campaignToDelete, setCampaignToDelete] = useState<Campaign | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
@@ -470,8 +481,12 @@ export default function BacklinkAutomation() {
 
   const pauseCampaign = async (campaignId: string) => {
     try {
+      // Use campaign service for backend call
+      await campaignService.pauseCampaign(campaignId);
+
+      // Also pause in queue manager
       await queueManager.pauseCampaign(campaignId);
-      
+
       setCampaigns(prev => prev.map(c =>
         c.id === campaignId ? { ...c, status: 'paused' as const } : c
       ));
@@ -482,6 +497,14 @@ export default function BacklinkAutomation() {
       });
     } catch (error) {
       console.error('Failed to pause campaign:', error);
+
+      await errorEngine.handleError(error as Error, {
+        component: 'campaign_pause',
+        operation: 'pause_campaign',
+        severity: 'medium',
+        metadata: { campaignId }
+      });
+
       toast({
         title: "Pause Failed",
         description: "Could not pause the campaign. Please try again.",
@@ -492,8 +515,12 @@ export default function BacklinkAutomation() {
 
   const resumeCampaign = async (campaignId: string) => {
     try {
+      // Use campaign service for backend call
+      await campaignService.resumeCampaign(campaignId);
+
+      // Also resume in queue manager
       await queueManager.resumeCampaign(campaignId);
-      
+
       setCampaigns(prev => prev.map(c =>
         c.id === campaignId ? { ...c, status: 'active' as const, lastActive: new Date() } : c
       ));
@@ -504,6 +531,14 @@ export default function BacklinkAutomation() {
       });
     } catch (error) {
       console.error('Failed to resume campaign:', error);
+
+      await errorEngine.handleError(error as Error, {
+        component: 'campaign_resume',
+        operation: 'resume_campaign',
+        severity: 'medium',
+        metadata: { campaignId }
+      });
+
       toast({
         title: "Resume Failed",
         description: "Could not resume the campaign. Please try again.",
@@ -537,6 +572,131 @@ export default function BacklinkAutomation() {
         variant: "destructive"
       });
     }
+  };
+
+  const handleDeleteClick = (campaign: Campaign) => {
+    setCampaignToDelete(campaign);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async (campaignId: string, options: CampaignDeletionOptions) => {
+    setIsDeleting(true);
+
+    try {
+      // Validate campaign before deletion
+      const validation = await campaignService.validateCampaignForDeletion(campaignId);
+
+      if (!validation.canDelete) {
+        throw new Error(`Cannot delete campaign: ${validation.warnings.join(', ')}`);
+      }
+
+      // Use the campaign service for deletion
+      const result = await campaignService.deleteCampaign(campaignId, options);
+
+      // Also delete from queue manager with proper error handling
+      let queueDeletionResult: CampaignDeletionResult | null = null;
+      try {
+        queueDeletionResult = await queueManager.deleteCampaign(
+          campaignId,
+          options.forceDelete
+        );
+      } catch (queueError) {
+        console.warn('Queue deletion failed but backend deletion succeeded:', queueError);
+        // Continue with the process as backend deletion was successful
+      }
+
+      // Remove from local state
+      setCampaigns(prev => prev.filter(c => c.id !== campaignId));
+
+      // Update system metrics
+      setSystemMetrics(prev => ({
+        ...prev,
+        activeCampaigns: campaigns.filter(c => c.id !== campaignId && c.status === 'active').length,
+        usedCapacity: Math.max(0, prev.usedCapacity - 1)
+      }));
+
+      // Update real-time metrics
+      setRealTimeMetrics(prev => ({
+        ...prev,
+        campaignsActive: campaigns.filter(c => c.id !== campaignId && c.status === 'active').length
+      }));
+
+      // Show success message with detailed information
+      toast({
+        title: "Campaign Deleted Successfully",
+        description: result.deletionSummary ?
+          `Campaign "${result.deletionSummary.campaignName}" has been deleted with ${result.deletionSummary.linksArchived} links archived.` :
+          "Campaign has been permanently deleted with all related data cleaned up.",
+      });
+
+      // Log comprehensive deletion information
+      console.log('Campaign deletion completed:', {
+        campaignId,
+        timestamp: new Date().toISOString(),
+        backendResult: result,
+        queueResult: queueDeletionResult,
+        options,
+        validationWarnings: validation.warnings
+      });
+
+    } catch (error) {
+      console.error('Campaign deletion failed:', error);
+
+      // Enhanced error handling with specific error types
+      let errorMessage = "An unexpected error occurred during deletion.";
+      let errorTitle = "Campaign Deletion Failed";
+
+      if (error instanceof Error) {
+        const apiError = error as CampaignApiError;
+
+        if (apiError.requiresConfirmation) {
+          errorTitle = "Confirmation Required";
+          errorMessage = apiError.message + " Please use force delete if you want to proceed.";
+        } else if (apiError.statusCode === 404) {
+          errorTitle = "Campaign Not Found";
+          errorMessage = "The campaign may have already been deleted or you don't have permission to delete it.";
+        } else if (apiError.statusCode === 409) {
+          errorTitle = "Cannot Delete Active Campaign";
+          errorMessage = apiError.details || "Please pause the campaign first or use force delete option.";
+        } else if (apiError.supportInfo) {
+          errorMessage = `${apiError.message} Support reference: ${apiError.supportInfo.errorCode}`;
+        } else {
+          errorMessage = apiError.message;
+        }
+      }
+
+      // Log error to error handling engine
+      await errorEngine.handleError(error as Error, {
+        component: 'campaign_deletion',
+        operation: 'delete_campaign',
+        severity: 'high',
+        metadata: {
+          campaignId,
+          forceDelete: options.forceDelete,
+          reason: options.reason,
+          confirmationText: options.confirmationText,
+          archiveLinks: options.archiveLinks,
+          errorType: (error as CampaignApiError).statusCode ? 'api_error' : 'unknown_error',
+          statusCode: (error as CampaignApiError).statusCode
+        }
+      });
+
+      toast({
+        title: errorTitle,
+        description: errorMessage,
+        variant: "destructive"
+      });
+
+      // Re-throw to prevent dialog from closing on error
+      throw error;
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteDialogOpen(false);
+    setCampaignToDelete(null);
   };
 
   const getStatusIcon = (status: Campaign['status']) => {
@@ -580,8 +740,13 @@ export default function BacklinkAutomation() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-6">
-      <div className="max-w-8xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      {/* Header */}
+      <ToolsHeader user={user} currentTool="automation" />
+
+      {/* Main Content */}
+      <div className="p-6">
+        <div className="max-w-8xl mx-auto space-y-6">
         {/* Header */}
         <div className="text-center space-y-4">
           <div className="flex items-center justify-center gap-3 mb-4">
@@ -883,6 +1048,15 @@ export default function BacklinkAutomation() {
                               ) : null}
                               <Button size="sm" variant="outline" onClick={() => loadCampaignAnalytics(campaign.id)}>
                                 <BarChart3 className="h-3 w-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDeleteClick(campaign)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 hover:border-red-300"
+                                title="Delete Campaign"
+                              >
+                                <Trash2 className="h-3 w-3" />
                               </Button>
                             </div>
                           </div>
@@ -1242,7 +1416,20 @@ export default function BacklinkAutomation() {
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Delete Campaign Dialog */}
+        <DeleteCampaignDialog
+          isOpen={deleteDialogOpen}
+          onClose={handleDeleteCancel}
+          onConfirm={handleDeleteConfirm}
+          campaign={campaignToDelete}
+          isDeleting={isDeleting}
+        />
+        </div>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

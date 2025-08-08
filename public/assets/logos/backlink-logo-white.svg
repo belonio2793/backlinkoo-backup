@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 60" width="200" height="60">
+  <defs>
+    <linearGradient id="whiteLogoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="50%" style="stop-color:#f1f5f9"/>
+      <stop offset="100%" style="stop-color:#ffffff"/>
+    </linearGradient>
+    <filter id="whiteGlow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Infinity Symbol -->
+  <g transform="translate(10, 15)">
+    <path d="M0 15 C0 7, 7 0, 15 0 C23 0, 30 7, 30 15 C30 23, 23 30, 15 30 C23 30, 30 37, 30 45 C30 53, 23 60, 15 60 C7 60, 0 53, 0 45 C0 37, 7 30, 15 30 C7 30, 0 23, 0 15 Z" 
+          fill="white" 
+          filter="url(#whiteGlow)"
+          stroke="#e2e8f0" 
+          stroke-width="1"/>
+    <circle cx="15" cy="15" r="3" fill="#f1f5f9" opacity="0.8"/>
+    <circle cx="15" cy="45" r="3" fill="#ffffff" opacity="0.8"/>
+  </g>
+  
+  <!-- Company Name -->
+  <text x="55" y="25" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white">
+    Backlink
+  </text>
+  <text x="55" y="45" font-family="Arial, sans-serif" font-size="12" font-weight="normal" fill="#e2e8f0">
+    SEO Tools Suite
+  </text>
+  
+  <!-- Infinity Symbol in text -->
+  <text x="140" y="25" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="white">
+    ∞
+  </text>
+</svg>
