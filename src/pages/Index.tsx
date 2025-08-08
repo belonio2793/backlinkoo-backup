@@ -532,9 +532,25 @@ const Index = () => {
                 <input
                   type="email"
                   placeholder="Enter your email for early access"
+                  value={waitlistEmail}
+                  onChange={(e) => setWaitlistEmail(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && waitlistEmail.trim()) {
+                      openWaitlistModal({ initialEmail: waitlistEmail.trim() });
+                    }
+                  }}
                   className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:outline-none"
                 />
-                <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3">
+                <Button
+                  onClick={() => {
+                    if (waitlistEmail.trim()) {
+                      openWaitlistModal({ initialEmail: waitlistEmail.trim() });
+                    } else {
+                      openWaitlistModal();
+                    }
+                  }}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-3"
+                >
                   Join Waitlist
                 </Button>
               </div>
