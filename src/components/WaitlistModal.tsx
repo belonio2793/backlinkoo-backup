@@ -19,7 +19,8 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
   isOpen,
   onClose,
   initialEmail = '',
-  modalProps
+  modalProps,
+  onSuccess
 }) => {
   const effectiveInitialEmail = modalProps?.initialEmail || initialEmail;
   const [step, setStep] = useState<'email' | 'signup' | 'success'>(effectiveInitialEmail ? 'signup' : 'email');
