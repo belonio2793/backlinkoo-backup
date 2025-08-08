@@ -21,23 +21,15 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
   // 3-second delay before showing popup
   useEffect(() => {
     if (isVisible) {
-      setTimeLeft(3);
       const timer = setTimeout(() => {
         setShowPopup(true);
       }, 3000);
 
-      // Countdown display
-      const countdown = setInterval(() => {
-        setTimeLeft(prev => prev > 0 ? prev - 1 : 0);
-      }, 1000);
-
       return () => {
         clearTimeout(timer);
-        clearInterval(countdown);
       };
     } else {
       setShowPopup(false);
-      setTimeLeft(3);
     }
   }, [isVisible]);
 
@@ -54,21 +46,7 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
   if (!isVisible) return null;
 
   if (!showPopup) {
-    return (
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-        <div className="bg-white p-6 rounded-lg shadow-lg text-center">
-          <div className="flex items-center justify-center mb-4">
-            <Clock className="h-6 w-6 text-blue-500 animate-pulse" />
-          </div>
-          <p className="text-lg font-medium text-gray-700">
-            Preparing important information...
-          </p>
-          <div className="mt-2 text-2xl font-bold text-blue-600">
-            {timeLeft}
-          </div>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (
