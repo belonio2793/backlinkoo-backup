@@ -271,9 +271,9 @@ export const AffiliateAssetLibrary: React.FC<AffiliateAssetLibraryProps> = ({
             type: 'social',
             category: 'social',
             dimensions: '1200x630',
-            fileUrl: '/api/assets/facebook_cover.png',
-            previewUrl: '/api/assets/preview/facebook_cover.png',
-            description: 'Facebook cover image with call-to-action',
+            fileUrl: '/assets/social/facebook-cover-1200x630.svg',
+            previewUrl: '/assets/social/facebook-cover-1200x630.svg',
+            description: 'Professional Facebook cover with affiliate program benefits',
             downloadCount: 789,
             customizable: true
           },
