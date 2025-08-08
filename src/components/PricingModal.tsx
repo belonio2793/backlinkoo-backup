@@ -483,34 +483,19 @@ export const PricingModal = ({
 
         {step === "auth" && (
           <div className="space-y-6">
-            <div className="text-center space-y-2">
-              <p className="text-muted-foreground">
-                Sign in to your account or create a new one to continue with your purchase.
-              </p>
-              <div className="flex items-center justify-center gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Track your orders</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Manage campaigns</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Access dashboard</span>
-                </div>
-              </div>
-            </div>
-            
-            <AuthFormTabs
+            <CheckoutAuthForm
               onAuthSuccess={handleAuthSuccess}
               defaultTab="signup"
+              orderSummary={{
+                credits: getFinalCreditsAndPrice().credits,
+                price: getFinalCreditsAndPrice().price,
+                planName: showCustomPlan ? `Custom ${getFinalCreditsAndPrice().credits} Credits` : pricingPlans.find(p => p.id === selectedPlan)?.name
+              }}
             />
-            
-            <div className="flex justify-center">
-              <Button 
-                variant="outline" 
+
+            <div className="flex justify-center pt-4 border-t">
+              <Button
+                variant="outline"
                 onClick={() => setStep("pricing")}
                 className="flex items-center gap-2"
               >
