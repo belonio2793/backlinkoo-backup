@@ -951,25 +951,7 @@ const Index = () => {
       {/* Footer */}
       <Footer />
 
-      {/* Login Modal */}
-      <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
-        onAuthSuccess={(user) => {
-          console.log('🎉 Index: Auth success, user:', user?.email);
-
-          // Close modal immediately
-          setShowLoginModal(false);
-
-          // Update user state
-          setUser(user);
-
-          // Navigate to dashboard instantly
-          console.log('🚀 Index: Navigating to dashboard instantly');
-          navigate('/dashboard');
-        }}
-        defaultTab={loginModalTab}
-      />
+      {/* Modals are now managed by UnifiedModalManager */}
     </div>
   );
 };
