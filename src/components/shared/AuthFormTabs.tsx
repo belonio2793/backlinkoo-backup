@@ -60,8 +60,8 @@ export function AuthFormTabs({
     e.preventDefault();
     if (isLoading) return;
 
-    const trimmedEmail = loginEmail.trim();
-    const trimmedPassword = loginPassword.trim();
+    const trimmedEmail = (loginEmail || "").trim();
+    const trimmedPassword = (loginPassword || "").trim();
 
     if (!trimmedEmail || !trimmedPassword) {
       toast({
@@ -85,7 +85,10 @@ export function AuthFormTabs({
     setLoadingMessage("Signing you in...");
 
     try {
-      const result = await AuthService.signIn(trimmedEmail, trimmedPassword);
+      const result = await AuthService.signIn({
+        email: trimmedEmail,
+        password: trimmedPassword
+      });
 
       if (result.success && result.user) {
         toast({
@@ -122,10 +125,10 @@ export function AuthFormTabs({
     e.preventDefault();
     if (isLoading) return;
 
-    const trimmedEmail = signupEmail.trim();
-    const trimmedPassword = signupPassword.trim();
-    const trimmedConfirmPassword = confirmPassword.trim();
-    const trimmedFirstName = firstName.trim();
+    const trimmedEmail = (signupEmail || "").trim();
+    const trimmedPassword = (signupPassword || "").trim();
+    const trimmedConfirmPassword = (confirmPassword || "").trim();
+    const trimmedFirstName = (firstName || "").trim();
 
     if (!trimmedEmail || !trimmedPassword || !trimmedConfirmPassword || !trimmedFirstName) {
       toast({
@@ -167,11 +170,11 @@ export function AuthFormTabs({
     setLoadingMessage("Creating your account...");
 
     try {
-      const result = await AuthService.signUp(
-        trimmedEmail,
-        trimmedPassword,
-        trimmedFirstName
-      );
+      const result = await AuthService.signUp({
+        email: trimmedEmail,
+        password: trimmedPassword,
+        firstName: trimmedFirstName
+      });
 
       if (result.success && result.user) {
         toast({
@@ -256,7 +259,7 @@ export function AuthFormTabs({
                 <Input
                   id="login-password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••"
+                  placeholder="•••���••••"
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   className={inputHeight}

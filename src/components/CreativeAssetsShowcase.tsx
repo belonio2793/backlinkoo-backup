@@ -110,7 +110,7 @@ const CreativeAssetsShowcase: React.FC<{
   const handlePreview = async (name: string, preview: string) => {
     try {
       // Find the asset details
-      const asset = [...displayBanners, ...brandAssets].find(a => a.name === name);
+      const asset = [...displayBanners, ...socialAssets].find(a => a.name === name);
       if (asset) {
         // Generate high-quality asset for preview
         const dataUrl = await generateAsset(asset.name);
@@ -519,45 +519,91 @@ const CreativeAssetsShowcase: React.FC<{
 
   const brandAssets = [
     {
-      name: 'Backlink Logo',
+      name: 'Premium Logo Suite',
       size: '1024x1024',
       format: 'PNG',
-      description: 'Primary brand logo',
+      description: 'High-end primary brand logo',
       category: 'brand',
       preview: (
-        <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden aspect-square shadow-2xl flex items-center justify-center">
-          <div className="w-40 h-40 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-2xl animate-pulse">
-            <span className="text-6xl font-black text-gray-900">∞</span>
-          </div>
-          <div className="absolute bottom-6 left-6 right-6 text-center">
-            <h3 className="text-white font-black text-3xl drop-shadow-xl">Backlink</h3>
+        <div className="relative bg-gradient-to-br from-slate-900 via-indigo-900 to-purple-900 rounded-2xl overflow-hidden aspect-square shadow-2xl">
+          {/* Background elements */}
+          <div className="absolute inset-0 bg-gradient-to-br from-yellow-400/10 via-transparent to-purple-500/10"></div>
+          <div className="absolute top-8 right-8 w-4 h-4 bg-yellow-400 rounded-full animate-ping"></div>
+          <div className="absolute bottom-12 left-12 w-3 h-3 bg-cyan-400 rounded-full animate-pulse"></div>
+
+          {/* Main logo container */}
+          <div className="relative h-full flex flex-col items-center justify-center p-8">
+            {/* Premium logo circle with multiple gradients */}
+            <div className="relative mb-6">
+              <div className="w-48 h-48 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-2xl relative">
+                <div className="absolute inset-2 bg-gradient-to-br from-yellow-300 to-orange-400 rounded-full"></div>
+                <div className="relative z-10">
+                  <span className="text-7xl font-black text-gray-900 drop-shadow-lg">∞</span>
+                </div>
+              </div>
+              {/* Glow ring */}
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 blur-xl opacity-30 scale-110"></div>
+            </div>
+
+            {/* Brand name with premium styling */}
+            <div className="text-center">
+              <h3 className="text-white font-black text-5xl drop-shadow-2xl mb-2 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+                Backlink ∞
+              </h3>
+              <div className="bg-gradient-to-r from-yellow-400 to-orange-500 h-1 w-32 mx-auto rounded-full"></div>
+            </div>
           </div>
         </div>
       )
     },
     {
-      name: 'Logo + Tagline',
+      name: 'Professional Wordmark',
       size: '1920x1080',
       format: 'PNG',
-      description: 'Logo with tagline combination',
+      description: 'Corporate logo with professional tagline',
       category: 'brand',
       preview: (
-        <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden aspect-video shadow-2xl flex flex-col items-center justify-center p-8">
-          <div className="flex items-center gap-6 mb-4">
-            <div className="w-20 h-20 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-xl">
-              <span className="text-3xl font-black text-gray-900">∞</span>
+        <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-indigo-900 rounded-2xl overflow-hidden aspect-video shadow-2xl">
+          {/* Subtle grid pattern */}
+          <div className="absolute inset-0 opacity-10" style={{
+            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
+            backgroundSize: '30px 30px'
+          }}></div>
+
+          {/* Main content */}
+          <div className="relative h-full flex items-center justify-center p-12">
+            <div className="text-center">
+              {/* Logo and brand name combination */}
+              <div className="flex items-center justify-center gap-8 mb-6">
+                <div className="w-24 h-24 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-full flex items-center justify-center shadow-2xl relative">
+                  <span className="text-4xl font-black text-gray-900">∞</span>
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400 to-orange-500 blur-lg opacity-30 scale-125"></div>
+                </div>
+                <div>
+                  <h3 className="text-white font-black text-6xl drop-shadow-2xl bg-gradient-to-r from-white via-gray-100 to-white bg-clip-text text-transparent">
+                    Backlink ∞
+                  </h3>
+                  <div className="bg-gradient-to-r from-transparent via-yellow-400 to-transparent h-1 w-full mt-2"></div>
+                </div>
+              </div>
+
+              {/* Professional tagline */}
+              <p className="text-gray-300 text-3xl font-bold mb-4">
+                Enterprise AI Link Building Platform
+              </p>
+              <p className="text-blue-300 text-xl font-medium max-w-2xl mx-auto leading-relaxed">
+                Trusted by 10,000+ SEO professionals worldwide for automated, high-authority backlink acquisition
+              </p>
             </div>
-            <h3 className="text-white font-black text-5xl drop-shadow-xl">Backlink</h3>
           </div>
-          <p className="text-gray-300 text-2xl font-bold text-center">Automated Link Building Platform</p>
         </div>
       )
     },
     {
-      name: 'Icon Only',
+      name: 'App Icon Collection',
       size: '512x512',
       format: 'PNG',
-      description: 'Standalone icon version',
+      description: 'Modern app icon with variants',
       category: 'brand',
       preview: (
         <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden aspect-square shadow-2xl flex items-center justify-center">
@@ -566,6 +612,118 @@ const CreativeAssetsShowcase: React.FC<{
             <span className="text-6xl font-black text-white drop-shadow-xl">��</span>
           </div>
           <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-white/10 rounded-2xl"></div>
+        </div>
+      )
+    },
+    {
+      name: 'Affiliate Badge Set',
+      size: '800x600',
+      format: 'PNG',
+      description: 'Partner & affiliate identification badges',
+      category: 'brand',
+      preview: (
+        <div className="relative bg-gradient-to-br from-emerald-900 via-green-800 to-teal-900 rounded-2xl overflow-hidden shadow-2xl" style={{ aspectRatio: '4/3' }}>
+          <div className="relative h-full flex flex-col items-center justify-center p-6 text-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full flex items-center justify-center mb-4 shadow-xl">
+              <span className="text-2xl">👑</span>
+            </div>
+            <div className="bg-gradient-to-r from-emerald-400 to-green-400 text-gray-900 px-6 py-3 rounded-full font-black text-xl mb-3 shadow-xl">
+              OFFICIAL PARTNER
+            </div>
+            <h4 className="text-white font-black text-2xl mb-2">Backlink ∞</h4>
+            <p className="text-emerald-200 text-lg font-bold mb-4">Authorized Affiliate</p>
+            <div className="grid grid-cols-2 gap-4 text-center">
+              <div className="bg-white/10 rounded-lg p-3 backdrop-blur">
+                <div className="text-yellow-300 font-black text-lg">20%</div>
+                <div className="text-white text-sm">Commission</div>
+              </div>
+              <div className="bg-white/10 rounded-lg p-3 backdrop-blur">
+                <div className="text-green-300 font-black text-lg">24/7</div>
+                <div className="text-white text-sm">Support</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      name: 'Social Media Kit',
+      size: '1200x1200',
+      format: 'PNG',
+      description: 'Profile picture & cover optimized',
+      category: 'brand',
+      preview: (
+        <div className="relative bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 rounded-2xl overflow-hidden aspect-square shadow-2xl">
+          <div className="relative h-full flex flex-col items-center justify-center p-8 text-center">
+            <div className="relative mb-6">
+              <div className="w-32 h-32 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 rounded-full flex items-center justify-center shadow-2xl relative">
+                <span className="text-5xl font-black text-white">∞</span>
+                <div className="absolute inset-0 rounded-full border-4 border-white/30"></div>
+              </div>
+            </div>
+            <h3 className="text-white font-black text-3xl mb-2 drop-shadow-xl">@BacklinkInfinity</h3>
+            <p className="text-purple-200 text-lg font-bold mb-4">🚀 AI Link Building</p>
+            <p className="text-indigo-200 text-sm font-medium mb-4">10K+ SEO Professionals</p>
+            <div className="flex items-center gap-4 text-sm">
+              <div className="text-center">
+                <div className="text-yellow-300 font-black">15.2K</div>
+                <div className="text-white/80">Followers</div>
+              </div>
+              <div className="text-center">
+                <div className="text-green-300 font-black">2.8K</div>
+                <div className="text-white/80">Partners</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      name: 'Presentation Template',
+      size: '1920x1080',
+      format: 'PNG',
+      description: 'Professional slide & pitch deck ready',
+      category: 'brand',
+      preview: (
+        <div className="relative bg-gradient-to-br from-gray-900 via-slate-800 to-gray-900 rounded-2xl overflow-hidden aspect-video shadow-2xl">
+          <div className="relative h-full p-8">
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <span className="text-xl font-black text-white">∞</span>
+                </div>
+                <div>
+                  <h3 className="text-white font-bold text-xl">Backlink ∞</h3>
+                  <p className="text-gray-400 text-sm">Enterprise Link Building Platform</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-gray-400 text-sm">Partner Presentation</div>
+                <div className="text-white text-lg font-semibold">2025 Overview</div>
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-8 h-32">
+              <div>
+                <h2 className="text-white font-black text-2xl mb-4">Revenue Growth</h2>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                    <span className="text-gray-300 text-sm">Partner Revenue: +180%</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-blue-400 rounded-full"></div>
+                    <span className="text-gray-300 text-sm">Active Affiliates: 10,000+</span>
+                  </div>
+                </div>
+              </div>
+              <div className="text-center">
+                <div className="bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-lg p-4 border border-blue-500/30">
+                  <div className="text-blue-300 text-3xl font-black mb-2">$2.3M</div>
+                  <div className="text-gray-300 text-sm">Total Partner Payouts</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )
     }
@@ -637,37 +795,6 @@ const CreativeAssetsShowcase: React.FC<{
         </div>
       </div>
 
-      {/* BRAND ASSETS SECTION */}
-      <div className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 rounded-3xl p-10 border border-blue-500/20 shadow-2xl relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-transparent to-cyan-500/10"></div>
-        <div className="relative">
-          <div className="flex items-center gap-6 mb-10">
-            <div className="p-4 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl shadow-xl">
-              <FileText className="h-8 w-8 text-white" />
-            </div>
-            <div>
-              <h4 className="text-3xl font-black text-white mb-2">Brand Assets</h4>
-              <p className="text-blue-200 text-xl">Professional brand elements for consistent marketing</p>
-            </div>
-            <div className="ml-auto flex items-center gap-2">
-              <Star className="h-6 w-6 text-yellow-400 animate-pulse" />
-              <Crown className="h-6 w-6 text-blue-400" />
-              <Sparkles className="h-6 w-6 text-cyan-400 animate-pulse" />
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
-            {brandAssets.map((asset) => (
-              <AssetCard
-                key={asset.name}
-                asset={asset}
-                onDownload={handleDownload}
-                onPreview={handlePreview}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
 
       {/* Asset Preview Modal */}
       {showPreviewModal && currentPreviewAsset && (

@@ -26,7 +26,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import { AuthFormTabs } from "@/components/shared/AuthFormTabs";
+import { CheckoutAuthForm } from "@/components/CheckoutAuthForm";
 
 interface PricingModalProps {
   isOpen: boolean;
@@ -304,7 +304,7 @@ export const PricingModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl lg:max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="w-[95vw] max-w-lg sm:max-w-2xl lg:max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-2xl">
             <Sparkles className="h-6 w-6 text-primary" />
@@ -483,34 +483,19 @@ export const PricingModal = ({
 
         {step === "auth" && (
           <div className="space-y-6">
-            <div className="text-center space-y-2">
-              <p className="text-muted-foreground">
-                Sign in to your account or create a new one to continue with your purchase.
-              </p>
-              <div className="flex items-center justify-center gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Track your orders</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Manage campaigns</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4 text-green-500" />
-                  <span>Access dashboard</span>
-                </div>
-              </div>
-            </div>
-            
-            <AuthFormTabs
+            <CheckoutAuthForm
               onAuthSuccess={handleAuthSuccess}
               defaultTab="signup"
+              orderSummary={{
+                credits: getFinalCreditsAndPrice().credits,
+                price: getFinalCreditsAndPrice().price,
+                planName: showCustomPlan ? `Custom ${getFinalCreditsAndPrice().credits} Credits` : pricingPlans.find(p => p.id === selectedPlan)?.name
+              }}
             />
-            
-            <div className="flex justify-center">
-              <Button 
-                variant="outline" 
+
+            <div className="flex justify-center pt-4 border-t">
+              <Button
+                variant="outline"
                 onClick={() => setStep("pricing")}
                 className="flex items-center gap-2"
               >
