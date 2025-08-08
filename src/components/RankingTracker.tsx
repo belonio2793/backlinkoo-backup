@@ -338,10 +338,10 @@ export const RankingTracker = () => {
         .join(', ');
 
       toast({
-        title: "Analysis Complete",
-        description: foundSummary 
+        title: "🎉 Rank Check Complete",
+        description: foundSummary
           ? `Found on: ${foundSummary}`
-          : "Not ranking in top 100",
+          : "Not found in top 100 results - try different keywords or improve SEO",
       });
 
     } catch (error) {
