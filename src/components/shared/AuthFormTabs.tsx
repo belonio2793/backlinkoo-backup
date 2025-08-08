@@ -325,13 +325,14 @@ export function AuthFormTabs({
   const spacingClass = isCompact ? "space-y-3" : "space-y-4";
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className={`w-full ${className}`}>
-      <TabsList className="grid w-full grid-cols-2">
-        <TabsTrigger value="login">Sign In</TabsTrigger>
-        <TabsTrigger value="signup">
-          {showTrialUpgrade ? "Upgrade" : "Create Account"}
-        </TabsTrigger>
-      </TabsList>
+    <div className={`w-full ${className}`}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2 mb-6">
+          <TabsTrigger value="login">Sign In</TabsTrigger>
+          <TabsTrigger value="signup">
+            {showTrialUpgrade ? "Upgrade" : "Create Account"}
+          </TabsTrigger>
+        </TabsList>
 
       <TabsContent value="login">
         <form onSubmit={handleLogin} className={spacingClass}>
@@ -513,6 +514,7 @@ export function AuthFormTabs({
           </div>
         )}
       </TabsContent>
-    </Tabs>
+      </Tabs>
+    </div>
   );
 }
