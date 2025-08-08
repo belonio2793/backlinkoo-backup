@@ -24,6 +24,9 @@ import {
   CheckCircle, XCircle, Clock3, Loader2, ArrowUp, ArrowDown, Trash2
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
+import ToolsHeader from '@/components/shared/ToolsHeader';
+import { Footer } from '@/components/Footer';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
 
