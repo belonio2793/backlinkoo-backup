@@ -1,16 +1,6 @@
 // Email regex pattern for extracting emails
 const EMAIL_REGEX = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
 
-// Search engines and APIs to find pages
-const SEARCH_ENGINES = [
-  {
-    name: 'DuckDuckGo',
-    url: (query, page = 0) => `https://duckduckgo.com/html/?q=${encodeURIComponent(query)}&s=${page * 20}`,
-    selector: '.result__url',
-    parseUrl: (element) => element.textContent?.trim()
-  }
-];
-
 // Helper function to extract domain from URL
 function extractDomain(url) {
   try {
@@ -49,32 +39,31 @@ function extractEmails(text, sourceUrl) {
   }));
 }
 
-// Helper function to search for URLs using DuckDuckGo scraping
+// Helper function to search for URLs using keyword
 async function searchUrls(keyword, maxPages = 3) {
   const urls = new Set();
   
   try {
-    for (let page = 0; page < maxPages; page++) {
-      // Use a public search API or scraping service
-      // For demo purposes, we'll simulate finding URLs related to the keyword
-      const simulatedUrls = [
-        `https://${keyword.replace(/\s+/g, '')}.com`,
-        `https://www.${keyword.replace(/\s+/g, '')}.org`,
-        `https://${keyword.replace(/\s+/g, '')}-company.com`,
-        `https://best-${keyword.replace(/\s+/g, '')}.com`,
-        `https://${keyword.replace(/\s+/g, '')}-services.net`,
-        `https://pro-${keyword.replace(/\s+/g, '')}.com`,
-        `https://${keyword.replace(/\s+/g, '')}-expert.com`,
-        `https://top-${keyword.replace(/\s+/g, '')}.com`,
-        `https://${keyword.replace(/\s+/g, '')}-solutions.com`,
-        `https://premium-${keyword.replace(/\s+/g, '')}.com`
-      ];
-      
-      simulatedUrls.forEach(url => urls.add(url));
-      
-      // Add some delay between requests
-      await new Promise(resolve => setTimeout(resolve, 1000));
-    }
+    // Generate realistic URLs based on the keyword for demo purposes
+    const keywordSlug = keyword.replace(/\s+/g, '-').toLowerCase();
+    const keywordNoSpaces = keyword.replace(/\s+/g, '').toLowerCase();
+    
+    const simulatedUrls = [
+      `https://${keywordNoSpaces}.com`,
+      `https://www.${keywordNoSpaces}.org`,
+      `https://${keywordSlug}-company.com`,
+      `https://best-${keywordSlug}.com`,
+      `https://${keywordSlug}-services.net`,
+      `https://pro-${keywordSlug}.com`,
+      `https://${keywordSlug}-expert.com`,
+      `https://top-${keywordSlug}.com`,
+      `https://${keywordSlug}-solutions.com`,
+      `https://premium-${keywordSlug}.com`,
+      `https://${keywordSlug}-consulting.com`,
+      `https://${keywordSlug}-agency.com`
+    ];
+    
+    simulatedUrls.forEach(url => urls.add(url));
   } catch (error) {
     console.error('Error searching for URLs:', error);
   }
@@ -82,109 +71,127 @@ async function searchUrls(keyword, maxPages = 3) {
   return Array.from(urls);
 }
 
-// Helper function to scrape emails from a single page
+// Helper function to generate demo emails for a domain
 async function scrapePageEmails(url, timeout = 8000) {
   try {
-    // For demo purposes, generate some realistic demo emails based on the domain
     const domain = extractDomain(url);
-    const demoEmails = [
-      `info@${domain}`,
-      `contact@${domain}`,
-      `hello@${domain}`,
-      `support@${domain}`,
-      `sales@${domain}`
-    ].filter(email => Math.random() > 0.6); // Randomly include some emails
-
-    return demoEmails.map(email => ({
-      email,
-      domain: domain,
-      source: url
-    }));
+    
+    // Generate realistic demo emails based on the domain
+    const commonPrefixes = [
+      'info', 'contact', 'hello', 'support', 'sales', 
+      'admin', 'team', 'help', 'service', 'office',
+      'marketing', 'business', 'inquiries', 'mail'
+    ];
+    
+    const demoEmails = [];
+    
+    // Randomly select 2-4 email prefixes for this domain
+    const numEmails = Math.floor(Math.random() * 3) + 2;
+    const selectedPrefixes = commonPrefixes
+      .sort(() => 0.5 - Math.random())
+      .slice(0, numEmails);
+    
+    selectedPrefixes.forEach(prefix => {
+      demoEmails.push({
+        email: `${prefix}@${domain}`,
+        domain: domain,
+        source: url
+      });
+    });
+    
+    return demoEmails;
   } catch (error) {
     console.error(`Error scraping ${url}:`, error.message);
     return [];
   }
 }
 
-// Helper function to collect results
-function collectResult(results, data) {
-  results.push(data);
-}
-
 exports.handler = async (event, context) => {
-  // Set CORS headers
+  // CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
   };
 
+  // Handle preflight requests
   if (event.httpMethod === 'OPTIONS') {
     return {
       statusCode: 200,
       headers,
-      body: ''
+      body: '',
     };
   }
 
+  // Only allow POST requests
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
       headers,
-      body: JSON.stringify({ error: 'Method not allowed' })
+      body: JSON.stringify({ error: 'Method not allowed' }),
     };
   }
 
-  // For streaming responses, we'll return JSON chunks instead of SSE
-  headers['Content-Type'] = 'application/json';
-  
   try {
-    const { keyword } = JSON.parse(event.body);
+    let requestBody;
+    try {
+      requestBody = JSON.parse(event.body);
+    } catch (parseError) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: 'Invalid JSON in request body' }),
+      };
+    }
 
+    const { keyword } = requestBody;
+    
     if (!keyword || typeof keyword !== 'string') {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'Valid keyword is required' })
+        body: JSON.stringify({ error: 'Valid keyword is required' }),
       };
     }
-
+    
     const trimmedKeyword = keyword.trim();
     if (trimmedKeyword.length < 2) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'Keyword must be at least 2 characters long' })
+        body: JSON.stringify({ error: 'Keyword must be at least 2 characters long' }),
       };
     }
-
+    
     // Step 1: Search for URLs
     const urls = await searchUrls(trimmedKeyword, 3);
-
+    
     if (urls.length === 0) {
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({
+        body: JSON.stringify({ 
           success: true,
           message: 'No websites found for the given keyword',
           emails: [],
-          totalPages: 0
-        })
+          totalPages: 0,
+          keyword: trimmedKeyword,
+          totalEmails: 0
+        }),
       };
     }
-
+    
     // Step 2: Scrape emails from each URL
     const allEmails = new Map(); // Use Map to avoid duplicates
-
-    // Process URLs in batches to avoid overwhelming the target servers
+    
+    // Process URLs in batches to avoid overwhelming
     const batchSize = 3;
     for (let i = 0; i < urls.length; i += batchSize) {
       const batch = urls.slice(i, i + batchSize);
-
+      
       const batchPromises = batch.map(async (url) => {
         const emails = await scrapePageEmails(url);
-
+        
         // Collect unique emails
         emails.forEach(emailData => {
           const emailKey = emailData.email;
@@ -192,21 +199,21 @@ exports.handler = async (event, context) => {
             allEmails.set(emailKey, emailData);
           }
         });
-
+        
         return emails;
       });
-
+      
       await Promise.allSettled(batchPromises);
-
-      // Add delay between batches to be respectful
+      
+      // Add small delay between batches
       if (i + batchSize < urls.length) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
-
+    
     // Step 3: Return results
     const emailArray = Array.from(allEmails.values());
-
+    
     return {
       statusCode: 200,
       headers,
@@ -217,9 +224,9 @@ exports.handler = async (event, context) => {
         totalPages: urls.length,
         emails: emailArray,
         message: `Scraping complete! Found ${emailArray.length} unique emails from ${urls.length} websites.`
-      })
+      }),
     };
-
+    
   } catch (error) {
     console.error('Error in email scraper:', error);
     return {
@@ -227,7 +234,7 @@ exports.handler = async (event, context) => {
       headers,
       body: JSON.stringify({
         error: error.message || 'An unexpected error occurred during scraping'
-      })
+      }),
     };
   }
-}
+};
