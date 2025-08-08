@@ -555,7 +555,7 @@ export function BrandGuidelinesPreviewModal({ isOpen, onClose }: BrandGuidelines
               </div>
 
               <div className="flex items-center gap-2">
-                {pages.map((_, index) => (
+                {pages && pages.map((_, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentPage(index)}
