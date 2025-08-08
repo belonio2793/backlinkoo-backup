@@ -557,10 +557,10 @@ const CreativeAssetsShowcase: React.FC<{
       )
     },
     {
-      name: 'Logo + Tagline',
+      name: 'Professional Wordmark',
       size: '1920x1080',
       format: 'PNG',
-      description: 'Logo with tagline combination',
+      description: 'Corporate logo with professional tagline',
       category: 'brand',
       preview: (
         <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl overflow-hidden aspect-video shadow-2xl flex flex-col items-center justify-center p-8">
