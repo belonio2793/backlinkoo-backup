@@ -171,7 +171,7 @@ export const RankingTracker = () => {
         device: 'desktop'
       });
 
-      console.log('�� Free rank tracking completed:', result);
+      console.log('✅ Free rank tracking completed:', result);
 
       // Convert to expected format
       const results = {
@@ -532,7 +532,7 @@ export const RankingTracker = () => {
                         {checkingProgress[0]}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        Checking Google rankings with technical analysis...
+                        Scanning Google search results in real-time...
                       </div>
                     </div>
                   </div>
