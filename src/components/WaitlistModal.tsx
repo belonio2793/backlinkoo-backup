@@ -452,14 +452,14 @@ export const WaitlistModal: React.FC<WaitlistModalProps> = ({
         )}
 
         {step === 'success' && (
-          <div className="relative overflow-hidden">
+          <div className="relative overflow-hidden waitlist-confetti">
             {/* Celebration Background */}
             <div className="absolute inset-0 bg-gradient-to-br from-green-400 via-blue-500 to-purple-600"></div>
             <div className={"absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"40\" height=\"40\" viewBox=\"0 0 40 40\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.1\"%3E%3Cpath d=\"M20 20L0 0h40L20 20z\"/%3E%3C/g%3E%3C/svg%3E')] opacity-20"}></div>
-            
+
             <div className="relative z-10 text-center p-8 md:p-16 text-white">
               {/* Success Animation */}
-              <div className="mx-auto w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-8 animate-pulse">
+              <div className="mx-auto w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-8 waitlist-bounce">
                 <CheckCircle className="w-12 h-12 text-white" />
               </div>
 
