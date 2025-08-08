@@ -496,7 +496,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "GY", name: "Guyana", flag: "🇬🇾" },
     { code: "HK", name: "Hong Kong", flag: "🇭🇰" },
     { code: "HM", name: "Heard Island and McDonald Islands", flag: "🇭🇲" },
-    { code: "HN", name: "Honduras", flag: "🇭🇳" },
+    { code: "HN", name: "Honduras", flag: "🇭��" },
     { code: "HR", name: "Croatia", flag: "🇭🇷" },
     { code: "HT", name: "Haiti", flag: "🇭🇹" },
     { code: "HU", name: "Hungary", flag: "🇭🇺" },
@@ -646,7 +646,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "WS", name: "Samoa", flag: "🇼🇸" },
     { code: "YE", name: "Yemen", flag: "🇾🇪" },
     { code: "YT", name: "Mayotte", flag: "🇾🇹" },
-    { code: "ZA", name: "South Africa", flag: "🇿🇦" },
+    { code: "ZA", name: "South Africa", flag: "���🇦" },
     { code: "ZM", name: "Zambia", flag: "🇿🇲" },
     { code: "ZW", name: "Zimbabwe", flag: "🇿🇼" }
   ];
@@ -732,6 +732,11 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
         }));
 
         setKeywords(processedKeywords);
+
+        // Save all keywords to database
+        for (let i = 0; i < processedKeywords.length; i++) {
+          await saveKeywordResearch(processedKeywords[i], i === 0);
+        }
       } else {
         // Fallback to single keyword if no array provided
         const fallbackKeyword: KeywordData = {
