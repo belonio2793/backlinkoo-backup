@@ -232,6 +232,17 @@ export const AffiliateAssetLibrary: React.FC<AffiliateAssetLibraryProps> = ({
             downloadCount: 1234,
             customizable: false,
             isNew: true
+          },
+          {
+            id: 'brand_colors',
+            name: 'Brand Color Palette',
+            type: 'brand',
+            category: 'brand',
+            fileUrl: '/assets/brand-kit/brand-colors.json',
+            previewUrl: '/assets/brand-kit/brand-colors.json',
+            description: 'Official brand colors with hex codes, RGB values, and usage guidelines',
+            downloadCount: 987,
+            customizable: false
           }
         ]
       },
