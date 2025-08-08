@@ -656,12 +656,12 @@ export function BeautifulBlogPost() {
                       )}
 
                       <Button
-                        onClick={() => setShowKillerWarning(true)}
+                        onClick={() => setShowSystemExplanation(true)}
                         variant="outline"
                         className="border-slate-300 text-slate-700 hover:bg-slate-50 font-medium"
                       >
                         <Shield className="mr-2 h-4 w-4" />
-                        Learn More
+                        How it Works
                       </Button>
                     </div>
                   </div>
@@ -749,7 +749,7 @@ export function BeautifulBlogPost() {
                                 <p className="text-sm">
                                   Permanently delete this post. As the owner, you have full permission to remove it at any time.
                                 </p>
-                                <p className="text-xs text-red-400">⚠️ This action cannot be undone</p>
+                                <p className="text-xs text-red-400">⚠��� This action cannot be undone</p>
                               </div>
                             </TooltipContent>
                           </Tooltip>
