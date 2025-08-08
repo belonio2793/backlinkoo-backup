@@ -684,8 +684,7 @@ const Index = () => {
                 </li>
               </ul>
               <Button onClick={() => {
-                setLoginModalTab("login");
-                setShowLoginModal(true);
+                openLoginModal();
               }} className="font-medium">
                 Track Rankings
                 <ArrowRight className="ml-2 h-4 w-4" />
