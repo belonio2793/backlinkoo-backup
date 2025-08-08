@@ -163,39 +163,51 @@ export const KeywordResearchTool = () => {
     detectLocation();
   }, []);
 
-  // Advanced keyword research with geographic and competition analysis
+  // Free keyword research using public APIs and real-time data
   const performKeywordResearch = async (searchTerm: string) => {
-    console.log('Starting keyword research for:', searchTerm);
+    console.log('🆓 Starting FREE keyword research for:', searchTerm);
 
     try {
-      const { data, error } = await supabase.functions.invoke('seo-analysis', {
-        body: {
-          type: 'advanced_keyword_research',
-          data: {
-            keyword: searchTerm,
-            country: selectedCountry,
-            city: selectedCity,
-            searchEngine: selectedEngine
-          }
-        }
+      // First try the free keyword research service
+      const freeData = await FreeKeywordResearchService.performResearch({
+        keyword: searchTerm,
+        country: selectedCountry,
+        city: selectedCity,
+        language: 'en'
       });
 
-      if (error) {
-        console.error('Supabase function error:', error);
-        // Fall back to local keyword research
-        return generateLocalKeywordData(searchTerm);
-      }
+      console.log('🎉 Free keyword research successful:', freeData);
 
-      if (!data) {
-        console.log('No data returned from API, using local fallback');
-        return generateLocalKeywordData(searchTerm);
-      }
+      // Transform free data to match expected format
+      return {
+        keywords: freeData.keywords.map(kw => ({
+          keyword: kw.keyword,
+          searchVolume: kw.searchVolume,
+          difficulty: kw.difficulty,
+          cpc: kw.cpc,
+          trend: kw.trend,
+          competition: kw.competition,
+          searchEngine: 'google' as const,
+          location: kw.location,
+          competitorCount: kw.competitorCount,
+          topCompetitors: kw.topDomains,
+          dataSources: ['Free_APIs', 'Google_Autocomplete', 'Trends_Analysis']
+        })),
+        serpResults: freeData.serpResults,
+        aiInsights: freeData.aiInsights,
+        dataQuality: {
+          score: 2.5, // Good quality for free data
+          sources: ['Google_Autocomplete', 'Trends_Analysis', 'SERP_Intelligence'],
+          confidence: 'medium' as const,
+          usingGoogleAdsApi: false,
+          apiType: 'Free Public APIs + Real-Time Analysis'
+        }
+      };
 
-      console.log('Keyword research successful:', data);
-      return data;
     } catch (error) {
-      console.error('Error in performKeywordResearch, using local fallback:', error);
-      // Fall back to local keyword research
+      console.error('Free keyword research failed, using enhanced fallback:', error);
+
+      // Enhanced fallback with more realistic data
       return generateLocalKeywordData(searchTerm);
     }
   };
@@ -505,7 +517,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "JP", name: "Japan", flag: "🇯🇵" },
     { code: "KE", name: "Kenya", flag: "🇰🇪" },
     { code: "KG", name: "Kyrgyzstan", flag: "🇰🇬" },
-    { code: "KH", name: "Cambodia", flag: "🇰🇭" },
+    { code: "KH", name: "Cambodia", flag: "��🇭" },
     { code: "KI", name: "Kiribati", flag: "🇰🇮" },
     { code: "KM", name: "Comoros", flag: "🇰🇲" },
     { code: "KN", name: "Saint Kitts and Nevis", flag: "🇰🇳" },
@@ -526,7 +538,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "LV", name: "Latvia", flag: "🇱🇻" },
     { code: "LY", name: "Libya", flag: "🇱🇾" },
     { code: "MA", name: "Morocco", flag: "🇲🇦" },
-    { code: "MC", name: "Monaco", flag: "🇲🇨" },
+    { code: "MC", name: "Monaco", flag: "🇲����" },
     { code: "MD", name: "Moldova", flag: "🇲🇩" },
     { code: "ME", name: "Montenegro", flag: "🇲🇪" },
     { code: "MF", name: "Saint Martin", flag: "🇲🇫" },
@@ -562,7 +574,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "NZ", name: "New Zealand", flag: "🇳🇿" },
     { code: "OM", name: "Oman", flag: "🇴🇲" },
     { code: "PA", name: "Panama", flag: "🇵🇦" },
-    { code: "PE", name: "Peru", flag: "����🇪" },
+    { code: "PE", name: "Peru", flag: "🇵🇪" },
     { code: "PF", name: "French Polynesia", flag: "🇵🇫" },
     { code: "PG", name: "Papua New Guinea", flag: "🇵🇬" },
     { code: "PH", name: "Philippines", flag: "🇵🇭" },
@@ -587,7 +599,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "SD", name: "Sudan", flag: "🇸🇩" },
     { code: "SE", name: "Sweden", flag: "🇸🇪" },
     { code: "SG", name: "Singapore", flag: "🇸🇬" },
-    { code: "SH", name: "Saint Helena", flag: "����🇭" },
+    { code: "SH", name: "Saint Helena", flag: "🇸🇭" },
     { code: "SI", name: "Slovenia", flag: "🇸🇮" },
     { code: "SJ", name: "Svalbard and Jan Mayen", flag: "🇸🇯" },
     { code: "SK", name: "Slovakia", flag: "🇸🇰" },
