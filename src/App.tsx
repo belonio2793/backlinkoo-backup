@@ -15,29 +15,31 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route
-            path="/automation"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <LazyBacklinkAutomation />
-              </Suspense>
-            }
-          />
-          <Route
-            path="/recursive-discovery"
-            element={
-              <Suspense fallback={<div>Loading...</div>}>
-                <LazyRecursiveDiscoveryDashboard />
-              </Suspense>
-            }
-          />
-        </Routes>
-      </BrowserRouter>
+      <ModalProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route
+              path="/automation"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <LazyBacklinkAutomation />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/recursive-discovery"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <LazyRecursiveDiscoveryDashboard />
+                </Suspense>
+              }
+            />
+          </Routes>
+        </BrowserRouter>
+      </ModalProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
