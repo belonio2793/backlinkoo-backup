@@ -5,10 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, TrendingUp, Eye, DollarSign, Globe, MapPin, BarChart3, Target } from "lucide-react";
+import { Search, TrendingUp, Eye, DollarSign, Globe, MapPin, BarChart3, Target, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { SearchableSelect } from "@/components/SearchableSelect";
+import { FreeKeywordResearchService } from "@/services/freeKeywordResearch";
 
 interface KeywordData {
   keyword: string;
@@ -410,7 +411,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "BE", name: "Belgium", flag: "🇧🇪" },
     { code: "BF", name: "Burkina Faso", flag: "🇧🇫" },
     { code: "BG", name: "Bulgaria", flag: "🇧🇬" },
-    { code: "BH", name: "Bahrain", flag: "🇧🇭" },
+    { code: "BH", name: "Bahrain", flag: "���🇭" },
     { code: "BI", name: "Burundi", flag: "🇧🇮" },
     { code: "BJ", name: "Benin", flag: "🇧🇯" },
     { code: "BL", name: "Saint Barthélemy", flag: "🇧🇱" },
@@ -461,7 +462,7 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
     { code: "FJ", name: "Fiji", flag: "🇫🇯" },
     { code: "FK", name: "Falkland Islands", flag: "🇫🇰" },
     { code: "FM", name: "Micronesia", flag: "🇫🇲" },
-    { code: "FO", name: "Faroe Islands", flag: "🇫���" },
+    { code: "FO", name: "Faroe Islands", flag: "🇫🇴" },
     { code: "FR", name: "France", flag: "🇫🇷" },
     { code: "GA", name: "Gabon", flag: "🇬🇦" },
     { code: "GB", name: "United Kingdom", flag: "🇬🇧" },
