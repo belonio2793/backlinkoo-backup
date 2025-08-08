@@ -93,33 +93,75 @@ exports.handler = async (event, context) => {
     }
 
     if (event.httpMethod === 'POST') {
-      const { action, campaign, campaignId, anchorTexts, dailyLimit } = requestBody;
+      if (!user) {
+        return {
+          statusCode: 401,
+          headers,
+          body: JSON.stringify({ error: 'Authentication required' }),
+        };
+      }
+
+      const { action, campaign, campaignId } = requestBody;
 
       switch (action) {
         case 'create':
           // Create new campaign
-          console.log('Creating campaign:', campaign.name);
-          
-          // Here you would normally save to database
-          // For demo, we'll simulate campaign creation
-          
+          const { data: newCampaign, error: createError } = await supabase
+            .from('backlink_campaigns')
+            .insert([{
+              user_id: user.id,
+              name: campaign.name,
+              target_url: campaign.target_url,
+              keywords: campaign.keywords,
+              anchor_texts: campaign.anchor_texts,
+              daily_limit: campaign.daily_limit,
+              strategy_blog_comments: campaign.strategy_blog_comments,
+              strategy_forum_profiles: campaign.strategy_forum_profiles,
+              strategy_web2_platforms: campaign.strategy_web2_platforms,
+              strategy_social_profiles: campaign.strategy_social_profiles,
+              strategy_contact_forms: campaign.strategy_contact_forms
+            }])
+            .select()
+            .single();
+
+          if (createError) {
+            console.error('Create campaign error:', createError);
+            return {
+              statusCode: 500,
+              headers,
+              body: JSON.stringify({ error: 'Failed to create campaign' }),
+            };
+          }
+
           return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
               success: true,
-              campaignId: campaign.id,
-              message: 'Campaign created successfully',
-              campaign: {
-                ...campaign,
-                anchorTexts: anchorTexts || [],
-                dailyLimit: dailyLimit || 10
-              }
+              campaign: newCampaign,
+              message: 'Campaign created successfully'
             }),
           };
 
         case 'pause':
-          console.log('Pausing campaign:', campaignId);
+          const { error: pauseError } = await supabase
+            .from('backlink_campaigns')
+            .update({
+              status: 'paused',
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', campaignId)
+            .eq('user_id', user.id);
+
+          if (pauseError) {
+            console.error('Pause campaign error:', pauseError);
+            return {
+              statusCode: 500,
+              headers,
+              body: JSON.stringify({ error: 'Failed to pause campaign' }),
+            };
+          }
+
           return {
             statusCode: 200,
             headers,
@@ -130,7 +172,25 @@ exports.handler = async (event, context) => {
           };
 
         case 'resume':
-          console.log('Resuming campaign:', campaignId);
+          const { error: resumeError } = await supabase
+            .from('backlink_campaigns')
+            .update({
+              status: 'active',
+              updated_at: new Date().toISOString(),
+              last_active_at: new Date().toISOString()
+            })
+            .eq('id', campaignId)
+            .eq('user_id', user.id);
+
+          if (resumeError) {
+            console.error('Resume campaign error:', resumeError);
+            return {
+              statusCode: 500,
+              headers,
+              body: JSON.stringify({ error: 'Failed to resume campaign' }),
+            };
+          }
+
           return {
             statusCode: 200,
             headers,
@@ -140,14 +200,28 @@ exports.handler = async (event, context) => {
             }),
           };
 
-        case 'stop':
-          console.log('Stopping campaign:', campaignId);
+        case 'delete':
+          const { error: deleteError } = await supabase
+            .from('backlink_campaigns')
+            .delete()
+            .eq('id', campaignId)
+            .eq('user_id', user.id);
+
+          if (deleteError) {
+            console.error('Delete campaign error:', deleteError);
+            return {
+              statusCode: 500,
+              headers,
+              body: JSON.stringify({ error: 'Failed to delete campaign' }),
+            };
+          }
+
           return {
             statusCode: 200,
             headers,
             body: JSON.stringify({
               success: true,
-              message: 'Campaign stopped successfully'
+              message: 'Campaign deleted successfully'
             }),
           };
 
