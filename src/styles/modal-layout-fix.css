@@ -1,0 +1,76 @@
+/* Modal Layout Fix - Prevents skewing and transform conflicts */
+
+/* Prevent transform inheritance on modal containers */
+[data-radix-portal],
+[data-radix-portal] *,
+.dialog-content,
+.dialog-content *,
+.auth-modal,
+.auth-modal * {
+  transform: none !important;
+  perspective: none !important;
+  backface-visibility: visible !important;
+}
+
+/* Ensure proper modal positioning */
+[data-radix-dialog-content] {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  z-index: 9999 !important;
+}
+
+/* Prevent any transform conflicts on tab content */
+[data-state="active"][data-orientation="horizontal"] {
+  transform: none !important;
+}
+
+/* Isolate components that use transforms */
+.shimmer-effect,
+.skew-animation,
+.transform-animation {
+  isolation: isolate;
+  contain: layout style;
+}
+
+/* Fix for auth form tabs specifically */
+.auth-form-tabs,
+.auth-form-tabs *,
+[role="tabpanel"],
+[role="tabpanel"] * {
+  transform: none !important;
+  will-change: auto !important;
+}
+
+/* Prevent layout shift in modals */
+.dialog-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 9998 !important;
+}
+
+/* Force proper stacking context for modals */
+.modal-container {
+  isolation: isolate;
+  contain: layout;
+}
+
+/* Prevent child transforms from affecting modal layout */
+.modal-safe {
+  transform-style: flat !important;
+  perspective: none !important;
+}
+
+/* Override any conflicting transforms */
+body:has([data-radix-dialog-content]) {
+  overflow: hidden;
+}
+
+/* Ensure form elements maintain proper layout */
+form input,
+form button,
+form label {
+  transform: none !important;
+  position: relative !important;
+}
