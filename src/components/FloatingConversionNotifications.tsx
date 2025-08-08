@@ -9,7 +9,7 @@ import {
   TrendingUp, 
   Users, 
   X,
-  Fire,
+  Flame,
   Heart,
   Eye,
   Zap,
@@ -57,7 +57,7 @@ export function FloatingConversionNotifications({
 
   const notifications = [
     {
-      icon: Fire,
+      icon: Flame,
       title: "🔥 CONTENT QUALITY DETECTED!",
       message: "Your keyword choice is FIRE! This will dominate the SERPs!",
       color: "from-red-500 to-orange-500",
