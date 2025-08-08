@@ -1041,7 +1041,7 @@ Link in bio: ${referralUrl}
         // Page 3
         {
           type: "Process Reveal",
-          content: `🔍 HOW I BUILD 30+ BACKLINKS/MONTH\n\nStep 1: Log into Backlink ∞\nStep 2: Set targeting parameters\nStep 3: Let AI do the work\nStep 4: Watch links roll in ��\n\nIt's that simple!\n\nLink in bio: ${referralUrl}\n\n#ProcessReveal #SEOHacks`,
+          content: `🔍 HOW I BUILD 30+ BACKLINKS/MONTH\n\nStep 1: Log into Backlink ∞\nStep 2: Set targeting parameters\nStep 3: Let AI do the work\nStep 4: Watch links roll in 🚀\n\nIt's that simple!\n\nLink in bio: ${referralUrl}\n\n#ProcessReveal #SEOHacks`,
           engagement: "Very High",
           audience: "Process learners"
         },
@@ -1060,7 +1060,7 @@ Link in bio: ${referralUrl}
         // Page 4
         {
           type: "Feature Friday",
-          content: `🌟 FEATURE FRIDAY 🌟\n\nSpotlight: Backlink ∞'s AI Outreach\n\n✨ Writes personalized emails\n✨ Finds perfect prospects\n✨ Follows up automatically\n✨ Tracks everything\n\nIt's like having a team of experts! ����\n\nLink in bio: ${referralUrl}\n\n#FeatureFriday #AITools`,
+          content: `🌟 FEATURE FRIDAY 🌟\n\nSpotlight: Backlink ∞'s AI Outreach\n\n✨ Writes personalized emails\n✨ Finds perfect prospects\n✨ Follows up automatically\n✨ Tracks everything\n\nIt's like having a team of experts! 🤖\n\nLink in bio: ${referralUrl}\n\n#FeatureFriday #AITools`,
           engagement: "High",
           audience: "Feature enthusiasts"
         },
@@ -1079,7 +1079,7 @@ Link in bio: ${referralUrl}
         // Page 5
         {
           type: "Myth Buster",
-          content: `🚫 MYTH BUSTER ALERT 🚫\n\nMyth: "AI can't do personalized outreach"\n\nReality: Backlink ∞'s AI writes better emails than most humans! 🤖\n\nPersonalization ���\nContext awareness ✅\nHigh response rates ✅\n\nLink in bio: ${referralUrl}\n\n#MythBuster #AIFacts`,
+          content: `🚫 MYTH BUSTER ALERT 🚫\n\nMyth: "AI can't do personalized outreach"\n\nReality: Backlink ∞'s AI writes better emails than most humans! 🤖\n\nPersonalization ✅\nContext awareness ✅\nHigh response rates ✅\n\nLink in bio: ${referralUrl}\n\n#MythBuster #AIFacts`,
           engagement: "High",
           audience: "Myth busters"
         },
@@ -1091,7 +1091,7 @@ Link in bio: ${referralUrl}
         },
         {
           type: "Growth Hack",
-          content: `🚨 GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️⃣ Technical SEO ✅\n3️⃣ High-quality backlinks ✅\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
+          content: `🚨 GROWTH HACK REVEALED 💡\n\nSecret sauce for explosive SEO growth:\n\n1️⃣ Quality content ✅\n2️⃣ Technical SEO ✅\n3️⃣ High-quality backlinks ���\n\nFor #3, I use Backlink ∞ exclusively! 🎯\n\nLink in bio: ${referralUrl}\n\n#GrowthHack #SEOSecrets`,
           engagement: "Very High",
           audience: "Growth hackers"
         },
@@ -1175,7 +1175,7 @@ Timestamps in description: ${referralUrl}`,
         },
         {
           type: "Before vs After",
-          content: `�� DRAMATIC BEFORE & AFTER: My website's transformation using Backlink ∞.
+          content: `📈 DRAMATIC BEFORE & AFTER: My website's transformation using Backlink ∞.
 
 Traffic charts, ranking improvements, and revenue growth - all the data revealed!
 
@@ -1185,7 +1185,7 @@ ${referralUrl}`,
         },
         {
           type: "Step by Step",
-          content: `��� COMPLETE GUIDE: Setting up your first Backlink ∞ campaign (Beginner friendly).
+          content: `📚 COMPLETE GUIDE: Setting up your first Backlink ∞ campaign (Beginner friendly).
 
 Follow along as I walk through every single step with zero experience assumed:
 
@@ -1248,13 +1248,13 @@ Here's the math: ${referralUrl}`,
         },
         {
           type: "Update Video",
-          content: `�� MAJOR UPDATE: New Backlink ∞ features that will blow your mind! AI improvements, better targeting, and automation upgrades that change everything: ${referralUrl}`,
+          content: `🔥 MAJOR UPDATE: New Backlink ∞ features that will blow your mind! AI improvements, better targeting, and automation upgrades that change everything: ${referralUrl}`,
           engagement: "High",
           audience: "Update watchers"
         },
         {
           type: "Behind the Scenes",
-          content: `�� BEHIND THE SCENES: My entire link building operation revealed. See exactly how I manage multiple Backlink ∞ campaigns and scale to 6-figure results: ${referralUrl}`,
+          content: `🎬 BEHIND THE SCENES: My entire link building operation revealed. See exactly how I manage multiple Backlink ∞ campaigns and scale to 6-figure results: ${referralUrl}`,
           engagement: "Very High",
           audience: "BTS enthusiasts"
         },
@@ -1878,7 +1878,7 @@ Here's the math: ${referralUrl}`,
               </div>
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">Affiliate Dashboard</h1>
-                <p className="text-gray-600">Welcome back, {user.email?.split('@')[0]}! ���</p>
+                <p className="text-gray-600">Welcome back, {user.email?.split('@')[0]}! 🎉</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -2028,12 +2028,12 @@ Here's the math: ${referralUrl}`,
               <div className="flex gap-2">
                 <input
                   type="text"
-                  value={`https://backlinkoo.com/pricing?ref=${affiliateData.affiliate_code}`}
+                  value={`https://backlinkoo.com/#pricing?ref=${affiliateData.affiliate_code}`}
                   readOnly
                   className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
                 />
                 <button
-                  onClick={() => copyToClipboard(`https://backlinkoo.com/pricing?ref=${affiliateData.affiliate_code}`)}
+                  onClick={() => copyToClipboard(`https://backlinkoo.com/#pricing?ref=${affiliateData.affiliate_code}`)}
                   className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
                 >
                   📋 Copy
@@ -2041,26 +2041,6 @@ Here's the math: ${referralUrl}`,
               </div>
             </div>
 
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-sm font-medium text-gray-700">Free Trial Link</label>
-                <span className="text-xs text-gray-500">Low barrier entry</span>
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={`https://backlinkoo.com/trial?ref=${affiliateData.affiliate_code}`}
-                  readOnly
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm font-mono"
-                />
-                <button
-                  onClick={() => copyToClipboard(`https://backlinkoo.com/trial?ref=${affiliateData.affiliate_code}`)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
-                >
-                  📋 Copy
-                </button>
-              </div>
-            </div>
           </div>
         </div>
 
