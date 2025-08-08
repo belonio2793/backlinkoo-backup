@@ -716,6 +716,13 @@ export class ContentFormatter {
       .replace(/&amp;gt;/g, '>')
       .replace(/&amp;amp;/g, '&')
 
+      // CRITICAL: Fix the broken heading pattern we see in DOM
+      // Pattern: <h2>&lt;</h2><p> strong&gt;Hook Introduction...</p>
+      .replace(/<h([1-6])[^>]*>&lt;<\/h[1-6]>\s*<p[^>]*>\s*strong&gt;([^<]+?)<\/p>/gi, '<h$1><strong>$2</strong></h$1>')
+
+      // Also handle without the strong tag
+      .replace(/<h([1-6])[^>]*>&lt;<\/h[1-6]>\s*<p[^>]*>\s*([^<]+?)<\/p>/gi, '<h$1>$2</h$1>')
+
       // Handle the exact pattern showing in DOM: ## &lt; <p>h2&gt;Pro Tip</p>
       .replace(/##\s*&lt;\s*<p[^>]*>\s*h[1-6]\s*&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
 
