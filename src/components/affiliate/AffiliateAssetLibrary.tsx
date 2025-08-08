@@ -191,6 +191,51 @@ export const AffiliateAssetLibrary: React.FC<AffiliateAssetLibraryProps> = ({
         ]
       },
       {
+        id: 'brand',
+        name: 'Brand Assets',
+        description: 'Official logos, brand guidelines, and identity assets',
+        icon: Award,
+        assets: [
+          {
+            id: 'brand_logo_primary',
+            name: 'Primary Logo (SVG)',
+            type: 'brand',
+            category: 'brand',
+            dimensions: '200x60',
+            fileUrl: '/assets/logos/backlink-logo-primary.svg',
+            previewUrl: '/assets/logos/backlink-logo-primary.svg',
+            description: 'Primary brand logo with gradient colors - SVG format',
+            downloadCount: 3456,
+            isPopular: true,
+            customizable: false
+          },
+          {
+            id: 'brand_logo_white',
+            name: 'White Logo (SVG)',
+            type: 'brand',
+            category: 'brand',
+            dimensions: '200x60',
+            fileUrl: '/assets/logos/backlink-logo-white.svg',
+            previewUrl: '/assets/logos/backlink-logo-white.svg',
+            description: 'White version for dark backgrounds - SVG format',
+            downloadCount: 2987,
+            isPopular: true,
+            customizable: false
+          },
+          {
+            id: 'brand_guidelines',
+            name: 'Brand Guidelines PDF',
+            type: 'brand',
+            category: 'brand',
+            fileUrl: '/brand-guidelines.pdf',
+            description: 'Complete brand identity guidelines and usage instructions',
+            downloadCount: 1234,
+            customizable: false,
+            isNew: true
+          }
+        ]
+      },
+      {
         id: 'social',
         name: 'Social Media',
         description: 'Social media posts and graphics',
