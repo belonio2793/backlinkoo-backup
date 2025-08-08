@@ -325,7 +325,8 @@ export function AuthFormTabs({
   const spacingClass = isCompact ? "space-y-3" : "space-y-4";
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className={`w-full ${className}`}>
+    <div className="w-full transform-none isolate" style={{ transform: 'none !important' }}>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className={`w-full ${className}`}>
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="login">Sign In</TabsTrigger>
         <TabsTrigger value="signup">
@@ -333,7 +334,7 @@ export function AuthFormTabs({
         </TabsTrigger>
       </TabsList>
 
-      <TabsContent value="login">
+      <TabsContent value="login" className="transform-none" style={{ transform: 'none' }}>
         <form onSubmit={handleLogin} className={spacingClass}>
           <div className="space-y-2">
             <Label htmlFor="login-email">Email</Label>
@@ -422,7 +423,7 @@ export function AuthFormTabs({
         </form>
       </TabsContent>
 
-      <TabsContent value="signup">
+      <TabsContent value="signup" className="transform-none" style={{ transform: 'none' }}>
         <form onSubmit={handleSignup} className={spacingClass}>
           <div className="space-y-2">
             <Label htmlFor="first-name">First Name</Label>
@@ -528,6 +529,7 @@ export function AuthFormTabs({
           )}
         </form>
       </TabsContent>
-    </Tabs>
+      </Tabs>
+    </div>
   );
 }
