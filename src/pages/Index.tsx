@@ -39,11 +39,11 @@ import { Footer } from "@/components/Footer";
 import { useToast } from "@/hooks/use-toast";
 import { AuthService } from "@/services/authService";
 
-import { LoginModal } from "@/components/LoginModal";
 import { InlineAuthForm } from "@/components/InlineAuthForm";
 import { TrialConversionBanner } from "@/components/TrialConversionBanner";
 import { QuickTrialUpgrade } from "@/components/QuickTrialUpgrade";
 import { TrialConversionService } from "@/services/trialConversionService";
+import { useAuthModal, usePremiumModal } from "@/contexts/ModalContext";
 
 
 
