@@ -245,8 +245,8 @@ export class ContentFormatter {
       })
       // Convert **text** patterns at start of line to <h2> tags (standalone bold headings)
       .replace(/^\*\*([^*]+?)\*\*(?=\s*\n|$)/gmi, '<h2>$1</h2>')
-      // Convert remaining **text** to <strong> tags (inline bold) with proper class
-      .replace(/\*\*([^*]+?)\*\*/g, '<strong class="font-bold text-inherit">$1</strong>')
+      // Convert remaining **text** to <strong> tags (inline bold) - use simpler markup initially
+      .replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>')
       // Convert *text* to <em> tags (italic)
       .replace(/\*([^*]+?)\*/g, '<em>$1</em>')
       // Convert ### headings to h3
