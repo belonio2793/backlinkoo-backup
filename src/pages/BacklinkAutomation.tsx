@@ -554,7 +554,7 @@ export default function BacklinkAutomation() {
     }
   };
 
-  const createCampaign = async () => {
+  const deployCampaign = async () => {
     // Check guest trial limit
     if (!user && guestLinksGenerated >= 20) {
       setShowTrialExhaustedModal(true);
@@ -1241,8 +1241,8 @@ export default function BacklinkAutomation() {
                       <div className="space-y-3">
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                           <Button
-                            onClick={createCampaign}
-                            className="h-12 px-8 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                            onClick={deployCampaign}
+                            className="w-full h-12 px-8 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
                             disabled={isLoading || !campaignForm.targetUrl || !campaignForm.keywords || (databaseStatus && !databaseStatus.isConnected)}
                           >
                             {isLoading ? (
@@ -1250,15 +1250,7 @@ export default function BacklinkAutomation() {
                             ) : (
                               <Zap className="h-4 w-4 mr-2" />
                             )}
-                            Create Campaign
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={() => window.location.href = '/login'}
-                            className="h-12 px-6"
-                          >
-                            <UserPlus className="h-4 w-4 mr-2" />
-                            Sign In for More
+                            Deploy Campaign
                           </Button>
                         </div>
                         <div className="text-center">
