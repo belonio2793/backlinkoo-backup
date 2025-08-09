@@ -120,8 +120,17 @@ class RecursiveUrlDiscoveryService {
         .select('domain')
         .limit(1);
 
-      if (error || (existingUrls && existingUrls.length > 0)) {
-        console.log('Seed database already initialized or error occurred');
+      if (error) {
+        if (error.code === '42P01') {
+          console.log('Table discovered_urls does not exist yet, skipping seed initialization');
+        } else {
+          console.log('Error checking seed database:', error.message);
+        }
+        return;
+      }
+
+      if (existingUrls && existingUrls.length > 0) {
+        console.log('Seed database already initialized');
         return;
       }
 
