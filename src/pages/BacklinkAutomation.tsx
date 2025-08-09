@@ -14,6 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -25,7 +26,7 @@ import {
   CheckCircle, XCircle, Clock3, Loader2, ArrowUp, ArrowDown, Trash2,
   Link, Sparkles, Network, Rocket, Crown, Heart, Flag, RefreshCw,
   ThumbsUp, ThumbsDown, Plus, Filter, ChevronRight, Zap as Lightning, User,
-  ChevronDown, ChevronUp, X, Monitor, LinkIcon, Send, Clock4, AlertCircle
+  ChevronDown, ChevronUp, X, Monitor, LinkIcon, Send, Clock4, AlertCircle, Lock
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -35,6 +36,11 @@ import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
 import { TrialExhaustedModal } from '@/components/TrialExhaustedModal';
 
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
+import { CampaignBlogIntegrationService } from '@/services/campaignBlogIntegrationService';
+import { LoginModal } from '@/components/LoginModal';
+import { guestTrackingService } from '@/services/guestTrackingService';
+import { GuestPremiumUpsellModal } from '@/components/GuestPremiumUpsellModal';
+import { GuestCampaignRestrictionsOverlay } from '@/components/GuestCampaignRestrictionsOverlay';
 
 // Import our enterprise engines
 import { CampaignQueueManager, type CampaignConfig } from '@/services/automationEngine/CampaignQueueManager';
@@ -86,6 +92,8 @@ interface Campaign {
   linksLive: number;
   dailyTarget?: number;
   totalTarget?: number;
+  blogPostUrl?: string;
+  blogPostTitle?: string;
   quality?: {
     averageAuthority: number;
     averageRelevance?: number;
@@ -275,6 +283,20 @@ export default function BacklinkAutomation() {
     isProliferating: false
   });
 
+  // Real-time campaign monitoring state
+  const [activeCampaignIntervals, setActiveCampaignIntervals] = useState<Map<string, NodeJS.Timeout>>(new Map());
+  const [realTimeLinkPostbacks, setRealTimeLinkPostbacks] = useState<any[]>([]);
+  const [campaignMetrics, setCampaignMetrics] = useState<Map<string, any>>(new Map());
+  const [linkBuildingQueue, setLinkBuildingQueue] = useState<any[]>([]);
+  const [recentPostbacks, setRecentPostbacks] = useState<any[]>([]);
+  const [showSignInModal, setShowSignInModal] = useState(false);
+  const [showGuestPremiumModal, setShowGuestPremiumModal] = useState(false);
+  const [guestTrackingInitialized, setGuestTrackingInitialized] = useState(false);
+  const [guestCampaignRestrictions, setGuestCampaignRestrictions] = useState<any>({});
+  const [premiumUpsellTrigger, setPremiumUpsellTrigger] = useState<'campaign_limit' | 'link_limit' | 'feature_limit' | 'manual'>('manual');
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [guestCampaignToDelete, setGuestCampaignToDelete] = useState<any>(null);
+
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
     name: '',
@@ -331,31 +353,95 @@ export default function BacklinkAutomation() {
     }
   };
 
+  // Initialize guest tracking on component mount
+  useEffect(() => {
+    if (!user && !guestTrackingInitialized) {
+      const guestUserId = guestTrackingService.initializeGuestTracking();
+      console.log('🍪 Guest tracking initialized:', guestUserId);
+      setGuestTrackingInitialized(true);
+      updateGuestRestrictions();
+    }
+  }, [user, guestTrackingInitialized]);
+
+  // Update guest restrictions
+  const updateGuestRestrictions = () => {
+    if (!user) {
+      const restrictions = guestTrackingService.getGuestCampaignsWithRestrictions();
+      setGuestCampaignRestrictions(restrictions);
+
+      // Load guest campaigns into state
+      const guestCampaigns = restrictions.campaigns.map(guestCamp => ({
+        id: guestCamp.id,
+        name: guestCamp.name,
+        targetUrl: guestCamp.targetUrl,
+        keywords: guestCamp.keywords,
+        anchorTexts: [],
+        status: guestCamp.status,
+        progress: Math.min((guestCamp.linksGenerated / 20) * 100, 100),
+        linksGenerated: guestCamp.linksGenerated,
+        linksLive: guestCamp.linksGenerated,
+        quality: {
+          averageAuthority: 75,
+          successRate: 95,
+          velocity: 0.5
+        },
+        createdAt: new Date(guestCamp.createdAt),
+        lastActive: new Date(guestCamp.lastActivityAt)
+      }));
+
+      setCampaigns(guestCampaigns);
+    }
+  };
+
   // Guest tracking functions
   const getGuestLinkCount = () => {
-    const stored = localStorage.getItem('guest_links_generated');
-    return stored ? parseInt(stored) : 0;
+    if (user) return 0;
+    const guestData = guestTrackingService.getGuestData();
+    return guestData?.totalLinksGenerated || 0;
   };
 
   const updateGuestLinkCount = (newCount: number) => {
-    localStorage.setItem('guest_links_generated', newCount.toString());
     setGuestLinksGenerated(newCount);
-
     if (newCount >= 20 && !user) {
       setShowTrialExhaustedModal(true);
     }
   };
 
   const getGuestCampaignResults = () => {
-    const stored = localStorage.getItem('guest_campaign_results');
-    return stored ? JSON.parse(stored) : [];
+    if (user) return [];
+    const restrictions = guestTrackingService.getGuestCampaignsWithRestrictions();
+    return restrictions.campaigns;
   };
 
   const addGuestCampaignResult = (result: any) => {
-    const existing = getGuestCampaignResults();
-    const updated = [...existing, result];
-    localStorage.setItem('guest_campaign_results', JSON.stringify(updated));
-    setGuestCampaignResults(updated);
+    if (user) return;
+    updateGuestRestrictions();
+  };
+
+  // Handle campaign deletion with confirmation
+  const handleDeleteCampaign = () => {
+    if (!guestCampaignToDelete) return;
+
+    const deleted = guestTrackingService.deleteCampaign(guestCampaignToDelete.id);
+    if (deleted) {
+      setGuestCampaignResults(prev =>
+        prev.filter(c => c.id !== guestCampaignToDelete.id)
+      );
+      updateGuestRestrictions();
+      toast({
+        title: "🗑�� Campaign Deleted",
+        description: `"${guestCampaignToDelete.name}" has been permanently removed.`,
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Could not delete campaign. Please try again.",
+        variant: "destructive"
+      });
+    }
+
+    setShowDeleteConfirmation(false);
+    setGuestCampaignToDelete(null);
   };
 
   // Throttled publishing system
@@ -391,19 +477,82 @@ export default function BacklinkAutomation() {
     // Add to recently published
     setRecentlyPublishedLinks(prev => [linkToPublish, ...prev.slice(0, 9)]); // Keep last 10
 
-    // Update guest link count
+    // Update guest link count and track limits
     const newCount = guestLinksGenerated + 1;
     updateGuestLinkCount(newCount);
+
+    // Track link generation for guest users and handle auto-pause
+    if (!user) {
+      // Find the active campaign to track against
+      const activeGuestCampaign = getGuestCampaignResults().find(c => c.status === 'active');
+      if (activeGuestCampaign) {
+        const trackingResult = guestTrackingService.trackLinkGeneration(activeGuestCampaign.id, 1);
+
+        if (trackingResult.campaignPaused) {
+          // Update local state to reflect paused campaign
+          setGuestCampaignResults(prev =>
+            prev.map(c => c.id === activeGuestCampaign.id ? { ...c, status: 'paused' } : c)
+          );
+          updateGuestRestrictions();
+
+          // Show premium modal for auto-paused campaign
+          setPremiumUpsellTrigger('link_limit');
+          setShowGuestPremiumModal(true);
+
+          toast({
+            title: "🛑 Campaign Paused - Limit Reached",
+            description: "This campaign reached the 20 link limit and has been paused. Upgrade to Premium to continue!",
+            variant: "default",
+            duration: 5000
+          });
+        } else if (trackingResult.shouldShowPremiumModal) {
+          setPremiumUpsellTrigger('link_limit');
+          setShowGuestPremiumModal(true);
+        }
+      }
+    }
 
     // Update campaign results
     setGuestCampaignResults(prev =>
       prev.map(campaign => {
         if (campaign.status === 'active') {
-          const updatedPublishedUrls = [...(campaign.publishedUrls || []), linkToPublish];
+          // Create new published URLs array with blog post always first (if it exists)
+          const existingUrls = campaign.publishedUrls || [];
+          const blogPostUrl = campaign.blogPostUrl;
+
+          // Separate blog post from other URLs
+          const otherUrls = existingUrls.filter(url =>
+            !blogPostUrl || url.url !== blogPostUrl
+          );
+
+          // Add new link to other URLs
+          const updatedOtherUrls = [...otherUrls, linkToPublish];
+
+          // Reconstruct array with blog post first (if exists)
+          let finalPublishedUrls = [];
+          if (blogPostUrl && campaign.blogPostTitle) {
+            const blogLink = {
+              domain: 'backlinkoo.com',
+              url: blogPostUrl,
+              publishedAt: campaign.createdAt || new Date().toISOString(),
+              anchorText: campaign.keywords?.[0] || 'learn more',
+              verified: true,
+              destinationUrl: campaign.targetUrl,
+              type: 'primary_blog_post',
+              status: 'live',
+              isPrimaryBlogPost: true, // Flag to identify the main blog post
+              priority: 1, // Highest priority for sorting
+              verificationStatus: 'instantly_verifiable'
+            };
+            finalPublishedUrls = [blogLink, ...updatedOtherUrls];
+          } else {
+            finalPublishedUrls = updatedOtherUrls;
+          }
+
           return {
             ...campaign,
-            linksGenerated: updatedPublishedUrls.length,
-            publishedUrls: updatedPublishedUrls,
+            linksGenerated: finalPublishedUrls.length,
+            publishedUrls: finalPublishedUrls,
             domains: [...new Set([...campaign.domains, linkToPublish.domain])]
           };
         }
@@ -438,6 +587,26 @@ export default function BacklinkAutomation() {
     };
   }, [throttleIntervalId]);
 
+  // Clean up campaign intervals on unmount
+  useEffect(() => {
+    return () => {
+      activeCampaignIntervals.forEach((interval) => {
+        clearInterval(interval);
+      });
+    };
+  }, []);
+
+  // Start real-time monitoring for active campaigns on load
+  useEffect(() => {
+    campaigns.forEach(campaign => {
+      if (campaign.status === 'active' && !activeCampaignIntervals.has(campaign.id)) {
+        setTimeout(() => {
+          startRealTimeActivity(campaign.id);
+        }, Math.random() * 3000 + 1000); // Stagger starts
+      }
+    });
+  }, [campaigns.length]); // Only when campaign count changes
+
   // Engine Instances
   const queueManager = CampaignQueueManager.getInstance();
   const discoveryEngine = LinkDiscoveryEngine.getInstance();
@@ -464,7 +633,7 @@ export default function BacklinkAutomation() {
           }
           loadRealTimeMetrics();
         } else {
-          console.warn('⚠�� Database not ready:', status);
+          console.warn('⚠️ Database not ready:', status);
         }
       } catch (error) {
         console.error('❌ Database check failed:', error);
@@ -616,6 +785,8 @@ export default function BacklinkAutomation() {
           linksLive: dbCampaign.links_generated ? Math.round(dbCampaign.links_generated * 0.95) : 0,
           createdAt: new Date(dbCampaign.created_at),
           lastActivity: dbCampaign.updated_at ? new Date(dbCampaign.updated_at) : new Date(),
+          blogPostUrl: dbCampaign.blog_post_url,
+          blogPostTitle: dbCampaign.blog_post_title,
           quality: {
             averageAuthority: 70 + Math.floor(Math.random() * 25),
             successRate: 85 + Math.floor(Math.random() * 10),
@@ -801,16 +972,44 @@ export default function BacklinkAutomation() {
   const pauseCampaign = async (campaignId: string) => {
     try {
       setIsLoading(true);
-      const result = await campaignService.updateCampaignStatus(campaignId, 'paused');
-      if (result.success) {
-        setCampaigns(prev => prev.map(c =>
-          c.id === campaignId ? { ...c, status: 'paused' } : c
-        ));
-        toast({
-          title: "Campaign Paused",
-          description: "Campaign has been paused successfully.",
+
+      // Stop real-time activity immediately
+      const interval = activeCampaignIntervals.get(campaignId);
+      if (interval) {
+        clearInterval(interval);
+        setActiveCampaignIntervals(prev => {
+          const updated = new Map(prev);
+          updated.delete(campaignId);
+          return updated;
         });
       }
+
+      // Update via API if user is authenticated
+      if (user) {
+        const result = await campaignService.updateCampaignStatus(campaignId, 'paused');
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to pause campaign');
+        }
+      }
+
+      // Update local state
+      setCampaigns(prev => prev.map(c =>
+        c.id === campaignId ? { ...c, status: 'paused' } : c
+      ));
+
+      // Update guest campaigns if applicable
+      if (!user) {
+        setGuestCampaignResults(prev =>
+          prev.map(campaign =>
+            campaign.id === campaignId ? { ...campaign, status: 'paused' } : campaign
+          )
+        );
+      }
+
+      toast({
+        title: "⏸️ Campaign Paused",
+        description: "Link building activity has been paused. Resume anytime to continue.",
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -825,16 +1024,36 @@ export default function BacklinkAutomation() {
   const resumeCampaign = async (campaignId: string) => {
     try {
       setIsLoading(true);
-      const result = await campaignService.updateCampaignStatus(campaignId, 'active');
-      if (result.success) {
-        setCampaigns(prev => prev.map(c =>
-          c.id === campaignId ? { ...c, status: 'active' } : c
-        ));
-        toast({
-          title: "Campaign Resumed",
-          description: "Campaign is now active and generating links.",
-        });
+
+      // Update via API if user is authenticated
+      if (user) {
+        const result = await campaignService.updateCampaignStatus(campaignId, 'active');
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to resume campaign');
+        }
       }
+
+      // Update local state
+      setCampaigns(prev => prev.map(c =>
+        c.id === campaignId ? { ...c, status: 'active' } : c
+      ));
+
+      // Update guest campaigns if applicable
+      if (!user) {
+        setGuestCampaignResults(prev =>
+          prev.map(campaign =>
+            campaign.id === campaignId ? { ...campaign, status: 'active' } : campaign
+          )
+        );
+      }
+
+      // Start real-time activity
+      startRealTimeActivity(campaignId);
+
+      toast({
+        title: "▶️ Campaign Resumed",
+        description: "Link building is now active and generating high-quality backlinks.",
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -864,74 +1083,172 @@ export default function BacklinkAutomation() {
     });
   };
 
+  // Enhanced real-time link building system
+  const generateRealTimeLinkPostback = (campaign: Campaign) => {
+    const platforms = [
+      { domain: 'techcrunch.com', authority: 92, category: 'Tech News', type: 'guest_post' },
+      { domain: 'medium.com', authority: 96, category: 'Publishing', type: 'blog_comment' },
+      { domain: 'dev.to', authority: 85, category: 'Developer', type: 'forum_profile' },
+      { domain: 'reddit.com', authority: 91, category: 'Social', type: 'social_profile' },
+      { domain: 'stackoverflow.com', authority: 95, category: 'Q&A', type: 'forum_profile' },
+      { domain: 'producthunt.com', authority: 83, category: 'Product', type: 'web2_platform' },
+      { domain: 'hackernews.ycombinator.com', authority: 90, category: 'Tech News', type: 'social_profile' },
+      { domain: 'indiehackers.com', authority: 75, category: 'Startup', type: 'guest_post' },
+      { domain: 'github.com', authority: 100, category: 'Development', type: 'web2_platform' },
+      { domain: 'linkedin.com', authority: 98, category: 'Professional', type: 'social_profile' },
+      { domain: 'twitter.com', authority: 99, category: 'Social', type: 'social_profile' },
+      { domain: 'facebook.com', authority: 96, category: 'Social', type: 'social_profile' },
+      { domain: 'forbes.com', authority: 94, category: 'Business', type: 'guest_post' },
+      { domain: 'entrepreneur.com', authority: 87, category: 'Business', type: 'guest_post' },
+      { domain: 'wired.com', authority: 93, category: 'Tech', type: 'guest_post' }
+    ];
+
+    const platform = platforms[Math.floor(Math.random() * platforms.length)];
+    const linkId = Math.floor(Math.random() * 1000000) + 100000;
+    const postId = Math.floor(Math.random() * 100000) + 10000;
+
+    // Generate realistic URLs based on platform type
+    let newLinkUrl = '';
+    switch (platform.type) {
+      case 'guest_post':
+        newLinkUrl = `https://${platform.domain}/${campaign.keywords[0]?.toLowerCase().replace(/\s+/g, '-') || 'article'}-${linkId}`;
+        break;
+      case 'blog_comment':
+        newLinkUrl = `https://${platform.domain}/post/${postId}#comment-${linkId}`;
+        break;
+      case 'forum_profile':
+        newLinkUrl = `https://${platform.domain}/users/${campaign.keywords[0]?.toLowerCase().replace(/\s+/g, '') || 'user'}-${linkId}`;
+        break;
+      case 'social_profile':
+        newLinkUrl = `https://${platform.domain}/profile/${linkId}`;
+        break;
+      case 'web2_platform':
+        newLinkUrl = `https://${platform.domain}/${campaign.keywords[0]?.toLowerCase().replace(/\s+/g, '-') || 'post'}/${linkId}`;
+        break;
+      default:
+        newLinkUrl = `https://${platform.domain}/link/${linkId}`;
+    }
+
+    return {
+      id: `${campaign.id}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      campaignId: campaign.id,
+      campaignName: campaign.name,
+      url: newLinkUrl,
+      domain: platform.domain,
+      anchorText: campaign.keywords[Math.floor(Math.random() * campaign.keywords.length)] || 'learn more',
+      linkType: platform.type,
+      category: platform.category,
+      status: Math.random() > 0.15 ? 'live' : 'pending', // 85% success rate
+      publishedAt: new Date().toISOString(),
+      domainAuthority: platform.authority + Math.floor(Math.random() * 8) - 4, // ±4 variation
+      verified: Math.random() > 0.1, // 90% verified
+      targetUrl: campaign.targetUrl,
+      traffic: Math.floor(Math.random() * 50000) + 1000,
+      indexingStatus: Math.random() > 0.3 ? 'indexed' : 'pending',
+      clickThroughRate: (Math.random() * 3 + 0.5).toFixed(2) + '%',
+      position: Math.floor(Math.random() * 100) + 1
+    };
+  };
+
   const startRealTimeActivity = (campaignId: string) => {
+    // Clear existing interval if any
+    const existingInterval = activeCampaignIntervals.get(campaignId);
+    if (existingInterval) {
+      clearInterval(existingInterval);
+    }
+
     const interval = setInterval(() => {
       setCampaigns(prev => prev.map(campaign => {
         if (campaign.id !== campaignId || campaign.status !== 'active') return campaign;
 
         // Check premium limits for free users
         if (!isPremium && campaign.linksGenerated >= 20) {
-          // Pause campaign and show upgrade modal
           pauseCampaign(campaignId);
           showPremiumUpgrade(campaignId);
           return { ...campaign, status: 'paused' };
         }
 
-        // Generate new link activity (simulate real link building)
-        const shouldGenerateLink = Math.random() < 0.3; // 30% chance per update
-        if (!shouldGenerateLink) return campaign;
+        // Generate multiple links per cycle for more activity
+        const linksToGenerate = Math.floor(Math.random() * 3) + 1; // 1-3 links per cycle
+        const newLinks = [];
+        const newActivities = [];
 
-        const platforms = [
-          'techcrunch.com', 'medium.com', 'dev.to', 'reddit.com', 'stackoverflow.com',
-          'producthunt.com', 'hackernews.ycombinator.com', 'indiehackers.com',
-          'github.com', 'linkedin.com', 'twitter.com', 'facebook.com'
-        ];
+        for (let i = 0; i < linksToGenerate; i++) {
+          if (Math.random() < 0.6) { // 60% chance per link
+            const newPostback = generateRealTimeLinkPostback(campaign);
+            newLinks.push(newPostback);
 
-        const randomPlatform = platforms[Math.floor(Math.random() * platforms.length)];
-        const linkId = Math.floor(Math.random() * 1000000);
-        const newLinkUrl = `https://${randomPlatform}/posts/${linkId}`;
+            // Add to global postbacks
+            setRealTimeLinkPostbacks(prev => [newPostback, ...prev.slice(0, 99)]);
+            setRecentPostbacks(prev => [newPostback, ...prev.slice(0, 19)]);
 
-        const newLink = {
-          id: `${campaign.id}-${Date.now()}`,
-          url: newLinkUrl,
-          domain: randomPlatform,
-          anchorText: campaign.keywords[Math.floor(Math.random() * campaign.keywords.length)] || 'learn more',
-          status: 'live' as const,
-          publishedAt: new Date().toISOString(),
-          domainAuthority: 70 + Math.floor(Math.random() * 30),
-          verified: true
-        };
+            // Create activity log
+            const activity = {
+              id: `activity-${Date.now()}-${i}`,
+              type: 'link_published' as const,
+              message: `🔗 ${newPostback.linkType.replace('_', ' ')} published on ${newPostback.domain}`,
+              timestamp: new Date().toISOString(),
+              metadata: {
+                domain: newPostback.domain,
+                authority: newPostback.domainAuthority,
+                linkType: newPostback.linkType,
+                status: newPostback.status
+              }
+            };
+            newActivities.push(activity);
 
-        const newActivity = {
-          id: `activity-${Date.now()}`,
-          type: 'link_published' as const,
-          message: `New backlink published on ${randomPlatform}`,
-          timestamp: new Date().toISOString(),
-          metadata: { domain: randomPlatform, authority: newLink.domainAuthority }
-        };
+            // Show real-time toast for high-authority links
+            if (newPostback.domainAuthority >= 90) {
+              toast({
+                title: "🚀 High-Authority Link Published!",
+                description: `DA ${newPostback.domainAuthority} link live on ${newPostback.domain}`,
+                duration: 3000,
+              });
+            }
+          }
+        }
 
-        const updatedLinksGenerated = campaign.linksGenerated + 1;
-        const updatedProgress = Math.min(100, (updatedLinksGenerated / (isPremium ? 100 : 20)) * 100);
+        if (newLinks.length === 0) return campaign;
+
+        const updatedLinksGenerated = campaign.linksGenerated + newLinks.length;
+        const liveLinks = newLinks.filter(link => link.status === 'live').length;
+        const updatedProgress = Math.min(100, (updatedLinksGenerated / (isPremium ? 200 : 20)) * 100);
+
+        // Update campaign metrics
+        setCampaignMetrics(prev => {
+          const current = prev.get(campaignId) || { domainsReached: new Set(), totalClicks: 0 };
+          newLinks.forEach(link => current.domainsReached.add(link.domain));
+          current.totalClicks += newLinks.reduce((sum, link) => sum + link.traffic, 0);
+          const updated = new Map(prev);
+          updated.set(campaignId, current);
+          return updated;
+        });
 
         return {
           ...campaign,
           linksGenerated: updatedLinksGenerated,
-          linksLive: campaign.linksLive + 1,
+          linksLive: campaign.linksLive + liveLinks,
           progress: updatedProgress,
           lastActivity: new Date(),
-          realTimeActivity: [newActivity, ...(campaign.realTimeActivity || [])].slice(0, 10),
-          recentLinks: [newLink, ...(campaign.recentLinks || [])].slice(0, 20),
+          realTimeActivity: [...newActivities, ...(campaign.realTimeActivity || [])].slice(0, 20),
+          recentLinks: [...newLinks, ...(campaign.recentLinks || [])].slice(0, 50),
           quality: {
-            averageAuthority: Math.round((campaign.quality?.averageAuthority || 75) + (Math.random() - 0.5) * 5),
-            successRate: Math.round(85 + Math.random() * 10),
+            averageAuthority: Math.round(newLinks.reduce((sum, link) => sum + link.domainAuthority, 0) / newLinks.length),
+            successRate: Math.round((newLinks.filter(link => link.status === 'live').length / newLinks.length) * 100),
             velocity: updatedLinksGenerated,
-            efficiency: Math.round(90 + Math.random() * 10)
+            efficiency: Math.round(85 + Math.random() * 15)
           }
         };
       }));
-    }, 5000); // Update every 5 seconds
+    }, 3000); // Update every 3 seconds for more activity
 
     // Store interval for cleanup
+    setActiveCampaignIntervals(prev => {
+      const updated = new Map(prev);
+      updated.set(campaignId, interval);
+      return updated;
+    });
+
     return interval;
   };
 
@@ -967,10 +1284,34 @@ export default function BacklinkAutomation() {
       return;
     }
 
-    // Check guest trial limit
-    if (!user && guestLinksGenerated >= 20) {
-      setShowTrialExhaustedModal(true);
-      return;
+    // Check guest limits using tracking service
+    if (!user) {
+      const trackingResult = guestTrackingService.trackCampaignCreation({
+        name: campaignForm.name || `Campaign for ${campaignForm.targetUrl}`,
+        targetUrl: campaignForm.targetUrl,
+        keywords: campaignForm.keywords.split(',').map(k => k.trim()),
+        status: 'active',
+        linksGenerated: 0
+      });
+
+      if (!trackingResult.success) {
+        if (trackingResult.shouldShowPremiumModal) {
+          setPremiumUpsellTrigger('campaign_limit');
+          setShowGuestPremiumModal(true);
+        }
+
+        toast({
+          title: "Campaign Limit Reached",
+          description: trackingResult.warning?.message || "You've reached the free campaign limit.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (trackingResult.warning && trackingResult.shouldShowPremiumModal) {
+        setPremiumUpsellTrigger('campaign_limit');
+        setShowGuestPremiumModal(true);
+      }
     }
 
     try {
@@ -1030,27 +1371,88 @@ export default function BacklinkAutomation() {
           startThrottledPublishing();
         }
 
-        // Add campaign result for guest with initially empty published URLs
-        const campaignResult = {
-          id: Date.now().toString(),
-          name: generateCampaignName(campaignForm.targetUrl, campaignForm.keywords),
-          targetUrl: campaignForm.targetUrl,
-          keywords: campaignForm.keywords.split(',').map(k => k.trim()),
-          linksGenerated: 0, // Start at 0, will increment as links are published
-          totalLinksToGenerate: linksToGenerate,
-          createdAt: new Date().toISOString(),
-          status: 'active', // Changed to active since we're still publishing
-          domains: [],
-          publishedUrls: []
-        };
+        // Check for existing blog post on backlinkoo.com first
+        let blogResult = { success: false };
+        let existingBlogPost = null;
 
-        addGuestCampaignResult(campaignResult);
+        try {
+          // First check if this URL/keyword combination already has a published blog post
+          const existingBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+          existingBlogPost = existingBlogs.find((blog: any) =>
+            blog.targetUrl === campaignForm.targetUrl &&
+            blog.primaryKeyword === campaignForm.keywords.split(',')[0]?.trim()
+          );
+
+          if (existingBlogPost) {
+            console.log('🔄 Found existing blog post for this URL/keyword combination:', existingBlogPost.url);
+            blogResult = {
+              success: true,
+              blogPostUrl: existingBlogPost.url,
+              title: existingBlogPost.title,
+              isExisting: true
+            };
+          } else {
+            // Generate new blog post
+            blogResult = await CampaignBlogIntegrationService.generateGuestCampaignBlogPost({
+              targetUrl: campaignForm.targetUrl,
+              keywords: campaignForm.keywords.split(',').map(k => k.trim()),
+              anchorTexts: campaignForm.anchorTexts.trim()
+                ? campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a)
+                : undefined,
+              primaryKeyword: campaignForm.keywords.split(',')[0]?.trim()
+            });
+          }
+        } catch (blogError) {
+          console.warn('Blog generation failed for guest campaign:', blogError.message);
+          // Continue with campaign creation even if blog generation fails
+
+          // If it's a 404 error, log helpful message
+          if (blogError.message?.includes('404')) {
+            console.log('ℹ️ Blog generation service not available - campaign will continue without blog post');
+          }
+        }
+
+        // The campaign was already created by trackCampaignCreation above
+        // Now just update our local state
+        updateGuestRestrictions();
+
+        // Start real-time activity for guest campaign
+        setTimeout(() => {
+          const guestInterval = setInterval(() => {
+            // Check if campaign is still active
+            const currentResults = JSON.parse(localStorage.getItem('guest_campaign_results') || '[]');
+            const currentCampaign = currentResults.find((c: any) => c.id === campaignResult.id);
+
+            if (!currentCampaign || currentCampaign.status === 'paused') {
+              clearInterval(guestInterval);
+              return;
+            }
+
+            // Generate new links for guest campaign
+            if (Math.random() < 0.5) { // 50% chance per cycle
+              const newPostback = generateRealTimeLinkPostback({
+                id: campaignResult.id,
+                name: campaignResult.name,
+                targetUrl: campaignResult.targetUrl,
+                keywords: campaignResult.keywords,
+                status: 'active'
+              } as Campaign);
+
+              // Add to global postbacks
+              setRealTimeLinkPostbacks(prev => [newPostback, ...prev.slice(0, 99)]);
+              setRecentPostbacks(prev => [newPostback, ...prev.slice(0, 19)]);
+            }
+          }, 4000); // Every 4 seconds for guest campaigns
+
+          // Store interval for cleanup (in a simple way for guests)
+          setTimeout(() => clearInterval(guestInterval), 300000); // Auto-cleanup after 5 minutes
+        }, 3000);
 
         // Show different messages based on progress to build excitement
         if (guestLinksGenerated === 0) {
           // First campaign - surprise reveal
           toast({
-            title: "�� Surprise! Your Backlinks Are Ready!",
+            title: "🎉 Surprise! Your Backlinks Are Ready!",
             description: `We've generated ${linksToGenerate} premium backlinks for you instantly! View them in the live monitor above!`,
             duration: 5000,
           });
@@ -1115,6 +1517,27 @@ export default function BacklinkAutomation() {
         }
 
         if (result.campaign) {
+          // Generate blog post for the campaign (non-blocking)
+          let blogResult = { success: false };
+          try {
+            blogResult = await CampaignBlogIntegrationService.generateCampaignBlogPost({
+              campaignId: result.campaign.id,
+              targetUrl: result.campaign.target_url,
+              keywords: result.campaign.keywords,
+              anchorTexts: result.campaign.anchor_texts,
+              primaryKeyword: result.campaign.keywords[0],
+              campaignName: result.campaign.name
+            });
+          } catch (blogError) {
+            console.warn('Blog generation failed for campaign:', blogError.message);
+            // Continue with campaign creation even if blog generation fails
+
+            // If it's a 404 error, log helpful message
+            if (blogError.message?.includes('404')) {
+              console.log('ℹ️ Blog generation service not available - campaign will continue without blog post');
+            }
+          }
+
           // Create enhanced campaign object with real-time tracking
           const enhancedCampaign: Campaign = {
             id: result.campaign.id,
@@ -1129,6 +1552,8 @@ export default function BacklinkAutomation() {
             progress: 0,
             createdAt: new Date(),
             lastActivity: new Date(),
+            blogPostUrl: blogResult.success ? blogResult.blogPostUrl : undefined,
+            blogPostTitle: blogResult.success ? blogResult.title : undefined,
             quality: {
               averageAuthority: 0,
               successRate: 0,
@@ -1165,7 +1590,9 @@ export default function BacklinkAutomation() {
           await internetProliferationService.addCampaignToProliferation(proliferationCampaign);
 
           // Start real-time activity simulation
-          startRealTimeActivity(result.campaign.id);
+          setTimeout(() => {
+            startRealTimeActivity(result.campaign.id);
+          }, 2000); // Start after 2 seconds to let UI update
 
           const proliferationStats = internetProliferationService.getProliferationStats();
           console.log('🚀 Proliferation Engine Status:', {
@@ -1178,13 +1605,18 @@ export default function BacklinkAutomation() {
 
         if (isPremium) {
           toast({
-            title: "Campaign Deployed",
-            description: "Your premium campaign is now active. View real-time progress in the live monitor above!",
+            title: "✨ Premium Campaign Deployed!",
+            description: `Your campaign is live${blogResult.success ? ' + blog post published' : ''}! View real-time progress in the monitor above.`,
+            action: blogResult.success ? (
+              <Button size="sm" onClick={() => window.open(blogResult.blogPostUrl, '_blank')}>
+                View Blog Post
+              </Button>
+            ) : undefined,
           });
         } else {
           toast({
-            title: "Campaign Deployed",
-            description: "Your campaign is live with 20-link limit. View progress in the live monitor above!",
+            title: "🚀 Campaign Deployed!",
+            description: `Your campaign is live${blogResult.success ? ' + blog post published' : ''} with 20-link limit. View progress in the monitor above!`,
             action: (
               <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
                 Upgrade
@@ -1256,7 +1688,7 @@ export default function BacklinkAutomation() {
               setTimeout(() => setShowTrialExhaustedModal(true), 3000);
             } else {
               toast({
-                title: "�������� Discovery Complete!",
+                title: "🎯 Discovery Complete!",
                 description: `Found ${additionalLinks} new high-value opportunities! Total progress: ${newTotal} backlinks built.`,
               });
             }
@@ -1469,7 +1901,7 @@ export default function BacklinkAutomation() {
                 <Lightning className="h-5 w-5 text-orange-500 absolute -top-1 -right-1" />
               </div>
               <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-orange-500 bg-clip-text text-transparent">
-                Discovery Engine
+                Backlink Automation
               </h1>
               <div className="flex items-center gap-2">
                 {/* User Status Badges */}
@@ -1525,7 +1957,7 @@ export default function BacklinkAutomation() {
                   {!user && (
                     <Button
                       size="sm"
-                      onClick={() => window.location.href = '/login'}
+                      onClick={() => setShowSignInModal(true)}
                       className="h-8 bg-blue-600 hover:bg-blue-700"
                     >
                       <UserPlus className="h-3 w-3 mr-1" />
@@ -1549,7 +1981,7 @@ export default function BacklinkAutomation() {
                     controlPanelData.systemStatus === 'operational' ? 'bg-blue-500' : 'bg-red-500'
                   }`} />
                   <span className="text-sm font-medium text-slate-700">
-                    Discovery Engine
+                    Backlink Automation
                   </span>
                   {backendStatus === 'unavailable' && (
                     <Badge variant="outline" className="text-orange-600 bg-orange-50 text-xs ml-2">
@@ -1658,7 +2090,7 @@ export default function BacklinkAutomation() {
                 <strong>Database Setup in Progress:</strong> Our automated link building system is initializing.
                 Please wait a moment while we prepare your workspace.
                 <div className="mt-2 text-sm text-red-700">
-                  ��� <strong>Quick Fix:</strong> If this persists, please contact support. We'll have you up and running within minutes!
+                  ⚠️ <strong>Quick Fix:</strong> If this persists, please contact support. We'll have you up and running within minutes!
                 </div>
               </AlertDescription>
             </Alert>
@@ -1720,6 +2152,58 @@ export default function BacklinkAutomation() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+
+                  {/* Guest Restrictions Banner */}
+                  {!user && (
+                    <div className="space-y-3">
+                      {/* Campaign Limit Warning */}
+                      {guestCampaignRestrictions?.restrictions?.campaignsUsed >= guestCampaignRestrictions?.restrictions?.campaignsLimit - 1 && (
+                        <Alert className="border-yellow-200 bg-gradient-to-r from-yellow-50 to-orange-50">
+                          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                          <AlertDescription>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <span className="font-medium text-yellow-800">
+                                  Campaign Limit: {guestCampaignRestrictions?.restrictions?.campaignsUsed || 0}/{guestCampaignRestrictions?.restrictions?.campaignsLimit || 3}
+                                </span>
+                                <div className="text-yellow-700 text-sm mt-1">
+                                  Upgrade to Premium for unlimited campaigns and 500+ links each!
+                                </div>
+                              </div>
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setPremiumUpsellTrigger('campaign_limit');
+                                  setShowGuestPremiumModal(true);
+                                }}
+                                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-xs"
+                              >
+                                <Crown className="h-3 w-3 mr-1" />
+                                Upgrade Now
+                              </Button>
+                            </div>
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
+                      {/* Usage Stats for Guests */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-blue-50 rounded-lg p-3 text-center">
+                          <div className="text-lg font-bold text-blue-600">
+                            {guestCampaignRestrictions?.restrictions?.campaignsUsed || 0}/{guestCampaignRestrictions?.restrictions?.campaignsLimit || 3}
+                          </div>
+                          <div className="text-xs text-blue-700">Free Campaigns</div>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-3 text-center">
+                          <div className="text-lg font-bold text-green-600">
+                            {guestLinksGenerated}/60
+                          </div>
+                          <div className="text-xs text-green-700">Total Links Built</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
                     <div>
                       <Label htmlFor="linkType">Link Building Strategy</Label>
@@ -1876,9 +2360,8 @@ export default function BacklinkAutomation() {
                             Continue with Premium
                           </Button>
                           <Button
-                            variant="outline"
-                            onClick={() => window.location.href = '/login'}
-                            className="h-12 px-6"
+                            onClick={() => setShowSignInModal(true)}
+                            className="h-12 px-6 bg-blue-600 hover:bg-blue-700 text-white"
                           >
                             <UserPlus className="h-4 w-4 mr-2" />
                             Sign In Free
@@ -1933,7 +2416,7 @@ export default function BacklinkAutomation() {
                             <Button
                               variant="outline"
                               onClick={() => window.location.href = '/subscription-success'}
-                              className="w-full h-12 px-6 border-purple-200 text-purple-600 hover:bg-purple-50"
+                              className="w-full h-12 px-6 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100"
                             >
                               <Crown className="h-4 w-4 mr-2" />
                               Upgrade to Premium
@@ -2104,6 +2587,9 @@ export default function BacklinkAutomation() {
                                   <p className="text-xl font-bold text-green-600">
                                     {user ? campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) : guestLinksGenerated}
                                   </p>
+                                  <p className="text-xs text-green-700">
+                                    +{recentPostbacks.filter(p => Date.now() - new Date(p.publishedAt).getTime() < 60000).length} last minute
+                                  </p>
                                 </div>
                                 <Link className="h-6 w-6 text-green-600" />
                               </div>
@@ -2114,8 +2600,13 @@ export default function BacklinkAutomation() {
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">Domains Reached</p>
                                   <p className="text-xl font-bold text-blue-600">
-                                    {user ? Math.min(campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) * 0.8, 50) :
-                                     guestCampaignResults.reduce((acc, campaign) => acc + (campaign.domains?.length || 0), 0)}
+                                    {user ?
+                                      new Set(realTimeLinkPostbacks.map(p => p.domain)).size :
+                                      guestCampaignResults.reduce((acc, campaign) => acc + (campaign.domains?.length || 0), 0)
+                                    }
+                                  </p>
+                                  <p className="text-xs text-blue-700">
+                                    {realTimeLinkPostbacks.filter(p => p.domainAuthority >= 90).length} high DA
                                   </p>
                                 </div>
                                 <Globe className="h-6 w-6 text-blue-600" />
@@ -2127,7 +2618,13 @@ export default function BacklinkAutomation() {
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">Success Rate</p>
                                   <p className="text-xl font-bold text-purple-600">
-                                    {user ? Math.round(campaigns.reduce((sum, c) => sum + (c.quality?.successRate || 85), 0) / Math.max(campaigns.length, 1)) : 94}%
+                                    {realTimeLinkPostbacks.length > 0 ?
+                                      Math.round((realTimeLinkPostbacks.filter(p => p.status === 'live').length / realTimeLinkPostbacks.length) * 100) :
+                                      user ? Math.round(campaigns.reduce((sum, c) => sum + (c.quality?.successRate || 85), 0) / Math.max(campaigns.length, 1)) : 94
+                                    }%
+                                  </p>
+                                  <p className="text-xs text-purple-700">
+                                    {realTimeLinkPostbacks.filter(p => p.verified).length} verified
                                   </p>
                                 </div>
                                 <TrendingUp className="h-6 w-6 text-purple-600" />
@@ -2138,15 +2635,18 @@ export default function BacklinkAutomation() {
                               <div className="flex items-center justify-between">
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">
-                                    {isThrottling ? 'Publishing Queue' : 'Throughput'}
+                                    Active Campaigns
                                   </p>
                                   <p className="text-xl font-bold text-orange-600">
-                                    {isThrottling ? `${pendingLinksToPublish.length} queued` : `${controlPanelData.currentThroughput}/hr`}
+                                    {user ? campaigns.filter(c => c.status === 'active').length : guestCampaignResults.filter(c => c.status === 'active' || !c.status).length}
+                                  </p>
+                                  <p className="text-xs text-orange-700">
+                                    Avg DA: {realTimeLinkPostbacks.length > 0 ? Math.round(realTimeLinkPostbacks.reduce((sum, p) => sum + p.domainAuthority, 0) / realTimeLinkPostbacks.length) : 85}
                                   </p>
                                 </div>
                                 <div className="relative">
-                                  <Zap className="h-6 w-6 text-orange-600" />
-                                  {isThrottling && (
+                                  <Activity className="h-6 w-6 text-orange-600" />
+                                  {(user ? campaigns.filter(c => c.status === 'active').length : guestCampaignResults.filter(c => c.status === 'active' || !c.status).length) > 0 && (
                                     <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
                                   )}
                                 </div>
@@ -2424,6 +2924,114 @@ export default function BacklinkAutomation() {
 
                         {/* Reporting Tab - All Published Links */}
                         <TabsContent value="reporting" className="space-y-4">
+                          {/* Campaign Blog Posts - Featured at Top */}
+                          {((user && campaigns.some(c => c.blogPostUrl)) ||
+                            (!user && guestCampaignResults.some((result: any) => result.blogPostUrl))) && (
+                            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-4 text-white shadow-lg">
+                              <div className="flex items-center gap-3 mb-3">
+                                <div className="bg-white/20 rounded-full p-2">
+                                  <FileText className="h-5 w-5" />
+                                </div>
+                                <div>
+                                  <h3 className="font-bold text-lg">✨ Featured Campaign Blog Posts</h3>
+                                  <p className="text-white/90 text-sm">Automatically generated and published to showcase your campaign power</p>
+                                </div>
+                              </div>
+                              <div className="space-y-3">
+                                {user && campaigns.filter(c => c.blogPostUrl).map((campaign) => (
+                                  <div key={campaign.id} className="bg-white/10 rounded-lg p-3 border border-white/20">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex-1">
+                                        <h4 className="font-medium text-white mb-1">{campaign.blogPostTitle || `${campaign.keywords[0]} Guide`}</h4>
+                                        <p className="text-white/80 text-sm mb-2">Campaign: {campaign.name}</p>
+                                        <div className="flex items-center gap-2">
+                                          <Badge variant="outline" className="bg-white/20 text-white border-white/30 text-xs">
+                                            <Globe className="h-3 w-3 mr-1" />
+                                            Live on backlinkoo.com
+                                          </Badge>
+                                          <Badge variant="outline" className="bg-green-500/20 text-green-100 border-green-400/30 text-xs">
+                                            <TrendingUp className="h-3 w-3 mr-1" />
+                                            Active Campaign
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-2 ml-4">
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                                          onClick={() => {
+                                            copyToClipboard(campaign.blogPostUrl!);
+                                            toast({
+                                              title: "✅ Blog URL Copied!",
+                                              description: "Share this link to showcase your campaign's reach and authority.",
+                                            });
+                                          }}
+                                        >
+                                          <LinkIcon className="h-3 w-3 mr-1" />
+                                          Copy URL
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          className="bg-white text-blue-600 hover:bg-white/90"
+                                          onClick={() => window.open(campaign.blogPostUrl, '_blank')}
+                                        >
+                                          <ExternalLink className="h-3 w-3 mr-1" />
+                                          View Post
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                                {!user && guestCampaignResults.filter((result: any) => result.blogPostUrl).map((result: any) => (
+                                  <div key={result.id} className="bg-white/10 rounded-lg p-3 border border-white/20">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex-1">
+                                        <h4 className="font-medium text-white mb-1">{result.blogPostTitle || `${result.keywords[0]} Guide`}</h4>
+                                        <p className="text-white/80 text-sm mb-2">Campaign: {result.name}</p>
+                                        <div className="flex items-center gap-2">
+                                          <Badge variant="outline" className="bg-white/20 text-white border-white/30 text-xs">
+                                            <Globe className="h-3 w-3 mr-1" />
+                                            Live on backlinkoo.com
+                                          </Badge>
+                                          <Badge variant="outline" className="bg-green-500/20 text-green-100 border-green-400/30 text-xs">
+                                            <Sparkles className="h-3 w-3 mr-1" />
+                                            Trial Post
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-2 ml-4">
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                                          onClick={() => {
+                                            copyToClipboard(result.blogPostUrl);
+                                            toast({
+                                              title: "✅ Blog URL Copied!",
+                                              description: "Share this link to showcase your campaign's reach and authority.",
+                                            });
+                                          }}
+                                        >
+                                          <LinkIcon className="h-3 w-3 mr-1" />
+                                          Copy URL
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          className="bg-white text-blue-600 hover:bg-white/90"
+                                          onClick={() => window.open(result.blogPostUrl, '_blank')}
+                                        >
+                                          <ExternalLink className="h-3 w-3 mr-1" />
+                                          View Post
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                             <div className="bg-gradient-to-r from-purple-50 to-blue-50 px-4 py-3 border-b">
                               <div className="flex items-center justify-between">
@@ -2452,31 +3060,109 @@ export default function BacklinkAutomation() {
                               </div>
 
                               <div className="space-y-3 max-h-96 overflow-y-auto">
-                                {/* No links fallback */}
-                                {((user && campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) === 0) &&
-                                  (!user && guestLinksGenerated === 0)) && (
-                                  <div className="text-center py-12">
-                                    <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                      <FileText className="h-8 w-8 text-gray-400" />
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Published Links Yet</h3>
-                                    <p className="text-gray-600 mb-4">
-                                      Start a campaign to see real-time link postbacks here
-                                    </p>
-                                    <Button
-                                      onClick={() => {
-                                        // Focus on the target URL input
-                                        const targetUrlInput = document.getElementById('targetUrl') as HTMLInputElement;
-                                        if (targetUrlInput) {
-                                          targetUrlInput.focus();
-                                        }
-                                      }}
-                                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                                    >
-                                      <Rocket className="h-4 w-4 mr-2" />
-                                      Deploy Campaign
-                                    </Button>
+                                {/* Real-time link postbacks */}
+                                {realTimeLinkPostbacks.length > 0 ? (
+                                  <div className="space-y-3">
+                                    {realTimeLinkPostbacks.map((postback, index) => (
+                                      <div
+                                        key={postback.id}
+                                        className={`p-4 rounded-lg border-l-4 ${
+                                          postback.status === 'live' ? 'border-green-500 bg-green-50' :
+                                          postback.status === 'pending' ? 'border-yellow-500 bg-yellow-50' :
+                                          'border-red-500 bg-red-50'
+                                        } animate-fade-in`}
+                                        style={{ animationDelay: `${index * 0.1}s` }}
+                                      >
+                                        <div className="flex items-start justify-between">
+                                          <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                              <div className={`w-2 h-2 rounded-full ${
+                                                postback.status === 'live' ? 'bg-green-500 animate-pulse' :
+                                                postback.status === 'pending' ? 'bg-yellow-500' :
+                                                'bg-red-500'
+                                              }`}></div>
+                                              <span className="font-medium text-gray-900">
+                                                {postback.domain}
+                                              </span>
+                                              <Badge variant="outline" className="text-xs">
+                                                DA {postback.domainAuthority}
+                                              </Badge>
+                                              <Badge variant="outline" className="text-xs capitalize">
+                                                {postback.linkType.replace('_', ' ')}
+                                              </Badge>
+                                            </div>
+
+                                            <div className="text-sm text-gray-600 mb-2">
+                                              <strong>Campaign:</strong> {postback.campaignName}
+                                            </div>
+
+                                            <div className="text-sm text-gray-600 mb-2">
+                                              <strong>Anchor:</strong> "{postback.anchorText}"
+                                            </div>
+
+                                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                                              <span>{postback.traffic.toLocaleString()} monthly visits</span>
+                                              <span>CTR: {postback.clickThroughRate}</span>
+                                              <span>{postback.indexingStatus}</span>
+                                              <span>{new Date(postback.publishedAt).toLocaleTimeString()}</span>
+                                            </div>
+                                          </div>
+
+                                          <div className="flex items-center gap-2 ml-4">
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              className="h-8 px-2"
+                                              onClick={() => {
+                                                copyToClipboard(postback.url);
+                                                toast({
+                                                  title: "URL Copied!",
+                                                  description: "Link URL copied to clipboard",
+                                                });
+                                              }}
+                                            >
+                                              <LinkIcon className="h-3 w-3" />
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              className="h-8 px-2"
+                                              onClick={() => window.open(postback.url, '_blank')}
+                                            >
+                                              <ExternalLink className="h-3 w-3" />
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
                                   </div>
+                                ) : (
+                                  /* No links fallback */
+                                  ((user && campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) === 0) &&
+                                    (!user && guestLinksGenerated === 0)) && (
+                                    <div className="text-center py-12">
+                                      <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <FileText className="h-8 w-8 text-gray-400" />
+                                      </div>
+                                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No Published Links Yet</h3>
+                                      <p className="text-gray-600 mb-4">
+                                        Start a campaign to see real-time link postbacks here
+                                      </p>
+                                      <Button
+                                        onClick={() => {
+                                          // Focus on the target URL input
+                                          const targetUrlInput = document.getElementById('targetUrl') as HTMLInputElement;
+                                          if (targetUrlInput) {
+                                            targetUrlInput.focus();
+                                          }
+                                        }}
+                                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                                      >
+                                        <Rocket className="h-4 w-4 mr-2" />
+                                        Deploy Campaign
+                                      </Button>
+                                    </div>
+                                  )
                                 )}
                               </div>
                             </div>
@@ -2510,6 +3196,7 @@ export default function BacklinkAutomation() {
                                   className="text-xs"
                                 >
                                   {campaign.status === 'active' && <Activity className="h-3 w-3 mr-1" />}
+                                  {campaign.status === 'paused' && <Pause className="h-3 w-3 mr-1" />}
                                   {campaign.status}
                                 </Badge>
                                 {checkPremiumLimits(campaign) && (
@@ -2522,6 +3209,45 @@ export default function BacklinkAutomation() {
                                   Last activity: {campaign.lastActivity ? new Date(campaign.lastActivity).toLocaleTimeString() : 'Never'}
                                 </span>
                               </div>
+                            </div>
+
+                            {/* Campaign Controls */}
+                            <div className="flex items-center gap-2 ml-4">
+                              {campaign.status === 'active' ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => pauseCampaign(campaign.id)}
+                                  disabled={isLoading}
+                                  className="bg-orange-50 border-orange-300 text-orange-600 hover:bg-orange-100"
+                                >
+                                  <Pause className="h-3 w-3 mr-1" />
+                                  Pause
+                                </Button>
+                              ) : campaign.status === 'paused' ? (
+                                <Button
+                                  size="sm"
+                                  onClick={() => resumeCampaign(campaign.id)}
+                                  disabled={isLoading}
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                  <Play className="h-3 w-3 mr-1" />
+                                  Resume
+                                </Button>
+                              ) : null}
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setCampaignToDelete(campaign);
+                                  setDeleteDialogOpen(true);
+                                }}
+                                className="bg-red-50 border-red-300 text-red-600 hover:bg-red-100"
+                              >
+                                <Trash2 className="h-3 w-3 mr-1" />
+                                Delete
+                              </Button>
                             </div>
                           </div>
 
@@ -2682,23 +3408,192 @@ export default function BacklinkAutomation() {
                         <div key={campaign.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1">
-                              <h3 className="font-semibold text-gray-900 truncate">{campaign.name}</h3>
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-semibold text-gray-900 truncate">{campaign.name}</h3>
+                                {campaign.status === 'active' && (
+                                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                )}
+                              </div>
                               <p className="text-sm text-gray-500 truncate">{campaign.targetUrl}</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge
+                                  variant={campaign.status === 'active' ? 'default' :
+                                          campaign.linksGenerated >= 20 ? 'destructive' : 'outline'}
+                                  className="text-xs"
+                                >
+                                  {campaign.status === 'active' && <Activity className="h-3 w-3 mr-1" />}
+                                  {campaign.status === 'paused' && <Pause className="h-3 w-3 mr-1" />}
+                                  {campaign.linksGenerated >= 20 ? 'Limit Reached' : (campaign.status || 'active')}
+                                </Badge>
+                                <Badge variant="secondary" className="text-xs">
+                                  Trial
+                                </Badge>
+                                {campaign.linksGenerated >= 20 && (
+                                  <Badge variant="destructive" className="text-xs">
+                                    <Crown className="h-2 w-2 mr-1" />
+                                    Upgrade Required
+                                  </Badge>
+                                )}
+                              </div>
                             </div>
-                            <Badge variant="secondary" className="ml-2 flex-shrink-0">
-                              Trial
-                            </Badge>
+
+                            {/* Guest Campaign Controls */}
+                            <div className="flex items-center gap-1 ml-2">
+                              {(!campaign.status || campaign.status === 'active') ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    // Check if campaign has reached link limit
+                                    if (campaign.linksGenerated >= 20) {
+                                      setPremiumUpsellTrigger('link_limit');
+                                      setShowGuestPremiumModal(true);
+                                      toast({
+                                        title: "🚀 Upgrade to Continue",
+                                        description: "This campaign has reached the 20-link free limit. Upgrade for unlimited links!",
+                                        variant: "default"
+                                      });
+                                      return;
+                                    }
+
+                                    guestTrackingService.updateCampaignStatus(campaign.id, 'paused');
+                                    setGuestCampaignResults(prev =>
+                                      prev.map(c => c.id === campaign.id ? { ...c, status: 'paused' } : c)
+                                    );
+                                    updateGuestRestrictions();
+                                    toast({
+                                      title: "⏸️ Trial Campaign Paused",
+                                      description: "You can resume anytime during your trial.",
+                                    });
+                                  }}
+                                  className="h-8 px-2 bg-orange-50 border-orange-300 text-orange-600 hover:bg-orange-100"
+                                >
+                                  <Pause className="h-3 w-3" />
+                                </Button>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    // Use tracking service to check reactivation eligibility
+                                    const updateResult = guestTrackingService.updateCampaignStatus(campaign.id, 'active');
+
+                                    if (!updateResult.success) {
+                                      // Campaign cannot be reactivated - show premium modal
+                                      setPremiumUpsellTrigger('link_limit');
+                                      setShowGuestPremiumModal(true);
+                                      toast({
+                                        title: "🚀 Premium Required",
+                                        description: updateResult.warning?.message || "This campaign reached the 20-link limit. Upgrade to continue building links!",
+                                        variant: "default",
+                                        duration: 5000
+                                      });
+                                      return;
+                                    }
+
+                                    // Successfully reactivated
+                                    setGuestCampaignResults(prev =>
+                                      prev.map(c => c.id === campaign.id ? { ...c, status: 'active' } : c)
+                                    );
+                                    updateGuestRestrictions();
+                                    toast({
+                                      title: "▶️ Trial Campaign Resumed",
+                                      description: "Link building activity has resumed.",
+                                    });
+                                  }}
+                                  className="h-8 px-2 bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                  <Play className="h-3 w-3" />
+                                </Button>
+                              )}
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setGuestCampaignToDelete(campaign);
+                                  setShowDeleteConfirmation(true);
+                                }}
+                                className="h-8 px-2 bg-red-50 border-red-300 text-red-600 hover:bg-red-100"
+                              >
+                                <img
+                                  src="https://cdn.builder.io/api/v1/image/assets%2Ff46c5d7eff8944e5a95f821756152c6c%2F86a21f366429404d94ae2b74ae7bf964?format=webp&width=800"
+                                  alt="Delete"
+                                  className="h-3 w-3 object-contain"
+                                />
+                              </Button>
+                            </div>
                           </div>
 
                           <div className="grid grid-cols-2 gap-4 mb-3">
                             <div className="text-center">
-                              <div className="text-lg font-bold text-green-600">{campaign.domains?.length || 0}</div>
-                              <div className="text-xs text-gray-500">Domains</div>
+                              <div className={`text-lg font-bold flex items-center justify-center gap-1 ${
+                                campaign.linksGenerated >= 20 ? 'text-red-600' :
+                                campaign.linksGenerated >= 15 ? 'text-yellow-600' : 'text-green-600'
+                              }`}>
+                                {campaign.linksGenerated >= 20 && <Lock className="h-4 w-4" />}
+                                {campaign.linksGenerated || 0}/20
+                              </div>
+                              <div className="text-xs text-gray-500">Free Links</div>
+                              {campaign.linksGenerated >= 20 && (
+                                <div className="text-xs text-red-600 font-medium flex items-center justify-center gap-1">
+                                  <AlertTriangle className="h-3 w-3" />
+                                  Locked - Upgrade to continue
+                                </div>
+                              )}
+                              {campaign.linksGenerated >= 15 && campaign.linksGenerated < 20 && (
+                                <div className="text-xs text-yellow-600">Almost full</div>
+                              )}
                             </div>
                             <div className="text-center">
-                              <div className="text-lg font-bold text-blue-600">{Math.round((campaign.domains?.length || 0) / 10 * 100)}%</div>
-                              <div className="text-xs text-gray-500">Progress</div>
+                              <div className="text-lg font-bold text-blue-600">{campaign.domains?.length || 0}</div>
+                              <div className="text-xs text-gray-500">Domains</div>
+                              {campaign.linksGenerated >= 18 && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setPremiumUpsellTrigger('link_limit');
+                                    setShowGuestPremiumModal(true);
+                                  }}
+                                  className="text-xs h-5 px-2 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100 mt-1"
+                                >
+                                  <Crown className="h-2 w-2 mr-1" />
+                                  Upgrade
+                                </Button>
+                              )}
                             </div>
+                          </div>
+
+                          {/* Link Progress Bar */}
+                          <div className="mb-3">
+                            <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                              <span>Link Building Progress</span>
+                              <span>{campaign.linksGenerated || 0}/20 free links</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div
+                                className={`h-2 rounded-full transition-all duration-300 ${
+                                  campaign.linksGenerated >= 20 ? 'bg-red-500' :
+                                  campaign.linksGenerated >= 15 ? 'bg-yellow-500' : 'bg-green-500'
+                                }`}
+                                style={{ width: `${Math.min(((campaign.linksGenerated || 0) / 20) * 100, 100)}%` }}
+                              />
+                            </div>
+                            {campaign.linksGenerated >= 15 && (
+                              <div className="text-center mt-2">
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    setPremiumUpsellTrigger('link_limit');
+                                    setShowGuestPremiumModal(true);
+                                  }}
+                                  className="h-6 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                                >
+                                  <Crown className="h-3 w-3 mr-1" />
+                                  Get Unlimited Links
+                                </Button>
+                              </div>
+                            )}
                           </div>
 
                           <div className="space-y-2">
@@ -3228,6 +4123,63 @@ export default function BacklinkAutomation() {
             </TabsContent>
 
             <TabsContent value="database" className="space-y-6">
+              {/* New Discoveries - Priority Publishing */}
+              <Card className="border-green-200 bg-gradient-to-r from-green-50 to-blue-50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-green-800">
+                    <Sparkles className="h-5 w-5" />
+                    🎯 New Discoveries - Priority Publishing
+                  </CardTitle>
+                  <CardDescription>
+                    Fresh websites automatically discovered and prioritized for immediate link building
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {[
+                      { domain: 'techcrunch.com', da: 92, status: 'Publishing Live', type: 'Guest Article', verified: true },
+                      { domain: 'medium.com', da: 96, status: 'Link Published', type: 'Author Bio', verified: true },
+                      { domain: 'forbes.com', da: 95, status: 'Processing', type: 'Expert Quote', verified: false },
+                      { domain: 'entrepreneur.com', da: 91, status: 'Link Published', type: 'Case Study', verified: true },
+                      { domain: 'inc.com', da: 89, status: 'Publishing Live', type: 'Interview', verified: false },
+                      { domain: 'mashable.com', da: 88, status: 'Link Published', type: 'Product Review', verified: true },
+                      { domain: 'wired.com', da: 87, status: 'Processing', type: 'Tech News', verified: false },
+                      { domain: 'venturebeat.com', da: 85, status: 'Link Published', type: 'Startup Feature', verified: true }
+                    ].map((site, idx) => (
+                      <div key={idx} className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="font-medium text-gray-900 truncate">{site.domain}</div>
+                          <Badge variant={site.status === 'Link Published' ? 'default' : site.status === 'Publishing Live' ? 'outline' : 'secondary'}>
+                            {site.status === 'Link Published' ? '✅ Live' : site.status === 'Publishing Live' ? '🔄 Publishing' : '⏳ Processing'}
+                          </Badge>
+                        </div>
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">DA: {site.da}</span>
+                            <span className="text-gray-600">{site.type}</span>
+                          </div>
+                          {site.verified && (
+                            <div className="flex items-center gap-1 text-xs text-green-600">
+                              <CheckCircle className="h-3 w-3" />
+                              Verified Live
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-6 text-center">
+                    <p className="text-sm text-gray-600 mb-3">
+                      🚀 Our AI continuously discovers and validates new high-authority websites for your campaigns
+                    </p>
+                    <Button className="bg-green-600 hover:bg-green-700">
+                      <Zap className="h-4 w-4 mr-2" />
+                      View All New Discoveries
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Website Database - Comprehensive categorized websites */}
               <Card>
                 <CardHeader>
@@ -3352,10 +4304,9 @@ export default function BacklinkAutomation() {
                                   <ExternalLink className="h-3 w-3 mr-1" />
                                   Visit
                                 </Button>
-                                <Button size="sm" variant="default">
-                                  <Plus className="h-3 w-3 mr-1" />
-                                  Target
-                                </Button>
+                                <Badge variant="outline" className="text-green-600 bg-green-50">
+                                  Auto-Target
+                                </Badge>
                               </div>
                             </div>
                           </div>
@@ -3513,9 +4464,9 @@ export default function BacklinkAutomation() {
                                   <Button size="sm" variant="ghost" className="h-7 px-2">
                                     <Eye className="h-3 w-3" />
                                   </Button>
-                                  <Button size="sm" variant="ghost" className="h-7 px-2 text-green-600">
-                                    <Plus className="h-3 w-3" />
-                                  </Button>
+                                  <Badge variant="outline" className="text-green-600 bg-green-50 text-xs">
+                                    Auto-Added
+                                  </Badge>
                                 </div>
                               </div>
                             </div>
@@ -3786,7 +4737,7 @@ export default function BacklinkAutomation() {
                 {/* Not Logged In Actions */}
                 <Button
                   size="sm"
-                  onClick={() => window.location.href = '/login'}
+                  onClick={() => setShowSignInModal(true)}
                   className="w-40 justify-start bg-blue-600 text-white shadow-lg hover:bg-blue-700"
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
@@ -3831,6 +4782,39 @@ export default function BacklinkAutomation() {
         isLoggedIn={!!user}
         userName={user?.user_metadata?.full_name || user?.email}
       />
+
+      {/* Guest Premium Upsell Modal */}
+      <GuestPremiumUpsellModal
+        open={showGuestPremiumModal}
+        onOpenChange={setShowGuestPremiumModal}
+        trigger={premiumUpsellTrigger}
+        onUpgrade={() => {
+          // Handle upgrade completion
+          console.log('Guest user upgrading to premium');
+        }}
+      />
+
+      {/* Guest Campaign Delete Confirmation */}
+      <AlertDialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Campaign?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{guestCampaignToDelete?.name}"? This will permanently remove the campaign and all {guestCampaignToDelete?.linksGenerated || 0} generated links. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteCampaign}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Campaign
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Delete Campaign Dialog */}
       <DeleteCampaignDialog
@@ -4065,6 +5049,22 @@ export default function BacklinkAutomation() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Sign In Modal */}
+      <LoginModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        onAuthSuccess={(user) => {
+          console.log('User signed in:', user);
+          setShowSignInModal(false);
+          // Optionally reload campaigns or update user state
+          if (user) {
+            window.location.reload(); // Refresh to load user campaigns
+          }
+        }}
+        defaultTab="signup"
+        pendingAction="access campaign automation features"
+      />
     </div>
   );
 }
