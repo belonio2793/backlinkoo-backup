@@ -1514,8 +1514,8 @@ export default function BacklinkAutomation() {
 
                   {/* User State-Aware Discovery Buttons */}
                   <div className="space-y-4">
-                    {/* Not Logged In State */}
-                    {!user && (
+                    {/* Guest Trial State */}
+                    {!user && guestLinksGenerated < 20 && (
                       <div className="space-y-3">
                         <Button
                           onClick={() => window.location.href = '/login'}
