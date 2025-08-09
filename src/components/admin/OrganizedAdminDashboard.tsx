@@ -124,7 +124,7 @@ export function OrganizedAdminDashboard() {
 
         {activeSection === "users" && (
           <div className="space-y-6">
-            <MockUserManagement />
+            <ComprehensiveUserManagement />
           </div>
         )}
 
