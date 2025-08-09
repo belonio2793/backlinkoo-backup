@@ -1183,24 +1183,9 @@ export default function BacklinkAutomation() {
 
         // Check premium limits for free users
         if (!isPremium && campaign.linksGenerated >= 20) {
-          // Mark campaign as completed instead of paused
-          setCampaigns(prev => prev.map(c =>
-            c.id === campaignId ? { ...c, status: 'completed' } : c
-          ));
-
-          // Update in database if user is logged in
-          if (user) {
-            campaignService.updateCampaignStatus(campaignId, 'completed')
-              .then(() => {
-                console.log(`✅ Campaign ${campaignId} marked as completed in database`);
-              })
-              .catch((error) => {
-                console.error('Failed to update campaign status to completed:', error);
-              });
-          }
-
+          pauseCampaign(campaignId);
           showPremiumUpgrade(campaignId);
-          return { ...campaign, status: 'completed' };
+          return { ...campaign, status: 'paused' };
         }
 
         // Generate multiple links per cycle for more activity
