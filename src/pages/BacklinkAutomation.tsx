@@ -237,6 +237,8 @@ export default function BacklinkAutomation() {
     details?: any;
   }>>([]);
   const [selectedGuestCampaign, setSelectedGuestCampaign] = useState<string | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authContext, setAuthContext] = useState<string>('');
   const [selectedTab, setSelectedTab] = useState('campaigns');
   const [selectedCampaignTab, setSelectedCampaignTab] = useState('create');
   const [selectedLinkType, setSelectedLinkType] = useState('all');
@@ -798,7 +800,7 @@ export default function BacklinkAutomation() {
             '🚀 VELOCITY: Publishing queue processing at optimal 1-2s intervals...',
             '🎯 TARGETING: Keyword relevance analysis complete - 98% match score...',
             '🔧 OPTIMIZATION: Auto-adjusting strategy based on real-time performance...',
-            '📈 METRICS: Success rate trending upward - exceeding baseline expectations...',
+            '�� METRICS: Success rate trending upward - exceeding baseline expectations...',
             '⚡ TURBO MODE: Ultra-fast publishing enabled for maximum user engagement...',
             '🛡️ QUALITY: All links passing premium verification standards...',
             '🔄 DISCOVERY: Recursive URL finding active - expanding opportunity pool...',
