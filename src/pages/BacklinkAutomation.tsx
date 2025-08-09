@@ -380,6 +380,9 @@ export default function BacklinkAutomation() {
         : campaign
     ));
 
+    // Start real-time reporting
+    startRealtimeReporting(campaignId, 'active');
+
     addGuestConsoleLog('success', `Campaign "${campaignId}" resumed by user`, campaignId);
     addThroughputEvent('guest_campaign_resumed');
 
