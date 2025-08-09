@@ -298,6 +298,15 @@ export default function BacklinkAutomation() {
     }
   };
 
+  const loadProliferationStats = () => {
+    try {
+      const stats = internetProliferationService.getProliferationStats();
+      setProliferationStats(stats);
+    } catch (error) {
+      console.error('Failed to load proliferation stats:', error);
+    }
+  };
+
   const loadPostedResults = async () => {
     if (!user) return;
 
@@ -342,7 +351,7 @@ export default function BacklinkAutomation() {
         status: result.success ? 'live' : 'failed' as 'live' | 'pending' | 'failed',
         domainAuthority: result.opportunity?.authority_score || 50,
         traffic: `${Math.floor(Math.random() * 50) + 10}M`,
-        position: ['Header', 'Footer', 'Sidebar', 'Content', 'Comment', 'Bio'][Math.floor(Math.random() * 6)],
+        position: result.posting_metadata?.position || ['Header', 'Footer', 'Sidebar', 'Content', 'Comment', 'Bio'][Math.floor(Math.random() * 6)],
         linkType: result.opportunity?.link_type || 'blog_comment',
         success: result.success,
         errorMessage: result.error_message
