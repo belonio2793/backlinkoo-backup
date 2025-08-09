@@ -40,6 +40,11 @@ import { AnalyticsEngine } from '@/services/automationEngine/AnalyticsEngine';
 import { ContentGenerationEngine } from '@/services/automationEngine/ContentGenerationEngine';
 import { ErrorHandlingEngine } from '@/services/automationEngine/ErrorHandlingEngine';
 
+// Import real services instead of mocking them
+import { internetProliferationService } from '@/services/internetProliferationService';
+import { liveLinkBuildingService } from '@/services/liveLinkBuildingService';
+import { recursiveUrlDiscoveryService } from '@/services/recursiveUrlDiscoveryService';
+
 interface DatabaseCampaign {
   id: string;
   user_id: string;
