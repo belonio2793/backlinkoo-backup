@@ -424,7 +424,7 @@ export default function BacklinkAutomation() {
     // Show toast notification for new link
     toast({
       title: "🔗 New Backlink Published!",
-      description: `Link published on ${linkToPublish.domain} �� Total: ${newCount} links built`,
+      description: `Link published on ${linkToPublish.domain} • Total: ${newCount} links built`,
       duration: 3000,
     });
 
@@ -1937,7 +1937,7 @@ export default function BacklinkAutomation() {
                         id="dailyLimit"
                         type="number"
                         value={campaignForm.dailyLimit}
-                        onChange={(e) => setCampaignForm(prev => ({ ...prev, dailyLimit: parseInt(e.target.value) || 25 }))}
+                        onChange={(e) => handleFormChange('dailyLimit', parseInt(e.target.value) || 25)}
                         placeholder="25"
                         className="h-12"
                       />
