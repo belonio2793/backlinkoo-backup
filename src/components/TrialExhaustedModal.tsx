@@ -205,7 +205,12 @@ export function TrialExhaustedModal({
             <Button
               size="lg"
               className="flex-1 h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              onClick={() => window.location.href = '/subscription-success'}
+              onClick={() => {
+                if (onUpgrade) {
+                  onUpgrade();
+                }
+                onOpenChange(false);
+              }}
             >
               <Crown className="h-5 w-5 mr-2" />
               Upgrade to Premium - $29/month
@@ -216,10 +221,10 @@ export function TrialExhaustedModal({
                 size="lg"
                 variant="outline"
                 className="h-14 border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
-                onClick={() => window.location.href = '/login'}
+                onClick={() => onOpenChange(false)}
               >
                 <UserPlus className="h-5 w-5 mr-2" />
-                Start Free Account
+                Create Free Account
               </Button>
             )}
           </div>
