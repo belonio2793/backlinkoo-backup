@@ -260,16 +260,35 @@ export default function BacklinkAutomation() {
   const contentEngine = ContentGenerationEngine.getInstance();
   const errorEngine = ErrorHandlingEngine.getInstance();
 
-  // Load campaigns and metrics on mount and when user changes
+  // Check database status on mount
   useEffect(() => {
-    loadCampaigns();
-    loadDiscoveredUrls();
-    loadDiscoveryStats();
-    if (user) {
-      checkUserPremiumStatus();
-      loadUsageStats();
-    }
-    loadRealTimeMetrics();
+    const checkDatabase = async () => {
+      setIsCheckingDatabase(true);
+      try {
+        const status = await checkDatabaseStatus();
+        setDatabaseStatus(status);
+
+        if (status.isConnected && !status.needsSetup) {
+          // Database is ready, load data
+          loadCampaigns();
+          loadDiscoveredUrls();
+          loadDiscoveryStats();
+          if (user) {
+            checkUserPremiumStatus();
+            loadUsageStats();
+          }
+          loadRealTimeMetrics();
+        } else {
+          console.warn('⚠️ Database not ready:', status);
+        }
+      } catch (error) {
+        console.error('❌ Database check failed:', error);
+      } finally {
+        setIsCheckingDatabase(false);
+      }
+    };
+
+    checkDatabase();
   }, [user, selectedLinkType]);
 
   // Check user's premium status
