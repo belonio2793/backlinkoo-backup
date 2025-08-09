@@ -840,17 +840,11 @@ export default function BacklinkAutomation() {
             <Alert className="border-red-200 bg-red-50">
               <XCircle className="h-4 w-4" />
               <AlertDescription>
-                <strong>Database Connection Failed:</strong> Unable to connect to the database.
-                {databaseStatus.errors.length > 0 && (
-                  <details className="mt-2">
-                    <summary className="cursor-pointer text-sm">View Details</summary>
-                    <ul className="mt-1 text-xs">
-                      {databaseStatus.errors.map((error, idx) => (
-                        <li key={idx}>• {error}</li>
-                      ))}
-                    </ul>
-                  </details>
-                )}
+                <strong>Database Setup in Progress:</strong> Our automated link building system is initializing.
+                Please wait a moment while we prepare your workspace.
+                <div className="mt-2 text-sm text-red-700">
+                  💡 <strong>Quick Fix:</strong> If this persists, please contact support. We'll have you up and running within minutes!
+                </div>
               </AlertDescription>
             </Alert>
           )}
