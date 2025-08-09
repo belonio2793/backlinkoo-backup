@@ -1080,7 +1080,49 @@ const Dashboard = () => {
     }
   };
 
+  const fixPremiumStatus = async () => {
+    if (!user?.email) {
+      toast({
+        title: "Error",
+        description: "No user authenticated",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    try {
+      console.log('🔧 Fixing premium status for:', user.email);
+      const result = await setPremiumStatus(user.email);
+
+      if (result.success) {
+        toast({
+          title: "Premium Status Updated",
+          description: result.message,
+        });
+
+        // Refresh premium status
+        setPremiumCheckComplete(false);
+        const isPremium = await PremiumService.checkPremiumStatus(user.id);
+        setIsPremiumSubscriber(isPremium);
+        setPremiumCheckComplete(true);
+
+        console.log('✅ Premium status refreshed:', isPremium);
+      } else {
+        toast({
+          title: "Premium Status Update Failed",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error('❌ Error fixing premium status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update premium status",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Show dashboard regardless of authentication state
 
