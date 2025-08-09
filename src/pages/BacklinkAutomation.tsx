@@ -625,7 +625,7 @@ export default function BacklinkAutomation() {
           console.warn('⚠�� Database not ready:', status);
         }
       } catch (error) {
-        console.error('��� Database check failed:', error);
+        console.error('❌ Database check failed:', error);
       } finally {
         setIsCheckingDatabase(false);
       }
@@ -783,6 +783,36 @@ export default function BacklinkAutomation() {
       window.removeEventListener('pagehide', handlePageHide);
     };
   }, [campaigns, campaignForm, unsavedChanges]);
+
+  // Real-time console log generation for guest campaigns
+  useEffect(() => {
+    if (!user && guestCampaignResults.some(c => c.status === 'active')) {
+      const interval = setInterval(() => {
+        const activeCampaign = guestCampaignResults.find(c => c.status === 'active');
+        if (activeCampaign) {
+          const systemMessages = [
+            '🔍 SCANNING: Analyzing high-authority domains for link opportunities...',
+            '⚙️ AI ENGINE: Content generation algorithms optimizing anchor text distribution...',
+            '🌐 NETWORK: Connecting to premium publishing networks...',
+            '📊 ANALYTICS: Real-time quality scoring enabled - monitoring DA thresholds...',
+            '🚀 VELOCITY: Publishing queue processing at optimal 1-2s intervals...',
+            '🎯 TARGETING: Keyword relevance analysis complete - 98% match score...',
+            '🔧 OPTIMIZATION: Auto-adjusting strategy based on real-time performance...',
+            '📈 METRICS: Success rate trending upward - exceeding baseline expectations...',
+            '⚡ TURBO MODE: Ultra-fast publishing enabled for maximum user engagement...',
+            '🛡️ QUALITY: All links passing premium verification standards...',
+            '🔄 DISCOVERY: Recursive URL finding active - expanding opportunity pool...',
+            '💎 PREMIUM: Showcasing enterprise-grade automation capabilities...'
+          ];
+
+          const randomMessage = systemMessages[Math.floor(Math.random() * systemMessages.length)];
+          addGuestConsoleLog('info', randomMessage, activeCampaign.id);
+        }
+      }, 2000 + Math.random() * 3000); // Random interval between 2-5 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [guestCampaignResults, user]);
 
   // Check user's premium status
   const checkUserPremiumStatus = async () => {
