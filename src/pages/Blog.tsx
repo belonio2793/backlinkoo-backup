@@ -761,12 +761,12 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
     localStorage.setItem('claim_intent', JSON.stringify(claimIntent));
 
     toast({
-      title: "Redirecting to sign in...",
-      description: "We'll bring you back to complete your claim.",
+      title: "Sign in required",
+      description: "Please sign in to claim this blog post.",
     });
 
-    // Navigate to login page
-    navigate('/login');
+    // Open login modal instead of navigating
+    setLoginModalOpen(true);
   };
 
   const handleClaimPost = async (e: React.MouseEvent) => {
