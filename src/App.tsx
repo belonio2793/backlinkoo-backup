@@ -88,6 +88,14 @@ const App = () => (
               }
             />
             <Route
+              path="/backlink-report"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyBacklinkReport />
+                </Suspense>
+              }
+            />
+            <Route
               path="/recursive-discovery"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
