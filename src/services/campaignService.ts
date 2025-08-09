@@ -68,7 +68,7 @@ class CampaignService {
    */
   public async isBackendAvailable(): Promise<boolean> {
     try {
-      const response = await this.makeXHRRequest(`${this.baseUrl}/api-status`, {
+      const response = await protectedRequest(`${this.baseUrl}/api-status`, {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' }
       });
