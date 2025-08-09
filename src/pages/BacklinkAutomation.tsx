@@ -1070,7 +1070,7 @@ export default function BacklinkAutomation() {
       startRealTimeActivity(campaignId);
 
       toast({
-        title: "▶️ Campaign Resumed",
+        title: "▶��� Campaign Resumed",
         description: "Link building is now active and generating high-quality backlinks.",
       });
     } catch (error) {
@@ -3237,15 +3237,16 @@ export default function BacklinkAutomation() {
                               <p className="text-sm text-gray-600 mb-2">{campaign.targetUrl}</p>
                               <div className="flex items-center gap-2">
                                 <Badge
-                                  variant={campaign.status === 'active' ? 'default' :
-                                          campaign.status === 'completed' ? 'secondary' :
-                                          campaign.status === 'paused' ? 'outline' : 'destructive'}
-                                  className="text-xs"
-                                >
-                                  {campaign.status === 'active' && <Activity className="h-3 w-3 mr-1" />}
-                                  {campaign.status === 'paused' && <Pause className="h-3 w-3 mr-1" />}
-                                  {campaign.status}
-                                </Badge>
+                                variant={campaign.status === 'active' ? 'default' :
+                                        campaign.status === 'completed' ? 'secondary' :
+                                        campaign.status === 'paused' ? 'outline' : 'destructive'}
+                                className="text-xs"
+                              >
+                                {campaign.status === 'active' && <Activity className="h-3 w-3 mr-1" />}
+                                {campaign.status === 'paused' && <Pause className="h-3 w-3 mr-1" />}
+                                {campaign.status === 'completed' && <CheckCircle className="h-3 w-3 mr-1" />}
+                                {campaign.status === 'completed' ? 'Completed - Saved Forever' : campaign.status}
+                              </Badge>
                                 {checkPremiumLimits(campaign) && (
                                   <Badge variant="destructive" className="text-xs">
                                     <AlertTriangle className="h-3 w-3 mr-1" />
