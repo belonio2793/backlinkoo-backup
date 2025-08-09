@@ -578,6 +578,15 @@ export default function BacklinkAutomation() {
   };
 
   const createCampaign = async () => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to create campaigns",
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!campaignForm.targetUrl.trim() || !campaignForm.keywords.trim() || !campaignForm.anchorTexts.trim()) {
       toast({
         title: "Missing Information",
