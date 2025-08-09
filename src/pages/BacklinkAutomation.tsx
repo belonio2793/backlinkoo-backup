@@ -221,6 +221,41 @@ export default function BacklinkAutomation() {
         averageResponseTime: Math.max(50, prev.averageResponseTime + (Math.random() - 0.5) * 20)
       }));
 
+      // Simulate link generation and check premium limit for active campaigns
+      if (campaigns.some(c => c.status === 'active')) {
+        const shouldGenerateLink = Math.random() < 0.3; // 30% chance to generate a link
+
+        if (shouldGenerateLink) {
+          setCampaigns(prev => prev.map(campaign => {
+            if (campaign.status === 'active' && campaign.linksGenerated < campaign.totalTarget) {
+              const newLinksGenerated = campaign.linksGenerated + 1;
+
+              // Check if this update triggers premium limit
+              setTimeout(() => checkPremiumLimit(), 100);
+
+              return {
+                ...campaign,
+                linksGenerated: newLinksGenerated,
+                linksLive: Math.min(newLinksGenerated, campaign.linksLive + (Math.random() < 0.8 ? 1 : 0)),
+                progress: Math.round((newLinksGenerated / campaign.totalTarget) * 100),
+                performance: {
+                  ...campaign.performance,
+                  velocity: campaign.performance.velocity + (Math.random() - 0.5) * 0.5,
+                  efficiency: Math.min(100, campaign.performance.efficiency + Math.random() * 2)
+                },
+                quality: {
+                  ...campaign.quality,
+                  averageAuthority: Math.min(100, campaign.quality.averageAuthority + Math.random()),
+                  successRate: Math.min(100, campaign.quality.successRate + (Math.random() - 0.3))
+                },
+                lastActive: new Date()
+              };
+            }
+            return campaign;
+          }));
+        }
+      }
+
     } catch (error) {
       console.error('Failed to update real-time metrics:', error);
     }
