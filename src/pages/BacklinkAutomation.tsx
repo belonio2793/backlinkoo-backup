@@ -2707,7 +2707,6 @@ export default function BacklinkAutomation() {
                           )}
                         </div>
 
-                        {/* Info text for non-premium users */}
                         {!isPremium && (
                           <div className="text-center">
                             <p className="text-sm text-gray-600 mb-2">
