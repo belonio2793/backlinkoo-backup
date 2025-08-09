@@ -165,8 +165,9 @@ export class CompatibilityAffiliateService {
         total_conversions: updates.total_conversions || 0
       };
     } catch (error: any) {
-      console.error('Update affiliate profile error:', error);
-      throw error;
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      console.error('Update affiliate profile error:', errorMessage, error);
+      throw new Error(`Failed to update affiliate profile: ${errorMessage}`);
     }
   }
 
