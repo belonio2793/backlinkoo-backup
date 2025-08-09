@@ -148,9 +148,10 @@ class GuestTrackingService {
     success: boolean;
     warning?: PremiumLimitWarning;
     shouldShowPremiumModal?: boolean;
+    campaignPaused?: boolean;
   } {
     const guestData = this.getGuestData();
-    
+
     if (!guestData) {
       return { success: false };
     }
@@ -182,19 +183,30 @@ class GuestTrackingService {
     guestData.totalLinksGenerated += newLinksCount;
     guestData.lastVisit = new Date().toISOString();
 
+    // Auto-pause campaign at exactly 20 links
+    let campaignPaused = false;
+    if (newTotal >= this.MAX_LINKS_PER_CAMPAIGN) {
+      campaign.status = 'paused';
+      campaignPaused = true;
+      console.log(`🛑 Campaign ${campaignId} auto-paused at ${newTotal} links`);
+    }
+
     this.saveGuestData(guestData);
 
-    // Check if approaching limit
-    const shouldShowPremiumModal = newTotal >= this.MAX_LINKS_PER_CAMPAIGN - 5;
+    // Check if at limit or approaching limit
+    const shouldShowPremiumModal = newTotal >= this.MAX_LINKS_PER_CAMPAIGN;
 
     return {
       success: true,
       shouldShowPremiumModal,
+      campaignPaused,
       warning: shouldShowPremiumModal ? {
         type: 'link_limit',
-        message: `Campaign approaching limit: ${newTotal}/${this.MAX_LINKS_PER_CAMPAIGN} links. Upgrade for unlimited links!`,
-        action: 'warn',
-        upgradeCTA: 'Get Premium Access'
+        message: newTotal >= this.MAX_LINKS_PER_CAMPAIGN
+          ? `Campaign reached the ${this.MAX_LINKS_PER_CAMPAIGN} link limit and has been paused. Upgrade to Premium for unlimited links!`
+          : `Campaign approaching limit: ${newTotal}/${this.MAX_LINKS_PER_CAMPAIGN} links. Upgrade for unlimited links!`,
+        action: newTotal >= this.MAX_LINKS_PER_CAMPAIGN ? 'block' : 'warn',
+        upgradeCTA: 'Upgrade to Premium - Unlimited Links!'
       } : undefined
     };
   }
