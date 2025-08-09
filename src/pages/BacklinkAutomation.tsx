@@ -4134,7 +4134,7 @@ export default function BacklinkAutomation() {
                                       <div className="flex items-center gap-2 text-xs">
                                         <span className="text-gray-600">Anchor:</span>
                                         <span className="font-medium text-blue-700">"{anchorText}"</span>
-                                        <span className="text-gray-600">→</span>
+                                        <span className="text-gray-600">��</span>
                                         <span className="text-green-600 truncate max-w-24">{campaign.targetUrl}</span>
                                         <Button
                                           size="sm"
@@ -4269,16 +4269,7 @@ export default function BacklinkAutomation() {
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {[
-                      { domain: 'techcrunch.com', da: 92, status: 'Publishing Live', type: 'Guest Article', verified: true },
-                      { domain: 'medium.com', da: 96, status: 'Link Published', type: 'Author Bio', verified: true },
-                      { domain: 'forbes.com', da: 95, status: 'Processing', type: 'Expert Quote', verified: false },
-                      { domain: 'entrepreneur.com', da: 91, status: 'Link Published', type: 'Case Study', verified: true },
-                      { domain: 'inc.com', da: 89, status: 'Publishing Live', type: 'Interview', verified: false },
-                      { domain: 'mashable.com', da: 88, status: 'Link Published', type: 'Product Review', verified: true },
-                      { domain: 'wired.com', da: 87, status: 'Processing', type: 'Tech News', verified: false },
-                      { domain: 'venturebeat.com', da: 85, status: 'Link Published', type: 'Startup Feature', verified: true }
-                    ].map((site, idx) => (
+                    {randomizedDiscoveries.map((site, idx) => (
                       <div key={idx} className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
                         <div className="flex items-center justify-between mb-3">
                           <div className="font-medium text-gray-900 truncate">{site.domain}</div>
@@ -4387,28 +4378,7 @@ export default function BacklinkAutomation() {
                       </div>
 
                       <div className="space-y-3 max-h-96 overflow-y-auto">
-                        {[
-                          { domain: 'techcrunch.com', authority: 94, traffic: 'Very High', type: 'News/Blog', opportunities: 245 },
-                          { domain: 'github.com', authority: 96, traffic: 'Very High', type: 'Platform', opportunities: 189 },
-                          { domain: 'stackoverflow.com', authority: 95, traffic: 'Very High', type: 'Community', opportunities: 312 },
-                          { domain: 'medium.com', authority: 93, traffic: 'Very High', type: 'Blog Platform', opportunities: 567 },
-                          { domain: 'dev.to', authority: 87, traffic: 'High', type: 'Community', opportunities: 234 },
-                          { domain: 'hackernews.ycombinator.com', authority: 89, traffic: 'High', type: 'News/Community', opportunities: 156 },
-                          { domain: 'producthunt.com', authority: 85, traffic: 'High', type: 'Directory', opportunities: 198 },
-                          { domain: 'indiehackers.com', authority: 82, traffic: 'Medium', type: 'Community', opportunities: 134 },
-                          { domain: 'betalist.com', authority: 76, traffic: 'Medium', type: 'Directory', opportunities: 89 },
-                          { domain: 'reddit.com/r/programming', authority: 91, traffic: 'Very High', type: 'Community', opportunities: 423 },
-                          { domain: 'linkedin.com', authority: 98, traffic: 'Very High', type: 'Social/Professional', opportunities: 678 },
-                          { domain: 'twitter.com', authority: 99, traffic: 'Very High', type: 'Social Media', opportunities: 534 },
-                          { domain: 'quora.com', authority: 90, traffic: 'Very High', type: 'Q&A Platform', opportunities: 345 },
-                          { domain: 'youtube.com', authority: 100, traffic: 'Very High', type: 'Video Platform', opportunities: 789 },
-                          { domain: 'forbes.com', authority: 92, traffic: 'Very High', type: 'News/Business', opportunities: 267 },
-                          { domain: 'wired.com', authority: 88, traffic: 'High', type: 'Tech News', opportunities: 178 },
-                          { domain: 'techradar.com', authority: 86, traffic: 'High', type: 'Tech Reviews', opportunities: 156 },
-                          { domain: 'venturebeat.com', authority: 84, traffic: 'High', type: 'Tech News', opportunities: 143 },
-                          { domain: 'mashable.com', authority: 87, traffic: 'High', type: 'Tech/Culture', opportunities: 189 },
-                          { domain: 'engadget.com', authority: 85, traffic: 'High', type: 'Tech News', opportunities: 167 }
-                        ].map((site, idx) => (
+                        {randomizedWebsites.map((site, idx) => (
                           <div key={idx} className="p-4 rounded-lg border hover:shadow-md transition-shadow bg-white">
                             <div className="flex items-center justify-between">
                               <div className="flex-1">
