@@ -213,6 +213,15 @@ export default function BacklinkAutomation() {
       }
 
       try {
+        // Check if backend is available first
+        const isBackendUp = await campaignService.isBackendAvailable();
+        if (!isBackendUp) {
+          console.log('Backend services not available, operating in demo mode');
+          setCampaigns([]);
+          setDatabaseCampaigns([]);
+          return;
+        }
+
         const dbCampaigns = await campaignService.getCampaigns();
         setDatabaseCampaigns(dbCampaigns);
         
