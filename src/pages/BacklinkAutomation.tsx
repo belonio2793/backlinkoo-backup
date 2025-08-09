@@ -232,6 +232,7 @@ export default function BacklinkAutomation() {
   useEffect(() => {
     loadCampaigns();
     loadSystemMetrics();
+    checkUserPremiumStatus();
 
     // Set up real-time updates
     const metricsInterval = setInterval(loadRealTimeMetrics, 10000); // Every 10 seconds
@@ -244,6 +245,19 @@ export default function BacklinkAutomation() {
       clearInterval(linkBuildingInterval);
     };
   }, []);
+
+  // Check user's premium status
+  const checkUserPremiumStatus = async () => {
+    if (!user?.id) return;
+
+    try {
+      const premiumCheck = await liveLinkBuildingService.checkPremiumLimits(user.id);
+      setPremiumLimitData(premiumCheck);
+      setIsUserPremium(!premiumCheck.isLimitReached || premiumCheck.maxLinks === -1);
+    } catch (error) {
+      console.error('Error checking premium status:', error);
+    }
+  };
 
   // Start link building when campaigns are active
   useEffect(() => {
