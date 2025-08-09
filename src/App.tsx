@@ -13,7 +13,7 @@ const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDisc
 const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
 const LazyBlog = lazy(() => import("./pages/Blog"));
 const LazyDashboard = lazy(() => import("./pages/Dashboard"));
-const LazyBeautifulBlogPost = lazy(() => import("./components/BeautifulBlogPost"));
+const LazyBeautifulBlogPost = lazy(() => import("./components/BeautifulBlogPost").then(module => ({ default: module.BeautifulBlogPost })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
