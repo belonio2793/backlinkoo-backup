@@ -384,7 +384,7 @@ export default function EnhancedUserManagement() {
             <div className="min-w-[140px]">
               <Select
                 value={filters.subscription}
-                onValueChange={(value) => setFilters({ ...filters, subscription: value })}
+                onValueChange={(value) => handleFiltersChange({ subscription: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Subscription" />
