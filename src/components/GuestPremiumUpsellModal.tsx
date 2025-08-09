@@ -50,16 +50,25 @@ export function GuestPremiumUpsellModal({
   const handleUpgrade = async () => {
     setIsProcessingUpgrade(true);
     try {
-      // Redirect to payment page with guest tracking data
-      const checkoutUrl = `/subscription-success?guest_id=${guestTrackingService.getGuestData()?.userId}&source=guest_upsell&trigger=${trigger}`;
-      
       if (onUpgrade) {
         onUpgrade();
       }
-      
-      // Close modal and redirect
+
+      // Show success message
+      toast({
+        title: "🚀 Upgrading to Premium!",
+        description: "Redirecting to secure checkout...",
+      });
+
+      // Close modal and redirect after a short delay
       onOpenChange(false);
-      window.location.href = checkoutUrl;
+
+      // Redirect to payment page with guest tracking data
+      const checkoutUrl = `/subscription-success?guest_id=${guestTrackingService.getGuestData()?.userId}&source=guest_upsell&trigger=${trigger}`;
+
+      setTimeout(() => {
+        window.location.href = checkoutUrl;
+      }, 1000);
     } catch (error) {
       console.error('Upgrade error:', error);
       toast({
