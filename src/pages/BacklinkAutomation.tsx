@@ -2793,6 +2793,229 @@ export default function BacklinkAutomation() {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Campaigns Display Interface - Right Side */}
+              <Card className="xl:col-span-1 border-0 shadow-none">
+                <CardHeader className="text-center">
+                  <CardTitle className="flex items-center justify-center gap-2">
+                    <Monitor className="h-5 w-5" />
+                    Your Campaigns
+                  </CardTitle>
+                  <CardDescription>
+                    {user ? `${campaigns.length} campaigns • ${campaigns.filter(c => c.status === 'active').length} active` : `${guestCampaignResults.length} campaigns created`}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {/* Campaigns List */}
+                  <div className="space-y-4 max-h-[600px] overflow-y-auto">
+                    {/* For logged-in users - show database campaigns */}
+                    {user && campaigns.length > 0 ? (
+                      campaigns.map((campaign) => (
+                        <div key={campaign.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-900 truncate">{campaign.name}</h3>
+                              <p className="text-sm text-gray-500 truncate">{campaign.targetUrl}</p>
+                            </div>
+                            <Badge
+                              variant={campaign.status === 'active' ? 'default' :
+                                      campaign.status === 'completed' ? 'secondary' :
+                                      campaign.status === 'paused' ? 'outline' : 'destructive'}
+                              className="ml-2 flex-shrink-0"
+                            >
+                              {campaign.status}
+                            </Badge>
+                          </div>
+
+                          <div className="grid grid-cols-3 gap-4 mb-3">
+                            <div className="text-center">
+                              <div className="text-lg font-bold text-green-600">{campaign.linksGenerated}</div>
+                              <div className="text-xs text-gray-500">Links</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-bold text-blue-600">{Math.round(campaign.progress)}%</div>
+                              <div className="text-xs text-gray-500">Progress</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-bold text-purple-600">{campaign.dailyLimit}</div>
+                              <div className="text-xs text-gray-500">Daily Limit</div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <div className="flex flex-wrap gap-1">
+                              {campaign.keywords.slice(0, 3).map((keyword, idx) => (
+                                <span key={idx} className="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                                  {keyword}
+                                </span>
+                              ))}
+                              {campaign.keywords.length > 3 && (
+                                <span className="inline-flex items-center px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                                  +{campaign.keywords.length - 3} more
+                                </span>
+                              )}
+                            </div>
+
+                            <Progress value={campaign.progress} className="h-2" />
+
+                            <div className="flex items-center justify-between text-xs text-gray-500">
+                              <span>Created {new Date(campaign.createdAt).toLocaleDateString()}</span>
+                              <div className="flex items-center gap-3">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 px-2 text-xs"
+                                  onClick={() => setSelectedCampaignDetails(campaign)}
+                                >
+                                  <Eye className="h-3 w-3 mr-1" />
+                                  View
+                                </Button>
+                                {campaign.status === 'active' && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 px-2 text-xs text-orange-600 hover:text-orange-700"
+                                    onClick={() => pauseCampaign(campaign.id)}
+                                  >
+                                    <Pause className="h-3 w-3 mr-1" />
+                                    Pause
+                                  </Button>
+                                )}
+                                {campaign.status === 'paused' && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 px-2 text-xs text-green-600 hover:text-green-700"
+                                    onClick={() => resumeCampaign(campaign.id)}
+                                  >
+                                    <Play className="h-3 w-3 mr-1" />
+                                    Resume
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : user && campaigns.length === 0 ? (
+                      /* No campaigns for logged-in users */
+                      <div className="text-center py-12">
+                        <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Target className="h-8 w-8 text-gray-400" />
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">No campaigns yet</h3>
+                        <p className="text-gray-500 mb-4">Create your first campaign to start building backlinks</p>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            // Focus on the target URL input
+                            const targetUrlInput = document.getElementById('targetUrl') as HTMLInputElement;
+                            if (targetUrlInput) {
+                              targetUrlInput.focus();
+                            }
+                          }}
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Get Started
+                        </Button>
+                      </div>
+                    ) : !user && guestCampaignResults.length > 0 ? (
+                      /* Guest campaigns */
+                      guestCampaignResults.map((campaign) => (
+                        <div key={campaign.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-900 truncate">{campaign.name}</h3>
+                              <p className="text-sm text-gray-500 truncate">{campaign.targetUrl}</p>
+                            </div>
+                            <Badge variant="secondary" className="ml-2 flex-shrink-0">
+                              Trial
+                            </Badge>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4 mb-3">
+                            <div className="text-center">
+                              <div className="text-lg font-bold text-green-600">{campaign.domains?.length || 0}</div>
+                              <div className="text-xs text-gray-500">Domains</div>
+                            </div>
+                            <div className="text-center">
+                              <div className="text-lg font-bold text-blue-600">{Math.round((campaign.domains?.length || 0) / 10 * 100)}%</div>
+                              <div className="text-xs text-gray-500">Progress</div>
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <div className="flex flex-wrap gap-1">
+                              {campaign.keywords?.slice(0, 3).map((keyword, idx) => (
+                                <span key={idx} className="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                                  {keyword}
+                                </span>
+                              ))}
+                              {(campaign.keywords?.length || 0) > 3 && (
+                                <span className="inline-flex items-center px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                                  +{(campaign.keywords?.length || 0) - 3} more
+                                </span>
+                              )}
+                            </div>
+
+                            <Progress value={(campaign.domains?.length || 0) / 10 * 100} className="h-2" />
+
+                            <div className="flex items-center justify-between text-xs text-gray-500">
+                              <span>Trial Campaign</span>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 px-2 text-xs"
+                                onClick={() => {
+                                  toast({
+                                    title: "Campaign Results",
+                                    description: `${campaign.domains?.length || 0} domains discovered for your trial campaign`,
+                                  });
+                                }}
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                View
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    ) : (
+                      /* Empty state for guest users */
+                      <div className="text-center py-12">
+                        <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <Sparkles className="h-8 w-8 text-gray-400" />
+                        </div>
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">Ready to get started?</h3>
+                        <p className="text-gray-500 mb-4">Your campaigns will appear here once created</p>
+                        <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
+                          <Target className="h-4 w-4" />
+                          <span>Create your first campaign on the left</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Pagination for future enhancement */}
+                  {((user && campaigns.length > 10) || (!user && guestCampaignResults.length > 10)) && (
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-200 mt-4">
+                      <div className="text-sm text-gray-500">
+                        Showing {user ? campaigns.length : guestCampaignResults.length} campaigns
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" disabled>
+                          <ChevronDown className="h-4 w-4 mr-1" />
+                          Previous
+                        </Button>
+                        <Button variant="outline" size="sm" disabled>
+                          Next
+                          <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
             </TabsContent>
 
             <TabsContent value="results" className="space-y-6">
