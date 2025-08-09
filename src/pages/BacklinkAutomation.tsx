@@ -688,6 +688,15 @@ export default function BacklinkAutomation() {
   };
 
   const pauseCampaign = async (campaignId: string) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to manage campaigns",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       await campaignService.pauseCampaign(campaignId);
       await loadCampaigns();
@@ -707,6 +716,15 @@ export default function BacklinkAutomation() {
   };
 
   const resumeCampaign = async (campaignId: string) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to manage campaigns",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       await campaignService.resumeCampaign(campaignId);
       await loadCampaigns();
