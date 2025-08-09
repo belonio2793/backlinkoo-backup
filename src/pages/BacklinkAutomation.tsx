@@ -78,25 +78,47 @@ interface Campaign {
   name: string;
   targetUrl: string;
   keywords: string[];
+  anchorTexts?: string[];
+  dailyLimit?: number;
   status: 'active' | 'paused' | 'stopped' | 'completed' | 'failed';
   progress: number;
   linksGenerated: number;
   linksLive: number;
-  dailyTarget: number;
-  totalTarget: number;
-  quality: {
+  dailyTarget?: number;
+  totalTarget?: number;
+  quality?: {
     averageAuthority: number;
-    averageRelevance: number;
+    averageRelevance?: number;
     successRate: number;
+    velocity?: number;
+    efficiency?: number;
   };
-  performance: {
+  performance?: {
     velocity: number;
     trend: 'up' | 'down' | 'stable';
     efficiency: number;
   };
   createdAt: Date;
-  lastActive: Date;
-  estimatedCompletion: Date;
+  lastActive?: Date;
+  lastActivity?: Date;
+  estimatedCompletion?: Date;
+  realTimeActivity?: Array<{
+    id: string;
+    type: 'link_published' | 'link_verified' | 'domain_found' | 'error';
+    message: string;
+    timestamp: string;
+    metadata?: any;
+  }>;
+  recentLinks?: Array<{
+    id: string;
+    url: string;
+    domain: string;
+    anchorText: string;
+    status: 'live' | 'pending' | 'failed';
+    publishedAt: string;
+    domainAuthority: number;
+    verified: boolean;
+  }>;
 }
 
 interface PostedLink {
