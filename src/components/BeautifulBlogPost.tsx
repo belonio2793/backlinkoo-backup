@@ -236,9 +236,9 @@ export function BeautifulBlogPost() {
 
     // Run cleanup after content loads
     if (blogPost) {
-      setTimeout(cleanupMalformedContent, 100);
-      // Run again after a longer delay to catch any late-loading content
-      setTimeout(cleanupMalformedContent, 1000);
+      setTimeout(cleanupMalformedContent, 1);
+      // Run again immediately for any content that needs cleanup
+      setTimeout(cleanupMalformedContent, 5);
     }
   }, [blogPost]);
 
