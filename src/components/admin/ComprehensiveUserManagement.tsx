@@ -675,11 +675,29 @@ export default function ComprehensiveUserManagement() {
             </Button>
           </div>
 
-          {/* Error Alert */}
+          {/* Error Alert with Instructions */}
           {error && (
             <Alert variant="destructive" className="mb-4">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>
+                <div className="space-y-2">
+                  <div className="font-semibold">Database Access Issue:</div>
+                  <div>{error}</div>
+                  {error.includes('permission denied') && (
+                    <div className="mt-3 p-3 bg-red-50 rounded text-sm">
+                      <div className="font-medium mb-2">To fix this, you need:</div>
+                      <ul className="list-disc list-inside space-y-1 text-xs">
+                        <li>Admin role in the profiles table</li>
+                        <li>Proper RLS policies that allow admin users to read all profiles</li>
+                        <li>The current user must have 'admin' role in their profile</li>
+                      </ul>
+                      <div className="mt-2 text-xs">
+                        <strong>Quick fix:</strong> Update your profile role to 'admin' in the Supabase dashboard.
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </AlertDescription>
             </Alert>
           )}
 
