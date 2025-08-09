@@ -581,7 +581,7 @@ class CampaignService {
    */
   async updateCampaignStatus(
     campaignId: string,
-    status: 'active' | 'paused' | 'stopped'
+    status: 'active' | 'paused' | 'stopped' | 'completed'
   ): Promise<{ success: boolean; message: string; error?: string }> {
     try {
       // Get current user for RLS policy compliance
