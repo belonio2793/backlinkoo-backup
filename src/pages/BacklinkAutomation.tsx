@@ -306,6 +306,36 @@ export default function BacklinkAutomation() {
 
   const { toast } = useToast();
 
+  // Dynamic throughput tracking
+  const addThroughputEvent = (eventType: string) => {
+    const now = Date.now();
+    setThroughputEvents(prev => {
+      // Keep only events from last hour for accurate calculation
+      const oneHourAgo = now - (60 * 60 * 1000);
+      const recentEvents = prev.filter(event => event.timestamp > oneHourAgo);
+      return [...recentEvents, { timestamp: now, type: eventType }];
+    });
+  };
+
+  const calculateRealTimeThroughput = () => {
+    const now = Date.now();
+    const oneHourAgo = now - (60 * 60 * 1000);
+    const recentEvents = throughputEvents.filter(event => event.timestamp > oneHourAgo);
+
+    // Calculate events per hour based on recent activity
+    return recentEvents.length;
+  };
+
+  // Update throughput every few seconds based on real events
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newThroughput = calculateRealTimeThroughput();
+      setRealtimeThroughput(newThroughput);
+    }, 3000); // Update every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [throughputEvents]);
+
   // Clipboard helper with fallback for when Clipboard API is blocked
   const copyToClipboard = async (text: string) => {
     try {
