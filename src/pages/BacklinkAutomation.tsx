@@ -296,6 +296,7 @@ export default function BacklinkAutomation() {
   const [premiumUpsellTrigger, setPremiumUpsellTrigger] = useState<'campaign_limit' | 'link_limit' | 'feature_limit' | 'manual'>('manual');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [guestCampaignToDelete, setGuestCampaignToDelete] = useState<any>(null);
+  const [showFabMenu, setShowFabMenu] = useState(false);
 
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
