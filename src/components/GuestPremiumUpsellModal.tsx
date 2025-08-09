@@ -69,38 +69,58 @@ export function GuestPremiumUpsellModal({
       );
 
       if (result.success && result.url) {
-        // Open checkout in new window/tab
-        const checkoutWindow = window.open(
-          result.url,
-          'stripe-checkout',
-          'width=800,height=600,scrollbars=yes,resizable=yes'
-        );
+        // Check if this is a demo/mock checkout
+        const isDemoCheckout = result.url.includes('mock=true') || result.sessionId?.startsWith('mock_');
 
-        if (checkoutWindow) {
-          // Close modal since checkout opened
+        if (isDemoCheckout) {
+          // Handle demo checkout differently
+          toast({
+            title: "🚧 Demo Checkout Mode",
+            description: "Payment system is in demo mode. No actual payment will be processed.",
+            duration: 5000,
+          });
+
+          // For demo, just navigate to success page
           onOpenChange(false);
-
-          // Monitor the checkout window
-          const checkClosed = setInterval(() => {
-            if (checkoutWindow.closed) {
-              clearInterval(checkClosed);
-              toast({
-                title: "Checkout Complete",
-                description: "If you completed your purchase, please refresh the page to see your premium features!",
-              });
-            }
-          }, 1000);
+          window.location.href = result.url;
 
           if (onUpgrade) {
             onUpgrade();
           }
         } else {
-          // Popup was blocked, fallback to same window
-          toast({
-            title: "Popup Blocked",
-            description: "Opening checkout in current window...",
-          });
-          window.location.href = result.url;
+          // Open real checkout in new window/tab
+          const checkoutWindow = window.open(
+            result.url,
+            'stripe-checkout',
+            'width=800,height=600,scrollbars=yes,resizable=yes'
+          );
+
+          if (checkoutWindow) {
+            // Close modal since checkout opened
+            onOpenChange(false);
+
+            // Monitor the checkout window
+            const checkClosed = setInterval(() => {
+              if (checkoutWindow.closed) {
+                clearInterval(checkClosed);
+                toast({
+                  title: "Checkout Complete",
+                  description: "If you completed your purchase, please refresh the page to see your premium features!",
+                });
+              }
+            }, 1000);
+
+            if (onUpgrade) {
+              onUpgrade();
+            }
+          } else {
+            // Popup was blocked, fallback to same window
+            toast({
+              title: "Popup Blocked",
+              description: "Opening checkout in current window...",
+            });
+            window.location.href = result.url;
+          }
         }
       } else {
         throw new Error(result.error || 'Failed to create checkout session');
