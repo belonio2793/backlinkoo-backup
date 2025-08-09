@@ -128,7 +128,7 @@ export class UserManagementService {
         email: profile.email,
         role: profile.role,
         subscription_tier: profile.subscription_tier,
-        subscription_status: profile.subscription_status || 'inactive',
+        subscription_status: 'active', // Default since column doesn't exist
         credits: profile.credits || 0,
         created_at: profile.created_at,
         last_sign_in_at: null, // This would need to be fetched from auth separately if needed
