@@ -249,6 +249,27 @@ class CampaignService {
   }
 
   /**
+   * Check if the backend campaign service is available
+   */
+  async checkBackendHealth(): Promise<{ available: boolean; message: string }> {
+    try {
+      // Try a simple health check call
+      const response = await this.makeRequest<any>('/backlink-campaigns', {
+        method: 'POST',
+        body: JSON.stringify({ action: 'health_check' })
+      });
+
+      return { available: true, message: 'Backend service is operational' };
+    } catch (error) {
+      console.log('Backend health check failed:', error.message);
+      return {
+        available: false,
+        message: `Backend service unavailable: ${error.message}`
+      };
+    }
+  }
+
+  /**
    * Delete a campaign with comprehensive safety checks
    */
   async deleteCampaign(
