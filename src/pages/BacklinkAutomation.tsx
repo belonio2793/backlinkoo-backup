@@ -2415,7 +2415,14 @@ export default function BacklinkAutomation() {
                           {!isPremium && (
                             <Button
                               variant="outline"
-                              onClick={() => window.location.href = '/subscription-success'}
+                              onClick={() => {
+                                setPremiumUpsellTrigger('manual');
+                                if (user) {
+                                  setShowTrialExhaustedModal(true);
+                                } else {
+                                  setShowGuestPremiumModal(true);
+                                }
+                              }}
                               className="w-full h-12 px-6 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100"
                             >
                               <Crown className="h-4 w-4 mr-2" />
