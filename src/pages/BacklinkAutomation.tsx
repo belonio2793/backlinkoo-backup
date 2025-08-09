@@ -3480,12 +3480,23 @@ export default function BacklinkAutomation() {
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  className="h-8 px-3 text-xs text-green-600 hover:text-green-700"
-                                  onClick={() => resumeCampaign(campaign.id)}
+                                  className="h-8 px-3 text-xs text-green-600 hover:text-green-700 border border-green-300"
+                                  onClick={() => {
+                                    resumeCampaign(campaign.id);
+                                    toast({
+                                      title: "🛡️ Reactivating Campaign",
+                                      description: "Initializing all automation engines and proprietary strategies...",
+                                      duration: 3000,
+                                    });
+                                  }}
                                   disabled={isLoading}
                                 >
-                                  <Play className="h-3 w-3 mr-1" />
-                                  Resume
+                                  {isLoading ? (
+                                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                  ) : (
+                                    <Rocket className="h-3 w-3 mr-1" />
+                                  )}
+                                  Reactivate
                                 </Button>
                               )}
                               {checkPremiumLimits(campaign) && (
