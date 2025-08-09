@@ -117,6 +117,7 @@ export default function BacklinkAutomation() {
   const [campaignToDelete, setCampaignToDelete] = useState<Campaign | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedLinkType, setSelectedLinkType] = useState('all');
+  const [showPremiumModal, setShowPremiumModal] = useState(false);
 
 
   // Campaign Form State
