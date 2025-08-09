@@ -51,9 +51,9 @@ interface DeletionOptions {
 }
 
 export default function DeleteCampaignDialog({
-  isOpen,
-  onClose,
-  onConfirm,
+  open,
+  onOpenChange,
+  onDelete,
   campaign,
   isDeleting = false
 }: DeleteCampaignDialogProps) {
