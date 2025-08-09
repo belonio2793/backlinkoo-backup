@@ -1346,14 +1346,20 @@ export default function BacklinkAutomation() {
         }
       }
 
-      setCampaignForm({
+      const resetForm = {
         name: '',
         targetUrl: '',
         keywords: '',
         anchorTexts: '',
         dailyLimit: 25,
         linkType: 'all'
-      });
+      };
+      setCampaignForm(resetForm);
+      setOriginalCampaignForm(resetForm);
+      setUnsavedChanges(false);
+
+      // Clear auto-saved form
+      localStorage.removeItem('autosaved_campaign_form');
 
     } catch (error) {
       console.error('Failed to create campaign:', error);
