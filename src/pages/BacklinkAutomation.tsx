@@ -1116,14 +1116,14 @@ export default function BacklinkAutomation() {
                 <Button
                   onClick={createCampaign}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                  disabled={isLoading}
+                  disabled={isLoading || !user}
                 >
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
                     <Rocket className="h-4 w-4 mr-2" />
                   )}
-                  Launch Internet Proliferation
+                  {!user ? "Login Required to Launch" : "Launch Internet Proliferation"}
                 </Button>
               </CardContent>
             </Card>
