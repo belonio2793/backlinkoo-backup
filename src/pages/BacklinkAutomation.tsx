@@ -814,7 +814,7 @@ export default function BacklinkAutomation() {
             </div>
 
             {/* Metrics Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 p-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 p-4">
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1 mb-1">
                   <Network className="h-3 w-3 text-green-600" />
@@ -861,6 +861,22 @@ export default function BacklinkAutomation() {
                   <span className="text-lg font-bold text-indigo-600">{controlPanelData.networkHealth.toFixed(0)}%</span>
                 </div>
                 <div className="text-xs text-gray-500">Network Health</div>
+              </div>
+
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  <Database className="h-3 w-3 text-pink-600" />
+                  <span className="text-lg font-bold text-pink-600">{proliferationStats.totalTargets}</span>
+                </div>
+                <div className="text-xs text-gray-500">Total Targets</div>
+              </div>
+
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  <Sparkles className="h-3 w-3 text-yellow-600" />
+                  <span className="text-lg font-bold text-yellow-600">{proliferationStats.automatedTargets}</span>
+                </div>
+                <div className="text-xs text-gray-500">Auto Targets</div>
               </div>
             </div>
 
