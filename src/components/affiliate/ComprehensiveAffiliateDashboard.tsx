@@ -427,6 +427,14 @@ export const ComprehensiveAffiliateDashboard: React.FC<DashboardProps> = ({ user
             </Card>
           </TabsContent>
 
+          {/* Referred Users Tab */}
+          <TabsContent value="referred" className="space-y-6">
+            <ReferredUsers
+              affiliateId={affiliateProfile.affiliate_id}
+              affiliateCode={affiliateProfile.affiliate_id}
+            />
+          </TabsContent>
+
           {/* Links & UTMs Tab */}
           <TabsContent value="links" className="space-y-6">
             <Card>
