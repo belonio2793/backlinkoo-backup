@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, startTransition } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/beautiful-blog.css';
 import { Button } from '@/components/ui/button';
@@ -236,9 +236,9 @@ export function BeautifulBlogPost() {
 
     // Run cleanup after content loads
     if (blogPost) {
-      setTimeout(cleanupMalformedContent, 100);
-      // Run again after a longer delay to catch any late-loading content
-      setTimeout(cleanupMalformedContent, 1000);
+      setTimeout(cleanupMalformedContent, 1);
+      // Run again immediately for any content that needs cleanup
+      setTimeout(cleanupMalformedContent, 5);
     }
   }, [blogPost]);
 
@@ -281,7 +281,20 @@ export function BeautifulBlogPost() {
   const loadBlogPost = async (slug: string) => {
     try {
       setLoading(true);
-      const post = await blogService.getBlogPostBySlug(slug);
+
+      // First try database, if that fails, try localStorage fallback
+      let post = null;
+      try {
+        post = await blogService.getBlogPostBySlug(slug);
+      } catch (dbError) {
+        console.warn('Database lookup failed, trying localStorage fallback:', dbError);
+        // Try to load from localStorage as fallback
+        const localStoragePost = localStorage.getItem(`blog_post_${slug}`);
+        if (localStoragePost) {
+          post = JSON.parse(localStoragePost);
+        }
+      }
+
       setBlogPost(post);
 
       // If post is claimed, fetch the author's email
@@ -296,8 +309,12 @@ export function BeautifulBlogPost() {
           if (profile?.email) {
             setAuthorEmail(profile.email);
           }
-        } catch (emailError) {
-          console.log('Could not fetch author email:', emailError);
+        } catch (emailError: any) {
+          const errorMessage = emailError.message || emailError;
+          // Only log unexpected errors, not permission issues
+          if (!errorMessage.includes('permission denied') && !errorMessage.includes('relation')) {
+            console.log('Could not fetch author email:', emailError);
+          }
           // Don't show error to user, just don't display email
         }
       } else {
@@ -305,11 +322,20 @@ export function BeautifulBlogPost() {
       }
     } catch (error: any) {
       console.error('Failed to load blog post:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load blog post",
-        variant: "destructive"
-      });
+
+      if (!post) {
+        toast({
+          title: "Blog Post Not Found",
+          description: "This blog post may have expired or been removed.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to load blog post",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -426,7 +452,9 @@ export function BeautifulBlogPost() {
               title: "Post Deleted",
               description: "The blog post has been successfully deleted.",
             });
-            navigate('/blog');
+            startTransition(() => {
+              navigate('/blog');
+            });
           } else {
             throw new Error(result.message || 'Delete failed');
           }
@@ -444,7 +472,9 @@ export function BeautifulBlogPost() {
                   title: "Post Deleted (Admin)",
                   description: "The blog post has been successfully deleted using admin privileges.",
                 });
-                navigate('/blog');
+                startTransition(() => {
+                  navigate('/blog');
+                });
                 return;
               }
             } catch (adminError) {
@@ -464,7 +494,9 @@ export function BeautifulBlogPost() {
           title: "Post Deleted",
           description: "The blog post has been successfully deleted.",
         });
-        navigate('/blog');
+        startTransition(() => {
+          navigate('/blog');
+        });
       }
     } catch (error: any) {
       console.error('❌ Unexpected delete error:', error);
@@ -593,7 +625,7 @@ export function BeautifulBlogPost() {
               <Sparkles className="absolute inset-0 m-auto h-6 w-6 text-primary animate-pulse" />
             </div>
             <p className="text-lg font-medium bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Loading...
+              Loading blog post...
             </p>
           </div>
         </div>
@@ -620,8 +652,8 @@ export function BeautifulBlogPost() {
               <p className="text-gray-600 mb-8 text-lg leading-relaxed">
                 The requested blog post could not be found or may have expired.
               </p>
-              <Button 
-                onClick={() => navigate('/blog')}
+              <Button
+                onClick={() => startTransition(() => navigate('/blog'))}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-6 text-lg"
               >
                 <ArrowLeft className="mr-2 h-5 w-5" />
@@ -686,7 +718,7 @@ export function BeautifulBlogPost() {
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
-              onClick={() => navigate('/blog')}
+              onClick={() => startTransition(() => navigate('/blog'))}
               className="flex items-center gap-2 hover:bg-transparent hover:text-blue-600 px-4 py-2 rounded-full transition-all duration-300 border border-transparent hover:border-blue-200/50 hover:shadow-md"
             >
               <ArrowLeft className="h-4 w-4" />

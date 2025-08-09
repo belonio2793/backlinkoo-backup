@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, startTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,11 +7,13 @@ import { Progress } from "@/components/ui/progress";
 import { PremiumPlanTab } from "@/components/PremiumPlanTab";
 import { SEOAcademyTab } from "@/components/SEOAcademyTab";
 import { StreamlinedPremiumProvider } from "@/components/StreamlinedPremiumProvider";
+import { PremiumPopupProvider } from "@/components/PremiumPopupProvider";
 import { Footer } from "@/components/Footer";
 
 import { PremiumService } from "@/services/premiumService";
 import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
 import { PricingModal } from "@/components/PricingModal";
+import { setPremiumStatus } from "@/utils/setPremiumStatus";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -116,15 +118,15 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
       if (!silentRefresh) {
         setError(null);
       }
-      setLoadingStatus('Connecting to database...');
+      // setLoadingStatus('Connecting to database...');
 
       // Load from database using the simplified claim service
       const { SimplifiedClaimService } = await import('@/services/simplifiedClaimService');
 
-      setLoadingStatus('Fetching published blog posts...');
+      // setLoadingStatus('Fetching published blog posts...');
       const dbPosts = await SimplifiedClaimService.getClaimablePosts(20);
 
-      setLoadingStatus('Checking local storage...');
+      // setLoadingStatus('Checking local storage...');
       // Also load from localStorage for backwards compatibility
       const localPosts = [];
       try {
@@ -142,7 +144,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
         console.warn('Error loading local posts:', error);
       }
 
-      setLoadingStatus('Combining and deduplicating posts...');
+      // setLoadingStatus('Combining and deduplicating posts...');
       // Combine and deduplicate posts (prioritize database posts)
       const combinedPosts = [...dbPosts];
       localPosts.forEach(localPost => {
@@ -211,7 +213,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
         });
       }
     } finally {
-      setLoadingStatus('Ready');
+      // setLoadingStatus('Ready');
     }
   };
 
@@ -373,14 +375,14 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
     if (!user) return;
 
     try {
-      setLoadingSavedPosts(true);
+      // setLoadingSavedPosts(true);
       const { SimplifiedClaimService } = await import('@/services/simplifiedClaimService');
       const savedPosts = await SimplifiedClaimService.getUserSavedPosts(user.id);
       setUserSavedPosts(savedPosts);
     } catch (error) {
       console.error('Error loading saved posts:', error);
     } finally {
-      setLoadingSavedPosts(false);
+      // setLoadingSavedPosts(false);
     }
   };
 
@@ -670,9 +672,9 @@ const Dashboard = () => {
     return urlParams.get('section') || "dashboard";
   });
   const [isPremiumSubscriber, setIsPremiumSubscriber] = useState(false);
+  const [premiumCheckComplete, setPremiumCheckComplete] = useState(false);
   const [userProgress, setUserProgress] = useState<{ [key: string]: boolean }>({});
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   // Handle hash-based navigation
@@ -739,23 +741,41 @@ const Dashboard = () => {
           }),
           // Check premium status
           PremiumService.checkPremiumStatus(session.user.id).then(isPremium => {
-            setIsPremiumSubscriber(isPremium);
+            if (isMounted) {
+              setIsPremiumSubscriber(isPremium);
+              setPremiumCheckComplete(true);
+            }
             return isPremium;
           }).catch(err => {
             console.warn('🏠 Dashboard - premium status check failed:', err);
+            if (isMounted) {
+              setIsPremiumSubscriber(false); // Explicitly set to false on error
+              setPremiumCheckComplete(true);
+            }
             return false;
           }),
           // Fetch user progress if premium
           PremiumService.getUserProgress(session.user.id).then(progress => {
-            setUserProgress(progress);
+            if (isMounted) {
+              setUserProgress(progress || {});
+            }
             return progress;
           }).catch(err => {
             console.warn('🏠 Dashboard - progress fetch failed:', err);
+            if (isMounted) {
+              setUserProgress({}); // Explicitly set to empty object on error
+            }
             return {};
           })
         ];
 
-        await Promise.all(dataPromises);
+        const results = await Promise.all(dataPromises);
+        console.log('🏠 Dashboard - All data promises resolved:', {
+          userData: results[0] ? 'success' : 'failed',
+          campaigns: results[1] ? 'success' : 'failed',
+          premiumStatus: results[2],
+          userProgress: Object.keys(results[3] || {}).length
+        });
 
       } catch (error) {
         console.error('🏠 Dashboard - Initialization error:', error);
@@ -776,7 +796,9 @@ const Dashboard = () => {
 
       if (event === 'SIGNED_OUT' || !session) {
         console.log('🚪 Dashboard - User signed out, redirecting to home...');
-        navigate('/');
+        startTransition(() => {
+          navigate('/');
+        });
       } else if (event === 'SIGNED_IN' && session) {
         console.log('🏠 Dashboard - User signed in, updating user state');
         setUser(session.user);
@@ -895,7 +917,7 @@ const Dashboard = () => {
 
         const result = await Promise.race([
           profilePromise,
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 1000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Profile fetch timeout')), 100))
         ]) as any;
 
         profile = result.data;
@@ -925,7 +947,7 @@ const Dashboard = () => {
 
         const result = await Promise.race([
           creditsPromise,
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Credits fetch timeout')), 1000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Credits fetch timeout')), 100))
         ]) as any;
 
         creditsData = result.data;
@@ -943,7 +965,7 @@ const Dashboard = () => {
       try {
         const { data: campaignsData } = await Promise.race([
           supabase.from('campaigns').select('id').eq('user_id', currentUser.id).limit(1),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Quick campaign check timeout')), 1000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Quick campaign check timeout')), 100))
         ]) as any;
 
         setIsFirstTimeUser(!campaignsData || campaignsData.length === 0);
@@ -990,7 +1012,7 @@ const Dashboard = () => {
 
         const result = await Promise.race([
           campaignsPromise,
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Campaigns fetch timeout')), 1000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Campaigns fetch timeout')), 100))
         ]) as any;
 
         campaignsData = result.data;
@@ -1032,8 +1054,10 @@ const Dashboard = () => {
       setCredits(0);
       setCampaigns([]);
 
-      // Navigate immediately
-      navigate('/');
+      // Navigate immediately with transition
+      startTransition(() => {
+        navigate('/');
+      });
 
       // Do actual sign out in background
       try {
@@ -1055,11 +1079,72 @@ const Dashboard = () => {
 
       // Force navigation even if sign out fails
       setUser(null);
-      navigate('/');
+      startTransition(() => {
+        navigate('/');
+      });
     }
   };
 
+  const fixPremiumStatus = async () => {
+    if (!user?.email) {
+      toast({
+        title: "Error",
+        description: "No user authenticated",
+        variant: "destructive",
+      });
+      return;
+    }
 
+    try {
+      console.log('🔧 Fixing premium status for:', user.email);
+      const result = await setPremiumStatus(user.email);
+
+      if (result.success) {
+        toast({
+          title: "Premium Status Updated",
+          description: result.message,
+        });
+
+        // Refresh premium status
+        setPremiumCheckComplete(false);
+        const isPremium = await PremiumService.checkPremiumStatus(user.id);
+        setIsPremiumSubscriber(isPremium);
+        setPremiumCheckComplete(true);
+
+        console.log('✅ Premium status refreshed:', isPremium);
+      } else {
+        toast({
+          title: "Premium Status Update Failed",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (error: any) {
+      console.error('❌ Error fixing premium status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update premium status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Debug: Check subscription status for specific user
+  useEffect(() => {
+    if (user?.email === 'labindalawamaryrose@gmail.com') {
+      console.log('🔍 Auto-checking subscription for:', user.email);
+      import('@/utils/checkUserSubscription').then(({ checkUserSubscription }) => {
+        checkUserSubscription().then(result => {
+          console.log('🔍 Subscription check result:', result);
+          if (result.success && result.shouldBePremium && !isPremiumSubscriber) {
+            console.log('⚠️ User should be premium but is not detected as such');
+            console.log('   Database says premium:', result.shouldBePremium);
+            console.log('   App detects premium:', isPremiumSubscriber);
+          }
+        });
+      });
+    }
+  }, [user?.email, isPremiumSubscriber]);
 
   // Show dashboard regardless of authentication state
 
@@ -1775,7 +1860,9 @@ const Dashboard = () => {
               </Tabs>
             ) : activeSection === "seo-tools" ? (
               <div className="space-y-6">
-                <SEOToolsSection user={user} />
+                <PremiumPopupProvider>
+                  <SEOToolsSection user={user} />
+                </PremiumPopupProvider>
               </div>
             ) : activeSection === "trial" ? (
               <div className="space-y-6">
@@ -1783,15 +1870,34 @@ const Dashboard = () => {
               </div>
             ) : activeSection === "premium-plan" ? (
               <div className="space-y-6">
-                <StreamlinedPremiumProvider>
-                  <PremiumPlanTab
-                    isSubscribed={isPremiumSubscriber}
-                    onUpgrade={() => {
-                      // Refresh premium status after successful upgrade
-                      PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
-                    }}
-                  />
-                </StreamlinedPremiumProvider>
+                {!premiumCheckComplete ? (
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                      <p className="text-muted-foreground">Checking premium status...</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <StreamlinedPremiumProvider>
+                    <PremiumPlanTab
+                      isSubscribed={isPremiumSubscriber}
+                      onUpgrade={() => {
+                        // Refresh premium status after successful upgrade
+                        if (user?.id) {
+                          setPremiumCheckComplete(false);
+                          PremiumService.checkPremiumStatus(user.id).then(isPremium => {
+                            setIsPremiumSubscriber(isPremium);
+                            setPremiumCheckComplete(true);
+                          }).catch(err => {
+                            console.warn('Premium status refresh failed:', err);
+                            setIsPremiumSubscriber(false);
+                            setPremiumCheckComplete(true);
+                          });
+                        }
+                      }}
+                    />
+                  </StreamlinedPremiumProvider>
+                )}
               </div>
             ) : null}
           </>

@@ -93,10 +93,16 @@ if (import.meta.env.DEV) {
     }
   };
 
+  // Import subscription check utility
+  import('./utils/checkUserSubscription').then(({ checkUserSubscription }) => {
+    (window as any).checkUserSubscription = checkUserSubscription;
+  });
+
   console.log('💡 Debug helpers available:');
   console.log('  - fixRLS() - Go to RLS recursion fix page');
   console.log('  - forcePremium() - Force current user to premium status');
   console.log('  - forceSignOut() - Force sign out and redirect to home');
+  console.log('  - checkUserSubscription() - Check user subscription status in database');
 }
 
 // Priority: Get React app rendering ASAP

@@ -32,7 +32,29 @@ class UserService {
 
       if (error) {
         const errorMessage = error.message || error;
-        console.error('❌ userService: Error fetching user profile:', errorMessage);
+
+        // Handle permission denied errors or table not found (silently for these common issues)
+        if (errorMessage && (
+          errorMessage.includes('permission denied') ||
+          errorMessage.includes('relation') ||
+          errorMessage.includes('does not exist') ||
+          errorMessage.includes('JWT expired') ||
+          errorMessage.includes('row-level security')
+        )) {
+          console.log('ℹ️ Database access limited - using fallback profile for:', user.email);
+          return {
+            id: user.id,
+            user_id: user.id,
+            email: user.email || '',
+            role: 'user' as const,
+            subscription_tier: 'free' as const,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+        }
+
+        // Only log unexpected errors
+        console.error('❌ userService: Unexpected error fetching user profile:', errorMessage);
 
         // Handle infinite recursion in RLS policies
         if (errorMessage && errorMessage.includes('infinite recursion detected in policy')) {

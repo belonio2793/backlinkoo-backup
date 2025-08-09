@@ -341,12 +341,8 @@ const BrandGuidelinesPDF: React.FC = () => {
               <span>24</span>
             </div>
             <div className="flex justify-between border-b border-gray-200 pb-2">
-              <span>18. Affiliate Program</span>
+              <span>18. Brand Assets & Resources</span>
               <span>25</span>
-            </div>
-            <div className="flex justify-between border-b border-gray-200 pb-2">
-              <span>19. Brand Assets & Resources</span>
-              <span>26</span>
             </div>
             <div className="flex justify-between border-b border-gray-200 pb-2">
               <span>20. Implementation Guide</span>

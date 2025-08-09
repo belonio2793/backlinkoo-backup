@@ -59,7 +59,7 @@ const getDifficultyLabel = (difficulty: number) => {
 
 export function Community() {
   const [ledgerEntries, setLedgerEntries] = useState<CampaignLedgerEntry[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [stats, setStats] = useState({
     totalCampaigns: 0,
     totalBacklinks: 0,

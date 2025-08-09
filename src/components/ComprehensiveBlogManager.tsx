@@ -77,7 +77,7 @@ export function ComprehensiveBlogManager() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState<'all' | 'draft' | 'published' | 'archived' | 'unclaimed' | 'claimed'>('all');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [pricingModalOpen, setPricingModalOpen] = useState(false);
   const [claiming, setClaiming] = useState<string | null>(null);

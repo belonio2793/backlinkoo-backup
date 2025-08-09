@@ -36,7 +36,8 @@ import {
   CheckCircle2,
   Globe,
   Infinity,
-  Loader2
+  Loader2,
+  Plus
 } from 'lucide-react';
 
 function Blog() {
@@ -44,7 +45,7 @@ function Blog() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [blogPosts, setBlogPosts] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -187,22 +188,6 @@ function Blog() {
 
   const categories = Array.from(new Set(blogPosts.map(post => post.category)));
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto"></div>
-            <Sparkles className="absolute inset-0 m-auto h-6 w-6 text-blue-600 animate-pulse" />
-          </div>
-          <div className="space-y-2">
-            <p className="text-xl font-medium text-gray-900">Loading Expert Content</p>
-            <p className="text-gray-600">Fetching the latest high-quality blog posts...</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">

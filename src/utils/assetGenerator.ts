@@ -287,7 +287,7 @@ export class AssetGenerator {
     const features = [
       { text: '🎯 High-DA\nBacklinks', y: 200 },
       { text: '⚡ AI Outreach\nAutomation', y: 280 },
-      { text: '📊 Real-time\nAnalytics', y: 360 }
+      { text: '�� Real-time\nAnalytics', y: 360 }
     ];
 
     features.forEach(feature => {
@@ -800,7 +800,7 @@ export class AssetGenerator {
     this.ctx.fillText(' ∞', 380, 230);
     
     this.ctx.fillStyle = 'white';
-    this.ctx.fillText(' Affiliate', 480, 230);
+    this.ctx.fillText(' Program', 480, 230);
 
     this.ctx.fillStyle = '#bfdbfe';
     this.ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
@@ -846,7 +846,7 @@ export class AssetGenerator {
 
     // Metrics grid
     const metrics = [
-      { label: '5,847', desc: 'Active Affiliates', x: 1080, y: 240, color: '#06b6d4' },
+      { label: '5,847', desc: 'Active Users', x: 1080, y: 240, color: '#06b6d4' },
       { label: '$2.3M', desc: 'Paid Out', x: 1320, y: 240, color: '#10b981' },
       { label: '89%', desc: 'Success Rate', x: 1080, y: 320, color: '#ec4899' },
       { label: '24h', desc: 'Fast Approval', x: 1320, y: 320, color: '#f97316' }
@@ -887,7 +887,7 @@ export class AssetGenerator {
     this.ctx.fillStyle = '#10b981';
     this.ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('🔥 TRENDING: New affiliate earned $15,247 in their first month!', 750, 65);
+    this.ctx.fillText('🔥 TRENDING: New user generated 15,247 backlinks in their first month!', 750, 65);
 
     return this.canvas.toDataURL('image/png');
   }
@@ -1059,92 +1059,6 @@ export class AssetGenerator {
     return this.canvas.toDataURL('image/png');
   }
 
-  async generateAffiliateBadge(): Promise<string> {
-    const width = 800;
-    const height = 600;
-    this.setupCanvas(width, height);
-
-    // Create professional badge background
-    const gradient = this.ctx.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, '#064e3b');
-    gradient.addColorStop(0.5, '#047857');
-    gradient.addColorStop(1, '#0f766e');
-
-    this.ctx.fillStyle = gradient;
-    this.fillRoundedRect(0, 0, width, height, 24);
-
-    // Add background pattern
-    this.ctx.fillStyle = 'rgba(255,255,255,0.05)';
-    for (let i = 0; i < 40; i++) {
-      const x = Math.random() * width;
-      const y = Math.random() * height;
-      this.ctx.beginPath();
-      this.ctx.arc(x, y, Math.random() * 3 + 1, 0, Math.PI * 2);
-      this.ctx.fill();
-    }
-
-    // Crown icon background
-    const crownGradient = this.ctx.createRadialGradient(400, 180, 0, 400, 180, 50);
-    crownGradient.addColorStop(0, '#fbbf24');
-    crownGradient.addColorStop(1, '#f59e0b');
-
-    this.ctx.fillStyle = crownGradient;
-    this.ctx.beginPath();
-    this.ctx.arc(400, 180, 40, 0, Math.PI * 2);
-    this.ctx.fill();
-
-    // Crown icon (simplified)
-    this.ctx.fillStyle = '#0f172a';
-    this.ctx.font = 'bold 30px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    this.ctx.textAlign = 'center';
-    this.ctx.fillText('👑', 400, 190);
-
-    // Official Partner badge
-    const badgeGradient = this.ctx.createLinearGradient(250, 240, 550, 280);
-    badgeGradient.addColorStop(0, '#10b981');
-    badgeGradient.addColorStop(1, '#059669');
-
-    this.ctx.fillStyle = badgeGradient;
-    this.fillRoundedRect(250, 240, 300, 50, 25);
-
-    this.ctx.fillStyle = '#0f172a';
-    this.ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    this.ctx.fillText('OFFICIAL PARTNER', 400, 272);
-
-    // Brand name
-    this.ctx.fillStyle = 'white';
-    this.ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    this.ctx.fillText('Backlink ∞', 400, 340);
-
-    this.ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-    this.ctx.fillStyle = '#a7f3d0';
-    this.ctx.fillText('Authorized Affiliate', 400, 380);
-
-    // Stats boxes
-    const stats = [
-      { label: '20%', desc: 'Commission', x: 280 },
-      { label: '24/7', desc: 'Support', x: 520 }
-    ];
-
-    stats.forEach(stat => {
-      this.ctx.fillStyle = 'rgba(255,255,255,0.1)';
-      this.fillRoundedRect(stat.x - 60, 420, 120, 80, 12);
-
-      this.ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-      this.ctx.lineWidth = 2;
-      this.strokeRoundedRect(stat.x - 60, 420, 120, 80, 12);
-
-      this.ctx.fillStyle = '#fbbf24';
-      this.ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      this.ctx.fillText(stat.label, stat.x, 450);
-
-      this.ctx.fillStyle = 'white';
-      this.ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
-      this.ctx.fillText(stat.desc, stat.x, 480);
-    });
-
-    return this.canvas.toDataURL('image/png');
-  }
 
   async generateSocialMediaKit(): Promise<string> {
     const width = 1200;
@@ -1301,7 +1215,7 @@ export class AssetGenerator {
     // Bullet points
     const bulletPoints = [
       'Partner Revenue: +180%',
-      'Active Affiliates: 10,000+',
+      'Active Users: 10,000+',
       'Avg Commission: 20-35%'
     ];
 
@@ -1409,8 +1323,6 @@ export async function generateAsset(name: string): Promise<string> {
     case 'Icon Only':
     case 'App Icon Collection':
       return generator.generateIconOnly();
-    case 'Affiliate Badge Set':
-      return generator.generateAffiliateBadge();
     case 'Social Media Kit':
       return generator.generateSocialMediaKit();
     case 'Presentation Template':

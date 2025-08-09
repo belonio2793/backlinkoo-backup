@@ -146,11 +146,6 @@ export const FOOTER_NAV_CONFIGS = {
   } as SmartNavigationConfig,
 
   // Company - Mixed access
-  AFFILIATE: {
-    route: '/affiliate',
-    requiresAuth: false
-  } as SmartNavigationConfig,
-
   ADMIN: {
     route: '/admin',
     requiresAuth: true
