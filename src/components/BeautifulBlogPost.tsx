@@ -281,7 +281,20 @@ export function BeautifulBlogPost() {
   const loadBlogPost = async (slug: string) => {
     try {
       setLoading(true);
-      const post = await blogService.getBlogPostBySlug(slug);
+
+      // First try database, if that fails, try localStorage fallback
+      let post = null;
+      try {
+        post = await blogService.getBlogPostBySlug(slug);
+      } catch (dbError) {
+        console.warn('Database lookup failed, trying localStorage fallback:', dbError);
+        // Try to load from localStorage as fallback
+        const localStoragePost = localStorage.getItem(`blog_post_${slug}`);
+        if (localStoragePost) {
+          post = JSON.parse(localStoragePost);
+        }
+      }
+
       setBlogPost(post);
 
       // If post is claimed, fetch the author's email
