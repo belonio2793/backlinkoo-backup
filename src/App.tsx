@@ -40,11 +40,7 @@ const App = () => (
             />
             <Route
               path="/blog/:slug"
-              element={
-                <Suspense fallback={<div>Loading post...</div>}>
-                  <LazyBeautifulBlogPost />
-                </Suspense>
-              }
+              element={<LazyBeautifulBlogPost />}
             />
             <Route
               path="/dashboard"
