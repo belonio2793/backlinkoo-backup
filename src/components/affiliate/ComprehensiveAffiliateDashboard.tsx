@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Progress } from '../ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { compatibilityAffiliateService } from '../../services/compatibilityAffiliateService';
-import ReferredUsersSimple from './ReferredUsersSimple';
 import {
   DollarSign,
   Users,
@@ -282,9 +281,8 @@ export const ComprehensiveAffiliateDashboard: React.FC<DashboardProps> = ({ user
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="referred">Referred Users</TabsTrigger>
             <TabsTrigger value="links">Links & UTMs</TabsTrigger>
             <TabsTrigger value="assets">Marketing Assets</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
@@ -425,14 +423,6 @@ export const ComprehensiveAffiliateDashboard: React.FC<DashboardProps> = ({ user
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          {/* Referred Users Tab */}
-          <TabsContent value="referred" className="space-y-6">
-            <ReferredUsersSimple
-              affiliateId={affiliateProfile.affiliate_id}
-              affiliateCode={affiliateProfile.affiliate_id}
-            />
           </TabsContent>
 
           {/* Links & UTMs Tab */}

@@ -9,7 +9,6 @@ import { compatibilityAffiliateService } from '../services/compatibilityAffiliat
 import ComprehensiveAffiliateDashboard from '../components/affiliate/ComprehensiveAffiliateDashboard';
 import EnhancedAffiliateRegistration from '../components/affiliate/EnhancedAffiliateRegistration';
 import AffiliateAssetLibrary from '../components/affiliate/AffiliateAssetLibrary';
-import ReferredUsersSimple from '../components/affiliate/ReferredUsersSimple';
 import AffiliateSetupGuide from '../components/AffiliateSetupGuide';
 import { Footer } from '../components/Footer';
 import {
@@ -410,9 +409,8 @@ export const AffiliateProgram: React.FC = () => {
       <Tabs defaultValue="dashboard" className="max-w-7xl mx-auto">
         <div className="border-b bg-white sticky top-0 z-40">
           <div className="px-6 py-4">
-            <TabsList className="grid w-full grid-cols-4 max-w-lg">
+            <TabsList className="grid w-full grid-cols-3 max-w-md">
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-              <TabsTrigger value="users">Referred Users</TabsTrigger>
               <TabsTrigger value="assets">Assets</TabsTrigger>
               <TabsTrigger value="support">Support</TabsTrigger>
             </TabsList>
@@ -421,13 +419,6 @@ export const AffiliateProgram: React.FC = () => {
 
         <TabsContent value="dashboard" className="mt-0">
           <ComprehensiveAffiliateDashboard userId={user.id} />
-        </TabsContent>
-
-        <TabsContent value="users" className="mt-0 p-6">
-          <ReferredUsersSimple
-            affiliateId={affiliateProfile.affiliate_id}
-            affiliateCode={affiliateProfile.affiliate_id}
-          />
         </TabsContent>
 
         <TabsContent value="assets" className="mt-0">
