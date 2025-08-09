@@ -37,6 +37,9 @@ import { TrialExhaustedModal } from '@/components/TrialExhaustedModal';
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
 import { CampaignBlogIntegrationService } from '@/services/campaignBlogIntegrationService';
 import { LoginModal } from '@/components/LoginModal';
+import { guestTrackingService } from '@/services/guestTrackingService';
+import { GuestPremiumUpsellModal } from '@/components/GuestPremiumUpsellModal';
+import { GuestCampaignRestrictionsOverlay } from '@/components/GuestCampaignRestrictionsOverlay';
 
 // Import our enterprise engines
 import { CampaignQueueManager, type CampaignConfig } from '@/services/automationEngine/CampaignQueueManager';
