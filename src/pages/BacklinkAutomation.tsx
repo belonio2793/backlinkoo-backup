@@ -1060,7 +1060,7 @@ export default function BacklinkAutomation() {
       const timer = setTimeout(() => {
         // Switch to live results sub-tab when campaigns are active\n        setSelectedCampaignTab('live-results');
         toast({
-          title: "��� Campaign Results Ready!",
+          title: "🚀 Campaign Results Ready!",
           description: "Your campaigns are now running. View real-time progress in the live monitor above.",
           duration: 4000,
         });
