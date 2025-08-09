@@ -359,6 +359,42 @@ export default function BacklinkAutomation() {
     return () => clearInterval(interval);
   }, []);
 
+  // Auto-switch to results tab when campaigns are active
+  useEffect(() => {
+    const activeCampaignCount = campaigns.filter(c => c.status === 'active').length;
+    const hasGuestResults = !user && guestCampaignResults.length > 0;
+
+    if ((activeCampaignCount > 0 || hasGuestResults) && selectedTab === 'campaigns') {
+      // Auto-switch to results tab after 3 seconds of campaign deployment
+      const timer = setTimeout(() => {
+        setSelectedTab('results');
+        toast({
+          title: "🎯 Campaign Results Ready!",
+          description: "Your campaigns are now running. View real-time progress in the Results tab.",
+          duration: 4000,
+        });
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [campaigns, guestCampaignResults, selectedTab, user]);
+
+  // Real-time results simulation for active campaigns
+  useEffect(() => {
+    if (selectedTab === 'results') {
+      const interval = setInterval(() => {
+        // Simulate real-time updates by triggering re-renders
+        setRealTimeMetrics(prev => ({
+          ...prev,
+          lastUpdate: new Date(),
+          currentThroughput: prev.currentThroughput + Math.floor(Math.random() * 3) - 1,
+        }));
+      }, 5000); // Update every 5 seconds when on results tab
+
+      return () => clearInterval(interval);
+    }
+  }, [selectedTab]);
+
   // Aggregate successful links for discovery engine
   useEffect(() => {
     if (publishedLinks.length > 0) {
