@@ -785,15 +785,30 @@ export default function BacklinkAutomation() {
 
   const pauseCampaign = async (campaignId: string) => {
     try {
-      // Stop live link building
+      // Stop live link building first
       liveLinkBuildingService.stopLinkBuilding(campaignId);
 
-      // Use campaign service for backend call
-      await campaignService.pauseCampaign(campaignId);
+      // Update database status
+      try {
+        await directCampaignService.updateCampaignStatus(campaignId, 'paused');
+      } catch (dbError) {
+        console.error('Direct database pause failed:', dbError);
+        // Try campaign service as fallback
+        try {
+          await campaignService.pauseCampaign(campaignId);
+        } catch (apiError) {
+          console.error('Campaign service pause failed:', apiError);
+        }
+      }
 
       // Also pause in queue manager
-      await queueManager.pauseCampaign(campaignId);
+      try {
+        await queueManager.pauseCampaign(campaignId);
+      } catch (queueError) {
+        console.error('Queue manager pause failed:', queueError);
+      }
 
+      // Update local state
       setCampaigns(prev => prev.map(c =>
         c.id === campaignId ? { ...c, status: 'paused' as const } : c
       ));
