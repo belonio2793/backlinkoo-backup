@@ -255,8 +255,13 @@ const Affiliate: React.FC = () => {
                       <Eye className="h-4 w-4 mr-2" />
                       View Affiliate Guide
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <RefreshCw className="h-4 w-4 mr-2" />
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start"
+                      onClick={refreshData}
+                      disabled={isLoading}
+                    >
+                      <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
                       Refresh Statistics
                     </Button>
                   </CardContent>
