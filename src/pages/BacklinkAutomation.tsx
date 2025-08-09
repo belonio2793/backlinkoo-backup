@@ -1433,14 +1433,11 @@ export default function BacklinkAutomation() {
           )}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="campaigns">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="campaigns" className="relative">
                 Campaign Manager
-              </TabsTrigger>
-              <TabsTrigger value="reporting" className="relative">
-                Reporting
-                {((user && campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) > 0) ||
-                  (!user && guestLinksGenerated > 0)) && (
+                {((user && campaigns.filter(c => c.status === 'active').length > 0) ||
+                  (!user && guestCampaignResults.length > 0)) && (
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
                 )}
               </TabsTrigger>
