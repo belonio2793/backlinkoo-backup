@@ -423,7 +423,7 @@ export default function BacklinkAutomation() {
 
     // Show toast notification for new link
     toast({
-      title: "🔗 New Backlink Published!",
+      title: "�� New Backlink Published!",
       description: `Link published on ${linkToPublish.domain} • Total: ${newCount} links built`,
       duration: 3000,
     });
@@ -1812,7 +1812,7 @@ export default function BacklinkAutomation() {
                     controlPanelData.systemStatus === 'operational' ? 'bg-blue-500' : 'bg-red-500'
                   }`} />
                   <span className="text-sm font-medium text-slate-700">
-                    Discovery Engine
+                    Backlink Automation
                   </span>
                   {backendStatus === 'unavailable' && (
                     <Badge variant="outline" className="text-orange-600 bg-orange-50 text-xs ml-2">
