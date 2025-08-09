@@ -800,7 +800,7 @@ export class AssetGenerator {
     this.ctx.fillText(' ∞', 380, 230);
     
     this.ctx.fillStyle = 'white';
-    this.ctx.fillText(' Affiliate', 480, 230);
+    this.ctx.fillText(' Program', 480, 230);
 
     this.ctx.fillStyle = '#bfdbfe';
     this.ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
