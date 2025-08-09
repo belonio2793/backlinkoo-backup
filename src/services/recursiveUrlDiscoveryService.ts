@@ -811,7 +811,8 @@ class RecursiveUrlDiscoveryService {
         metadata: item.metadata || {}
       }));
     } catch (error) {
-      console.error('Failed to get discovered URLs:', error);
+      console.error('Failed to get discovered URLs:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
+      console.log('Returning demo URLs as fallback');
       // Return demo data as fallback
       return this.getDemoUrls(linkType, limit);
     }
