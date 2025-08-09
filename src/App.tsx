@@ -148,6 +148,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/symbol-cleaner-debug"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazySymbolCleanerDebug />
+                </Suspense>
+              }
+            />
 
             {/* Authentication routes */}
             <Route
