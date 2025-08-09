@@ -974,7 +974,7 @@ export default function BacklinkAutomation() {
             '🚀 VELOCITY: Publishing queue processing at optimal 1-2s intervals...',
             '🎯 TARGETING: Keyword relevance analysis complete - 98% match score...',
             '🔧 OPTIMIZATION: Auto-adjusting strategy based on real-time performance...',
-            '�� METRICS: Success rate trending upward - exceeding baseline expectations...',
+            '📈 METRICS: Success rate trending upward - exceeding baseline expectations...',
             '⚡ TURBO MODE: Ultra-fast publishing enabled for maximum user engagement...',
             '🛡️ QUALITY: All links passing premium verification standards...',
             '🔄 DISCOVERY: Recursive URL finding active - expanding opportunity pool...',
@@ -4281,7 +4281,7 @@ export default function BacklinkAutomation() {
                       <div className="space-y-2 max-h-96 overflow-y-auto">
                         {[
                           { name: 'Technology & Software', count: 125420, icon: '💻' },
-                          { name: 'Business & Finance', count: 98750, icon: '����' },
+                          { name: 'Business & Finance', count: 98750, icon: '💼' },
                           { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
