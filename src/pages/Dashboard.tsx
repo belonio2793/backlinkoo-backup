@@ -124,7 +124,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
       // setLoadingStatus('Fetching published blog posts...');
       const dbPosts = await SimplifiedClaimService.getClaimablePosts(20);
 
-      setLoadingStatus('Checking local storage...');
+      // setLoadingStatus('Checking local storage...');
       // Also load from localStorage for backwards compatibility
       const localPosts = [];
       try {
