@@ -4470,6 +4470,17 @@ export default function BacklinkAutomation() {
         userName={user?.user_metadata?.full_name || user?.email}
       />
 
+      {/* Guest Premium Upsell Modal */}
+      <GuestPremiumUpsellModal
+        open={showGuestPremiumModal}
+        onOpenChange={setShowGuestPremiumModal}
+        trigger={premiumUpsellTrigger}
+        onUpgrade={() => {
+          // Handle upgrade completion
+          console.log('Guest user upgrading to premium');
+        }}
+      />
+
       {/* Delete Campaign Dialog */}
       <DeleteCampaignDialog
         open={deleteDialogOpen}
