@@ -28,7 +28,9 @@ import { useAuth } from '@/hooks/useAuth';
 import ToolsHeader from '@/components/shared/ToolsHeader';
 import { Footer } from '@/components/Footer';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
+import { PremiumUpgradeModal } from '@/components/PremiumUpgradeModal';
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
+import { liveLinkBuildingService, type LinkBuildingConfig, type PremiumLimitResult } from '@/services/liveLinkBuildingService';
 
 // Import our enterprise engines
 import { CampaignQueueManager, type CampaignConfig, type QueuedCampaign, type CampaignDeletionResult } from '@/services/automationEngine/CampaignQueueManager';
