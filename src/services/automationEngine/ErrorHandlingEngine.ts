@@ -316,7 +316,7 @@ export class ErrorHandlingEngine {
       browser: navigator.userAgent,
       device: this.detectDevice(),
       os: this.detectOS(),
-      version: process.env.VERSION || '1.0.0',
+      version: import.meta.env.VITE_VERSION || '1.0.0',
       networkConditions: await this.getNetworkConditions(),
       resourceUsage: await this.getResourceUsage()
     };
