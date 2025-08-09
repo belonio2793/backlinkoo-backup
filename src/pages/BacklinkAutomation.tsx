@@ -134,29 +134,7 @@ export default function BacklinkAutomation() {
     name: '',
     targetUrl: '',
     keywords: '',
-    anchorTexts: '',
-    dailyLimit: 10,
-    totalTarget: 100,
-    strategy: {
-      blogComments: { enabled: true, weight: 25, dailyLimit: 5, qualityThreshold: 70 },
-      forumProfiles: { enabled: true, weight: 20, dailyLimit: 3, qualityThreshold: 75 },
-      web2Platforms: { enabled: true, weight: 20, dailyLimit: 4, qualityThreshold: 65 },
-      socialProfiles: { enabled: false, weight: 10, dailyLimit: 2, qualityThreshold: 60 },
-      contactForms: { enabled: false, weight: 5, dailyLimit: 1, qualityThreshold: 80 },
-      guestPosts: { enabled: true, weight: 15, dailyLimit: 2, qualityThreshold: 85 },
-      resourcePages: { enabled: true, weight: 5, dailyLimit: 1, qualityThreshold: 90 }
-    },
-    qualityFilters: {
-      minDomainAuthority: 30,
-      maxSpamScore: 20,
-      contentRelevanceThreshold: 75
-    },
-    antiDetection: {
-      userAgentRotation: true,
-      humanLikeDelays: true,
-      contentVariation: true,
-      maxActionsPerIp: 5
-    }
+    anchorTexts: ''
   });
 
   const { toast } = useToast();
