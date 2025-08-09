@@ -5204,5 +5204,3 @@ export default function BacklinkAutomation() {
     </div>
   );
 }
-
-export default BacklinkAutomation;
