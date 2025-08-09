@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ModalProvider } from "@/contexts/ModalContext";
+import { ReportSyncProvider } from "@/contexts/ReportSyncContext";
 import { UnifiedModalManager } from "@/components/UnifiedModalManager";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import Index from "./pages/Index";
