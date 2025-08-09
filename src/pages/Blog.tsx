@@ -659,6 +659,44 @@ function Blog() {
       {/* Footer */}
       <Footer />
 
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        defaultTab="login"
+        pendingAction="premium blog features"
+        onAuthSuccess={(user) => {
+          setLoginModalOpen(false);
+          toast({
+            title: "Welcome back!",
+            description: "You have been successfully signed in.",
+          });
+
+          // Check for claim intent
+          const claimIntent = localStorage.getItem('claim_intent');
+          if (claimIntent) {
+            try {
+              const intent = JSON.parse(claimIntent);
+              localStorage.removeItem('claim_intent');
+              toast({
+                title: "Continuing with your claim...",
+                description: `Processing your request to claim "${intent.postTitle}"`,
+              });
+              setTimeout(() => {
+                navigate(`/blog/${intent.postSlug}`);
+              }, 1500);
+            } catch (error) {
+              console.warn('Failed to parse claim intent:', error);
+            }
+          }
+
+          // Refresh the page to show updated user state
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        }}
+      />
+
       {/* Pricing Modal */}
       <EnhancedUnifiedPaymentModal
         isOpen={paymentModalOpen}
