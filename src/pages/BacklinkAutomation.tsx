@@ -1154,10 +1154,34 @@ export default function BacklinkAutomation() {
       return;
     }
 
-    // Check guest trial limit
-    if (!user && guestLinksGenerated >= 20) {
-      setShowTrialExhaustedModal(true);
-      return;
+    // Check guest limits using tracking service
+    if (!user) {
+      const trackingResult = guestTrackingService.trackCampaignCreation({
+        name: campaignForm.name || `Campaign for ${campaignForm.targetUrl}`,
+        targetUrl: campaignForm.targetUrl,
+        keywords: campaignForm.keywords.split(',').map(k => k.trim()),
+        status: 'active',
+        linksGenerated: 0
+      });
+
+      if (!trackingResult.success) {
+        if (trackingResult.shouldShowPremiumModal) {
+          setPremiumUpsellTrigger('campaign_limit');
+          setShowGuestPremiumModal(true);
+        }
+
+        toast({
+          title: "Campaign Limit Reached",
+          description: trackingResult.warning?.message || "You've reached the free campaign limit.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (trackingResult.warning && trackingResult.shouldShowPremiumModal) {
+        setPremiumUpsellTrigger('campaign_limit');
+        setShowGuestPremiumModal(true);
+      }
     }
 
     try {
