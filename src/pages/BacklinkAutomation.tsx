@@ -663,17 +663,37 @@ export default function BacklinkAutomation() {
     }
   };
 
-  // Initialize website randomization and load permanent campaigns
+  // Initialize with live monitoring system
   useEffect(() => {
     randomizeWebsites();
 
-    // Load permanently saved campaigns
+    // Load permanently saved campaigns with live monitoring
     const permanentCampaigns = loadPermanentCampaigns();
     if (permanentCampaigns.length > 0) {
       setGuestCampaignResults(permanentCampaigns);
-      console.log('📋 Loaded', permanentCampaigns.length, 'permanently saved campaigns');
+      console.log('🔄 Live Monitor: Loaded', permanentCampaigns.length, 'campaigns with progressive counts');
     }
-  }, [randomizeWebsites, loadPermanentCampaigns]);
+
+    // Run initial auto-detection
+    autoDetectionSystem();
+
+    // Set up periodic monitoring (every 30 seconds)
+    const monitoringInterval = setInterval(() => {
+      autoDetectionSystem();
+
+      // Update live monitoring metrics
+      const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
+      const activeCampaigns = savedCampaigns.filter((c: any) => c.status === 'active');
+
+      if (activeCampaigns.length > 0) {
+        console.log('🔄 Live Monitor: Tracking', activeCampaigns.length, 'active campaigns');
+      }
+    }, 30000);
+
+    return () => {
+      clearInterval(monitoringInterval);
+    };
+  }, [randomizeWebsites, loadPermanentCampaigns, autoDetectionSystem]);
 
   // Start live updates when database tab is accessed
   useEffect(() => {
