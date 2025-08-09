@@ -560,10 +560,20 @@ class CampaignService {
    */
   async createCampaign(campaignData: any): Promise<{ campaign?: any; error?: string }> {
     try {
+      // Get current user for RLS policy compliance
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        return {
+          error: 'User authentication required to create campaigns'
+        };
+      }
+
       const { data, error } = await supabase
         .from('backlink_campaigns')
         .insert({
           ...campaignData,
+          user_id: user.id, // Required for RLS policy
           status: 'active',
           progress: 0,
           links_generated: 0,
