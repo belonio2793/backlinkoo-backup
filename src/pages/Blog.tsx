@@ -916,12 +916,12 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired }: any) {
         </div>
         
         <CardTitle className="text-xl font-bold line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors duration-300 mb-3">
-          {post.title}
+          {cleanTitle(post.title)}
         </CardTitle>
 
         {post.meta_description && (
           <p className="text-gray-600 line-clamp-3 leading-relaxed text-sm font-light">
-            {post.meta_description}
+            {cleanDescription(post.meta_description)}
           </p>
         )}
       </CardHeader>
