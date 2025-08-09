@@ -1138,15 +1138,21 @@ export default function BacklinkAutomation() {
         }
 
         if (result.campaign) {
-          // Generate blog post for the campaign
-          const blogResult = await CampaignBlogIntegrationService.generateCampaignBlogPost({
-            campaignId: result.campaign.id,
-            targetUrl: result.campaign.target_url,
-            keywords: result.campaign.keywords,
-            anchorTexts: result.campaign.anchor_texts,
-            primaryKeyword: result.campaign.keywords[0],
-            campaignName: result.campaign.name
-          });
+          // Generate blog post for the campaign (non-blocking)
+          let blogResult = { success: false };
+          try {
+            blogResult = await CampaignBlogIntegrationService.generateCampaignBlogPost({
+              campaignId: result.campaign.id,
+              targetUrl: result.campaign.target_url,
+              keywords: result.campaign.keywords,
+              anchorTexts: result.campaign.anchor_texts,
+              primaryKeyword: result.campaign.keywords[0],
+              campaignName: result.campaign.name
+            });
+          } catch (blogError) {
+            console.warn('Blog generation failed for campaign:', blogError.message);
+            // Continue with campaign creation even if blog generation fails
+          }
 
           // Create enhanced campaign object with real-time tracking
           const enhancedCampaign: Campaign = {
