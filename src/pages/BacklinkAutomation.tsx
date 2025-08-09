@@ -568,6 +568,20 @@ export default function BacklinkAutomation() {
     };
   }, [selectedTab, startLiveUpdates, stopLiveUpdates]);
 
+  // Auto-save campaigns whenever they change
+  useEffect(() => {
+    if (guestCampaignResults.length > 0) {
+      guestCampaignResults.forEach(campaign => {
+        saveCampaignPermanently(campaign);
+      });
+    }
+    if (campaigns.length > 0) {
+      campaigns.forEach(campaign => {
+        saveCampaignPermanently(campaign);
+      });
+    }
+  }, [guestCampaignResults, campaigns, saveCampaignPermanently]);
+
   // Cleanup on unmount
   useEffect(() => {
     return () => {
