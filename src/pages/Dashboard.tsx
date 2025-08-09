@@ -904,7 +904,7 @@ const Dashboard = () => {
           console.log('🔍 Profile error (non-critical):', result.error);
         }
       } catch (profileError) {
-        console.warn('��️ Profile fetch failed, using defaults:', profileError);
+        console.warn('⚠️ Profile fetch failed, using defaults:', profileError);
       }
 
       // Set user type based on profile
@@ -990,7 +990,7 @@ const Dashboard = () => {
 
         const result = await Promise.race([
           campaignsPromise,
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Campaigns fetch timeout')), 1000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Campaigns fetch timeout')), 100))
         ]) as any;
 
         campaignsData = result.data;
