@@ -168,11 +168,13 @@ export default function AdminSetupHelper() {
       setDiagnostics(results);
 
     } catch (error: any) {
+      const errorMsg = error?.message || error?.toString() || 'Unknown diagnostic error';
       toast({
         title: "Diagnostic Failed",
-        description: error.message,
+        description: errorMsg,
         variant: "destructive"
       });
+      console.error('Diagnostic error:', error);
     } finally {
       setLoading(false);
     }
