@@ -369,7 +369,7 @@ export default function BacklinkAutomation() {
       const timer = setTimeout(() => {
         setSelectedTab('results');
         toast({
-          title: "🎯 Campaign Results Ready!",
+          title: "���� Campaign Results Ready!",
           description: "Your campaigns are now running. View real-time progress in the Results tab.",
           duration: 4000,
         });
@@ -591,6 +591,37 @@ export default function BacklinkAutomation() {
   };
 
   const deployCampaign = async () => {
+    // Validation
+    if (!campaignForm.targetUrl.trim()) {
+      toast({
+        title: "Target URL Required",
+        description: "Please enter a target URL for your campaign.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!campaignForm.keywords.trim()) {
+      toast({
+        title: "Keywords Required",
+        description: "Please enter target keywords for your campaign.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate URL format
+    try {
+      new URL(campaignForm.targetUrl);
+    } catch {
+      toast({
+        title: "Invalid URL",
+        description: "Please enter a valid URL (e.g., https://yoursite.com)",
+        variant: "destructive"
+      });
+      return;
+    }
+
     // Check guest trial limit
     if (!user && guestLinksGenerated >= 20) {
       setShowTrialExhaustedModal(true);
@@ -784,7 +815,7 @@ export default function BacklinkAutomation() {
               setTimeout(() => setShowTrialExhaustedModal(true), 3000);
             } else {
               toast({
-                title: "���� Discovery Complete!",
+                title: "������ Discovery Complete!",
                 description: `Found ${additionalLinks} new high-value opportunities! Total progress: ${newTotal} backlinks built.`,
               });
             }
