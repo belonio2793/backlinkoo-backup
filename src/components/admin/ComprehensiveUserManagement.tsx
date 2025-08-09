@@ -148,24 +148,88 @@ export default function ComprehensiveUserManagement() {
 
   const { toast } = useToast();
 
-  // Load users from both auth.users and profiles tables
+  // Load users from profiles table with proper error handling
   const loadUsers = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Get all profiles first
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Check current user's admin status first
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
 
-      if (profilesError) {
-        throw new Error(`Failed to fetch profiles: ${profilesError.message}`);
+      if (!currentUser) {
+        throw new Error('You must be logged in to access user management');
       }
 
-      // Get auth users (admin function needed for this, so we'll work with profiles mainly)
-      const combinedUsers: CombinedUser[] = (profiles || []).map((profile: UserProfile) => ({
+      // Try multiple approaches to get user data
+      let profiles: UserProfile[] = [];
+      let profilesError: any = null;
+
+      // Approach 1: Try to get all profiles (requires admin RLS policy)
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select(`
+            id,
+            user_id,
+            email,
+            role,
+            subscription_tier,
+            subscription_status,
+            display_name,
+            created_at,
+            updated_at
+          `)
+          .order('created_at', { ascending: false });
+
+        if (error) {
+          profilesError = error;
+          throw error;
+        }
+
+        profiles = data || [];
+
+      } catch (firstError: any) {
+        console.warn('Direct profiles query failed:', firstError);
+
+        // Approach 2: Try to get current user's profile only (fallback)
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select(`
+              id,
+              user_id,
+              email,
+              role,
+              subscription_tier,
+              subscription_status,
+              display_name,
+              created_at,
+              updated_at
+            `)
+            .eq('user_id', currentUser.id)
+            .single();
+
+          if (error) {
+            throw error;
+          }
+
+          // If we can only see our own profile, show a limited view
+          profiles = data ? [data] : [];
+
+          setError('Limited access: Only showing your own profile. Full user management requires admin privileges.');
+
+        } catch (secondError: any) {
+          console.error('Profile access completely failed:', secondError);
+
+          // Approach 3: Create demo data to show the interface
+          profiles = [];
+          setError(`Database access denied: ${firstError.message}. Please ensure you have admin privileges and proper RLS policies are set up.`);
+        }
+      }
+
+      // Transform the data
+      const combinedUsers: CombinedUser[] = profiles.map((profile: UserProfile) => ({
         id: profile.user_id,
         email: profile.email,
         role: profile.role || 'user',
@@ -174,7 +238,7 @@ export default function ComprehensiveUserManagement() {
         display_name: profile.display_name,
         created_at: profile.created_at,
         last_sign_in_at: null, // Would need admin API to get this
-        email_confirmed_at: null, // Would need admin API to get this  
+        email_confirmed_at: null, // Would need admin API to get this
         banned_until: null, // Would need admin API to get this
         user_metadata: {}
       }));
@@ -192,17 +256,30 @@ export default function ComprehensiveUserManagement() {
       };
       setUserStats(stats);
 
-      toast({
-        title: "Users Loaded",
-        description: `Successfully loaded ${combinedUsers.length} users from database.`,
-      });
+      if (combinedUsers.length > 0) {
+        toast({
+          title: "Users Loaded",
+          description: `Successfully loaded ${combinedUsers.length} user${combinedUsers.length === 1 ? '' : 's'} from database.`,
+        });
+      }
 
     } catch (error: any) {
       const errorMessage = error.message || 'Failed to load users';
       setError(errorMessage);
+
+      // Set empty state
+      setUsers([]);
+      setFilteredUsers([]);
+      setUserStats({
+        totalUsers: 0,
+        activeUsers: 0,
+        premiumUsers: 0,
+        newUsersToday: 0
+      });
+
       toast({
         title: "Error Loading Users",
-        description: errorMessage,
+        description: `${errorMessage}. Check console for details.`,
         variant: "destructive"
       });
       console.error('Error loading users:', error);
