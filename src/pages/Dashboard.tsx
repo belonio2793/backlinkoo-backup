@@ -904,7 +904,7 @@ const Dashboard = () => {
           console.log('🔍 Profile error (non-critical):', result.error);
         }
       } catch (profileError) {
-        console.warn('⚠️ Profile fetch failed, using defaults:', profileError);
+        console.warn('��️ Profile fetch failed, using defaults:', profileError);
       }
 
       // Set user type based on profile
@@ -943,7 +943,7 @@ const Dashboard = () => {
       try {
         const { data: campaignsData } = await Promise.race([
           supabase.from('campaigns').select('id').eq('user_id', currentUser.id).limit(1),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Quick campaign check timeout')), 1000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Quick campaign check timeout')), 100))
         ]) as any;
 
         setIsFirstTimeUser(!campaignsData || campaignsData.length === 0);
