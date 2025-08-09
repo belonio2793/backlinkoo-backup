@@ -828,6 +828,16 @@ export default function BacklinkAutomation() {
     setCampaignToDelete(null);
   };
 
+  const handleUpgradeClick = () => {
+    // Redirect to payment/upgrade page
+    window.open('/upgrade-premium', '_blank');
+    setPremiumUpgradeModal(false);
+  };
+
+  const handleUpgradeModalClose = () => {
+    setPremiumUpgradeModal(false);
+  };
+
   const getStatusIcon = (status: Campaign['status']) => {
     switch (status) {
       case 'active':
