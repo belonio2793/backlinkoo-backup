@@ -2453,6 +2453,114 @@ export default function BacklinkAutomation() {
 
                         {/* Reporting Tab - All Published Links */}
                         <TabsContent value="reporting" className="space-y-4">
+                          {/* Campaign Blog Posts - Featured at Top */}
+                          {((user && campaigns.some(c => c.blogPostUrl)) ||
+                            (!user && guestCampaignResults.some((result: any) => result.blogPostUrl))) && (
+                            <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg p-4 text-white shadow-lg">
+                              <div className="flex items-center gap-3 mb-3">
+                                <div className="bg-white/20 rounded-full p-2">
+                                  <FileText className="h-5 w-5" />
+                                </div>
+                                <div>
+                                  <h3 className="font-bold text-lg">✨ Featured Campaign Blog Posts</h3>
+                                  <p className="text-white/90 text-sm">Automatically generated and published to showcase your campaign power</p>
+                                </div>
+                              </div>
+                              <div className="space-y-3">
+                                {user && campaigns.filter(c => c.blogPostUrl).map((campaign) => (
+                                  <div key={campaign.id} className="bg-white/10 rounded-lg p-3 border border-white/20">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex-1">
+                                        <h4 className="font-medium text-white mb-1">{campaign.blogPostTitle || `${campaign.keywords[0]} Guide`}</h4>
+                                        <p className="text-white/80 text-sm mb-2">Campaign: {campaign.name}</p>
+                                        <div className="flex items-center gap-2">
+                                          <Badge variant="outline" className="bg-white/20 text-white border-white/30 text-xs">
+                                            <Globe className="h-3 w-3 mr-1" />
+                                            Live on backlinkoo.com
+                                          </Badge>
+                                          <Badge variant="outline" className="bg-green-500/20 text-green-100 border-green-400/30 text-xs">
+                                            <TrendingUp className="h-3 w-3 mr-1" />
+                                            Active Campaign
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-2 ml-4">
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                                          onClick={() => {
+                                            copyToClipboard(campaign.blogPostUrl!);
+                                            toast({
+                                              title: "✅ Blog URL Copied!",
+                                              description: "Share this link to showcase your campaign's reach and authority.",
+                                            });
+                                          }}
+                                        >
+                                          <LinkIcon className="h-3 w-3 mr-1" />
+                                          Copy URL
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          className="bg-white text-blue-600 hover:bg-white/90"
+                                          onClick={() => window.open(campaign.blogPostUrl, '_blank')}
+                                        >
+                                          <ExternalLink className="h-3 w-3 mr-1" />
+                                          View Post
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                                {!user && guestCampaignResults.filter((result: any) => result.blogPostUrl).map((result: any) => (
+                                  <div key={result.id} className="bg-white/10 rounded-lg p-3 border border-white/20">
+                                    <div className="flex items-center justify-between">
+                                      <div className="flex-1">
+                                        <h4 className="font-medium text-white mb-1">{result.blogPostTitle || `${result.keywords[0]} Guide`}</h4>
+                                        <p className="text-white/80 text-sm mb-2">Campaign: {result.name}</p>
+                                        <div className="flex items-center gap-2">
+                                          <Badge variant="outline" className="bg-white/20 text-white border-white/30 text-xs">
+                                            <Globe className="h-3 w-3 mr-1" />
+                                            Live on backlinkoo.com
+                                          </Badge>
+                                          <Badge variant="outline" className="bg-green-500/20 text-green-100 border-green-400/30 text-xs">
+                                            <Sparkles className="h-3 w-3 mr-1" />
+                                            Trial Post
+                                          </Badge>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-2 ml-4">
+                                        <Button
+                                          size="sm"
+                                          variant="outline"
+                                          className="bg-white/10 border-white/30 text-white hover:bg-white/20"
+                                          onClick={() => {
+                                            copyToClipboard(result.blogPostUrl);
+                                            toast({
+                                              title: "✅ Blog URL Copied!",
+                                              description: "Share this link to showcase your campaign's reach and authority.",
+                                            });
+                                          }}
+                                        >
+                                          <LinkIcon className="h-3 w-3 mr-1" />
+                                          Copy URL
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          className="bg-white text-blue-600 hover:bg-white/90"
+                                          onClick={() => window.open(result.blogPostUrl, '_blank')}
+                                        >
+                                          <ExternalLink className="h-3 w-3 mr-1" />
+                                          View Post
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
                           <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
                             <div className="bg-gradient-to-r from-purple-50 to-blue-50 px-4 py-3 border-b">
                               <div className="flex items-center justify-between">
