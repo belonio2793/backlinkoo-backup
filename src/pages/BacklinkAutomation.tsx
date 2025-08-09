@@ -355,13 +355,12 @@ export default function BacklinkAutomation() {
       await startLinkDiscovery(newCampaign);
 
       // Reset form
-      setCampaignForm(prev => ({
-        ...prev,
+      setCampaignForm({
         name: '',
         targetUrl: '',
         keywords: '',
         anchorTexts: ''
-      }));
+      });
 
       toast({
         title: "Campaign Created Successfully",
