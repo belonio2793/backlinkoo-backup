@@ -1235,7 +1235,7 @@ export default function BacklinkAutomation() {
 
         const updatedLinksGenerated = campaign.linksGenerated + newLinks.length;
         const liveLinks = newLinks.filter(link => link.status === 'live').length;
-        const updatedProgress = campaign.status === 'completed' ? 100 : Math.min(100, (updatedLinksGenerated / (isPremium ? 200 : 20)) * 100);
+        const updatedProgress = Math.min(100, (updatedLinksGenerated / (isPremium ? 200 : 20)) * 100);
 
         // Update campaign metrics
         setCampaignMetrics(prev => {
