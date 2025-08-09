@@ -675,7 +675,6 @@ const Dashboard = () => {
   const [premiumCheckComplete, setPremiumCheckComplete] = useState(false);
   const [userProgress, setUserProgress] = useState<{ [key: string]: boolean }>({});
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
-  const { toast } = useToast();
   const navigate = useNavigate();
 
   // Handle hash-based navigation
