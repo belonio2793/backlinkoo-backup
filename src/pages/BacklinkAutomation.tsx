@@ -2612,7 +2612,7 @@ export default function BacklinkAutomation() {
                                             </div>
                                             <div className="flex items-center gap-2">
                                               <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
-                                                �� {campaign.status}
+                                                ✓ {campaign.status}
                                               </Badge>
                                               <Button
                                                 variant="ghost"
@@ -3387,19 +3387,23 @@ export default function BacklinkAutomation() {
                                 <Button
                                   size="sm"
                                   onClick={() => {
-                                    // Check link limits before resuming
-                                    if (campaign.linksGenerated >= 20) {
+                                    // Use tracking service to check reactivation eligibility
+                                    const updateResult = guestTrackingService.updateCampaignStatus(campaign.id, 'active');
+
+                                    if (!updateResult.success) {
+                                      // Campaign cannot be reactivated - show premium modal
                                       setPremiumUpsellTrigger('link_limit');
                                       setShowGuestPremiumModal(true);
                                       toast({
                                         title: "🚀 Premium Required",
-                                        description: "This campaign reached the 20-link limit. Upgrade to continue building links!",
-                                        variant: "default"
+                                        description: updateResult.warning?.message || "This campaign reached the 20-link limit. Upgrade to continue building links!",
+                                        variant: "default",
+                                        duration: 5000
                                       });
                                       return;
                                     }
 
-                                    guestTrackingService.updateCampaignStatus(campaign.id, 'active');
+                                    // Successfully reactivated
                                     setGuestCampaignResults(prev =>
                                       prev.map(c => c.id === campaign.id ? { ...c, status: 'active' } : c)
                                     );
