@@ -16,6 +16,16 @@ const LazyBlog = lazy(() => import("./pages/Blog"));
 const LazyDashboard = lazy(() => import("./pages/Dashboard"));
 const LazyLogin = lazy(() => import("./pages/Login"));
 const LazyBeautifulBlogPost = lazy(() => import("./components/BeautifulBlogPost").then(module => ({ default: module.BeautifulBlogPost })));
+const LazyAuthCallback = lazy(() => import("./pages/AuthCallback"));
+const LazyEmailConfirmation = lazy(() => import("./pages/EmailConfirmation"));
+const LazyPasswordReset = lazy(() => import("./pages/PasswordReset"));
+const LazyPaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+const LazyPaymentCancelled = lazy(() => import("./pages/PaymentCancelled"));
+const LazySubscriptionSuccess = lazy(() => import("./pages/SubscriptionSuccess"));
+const LazySubscriptionCancelled = lazy(() => import("./pages/SubscriptionCancelled"));
+const LazyTermsOfService = lazy(() => import("./pages/TermsOfService"));
+const LazyPrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const LazyNotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
