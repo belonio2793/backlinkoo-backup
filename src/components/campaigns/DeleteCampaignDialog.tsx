@@ -71,7 +71,7 @@ export default function DeleteCampaignDialog({
   const handleClose = () => {
     // Reset all state when closing
     setConfirmationText('');
-    onClose();
+    onOpenChange(false);
   };
 
   const handleConfirm = async () => {
@@ -82,7 +82,7 @@ export default function DeleteCampaignDialog({
     };
 
     try {
-      await onConfirm(campaign.id, options);
+      await onDelete(campaign.id, options);
       handleClose();
     } catch (error) {
       console.error('Delete confirmation failed:', error);
