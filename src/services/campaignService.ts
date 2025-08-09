@@ -109,9 +109,27 @@ class CampaignService {
 
     let data;
     try {
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        // If not JSON, get the text for debugging
+        const responseText = await response.text();
+        console.log('Non-JSON response received:', {
+          status: response.status,
+          contentType,
+          responseText: responseText.substring(0, 200) // First 200 chars for debugging
+        });
+        throw new Error('Server returned non-JSON response. Backend service may not be properly configured.');
+      }
+
       data = await response.json();
     } catch (parseError) {
-      throw new Error('Invalid response from server. Please try again.');
+      if (parseError.message.includes('Server returned non-JSON response')) {
+        throw parseError; // Re-throw our custom error
+      }
+      // If it's a JSON parsing error but content-type was JSON
+      console.error('JSON parsing error:', parseError);
+      throw new Error('Invalid JSON response from server. Please try again.');
     }
 
     if (!response.ok) {
