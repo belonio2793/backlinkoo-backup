@@ -63,6 +63,21 @@ class CampaignService {
   }
 
   /**
+   * Check if backend services are available
+   */
+  public async isBackendAvailable(): Promise<boolean> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api-status`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      return response.ok;
+    } catch (error) {
+      return false;
+    }
+  }
+
+  /**
    * Make authenticated API request
    */
   private async makeRequest<T>(
