@@ -1215,7 +1215,7 @@ export class AssetGenerator {
     // Bullet points
     const bulletPoints = [
       'Partner Revenue: +180%',
-      'Active Affiliates: 10,000+',
+      'Active Users: 10,000+',
       'Avg Commission: 20-35%'
     ];
 
