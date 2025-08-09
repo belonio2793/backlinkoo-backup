@@ -3365,9 +3365,23 @@ export default function BacklinkAutomation() {
                                 <Button
                                   size="sm"
                                   onClick={() => {
+                                    // Check link limits before resuming
+                                    if (campaign.linksGenerated >= 20) {
+                                      setPremiumUpsellTrigger('link_limit');
+                                      setShowGuestPremiumModal(true);
+                                      toast({
+                                        title: "🚀 Premium Required",
+                                        description: "This campaign reached the 20-link limit. Upgrade to continue building links!",
+                                        variant: "default"
+                                      });
+                                      return;
+                                    }
+
+                                    guestTrackingService.updateCampaignStatus(campaign.id, 'active');
                                     setGuestCampaignResults(prev =>
                                       prev.map(c => c.id === campaign.id ? { ...c, status: 'active' } : c)
                                     );
+                                    updateGuestRestrictions();
                                     toast({
                                       title: "▶️ Trial Campaign Resumed",
                                       description: "Link building activity has resumed.",
