@@ -23,7 +23,7 @@ import {
   Activity, Users, Database, Server, Brain, Eye,
   CheckCircle, XCircle, Clock3, Loader2, ArrowUp, ArrowDown, Trash2,
   Link, Sparkles, Network, Rocket, Crown, Heart, Flag, RefreshCw,
-  ThumbsUp, ThumbsDown, Plus, Filter, ChevronRight, Zap as Lightning
+  ThumbsUp, ThumbsDown, Plus, Filter, ChevronRight, Zap as Lightning, User
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -958,7 +958,7 @@ export default function BacklinkAutomation() {
                 <strong>Database Setup in Progress:</strong> Our automated link building system is initializing.
                 Please wait a moment while we prepare your workspace.
                 <div className="mt-2 text-sm text-red-700">
-                  💡 <strong>Quick Fix:</strong> If this persists, please contact support. We'll have you up and running within minutes!
+                  ��� <strong>Quick Fix:</strong> If this persists, please contact support. We'll have you up and running within minutes!
                 </div>
               </AlertDescription>
             </Alert>
