@@ -95,7 +95,7 @@ export class UserManagementService {
 
       // Apply filters
       if (search) {
-        query = query.or(`email.ilike.%${search}%,auth.users.email.ilike.%${search}%`);
+        query = query.ilike('email', `%${search}%`);
       }
 
       if (role !== 'all') {
