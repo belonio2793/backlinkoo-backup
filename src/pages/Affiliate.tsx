@@ -111,13 +111,13 @@ const Affiliate: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Total Referrals</p>
-                    <p className="text-3xl font-bold text-blue-600">{affiliateStats.totalReferrals}</p>
+                    <p className="text-3xl font-bold text-blue-600">{stats.totalReferrals}</p>
                   </div>
                   <Users className="h-8 w-8 text-blue-600" />
                 </div>
                 <div className="mt-2 flex items-center gap-1">
                   <TrendingUp className="h-3 w-3 text-green-600" />
-                  <span className="text-xs text-green-600">+{affiliateStats.thisMonthReferrals} this month</span>
+                  <span className="text-xs text-green-600">+{stats.thisMonthReferrals} this month</span>
                 </div>
               </CardContent>
             </Card>
