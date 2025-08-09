@@ -801,7 +801,7 @@ export default function BacklinkAutomation() {
         if (guestLinksGenerated === 0) {
           // First campaign - surprise reveal
           toast({
-            title: "🎉 Surprise! Your Backlinks Are Ready!",
+            title: "�� Surprise! Your Backlinks Are Ready!",
             description: `We've generated ${linksToGenerate} premium backlinks for you instantly! View them in the live monitor above!`,
             duration: 5000,
           });
@@ -3104,6 +3104,229 @@ export default function BacklinkAutomation() {
         }}
         isDeleting={isDeleting}
       />
+
+      {/* Detailed Campaign Monitor Modal */}
+      <Dialog open={showCampaignModal} onOpenChange={setShowCampaignModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Monitor className="h-5 w-5 text-blue-600" />
+              Campaign Analytics Dashboard
+              {selectedCampaignDetails && (
+                <Badge variant="outline" className={`ml-2 ${
+                  selectedCampaignDetails.status === 'active' ? 'bg-green-100 text-green-700' :
+                  selectedCampaignDetails.status === 'completed' ? 'bg-blue-100 text-blue-700' :
+                  'bg-gray-100 text-gray-700'
+                }`}>
+                  {selectedCampaignDetails.status}
+                </Badge>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedCampaignDetails && (
+            <div className="space-y-6">
+              {/* Campaign Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Campaign Details</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <Label className="text-sm font-medium">Campaign Name</Label>
+                      <p className="text-sm text-gray-700">{selectedCampaignDetails.name}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Target URL</Label>
+                      <p className="text-sm text-blue-600 break-all">{selectedCampaignDetails.targetUrl}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Keywords</Label>
+                      <p className="text-sm text-gray-700">{selectedCampaignDetails.keywords?.join(', ')}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Created</Label>
+                      <p className="text-sm text-gray-700">{new Date(selectedCampaignDetails.createdAt).toLocaleString()}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Performance Metrics</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">{selectedCampaignDetails.linksGenerated || 0}</div>
+                        <div className="text-sm text-gray-600">Links Generated</div>
+                      </div>
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">{selectedCampaignDetails.domains?.length || 0}</div>
+                        <div className="text-sm text-gray-600">Domains</div>
+                      </div>
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">94%</div>
+                        <div className="text-sm text-gray-600">Success Rate</div>
+                      </div>
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {Math.round((Date.now() - new Date(selectedCampaignDetails.createdAt).getTime()) / (1000 * 60))}m
+                        </div>
+                        <div className="text-sm text-gray-600">Runtime</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Real-time Activity Stream */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-green-600" />
+                    Real-Time Activity Stream
+                    <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse ml-2"></div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 max-h-60 overflow-y-auto">
+                    {generateRealTimeActivity(selectedCampaignDetails).map((activity, idx) => (
+                      <div key={idx} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div className={`mt-1 h-3 w-3 rounded-full flex-shrink-0 ${
+                          activity.status === 'completed' ? 'bg-green-500' :
+                          activity.status === 'active' ? 'bg-orange-500 animate-pulse' :
+                          'bg-gray-400'
+                        }`}></div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            {activity.type === 'discovery' && <Search className="h-4 w-4 text-blue-600" />}
+                            {activity.type === 'content' && <FileText className="h-4 w-4 text-purple-600" />}
+                            {activity.type === 'posting' && <Send className="h-4 w-4 text-green-600" />}
+                            {activity.type === 'verification' && <CheckCircle className="h-4 w-4 text-orange-600" />}
+                            {activity.type === 'analysis' && <Brain className="h-4 w-4 text-indigo-600" />}
+                            <span className="font-medium text-sm text-gray-800">{activity.message}</span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Clock4 className="h-3 w-3 text-gray-400" />
+                            <span className="text-xs text-gray-500">{activity.timestamp.toLocaleString()}</span>
+                            <Badge variant="outline" className={`text-xs ${
+                              activity.status === 'completed' ? 'bg-green-100 text-green-700' :
+                              activity.status === 'active' ? 'bg-orange-100 text-orange-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {activity.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Published Links Details */}
+              {selectedCampaignDetails.publishedUrls && selectedCampaignDetails.publishedUrls.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <LinkIcon className="h-5 w-5 text-blue-600" />
+                      Published Links ({selectedCampaignDetails.publishedUrls.length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                      {selectedCampaignDetails.publishedUrls.map((urlData, idx) => (
+                        <div key={idx} className="border rounded-lg p-3 bg-gray-50">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className={`h-2 w-2 rounded-full ${urlData.verified ? 'bg-green-500' : 'bg-orange-500'}`}></div>
+                              <span className="font-medium text-sm text-gray-800">{urlData.domain}</span>
+                              <Badge variant="outline" className={`text-xs ${urlData.verified ? 'bg-green-50 text-green-700' : 'bg-orange-50 text-orange-700'}`}>
+                                {urlData.verified ? 'Verified' : 'Pending'}
+                              </Badge>
+                            </div>
+                            <span className="text-xs text-gray-500">{urlData.type}</span>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-gray-600">URL:</span>
+                              <a
+                                href={urlData.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline truncate flex-1"
+                              >
+                                {urlData.url}
+                              </a>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 w-6 p-0"
+                                onClick={() => window.open(urlData.url, '_blank')}
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-gray-600">Anchor:</span>
+                              <span className="font-medium text-blue-700">"{urlData.anchorText}"</span>
+                              <span className="text-gray-600">→</span>
+                              <span className="text-green-600 truncate">{urlData.destinationUrl}</span>
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              Published: {new Date(urlData.publishedAt).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Throttling Status */}
+              {selectedCampaignDetails.status === 'active' && isThrottling && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-orange-600" />
+                      Publishing Queue Status
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="p-3 bg-orange-50 rounded-lg">
+                        <div className="text-xl font-bold text-orange-600">{pendingLinksToPublish.length}</div>
+                        <div className="text-sm text-gray-600">Links Queued</div>
+                      </div>
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <div className="text-xl font-bold text-blue-600">{Math.round(currentThrottleDelay/1000)}s</div>
+                        <div className="text-sm text-gray-600">Next Publish</div>
+                      </div>
+                      <div className="p-3 bg-purple-50 rounded-lg">
+                        <div className="text-xl font-bold text-purple-600">30/60s</div>
+                        <div className="text-sm text-gray-600">Intervals</div>
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between text-sm mb-2">
+                        <span>Publishing Progress</span>
+                        <span>{selectedCampaignDetails.totalLinksToGenerate ? Math.round(((selectedCampaignDetails.totalLinksToGenerate - pendingLinksToPublish.length) / selectedCampaignDetails.totalLinksToGenerate) * 100) : 0}%</span>
+                      </div>
+                      <Progress
+                        value={selectedCampaignDetails.totalLinksToGenerate ? ((selectedCampaignDetails.totalLinksToGenerate - pendingLinksToPublish.length) / selectedCampaignDetails.totalLinksToGenerate) * 100 : 0}
+                        className="h-2"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
