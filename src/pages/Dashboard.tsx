@@ -373,7 +373,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
     if (!user) return;
 
     try {
-      setLoadingSavedPosts(true);
+      // setLoadingSavedPosts(true);
       const { SimplifiedClaimService } = await import('@/services/simplifiedClaimService');
       const savedPosts = await SimplifiedClaimService.getUserSavedPosts(user.id);
       setUserSavedPosts(savedPosts);
