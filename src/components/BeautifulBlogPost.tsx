@@ -309,8 +309,12 @@ export function BeautifulBlogPost() {
           if (profile?.email) {
             setAuthorEmail(profile.email);
           }
-        } catch (emailError) {
-          console.log('Could not fetch author email:', emailError);
+        } catch (emailError: any) {
+          const errorMessage = emailError.message || emailError;
+          // Only log unexpected errors, not permission issues
+          if (!errorMessage.includes('permission denied') && !errorMessage.includes('relation')) {
+            console.log('Could not fetch author email:', emailError);
+          }
           // Don't show error to user, just don't display email
         }
       } else {
