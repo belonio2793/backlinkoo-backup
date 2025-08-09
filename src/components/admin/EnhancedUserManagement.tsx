@@ -99,10 +99,12 @@ export default function EnhancedUserManagement() {
     refresh
   } = useUserManagement();
 
-  useEffect(() => {
-    loadUsers();
-    loadUserStats();
-  }, [currentPage, filters]);
+  // Update filters and reload when they change
+  const handleFiltersChange = (newFilters: Partial<UserFilters>) => {
+    const updatedFilters = { ...filters, ...newFilters };
+    setFilters(updatedFilters);
+    loadUsers(updatedFilters);
+  };
 
   const loadUsers = async () => {
     setLoading(true);
