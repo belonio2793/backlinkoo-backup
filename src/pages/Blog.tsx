@@ -856,3 +856,5 @@ function BlogPostListItem({ post, navigate, formatDate }: any) {
     </Card>
   );
 }
+-e 
+export default Blog;
