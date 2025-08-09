@@ -1027,7 +1027,7 @@ export default function BacklinkAutomation() {
   const showPremiumUpgrade = (campaignId: string) => {
     setShowTrialExhaustedModal(true);
     toast({
-      title: "🚀 20 Link Limit Reached!",
+      title: "���� 20 Link Limit Reached!",
       description: "Upgrade to Premium for unlimited link building and advanced features!",
       action: (
         <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
@@ -4258,7 +4258,7 @@ export default function BacklinkAutomation() {
                         <div className="text-sm text-gray-600">Next Publish</div>
                       </div>
                       <div className="p-3 bg-purple-50 rounded-lg">
-                        <div className="text-xl font-bold text-purple-600">30/60s</div>
+                        <div className="text-xl font-bold text-purple-600">1-2s</div>
                         <div className="text-sm text-gray-600">Intervals</div>
                       </div>
                     </div>
