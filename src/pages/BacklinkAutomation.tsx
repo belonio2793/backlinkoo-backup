@@ -1182,9 +1182,23 @@ export default function BacklinkAutomation() {
 
         // Check premium limits for free users
         if (!isPremium && campaign.linksGenerated >= 20) {
-          pauseCampaign(campaignId);
+          // Mark campaign as completed instead of paused
+          setCampaigns(prev => prev.map(c =>
+            c.id === campaignId ? { ...c, status: 'completed' } : c
+          ));
+
+          // Update in database if user is logged in
+          if (user) {
+            try {
+              await campaignService.updateCampaignStatus(campaignId, 'completed');
+              console.log(`✅ Campaign ${campaignId} marked as completed in database`);
+            } catch (error) {
+              console.error('Failed to update campaign status to completed:', error);
+            }
+          }
+
           showPremiumUpgrade(campaignId);
-          return { ...campaign, status: 'paused' };
+          return { ...campaign, status: 'completed' };
         }
 
         // Generate multiple links per cycle for more activity
@@ -4245,7 +4259,7 @@ export default function BacklinkAutomation() {
                           { name: 'Real Estate', count: 27450, icon: '🏠' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
-                          { name: 'Home & Garden', count: 21890, icon: '🏡' },
+                          { name: 'Home & Garden', count: 21890, icon: '��' },
                           { name: 'Legal Services', count: 19650, icon: '⚖️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
