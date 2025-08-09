@@ -4803,17 +4803,8 @@ export default function BacklinkAutomation() {
         isLoggedIn={!!user}
         userName={user?.user_metadata?.full_name || user?.email}
         onUpgrade={() => {
-          // This could trigger a payment flow modal or redirect
+          // The TrialExhaustedModal now handles its own checkout integration
           console.log('User upgrading to premium from trial exhausted modal');
-          // For now, we can show an alert or open another modal
-          toast({
-            title: "🚀 Upgrading to Premium!",
-            description: "Redirecting to secure checkout...",
-          });
-          // You could also open a payment modal here instead
-          setTimeout(() => {
-            window.location.href = '/subscription-success';
-          }, 1000);
         }}
       />
 
