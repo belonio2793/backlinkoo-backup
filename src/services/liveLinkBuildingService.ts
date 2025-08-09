@@ -262,14 +262,9 @@ class LiveLinkBuildingService {
           id: publishedLink.id,
           campaign_id: config.campaignId,
           posted_url: publishedLink.sourceUrl,
-          target_url: publishedLink.targetUrl,
+          link_url: publishedLink.targetUrl,
           anchor_text: publishedLink.anchorText,
-          platform: publishedLink.platform,
-          domain_authority: publishedLink.domainAuthority,
-          status: publishedLink.status,
-          clicks: publishedLink.clicks,
-          response_time: publishedLink.responseTime,
-          http_status: publishedLink.httpStatus
+          status: publishedLink.status
         });
 
       if (error) {
