@@ -260,10 +260,7 @@ class AffiliateService {
     try {
       const { data, error } = await supabase
         .from('user_referrals')
-        .select(`
-          *,
-          referred_user:users(email)
-        `)
+        .select('*')
         .eq('referrer_id', userId)
         .order('created_at', { ascending: false });
 
