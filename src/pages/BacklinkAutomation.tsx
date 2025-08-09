@@ -163,7 +163,7 @@ export default function BacklinkAutomation() {
     const systemInterval = setInterval(loadSystemMetrics, 30000); // Every 30 seconds for system health
     
     return () => {
-      clearInterval(metricsInterval);
+      clearInterval(fastMetricsInterval);
       clearInterval(systemInterval);
     };
   }, []);
