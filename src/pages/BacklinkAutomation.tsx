@@ -910,20 +910,22 @@ export default function BacklinkAutomation() {
                     )}
                   </div>
 
-                  <Button
-                    onClick={createCampaign}
-                    className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                    disabled={isLoading || !user || (!isPremium && usageStats.isLimitReached)}
-                  >
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Rocket className="h-4 w-4 mr-2" />
-                    )}
-                    {!user ? "Login Required" : 
-                     (!isPremium && usageStats.isLimitReached) ? "Upgrade to Premium" : 
-                     "Deploy Campaign"}
-                  </Button>
+                  <div className="max-w-2xl mx-auto">
+                    <Button
+                      onClick={createCampaign}
+                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                      disabled={isLoading || !user || (!isPremium && usageStats.isLimitReached)}
+                    >
+                      {isLoading ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Rocket className="h-4 w-4 mr-2" />
+                      )}
+                      {!user ? "Login Required" :
+                       (!isPremium && usageStats.isLimitReached) ? "Upgrade to Premium" :
+                       "Deploy Campaign"}
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
 
