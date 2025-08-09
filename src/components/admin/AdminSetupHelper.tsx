@@ -124,10 +124,11 @@ export default function AdminSetupHelper() {
           });
         }
       } catch (error: any) {
+        const errorMsg = error?.message || error?.toString() || 'Unknown error';
         results.push({
           check: 'Profiles Table Access',
           status: 'fail',
-          message: `Table access error: ${error.message}`,
+          message: `Table access error: ${errorMsg}`,
           solution: 'Ensure profiles table exists and has proper RLS policies'
         });
       }
