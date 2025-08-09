@@ -385,8 +385,8 @@ function Blog() {
 
       {/* Search and Filter Bar */}
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
             {/* Search */}
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -402,12 +402,12 @@ function Blog() {
                     e.currentTarget.blur();
                   }
                 }}
-                className="pl-10 h-12 text-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                className="pl-10 h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
 
             {/* Filters */}
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               {/* Category Filter */}
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4 text-gray-500" />
