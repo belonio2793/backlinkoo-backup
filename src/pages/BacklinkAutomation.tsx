@@ -1447,24 +1447,22 @@ export default function BacklinkAutomation() {
         );
       }
 
-      // Ensure all links are preserved in permanent storage when paused
-      if (!user) {
-        guestCampaignResults.forEach(camp => {
-          if (camp.id === campaignId) {
-            saveCampaignPermanently({
-              ...camp,
-              status: 'paused',
-              pausedAt: new Date().toISOString(),
-              linksPreserved: camp.linksGenerated || 0,
-              preservationNote: 'All links and metrics saved permanently upon pause'
-            });
-          }
+      // Force save to permanent storage to prevent any data loss
+      const currentCampaign = (user ? campaigns : guestCampaignResults).find(c => c.id === campaignId);
+      if (currentCampaign) {
+        await saveCampaignPermanently({
+          ...currentCampaign,
+          status: 'paused',
+          pausedAt: new Date().toISOString(),
+          linksPreserved: currentCampaign.linksGenerated || 0,
+          preservationNote: 'All links and metrics saved permanently upon pause - will never reset'
         });
       }
 
+      const linksCount = (user ? campaigns : guestCampaignResults).find(c => c.id === campaignId)?.linksGenerated || 0;
       toast({
         title: "⏸️ Campaign Paused Successfully",
-        description: `All ${campaigns.find(c => c.id === campaignId)?.linksGenerated || 0} links and metrics permanently saved. Resume anytime to continue.`,
+        description: `All ${linksCount} links and metrics permanently saved to your account. Will never reset when resuming or refreshing page.`,
       });
     } catch (error) {
       toast({
