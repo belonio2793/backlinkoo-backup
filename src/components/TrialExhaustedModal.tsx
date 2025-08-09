@@ -7,10 +7,12 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-  Crown, CheckCircle, TrendingUp, Target, Zap, 
-  UserPlus, BarChart3, Globe, Link, Sparkles, ArrowRight 
+import {
+  Crown, CheckCircle, TrendingUp, Target, Zap,
+  UserPlus, BarChart3, Globe, Link, Sparkles, ArrowRight
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { paymentIntegrationService } from '@/services/paymentIntegrationService';
 
 interface TrialExhaustedModalProps {
   open: boolean;
