@@ -997,6 +997,17 @@ export default function BacklinkAutomation() {
           </TabsList>
 
           <TabsContent value="campaigns" className="space-y-6">
+            {/* Authentication Check */}
+            {!user && (
+              <Alert className="border-blue-200 bg-blue-50">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Authentication Required:</strong> Please log in to create and manage campaigns.
+                  Your campaigns are saved to your account and linked to your user profile.
+                </AlertDescription>
+              </Alert>
+            )}
+
             {/* Campaign Creation */}
             <Card>
               <CardHeader className="text-center">
