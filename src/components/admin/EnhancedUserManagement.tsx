@@ -344,7 +344,7 @@ export default function EnhancedUserManagement() {
                     <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
                       Cancel
                     </Button>
-                    <Button onClick={createUser} disabled={!newUser.email || !newUser.password}>
+                    <Button onClick={handleCreateUser} disabled={!newUser.email || !newUser.password}>
                       Create User
                     </Button>
                   </DialogFooter>
