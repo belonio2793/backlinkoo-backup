@@ -149,6 +149,19 @@ function Blog() {
     loadBlogPosts();
   }, [sortBy]);
 
+  // Add keyboard shortcut for search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const sortPosts = (posts: BlogPost[], criteria: string) => {
     switch (criteria) {
       case 'popular':
