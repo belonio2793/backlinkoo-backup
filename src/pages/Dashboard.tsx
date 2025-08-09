@@ -7,6 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import { PremiumPlanTab } from "@/components/PremiumPlanTab";
 import { SEOAcademyTab } from "@/components/SEOAcademyTab";
 import { StreamlinedPremiumProvider } from "@/components/StreamlinedPremiumProvider";
+import { PremiumPopupProvider } from "@/components/PremiumPopupProvider";
 import { Footer } from "@/components/Footer";
 
 import { PremiumService } from "@/services/premiumService";
