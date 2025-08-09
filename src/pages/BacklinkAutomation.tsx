@@ -448,9 +448,18 @@ export default function BacklinkAutomation() {
     // Add to recently published
     setRecentlyPublishedLinks(prev => [linkToPublish, ...prev.slice(0, 9)]); // Keep last 10
 
-    // Update guest link count
+    // Update guest link count and track limits
     const newCount = guestLinksGenerated + 1;
     updateGuestLinkCount(newCount);
+
+    // Track link generation for guest users
+    if (!user) {
+      const trackingResult = guestTrackingService.trackLinkGeneration('current_campaign', 1);
+      if (trackingResult.shouldShowPremiumModal) {
+        setPremiumUpsellTrigger('link_limit');
+        setShowGuestPremiumModal(true);
+      }
+    }
 
     // Update campaign results
     setGuestCampaignResults(prev =>
