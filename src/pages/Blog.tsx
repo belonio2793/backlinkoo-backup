@@ -243,28 +243,39 @@ function Blog() {
   const cleanDescription = (description: string): string => {
     if (!description) return '';
 
-    return description
-      // Remove HTML tags completely
-      .replace(/<[^>]*>/g, '')
-      // Remove common markdown syntax
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
-      .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
-      .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove markdown links, keep text
-      // Remove common HTML entities
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/&rsquo;/g, "'")
-      .replace(/&lsquo;/g, "'")
-      .replace(/&rdquo;/g, '"')
-      .replace(/&ldquo;/g, '"')
-      // Clean up extra whitespace and line breaks
-      .replace(/\s+/g, ' ')
-      .replace(/^\W+/, '') // Remove leading non-word characters
-      .trim();
+    let cleaned = description;
+
+    // Apply multiple passes for thorough cleaning
+    for (let i = 0; i < 2; i++) {
+      cleaned = cleaned
+        // Remove HTML tags completely
+        .replace(/<[^>]*>/g, '')
+        // Remove common markdown syntax
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+        .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
+        .replace(/__(.*?)__/g, '$1') // Remove underline markdown
+        .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove markdown links, keep text
+        .replace(/`([^`]*)`/g, '$1') // Remove code markdown
+        // Remove common HTML entities
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&rsquo;/g, "'")
+        .replace(/&lsquo;/g, "'")
+        .replace(/&rdquo;/g, '"')
+        .replace(/&ldquo;/g, '"')
+        .replace(/&hellip;/g, '...')
+        // Clean up extra whitespace and line breaks
+        .replace(/\s+/g, ' ')
+        .replace(/^[\W\s]+/, '') // Remove leading non-word characters and whitespace
+        .replace(/[\s]+$/, '') // Remove trailing whitespace
+        .trim();
+    }
+
+    return cleaned;
   };
 
   const filteredPosts = blogPosts.filter(post => {
