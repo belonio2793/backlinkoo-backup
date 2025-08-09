@@ -937,6 +937,33 @@ export default function BacklinkAutomation() {
                   </div>
                   <div className="text-xs text-gray-500">Quality Score</div>
                 </div>
+
+                {/* User Status & Limits */}
+                <div className="text-center">
+                  <div className="flex items-center justify-center gap-1 mb-1">
+                    {user ? (
+                      isPremium ? (
+                        <>
+                          <Crown className="h-3 w-3 text-purple-600" />
+                          <span className="text-lg font-bold text-purple-600">∞</span>
+                        </>
+                      ) : (
+                        <>
+                          <User className="h-3 w-3 text-blue-600" />
+                          <span className="text-lg font-bold text-blue-600">{usageStats.linksPosted}/20</span>
+                        </>
+                      )
+                    ) : (
+                      <>
+                        <UserPlus className="h-3 w-3 text-gray-600" />
+                        <span className="text-lg font-bold text-gray-600">--</span>
+                      </>
+                    )}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    {user ? (isPremium ? "Unlimited" : "Monthly Links") : "Sign In"}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -958,7 +985,7 @@ export default function BacklinkAutomation() {
                 <strong>Database Setup in Progress:</strong> Our automated link building system is initializing.
                 Please wait a moment while we prepare your workspace.
                 <div className="mt-2 text-sm text-red-700">
-                  ��� <strong>Quick Fix:</strong> If this persists, please contact support. We'll have you up and running within minutes!
+                  �� <strong>Quick Fix:</strong> If this persists, please contact support. We'll have you up and running within minutes!
                 </div>
               </AlertDescription>
             </Alert>
