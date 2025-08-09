@@ -763,6 +763,15 @@ export default function BacklinkAutomation() {
     };
   }, [throttleIntervalId]);
 
+  // Clean up reporting intervals on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(reportingIntervals).forEach(interval => {
+        clearInterval(interval);
+      });
+    };
+  }, [reportingIntervals]);
+
   // Engine Instances
   const queueManager = CampaignQueueManager.getInstance();
   const discoveryEngine = LinkDiscoveryEngine.getInstance();
@@ -5109,7 +5118,7 @@ export default function BacklinkAutomation() {
               {authContext === 'trial_complete' && (
                 <div className="bg-green-50 rounded-lg p-3 mb-4">
                   <div className="text-sm text-green-800">
-                    🎉 <strong>Trial Complete!</strong> Sign in to save your {guestLinksGenerated} generated backlinks and continue building.
+                    �� <strong>Trial Complete!</strong> Sign in to save your {guestLinksGenerated} generated backlinks and continue building.
                   </div>
                 </div>
               )}
