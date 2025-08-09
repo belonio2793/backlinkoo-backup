@@ -1,248 +1,221 @@
+/**
+ * Database Setup and Initialization Utilities
+ * Handles database table creation and initial data seeding
+ */
+
 import { supabase } from '@/integrations/supabase/client';
-import type { Tables } from '@/integrations/supabase/types';
 
-type BlogPost = Tables<'blog_posts'>;
+export interface DatabaseStatus {
+  isConnected: boolean;
+  tablesExist: {
+    backlink_campaigns: boolean;
+    discovered_urls: boolean;
+    link_opportunities: boolean;
+    link_posting_results: boolean;
+  };
+  errors: string[];
+  needsSetup: boolean;
+}
 
-export const DatabaseSetup = {
-  /**
-   * Test if database connection is working
-   */
-  async testConnection(): Promise<boolean> {
-    try {
-      console.log('🔍 Testing Supabase database connection...');
-      
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('count', { count: 'exact' })
-        .limit(1);
-      
-      if (error) {
-        console.error('❌ Database connection failed:', error.message);
-        return false;
-      }
-      
-      console.log('✅ Database connection successful!');
-      return true;
-    } catch (err) {
-      console.error('❌ Database connection error:', err);
-      return false;
-    }
-  },
+/**
+ * Check database connectivity and table existence
+ */
+export async function checkDatabaseStatus(): Promise<DatabaseStatus> {
+  const status: DatabaseStatus = {
+    isConnected: false,
+    tablesExist: {
+      backlink_campaigns: false,
+      discovered_urls: false,
+      link_opportunities: false,
+      link_posting_results: false,
+    },
+    errors: [],
+    needsSetup: false,
+  };
 
-  /**
-   * Get count of existing blog posts
-   */
-  async getPostCount(): Promise<number> {
-    try {
-      const { count, error } = await supabase
-        .from('blog_posts')
-        .select('*', { count: 'exact', head: true });
-      
-      if (error) {
-        console.error('Error getting post count:', error);
-        return 0;
-      }
-      
-      return count || 0;
-    } catch (err) {
-      console.error('Error getting post count:', err);
-      return 0;
-    }
-  },
+  try {
+    // Test basic connectivity
+    const { data: authData } = await supabase.auth.getSession();
+    console.log('🔍 Auth session check:', authData?.session ? 'Active' : 'No session');
 
-  /**
-   * Create sample blog posts if database is empty
-   */
-  async createSamplePosts(): Promise<boolean> {
-    try {
-      const count = await this.getPostCount();
-      
-      if (count > 0) {
-        console.log(`📊 Database already has ${count} posts, skipping sample creation`);
-        return true;
-      }
-      
-      console.log('📝 Creating sample blog posts...');
-      
-      const samplePosts = [
-        {
-          title: 'The Complete Guide to SEO Optimization in 2024',
-          slug: 'complete-seo-optimization-guide-2024',
-          content: `# The Complete Guide to SEO Optimization in 2024
+    // Check if tables exist by attempting simple queries
+    const tableChecks = [
+      { name: 'backlink_campaigns', query: supabase.from('backlink_campaigns').select('id').limit(1) },
+      { name: 'discovered_urls', query: supabase.from('discovered_urls').select('id').limit(1) },
+      { name: 'link_opportunities', query: supabase.from('link_opportunities').select('id').limit(1) },
+      { name: 'link_posting_results', query: supabase.from('link_posting_results').select('id').limit(1) },
+    ];
 
-Search Engine Optimization (SEO) continues to evolve, and staying ahead of the curve is crucial for digital success. In this comprehensive guide, we'll explore the latest SEO strategies that actually work in 2024.
-
-## Key SEO Strategies for 2024
-
-### 1. Content Quality and Relevance
-Creating high-quality, relevant content remains the cornerstone of effective SEO. Search engines prioritize content that provides genuine value to users.
-
-### 2. Technical SEO Excellence
-Technical optimization ensures your website can be properly crawled and indexed by search engines.
-
-### 3. User Experience Optimization
-Page speed, mobile responsiveness, and overall user experience are critical ranking factors.
-
-## Advanced Techniques
-
-- **Semantic SEO**: Understanding search intent and context
-- **Entity-based SEO**: Optimizing for entities rather than just keywords
-- **AI-assisted content creation**: Leveraging AI tools responsibly
-
-## Conclusion
-
-SEO success in 2024 requires a holistic approach combining technical excellence, quality content, and exceptional user experience.`,
-          excerpt: 'Master the latest SEO strategies and techniques that drive real results in 2024.',
-          target_url: 'https://example.com/seo-guide',
-          status: 'published',
-          category: 'SEO',
-          tags: ['seo', 'optimization', 'digital marketing', 'search engines'],
-          meta_description: 'Complete guide to SEO optimization in 2024. Learn proven strategies and techniques that drive real results.',
-          author_name: 'SEO Expert',
-          reading_time: 8,
-          word_count: 1200,
-          seo_score: 95,
-          is_trial_post: false,
-          view_count: 1250
-        },
-        {
-          title: 'Advanced Link Building Strategies That Actually Work',
-          slug: 'advanced-link-building-strategies',
-          content: `# Advanced Link Building Strategies That Actually Work
-
-Link building remains one of the most important ranking factors in SEO. However, the strategies that worked years ago are no longer effective. Here's what works now.
-
-## Modern Link Building Approaches
-
-### 1. Digital PR and HARO
-Help A Reporter Out (HARO) and digital PR campaigns can generate high-quality backlinks from authoritative sources.
-
-### 2. Resource Page Link Building
-Finding resource pages in your niche and getting your content included.
-
-### 3. Broken Link Building
-Identifying broken links on relevant websites and suggesting your content as a replacement.
-
-## Quality Over Quantity
-
-Focus on earning links from:
-- High domain authority sites
-- Relevant industry publications
-- Local business directories
-- Educational institutions
-
-## Tools for Link Building
-
-- Ahrefs for competitor analysis
-- Semrush for link opportunities
-- Moz for domain authority checking
-
-Remember, sustainable link building is about creating genuinely valuable content that people want to link to.`,
-          excerpt: 'Discover advanced link building strategies that generate high-quality backlinks and improve your search rankings.',
-          target_url: 'https://example.com/link-building',
-          status: 'published',
-          category: 'Link Building',
-          tags: ['link building', 'backlinks', 'seo', 'digital marketing'],
-          meta_description: 'Learn advanced link building strategies that actually work. Generate high-quality backlinks and improve rankings.',
-          author_name: 'Link Building Specialist',
-          reading_time: 6,
-          word_count: 800,
-          seo_score: 88,
-          is_trial_post: false,
-          view_count: 890
-        },
-        {
-          title: 'Content Marketing Automation: Tools and Strategies',
-          slug: 'content-marketing-automation-tools',
-          content: `# Content Marketing Automation: Tools and Strategies
-
-Content marketing automation can transform your marketing efforts, saving time while improving results. Here's how to implement it effectively.
-
-## Why Automate Content Marketing?
-
-- **Consistency**: Maintain regular publishing schedules
-- **Efficiency**: Reduce manual work and repetitive tasks
-- **Scalability**: Manage larger content volumes
-- **Analytics**: Better tracking and optimization
-
-## Essential Automation Tools
-
-### 1. Content Creation
-- AI writing assistants
-- Template systems
-- Content calendars
-
-### 2. Distribution
-- Social media schedulers
-- Email marketing platforms
-- RSS feed automation
-
-### 3. Analytics and Optimization
-- Performance tracking
-- A/B testing platforms
-- SEO monitoring tools
-
-## Best Practices
-
-1. Start with clear goals and metrics
-2. Maintain human oversight and creativity
-3. Test and optimize continuously
-4. Don't over-automate - keep the human touch
-
-Automation should enhance your content marketing, not replace the strategic thinking and creativity that makes content truly valuable.`,
-          excerpt: 'Streamline your content marketing with automation tools and strategies that save time while improving results.',
-          target_url: 'https://example.com/content-automation',
-          status: 'published',
-          category: 'Content Marketing',
-          tags: ['content marketing', 'automation', 'productivity', 'tools'],
-          meta_description: 'Discover content marketing automation tools and strategies that streamline your workflow and improve results.',
-          author_name: 'Content Marketing Expert',
-          reading_time: 5,
-          word_count: 650,
-          seo_score: 82,
-          is_trial_post: false,
-          view_count: 567
+    for (const { name, query } of tableChecks) {
+      try {
+        const { error } = await query;
+        if (error) {
+          console.warn(`⚠️ Table ${name} check failed:`, error.message);
+          status.errors.push(`Table ${name}: ${error.message}`);
+          status.tablesExist[name as keyof typeof status.tablesExist] = false;
+        } else {
+          console.log(`✅ Table ${name} exists and accessible`);
+          status.tablesExist[name as keyof typeof status.tablesExist] = true;
         }
-      ];
-
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .insert(samplePosts)
-        .select();
-
-      if (error) {
-        console.error('❌ Failed to create sample posts:', error);
-        return false;
+      } catch (checkError: any) {
+        console.error(`❌ Table ${name} check error:`, checkError);
+        status.errors.push(`Table ${name}: ${checkError.message}`);
+        status.tablesExist[name as keyof typeof status.tablesExist] = false;
       }
-
-      console.log(`✅ Successfully created ${data?.length || 0} sample blog posts`);
-      return true;
-
-    } catch (err) {
-      console.error('❌ Error creating sample posts:', err);
-      return false;
     }
-  },
 
-  /**
-   * Initialize database with sample data if needed
-   */
-  async initializeDatabase(): Promise<boolean> {
-    try {
-      // Test connection first
-      const isConnected = await this.testConnection();
-      if (!isConnected) {
-        console.log('❌ Database connection failed, cannot initialize');
-        return false;
-      }
+    status.isConnected = status.errors.length === 0 || status.errors.some(e => !e.includes('relation') && !e.includes('does not exist'));
+    status.needsSetup = Object.values(status.tablesExist).some(exists => !exists);
 
-      // Create sample posts if database is empty
-      await this.createSamplePosts();
-      
-      return true;
-    } catch (err) {
-      console.error('❌ Database initialization failed:', err);
-      return false;
-    }
+    console.log('📊 Database Status:', {
+      connected: status.isConnected,
+      tablesExisting: Object.values(status.tablesExist).filter(Boolean).length,
+      totalTables: Object.keys(status.tablesExist).length,
+      needsSetup: status.needsSetup,
+      errorCount: status.errors.length
+    });
+
+  } catch (error: any) {
+    console.error('❌ Database status check failed:', error);
+    status.errors.push(`Connection error: ${error.message}`);
+    status.isConnected = false;
+    status.needsSetup = true;
   }
-};
+
+  return status;
+}
+
+/**
+ * Initialize database with required tables and seed data
+ */
+export async function initializeDatabase(): Promise<{ success: boolean; message: string }> {
+  try {
+    console.log('🚀 Starting database initialization...');
+
+    // Check current status first
+    const status = await checkDatabaseStatus();
+    
+    if (!status.needsSetup) {
+      return { success: true, message: 'Database already initialized' };
+    }
+
+    // For now, we'll return a message that manual setup is needed
+    // In a real deployment, this would trigger the migration scripts
+    return {
+      success: false,
+      message: 'Database requires setup. Please run migration scripts or contact support.',
+    };
+
+  } catch (error: any) {
+    console.error('❌ Database initialization failed:', error);
+    return {
+      success: false,
+      message: `Database initialization failed: ${error.message}`,
+    };
+  }
+}
+
+/**
+ * Seed database with initial discovery URLs for testing
+ */
+export async function seedDiscoveryUrls(): Promise<{ success: boolean; count: number }> {
+  try {
+    console.log('🌱 Seeding discovery URLs...');
+
+    const seedUrls = [
+      {
+        url: 'https://techcrunch.com/submit-startup/',
+        domain: 'techcrunch.com',
+        link_type: 'directory_listing',
+        domain_authority: 95,
+        status: 'verified',
+        upvotes: 15,
+        downvotes: 2,
+      },
+      {
+        url: 'https://medium.com',
+        domain: 'medium.com', 
+        link_type: 'web2_platform',
+        domain_authority: 90,
+        status: 'verified',
+        upvotes: 25,
+        downvotes: 1,
+      },
+      {
+        url: 'https://reddit.com/r/startups',
+        domain: 'reddit.com',
+        link_type: 'social_profile',
+        domain_authority: 85,
+        status: 'verified', 
+        upvotes: 20,
+        downvotes: 3,
+      },
+    ];
+
+    const { data, error } = await supabase
+      .from('discovered_urls')
+      .upsert(seedUrls, { onConflict: 'url' })
+      .select('id');
+
+    if (error) {
+      console.error('❌ Failed to seed URLs:', error);
+      return { success: false, count: 0 };
+    }
+
+    console.log(`✅ Seeded ${data?.length || 0} discovery URLs`);
+    return { success: true, count: data?.length || 0 };
+
+  } catch (error: any) {
+    console.error('❌ URL seeding failed:', error);
+    return { success: false, count: 0 };
+  }
+}
+
+/**
+ * Get database statistics for dashboard
+ */
+export async function getDatabaseStats() {
+  try {
+    const stats = {
+      campaigns: 0,
+      discoveredUrls: 0,
+      linkOpportunities: 0,
+      postedLinks: 0,
+    };
+
+    // Get campaign count
+    const { count: campaignCount } = await supabase
+      .from('backlink_campaigns')
+      .select('*', { count: 'exact', head: true });
+    stats.campaigns = campaignCount || 0;
+
+    // Get discovered URLs count  
+    const { count: urlCount } = await supabase
+      .from('discovered_urls')
+      .select('*', { count: 'exact', head: true });
+    stats.discoveredUrls = urlCount || 0;
+
+    // Get opportunities count
+    const { count: opportunityCount } = await supabase
+      .from('link_opportunities')
+      .select('*', { count: 'exact', head: true });
+    stats.linkOpportunities = opportunityCount || 0;
+
+    // Get posted links count
+    const { count: postedCount } = await supabase
+      .from('link_posting_results')
+      .select('*', { count: 'exact', head: true });
+    stats.postedLinks = postedCount || 0;
+
+    return stats;
+
+  } catch (error: any) {
+    console.error('❌ Failed to get database stats:', error);
+    return {
+      campaigns: 0,
+      discoveredUrls: 0, 
+      linkOpportunities: 0,
+      postedLinks: 0,
+    };
+  }
+}
