@@ -560,7 +560,7 @@ export default function BacklinkAutomation() {
 
     // Show toast notification for new link
     toast({
-      title: "�� New Backlink Published!",
+      title: "🔗 New Backlink Published!",
       description: `Link published on ${linkToPublish.domain} • Total: ${newCount} links built`,
       duration: 3000,
     });
