@@ -424,7 +424,7 @@ export default function BacklinkAutomation() {
     // Show toast notification for new link
     toast({
       title: "🔗 New Backlink Published!",
-      description: `Link published on ${linkToPublish.domain} ��� Total: ${newCount} links built`,
+      description: `Link published on ${linkToPublish.domain} • Total: ${newCount} links built`,
       duration: 3000,
     });
 
@@ -503,6 +503,138 @@ export default function BacklinkAutomation() {
 
     return () => clearTimeout(notificationTimer);
   }, [user, selectedLinkType]);
+
+  // Auto-save and page leave protection
+  useEffect(() => {
+    // Track form changes for auto-save
+    const hasChanges = JSON.stringify(campaignForm) !== JSON.stringify(originalCampaignForm);
+    setUnsavedChanges(hasChanges);
+
+    // Auto-save every 30 seconds if there are changes
+    if (hasChanges && (campaignForm.targetUrl || campaignForm.keywords)) {
+      const autoSaveTimer = setTimeout(() => {
+        localStorage.setItem('autosaved_campaign_form', JSON.stringify({
+          ...campaignForm,
+          lastSaved: new Date().toISOString()
+        }));
+
+        toast({
+          title: "✅ Draft Saved",
+          description: "Your campaign draft has been automatically saved.",
+          duration: 2000,
+        });
+      }, 30000); // Auto-save after 30 seconds of inactivity
+
+      return () => clearTimeout(autoSaveTimer);
+    }
+  }, [campaignForm, originalCampaignForm]);
+
+  // Load auto-saved form on mount
+  useEffect(() => {
+    const savedForm = localStorage.getItem('autosaved_campaign_form');
+    if (savedForm) {
+      try {
+        const parsed = JSON.parse(savedForm);
+        if (parsed.lastSaved) {
+          const lastSaved = new Date(parsed.lastSaved);
+          const now = new Date();
+          const hoursSinceLastSave = (now.getTime() - lastSaved.getTime()) / (1000 * 60 * 60);
+
+          // Only restore if saved within last 24 hours
+          if (hoursSinceLastSave < 24) {
+            setCampaignForm({
+              name: parsed.name || '',
+              targetUrl: parsed.targetUrl || '',
+              keywords: parsed.keywords || '',
+              anchorTexts: parsed.anchorTexts || '',
+              dailyLimit: parsed.dailyLimit || 25,
+              linkType: parsed.linkType || 'all'
+            });
+
+            toast({
+              title: "📋 Draft Restored",
+              description: `Auto-saved campaign from ${lastSaved.toLocaleString()} has been restored.`,
+              duration: 4000,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error loading auto-saved form:', error);
+      }
+    }
+  }, []);
+
+  // Page leave protection and campaign pausing
+  useEffect(() => {
+    const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
+      // Pause all active campaigns when user tries to leave
+      const activeCampaigns = campaigns.filter(c => c.status === 'active');
+
+      if (activeCampaigns.length > 0) {
+        // Prevent immediate page leave to show warning
+        e.preventDefault();
+        e.returnValue = 'Leaving this page will automatically pause your active campaigns. Are you sure you want to continue?';
+
+        // Pause campaigns in the background
+        for (const campaign of activeCampaigns) {
+          try {
+            await campaignService.updateCampaignStatus(campaign.id, 'paused');
+          } catch (error) {
+            console.error('Error pausing campaign:', campaign.id, error);
+          }
+        }
+
+        // Update local state
+        setCampaigns(prev => prev.map(c =>
+          activeCampaigns.some(ac => ac.id === c.id)
+            ? { ...c, status: 'paused' as const }
+            : c
+        ));
+
+        // Show final toast (may not be visible due to page unload)
+        toast({
+          title: "⏸️ Campaigns Paused",
+          description: `${activeCampaigns.length} active campaign${activeCampaigns.length > 1 ? 's' : ''} automatically paused.`,
+          duration: 3000,
+        });
+
+        return e.returnValue;
+      }
+
+      // Save any unsaved form data before leaving
+      if (unsavedChanges && (campaignForm.targetUrl || campaignForm.keywords)) {
+        localStorage.setItem('autosaved_campaign_form', JSON.stringify({
+          ...campaignForm,
+          lastSaved: new Date().toISOString()
+        }));
+      }
+    };
+
+    const handlePageHide = async () => {
+      // Similar logic for mobile/page visibility changes
+      const activeCampaigns = campaigns.filter(c => c.status === 'active');
+
+      if (activeCampaigns.length > 0) {
+        for (const campaign of activeCampaigns) {
+          try {
+            await campaignService.updateCampaignStatus(campaign.id, 'paused');
+          } catch (error) {
+            console.error('Error pausing campaign on page hide:', campaign.id, error);
+          }
+        }
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handlePageHide);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handlePageHide);
+    };
+  }, [campaigns, campaignForm, unsavedChanges]);
 
   // Check user's premium status
   const checkUserPremiumStatus = async () => {
