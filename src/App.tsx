@@ -54,6 +54,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/affiliate"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <LazyAffiliateProgram />
+                </Suspense>
+              }
+            />
           </Routes>
         </BrowserRouter>
       </ModalProvider>
