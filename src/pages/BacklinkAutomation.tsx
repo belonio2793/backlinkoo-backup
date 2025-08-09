@@ -1301,11 +1301,11 @@ export default function BacklinkAutomation() {
                     {/* Guest Trial State */}
                     {!user && guestLinksGenerated < 20 && (
                       <div className="space-y-3">
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <div className="max-w-2xl mx-auto">
                           <Button
                             onClick={deployCampaign}
                             className="w-full h-12 px-8 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
-                            disabled={isLoading || !campaignForm.targetUrl || !campaignForm.keywords || (databaseStatus && !databaseStatus.isConnected)}
+                            disabled={isLoading}
                           >
                             {isLoading ? (
                               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -1408,11 +1408,11 @@ export default function BacklinkAutomation() {
                     {/* Logged In and Ready */}
                     {user && databaseStatus && databaseStatus.isConnected && (
                       <div className="space-y-3">
-                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <div className="max-w-2xl mx-auto space-y-3">
                           <Button
                             onClick={deployCampaign}
-                            className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                            disabled={isLoading || !campaignForm.targetUrl || !campaignForm.keywords}
+                            className="w-full h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                            disabled={isLoading}
                           >
                             {isLoading ? (
                               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
