@@ -1043,21 +1043,168 @@ export default function BacklinkAutomation() {
                     )}
                   </div>
 
-                  <div className="flex justify-center">
-                    <Button
-                      onClick={createCampaign}
-                      className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                      disabled={isLoading || !user || !campaignForm.targetUrl || !campaignForm.keywords || (databaseStatus && !databaseStatus.isConnected)}
-                    >
-                      {isLoading ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <Rocket className="h-4 w-4 mr-2" />
-                      )}
-                      {!user ? "Login Required" :
-                     (databaseStatus && !databaseStatus.isConnected) ? "System Initializing..." :
-                     "Launch Campaign"}
-                    </Button>
+                  {/* User State-Aware Action Buttons */}
+                  <div className="space-y-4">
+                    {/* Not Logged In State */}
+                    {!user && (
+                      <div className="space-y-3">
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                          <Button
+                            onClick={() => window.location.href = '/login'}
+                            className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                          >
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            Sign In to Create Campaign
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => window.location.href = '/login'}
+                            className="h-12 px-6"
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Preview Features
+                          </Button>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm text-gray-600 mb-2">
+                            Join thousands building high-quality backlinks automatically
+                          </p>
+                          <Button
+                            variant="link"
+                            size="sm"
+                            onClick={() => setSelectedTab('discovery')}
+                            className="text-blue-600"
+                          >
+                            Explore URL Discovery →
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Logged In but System Initializing */}
+                    {user && databaseStatus && !databaseStatus.isConnected && (
+                      <div className="space-y-3">
+                        <div className="flex justify-center">
+                          <Button
+                            disabled
+                            className="h-12 px-8 bg-gradient-to-r from-gray-400 to-gray-500"
+                          >
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            System Initializing...
+                          </Button>
+                        </div>
+                        <div className="text-center">
+                          <Button
+                            variant="outline"
+                            onClick={() => window.open('mailto:support@backlinkoo.com?subject=Quick Setup Request', '_blank')}
+                            className="h-10"
+                          >
+                            <Zap className="h-4 w-4 mr-2" />
+                            Get Instant Setup
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Logged In and Ready */}
+                    {user && databaseStatus && databaseStatus.isConnected && (
+                      <div className="space-y-3">
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                          <Button
+                            onClick={createCampaign}
+                            className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                            disabled={isLoading || !campaignForm.targetUrl || !campaignForm.keywords}
+                          >
+                            {isLoading ? (
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <Rocket className="h-4 w-4 mr-2" />
+                            )}
+                            {isPremium ? "Launch Premium Campaign" : "Launch Campaign"}
+                          </Button>
+
+                          {!isPremium && (
+                            <Button
+                              variant="outline"
+                              onClick={() => window.location.href = '/subscription-success'}
+                              className="h-12 px-6 border-purple-200 text-purple-600 hover:bg-purple-50"
+                            >
+                              <Crown className="h-4 w-4 mr-2" />
+                              Upgrade to Premium
+                            </Button>
+                          )}
+                        </div>
+
+                        {/* Additional Action Buttons for Logged In Users */}
+                        <div className="flex flex-wrap gap-2 justify-center">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setCampaignForm({
+                                name: '',
+                                targetUrl: 'https://example.com',
+                                keywords: 'AI tools, automation software',
+                                anchorTexts: 'innovative AI platform, cutting-edge automation',
+                                dailyLimit: 50,
+                                linkType: 'all'
+                              });
+                            }}
+                          >
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            Use Template
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedTab('discovery')}
+                          >
+                            <Search className="h-3 w-3 mr-1" />
+                            Browse URLs
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.location.href = '/backlink-report'}
+                          >
+                            <BarChart3 className="h-3 w-3 mr-1" />
+                            View Reports
+                          </Button>
+                        </div>
+
+                        {/* Premium User Benefits */}
+                        {isPremium && (
+                          <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-3">
+                            <div className="flex items-center justify-center gap-2 text-sm">
+                              <Crown className="h-4 w-4 text-purple-600" />
+                              <span className="text-purple-700 font-medium">Premium Active:</span>
+                              <span className="text-gray-600">Unlimited campaigns • Priority processing • Advanced analytics</span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Free User Limitations */}
+                        {user && !isPremium && (
+                          <div className="bg-amber-50 rounded-lg p-3">
+                            <div className="flex items-center justify-center gap-2 text-sm">
+                              <AlertTriangle className="h-4 w-4 text-amber-600" />
+                              <span className="text-amber-700">Free Plan:</span>
+                              <span className="text-gray-600">20 links/month • Standard processing</span>
+                              <Button
+                                variant="link"
+                                size="sm"
+                                onClick={() => window.location.href = '/subscription-success'}
+                                className="p-0 h-auto text-amber-700 hover:text-amber-800"
+                              >
+                                Upgrade →
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </CardContent>
               </Card>
