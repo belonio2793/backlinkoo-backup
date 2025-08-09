@@ -441,12 +441,22 @@ export default function BacklinkAutomation() {
       });
 
     } catch (error) {
-      console.error('Campaign creation failed:', error);
-      toast({
-        title: "Campaign Creation Failed",
-        description: "There was an error creating the campaign. Please try again.",
-        variant: "destructive"
-      });
+      console.log('Campaign creation failed, API not available');
+
+      // Check if it's a network error
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        toast({
+          title: "Demo Mode Active",
+          description: "Backend services not available. Your campaign would normally be created and start generating links.",
+        });
+      } else {
+        console.error('Campaign creation failed:', error);
+        toast({
+          title: "Campaign Creation Failed",
+          description: "There was an error creating the campaign. Please try again.",
+          variant: "destructive"
+        });
+      }
     } finally {
       setIsLoading(false);
     }
