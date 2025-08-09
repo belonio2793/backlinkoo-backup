@@ -1815,11 +1815,17 @@ const Dashboard = () => {
                       isSubscribed={isPremiumSubscriber}
                       onUpgrade={() => {
                         // Refresh premium status after successful upgrade
-                        setPremiumCheckComplete(false);
-                        PremiumService.checkPremiumStatus(user?.id || '').then(isPremium => {
-                          setIsPremiumSubscriber(isPremium);
-                          setPremiumCheckComplete(true);
-                        });
+                        if (user?.id) {
+                          setPremiumCheckComplete(false);
+                          PremiumService.checkPremiumStatus(user.id).then(isPremium => {
+                            setIsPremiumSubscriber(isPremium);
+                            setPremiumCheckComplete(true);
+                          }).catch(err => {
+                            console.warn('Premium status refresh failed:', err);
+                            setIsPremiumSubscriber(false);
+                            setPremiumCheckComplete(true);
+                          });
+                        }
                       }}
                     />
                   </StreamlinedPremiumProvider>
