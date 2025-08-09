@@ -881,12 +881,15 @@ export default function BacklinkAutomation() {
             </div>
 
             {/* Live Activity Indicator */}
-            {controlPanelData.queueProcessing > 0 && (
+            {(controlPanelData.queueProcessing > 0 || proliferationStats.isProliferating) && (
               <div className="bg-blue-50 border-t px-4 py-2">
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
                   <span className="text-blue-700 font-medium">
-                    Processing {controlPanelData.queueProcessing} link{controlPanelData.queueProcessing !== 1 ? 's' : ''} across the internet
+                    {proliferationStats.isProliferating
+                      ? `Internet Proliferation Engine ACTIVE - Processing ${proliferationStats.queueLength} campaign${proliferationStats.queueLength !== 1 ? 's' : ''}`
+                      : `Processing ${controlPanelData.queueProcessing} link${controlPanelData.queueProcessing !== 1 ? 's' : ''} across the internet`
+                    }
                   </span>
                 </div>
               </div>
