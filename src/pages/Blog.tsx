@@ -9,6 +9,7 @@ import { UnifiedClaimService } from '@/services/unifiedClaimService';
 import { useAuth } from '@/hooks/useAuth';
 import { BlogClaimService } from '@/services/blogClaimService';
 import { supabase } from '@/integrations/supabase/client';
+import type { BlogPost } from '@/types/blogTypes';
 import { Footer } from '@/components/Footer';
 
 import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
