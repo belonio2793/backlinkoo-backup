@@ -178,84 +178,8 @@ export default function BacklinkAutomation() {
       // Get queue stats from campaign manager
       const queueStats = queueManager.getQueueStats();
       
-      // Generate demo campaigns based on system capacity
-      const demoCampaigns: Campaign[] = [
-        {
-          id: 'enterprise_campaign_1',
-          name: 'AI-Powered SEO Authority Building',
-          targetUrl: 'https://example.com',
-          keywords: ['artificial intelligence', 'SEO automation', 'link building'],
-          status: 'active',
-          progress: 78,
-          linksGenerated: 234,
-          linksLive: 189,
-          dailyTarget: 25,
-          totalTarget: 500,
-          quality: {
-            averageAuthority: 68,
-            averageRelevance: 84,
-            successRate: 73
-          },
-          performance: {
-            velocity: 23.5,
-            trend: 'up',
-            efficiency: 87
-          },
-          createdAt: new Date(Date.now() - 86400000 * 12), // 12 days ago
-          lastActive: new Date(),
-          estimatedCompletion: new Date(Date.now() + 86400000 * 8) // 8 days from now
-        },
-        {
-          id: 'enterprise_campaign_2',
-          name: 'Brand Awareness - Global Expansion',
-          targetUrl: 'https://mybrand.com',
-          keywords: ['brand marketing', 'digital transformation', 'enterprise solutions'],
-          status: 'active',
-          progress: 45,
-          linksGenerated: 156,
-          linksLive: 134,
-          dailyTarget: 15,
-          totalTarget: 350,
-          quality: {
-            averageAuthority: 72,
-            averageRelevance: 91,
-            successRate: 86
-          },
-          performance: {
-            velocity: 14.2,
-            trend: 'stable',
-            efficiency: 92
-          },
-          createdAt: new Date(Date.now() - 86400000 * 8), // 8 days ago
-          lastActive: new Date(Date.now() - 1800000), // 30 minutes ago
-          estimatedCompletion: new Date(Date.now() + 86400000 * 14) // 14 days from now
-        },
-        {
-          id: 'enterprise_campaign_3',
-          name: 'Competitor Analysis - Tech Industry',
-          targetUrl: 'https://techstartup.com',
-          keywords: ['technology trends', 'startup ecosystem', 'innovation'],
-          status: 'paused',
-          progress: 23,
-          linksGenerated: 67,
-          linksLive: 58,
-          dailyTarget: 12,
-          totalTarget: 300,
-          quality: {
-            averageAuthority: 65,
-            averageRelevance: 78,
-            successRate: 67
-          },
-          performance: {
-            velocity: 0,
-            trend: 'down',
-            efficiency: 71
-          },
-          createdAt: new Date(Date.now() - 86400000 * 5), // 5 days ago
-          lastActive: new Date(Date.now() - 3600000 * 6), // 6 hours ago
-          estimatedCompletion: new Date(Date.now() + 86400000 * 25) // 25 days from now
-        }
-      ];
+      // No demo campaigns - start with empty array
+      const demoCampaigns: Campaign[] = [];
 
       setCampaigns(demoCampaigns);
       
