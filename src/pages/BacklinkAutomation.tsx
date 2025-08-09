@@ -3463,24 +3463,8 @@ export default function BacklinkAutomation() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  // Use tracking service to delete campaign
-                                  const deleted = guestTrackingService.deleteCampaign(campaign.id);
-                                  if (deleted) {
-                                    setGuestCampaignResults(prev =>
-                                      prev.filter(c => c.id !== campaign.id)
-                                    );
-                                    updateGuestRestrictions();
-                                    toast({
-                                      title: "🗑️ Trial Campaign Deleted",
-                                      description: "Campaign has been removed from your trial.",
-                                    });
-                                  } else {
-                                    toast({
-                                      title: "Error",
-                                      description: "Could not delete campaign. Please try again.",
-                                      variant: "destructive"
-                                    });
-                                  }
+                                  setCampaignToDelete(campaign);
+                                  setShowDeleteConfirmation(true);
                                 }}
                                 className="h-8 px-2 border-red-300 text-red-600 hover:bg-red-50"
                               >
@@ -4113,7 +4097,7 @@ export default function BacklinkAutomation() {
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '🛒' },
-                          { name: 'Travel & Tourism', count: 38920, icon: '✈️' },
+                          { name: 'Travel & Tourism', count: 38920, icon: '✈���' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
                           { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
