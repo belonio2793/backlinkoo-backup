@@ -1262,10 +1262,9 @@ export default function BacklinkAutomation() {
           )}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="campaigns">Campaign Manager</TabsTrigger>
-              <TabsTrigger value="results" className="relative">
-                Live Results
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="campaigns" className="relative">
+                Campaign Manager
                 {((user && campaigns.filter(c => c.status === 'active').length > 0) ||
                   (!user && guestCampaignResults.length > 0)) && (
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
@@ -1275,7 +1274,186 @@ export default function BacklinkAutomation() {
             </TabsList>
 
             <TabsContent value="campaigns" className="space-y-6">
-              {/* Hidden initially - only show as surprise after links delivered */}
+              {/* Live Results Embedded Interface - Show when campaigns are active */}
+              {((user && campaigns.filter(c => c.status === 'active').length > 0) ||
+                (!user && guestCampaignResults.length > 0)) && (
+                <Card className="border-2 border-green-200 bg-gradient-to-r from-green-50 to-blue-50">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="relative">
+                          <Activity className="h-5 w-5 text-green-600" />
+                          <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
+                        </div>
+                        Real-Time Campaign Monitor
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span className="text-green-600 font-medium">LIVE</span>
+                        <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">
+                          {user ? campaigns.filter(c => c.status === 'active').length : guestCampaignResults.length} Active
+                        </Badge>
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Real-time Stats Dashboard */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="bg-white rounded-lg p-3 border border-green-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">Links Published</p>
+                            <p className="text-xl font-bold text-green-600">
+                              {user ? campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) : guestLinksGenerated}
+                            </p>
+                          </div>
+                          <Link className="h-6 w-6 text-green-600" />
+                        </div>
+                      </div>
+
+                      <div className="bg-white rounded-lg p-3 border border-blue-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">Domains Reached</p>
+                            <p className="text-xl font-bold text-blue-600">
+                              {user ? Math.min(campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) * 0.8, 50) :
+                               guestCampaignResults.reduce((acc, campaign) => acc + (campaign.domains?.length || 0), 0)}
+                            </p>
+                          </div>
+                          <Globe className="h-6 w-6 text-blue-600" />
+                        </div>
+                      </div>
+
+                      <div className="bg-white rounded-lg p-3 border border-purple-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">Success Rate</p>
+                            <p className="text-xl font-bold text-purple-600">
+                              {user ? Math.round(campaigns.reduce((sum, c) => sum + (c.quality?.successRate || 85), 0) / Math.max(campaigns.length, 1)) : 94}%
+                            </p>
+                          </div>
+                          <TrendingUp className="h-6 w-6 text-purple-600" />
+                        </div>
+                      </div>
+
+                      <div className="bg-white rounded-lg p-3 border border-orange-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-xs font-medium text-muted-foreground">Throughput</p>
+                            <p className="text-xl font-bold text-orange-600">
+                              {controlPanelData.currentThroughput}/hr
+                            </p>
+                          </div>
+                          <Zap className="h-6 w-6 text-orange-600" />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Active Campaigns Real-time List */}
+                    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                      <div className="bg-gradient-to-r from-gray-50 to-blue-50 px-4 py-2 border-b flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <BarChart3 className="h-4 w-4 text-blue-600" />
+                          <span className="font-medium text-gray-900">Active Campaign Status</span>
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          Updated: {controlPanelData.lastUpdate.toLocaleTimeString()}
+                        </div>
+                      </div>
+
+                      <div className="max-h-80 overflow-y-auto">
+                        {/* Guest Results */}
+                        {!user && guestCampaignResults.length > 0 && (
+                          <div className="p-4 space-y-3">
+                            {guestCampaignResults.map((campaign, idx) => (
+                              <div key={idx} className="border rounded-lg p-3 bg-gradient-to-r from-green-50 to-blue-50">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                                    <span className="font-medium text-sm">{campaign.name}</span>
+                                  </div>
+                                  <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
+                                    ✓ {campaign.status}
+                                  </Badge>
+                                </div>
+                                <div className="grid grid-cols-3 gap-2 text-xs">
+                                  <div className="text-center">
+                                    <div className="font-bold text-green-600">{campaign.linksGenerated}</div>
+                                    <div className="text-gray-600">Links</div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="font-bold text-blue-600">{campaign.domains?.length || 0}</div>
+                                    <div className="text-gray-600">Domains</div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="font-bold text-purple-600">94%</div>
+                                    <div className="text-gray-600">Success</div>
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* User Campaigns */}
+                        {user && campaigns.filter(c => c.status === 'active' || c.status === 'completed').length > 0 && (
+                          <div className="p-4 space-y-3">
+                            {campaigns.filter(c => c.status === 'active' || c.status === 'completed').map((campaign, idx) => (
+                              <div key={idx} className="border rounded-lg p-3 bg-gradient-to-r from-blue-50 to-purple-50">
+                                <div className="flex items-center justify-between mb-2">
+                                  <div className="flex items-center gap-2">
+                                    {getStatusIcon(campaign.status)}
+                                    <span className="font-medium text-sm">{campaign.name}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant="outline" className={`text-xs ${
+                                      campaign.status === 'active' ? 'bg-green-100 text-green-700 border-green-300' :
+                                      campaign.status === 'completed' ? 'bg-blue-100 text-blue-700 border-blue-300' :
+                                      'bg-gray-100 text-gray-700 border-gray-300'
+                                    }`}>
+                                      {campaign.status}
+                                    </Badge>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-4 gap-2 text-xs">
+                                  <div className="text-center">
+                                    <div className="font-bold text-green-600">{campaign.linksGenerated}</div>
+                                    <div className="text-gray-600">Generated</div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="font-bold text-blue-600">{campaign.linksLive}</div>
+                                    <div className="text-gray-600">Live</div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="font-bold text-purple-600">{Math.round(campaign.progress)}%</div>
+                                    <div className="text-gray-600">Progress</div>
+                                  </div>
+                                  <div className="text-center">
+                                    <div className="font-bold text-orange-600">{campaign.quality?.successRate || 85}%</div>
+                                    <div className="text-gray-600">Success</div>
+                                  </div>
+                                </div>
+                                <div className="mt-2">
+                                  <Progress value={campaign.progress} className="h-1" />
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* No active campaigns fallback */}
+                        {((user && campaigns.filter(c => c.status === 'active' || c.status === 'completed').length === 0) &&
+                          (!user && guestCampaignResults.length === 0)) && (
+                          <div className="p-8 text-center text-gray-500">
+                            <Rocket className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                            <p className="text-sm">No campaigns running yet</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Campaign Creation */}
               <Card>
