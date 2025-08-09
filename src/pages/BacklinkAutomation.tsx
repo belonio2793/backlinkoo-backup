@@ -667,7 +667,7 @@ export default function BacklinkAutomation() {
       );
       updateGuestRestrictions();
       toast({
-        title: "������ Campaign Deleted",
+        title: "🗑�� Campaign Deleted",
         description: `"${guestCampaignToDelete.name}" has been permanently removed.`,
       });
     } else {
@@ -5297,11 +5297,11 @@ export default function BacklinkAutomation() {
                             {activity.type === 'posting' && <Send className="h-4 w-4 text-green-600" />}
                             {activity.type === 'verification' && <CheckCircle className="h-4 w-4 text-orange-600" />}
                             {activity.type === 'analysis' && <Brain className="h-4 w-4 text-indigo-600" />}
-                            <span className="font-medium text-sm text-gray-800">{activity.message}</span>
+                            <span className="font-medium text-sm text-gray-900">{activity.message}</span>
                           </div>
                           <div className="flex items-center gap-2 mt-1">
-                            <Clock4 className="h-3 w-3 text-gray-400" />
-                            <span className="text-xs text-gray-500">{activity.timestamp.toLocaleString()}</span>
+                            <Clock4 className="h-3 w-3 text-gray-500" />
+                            <span className="text-xs text-gray-700">{activity.timestamp.toLocaleString()}</span>
                             <Badge variant="outline" className={`text-xs ${
                               activity.status === 'completed' ? 'bg-green-100 text-green-700' :
                               activity.status === 'active' ? 'bg-orange-100 text-orange-700' :
