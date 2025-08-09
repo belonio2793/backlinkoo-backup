@@ -615,7 +615,7 @@ export default function BacklinkAutomation() {
 
       toast({
         title: "URL Discovery Started",
-        description: `Discovering URLs for ${selectedLinkType.replace('_', ' ')} strategy.`,
+        description: `Discovering URLs for ${selectedLinkType?.replace('_', ' ') || 'selected'} strategy.`,
       });
 
       setTimeout(() => {
@@ -1182,7 +1182,7 @@ export default function BacklinkAutomation() {
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-2">
                                 <Badge variant="outline" className="capitalize">
-                                  {url.type.replace('_', ' ')}
+                                  {url.type?.replace('_', ' ') || 'Unknown'}
                                 </Badge>
                                 <Badge 
                                   variant="outline" 
