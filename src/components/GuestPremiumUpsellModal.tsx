@@ -63,7 +63,7 @@ export function GuestPremiumUpsellModal({
 
       // Create subscription checkout session
       const result = await paymentIntegrationService.createSubscription(
-        'monthly', // Default to monthly plan
+        selectedPlan,
         true, // isGuest
         guestEmail
       );
