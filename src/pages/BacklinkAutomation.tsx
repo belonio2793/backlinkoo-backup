@@ -597,6 +597,24 @@ export default function BacklinkAutomation() {
     };
   }, []);
 
+  // Close FAB menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const fabContainer = document.querySelector('.fixed.bottom-6.right-6');
+      if (fabContainer && !fabContainer.contains(event.target as Node)) {
+        setShowFabMenu(false);
+      }
+    };
+
+    if (showFabMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showFabMenu]);
+
   // Start real-time monitoring for active campaigns on load
   useEffect(() => {
     campaigns.forEach(campaign => {
