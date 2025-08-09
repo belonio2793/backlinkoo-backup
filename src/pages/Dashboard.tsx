@@ -1129,6 +1129,23 @@ const Dashboard = () => {
     }
   };
 
+  // Debug: Check subscription status for specific user
+  useEffect(() => {
+    if (user?.email === 'labindalawamaryrose@gmail.com') {
+      console.log('🔍 Auto-checking subscription for:', user.email);
+      import('@/utils/checkUserSubscription').then(({ checkUserSubscription }) => {
+        checkUserSubscription().then(result => {
+          console.log('🔍 Subscription check result:', result);
+          if (result.success && result.shouldBePremium && !isPremiumSubscriber) {
+            console.log('⚠️ User should be premium but is not detected as such');
+            console.log('   Database says premium:', result.shouldBePremium);
+            console.log('   App detects premium:', isPremiumSubscriber);
+          }
+        });
+      });
+    }
+  }, [user?.email, isPremiumSubscriber]);
+
   // Show dashboard regardless of authentication state
 
   return (
