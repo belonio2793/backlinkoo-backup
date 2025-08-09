@@ -736,67 +736,66 @@ export default function BacklinkAutomation() {
 
           <TabsContent value="campaigns" className="space-y-6">
             {/* Campaign Creation */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+            <Card className="max-w-2xl mx-auto">
+              <CardHeader className="text-center">
+                <CardTitle className="flex items-center justify-center gap-2">
                   <Target className="h-5 w-5" />
                   Create Enterprise Campaign
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-center">
                   Deploy an AI-powered link building campaign with advanced targeting and quality controls
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="targetUrl">Target URL</Label>
-                      <Input
-                        id="targetUrl"
-                        value={campaignForm.targetUrl}
-                        onChange={(e) => setCampaignForm(prev => ({ ...prev, targetUrl: e.target.value }))}
-                        placeholder="https://yourwebsite.com"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="keywords">Target Keywords (comma-separated)</Label>
-                      <Input
-                        id="keywords"
-                        value={campaignForm.keywords}
-                        onChange={(e) => setCampaignForm(prev => ({ ...prev, keywords: e.target.value }))}
-                        placeholder="enterprise software, business automation, AI solutions"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="anchorTexts">Anchor Text Variations</Label>
-                      <Textarea
-                        id="anchorTexts"
-                        value={campaignForm.anchorTexts}
-                        onChange={(e) => setCampaignForm(prev => ({ ...prev, anchorTexts: e.target.value }))}
-                        placeholder="click here, learn more, enterprise solution, your brand name"
-                        rows={3}
-                      />
-                    </div>
+                <div className="space-y-4 max-w-md mx-auto">
+                  <div>
+                    <Label htmlFor="targetUrl">Target URL</Label>
+                    <Input
+                      id="targetUrl"
+                      value={campaignForm.targetUrl}
+                      onChange={(e) => setCampaignForm(prev => ({ ...prev, targetUrl: e.target.value }))}
+                      placeholder="https://yourwebsite.com"
+                      className="w-full"
+                    />
                   </div>
-
-                  <div className="space-y-4">
-                    {/* Quality controls moved to internal configuration */}
+                  <div>
+                    <Label htmlFor="keywords">Target Keywords (comma-separated)</Label>
+                    <Input
+                      id="keywords"
+                      value={campaignForm.keywords}
+                      onChange={(e) => setCampaignForm(prev => ({ ...prev, keywords: e.target.value }))}
+                      placeholder="enterprise software, business automation, AI solutions"
+                      className="w-full"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="anchorTexts">Anchor Text Variations</Label>
+                    <Textarea
+                      id="anchorTexts"
+                      value={campaignForm.anchorTexts}
+                      onChange={(e) => setCampaignForm(prev => ({ ...prev, anchorTexts: e.target.value }))}
+                      placeholder="click here, learn more, enterprise solution, your brand name"
+                      rows={3}
+                      className="w-full"
+                    />
                   </div>
                 </div>
 
-                <Button
-                  onClick={createCampaign}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 h-12"
-                  size="lg"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
-                  ) : (
-                    <Bot className="h-5 w-5 mr-2" />
-                  )}
-                  Deploy Campaign
-                </Button>
+                <div className="max-w-md mx-auto">
+                  <Button
+                    onClick={createCampaign}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 h-12"
+                    size="lg"
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    ) : (
+                      <Bot className="h-5 w-5 mr-2" />
+                    )}
+                    Deploy Campaign
+                  </Button>
+                </div>
               </CardContent>
             </Card>
 
