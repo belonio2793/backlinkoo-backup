@@ -3859,175 +3859,123 @@ export default function BacklinkAutomation() {
                 </CardContent>
               </Card>
 
-              {/* Discovered URLs */}
-              {discoveredUrls && discoveredUrls.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Eye className="h-5 w-5" />
-                      Discovered URLs ({discoveredUrls.length})
-                    </CardTitle>
-                    <CardDescription>
-                      Community-verified opportunities for {linkTypeConfig[selectedLinkType as keyof typeof linkTypeConfig]?.title.toLowerCase()}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {discoveredUrls.filter(url => url && url.id).map((url) => (
-                        <div key={url.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1 min-w-0">
+              {/* Categorized URL Listings */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Database className="h-5 w-5" />
+                    {linkTypeConfig[selectedLinkType as keyof typeof linkTypeConfig]?.title || 'All'} URLs
+                  </CardTitle>
+                  <CardDescription>
+                    Curated URLs for {linkTypeConfig[selectedLinkType as keyof typeof linkTypeConfig]?.title.toLowerCase() || 'all strategies'}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 max-h-96 overflow-y-auto">
+                    {(() => {
+                      // Define URLs for each category
+                      const urlCategories = {
+                        all: [
+                          { url: 'reddit.com', type: 'Community', authority: 98, category: 'Social' },
+                          { url: 'medium.com', type: 'Blog Platform', authority: 93, category: 'Content' },
+                          { url: 'dev.to', type: 'Developer Community', authority: 87, category: 'Tech' },
+                          { url: 'hackernews.ycombinator.com', type: 'News Community', authority: 89, category: 'Tech' },
+                          { url: 'stackoverflow.com', type: 'Q&A Platform', authority: 95, category: 'Tech' },
+                          { url: 'github.com', type: 'Code Repository', authority: 96, category: 'Tech' },
+                          { url: 'quora.com', type: 'Q&A Platform', authority: 90, category: 'General' },
+                          { url: 'linkedin.com', type: 'Professional Network', authority: 98, category: 'Business' },
+                          { url: 'twitter.com', type: 'Social Media', authority: 99, category: 'Social' },
+                          { url: 'facebook.com', type: 'Social Network', authority: 100, category: 'Social' }
+                        ],
+                        blog_comment: [
+                          { url: 'techcrunch.com', type: 'Tech Blog', authority: 94, category: 'Technology' },
+                          { url: 'mashable.com', type: 'Tech Blog', authority: 87, category: 'Technology' },
+                          { url: 'engadget.com', type: 'Tech Blog', authority: 85, category: 'Technology' },
+                          { url: 'venturebeat.com', type: 'Business Blog', authority: 84, category: 'Business' },
+                          { url: 'wired.com', type: 'Tech Blog', authority: 88, category: 'Technology' },
+                          { url: 'fastcompany.com', type: 'Business Blog', authority: 86, category: 'Business' },
+                          { url: 'entrepreneur.com', type: 'Business Blog', authority: 83, category: 'Business' },
+                          { url: 'huffpost.com', type: 'News Blog', authority: 91, category: 'News' },
+                          { url: 'buzzfeed.com', type: 'Lifestyle Blog', authority: 78, category: 'Lifestyle' },
+                          { url: 'lifehacker.com', type: 'Productivity Blog', authority: 82, category: 'Productivity' }
+                        ],
+                        forum_profile: [
+                          { url: 'reddit.com/r/entrepreneur', type: 'Business Forum', authority: 98, category: 'Business' },
+                          { url: 'stackoverflow.com', type: 'Developer Forum', authority: 95, category: 'Technology' },
+                          { url: 'warriorforum.com', type: 'Marketing Forum', authority: 75, category: 'Marketing' },
+                          { url: 'blackhatworld.com', type: 'SEO Forum', authority: 73, category: 'SEO' },
+                          { url: 'digitalpoint.com', type: 'Webmaster Forum', authority: 78, category: 'Web Development' },
+                          { url: 'sitepoint.com/community', type: 'Web Dev Forum', authority: 82, category: 'Web Development' },
+                          { url: 'indiehackers.com', type: 'Startup Forum', authority: 82, category: 'Startups' },
+                          { url: 'producthunt.com', type: 'Product Forum', authority: 85, category: 'Products' },
+                          { url: 'nomadlist.com', type: 'Remote Work Forum', authority: 76, category: 'Remote Work' },
+                          { url: 'growthhackers.com', type: 'Growth Forum', authority: 80, category: 'Growth Hacking' }
+                        ],
+                        web2_platform: [
+                          { url: 'medium.com', type: 'Publishing Platform', authority: 93, category: 'Content' },
+                          { url: 'wordpress.com', type: 'Blog Platform', authority: 91, category: 'Blogging' },
+                          { url: 'blogger.com', type: 'Blog Platform', authority: 89, category: 'Blogging' },
+                          { url: 'tumblr.com', type: 'Microblog Platform', authority: 85, category: 'Social Blogging' },
+                          { url: 'hubpages.com', type: 'Content Platform', authority: 79, category: 'Content' },
+                          { url: 'ezinearticles.com', type: 'Article Directory', authority: 72, category: 'Articles' },
+                          { url: 'livejournal.com', type: 'Blog Platform', authority: 74, category: 'Blogging' },
+                          { url: 'weebly.com', type: 'Website Builder', authority: 83, category: 'Web Building' },
+                          { url: 'wix.com', type: 'Website Builder', authority: 86, category: 'Web Building' },
+                          { url: 'squarespace.com', type: 'Website Builder', authority: 88, category: 'Web Building' }
+                        ],
+                        social_profile: [
+                          { url: 'linkedin.com', type: 'Professional Network', authority: 98, category: 'Business' },
+                          { url: 'twitter.com', type: 'Social Media', authority: 99, category: 'Social' },
+                          { url: 'facebook.com', type: 'Social Network', authority: 100, category: 'Social' },
+                          { url: 'instagram.com', type: 'Photo Sharing', authority: 97, category: 'Visual' },
+                          { url: 'youtube.com', type: 'Video Platform', authority: 100, category: 'Video' },
+                          { url: 'pinterest.com', type: 'Visual Discovery', authority: 94, category: 'Visual' },
+                          { url: 'tiktok.com', type: 'Short Video', authority: 92, category: 'Video' },
+                          { url: 'snapchat.com', type: 'Messaging App', authority: 89, category: 'Social' },
+                          { url: 'behance.net', type: 'Creative Portfolio', authority: 87, category: 'Creative' },
+                          { url: 'dribbble.com', type: 'Design Community', authority: 84, category: 'Design' }
+                        ]
+                      };
+
+                      const selectedUrls = urlCategories[selectedLinkType as keyof typeof urlCategories] || urlCategories.all;
+
+                      return selectedUrls.map((site, idx) => (
+                        <div key={idx} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
-                                <Badge variant="outline" className="capitalize">
-                                  {url.type?.replace('_', ' ') || 'Unknown'}
-                                </Badge>
+                                <h4 className="font-medium text-blue-600">{site.url}</h4>
                                 <Badge
-                                  variant="outline"
-                                  className={(url.quality_score || 0) >= 80 ? 'text-green-600 bg-green-50' :
-                                           (url.quality_score || 0) >= 60 ? 'text-yellow-600 bg-yellow-50' :
-                                           'text-red-600 bg-red-50'}
+                                  variant={site.authority >= 90 ? 'default' : site.authority >= 80 ? 'secondary' : 'outline'}
+                                  className="text-xs"
                                 >
-                                  {url.quality_score || 0}% Quality
+                                  DA {site.authority}
                                 </Badge>
-                                <Badge variant="outline" className="text-blue-600 bg-blue-50">
-                                  {url.domain || 'Unknown Domain'}
+                                <Badge variant="outline" className="text-xs">
+                                  {site.type}
                                 </Badge>
-                              </div>
-                              <div className="text-xs text-gray-500 bg-gray-100 rounded px-2 py-1 font-mono">
-                                {url.url || 'No URL available'}
+                                <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                                  {site.category}
+                                </Badge>
                               </div>
                             </div>
-
-                            <div className="flex flex-col gap-2 ml-4">
-                              {/* User State-Aware Action Buttons */}
-                              {user ? (
-                                <>
-                                  {/* Logged In User Actions */}
-                                  <div className="flex gap-1">
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => voteOnUrl(url.id, 'up')}
-                                      className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                    >
-                                      <ThumbsUp className="h-3 w-3 mr-1" />
-                                      {url.upvotes || 0}
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => voteOnUrl(url.id, 'down')}
-                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    >
-                                      <ThumbsDown className="h-3 w-3 mr-1" />
-                                      {url.downvotes || 0}
-                                    </Button>
-                                  </div>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => reportUrl(url.id, 'poor_quality')}
-                                    className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                                  >
-                                    <Flag className="h-3 w-3 mr-1" />
-                                    Report
-                                  </Button>
-                                  {isPremium && (
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={async () => {
-                                        try {
-                                          const success = await copyToClipboard(url.url || '');
-                                          if (success) {
-                                            toast({
-                                              title: "URL Copied",
-                                              description: "URL copied to clipboard for campaign use!",
-                                            });
-                                          } else {
-                                            toast({
-                                              title: "Copy Failed",
-                                              description: "Could not copy to clipboard. Please copy manually.",
-                                              variant: "destructive",
-                                            });
-                                          }
-                                        } catch (error) {
-                                          toast({
-                                            title: "Copy Failed",
-                                            description: "Could not copy to clipboard. Please copy manually.",
-                                            variant: "destructive",
-                                          });
-                                        }
-                                      }}
-                                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                    >
-                                      <Link className="h-3 w-3 mr-1" />
-                                      Copy
-                                    </Button>
-                                  )}
-                                </>
-                              ) : (
-                                <>
-                                  {/* Not Logged In - View Only */}
-                                  <div className="flex gap-1">
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => {
-                                        toast({
-                                          title: "Sign In Required",
-                                          description: "Please sign in to vote on URLs",
-                                          action: (
-                                            <Button size="sm" onClick={() => window.location.href = '/login'}>
-                                              Sign In
-                                            </Button>
-                                          ),
-                                        });
-                                      }}
-                                      className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                    >
-                                      <ThumbsUp className="h-3 w-3 mr-1" />
-                                      {url.upvotes || 0}
-                                    </Button>
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => {
-                                        toast({
-                                          title: "Sign In Required",
-                                          description: "Please sign in to vote on URLs",
-                                          action: (
-                                            <Button size="sm" onClick={() => window.location.href = '/login'}>
-                                              Sign In
-                                            </Button>
-                                          ),
-                                        });
-                                      }}
-                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                    >
-                                      <ThumbsDown className="h-3 w-3 mr-1" />
-                                      {url.downvotes || 0}
-                                    </Button>
-                                  </div>
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={() => window.location.href = '/login'}
-                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                                  >
-                                    <UserPlus className="h-3 w-3 mr-1" />
-                                    Sign In
-                                  </Button>
-                                </>
-                              )}
+                            <div className="flex items-center gap-2">
+                              <Button size="sm" variant="outline">
+                                <ExternalLink className="h-3 w-3 mr-1" />
+                                Visit
+                              </Button>
+                              <Button size="sm" variant="default">
+                                <Plus className="h-3 w-3 mr-1" />
+                                Add to Campaign
+                              </Button>
                             </div>
                           </div>
                         </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+                      ));
+                    })()}
+                  </div>
+                </CardContent>
+              </Card>
             </TabsContent>
           </Tabs>
         </div>
