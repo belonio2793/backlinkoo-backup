@@ -207,6 +207,46 @@ function Blog() {
 
   const categories = Array.from(new Set(blogPosts.map(post => post.category)));
 
+  // Utility function to clean HTML syntax and common prefixes from titles
+  const cleanTitle = (title: string): string => {
+    if (!title) return '';
+
+    return title
+      // Remove HTML tag prefixes like "H1:", "H2:", etc.
+      .replace(/^H[1-6]:\s*/i, '')
+      // Remove HTML tags
+      .replace(/<[^>]*>/g, '')
+      // Remove common HTML entities
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      // Clean up extra whitespace
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  // Utility function to clean descriptions/content
+  const cleanDescription = (description: string): string => {
+    if (!description) return '';
+
+    return description
+      // Remove HTML tags
+      .replace(/<[^>]*>/g, '')
+      // Remove common HTML entities
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      // Clean up extra whitespace and line breaks
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
   const handleRefreshPosts = async () => {
     setRefreshing(true);
     try {
