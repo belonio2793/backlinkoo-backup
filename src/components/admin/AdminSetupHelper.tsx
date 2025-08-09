@@ -215,11 +215,13 @@ export default function AdminSetupHelper() {
       await runDiagnostics();
 
     } catch (error: any) {
+      const errorMsg = error?.message || error?.toString() || 'Unknown error setting admin role';
       toast({
         title: "Failed to Set Admin Role",
-        description: error.message,
+        description: errorMsg,
         variant: "destructive"
       });
+      console.error('Make admin error:', error);
     } finally {
       setLoading(false);
     }
