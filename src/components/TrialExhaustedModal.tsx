@@ -19,6 +19,7 @@ interface TrialExhaustedModalProps {
   totalLinks: number;
   isLoggedIn?: boolean;
   userName?: string;
+  onUpgrade?: () => void;
 }
 
 export function TrialExhaustedModal({
