@@ -1155,7 +1155,9 @@ export default function BacklinkAutomation() {
                     ) : (
                       <Search className="h-4 w-4 mr-2" />
                     )}
-                    {!user ? "Login Required" : "Start Recursive Discovery"}
+                    {!user ? "Login Required" :
+                     (databaseStatus && !databaseStatus.isConnected) ? "System Initializing..." :
+                     "Start Recursive Discovery"}
                   </Button>
                 </CardContent>
               </Card>
