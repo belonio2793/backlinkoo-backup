@@ -4749,7 +4749,7 @@ export default function BacklinkAutomation() {
                 <Button
                   size="sm"
                   onClick={() => {
-                    setSelectedTab('discovery');
+                    setSelectedTab('database');
                     setShowFabMenu(false);
                   }}
                   className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
@@ -4760,14 +4760,13 @@ export default function BacklinkAutomation() {
                 <Button
                   size="sm"
                   onClick={() => {
-                    setSelectedTab('campaigns');
-                    setSelectedCampaignTab('live-results');
+                    setSelectedTab('recursive');
                     setShowFabMenu(false);
                   }}
                   className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  View Results
+                  <Network className="h-4 w-4 mr-2" />
+                  Recursive Discovery
                 </Button>
                 {!isPremium && (
                   <Button
