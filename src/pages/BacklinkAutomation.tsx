@@ -30,11 +30,8 @@ import { useAuth } from '@/hooks/useAuth';
 import ToolsHeader from '@/components/shared/ToolsHeader';
 import { Footer } from '@/components/Footer';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
-import PremiumPlanPopup from '@/components/PremiumPlanPopup';
+
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
-import { internetProliferationService, type CampaignProliferation } from '@/services/internetProliferationService';
-import { recursiveUrlDiscoveryService, type DiscoveredUrl, type DiscoveryRequest } from '@/services/recursiveUrlDiscoveryService';
-import { supabase } from '@/integrations/supabase/client';
 
 // Import our enterprise engines
 import { CampaignQueueManager, type CampaignConfig } from '@/services/automationEngine/CampaignQueueManager';
@@ -108,6 +105,40 @@ interface PostedLink {
   errorMessage?: string;
 }
 
+interface PublishedLink {
+  id: string;
+  sourceUrl: string;
+  targetUrl: string;
+  anchorText: string;
+  campaignId: string;
+  campaignName: string;
+  publishedAt: Date;
+  platform: string;
+  domainAuthority: number;
+  status: 'live' | 'indexing' | 'verified';
+  clicks: number;
+  linkJuice: number;
+}
+
+interface ActivityLog {
+  id: string;
+  timestamp: Date;
+  type: 'link_published' | 'opportunity_found' | 'content_generated' | 'verification_complete';
+  message: string;
+  campaignId?: string;
+  success: boolean;
+  data?: any;
+}
+
+interface GlobalSuccessModel {
+  totalLinksBuilt: number;
+  highPerformingDomains: string[];
+  successfulAnchorTexts: string[];
+  optimalPostingTimes: { hour: number; successRate: number }[];
+  bestPerformingPlatforms: { platform: string; successRate: number; avgDA: number }[];
+  sharedStrategies: { strategy: string; successRate: number; timesUsed: number }[];
+}
+
 export default function BacklinkAutomation() {
   // Auth Hook
   const { user, isPremium } = useAuth();
@@ -123,38 +154,6 @@ export default function BacklinkAutomation() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [campaignToDelete, setCampaignToDelete] = useState<Campaign | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const [isDiscovering, setIsDiscovering] = useState(false);
-  const [backendStatus, setBackendStatus] = useState<'available' | 'unavailable' | 'checking'>('checking');
-
-  // Premium Usage Tracking
-  const [usageStats, setUsageStats] = useState({
-    linksPosted: 0,
-    freeLimit: 20,
-    premiumPrice: 29,
-    isLimitReached: false
-  });
-
-  // Results tracking state - only for active campaigns
-  const [postedLinks, setPostedLinks] = useState<PostedLink[]>([]);
-
-  // Real-time control panel state
-  const [controlPanelData, setControlPanelData] = useState({
-    systemStatus: 'operational',
-    activeConnections: 24,
-    queueProcessing: 0,
-    successfulLinks: 0,
-    failedAttempts: 0,
-    averageResponseTime: 1.2,
-    currentThroughput: 0,
-    lastUpdate: new Date(),
-    networkHealth: 100,
-    apiCallsUsed: 0,
-    discoveryRate: 0,
-    totalUrls: 0,
-    verifiedUrls: 0
-  });
-  const [isFetching, setIsFetching] = useState(false);
 
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
@@ -188,100 +187,69 @@ export default function BacklinkAutomation() {
   // Load campaigns and metrics on mount and when user changes
   useEffect(() => {
     loadCampaigns();
-    loadDiscoveredUrls();
-    loadDiscoveryStats();
-    loadUsageStats();
-    
-    // Set up real-time updates
-    const fastMetricsInterval = setInterval(loadRealTimeMetrics, 5000);
-    const discoveryInterval = setInterval(loadDiscoveredUrls, 15000);
-    const statsInterval = setInterval(loadDiscoveryStats, 30000);
-    const usageInterval = setInterval(loadUsageStats, 10000);
-    
-    return () => {
-      clearInterval(fastMetricsInterval);
-      clearInterval(discoveryInterval);
-      clearInterval(statsInterval);
-      clearInterval(usageInterval);
+
     };
   }, [user, selectedLinkType]);
+
+  // Check user's premium status
+  const checkUserPremiumStatus = async () => {
+    if (!user?.id) return;
+
+    try {
+      const premiumCheck = await liveLinkBuildingService.checkPremiumLimits(user.id);
+      setPremiumLimitData(premiumCheck);
+      setIsUserPremium(!premiumCheck.isLimitReached || premiumCheck.maxLinks === -1);
+    } catch (error) {
+      console.error('Error checking premium status:', error);
+    }
+  };
+
+  // Start link building when campaigns are active
+  useEffect(() => {
+    const activeCampaignCount = campaigns.filter(c => c.status === 'active').length;
+    setIsLinkBuildingActive(activeCampaignCount > 0);
+  }, [campaigns]);
+
+  // Aggregate successful links for discovery engine
+  useEffect(() => {
+    if (publishedLinks.length > 0) {
+      const aggregated = publishedLinks.reduce((acc, link) => {
+        const key = `${link.platform}-${new URL(link.sourceUrl).hostname}`;
+        if (!acc[key]) {
+          acc[key] = {
+            platform: link.platform,
+            domain: new URL(link.sourceUrl).hostname,
+            successCount: 0,
+            lastSuccess: link.publishedAt,
+            averageDA: 0,
+            successRate: 0,
+            totalAttempts: 0,
+            recentLinks: []
+          };
+        }
+
+        acc[key].successCount += 1;
+        acc[key].totalAttempts += 1; // In real system, this would include failed attempts
+        acc[key].lastSuccess = link.publishedAt > acc[key].lastSuccess ? link.publishedAt : acc[key].lastSuccess;
+        acc[key].averageDA = Math.round((acc[key].averageDA * (acc[key].successCount - 1) + link.domainAuthority) / acc[key].successCount);
+        acc[key].successRate = (acc[key].successCount / acc[key].totalAttempts) * 100;
+        acc[key].recentLinks = [link, ...acc[key].recentLinks.slice(0, 2)];
+
+        return acc;
+      }, {} as Record<string, any>);
+
+      const sortedAggregated = Object.values(aggregated)
+        .sort((a: any, b: any) => b.successCount - a.successCount)
+        .slice(0, 20); // Top 20 performing domains
+
+      setAggregatedSuccessfulLinks(sortedAggregated as any);
+    }
+  }, [publishedLinks]);
 
   const loadCampaigns = async () => {
     try {
       setIsLoading(true);
-      
-      if (!user) {
-        setCampaigns([]);
-        setDatabaseCampaigns([]);
-        return;
-      }
 
-      try {
-        // Try to get campaigns directly, don't block on availability check
-        console.log('Attempting to load campaigns from backend...');
-        const dbCampaigns = await campaignService.getCampaigns();
-
-        // If we get campaigns (even empty array), backend responded successfully
-        if (Array.isArray(dbCampaigns)) {
-          setBackendStatus('available');
-          setDatabaseCampaigns(dbCampaigns);
-        } else {
-          // This shouldn't happen with our new error handling, but just in case
-          setBackendStatus('unavailable');
-          setDatabaseCampaigns([]);
-        }
-        
-        const displayCampaigns: Campaign[] = (dbCampaigns || []).map(dbCampaign => ({
-          id: dbCampaign.id,
-          name: dbCampaign.name,
-          targetUrl: dbCampaign.target_url,
-          keywords: dbCampaign.keywords,
-          status: dbCampaign.status,
-          progress: dbCampaign.progress,
-          linksGenerated: dbCampaign.links_generated,
-          linksLive: Math.floor(dbCampaign.links_generated * 0.92),
-          dailyTarget: dbCampaign.daily_limit,
-          totalTarget: 1000,
-          quality: {
-            averageAuthority: 75 + Math.random() * 20,
-            averageRelevance: 80 + Math.random() * 15,
-            successRate: 85 + Math.random() * 10
-          },
-          performance: {
-            velocity: Math.random() * 10,
-            trend: Math.random() > 0.5 ? 'up' : 'stable' as 'up' | 'down' | 'stable',
-            efficiency: 70 + Math.random() * 25
-          },
-          createdAt: new Date(dbCampaign.created_at),
-          lastActive: new Date(dbCampaign.last_active_at),
-          estimatedCompletion: new Date(Date.now() + 86400000 * Math.ceil(1000 / dbCampaign.daily_limit))
-        }));
-
-        setCampaigns(displayCampaigns);
-
-      } catch (apiError) {
-        console.log('Campaign loading failed, switching to demo mode');
-        setBackendStatus('unavailable');
-
-        // Categorize the error for better handling
-        if (apiError instanceof TypeError && apiError.message.includes('Failed to fetch')) {
-          console.log('Network error: Cannot reach backend services');
-        } else if (apiError.message.includes('Invalid response') || apiError.message.includes('JSON')) {
-          console.log('Backend configuration error: Server returning invalid responses');
-        } else if (apiError.message.includes('Backend services not available')) {
-          console.log('Backend services are down');
-        } else {
-          console.log('API error:', apiError.message);
-        }
-
-        setCampaigns([]);
-        setDatabaseCampaigns([]);
-      }
-
-    } catch (error) {
-      console.error('Failed to load campaigns:', error);
-      setCampaigns([]);
-      setDatabaseCampaigns([]);
     } finally {
       setIsLoading(false);
     }
@@ -380,26 +348,6 @@ export default function BacklinkAutomation() {
     }
   };
 
-  const createCampaign = async () => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to create campaigns",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Check premium limit
-    if (!isPremium && usageStats.linksPosted >= usageStats.freeLimit) {
-      setShowPremiumModal(true);
-      return;
-    }
-
-    if (!campaignForm.targetUrl.trim() || !campaignForm.keywords.trim()) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in Target URL and Keywords",
         variant: "destructive"
       });
       return;
@@ -408,21 +356,7 @@ export default function BacklinkAutomation() {
     try {
       setIsLoading(true);
 
-      const generatedName = generateCampaignName(campaignForm.targetUrl, campaignForm.keywords);
 
-      const campaignData = {
-        name: generatedName,
-        target_url: campaignForm.targetUrl,
-        keywords: campaignForm.keywords.split(',').map(k => k.trim()),
-        anchor_texts: campaignForm.anchorTexts.trim()
-          ? campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a)
-          : ['click here', 'learn more', 'read more', 'visit site'],
-        daily_limit: campaignForm.dailyLimit,
-        strategy_blog_comments: campaignForm.linkType === 'blog_comment' || campaignForm.linkType === 'all',
-        strategy_forum_profiles: campaignForm.linkType === 'forum_profile' || campaignForm.linkType === 'all',
-        strategy_web2_platforms: campaignForm.linkType === 'web2_platform' || campaignForm.linkType === 'all',
-        strategy_social_profiles: campaignForm.linkType === 'social_profile' || campaignForm.linkType === 'all',
-        strategy_contact_forms: campaignForm.linkType === 'all'
       };
 
       const result = await campaignService.createCampaign(campaignData);
@@ -470,30 +404,7 @@ export default function BacklinkAutomation() {
         linkType: 'all'
       });
 
-      await loadCampaigns();
 
-      toast({
-        title: "🚀 Campaign Engine Started",
-        description: `${generatedName} is now propagating across ${internetProliferationService.getProliferationStats().totalTargets}+ platforms`,
-      });
-
-    } catch (error) {
-      console.log('Campaign creation failed, API not available');
-
-      // Check if it's a network error
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        toast({
-          title: "Demo Mode Active",
-          description: "Backend services not available. Your campaign would normally be created and start generating links.",
-        });
-      } else {
-        console.error('Campaign creation failed:', error);
-        toast({
-          title: "Campaign Creation Failed",
-          description: "There was an error creating the campaign. Please try again.",
-          variant: "destructive"
-        });
-      }
     } finally {
       setIsLoading(false);
     }
@@ -519,17 +430,7 @@ export default function BacklinkAutomation() {
     }
 
     try {
-      setIsDiscovering(true);
 
-      const request: DiscoveryRequest = {
-        keywords: discoveryForm.keywords.split(',').map(k => k.trim()),
-        linkTypes: [selectedLinkType],
-        discoveryDepth: discoveryForm.depth,
-        priority: 1,
-        maxResults: discoveryForm.maxResults
-      };
-
-      const sessionId = await recursiveUrlDiscoveryService.requestDiscovery(request);
 
       toast({
         title: "URL Discovery Started",
@@ -554,25 +455,22 @@ export default function BacklinkAutomation() {
     }
   };
 
-  const voteOnUrl = async (urlId: string, vote: 'up' | 'down') => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to vote on URLs",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    try {
-      await recursiveUrlDiscoveryService.voteOnUrl(urlId, vote);
-      
-      // Update local state
-      setDiscoveredUrls(prev => prev.map(url => 
-        url.id === urlId 
-          ? { ...url, [vote === 'up' ? 'upvotes' : 'downvotes']: url[vote === 'up' ? 'upvotes' : 'downvotes'] + 1 }
-          : url
       ));
+
+      // Restart live link building
+      const campaign = campaigns.find(c => c.id === campaignId);
+      if (campaign && user?.id) {
+        const linkBuildingConfig: LinkBuildingConfig = {
+          campaignId,
+          targetUrl: campaign.targetUrl,
+          keywords: campaign.keywords,
+          anchorTexts: [], // Will be extracted from campaign data
+          userId: user.id,
+          isUserPremium: isUserPremium
+        };
+
+        await liveLinkBuildingService.startLinkBuilding(linkBuildingConfig);
+      }
 
       toast({
         title: vote === 'up' ? "URL Upvoted" : "URL Downvoted",
@@ -627,41 +525,6 @@ export default function BacklinkAutomation() {
   const formatUrl = (url: string) => {
     if (!url.trim()) return url;
 
-    // Check if URL already has a protocol
-    if (url.match(/^https?:\/\//)) {
-      return url;
-    }
-
-    // Add https:// by default
-    return `https://${url}`;
-  };
-
-  const handleUrlChange = (url: string) => {
-    setCampaignForm(prev => ({ ...prev, targetUrl: url }));
-
-    // Auto-format URL when user finishes typing (after a short delay)
-    if (url && !url.match(/^https?:\/\//)) {
-      setTimeout(() => {
-        setCampaignForm(prev => {
-          if (prev.targetUrl === url) {
-            return { ...prev, targetUrl: formatUrl(url) };
-          }
-          return prev;
-        });
-      }, 1000);
-    }
-  };
-
-  const generateCampaignName = (url: string, keywords: string) => {
-    try {
-      const domain = new URL(url).hostname.replace('www.', '');
-      const primaryKeyword = keywords.split(',')[0]?.trim() || 'SEO';
-      const timestamp = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-      return `${domain} ${primaryKeyword} ${timestamp}`;
-    } catch {
-      return `Campaign ${new Date().toLocaleDateString()}`;
-    }
-  };
 
   const getStatusIcon = (status: Campaign['status']) => {
     switch (status) {
@@ -810,18 +673,6 @@ export default function BacklinkAutomation() {
                   <div className="text-xs text-gray-500">Quality Score</div>
                 </div>
 
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    <Lightning className="h-3 w-3 text-orange-600" />
-                    <span className="text-lg font-bold text-orange-600">{controlPanelData.currentThroughput}</span>
-                  </div>
-                  <div className="text-xs text-gray-500">Links/Hour</div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="campaigns">Campaign Manager</TabsTrigger>
@@ -928,87 +779,6 @@ export default function BacklinkAutomation() {
                     )}
                   </div>
 
-                  <div className="max-w-2xl mx-auto">
-                    <Button
-                      onClick={createCampaign}
-                      className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                      disabled={isLoading || !user || (!isPremium && usageStats.isLimitReached)}
-                    >
-                      {isLoading ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <Rocket className="h-4 w-4 mr-2" />
-                      )}
-                      {!user ? "Login Required" :
-                       (!isPremium && usageStats.isLimitReached) ? "Upgrade to Premium" :
-                       "Deploy Campaign"}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Active Campaigns */}
-              {campaigns.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <BarChart3 className="h-5 w-5" />
-                      Active Campaigns
-                    </CardTitle>
-                    <CardDescription>
-                      {campaigns.filter(c => c.status === 'active').length} active campaigns running
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {campaigns.map((campaign) => (
-                        <div key={campaign.id} className={`border rounded-lg p-6 transition-all ${
-                          campaign.status === 'active'
-                            ? 'bg-gradient-to-r from-green-50 to-blue-50 border-green-200 shadow-md'
-                            : 'bg-gradient-to-r from-white to-gray-50 hover:shadow-md'
-                        }`}>
-                          <div className="flex items-center justify-between mb-4">
-                            <div className="flex items-center gap-3">
-                              <div className="relative">
-                                {getStatusIcon(campaign.status)}
-                                {campaign.status === 'active' && (
-                                  <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                                )}
-                              </div>
-                              <div>
-                                <h3 className="font-semibold text-lg">{campaign.name}</h3>
-                                <p className="text-sm text-gray-600">{campaign.targetUrl}</p>
-                              </div>
-                            </div>
-                            <Badge variant={campaign.status === 'active' ? 'default' : 'secondary'}>
-                              {campaign.status.toUpperCase()}
-                            </Badge>
-                          </div>
-                          
-                          <div className="grid grid-cols-3 gap-4 mb-4">
-                            <div className="text-center">
-                              <div className="text-2xl font-bold text-blue-600">{campaign.linksGenerated}</div>
-                              <div className="text-xs text-gray-500">Links Generated</div>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-2xl font-bold text-green-600">{campaign.linksLive}</div>
-                              <div className="text-xs text-gray-500">Live Links</div>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-2xl font-bold text-purple-600">{Math.round(campaign.quality.successRate)}%</div>
-                              <div className="text-xs text-gray-500">Success Rate</div>
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span>Progress</span>
-                              <span>{campaign.progress}% ({campaign.linksGenerated}/{campaign.totalTarget})</span>
-                            </div>
-                            <Progress value={campaign.progress} className="h-3" />
-                          </div>
-                        </div>
-                      ))}
                     </div>
                   </CardContent>
                 </Card>
@@ -1124,63 +894,6 @@ export default function BacklinkAutomation() {
                 </CardContent>
               </Card>
 
-              {/* Discovered URLs */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <Database className="h-5 w-5" />
-                        Discovered URLs - {linkTypeConfig[selectedLinkType as keyof typeof linkTypeConfig]?.title}
-                      </CardTitle>
-                      <CardDescription>
-                        Community-verified URLs ready for link building
-                      </CardDescription>
-                    </div>
-                    <Button
-                      variant="outline"
-                      onClick={loadDiscoveredUrls}
-                      disabled={isFetching}
-                    >
-                      <RefreshCw className={`h-4 w-4 mr-2 ${isFetching ? 'animate-spin' : ''}`} />
-                      Refresh
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {discoveredUrls.length === 0 ? (
-                    <div className="text-center py-12">
-                      <Search className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-                      <p className="text-gray-500">No URLs discovered yet for this strategy</p>
-                      <p className="text-sm text-gray-400 mt-1">
-                        Start a discovery session to find new opportunities
-                      </p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3 max-h-[600px] overflow-y-auto">
-                      {discoveredUrls.map((url) => (
-                        <div key={url.id} className="p-4 border rounded-lg bg-white hover:shadow-md transition-shadow">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1 space-y-2">
-                              <div className="flex items-center gap-3">
-                                <div className="font-medium text-blue-600">{url.domain}</div>
-                                <Badge variant="outline" className="text-xs">
-                                  DA {url.domainAuthority}
-                                </Badge>
-                                <Badge variant="outline" className="text-xs">
-                                  {url.trafficEstimate} traffic
-                                </Badge>
-                                <Badge variant={url.status === 'verified' ? 'default' : 'secondary'} className="text-xs">
-                                  {url.status.toUpperCase()}
-                                </Badge>
-                              </div>
-                              
-                              <div className="text-sm text-gray-600">
-                                <div>Method: {url.postingMethod.replace('_', ' ').toUpperCase()}</div>
-                                <div>Success Rate: {url.successRate}%</div>
-                                {url.requiresRegistration && <div className="text-orange-600">Registration Required</div>}
-                                {url.requiresModeration && <div className="text-yellow-600">Moderated</div>}
-                              </div>
 
                               <div className="text-xs text-gray-500 bg-gray-100 rounded px-2 py-1 font-mono">
                                 {url.url}
@@ -1222,17 +935,7 @@ export default function BacklinkAutomation() {
                         </div>
                       ))}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
 
-          {/* Premium Plan Popup */}
-          <PremiumPlanPopup
-            isOpen={showPremiumModal}
-            onClose={() => setShowPremiumModal(false)}
-          />
         </div>
       </div>
 
