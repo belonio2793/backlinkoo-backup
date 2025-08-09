@@ -604,33 +604,14 @@ export default function EnhancedUserManagement() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="edit-credits">Credits</Label>
-                  <Input
-                    id="edit-credits"
-                    type="number"
-                    value={editingUser.credits}
-                    onChange={(e) => setEditingUser({ ...editingUser, credits: parseInt(e.target.value) || 0 })}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="edit-status">Subscription Status</Label>
-                  <Select
-                    value={editingUser.subscription_status}
-                    onValueChange={(value) => setEditingUser({ ...editingUser, subscription_status: value as any })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="inactive">Inactive</SelectItem>
-                      <SelectItem value="suspended">Suspended</SelectItem>
-                      <SelectItem value="cancelled">Cancelled</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div>
+                <Label htmlFor="edit-credits">Credits</Label>
+                <Input
+                  id="edit-credits"
+                  type="number"
+                  value={editingUser.credits}
+                  onChange={(e) => setEditingUser({ ...editingUser, credits: parseInt(e.target.value) || 0 })}
+                />
               </div>
 
               <div>
