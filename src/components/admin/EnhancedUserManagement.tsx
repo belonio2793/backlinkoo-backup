@@ -260,7 +260,7 @@ export default function EnhancedUserManagement() {
                 <Download className="h-4 w-4 mr-2" />
                 Export CSV
               </Button>
-              <Button onClick={loadUsers} variant="outline" size="sm">
+              <Button onClick={refresh} variant="outline" size="sm">
                 <RefreshCw className="h-4 w-4 mr-2" />
                 Refresh
               </Button>
