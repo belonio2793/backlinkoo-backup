@@ -1518,11 +1518,16 @@ export default function BacklinkAutomation() {
                     {!user && guestLinksGenerated < 20 && (
                       <div className="space-y-3">
                         <Button
-                          onClick={() => window.location.href = '/login'}
+                          onClick={startUrlDiscovery}
                           className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                          disabled={isDiscovering || !discoveryForm.keywords.trim()}
                         >
-                          <UserPlus className="h-4 w-4 mr-2" />
-                          Sign In to Start Discovery
+                          {isDiscovering ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Search className="h-4 w-4 mr-2" />
+                          )}
+                          Discover URLs (Trial Mode)
                         </Button>
                         <div className="flex gap-2">
                           <Button
