@@ -4609,6 +4609,71 @@ export default function BacklinkAutomation() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* In-Page Authentication Modal */}
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-blue-600" />
+              Continue with Your Account
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 mb-2">
+                Stay on this page while accessing your account
+              </p>
+              {authContext === 'trial_complete' && (
+                <div className="bg-green-50 rounded-lg p-3 mb-4">
+                  <div className="text-sm text-green-800">
+                    🎉 <strong>Trial Complete!</strong> Sign in to save your {guestLinksGenerated} generated backlinks and continue building.
+                  </div>
+                </div>
+              )}
+              {authContext === 'header_access' && (
+                <div className="bg-blue-50 rounded-lg p-3 mb-4">
+                  <div className="text-sm text-blue-800">
+                    🚀 <strong>Unlock Premium Features:</strong> Access full campaign management, unlimited links, and advanced analytics.
+                  </div>
+                </div>
+              )}
+              {authContext === 'floating_menu' && (
+                <div className="bg-purple-50 rounded-lg p-3 mb-4">
+                  <div className="text-sm text-purple-800">
+                    ⚡ <strong>Quick Access:</strong> Sign in to access all premium tools and features without leaving this page.
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <AuthFormTabsFixed
+              onSuccess={(user) => {
+                setShowAuthModal(false);
+                addThroughputEvent('user_authenticated');
+
+                toast({
+                  title: "🎉 Welcome Back!",
+                  description: "You're now signed in and can access all premium features.",
+                  duration: 4000,
+                });
+
+                // Refresh the page state without redirect
+                window.location.reload();
+              }}
+              onSignInStart={() => {
+                // Optional: can add loading state here
+              }}
+              loadingMessage="Signing you in..."
+            />
+
+            <div className="text-center text-xs text-gray-500 pt-2 border-t">
+              🔒 Secure authentication • Stay on this page • No disruption to your campaigns
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
