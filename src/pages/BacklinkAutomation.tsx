@@ -1445,7 +1445,7 @@ export default function BacklinkAutomation() {
         } else {
           // Progress update
           toast({
-            title: `��� +${linksToGenerate} More Backlinks Generated!`,
+            title: `🔥 +${linksToGenerate} More Backlinks Generated!`,
             description: `Total: ${newTotal} premium backlinks built! Keep going - you're on fire!`,
           });
         }
@@ -3489,7 +3489,7 @@ export default function BacklinkAutomation() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  setCampaignToDelete(campaign);
+                                  setGuestCampaignToDelete(campaign);
                                   setShowDeleteConfirmation(true);
                                 }}
                                 className="h-8 px-2 border-red-300 text-red-600 hover:bg-red-50"
