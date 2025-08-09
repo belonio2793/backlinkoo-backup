@@ -606,6 +606,34 @@ export default function BacklinkAutomation() {
     }
   };
 
+  const formatUrl = (url: string) => {
+    if (!url.trim()) return url;
+
+    // Check if URL already has a protocol
+    if (url.match(/^https?:\/\//)) {
+      return url;
+    }
+
+    // Add https:// by default
+    return `https://${url}`;
+  };
+
+  const handleUrlChange = (url: string) => {
+    setCampaignForm(prev => ({ ...prev, targetUrl: url }));
+
+    // Auto-format URL when user finishes typing (after a short delay)
+    if (url && !url.match(/^https?:\/\//)) {
+      setTimeout(() => {
+        setCampaignForm(prev => {
+          if (prev.targetUrl === url) {
+            return { ...prev, targetUrl: formatUrl(url) };
+          }
+          return prev;
+        });
+      }, 1000);
+    }
+  };
+
   const generateCampaignName = (url: string, keywords: string) => {
     try {
       const domain = new URL(url).hostname.replace('www.', '');
@@ -684,7 +712,7 @@ export default function BacklinkAutomation() {
                 <Lightning className="h-5 w-5 text-orange-500 absolute -top-1 -right-1" />
               </div>
               <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-orange-500 bg-clip-text text-transparent">
-                Recursive Link Discovery Engine
+                Backlink ∞ Automation Link Building
               </h1>
               <div className="flex items-center gap-2">
                 {isPremium && (
@@ -830,8 +858,8 @@ export default function BacklinkAutomation() {
                       <Input
                         id="targetUrl"
                         value={campaignForm.targetUrl}
-                        onChange={(e) => setCampaignForm(prev => ({ ...prev, targetUrl: e.target.value }))}
-                        placeholder="https://yourwebsite.com"
+                        onChange={(e) => handleUrlChange(e.target.value)}
+                        placeholder="yourwebsite.com (will auto-format to https://)"
                         className="h-12"
                       />
                     </div>
