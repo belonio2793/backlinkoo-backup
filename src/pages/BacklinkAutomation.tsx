@@ -1516,6 +1516,12 @@ export default function BacklinkAutomation() {
 
   const handleUrlChange = (value: string) => {
     setCampaignForm(prev => ({ ...prev, targetUrl: formatUrl(value) }));
+    setUnsavedChanges(true);
+  };
+
+  const handleFormChange = (field: string, value: string | number) => {
+    setCampaignForm(prev => ({ ...prev, [field]: value }));
+    setUnsavedChanges(true);
   };
 
   const generateCampaignName = (url: string, keywords: string) => {
@@ -3402,7 +3408,7 @@ export default function BacklinkAutomation() {
                           { name: 'Business & Finance', count: 98750, icon: '💼' },
                           { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
-                          { name: 'News & Media', count: 65430, icon: '📰' },
+                          { name: 'News & Media', count: 65430, icon: '��' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '🛒' },
                           { name: 'Travel & Tourism', count: 38920, icon: '✈️' },
