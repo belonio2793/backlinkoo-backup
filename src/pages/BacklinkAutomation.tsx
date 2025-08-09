@@ -214,18 +214,8 @@ export default function BacklinkAutomation() {
       }
 
       try {
-        // Check if backend is available first
-        const isBackendUp = await campaignService.isBackendAvailable();
-        if (!isBackendUp) {
-          console.log('Backend services not available, operating in demo mode');
-          setBackendStatus('unavailable');
-          setCampaigns([]);
-          setDatabaseCampaigns([]);
-          return;
-        }
-
-        setBackendStatus('available');
-
+        // Try to get campaigns directly, don't block on availability check
+        console.log('Attempting to load campaigns from backend...');
         const dbCampaigns = await campaignService.getCampaigns();
         setDatabaseCampaigns(dbCampaigns);
         
