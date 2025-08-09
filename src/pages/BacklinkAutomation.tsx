@@ -795,8 +795,8 @@ export default function BacklinkAutomation() {
           <TabsContent value="campaigns" className="space-y-6">
             {/* Campaign Creation */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+              <CardHeader className="text-center">
+                <CardTitle className="flex items-center justify-center gap-2">
                   <Target className="h-5 w-5" />
                   Create Enterprise Campaign
                 </CardTitle>
