@@ -399,7 +399,9 @@ export default function BacklinkAutomation() {
           campaignId: result.campaign.id,
           targetUrl: campaignForm.targetUrl,
           keywords: campaignForm.keywords.split(',').map(k => k.trim()),
-          anchorTexts: campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a),
+          anchorTexts: campaignForm.anchorTexts.trim()
+            ? campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a)
+            : ['click here', 'learn more', 'read more', 'visit site'],
           dailyLimit: campaignForm.dailyLimit,
           strategies: {
             blog_comments: campaignForm.linkType === 'blog_comment' || campaignForm.linkType === 'all',
