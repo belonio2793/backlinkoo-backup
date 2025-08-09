@@ -597,12 +597,19 @@ class CampaignService {
 
       // Update via Supabase directly for better real-time response
       // RLS policy will automatically ensure user can only update their own campaigns
+      const updateData: any = {
+        status,
+        updated_at: new Date().toISOString()
+      };
+
+      // Add completion timestamp if marking as completed
+      if (status === 'completed') {
+        updateData.completed_at = new Date().toISOString();
+      }
+
       const { data, error } = await supabase
         .from('backlink_campaigns')
-        .update({
-          status,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', campaignId)
         .select()
         .single();
