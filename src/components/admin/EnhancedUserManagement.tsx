@@ -361,7 +361,7 @@ export default function EnhancedUserManagement() {
               <Input
                 placeholder="Search users by email..."
                 value={filters.search}
-                onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                onChange={(e) => handleFiltersChange({ search: e.target.value })}
                 className="w-full"
               />
             </div>
