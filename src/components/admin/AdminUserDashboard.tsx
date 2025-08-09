@@ -155,7 +155,14 @@ export function AdminUserDashboard() {
   const testDatabaseConnection = async () => {
     try {
       console.log('🔍 Testing database connection...');
-      
+
+      // Check for RLS recursion specifically first
+      if (connectionStatus.error?.includes('infinite recursion')) {
+        console.log('🔧 RLS recursion detected, attempting to fix...');
+        await fixRLSRecursion();
+        return;
+      }
+
       // Direct test of profiles table
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
@@ -163,6 +170,12 @@ export function AdminUserDashboard() {
         .limit(1);
 
       if (profilesError) {
+        // Check if this is an RLS recursion error
+        if (profilesError.message.includes('infinite recursion')) {
+          console.log('🔧 RLS recursion detected in profiles query, attempting fix...');
+          await fixRLSRecursion();
+          return;
+        }
         throw new Error(`Database connection failed: ${profilesError.message}`);
       }
 
