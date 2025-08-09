@@ -51,30 +51,64 @@ export function GuestPremiumUpsellModal({
   const handleUpgrade = async () => {
     setIsProcessingUpgrade(true);
     try {
-      if (onUpgrade) {
-        onUpgrade();
-      }
+      const guestData = guestTrackingService.getGuestData();
+      const guestEmail = guestData?.email || '';
 
-      // Show success message
+      // Show processing message
       toast({
-        title: "🚀 Upgrading to Premium!",
-        description: "Redirecting to secure checkout...",
+        title: "🚀 Creating Secure Checkout!",
+        description: "Opening payment window...",
       });
 
-      // Close modal and redirect after a short delay
-      onOpenChange(false);
+      // Create subscription checkout session
+      const result = await paymentIntegrationService.createSubscription(
+        'monthly', // Default to monthly plan
+        true, // isGuest
+        guestEmail
+      );
 
-      // Redirect to payment page with guest tracking data
-      const checkoutUrl = `/subscription-success?guest_id=${guestTrackingService.getGuestData()?.userId}&source=guest_upsell&trigger=${trigger}`;
+      if (result.success && result.url) {
+        // Open checkout in new window/tab
+        const checkoutWindow = window.open(
+          result.url,
+          'stripe-checkout',
+          'width=800,height=600,scrollbars=yes,resizable=yes'
+        );
 
-      setTimeout(() => {
-        window.location.href = checkoutUrl;
-      }, 1000);
+        if (checkoutWindow) {
+          // Close modal since checkout opened
+          onOpenChange(false);
+
+          // Monitor the checkout window
+          const checkClosed = setInterval(() => {
+            if (checkoutWindow.closed) {
+              clearInterval(checkClosed);
+              toast({
+                title: "Checkout Complete",
+                description: "If you completed your purchase, please refresh the page to see your premium features!",
+              });
+            }
+          }, 1000);
+
+          if (onUpgrade) {
+            onUpgrade();
+          }
+        } else {
+          // Popup was blocked, fallback to same window
+          toast({
+            title: "Popup Blocked",
+            description: "Opening checkout in current window...",
+          });
+          window.location.href = result.url;
+        }
+      } else {
+        throw new Error(result.error || 'Failed to create checkout session');
+      }
     } catch (error) {
       console.error('Upgrade error:', error);
       toast({
-        title: "Upgrade Error",
-        description: "Something went wrong. Please try again.",
+        title: "Checkout Error",
+        description: error instanceof Error ? error.message : "Something went wrong. Please try again.",
         variant: "destructive"
       });
     } finally {
