@@ -12,7 +12,7 @@ const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
 const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDiscoveryDashboard"));
 const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
 const LazyAffiliateProgram = lazy(() => import("./pages/AffiliateProgram"));
-const LazyBlog = lazy(() => import("./pages/Blog"));
+const LazyBlog = lazy(() => import("./pages/Blog").then(module => ({ default: module.Blog })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
