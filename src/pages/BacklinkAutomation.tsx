@@ -3831,265 +3831,30 @@ export default function BacklinkAutomation() {
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
-                    <Brain className="h-5 w-5" />
-                    Recursive URL Discovery for {linkTypeConfig[selectedLinkType as keyof typeof linkTypeConfig]?.title}
+                    <Search className="h-5 w-5" />
+                    URL Discovery
                   </CardTitle>
                   <CardDescription>
-                    Launch AI-powered discovery to find new high-quality URLs for {linkTypeConfig[selectedLinkType as keyof typeof linkTypeConfig]?.title.toLowerCase()}
+                    Browse categorized URLs by link building strategy
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label htmlFor="discoveryKeywords">Discovery Keywords</Label>
-                      <Input
-                        id="discoveryKeywords"
-                        value={discoveryForm.keywords}
-                        onChange={(e) => setDiscoveryForm(prev => ({ ...prev, keywords: e.target.value }))}
-                        placeholder="AI, technology, software"
-                        className="h-12"
-                      />
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="discoveryDepth">Discovery Depth</Label>
-                      <Select value={discoveryForm.depth.toString()} onValueChange={(value) => setDiscoveryForm(prev => ({ ...prev, depth: parseInt(value) }))}>
-                        <SelectTrigger className="h-12">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="1">Depth 1 (Fast)</SelectItem>
-                          <SelectItem value="2">Depth 2 (Balanced)</SelectItem>
-                          <SelectItem value="3">Depth 3 (Thorough)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    
-                    <div>
-                      <Label htmlFor="maxResults">Max Results</Label>
-                      <Select value={discoveryForm.maxResults.toString()} onValueChange={(value) => setDiscoveryForm(prev => ({ ...prev, maxResults: parseInt(value) }))}>
-                        <SelectTrigger className="h-12">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="50">50 URLs</SelectItem>
-                          <SelectItem value="100">100 URLs</SelectItem>
-                          <SelectItem value="200">200 URLs</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-
-                  {/* User State-Aware Discovery Buttons */}
+                <CardContent>
                   <div className="space-y-4">
-                    {/* Guest Trial State */}
-                    {!user && guestLinksGenerated < 20 && (
-                      <div className="space-y-3">
-                        <Button
-                          onClick={startUrlDiscovery}
-                          className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                          disabled={isDiscovering || !discoveryForm.keywords.trim()}
-                        >
-                          {isDiscovering ? (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          ) : (
-                            <Search className="h-4 w-4 mr-2" />
-                          )}
-                          Discover URLs (Trial Mode)
-                        </Button>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="outline"
-                            onClick={() => setSelectedTab('campaigns')}
-                            className="flex-1"
-                          >
-                            <Target className="h-4 w-4 mr-2" />
-                            View Campaigns
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={() => {
-                              // Show sample data
-                              toast({
-                                title: "Preview Mode",
-                                description: "Sign in to access live URL discovery with real-time data!",
-                              });
-                            }}
-                            className="flex-1"
-                          >
-                            <Eye className="h-4 w-4 mr-2" />
-                            Preview Mode
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Trial Exhausted Discovery State */}
-                    {!user && guestLinksGenerated >= 20 && (
-                      <div className="space-y-3">
-                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 border-2 border-amber-200">
-                          <div className="text-center">
-                            <div className="text-lg font-bold text-amber-800 mb-2">
-                              🎯 Trial Complete! Amazing Discovery Results
-                            </div>
-                            <p className="text-sm text-amber-700">
-                              You've discovered thousands of high-quality URLs. Sign in to continue exploring!
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex gap-3">
-                          <Button
-                            onClick={() => setShowTrialExhaustedModal(true)}
-                            className="flex-1 h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                          >
-                            <Crown className="h-4 w-4 mr-2" />
-                            Unlock Premium
-                          </Button>
-                          <Button
-                            variant="outline"
-                            onClick={() => window.location.href = '/login'}
-                            className="flex-1 h-12"
-                          >
-                            <UserPlus className="h-4 w-4 mr-2" />
-                            Sign In Free
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Logged In but System Initializing */}
-                    {user && databaseStatus && !databaseStatus.isConnected && (
-                      <div className="space-y-3">
-                        <Button
-                          disabled
-                          className="w-full h-12 bg-gradient-to-r from-gray-400 to-gray-500"
-                        >
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Discovery Engine Initializing...
-                        </Button>
-                        <div className="text-center">
-                          <Button
-                            variant="outline"
-                            onClick={() => window.open('mailto:support@backlinkoo.com?subject=Discovery Engine Setup', '_blank')}
-                            className="h-10"
-                          >
-                            <Settings className="h-4 w-4 mr-2" />
-                            Get Help with Setup
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Logged In and Ready */}
-                    {user && databaseStatus && databaseStatus.isConnected && (
-                      <div className="space-y-3">
-                        <Button
-                          onClick={startUrlDiscovery}
-                          className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                          disabled={isDiscovering || !discoveryForm.keywords.trim()}
-                        >
-                          {isDiscovering ? (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          ) : (
-                            <Search className="h-4 w-4 mr-2" />
-                          )}
-                          {isPremium ? "Start Advanced Discovery" : "Start Discovery"}
-                        </Button>
-
-                        {/* Additional Discovery Actions */}
-                        <div className="grid grid-cols-2 gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setDiscoveryForm({
-                                keywords: 'AI tools, software',
-                                depth: 2,
-                                maxResults: 100
-                              });
-                            }}
-                          >
-                            <Sparkles className="h-3 w-3 mr-1" />
-                            Quick Start
-                          </Button>
-
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              if (isPremium) {
-                                setDiscoveryForm(prev => ({ ...prev, depth: 3, maxResults: 200 }));
-                                toast({
-                                  title: "Premium Mode Activated",
-                                  description: "Using advanced depth and maximum results!",
-                                });
-                              } else {
-                                toast({
-                                  title: "Premium Feature",
-                                  description: "Upgrade to unlock advanced discovery settings!",
-                                  action: (
-                                    <Button size="sm" onClick={() => window.location.href = '/subscription-success'}>
-                                      Upgrade
-                                    </Button>
-                                  ),
-                                });
-                              }
-                            }}
-                          >
-                            <Brain className="h-3 w-3 mr-1" />
-                            {isPremium ? "Max Power" : "Premium Mode"}
-                          </Button>
-                        </div>
-
-                        {/* Discovery Stats & Actions */}
-                        <div className="flex flex-wrap gap-2 justify-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => {
-                              loadDiscoveredUrls();
-                              loadDiscoveryStats();
-                              toast({
-                                title: "Data Refreshed",
-                                description: "Latest discovery results loaded!",
-                              });
-                            }}
-                          >
-                            <RefreshCw className="h-3 w-3 mr-1" />
-                            Refresh Data
-                          </Button>
-
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => window.location.href = '/backlink-report'}
-                          >
-                            <BarChart3 className="h-3 w-3 mr-1" />
-                            View Analytics
-                          </Button>
-                        </div>
-
-                        {/* User Plan Status */}
-                        {!isPremium && (
-                          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-3">
-                            <div className="flex items-center justify-between text-sm">
-                              <div className="flex items-center gap-2">
-                                <AlertTriangle className="h-4 w-4 text-purple-600" />
-                                <span className="text-purple-700">Free Plan: Limited to {discoveryForm.maxResults} URLs</span>
-                              </div>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => window.location.href = '/subscription-success'}
-                                className="border-purple-200 text-purple-600 hover:bg-purple-100"
-                              >
-                                Unlock More
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                    <div>
+                      <Label htmlFor="linkTypeSelect">Select Link Type</Label>
+                      <Select value={selectedLinkType} onValueChange={setSelectedLinkType}>
+                        <SelectTrigger className="h-12">
+                          <SelectValue placeholder="Choose link building strategy" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Strategies</SelectItem>
+                          <SelectItem value="blog_comment">Blog Comments</SelectItem>
+                          <SelectItem value="forum_profile">Forum Profiles</SelectItem>
+                          <SelectItem value="web2_platform">Web 2.0 Platforms</SelectItem>
+                          <SelectItem value="social_profile">Social Profiles</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
