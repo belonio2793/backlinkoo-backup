@@ -867,13 +867,38 @@ export default function BacklinkAutomation() {
             {campaigns.length > 0 && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <BarChart3 className="h-5 w-5" />
-                    Enterprise Campaign Dashboard
-                  </CardTitle>
-                  <CardDescription>
-                    Real-time monitoring of {campaigns.filter(c => c.status === 'active').length} active campaigns
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <BarChart3 className="h-5 w-5" />
+                        Enterprise Campaign Dashboard
+                      </CardTitle>
+                      <CardDescription>
+                        Real-time monitoring of {campaigns.filter(c => c.status === 'active').length} active campaigns
+                      </CardDescription>
+                    </div>
+                    {!isPremium && (
+                      <div className="text-right">
+                        <div className="text-sm font-medium">
+                          Links Generated: {campaigns.reduce((sum, c) => sum + c.linksGenerated, 0)}/20
+                        </div>
+                        <div className={`text-xs ${
+                          campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) >= 15
+                            ? 'text-red-600'
+                            : campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) >= 10
+                            ? 'text-yellow-600'
+                            : 'text-gray-500'
+                        }`}>
+                          {campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) >= 20
+                            ? 'Upgrade to Premium for unlimited links'
+                            : campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) >= 15
+                            ? 'Approaching free limit - upgrade soon'
+                            : 'Free tier limit'
+                          }
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
