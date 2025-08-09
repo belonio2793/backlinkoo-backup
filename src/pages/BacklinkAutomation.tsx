@@ -214,7 +214,7 @@ export default function BacklinkAutomation() {
   const contentEngine = ContentGenerationEngine.getInstance();
   const errorEngine = ErrorHandlingEngine.getInstance();
 
-  // Load campaigns and metrics on mount
+  // Load campaigns and metrics on mount and when user changes
   useEffect(() => {
     loadCampaigns();
     loadSystemMetrics();
@@ -223,7 +223,9 @@ export default function BacklinkAutomation() {
     // Set up real-time updates with different intervals for transparency
     const fastMetricsInterval = setInterval(loadRealTimeMetrics, 3000); // Every 3 seconds for active campaigns
     const systemInterval = setInterval(loadSystemMetrics, 30000); // Every 30 seconds for system health
-    const resultsInterval = setInterval(loadPostedResults, 5000); // Every 5 seconds for results
+    const resultsInterval = setInterval(() => {
+      if (user) loadPostedResults(); // Only load results if user is authenticated
+    }, 5000); // Every 5 seconds for results
     const proliferationInterval = setInterval(loadProliferationStats, 10000); // Every 10 seconds for proliferation stats
 
     return () => {
@@ -232,7 +234,7 @@ export default function BacklinkAutomation() {
       clearInterval(resultsInterval);
       clearInterval(proliferationInterval);
     };
-  }, []);
+  }, [user]); // Add user as dependency to re-run when auth state changes
 
   const loadCampaigns = async () => {
     try {
