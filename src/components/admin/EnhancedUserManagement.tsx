@@ -400,7 +400,7 @@ export default function EnhancedUserManagement() {
             </div>
             <Button
               variant="outline"
-              onClick={() => setFilters({
+              onClick={() => handleFiltersChange({
                 search: '',
                 role: 'all',
                 subscription: 'all',
