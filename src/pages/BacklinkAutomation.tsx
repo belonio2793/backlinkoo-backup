@@ -433,6 +433,22 @@ export default function BacklinkAutomation() {
     }
   };
 
+  // Initialize website randomization on component mount
+  useEffect(() => {
+    randomizeWebsites();
+  }, [randomizeWebsites]);
+
+  // Randomize websites when database tab is accessed
+  useEffect(() => {
+    if (selectedTab === 'database') {
+      const timeSinceLastRotation = new Date().getTime() - lastRotationTime.getTime();
+      // Rotate if more than 5 seconds have passed since last rotation
+      if (timeSinceLastRotation > 5000) {
+        randomizeWebsites();
+      }
+    }
+  }, [selectedTab, lastRotationTime, randomizeWebsites]);
+
   // Initialize guest tracking on component mount
   useEffect(() => {
     if (!user && !guestTrackingInitialized) {
