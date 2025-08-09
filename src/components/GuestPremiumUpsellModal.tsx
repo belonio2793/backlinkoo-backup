@@ -298,24 +298,24 @@ export function GuestPremiumUpsellModal({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div className="text-center">
                 <div className="h-12 w-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Play className="h-6 w-6" />
+                  <Infinity className="h-6 w-6" />
                 </div>
-                <div className="text-xl font-bold">Resume Campaigns</div>
-                <div className="text-sm opacity-90">Continue from where you left off</div>
+                <div className="text-xl font-bold">Unlimited Everything</div>
+                <div className="text-sm opacity-90">500+ links per campaign, unlimited campaigns</div>
               </div>
               <div className="text-center">
                 <div className="h-12 w-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Infinity className="h-6 w-6" />
+                  <Star className="h-6 w-6" />
                 </div>
-                <div className="text-xl font-bold">∞ Links</div>
-                <div className="text-sm opacity-90">No more 20-link limits</div>
+                <div className="text-xl font-bold">SEO Academy</div>
+                <div className="text-sm opacity-90">Complete video courses & expert guidance</div>
               </div>
               <div className="text-center">
                 <div className="h-12 w-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Shield className="h-6 w-6" />
                 </div>
-                <div className="text-xl font-bold">Keep Progress</div>
-                <div className="text-sm opacity-90">All your links are preserved</div>
+                <div className="text-xl font-bold">Priority Support</div>
+                <div className="text-sm opacity-90">Skip the line, get expert help fast</div>
               </div>
             </div>
 
