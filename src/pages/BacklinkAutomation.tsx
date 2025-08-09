@@ -1932,6 +1932,14 @@ export default function BacklinkAutomation() {
         </div>
       </div>
 
+      {/* Trial Exhausted Modal */}
+      <TrialExhaustedModal
+        open={showTrialExhaustedModal}
+        onOpenChange={setShowTrialExhaustedModal}
+        guestResults={guestCampaignResults}
+        totalLinks={guestLinksGenerated}
+      />
+
       {/* Delete Campaign Dialog */}
       <DeleteCampaignDialog
         open={deleteDialogOpen}
