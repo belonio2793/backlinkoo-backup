@@ -953,6 +953,33 @@ export default function BacklinkAutomation() {
         const result = await campaignService.createCampaign(campaignData);
 
         if (result.campaign) {
+          // Create enhanced campaign object with real-time tracking
+          const enhancedCampaign: Campaign = {
+            id: result.campaign.id,
+            name: result.campaign.name,
+            targetUrl: result.campaign.target_url,
+            keywords: result.campaign.keywords,
+            anchorTexts: result.campaign.anchor_texts || [],
+            dailyLimit: result.campaign.daily_limit || 25,
+            status: 'active',
+            linksGenerated: 0,
+            linksLive: 0,
+            progress: 0,
+            createdAt: new Date(),
+            lastActivity: new Date(),
+            quality: {
+              averageAuthority: 0,
+              successRate: 0,
+              velocity: 0,
+              efficiency: 0
+            },
+            realTimeActivity: [],
+            recentLinks: []
+          };
+
+          // Add to campaigns state immediately
+          setCampaigns(prev => [...prev, enhancedCampaign]);
+
           const proliferationCampaign: CampaignProliferation = {
             campaignId: result.campaign.id,
             targetUrl: campaignForm.targetUrl,
@@ -974,6 +1001,9 @@ export default function BacklinkAutomation() {
           };
 
           await internetProliferationService.addCampaignToProliferation(proliferationCampaign);
+
+          // Start real-time activity simulation
+          startRealTimeActivity(result.campaign.id);
 
           const proliferationStats = internetProliferationService.getProliferationStats();
           console.log('🚀 Proliferation Engine Status:', {
