@@ -2504,7 +2504,14 @@ export default function BacklinkAutomation() {
                               <Button
                                 variant="link"
                                 size="sm"
-                                onClick={() => window.location.href = '/subscription-success'}
+                                onClick={() => {
+                                  setPremiumUpsellTrigger('manual');
+                                  if (user) {
+                                    setShowTrialExhaustedModal(true);
+                                  } else {
+                                    setShowGuestPremiumModal(true);
+                                  }
+                                }}
                                 className="p-0 h-auto text-amber-700 hover:text-amber-800"
                               >
                                 Upgrade →
