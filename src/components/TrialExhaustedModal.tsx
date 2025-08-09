@@ -33,13 +33,80 @@ export function TrialExhaustedModal({
   userName,
   onUpgrade
 }: TrialExhaustedModalProps) {
-  
-  const totalDomains = guestResults.reduce((acc, campaign) => 
+  const { toast } = useToast();
+  const [isProcessingUpgrade, setIsProcessingUpgrade] = useState(false);
+
+  const totalDomains = guestResults.reduce((acc, campaign) =>
     acc + (campaign.domains?.length || 0), 0
   );
 
   const topDomains = guestResults.flatMap(c => c.domains || [])
     .slice(0, 6);
+
+  const handleUpgradeClick = async () => {
+    setIsProcessingUpgrade(true);
+    try {
+      // Show processing message
+      toast({
+        title: "🚀 Creating Secure Checkout!",
+        description: "Opening payment window...",
+      });
+
+      // Create subscription checkout session
+      const result = await paymentIntegrationService.createSubscription(
+        'monthly', // Default to monthly plan
+        !isLoggedIn, // isGuest (opposite of isLoggedIn)
+        !isLoggedIn ? 'guest@example.com' : undefined // Guest email placeholder
+      );
+
+      if (result.success && result.url) {
+        // Open checkout in new window/tab
+        const checkoutWindow = window.open(
+          result.url,
+          'stripe-checkout',
+          'width=800,height=600,scrollbars=yes,resizable=yes'
+        );
+
+        if (checkoutWindow) {
+          // Close modal since checkout opened
+          onOpenChange(false);
+
+          // Monitor the checkout window
+          const checkClosed = setInterval(() => {
+            if (checkoutWindow.closed) {
+              clearInterval(checkClosed);
+              toast({
+                title: "Checkout Complete",
+                description: "If you completed your purchase, please refresh the page to see your premium features!",
+              });
+            }
+          }, 1000);
+
+          if (onUpgrade) {
+            onUpgrade();
+          }
+        } else {
+          // Popup was blocked, fallback to same window
+          toast({
+            title: "Popup Blocked",
+            description: "Opening checkout in current window...",
+          });
+          window.location.href = result.url;
+        }
+      } else {
+        throw new Error(result.error || 'Failed to create checkout session');
+      }
+    } catch (error) {
+      console.error('Upgrade error:', error);
+      toast({
+        title: "Checkout Error",
+        description: error instanceof Error ? error.message : "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessingUpgrade(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
