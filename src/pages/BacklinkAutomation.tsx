@@ -87,6 +87,8 @@ interface Campaign {
   linksLive: number;
   dailyTarget?: number;
   totalTarget?: number;
+  blogPostUrl?: string;
+  blogPostTitle?: string;
   quality?: {
     averageAuthority: number;
     averageRelevance?: number;
