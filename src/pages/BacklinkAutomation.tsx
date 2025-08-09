@@ -119,6 +119,22 @@ export default function BacklinkAutomation() {
   const [selectedLinkType, setSelectedLinkType] = useState('all');
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
+  // Real-time control panel state
+  const [controlPanelData, setControlPanelData] = useState({
+    systemStatus: 'operational',
+    activeConnections: 24,
+    queueProcessing: 0,
+    successfulLinks: 0,
+    failedAttempts: 0,
+    averageResponseTime: 1.2,
+    currentThroughput: 0,
+    lastUpdate: new Date(),
+    networkHealth: 100,
+    apiCallsUsed: 0,
+    discoveryRate: 0
+  });
+  const [isFetching, setIsFetching] = useState(false);
+
 
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
