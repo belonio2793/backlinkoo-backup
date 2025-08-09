@@ -256,7 +256,7 @@ export default function BacklinkAutomation() {
   // Throttling state for controlled link publishing
   const [isThrottling, setIsThrottling] = useState(false);
   const [throttleIntervalId, setThrottleIntervalId] = useState<NodeJS.Timeout | null>(null);
-  const [currentThrottleDelay, setCurrentThrottleDelay] = useState(30000); // Start with 30 seconds
+  const [currentThrottleDelay, setCurrentThrottleDelay] = useState(1500); // Start with 1.5 seconds
   const [pendingLinksToPublish, setPendingLinksToPublish] = useState<any[]>([]);
   const [recentlyPublishedLinks, setRecentlyPublishedLinks] = useState<any[]>([]);
   const [controlPanelData, setControlPanelData] = useState({
@@ -3462,7 +3462,7 @@ export default function BacklinkAutomation() {
                         {[
                           { name: 'Technology & Software', count: 125420, icon: '💻' },
                           { name: 'Business & Finance', count: 98750, icon: '💼' },
-                          { name: 'Health & Medicine', count: 87320, icon: '��' },
+                          { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
