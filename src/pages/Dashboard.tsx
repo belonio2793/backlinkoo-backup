@@ -925,7 +925,7 @@ const Dashboard = () => {
 
         const result = await Promise.race([
           creditsPromise,
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Credits fetch timeout')), 1000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Credits fetch timeout')), 100))
         ]) as any;
 
         creditsData = result.data;
