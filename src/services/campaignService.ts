@@ -191,36 +191,18 @@ class CampaignService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
-      // Use XMLHttpRequest as fallback to avoid FullStory interference completely
-      const useXHR = true;
-
-      if (useXHR) {
-        response = await this.makeXHRRequest(url, {
-          ...options,
-          signal: controller.signal,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-            'Cache-Control': 'no-cache',
-            'X-Requested-With': 'XMLHttpRequest',
-            ...options.headers,
-          },
-        });
-      } else {
-        // Fallback to safe fetch
-        const safeFetch = this.createSafeFetch();
-        response = await safeFetch(url, {
-          ...options,
-          signal: controller.signal,
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-            'Cache-Control': 'no-cache',
-            'X-Requested-With': 'XMLHttpRequest',
-            ...options.headers,
-          },
-        });
-      }
+      // Use protected request to bypass FullStory interference
+      response = await protectedRequest(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache',
+          'X-Requested-With': 'XMLHttpRequest',
+          ...options.headers,
+        },
+      });
 
       clearTimeout(timeoutId);
     } catch (networkError) {
