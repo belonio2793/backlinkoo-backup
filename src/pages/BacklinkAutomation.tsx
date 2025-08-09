@@ -1222,7 +1222,7 @@ export default function BacklinkAutomation() {
                                   className="text-green-600 hover:text-green-700 hover:bg-green-50"
                                 >
                                   <ThumbsUp className="h-3 w-3 mr-1" />
-                                  {url.upvotes}
+                                  {url.upvotes || 0}
                                 </Button>
                                 <Button
                                   size="sm"
@@ -1231,7 +1231,7 @@ export default function BacklinkAutomation() {
                                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
                                 >
                                   <ThumbsDown className="h-3 w-3 mr-1" />
-                                  {url.downvotes}
+                                  {url.downvotes || 0}
                                 </Button>
                               </div>
                               <Button
