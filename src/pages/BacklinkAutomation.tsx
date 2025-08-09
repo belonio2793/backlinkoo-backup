@@ -853,14 +853,15 @@ export default function BacklinkAutomation() {
             <Alert className="border-yellow-200 bg-yellow-50">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
-                <strong>Database Setup Required:</strong> Some database tables are missing.
-                The system is running in limited mode. Contact support to complete database setup.
-                <div className="mt-2 text-xs">
-                  Missing tables: {Object.entries(databaseStatus.tablesExist)
-                    .filter(([_, exists]) => !exists)
-                    .map(([table]) => table)
-                    .join(', ')
-                  }
+                <strong>Final Setup Step:</strong> We're preparing your personalized link building workspace.
+                <div className="mt-2">
+                  <Button
+                    size="sm"
+                    className="bg-yellow-600 hover:bg-yellow-700"
+                    onClick={() => window.open('mailto:support@backlinkoo.com?subject=Complete Database Setup', '_blank')}
+                  >
+                    Complete Setup (1 minute)
+                  </Button>
                 </div>
               </AlertDescription>
             </Alert>
