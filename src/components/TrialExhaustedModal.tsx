@@ -28,7 +28,8 @@ export function TrialExhaustedModal({
   guestResults,
   totalLinks,
   isLoggedIn = false,
-  userName
+  userName,
+  onUpgrade
 }: TrialExhaustedModalProps) {
   
   const totalDomains = guestResults.reduce((acc, campaign) => 
