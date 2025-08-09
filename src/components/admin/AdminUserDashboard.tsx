@@ -112,6 +112,48 @@ export function AdminUserDashboard() {
   });
   const { toast } = useToast();
 
+  // RLS Recursion Fix Function
+  const fixRLSRecursion = async () => {
+    try {
+      console.log('🔧 Attempting to fix RLS recursion...');
+
+      const response = await fetch('/.netlify/functions/fix-rls-recursion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('✅ RLS recursion fix successful');
+        toast({
+          title: "RLS Fix Applied",
+          description: "Database policies have been fixed. Retesting connection...",
+        });
+
+        // Wait a moment then retry connection
+        setTimeout(() => {
+          testDatabaseConnection();
+        }, 2000);
+      } else {
+        throw new Error(result.error || 'RLS fix failed');
+      }
+    } catch (error) {
+      console.error('❌ RLS fix failed:', error);
+      setConnectionStatus({
+        connected: false,
+        error: `RLS fix failed: ${error instanceof Error ? error.message : 'Unknown error'}. Manual intervention required.`,
+        lastTested: new Date()
+      });
+
+      toast({
+        title: "RLS Fix Failed",
+        description: "Manual database policy review required. Check console for details.",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Initialize connection and load data
   useEffect(() => {
     initializeConnection();
