@@ -228,7 +228,7 @@ export default function BacklinkAutomation() {
           setDatabaseCampaigns([]);
         }
         
-        const displayCampaigns: Campaign[] = dbCampaigns.map(dbCampaign => ({
+        const displayCampaigns: Campaign[] = (dbCampaigns || []).map(dbCampaign => ({
           id: dbCampaign.id,
           name: dbCampaign.name,
           targetUrl: dbCampaign.target_url,
