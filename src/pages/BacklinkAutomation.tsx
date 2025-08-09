@@ -1618,7 +1618,7 @@ export default function BacklinkAutomation() {
         } else if (newTotal >= 20) {
           // Trial complete
           toast({
-            title: "🚀 Amazing! You've Built 20+ Backlinks!",
+            title: "���� Amazing! You've Built 20+ Backlinks!",
             description: "See your incredible results and unlock unlimited campaigns!",
             duration: 6000,
           });
@@ -1826,7 +1826,7 @@ export default function BacklinkAutomation() {
               setTimeout(() => setShowTrialExhaustedModal(true), 3000);
             } else {
               toast({
-                title: "�������� Discovery Complete!",
+                title: "🔍 Discovery Complete!",
                 description: `Found ${additionalLinks} new high-value opportunities! Total progress: ${newTotal} backlinks built.`,
               });
             }
@@ -4281,7 +4281,7 @@ export default function BacklinkAutomation() {
                       <div className="space-y-2 max-h-96 overflow-y-auto">
                         {[
                           { name: 'Technology & Software', count: 125420, icon: '💻' },
-                          { name: 'Business & Finance', count: 98750, icon: '����' },
+                          { name: 'Business & Finance', count: 98750, icon: '💼' },
                           { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
