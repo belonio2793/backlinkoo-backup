@@ -78,7 +78,7 @@ export class UserManagementService {
         offset = 0
       } = filters;
 
-      // Build the query
+      // Build the query - simplified to only select from profiles table
       let query = supabase
         .from('profiles')
         .select(`
@@ -89,16 +89,8 @@ export class UserManagementService {
           subscription_status,
           credits,
           created_at,
-          metadata,
-          auth.users!inner (
-            id,
-            email,
-            last_sign_in_at,
-            email_confirmed_at,
-            banned_until,
-            raw_user_meta_data,
-            user_metadata
-          )
+          last_sign_in_at,
+          metadata
         `, { count: 'exact' });
 
       // Apply filters
