@@ -116,7 +116,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
       if (!silentRefresh) {
         setError(null);
       }
-      setLoadingStatus('Connecting to database...');
+      // setLoadingStatus('Connecting to database...');
 
       // Load from database using the simplified claim service
       const { SimplifiedClaimService } = await import('@/services/simplifiedClaimService');
