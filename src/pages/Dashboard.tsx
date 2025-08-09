@@ -380,7 +380,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
     } catch (error) {
       console.error('Error loading saved posts:', error);
     } finally {
-      setLoadingSavedPosts(false);
+      // setLoadingSavedPosts(false);
     }
   };
 
