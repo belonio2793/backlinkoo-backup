@@ -315,6 +315,70 @@ export default function BacklinkAutomation() {
 
   const { toast } = useToast();
 
+  // Guest campaign management
+  const addGuestConsoleLog = (type: 'info' | 'success' | 'warning' | 'error', message: string, campaignId?: string, details?: any) => {
+    const newLog = {
+      id: `log-${Date.now()}-${Math.random()}`,
+      timestamp: new Date(),
+      type,
+      message,
+      campaignId,
+      details
+    };
+
+    setGuestConsoleLogs(prev => [newLog, ...prev.slice(0, 99)]); // Keep last 100 logs
+
+    // Track console activity for throughput
+    addThroughputEvent('console_log_generated');
+  };
+
+  const pauseGuestCampaign = (campaignId: string) => {
+    setGuestCampaignResults(prev => prev.map(campaign =>
+      campaign.id === campaignId
+        ? { ...campaign, status: 'paused' }
+        : campaign
+    ));
+
+    addGuestConsoleLog('warning', `Campaign "${campaignId}" paused by user`, campaignId);
+    addThroughputEvent('guest_campaign_paused');
+
+    toast({
+      title: "⏸️ Campaign Paused",
+      description: "Guest campaign has been paused successfully.",
+      duration: 3000,
+    });
+  };
+
+  const resumeGuestCampaign = (campaignId: string) => {
+    setGuestCampaignResults(prev => prev.map(campaign =>
+      campaign.id === campaignId
+        ? { ...campaign, status: 'active' }
+        : campaign
+    ));
+
+    addGuestConsoleLog('success', `Campaign "${campaignId}" resumed by user`, campaignId);
+    addThroughputEvent('guest_campaign_resumed');
+
+    toast({
+      title: "▶️ Campaign Resumed",
+      description: "Guest campaign is now active and generating links.",
+      duration: 3000,
+    });
+  };
+
+  const deleteGuestCampaign = (campaignId: string) => {
+    setGuestCampaignResults(prev => prev.filter(campaign => campaign.id !== campaignId));
+
+    addGuestConsoleLog('error', `Campaign "${campaignId}" deleted by user`, campaignId);
+    addThroughputEvent('guest_campaign_deleted');
+
+    toast({
+      title: "🗑️ Campaign Deleted",
+      description: "Guest campaign has been removed.",
+      duration: 3000,
+    });
+  };
+
   // Dynamic throughput tracking
   const addThroughputEvent = (eventType: string) => {
     const now = Date.now();
@@ -3548,7 +3612,7 @@ export default function BacklinkAutomation() {
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
                           { name: 'Science & Research', count: 14560, icon: '🔬' },
-                          { name: 'Arts & Culture', count: 13290, icon: '🎨' }
+                          { name: 'Arts & Culture', count: 13290, icon: '���' }
                         ].map((category, idx) => (
                           <div key={idx} className="p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors">
                             <div className="flex items-center justify-between">
