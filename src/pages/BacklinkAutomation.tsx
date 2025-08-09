@@ -543,10 +543,17 @@ export default function BacklinkAutomation() {
     }
   };
 
-  // Initialize website randomization on component mount
+  // Initialize website randomization and load permanent campaigns
   useEffect(() => {
     randomizeWebsites();
-  }, [randomizeWebsites]);
+
+    // Load permanently saved campaigns
+    const permanentCampaigns = loadPermanentCampaigns();
+    if (permanentCampaigns.length > 0) {
+      setGuestCampaignResults(permanentCampaigns);
+      console.log('📋 Loaded', permanentCampaigns.length, 'permanently saved campaigns');
+    }
+  }, [randomizeWebsites, loadPermanentCampaigns]);
 
   // Start live updates when database tab is accessed
   useEffect(() => {
