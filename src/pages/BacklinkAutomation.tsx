@@ -1380,6 +1380,20 @@ export default function BacklinkAutomation() {
                           )}
                         </div>
 
+                        {/* Info text for non-premium users */}
+                        {!isPremium && (
+                          <div className="text-center">
+                            <p className="text-sm text-gray-600 mb-2">
+                              🎯 Free accounts get 1 campaign with 20 premium backlinks
+                            </p>
+                            <div className="flex justify-center gap-4 text-xs text-gray-500">
+                              <span>✓ High-authority domains</span>
+                              <span>✓ Real-time tracking</span>
+                              <span>✓ Full reporting</span>
+                            </div>
+                          </div>
+                        )}
+
                         {/* Additional Action Buttons for Logged In Users */}
                         <div className="flex flex-wrap gap-2 justify-center">
                           <Button
