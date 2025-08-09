@@ -4,6 +4,8 @@ import App from './App.tsx'
 import './index.css'
 import './utils/globalErrorHandler'
 import './utils/cryptoWalletHandler'
+// Protect fetch from FullStory interference early
+import './utils/fullstoryProtection'
 
 // Clear previous console errors in development
 if (import.meta.env.DEV) {
