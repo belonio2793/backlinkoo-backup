@@ -1186,58 +1186,6 @@ export default function BacklinkAutomation() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="analytics" className="space-y-6">
-            {/* Analytics Dashboard */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <div className="text-3xl font-bold text-blue-600">
-                    {campaigns.reduce((sum, c) => sum + c.linksGenerated, 0)}
-                  </div>
-                  <div className="text-sm text-gray-600">Total Links Generated</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <div className="text-3xl font-bold text-green-600">
-                    {campaigns.reduce((sum, c) => sum + c.linksLive, 0)}
-                  </div>
-                  <div className="text-sm text-gray-600">Links Live</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <div className="text-3xl font-bold text-purple-600">{systemMetrics.averageQuality.toFixed(0)}</div>
-                  <div className="text-sm text-gray-600">Average Quality Score</div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardContent className="p-4 text-center">
-                  <div className="text-3xl font-bold text-orange-600">
-                    {linkOpportunities.length}
-                  </div>
-                  <div className="text-sm text-gray-600">Opportunities Available</div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {analytics && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Campaign Analytics</CardTitle>
-                  <CardDescription>Detailed performance metrics and insights</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Alert>
-                    <BarChart3 className="h-4 w-4" />
-                    <AlertDescription>
-                      Advanced analytics dashboard with predictive insights, competitor analysis, and ROI tracking is being loaded.
-                    </AlertDescription>
-                  </Alert>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
 
           <TabsContent value="content" className="space-y-6">
             {/* Content Generation AI */}
