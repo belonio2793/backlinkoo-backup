@@ -202,8 +202,9 @@ export class CompatibilityAffiliateService {
       this.setTrackingCookie(affiliateCode, trackingId);
       return trackingId;
     } catch (error: any) {
-      console.error('Track click error:', error);
-      throw error;
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      console.error('Track click error:', errorMessage, error);
+      throw new Error(`Failed to track click: ${errorMessage}`);
     }
   }
 
