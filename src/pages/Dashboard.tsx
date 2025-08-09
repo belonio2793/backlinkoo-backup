@@ -347,7 +347,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           <div className="text-xs text-gray-600 space-y-1">
             <div>🔧 Status: {loadingStatus}</div>
             <div>⏰ Last check: {lastRefresh?.toLocaleTimeString() || 'Never'}</div>
-            <div>🔄 Auto-refresh: Every 30 seconds</div>
+            <div>��� Auto-refresh: Every 30 seconds</div>
             <div>📡 Connection: {navigator.onLine ? 'Online' : 'Offline'}</div>
           </div>
         </div>
@@ -739,10 +739,15 @@ const Dashboard = () => {
           }),
           // Check premium status
           PremiumService.checkPremiumStatus(session.user.id).then(isPremium => {
-            setIsPremiumSubscriber(isPremium);
+            if (isMounted) {
+              setIsPremiumSubscriber(isPremium);
+            }
             return isPremium;
           }).catch(err => {
             console.warn('🏠 Dashboard - premium status check failed:', err);
+            if (isMounted) {
+              setIsPremiumSubscriber(false); // Explicitly set to false on error
+            }
             return false;
           }),
           // Fetch user progress if premium
@@ -904,7 +909,7 @@ const Dashboard = () => {
           console.log('🔍 Profile error (non-critical):', result.error);
         }
       } catch (profileError) {
-        console.warn('⚠️ Profile fetch failed, using defaults:', profileError);
+        console.warn('���️ Profile fetch failed, using defaults:', profileError);
       }
 
       // Set user type based on profile
