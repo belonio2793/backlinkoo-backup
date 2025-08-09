@@ -237,7 +237,30 @@ export class GlobalErrorHandler {
    */
   private handleGenericError(error: any, source: string, count: number): void {
     if (count <= 5) {
-      console.error(`❌ Application error (${source}, occurrence ${count}):`, error);
+      const errorMessage = this.formatError(error);
+      console.error(`❌ Application error (${source}, occurrence ${count}):`, errorMessage);
+    }
+  }
+
+  /**
+   * Format error for proper display (prevent [object Object])
+   */
+  private formatError(error: any): string {
+    if (!error) return 'Unknown error';
+
+    if (typeof error === 'string') return error;
+
+    if (error.message) return error.message;
+
+    if (error.toString && typeof error.toString === 'function') {
+      const str = error.toString();
+      if (str !== '[object Object]') return str;
+    }
+
+    try {
+      return JSON.stringify(error, null, 2);
+    } catch {
+      return 'Error object could not be serialized';
     }
   }
 
