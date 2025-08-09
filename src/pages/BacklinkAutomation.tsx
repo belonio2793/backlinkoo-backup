@@ -4738,7 +4738,14 @@ export default function BacklinkAutomation() {
                 {!isPremium && (
                   <Button
                     size="sm"
-                    onClick={() => window.location.href = '/subscription-success'}
+                    onClick={() => {
+                      setPremiumUpsellTrigger('manual');
+                      if (user) {
+                        setShowTrialExhaustedModal(true);
+                      } else {
+                        setShowGuestPremiumModal(true);
+                      }
+                    }}
                     className="w-40 justify-start bg-purple-600 text-white shadow-lg hover:bg-purple-700"
                   >
                     <Crown className="h-4 w-4 mr-2" />
