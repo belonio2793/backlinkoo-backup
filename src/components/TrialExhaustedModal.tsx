@@ -274,6 +274,21 @@ export function TrialExhaustedModal({
           </div>
         </div>
 
+        {/* Success Domains */}
+        <div className="mb-8">
+          <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-white">
+            <BarChart3 className="h-5 w-5" />
+            High-Authority Domains You Conquered
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {topDomains.map((domain, idx) => (
+              <Badge key={idx} variant="outline" className="bg-white/20 text-white border-white/30">
+                {domain}
+              </Badge>
+            ))}
+          </div>
+        </div>
+
         {/* Plan Selection */}
         <div className="mb-8">
           <h3 className="text-lg font-bold mb-4 text-center text-white">Choose Your Plan</h3>
