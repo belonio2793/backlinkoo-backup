@@ -1369,17 +1369,37 @@ export default function BacklinkAutomation() {
           startThrottledPublishing();
         }
 
-        // Generate blog post for guest campaign (non-blocking)
+        // Check for existing blog post on backlinkoo.com first
         let blogResult = { success: false };
+        let existingBlogPost = null;
+
         try {
-          blogResult = await CampaignBlogIntegrationService.generateGuestCampaignBlogPost({
-            targetUrl: campaignForm.targetUrl,
-            keywords: campaignForm.keywords.split(',').map(k => k.trim()),
-            anchorTexts: campaignForm.anchorTexts.trim()
-              ? campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a)
-              : undefined,
-            primaryKeyword: campaignForm.keywords.split(',')[0]?.trim()
-          });
+          // First check if this URL/keyword combination already has a published blog post
+          const existingBlogs = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+          existingBlogPost = existingBlogs.find((blog: any) =>
+            blog.targetUrl === campaignForm.targetUrl &&
+            blog.primaryKeyword === campaignForm.keywords.split(',')[0]?.trim()
+          );
+
+          if (existingBlogPost) {
+            console.log('🔄 Found existing blog post for this URL/keyword combination:', existingBlogPost.url);
+            blogResult = {
+              success: true,
+              blogPostUrl: existingBlogPost.url,
+              title: existingBlogPost.title,
+              isExisting: true
+            };
+          } else {
+            // Generate new blog post
+            blogResult = await CampaignBlogIntegrationService.generateGuestCampaignBlogPost({
+              targetUrl: campaignForm.targetUrl,
+              keywords: campaignForm.keywords.split(',').map(k => k.trim()),
+              anchorTexts: campaignForm.anchorTexts.trim()
+                ? campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a)
+                : undefined,
+              primaryKeyword: campaignForm.keywords.split(',')[0]?.trim()
+            });
+          }
         } catch (blogError) {
           console.warn('Blog generation failed for guest campaign:', blogError.message);
           // Continue with campaign creation even if blog generation fails
@@ -4179,7 +4199,7 @@ export default function BacklinkAutomation() {
                         {[
                           { name: 'Technology & Software', count: 125420, icon: '💻' },
                           { name: 'Business & Finance', count: 98750, icon: '💼' },
-                          { name: 'Health & Medicine', count: 87320, icon: '🏥' },
+                          { name: 'Health & Medicine', count: 87320, icon: '���' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
