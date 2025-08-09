@@ -1356,7 +1356,7 @@ export default function BacklinkAutomation() {
                       <div className="space-y-3">
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                           <Button
-                            onClick={createCampaign}
+                            onClick={deployCampaign}
                             className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                             disabled={isLoading || !campaignForm.targetUrl || !campaignForm.keywords}
                           >
@@ -1365,7 +1365,7 @@ export default function BacklinkAutomation() {
                             ) : (
                               <Rocket className="h-4 w-4 mr-2" />
                             )}
-                            {isPremium ? "Launch Premium Campaign" : "Launch Campaign"}
+                            {isPremium ? "Deploy Premium Campaign" : "Deploy Campaign (20 Links)"}
                           </Button>
 
                           {!isPremium && (
