@@ -1496,7 +1496,7 @@ export default function BacklinkAutomation() {
                             <Button
                               variant="outline"
                               onClick={() => window.location.href = '/subscription-success'}
-                              className="h-12 px-6 border-purple-200 text-purple-600 hover:bg-purple-50"
+                              className="w-full h-12 px-6 border-purple-200 text-purple-600 hover:bg-purple-50"
                             >
                               <Crown className="h-4 w-4 mr-2" />
                               Upgrade to Premium
