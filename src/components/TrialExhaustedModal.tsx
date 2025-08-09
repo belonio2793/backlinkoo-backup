@@ -223,21 +223,6 @@ export function TrialExhaustedModal({
           </div>
         </div>
 
-        {/* Success Domains */}
-        <div className="mb-8">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            High-Authority Domains You Conquered
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {topDomains.map((domain, idx) => (
-              <Badge key={idx} variant="outline" className="bg-blue-50 text-blue-700">
-                {domain}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
         {/* Value Proposition */}
         <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 text-white mb-8">
           <div className="text-center">
