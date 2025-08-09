@@ -150,6 +150,16 @@ export default function BacklinkAutomation() {
   const [campaignToDelete, setCampaignToDelete] = useState<Campaign | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedLinkType, setSelectedLinkType] = useState('all');
+  const [aggregatedSuccessfulLinks, setAggregatedSuccessfulLinks] = useState<{
+    platform: string;
+    domain: string;
+    successCount: number;
+    lastSuccess: Date;
+    averageDA: number;
+    successRate: number;
+    totalAttempts: number;
+    recentLinks: PublishedLink[];
+  }[]>([]);
   const [publishedLinks, setPublishedLinks] = useState<PublishedLink[]>([]);
   const [activityLog, setActivityLog] = useState<ActivityLog[]>([]);
   const [globalSuccessModel, setGlobalSuccessModel] = useState<GlobalSuccessModel>({
@@ -360,7 +370,7 @@ export default function BacklinkAutomation() {
         id: `activity_${Date.now()}`,
         timestamp: new Date(),
         type: 'link_published',
-        message: `🚀 Link published on ${platform.name} with DA ${newLink.domainAuthority} using anchor "${selectedAnchor}"`,
+        message: `�� Link published on ${platform.name} with DA ${newLink.domainAuthority} using anchor "${selectedAnchor}"`,
         campaignId: randomCampaign.id,
         success: true,
         data: newLink
