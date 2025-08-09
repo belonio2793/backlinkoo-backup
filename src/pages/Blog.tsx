@@ -410,6 +410,17 @@ function Blog() {
                 <option value="trending">Highest SEO</option>
               </select>
 
+              {/* Refresh Button */}
+              <Button
+                onClick={handleRefreshPosts}
+                disabled={refreshing}
+                size="sm"
+                variant="outline"
+                className="px-3"
+              >
+                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              </Button>
+
               {/* View Mode */}
               <div className="flex border border-gray-300 rounded-lg overflow-hidden">
                 <Button
