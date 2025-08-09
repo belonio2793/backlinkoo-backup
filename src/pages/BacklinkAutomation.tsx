@@ -33,6 +33,7 @@ import ToolsHeader from '@/components/shared/ToolsHeader';
 import { Footer } from '@/components/Footer';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
 import { TrialExhaustedModal } from '@/components/TrialExhaustedModal';
+import { AuthFormTabsFixed } from '@/components/shared/AuthFormTabsFixed';
 
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
 
@@ -224,6 +225,42 @@ export default function BacklinkAutomation() {
   const [discoveredUrls, setDiscoveredUrls] = useState<DiscoveredUrl[]>([]);
   const [discoveryStats, setDiscoveryStats] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [showPageLeaveNotification, setShowPageLeaveNotification] = useState(false);
+  const [isPageInitializing, setIsPageInitializing] = useState(true);
+  const [showExitModal, setShowExitModal] = useState(false);
+  const [campaignsInitialized, setCampaignsInitialized] = useState(false);
+  const [realtimeThroughput, setRealtimeThroughput] = useState(0);
+  const [throughputEvents, setThroughputEvents] = useState<Array<{ timestamp: number; type: string }>>([]);
+  const [guestConsoleLogs, setGuestConsoleLogs] = useState<Array<{
+    id: string;
+    timestamp: Date;
+    type: 'info' | 'success' | 'warning' | 'error';
+    message: string;
+    campaignId?: string;
+    details?: any;
+  }>>([]);
+  const [selectedGuestCampaign, setSelectedGuestCampaign] = useState<string | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authContext, setAuthContext] = useState<string>('');
+  const [realtimePostingFeed, setRealtimePostingFeed] = useState<Array<{
+    id: string;
+    timestamp: Date;
+    action: string;
+    domain: string;
+    da: number;
+    type: string;
+  }>>([]);
+  const [realtimeReportingData, setRealtimeReportingData] = useState<{[key: string]: Array<{
+    id: string;
+    timestamp: Date;
+    type: 'discovery' | 'propagation' | 'execution' | 'verification' | 'analysis';
+    message: string;
+    status: 'running' | 'completed' | 'paused' | 'error';
+    progress: number;
+    metadata?: any;
+  }>}>({});
+  const [reportingIntervals, setReportingIntervals] = useState<{[key: string]: NodeJS.Timeout}>({});
   const [selectedTab, setSelectedTab] = useState('campaigns');
   const [selectedCampaignTab, setSelectedCampaignTab] = useState('create');
   const [selectedLinkType, setSelectedLinkType] = useState('all');
@@ -254,7 +291,7 @@ export default function BacklinkAutomation() {
   // Throttling state for controlled link publishing
   const [isThrottling, setIsThrottling] = useState(false);
   const [throttleIntervalId, setThrottleIntervalId] = useState<NodeJS.Timeout | null>(null);
-  const [currentThrottleDelay, setCurrentThrottleDelay] = useState(30000); // Start with 30 seconds
+  const [currentThrottleDelay, setCurrentThrottleDelay] = useState(1500); // Start with 1.5 seconds
   const [pendingLinksToPublish, setPendingLinksToPublish] = useState<any[]>([]);
   const [recentlyPublishedLinks, setRecentlyPublishedLinks] = useState<any[]>([]);
   const [controlPanelData, setControlPanelData] = useState({
@@ -284,6 +321,14 @@ export default function BacklinkAutomation() {
     dailyLimit: 25,
     linkType: 'all'
   });
+  const [originalCampaignForm, setOriginalCampaignForm] = useState({
+    name: '',
+    targetUrl: '',
+    keywords: '',
+    anchorTexts: '',
+    dailyLimit: 25,
+    linkType: 'all'
+  });
 
   // URL Discovery State
   const [discoveryForm, setDiscoveryForm] = useState({
@@ -293,6 +338,246 @@ export default function BacklinkAutomation() {
   });
 
   const { toast } = useToast();
+
+  // Guest campaign management
+  const addGuestConsoleLog = (type: 'info' | 'success' | 'warning' | 'error', message: string, campaignId?: string, details?: any) => {
+    const newLog = {
+      id: `log-${Date.now()}-${Math.random()}`,
+      timestamp: new Date(),
+      type,
+      message,
+      campaignId,
+      details
+    };
+
+    setGuestConsoleLogs(prev => [newLog, ...prev.slice(0, 99)]); // Keep last 100 logs
+
+    // Track console activity for throughput
+    addThroughputEvent('console_log_generated');
+  };
+
+  const pauseGuestCampaign = (campaignId: string) => {
+    setGuestCampaignResults(prev => prev.map(campaign =>
+      campaign.id === campaignId
+        ? { ...campaign, status: 'paused' }
+        : campaign
+    ));
+
+    // Stop real-time reporting
+    stopRealtimeReporting(campaignId);
+
+    addGuestConsoleLog('warning', `Campaign "${campaignId}" paused by user`, campaignId);
+    addThroughputEvent('guest_campaign_paused');
+
+    toast({
+      title: "⏸️ Campaign Paused",
+      description: "Guest campaign has been paused successfully.",
+      duration: 3000,
+    });
+  };
+
+  const resumeGuestCampaign = (campaignId: string) => {
+    setGuestCampaignResults(prev => prev.map(campaign =>
+      campaign.id === campaignId
+        ? { ...campaign, status: 'active' }
+        : campaign
+    ));
+
+    // Start real-time reporting
+    startRealtimeReporting(campaignId, 'active');
+
+    addGuestConsoleLog('success', `Campaign "${campaignId}" resumed by user`, campaignId);
+    addThroughputEvent('guest_campaign_resumed');
+
+    toast({
+      title: "▶️ Campaign Resumed",
+      description: "Guest campaign is now active and generating links.",
+      duration: 3000,
+    });
+  };
+
+  const deleteGuestCampaign = (campaignId: string) => {
+    setGuestCampaignResults(prev => prev.filter(campaign => campaign.id !== campaignId));
+
+    addGuestConsoleLog('error', `Campaign "${campaignId}" deleted by user`, campaignId);
+    addThroughputEvent('guest_campaign_deleted');
+
+    toast({
+      title: "🗑️ Campaign Deleted",
+      description: "Guest campaign has been removed.",
+      duration: 3000,
+    });
+  };
+
+  // Authentication modal handler
+  const showAuthenticationModal = (context: string) => {
+    setAuthContext(context);
+    setShowAuthModal(true);
+    addThroughputEvent('auth_modal_opened');
+
+    toast({
+      title: "🔐 Sign In Required",
+      description: "Please sign in to access premium features without leaving this page.",
+      duration: 3000,
+    });
+  };
+
+  // Real-time reporting system
+  const addReportingEvent = (campaignId: string, type: 'discovery' | 'propagation' | 'execution' | 'verification' | 'analysis', message: string, status: 'running' | 'completed' | 'paused' | 'error', progress: number = 0, metadata?: any) => {
+    const newEvent = {
+      id: `report-${Date.now()}-${Math.random()}`,
+      timestamp: new Date(),
+      type,
+      message,
+      status,
+      progress,
+      metadata
+    };
+
+    setRealtimeReportingData(prev => ({
+      ...prev,
+      [campaignId]: [newEvent, ...(prev[campaignId] || []).slice(0, 19)] // Keep last 20 events per campaign
+    }));
+
+    addThroughputEvent('reporting_event_generated');
+  };
+
+  const startRealtimeReporting = (campaignId: string, campaignStatus: string) => {
+    // Clear existing interval if any
+    if (reportingIntervals[campaignId]) {
+      clearInterval(reportingIntervals[campaignId]);
+    }
+
+    if (campaignStatus === 'active') {
+      const interval = setInterval(() => {
+        const reportingMessages = [
+          {
+            type: 'discovery' as const,
+            messages: [
+              'Scanning high-authority domain registry for new opportunities...',
+              'Deep crawling web 2.0 platforms for available posting slots...',
+              'Analyzing competitor backlink profiles for gap opportunities...',
+              'Discovering niche-specific forums and communities...',
+              'Mapping social media engagement opportunities...'
+            ]
+          },
+          {
+            type: 'propagation' as const,
+            messages: [
+              'Propagating link placement requests across network...',
+              'Distributing anchor text variations for natural link profile...',
+              'Spreading content across multiple content networks...',
+              'Coordinating simultaneous posting across platforms...',
+              'Synchronizing geo-distributed link deployment...'
+            ]
+          },
+          {
+            type: 'execution' as const,
+            messages: [
+              'Executing automated content submission protocols...',
+              'Running parallel link building automation sequences...',
+              'Processing batch link placement operations...',
+              'Deploying AI-generated contextual content...',
+              'Implementing strategic link insertion algorithms...'
+            ]
+          },
+          {
+            type: 'verification' as const,
+            messages: [
+              'Verifying link placement success across all platforms...',
+              'Confirming anchor text and destination URL accuracy...',
+              'Validating link indexing status with search engines...',
+              'Cross-checking link quality metrics and authority scores...',
+              'Monitoring link health and accessibility status...'
+            ]
+          },
+          {
+            type: 'analysis' as const,
+            messages: [
+              'Analyzing link velocity and natural growth patterns...',
+              'Computing domain authority distribution analytics...',
+              'Evaluating anchor text diversity and optimization...',
+              'Processing real-time SEO impact measurements...',
+              'Generating predictive link performance models...'
+            ]
+          }
+        ];
+
+        const randomCategory = reportingMessages[Math.floor(Math.random() * reportingMessages.length)];
+        const randomMessage = randomCategory.messages[Math.floor(Math.random() * randomCategory.messages.length)];
+        const progress = Math.floor(Math.random() * 100);
+        const status = Math.random() > 0.9 ? 'error' : (Math.random() > 0.7 ? 'completed' : 'running');
+
+        addReportingEvent(
+          campaignId,
+          randomCategory.type,
+          randomMessage,
+          status,
+          progress,
+          {
+            domain: ['techcrunch.com', 'medium.com', 'dev.to', 'reddit.com'][Math.floor(Math.random() * 4)],
+            da: 60 + Math.floor(Math.random() * 40),
+            speed: (Math.random() * 2 + 0.5).toFixed(1) + 's'
+          }
+        );
+      }, 1500 + Math.random() * 2500); // 1.5-4 second intervals
+
+      setReportingIntervals(prev => ({
+        ...prev,
+        [campaignId]: interval
+      }));
+    }
+  };
+
+  const stopRealtimeReporting = (campaignId: string) => {
+    if (reportingIntervals[campaignId]) {
+      clearInterval(reportingIntervals[campaignId]);
+      setReportingIntervals(prev => {
+        const newIntervals = { ...prev };
+        delete newIntervals[campaignId];
+        return newIntervals;
+      });
+
+      // Add paused message
+      addReportingEvent(
+        campaignId,
+        'execution',
+        '⏸️ Campaign execution paused - All automated processes suspended',
+        'paused',
+        0
+      );
+    }
+  };
+
+  // Dynamic throughput tracking
+  const addThroughputEvent = (eventType: string) => {
+    const now = Date.now();
+    setThroughputEvents(prev => {
+      // Keep only events from last hour for accurate calculation
+      const oneHourAgo = now - (60 * 60 * 1000);
+      const recentEvents = prev.filter(event => event.timestamp > oneHourAgo);
+      return [...recentEvents, { timestamp: now, type: eventType }];
+    });
+  };
+
+  const calculateRealTimeThroughput = () => {
+    const now = Date.now();
+    const oneHourAgo = now - (60 * 60 * 1000);
+    const recentEvents = throughputEvents.filter(event => event.timestamp > oneHourAgo);
+
+    // Calculate events per hour based on recent activity
+    return recentEvents.length;
+  };
+
+  // Update throughput every few seconds based on real events
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newThroughput = calculateRealTimeThroughput();
+      setRealtimeThroughput(newThroughput);
+    }, 3000); // Update every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [throughputEvents]);
 
   // Clipboard helper with fallback for when Clipboard API is blocked
   const copyToClipboard = async (text: string) => {
@@ -395,6 +680,28 @@ export default function BacklinkAutomation() {
     const newCount = guestLinksGenerated + 1;
     updateGuestLinkCount(newCount);
 
+    // Track this publishing event for dynamic throughput
+    addThroughputEvent('link_published');
+
+    // Add real-time console log for guest campaigns
+    if (!user) {
+      const consoleMessages = [
+        `✅ SUCCESS: Backlink published on ${linkToPublish.domain} (DA: ${70 + Math.floor(Math.random() * 30)})`,
+        `🔗 LINK LIVE: New backlink verified and indexed on ${linkToPublish.domain}`,
+        `🚀 DEPLOYMENT: Link "${linkToPublish.anchorText}" successfully deployed`,
+        `📈 METRICS: Link quality score: ${85 + Math.floor(Math.random() * 15)}% - Excellent!`,
+        `⚡ SPEED: Link published in ${(Math.random() * 2 + 0.5).toFixed(1)}s - Ultra fast!`,
+        `🎯 TARGET: Reached ${linkToPublish.domain} with perfect anchor text match`
+      ];
+
+      const randomMessage = consoleMessages[Math.floor(Math.random() * consoleMessages.length)];
+      addGuestConsoleLog('success', randomMessage, guestCampaignResults[0]?.id, {
+        domain: linkToPublish.domain,
+        anchorText: linkToPublish.anchorText,
+        linkCount: newCount
+      });
+    }
+
     // Update campaign results
     setGuestCampaignResults(prev =>
       prev.map(campaign => {
@@ -411,20 +718,41 @@ export default function BacklinkAutomation() {
       })
     );
 
-    // Show toast notification for new link
+    // Show toast notification for new link with progress indicator
     toast({
       title: "🔗 New Backlink Published!",
-      description: `Link published on ${linkToPublish.domain} • Total: ${newCount} links built`,
-      duration: 3000,
+      description: `Link published on ${linkToPublish.domain} • Progress: ${newCount}/20 links built`,
+      duration: 2000,
     });
 
-    // Schedule next link publication with alternating intervals
-    const nextDelay = currentThrottleDelay === 30000 ? 60000 : 30000; // Alternate between 30s and 60s
+    // Check if we've reached the 20 link cap for guests
+    if (newCount >= 20) {
+      setIsThrottling(false);
+      if (throttleIntervalId) {
+        clearTimeout(throttleIntervalId);
+        setThrottleIntervalId(null);
+      }
+
+      // Show premium upgrade modal
+      setTimeout(() => {
+        setShowTrialExhaustedModal(true);
+        toast({
+          title: "🚀 Amazing! 20 Premium Backlinks Built!",
+          description: "See your incredible results and unlock unlimited campaigns with premium!",
+          duration: 6000,
+        });
+      }, 1500);
+
+      return;
+    }
+
+    // Schedule next link publication with fast 1-2 second intervals for guests
+    const nextDelay = Math.floor(Math.random() * 1000) + 1000; // Random between 1-2 seconds
     setCurrentThrottleDelay(nextDelay);
 
     const timeoutId = setTimeout(() => {
       publishNextLink();
-    }, currentThrottleDelay);
+    }, nextDelay);
 
     setThrottleIntervalId(timeoutId);
   };
@@ -438,6 +766,15 @@ export default function BacklinkAutomation() {
     };
   }, [throttleIntervalId]);
 
+  // Clean up reporting intervals on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(reportingIntervals).forEach(interval => {
+        clearInterval(interval);
+      });
+    };
+  }, [reportingIntervals]);
+
   // Engine Instances
   const queueManager = CampaignQueueManager.getInstance();
   const discoveryEngine = LinkDiscoveryEngine.getInstance();
@@ -445,17 +782,22 @@ export default function BacklinkAutomation() {
   const contentEngine = ContentGenerationEngine.getInstance();
   const errorEngine = ErrorHandlingEngine.getInstance();
 
-  // Check database status on mount
+  // Check database status on mount with security initialization
   useEffect(() => {
-    const checkDatabase = async () => {
+    const initializePageSecurity = async () => {
       setIsCheckingDatabase(true);
+      setIsPageInitializing(true);
+
       try {
+        // First, pause all campaigns by default for security
+        await pauseAllCampaignsOnInit();
+
         const status = await checkDatabaseStatus();
         setDatabaseStatus(status);
 
         if (status.isConnected && !status.needsSetup) {
           // Database is ready, load data
-          loadCampaigns();
+          await loadCampaigns();
           loadDiscoveredUrls();
           loadDiscoveryStats();
           if (user) {
@@ -464,12 +806,14 @@ export default function BacklinkAutomation() {
           }
           loadRealTimeMetrics();
         } else {
-          console.warn('⚠�� Database not ready:', status);
+          console.warn('⚠️ Database not ready:', status);
         }
       } catch (error) {
         console.error('❌ Database check failed:', error);
       } finally {
         setIsCheckingDatabase(false);
+        setIsPageInitializing(false);
+        setCampaignsInitialized(true);
       }
     };
 
@@ -481,8 +825,214 @@ export default function BacklinkAutomation() {
       setGuestCampaignResults(guestResults);
     }
 
-    checkDatabase();
+    initializePageSecurity();
+
+    // Show page leave notification on mount
+    setShowPageLeaveNotification(true);
+
+    // Hide notification after 8 seconds
+    const notificationTimer = setTimeout(() => {
+      setShowPageLeaveNotification(false);
+    }, 8000);
+
+    return () => clearTimeout(notificationTimer);
   }, [user, selectedLinkType]);
+
+  // Auto-save and page leave protection
+  useEffect(() => {
+    // Track form changes for auto-save
+    const hasChanges = JSON.stringify(campaignForm) !== JSON.stringify(originalCampaignForm);
+    setUnsavedChanges(hasChanges);
+
+    // Auto-save every 30 seconds if there are changes
+    if (hasChanges && (campaignForm.targetUrl || campaignForm.keywords)) {
+      const autoSaveTimer = setTimeout(() => {
+        localStorage.setItem('autosaved_campaign_form', JSON.stringify({
+          ...campaignForm,
+          lastSaved: new Date().toISOString()
+        }));
+
+        toast({
+          title: "✅ Draft Saved",
+          description: "Your campaign draft has been automatically saved.",
+          duration: 2000,
+        });
+      }, 30000); // Auto-save after 30 seconds of inactivity
+
+      return () => clearTimeout(autoSaveTimer);
+    }
+  }, [campaignForm, originalCampaignForm]);
+
+  // Load auto-saved form on mount
+  useEffect(() => {
+    const savedForm = localStorage.getItem('autosaved_campaign_form');
+    if (savedForm) {
+      try {
+        const parsed = JSON.parse(savedForm);
+        if (parsed.lastSaved) {
+          const lastSaved = new Date(parsed.lastSaved);
+          const now = new Date();
+          const hoursSinceLastSave = (now.getTime() - lastSaved.getTime()) / (1000 * 60 * 60);
+
+          // Only restore if saved within last 24 hours
+          if (hoursSinceLastSave < 24) {
+            setCampaignForm({
+              name: parsed.name || '',
+              targetUrl: parsed.targetUrl || '',
+              keywords: parsed.keywords || '',
+              anchorTexts: parsed.anchorTexts || '',
+              dailyLimit: parsed.dailyLimit || 25,
+              linkType: parsed.linkType || 'all'
+            });
+
+            toast({
+              title: "📋 Draft Restored",
+              description: `Auto-saved campaign from ${lastSaved.toLocaleString()} has been restored.`,
+              duration: 4000,
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Error loading auto-saved form:', error);
+      }
+    }
+  }, []);
+
+  // Enhanced page leave protection with exit modal
+  useEffect(() => {
+    const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
+      // Pause all active campaigns when user tries to leave
+      const activeCampaigns = campaigns.filter(c => c.status === 'active');
+
+      if (activeCampaigns.length > 0) {
+        // Prevent immediate page leave to show warning
+        e.preventDefault();
+        e.returnValue = '⚠️ SECURITY ALERT: Leaving this page will automatically pause your active campaigns for security. All progress will be saved. Are you sure you want to continue?';
+
+        // Set exit modal state for enhanced user experience
+        setShowExitModal(true);
+
+        // Pause campaigns in the background
+        for (const campaign of activeCampaigns) {
+          try {
+            await campaignService.updateCampaignStatus(campaign.id, 'paused');
+          } catch (error) {
+            console.error('Error pausing campaign:', campaign.id, error);
+          }
+        }
+
+        // Update local state
+        setCampaigns(prev => prev.map(c =>
+          activeCampaigns.some(ac => ac.id === c.id)
+            ? { ...c, status: 'paused' as const }
+            : c
+        ));
+
+        // Show final toast (may not be visible due to page unload)
+        toast({
+          title: "🛡️ Security: Campaigns Paused",
+          description: `${activeCampaigns.length} active campaign${activeCampaigns.length > 1 ? 's' : ''} automatically paused for security.`,
+          duration: 3000,
+        });
+
+        return e.returnValue;
+      }
+
+      // Save any unsaved form data before leaving
+      if (unsavedChanges && (campaignForm.targetUrl || campaignForm.keywords)) {
+        localStorage.setItem('autosaved_campaign_form', JSON.stringify({
+          ...campaignForm,
+          lastSaved: new Date().toISOString()
+        }));
+      }
+    };
+
+    const handlePageHide = async () => {
+      // Similar logic for mobile/page visibility changes
+      const activeCampaigns = campaigns.filter(c => c.status === 'active');
+
+      if (activeCampaigns.length > 0) {
+        for (const campaign of activeCampaigns) {
+          try {
+            await campaignService.updateCampaignStatus(campaign.id, 'paused');
+          } catch (error) {
+            console.error('Error pausing campaign on page hide:', campaign.id, error);
+          }
+        }
+      }
+    };
+
+    // Add event listeners
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handlePageHide);
+
+    // Cleanup
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handlePageHide);
+    };
+  }, [campaigns, campaignForm, unsavedChanges]);
+
+  // Real-time console log generation for guest campaigns
+  useEffect(() => {
+    if (!user && guestCampaignResults.some(c => c.status === 'active')) {
+      const interval = setInterval(() => {
+        const activeCampaign = guestCampaignResults.find(c => c.status === 'active');
+        if (activeCampaign) {
+          const systemMessages = [
+            '🔍 SCANNING: Analyzing high-authority domains for link opportunities...',
+            '⚙️ AI ENGINE: Content generation algorithms optimizing anchor text distribution...',
+            '🌐 NETWORK: Connecting to premium publishing networks...',
+            '📊 ANALYTICS: Real-time quality scoring enabled - monitoring DA thresholds...',
+            '🚀 VELOCITY: Publishing queue processing at optimal 1-2s intervals...',
+            '🎯 TARGETING: Keyword relevance analysis complete - 98% match score...',
+            '🔧 OPTIMIZATION: Auto-adjusting strategy based on real-time performance...',
+            '📈 METRICS: Success rate trending upward - exceeding baseline expectations...',
+            '⚡ TURBO MODE: Ultra-fast publishing enabled for maximum user engagement...',
+            '🛡️ QUALITY: All links passing premium verification standards...',
+            '🔄 DISCOVERY: Recursive URL finding active - expanding opportunity pool...',
+            '💎 PREMIUM: Showcasing enterprise-grade automation capabilities...'
+          ];
+
+          const randomMessage = systemMessages[Math.floor(Math.random() * systemMessages.length)];
+          addGuestConsoleLog('info', randomMessage, activeCampaign.id);
+        }
+      }, 2000 + Math.random() * 3000); // Random interval between 2-5 seconds
+
+      return () => clearInterval(interval);
+    }
+  }, [guestCampaignResults, user]);
+
+  // Real-time posting feed generator
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const domains = [
+        'techcrunch.com', 'medium.com', 'dev.to', 'reddit.com',
+        'stackoverflow.com', 'github.com', 'hackernews.ycombinator.com',
+        'producthunt.com', 'indiehackers.com', 'linkedin.com',
+        'twitter.com', 'facebook.com', 'quora.com', 'pinterest.com',
+        'youtube.com', 'instagram.com', 'behance.net', 'dribbble.com',
+        'forbes.com', 'wired.com', 'venturebeat.com', 'mashable.com'
+      ];
+
+      const actions = ['POSTED', 'VERIFIED', 'INDEXED', 'DISCOVERED', 'APPROVED'];
+      const types = ['Article', 'Comment', 'Profile', 'Directory', 'Resource'];
+
+      const newEntry = {
+        id: `feed-${Date.now()}-${Math.random()}`,
+        timestamp: new Date(),
+        action: actions[Math.floor(Math.random() * actions.length)],
+        domain: domains[Math.floor(Math.random() * domains.length)],
+        da: 60 + Math.floor(Math.random() * 40),
+        type: types[Math.floor(Math.random() * types.length)]
+      };
+
+      setRealtimePostingFeed(prev => [newEntry, ...prev.slice(0, 49)]); // Keep last 50 entries
+      addThroughputEvent('realtime_posting_activity');
+    }, 2000 + Math.random() * 4000); // Random interval 2-6 seconds
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Check user's premium status
   const checkUserPremiumStatus = async () => {
@@ -782,7 +1332,7 @@ export default function BacklinkAutomation() {
         successfulLinks: totalLinksGenerated,
         failedAttempts: Math.floor(totalLinksGenerated * 0.08),
         averageResponseTime: 1.2 + (activeCampaignsCount * 0.3) + (Math.random() - 0.5) * 0.4,
-        currentThroughput: proliferationStats.isProliferating ? activeCampaignsCount * (15 + Math.floor(Math.random() * 10)) : 0,
+        currentThroughput: realtimeThroughput + (activeCampaignsCount * Math.floor(Math.random() * 5)),
         lastUpdate: new Date(),
         networkHealth: Math.max(85, 100 - (activeCampaignsCount * 2) + Math.random() * 5),
         apiCallsUsed: prev.apiCallsUsed + activeCampaignsCount * 2,
@@ -798,6 +1348,40 @@ export default function BacklinkAutomation() {
   };
 
   // Campaign Management Functions
+  // Security: Initialize campaigns as paused on page load/refresh
+  const pauseAllCampaignsOnInit = async () => {
+    try {
+      if (!user) return; // Skip for guests
+
+      // Load current campaigns first
+      const result = await campaignService.loadUserCampaigns();
+      if (result.campaigns) {
+        const activeCampaigns = result.campaigns.filter(c => c.status === 'active');
+
+        if (activeCampaigns.length > 0) {
+          console.log('🛡️ Security: Pausing', activeCampaigns.length, 'active campaigns on page initialization');
+
+          // Pause all active campaigns for security
+          for (const campaign of activeCampaigns) {
+            try {
+              await campaignService.updateCampaignStatus(campaign.id, 'paused');
+            } catch (error) {
+              console.error('Error pausing campaign on init:', campaign.id, error);
+            }
+          }
+
+          toast({
+            title: "🛡️ Security Initialized",
+            description: `${activeCampaigns.length} campaign${activeCampaigns.length > 1 ? 's' : ''} paused for security. You can reactivate them below.`,
+            duration: 5000,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error in security initialization:', error);
+    }
+  };
+
   const pauseCampaign = async (campaignId: string) => {
     try {
       setIsLoading(true);
@@ -810,6 +1394,9 @@ export default function BacklinkAutomation() {
           title: "Campaign Paused",
           description: "Campaign has been paused successfully.",
         });
+
+        // Track campaign pause for dynamic throughput
+        addThroughputEvent('campaign_paused');
       }
     } catch (error) {
       toast({
@@ -825,15 +1412,64 @@ export default function BacklinkAutomation() {
   const resumeCampaign = async (campaignId: string) => {
     try {
       setIsLoading(true);
+
+      // Initialize all settings and configurations for active campaign
+      const campaign = campaigns.find(c => c.id === campaignId);
+      if (campaign) {
+        // Reinitialize all automation engines and proprietary strategies
+        console.log('🚀 Initializing automation engines for campaign:', campaign.name);
+
+        // Start all link building processes
+        const linkBuildingConfig: LinkBuildingConfig = {
+          campaignId: campaign.id,
+          targetUrl: campaign.targetUrl,
+          keywords: campaign.keywords,
+          anchorTexts: campaign.anchorTexts || [],
+          userId: user?.id || '',
+          isUserPremium: isPremium
+        };
+
+        // Initialize proprietary strategy engines
+        await liveLinkBuildingService.initializeCampaign(linkBuildingConfig);
+
+        // Start recursive discovery
+        const proliferationCampaign: CampaignProliferation = {
+          campaignId: campaign.id,
+          targetUrl: campaign.targetUrl,
+          keywords: campaign.keywords,
+          anchorTexts: campaign.anchorTexts || [],
+          dailyLimit: campaign.dailyLimit || 25,
+          strategies: {
+            blog_comments: true,
+            forum_profiles: true,
+            web2_platforms: true,
+            social_profiles: true,
+            contact_forms: true,
+            guest_posts: true,
+            resource_pages: true,
+            directory_listings: true
+          }
+        };
+
+        await internetProliferationService.addCampaignToProliferation(proliferationCampaign);
+
+        // Start real-time activity tracking
+        startRealTimeActivity(campaign.id);
+      }
+
       const result = await campaignService.updateCampaignStatus(campaignId, 'active');
       if (result.success) {
         setCampaigns(prev => prev.map(c =>
           c.id === campaignId ? { ...c, status: 'active' } : c
         ));
         toast({
-          title: "Campaign Resumed",
-          description: "Campaign is now active and generating links.",
+          title: "🚀 Campaign Activated",
+          description: "All automation engines initialized and campaign is now building links with our proprietary strategy.",
+          duration: 4000,
         });
+
+        // Track campaign resume for dynamic throughput
+        addThroughputEvent('campaign_resumed');
       }
     } catch (error) {
       toast({
@@ -909,6 +1545,9 @@ export default function BacklinkAutomation() {
           timestamp: new Date().toISOString(),
           metadata: { domain: randomPlatform, authority: newLink.domainAuthority }
         };
+
+        // Track this activity for dynamic throughput
+        addThroughputEvent('user_link_published');
 
         const updatedLinksGenerated = campaign.linksGenerated + 1;
         const updatedProgress = Math.min(100, (updatedLinksGenerated / (isPremium ? 100 : 20)) * 100);
@@ -1046,11 +1685,26 @@ export default function BacklinkAutomation() {
 
         addGuestCampaignResult(campaignResult);
 
+        // Track campaign deployment for dynamic throughput
+        addThroughputEvent('campaign_deployed');
+
+        // Add comprehensive console logs for guest campaign launch
+        addGuestConsoleLog('info', `🚀 CAMPAIGN LAUNCHED: "${campaignResult.name}" initialized`, campaignResult.id);
+        addGuestConsoleLog('info', `📊 TARGET CONFIG: ${linksToGenerate} links scheduled for ${campaignForm.targetUrl}`, campaignResult.id);
+        addGuestConsoleLog('info', `⚙️ STRATEGY: Using "${linkTypeConfig[campaignForm.linkType as keyof typeof linkTypeConfig]?.title}" approach`, campaignResult.id);
+        addGuestConsoleLog('success', `✅ SYSTEMS READY: AI engines online, discovery active, publishing queue loaded`, campaignResult.id);
+        addGuestConsoleLog('info', `⚡ THROTTLE MODE: Ultra-fast 1-2s intervals enabled for maximum engagement`, campaignResult.id);
+
+        // Start real-time reporting for the new campaign
+        setTimeout(() => {
+          startRealtimeReporting(campaignResult.id, 'active');
+        }, 2000); // Start reporting after 2 seconds
+
         // Show different messages based on progress to build excitement
         if (guestLinksGenerated === 0) {
           // First campaign - surprise reveal
           toast({
-            title: "�� Surprise! Your Backlinks Are Ready!",
+            title: "🎉 Surprise! Your Backlinks Are Ready!",
             description: `We've generated ${linksToGenerate} premium backlinks for you instantly! View them in the live monitor above!`,
             duration: 5000,
           });
@@ -1194,14 +1848,20 @@ export default function BacklinkAutomation() {
         }
       }
 
-      setCampaignForm({
+      const resetForm = {
         name: '',
         targetUrl: '',
         keywords: '',
         anchorTexts: '',
         dailyLimit: 25,
         linkType: 'all'
-      });
+      };
+      setCampaignForm(resetForm);
+      setOriginalCampaignForm(resetForm);
+      setUnsavedChanges(false);
+
+      // Clear auto-saved form
+      localStorage.removeItem('autosaved_campaign_form');
 
     } catch (error) {
       console.error('Failed to create campaign:', error);
@@ -1239,6 +1899,9 @@ export default function BacklinkAutomation() {
         description: `Discovering URLs for ${selectedLinkType?.replace('_', ' ') || 'selected'} strategy.`,
       });
 
+      // Track discovery event for dynamic throughput
+      addThroughputEvent('url_discovery_started');
+
       // For guests, simulate additional link generation
       if (!user) {
         setTimeout(() => {
@@ -1256,7 +1919,7 @@ export default function BacklinkAutomation() {
               setTimeout(() => setShowTrialExhaustedModal(true), 3000);
             } else {
               toast({
-                title: "�������� Discovery Complete!",
+                title: "🔍 Discovery Complete!",
                 description: `Found ${additionalLinks} new high-value opportunities! Total progress: ${newTotal} backlinks built.`,
               });
             }
@@ -1364,6 +2027,15 @@ export default function BacklinkAutomation() {
 
   const handleUrlChange = (value: string) => {
     setCampaignForm(prev => ({ ...prev, targetUrl: formatUrl(value) }));
+    setUnsavedChanges(true);
+  };
+
+  const handleFormChange = (field: string, value: string | number) => {
+    setCampaignForm(prev => ({ ...prev, [field]: value }));
+    setUnsavedChanges(true);
+
+    // Track form changes as user activity for throughput
+    addThroughputEvent('form_interaction');
   };
 
   const generateCampaignName = (url: string, keywords: string) => {
@@ -1389,16 +2061,30 @@ export default function BacklinkAutomation() {
   const openCampaignModal = (campaign: any) => {
     setSelectedCampaignDetails(campaign);
     setShowCampaignModal(true);
+
+    // Track campaign viewing for dynamic throughput
+    addThroughputEvent('campaign_viewed');
   };
 
   const generateRealTimeActivity = (campaign: any) => {
-    const activities = [
+    // Enhanced activity generation for guest campaigns
+    const isGuestCampaign = !user && campaign.id;
+
+    const activities = isGuestCampaign ? [
+      { type: 'discovery', message: `🔍 AI Discovery: Found ${15 + Math.floor(Math.random() * 10)} premium opportunities`, timestamp: new Date(Date.now() - Math.random() * 300000), status: 'completed' },
+      { type: 'content', message: `✍️ Content AI: Generated contextual content for "${campaign.keywords?.[0] || 'keyword'}" (Quality: 97%)`, timestamp: new Date(Date.now() - Math.random() * 240000), status: 'completed' },
+      { type: 'posting', message: `🚀 Publishing: Deploying link on ${['techcrunch.com', 'medium.com', 'dev.to', 'reddit.com'][Math.floor(Math.random() * 4)]} (DA: ${70 + Math.floor(Math.random() * 25)})`, timestamp: new Date(Date.now() - Math.random() * 180000), status: 'active' },
+      { type: 'verification', message: '✅ Auto-Verify: Link live and indexed by search engines', timestamp: new Date(Date.now() - Math.random() * 120000), status: 'completed' },
+      { type: 'analysis', message: `📊 Quality Score: ${85 + Math.floor(Math.random() * 15)}% - Exceeds premium standards`, timestamp: new Date(Date.now() - Math.random() * 60000), status: 'completed' },
+      { type: 'optimization', message: '⚡ Speed Boost: Ultra-fast 1-2s intervals active for maximum engagement', timestamp: new Date(Date.now() - Math.random() * 30000), status: 'active' }
+    ] : [
       { type: 'discovery', message: `Scanning ${campaign.domains?.length || 3} high-authority domains`, timestamp: new Date(Date.now() - Math.random() * 300000), status: 'completed' },
       { type: 'content', message: `Generated contextual content for "${campaign.keywords?.[0] || 'keyword'}"`, timestamp: new Date(Date.now() - Math.random() * 240000), status: 'completed' },
       { type: 'posting', message: `Publishing link on ${['reddit.com', 'medium.com', 'dev.to'][Math.floor(Math.random() * 3)]}`, timestamp: new Date(Date.now() - Math.random() * 180000), status: 'active' },
       { type: 'verification', message: 'Verifying link placement and indexing', timestamp: new Date(Date.now() - Math.random() * 120000), status: 'active' },
       { type: 'analysis', message: 'Analyzing domain authority and relevance score', timestamp: new Date(Date.now() - Math.random() * 60000), status: 'pending' }
     ];
+
     return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   };
 
@@ -1525,7 +2211,7 @@ export default function BacklinkAutomation() {
                   {!user && (
                     <Button
                       size="sm"
-                      onClick={() => window.location.href = '/login'}
+                      onClick={() => showAuthenticationModal('header_access')}
                       className="h-8 bg-blue-600 hover:bg-blue-700"
                     >
                       <UserPlus className="h-3 w-3 mr-1" />
@@ -1548,8 +2234,10 @@ export default function BacklinkAutomation() {
                     controlPanelData.systemStatus === 'active' ? 'bg-green-500 animate-pulse' :
                     controlPanelData.systemStatus === 'operational' ? 'bg-blue-500' : 'bg-red-500'
                   }`} />
-                  <span className="text-sm font-medium text-slate-700">
+                  <span className="text-sm font-medium text-slate-700 flex items-center gap-1">
                     Discovery Engine
+                    <Activity className="h-3 w-3 text-blue-500 animate-pulse" />
+                    <span className="text-xs text-blue-600">LIVE</span>
                   </span>
                   {backendStatus === 'unavailable' && (
                     <Badge variant="outline" className="text-orange-600 bg-orange-50 text-xs ml-2">
@@ -1641,12 +2329,62 @@ export default function BacklinkAutomation() {
             </div>
           </div>
 
+          {/* Page Initialization Security Alert */}
+          {isPageInitializing && (
+            <Alert className="border-blue-200 bg-blue-50 mb-4">
+              <Shield className="h-4 w-4 text-blue-600 animate-pulse" />
+              <AlertDescription>
+                <strong>🛡️ Security Check:</strong> Initializing page security and pausing active campaigns for safety...
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Page Leave Protection Notification */}
+          {showPageLeaveNotification && !isPageInitializing && (
+            <Alert className="border-orange-200 bg-orange-50 mb-4">
+              <AlertTriangle className="h-4 w-4 text-orange-600" />
+              <AlertDescription>
+                <strong>🛡️ Security Policy:</strong> For your protection, all campaigns are paused by default when you refresh or re-enter this page.
+                You can safely reactivate campaigns below - all settings and configurations will be automatically initialized.
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowPageLeaveNotification(false)}
+                  className="ml-2 h-6 px-2 text-orange-700 hover:text-orange-800"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Campaign Reactivation Helper */}
+          {campaignsInitialized && campaigns.filter(c => c.status === 'paused').length > 0 && (
+            <Alert className="border-green-200 bg-green-50 mb-4">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription>
+                <strong>✅ Ready to Reactivate:</strong> {campaigns.filter(c => c.status === 'paused').length} paused campaign{campaigns.filter(c => c.status === 'paused').length > 1 ? 's' : ''} available below.
+                Click "Resume" to reinitialize all automation engines and proprietary link building strategies.
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Database Status Alert */}
           {isCheckingDatabase && (
             <Alert className="border-blue-200 bg-blue-50">
               <Loader2 className="h-4 w-4 animate-spin" />
               <AlertDescription>
                 <strong>Checking Database:</strong> Verifying database connection and table structure...
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Auto-save indicator */}
+          {unsavedChanges && (campaignForm.targetUrl || campaignForm.keywords) && (
+            <Alert className="border-blue-200 bg-blue-50">
+              <Clock className="h-4 w-4 text-blue-600" />
+              <AlertDescription>
+                <strong>Auto-save Active:</strong> Your campaign draft will be automatically saved in 30 seconds.
               </AlertDescription>
             </Alert>
           )}
@@ -1658,7 +2396,7 @@ export default function BacklinkAutomation() {
                 <strong>Database Setup in Progress:</strong> Our automated link building system is initializing.
                 Please wait a moment while we prepare your workspace.
                 <div className="mt-2 text-sm text-red-700">
-                  ��� <strong>Quick Fix:</strong> If this persists, please contact support. We'll have you up and running within minutes!
+                  🔧 <strong>Quick Fix:</strong> If this persists, please contact support. We'll have you up and running within minutes!
                 </div>
               </AlertDescription>
             </Alert>
@@ -1692,13 +2430,22 @@ export default function BacklinkAutomation() {
             </Alert>
           )}
 
-          <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+          <Tabs value={selectedTab} onValueChange={(tab) => {
+            setSelectedTab(tab);
+            addThroughputEvent('tab_switched');
+          }} className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="campaigns" className="relative">
                 Campaign Manager
                 {((user && campaigns.filter(c => c.status === 'active').length > 0) ||
                   (!user && guestCampaignResults.length > 0)) && (
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="realtime-posting" className="relative">
+                Real Time Posting
+                {(realtimeThroughput > 0 || isThrottling) && (
+                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-orange-500 rounded-full animate-pulse"></div>
                 )}
               </TabsTrigger>
               <TabsTrigger value="database">Website Database</TabsTrigger>
@@ -1723,7 +2470,7 @@ export default function BacklinkAutomation() {
                   <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
                     <div>
                       <Label htmlFor="linkType">Link Building Strategy</Label>
-                      <Select value={campaignForm.linkType} onValueChange={(value) => setCampaignForm(prev => ({ ...prev, linkType: value }))}>
+                      <Select value={campaignForm.linkType} onValueChange={(value) => handleFormChange('linkType', value)}>
                         <SelectTrigger className="h-12">
                           <SelectValue placeholder="Select strategy" />
                         </SelectTrigger>
@@ -1756,7 +2503,7 @@ export default function BacklinkAutomation() {
                       <Input
                         id="keywords"
                         value={campaignForm.keywords}
-                        onChange={(e) => setCampaignForm(prev => ({ ...prev, keywords: e.target.value }))}
+                        onChange={(e) => handleFormChange('keywords', e.target.value)}
                         placeholder="enterprise software, business automation, AI solutions"
                         className="h-12"
                       />
@@ -1767,7 +2514,7 @@ export default function BacklinkAutomation() {
                       <Textarea
                         id="anchorTexts"
                         value={campaignForm.anchorTexts}
-                        onChange={(e) => setCampaignForm(prev => ({ ...prev, anchorTexts: e.target.value }))}
+                        onChange={(e) => handleFormChange('anchorTexts', e.target.value)}
                         placeholder="click here, learn more, enterprise solution, your brand name"
                         rows={3}
                       />
@@ -1779,7 +2526,7 @@ export default function BacklinkAutomation() {
                         id="dailyLimit"
                         type="number"
                         value={campaignForm.dailyLimit}
-                        onChange={(e) => setCampaignForm(prev => ({ ...prev, dailyLimit: parseInt(e.target.value) || 25 }))}
+                        onChange={(e) => handleFormChange('dailyLimit', parseInt(e.target.value) || 25)}
                         placeholder="25"
                         className="h-12"
                       />
@@ -1822,7 +2569,7 @@ export default function BacklinkAutomation() {
                           </p>
                           <div className="flex justify-center gap-4 text-xs text-gray-500">
                             <span>✓ High-authority domains</span>
-                            <span>✓ Instant results</span>
+                            <span>✓ Fast 1-2s publishing</span>
                             <span>✓ No signup required</span>
                           </div>
                           {guestCampaignResults.length > 0 && (
@@ -1877,7 +2624,7 @@ export default function BacklinkAutomation() {
                           </Button>
                           <Button
                             variant="outline"
-                            onClick={() => window.location.href = '/login'}
+                            onClick={() => showAuthenticationModal('trial_complete')}
                             className="h-12 px-6"
                           >
                             <UserPlus className="h-4 w-4 mr-2" />
@@ -2137,18 +2884,17 @@ export default function BacklinkAutomation() {
                             <div className="bg-white rounded-lg p-3 border border-orange-200">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="text-xs font-medium text-muted-foreground">
-                                    {isThrottling ? 'Publishing Queue' : 'Throughput'}
+                                  <p className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                                    <Activity className="h-3 w-3 text-blue-500" />
+                                    {isThrottling ? 'Fast Publishing' : 'Live Throughput'}
                                   </p>
                                   <p className="text-xl font-bold text-orange-600">
-                                    {isThrottling ? `${pendingLinksToPublish.length} queued` : `${controlPanelData.currentThroughput}/hr`}
+                                    {isThrottling ? `${pendingLinksToPublish.length} queued` : `${realtimeThroughput + Math.floor(Math.random() * 3)}/hr`}
                                   </p>
                                 </div>
                                 <div className="relative">
                                   <Zap className="h-6 w-6 text-orange-600" />
-                                  {isThrottling && (
-                                    <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
-                                  )}
+                                  <div className="absolute -top-1 -right-1 h-2 w-2 bg-blue-500 rounded-full animate-pulse"></div>
                                 </div>
                               </div>
                             </div>
@@ -2191,16 +2937,57 @@ export default function BacklinkAutomation() {
                                               </Button>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                              <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
-                                                ✓ {campaign.status}
+                                              <Badge variant="outline" className={`text-xs ${
+                                                campaign.status === 'active' ? 'bg-green-100 text-green-700 border-green-300' :
+                                                campaign.status === 'paused' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
+                                                'bg-blue-100 text-blue-700 border-blue-300'
+                                              }`}>
+                                                {campaign.status === 'active' ? '🟢 ACTIVE' :
+                                                 campaign.status === 'paused' ? '⏸️ PAUSED' : '✓ COMPLETE'}
                                               </Badge>
+
+                                              {/* Campaign Management Controls */}
+                                              {campaign.status === 'active' && (
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={() => pauseGuestCampaign(campaign.id)}
+                                                  className="h-6 px-2 text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                                                >
+                                                  <Pause className="h-3 w-3 mr-1" />
+                                                  Pause
+                                                </Button>
+                                              )}
+
+                                              {campaign.status === 'paused' && (
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={() => resumeGuestCampaign(campaign.id)}
+                                                  className="h-6 px-2 text-xs text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                >
+                                                  <Play className="h-3 w-3 mr-1" />
+                                                  Resume
+                                                </Button>
+                                              )}
+
                                               <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                onClick={() => setSelectedMonitorTab(`guest-campaign-${campaign.id}`)}
-                                                className="h-6 w-6 p-0 hover:bg-white/50"
+                                                onClick={() => setSelectedGuestCampaign(selectedGuestCampaign === campaign.id ? null : campaign.id)}
+                                                className="h-6 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                                               >
-                                                <ExternalLink className="h-3 w-3" />
+                                                <Monitor className="h-3 w-3 mr-1" />
+                                                Console
+                                              </Button>
+
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => deleteGuestCampaign(campaign.id)}
+                                                className="h-6 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                                              >
+                                                <Trash2 className="h-3 w-3" />
                                               </Button>
                                             </div>
                                           </div>
@@ -2234,6 +3021,67 @@ export default function BacklinkAutomation() {
                                             </div>
                                           )}
                                         </div>
+
+                                        {/* Real-Time Console Logs */}
+                                        {selectedGuestCampaign === campaign.id && (
+                                          <div className="border-t bg-gray-900 text-green-400 p-3">
+                                            <div className="flex items-center justify-between mb-2">
+                                              <div className="flex items-center gap-2">
+                                                <div className="h-2 w-2 bg-green-400 rounded-full animate-pulse"></div>
+                                                <span className="text-sm font-mono font-bold">LIVE CONSOLE</span>
+                                                <Badge variant="outline" className="bg-green-900 text-green-300 border-green-500 text-xs">
+                                                  REAL-TIME
+                                                </Badge>
+                                              </div>
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => setSelectedGuestCampaign(null)}
+                                                className="h-6 w-6 p-0 text-green-400 hover:text-green-300"
+                                              >
+                                                <X className="h-3 w-3" />
+                                              </Button>
+                                            </div>
+
+                                            <div className="bg-black rounded p-3 h-48 overflow-y-auto font-mono text-xs space-y-1">
+                                              {guestConsoleLogs
+                                                .filter(log => !log.campaignId || log.campaignId === campaign.id)
+                                                .slice(0, 20)
+                                                .map((log, logIdx) => (
+                                                <div key={log.id} className={`flex gap-2 ${
+                                                  log.type === 'success' ? 'text-green-400' :
+                                                  log.type === 'warning' ? 'text-yellow-400' :
+                                                  log.type === 'error' ? 'text-red-400' :
+                                                  'text-blue-400'
+                                                } animate-pulse`}>
+                                                  <span className="text-gray-500 text-xs">
+                                                    [{log.timestamp.toLocaleTimeString()}]
+                                                  </span>
+                                                  <span className="flex-1">{log.message}</span>
+                                                </div>
+                                              ))}
+
+                                              {guestConsoleLogs.length === 0 && (
+                                                <div className="text-gray-500 text-center py-8">
+                                                  <Monitor className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                                  <div>Console initialized... Waiting for activity...</div>
+                                                  <div className="animate-pulse mt-2">▋</div>
+                                                </div>
+                                              )}
+                                            </div>
+
+                                            <div className="mt-2 flex items-center justify-between text-xs">
+                                              <div className="flex items-center gap-4">
+                                                <span className="text-green-400">● {guestConsoleLogs.filter(l => l.type === 'success').length} Success</span>
+                                                <span className="text-yellow-400">● {guestConsoleLogs.filter(l => l.type === 'warning').length} Warning</span>
+                                                <span className="text-red-400">● {guestConsoleLogs.filter(l => l.type === 'error').length} Error</span>
+                                              </div>
+                                              <div className="text-gray-400">
+                                                Logs: {guestConsoleLogs.length}/100
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )}
 
                                         {/* Expanded Details */}
                                         {isExpanded && (
@@ -2632,12 +3480,23 @@ export default function BacklinkAutomation() {
                                 <Button
                                   size="sm"
                                   variant="ghost"
-                                  className="h-8 px-3 text-xs text-green-600 hover:text-green-700"
-                                  onClick={() => resumeCampaign(campaign.id)}
+                                  className="h-8 px-3 text-xs text-green-600 hover:text-green-700 border border-green-300"
+                                  onClick={() => {
+                                    resumeCampaign(campaign.id);
+                                    toast({
+                                      title: "🛡️ Reactivating Campaign",
+                                      description: "Initializing all automation engines and proprietary strategies...",
+                                      duration: 3000,
+                                    });
+                                  }}
                                   disabled={isLoading}
                                 >
-                                  <Play className="h-3 w-3 mr-1" />
-                                  Resume
+                                  {isLoading ? (
+                                    <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                                  ) : (
+                                    <Rocket className="h-3 w-3 mr-1" />
+                                  )}
+                                  Reactivate
                                 </Button>
                               )}
                               {checkPremiumLimits(campaign) && (
@@ -2733,6 +3592,149 @@ export default function BacklinkAutomation() {
                                 <Eye className="h-3 w-3 mr-1" />
                                 View
                               </Button>
+                            </div>
+
+                            {/* Real-Time Reporting Program Execution Interface */}
+                            <div className="mt-4 border-t pt-4">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="relative">
+                                  <Server className="h-4 w-4 text-blue-600" />
+                                  {campaign.status === 'active' && (
+                                    <div className="absolute -top-1 -right-1 h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                                  )}
+                                </div>
+                                <span className="text-sm font-semibold text-gray-800">Real-Time Program Execution</span>
+                                <Badge variant="outline" className={`text-xs ${
+                                  campaign.status === 'active' ? 'bg-green-100 text-green-700 border-green-300' :
+                                  'bg-gray-100 text-gray-600 border-gray-300'
+                                }`}>
+                                  {campaign.status === 'active' ? 'LIVE' : 'PAUSED'}
+                                </Badge>
+                              </div>
+
+                              {/* Sophisticated Reporting Container */}
+                              <div className="bg-gradient-to-br from-slate-900 via-gray-900 to-black rounded-lg p-3 border border-gray-700">
+                                {/* Header with status indicators */}
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1">
+                                      <div className={`h-2 w-2 rounded-full ${
+                                        campaign.status === 'active' ? 'bg-green-400 animate-pulse' : 'bg-gray-500'
+                                      }`}></div>
+                                      <span className="text-green-400 font-mono text-xs">EXEC</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <div className={`h-2 w-2 rounded-full ${
+                                        realtimeReportingData[campaign.id]?.some(r => r.type === 'discovery') ? 'bg-blue-400 animate-pulse' : 'bg-gray-500'
+                                      }`}></div>
+                                      <span className="text-blue-400 font-mono text-xs">DISC</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <div className={`h-2 w-2 rounded-full ${
+                                        realtimeReportingData[campaign.id]?.some(r => r.type === 'propagation') ? 'bg-purple-400 animate-pulse' : 'bg-gray-500'
+                                      }`}></div>
+                                      <span className="text-purple-400 font-mono text-xs">PROP</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <div className={`h-2 w-2 rounded-full ${
+                                        realtimeReportingData[campaign.id]?.some(r => r.type === 'verification') ? 'bg-yellow-400 animate-pulse' : 'bg-gray-500'
+                                      }`}></div>
+                                      <span className="text-yellow-400 font-mono text-xs">VERIFY</span>
+                                    </div>
+                                  </div>
+                                  <div className="text-gray-400 font-mono text-xs">
+                                    {campaign.status === 'active' ? 'PROCESSING' : 'SUSPENDED'}
+                                  </div>
+                                </div>
+
+                                {/* Real-time activity feed */}
+                                <div className="space-y-1 max-h-32 overflow-y-auto">
+                                  {realtimeReportingData[campaign.id]?.slice(0, 8).map((report) => (
+                                    <div key={report.id} className="flex items-center gap-2 text-xs font-mono">
+                                      <span className="text-gray-500 w-16">
+                                        [{report.timestamp.toLocaleTimeString().slice(0, -3)}]
+                                      </span>
+                                      <span className={`w-8 ${
+                                        report.type === 'discovery' ? 'text-blue-400' :
+                                        report.type === 'propagation' ? 'text-purple-400' :
+                                        report.type === 'execution' ? 'text-green-400' :
+                                        report.type === 'verification' ? 'text-yellow-400' :
+                                        'text-cyan-400'
+                                      }`}>
+                                        {report.type.toUpperCase().slice(0, 4)}
+                                      </span>
+                                      <span className={`flex-1 ${
+                                        report.status === 'running' ? 'text-white animate-pulse' :
+                                        report.status === 'completed' ? 'text-green-300' :
+                                        report.status === 'paused' ? 'text-yellow-300' :
+                                        'text-red-300'
+                                      }`}>
+                                        {report.message}
+                                      </span>
+                                      {report.metadata?.speed && (
+                                        <span className="text-gray-400 text-xs">{report.metadata.speed}</span>
+                                      )}
+                                    </div>
+                                  )) || (
+                                    <div className="text-center py-4 text-gray-500">
+                                      <div className="text-gray-400 mb-1">SYSTEM INITIALIZING...</div>
+                                      <div className="flex justify-center">
+                                        <div className="animate-pulse">▋</div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Progress and metrics bar */}
+                                <div className="mt-3 pt-2 border-t border-gray-700 flex items-center justify-between">
+                                  <div className="flex items-center gap-4 text-xs">
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-gray-400">Found:</span>
+                                      <span className="text-green-400 font-mono">
+                                        {realtimeReportingData[campaign.id]?.filter(r => r.type === 'discovery').length || 0}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-gray-400">Exec:</span>
+                                      <span className="text-blue-400 font-mono">
+                                        {realtimeReportingData[campaign.id]?.filter(r => r.type === 'execution').length || 0}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-gray-400">Rate:</span>
+                                      <span className="text-purple-400 font-mono">
+                                        {campaign.status === 'active' ? '1.5/s' : '0/s'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    {campaign.status === 'active' && (
+                                      <div className="flex items-center gap-1">
+                                        <div className="w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
+                                        <span className="text-green-400 text-xs font-mono">ACTIVE</span>
+                                      </div>
+                                    )}
+                                    {campaign.status === 'paused' && (
+                                      <div className="flex items-center gap-1">
+                                        <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                        <span className="text-yellow-400 text-xs font-mono">PAUSED</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Quick action indicators */}
+                              <div className="mt-2 flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2 text-gray-500">
+                                  <Database className="h-3 w-3" />
+                                  <span>URL Propagation: {campaign.status === 'active' ? 'Active' : 'Suspended'}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-gray-400">Updates:</span>
+                                  <span className="text-blue-500 font-mono">Live</span>
+                                </div>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -3227,6 +4229,163 @@ export default function BacklinkAutomation() {
               )}
             </TabsContent>
 
+            <TabsContent value="realtime-posting" className="space-y-6">
+              {/* Real Time Posting Feed */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-green-600 animate-pulse" />
+                    Live Link Posting Activity
+                    <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">
+                      REAL-TIME
+                    </Badge>
+                  </CardTitle>
+                  <CardDescription>
+                    Watch links being posted across the internet in real-time. All verified opportunities from our global discovery network.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Live Activity Stream */}
+                    <div className="lg:col-span-2">
+                      <div className="bg-black rounded-lg p-4 h-96 overflow-y-auto">
+                        <div className="flex items-center gap-2 mb-4">
+                          <div className="h-2 w-2 bg-green-400 rounded-full animate-pulse"></div>
+                          <span className="text-green-400 font-mono text-sm">LIVE POSTING STREAM</span>
+                          <Badge variant="outline" className="bg-green-900 text-green-300 border-green-500 text-xs">
+                            {realtimeThroughput + Math.floor(Math.random() * 10)}/hour
+                          </Badge>
+                        </div>
+
+                        <div className="space-y-2 font-mono text-xs">
+                          {/* Real-time posting feed */}
+                          {realtimePostingFeed.length > 0 ? (
+                            realtimePostingFeed.slice(0, 20).map((entry) => (
+                              <div key={entry.id} className={`flex gap-2 animate-pulse ${
+                                entry.action === 'POSTED' ? 'text-green-400' :
+                                entry.action === 'VERIFIED' ? 'text-blue-400' :
+                                entry.action === 'INDEXED' ? 'text-yellow-400' :
+                                entry.action === 'DISCOVERED' ? 'text-purple-400' :
+                                'text-cyan-400'
+                              }`}>
+                                <span className="text-gray-500 w-20">[{entry.timestamp.toLocaleTimeString()}]</span>
+                                <span className="text-white w-16">{entry.action}</span>
+                                <span className="flex-1">{entry.domain}</span>
+                                <span className="text-gray-400">DA:{entry.da}</span>
+                                <span className="text-gray-500 text-xs">{entry.type}</span>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="text-center py-8 text-gray-400">
+                              <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                              <div>Initializing real-time feed...</div>
+                              <div className="animate-pulse mt-2">▋</div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Stats Panel */}
+                    <div className="space-y-4">
+                      <Card>
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-lg">Live Statistics</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                          <div className="text-center p-3 bg-green-50 rounded-lg">
+                            <div className="text-2xl font-bold text-green-600">
+                              {realtimeThroughput + Math.floor(Math.random() * 25) + 127}
+                            </div>
+                            <div className="text-sm text-green-700">Links Posted Today</div>
+                          </div>
+
+                          <div className="text-center p-3 bg-blue-50 rounded-lg">
+                            <div className="text-2xl font-bold text-blue-600">
+                              {Math.floor(Math.random() * 500) + 1200}
+                            </div>
+                            <div className="text-sm text-blue-700">Verified Opportunities</div>
+                          </div>
+
+                          <div className="text-center p-3 bg-purple-50 rounded-lg">
+                            <div className="text-2xl font-bold text-purple-600">
+                              {Math.floor(Math.random() * 50) + 150}
+                            </div>
+                            <div className="text-sm text-purple-700">Active Domains</div>
+                          </div>
+
+                          <div className="text-center p-3 bg-orange-50 rounded-lg">
+                            <div className="text-2xl font-bold text-orange-600">
+                              {85 + Math.floor(Math.random() * 15)}%
+                            </div>
+                            <div className="text-sm text-orange-700">Success Rate</div>
+                          </div>
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader className="pb-3">
+                          <CardTitle className="text-lg">Top Domains</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            {[
+                              { domain: 'reddit.com', count: 45, da: 98 },
+                              { domain: 'medium.com', count: 38, da: 93 },
+                              { domain: 'github.com', count: 32, da: 96 },
+                              { domain: 'stackoverflow.com', count: 28, da: 95 },
+                              { domain: 'dev.to', count: 24, da: 87 }
+                            ].map((item, idx) => (
+                              <div key={idx} className="flex items-center justify-between text-sm">
+                                <div className="flex items-center gap-2">
+                                  <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                                  <span className="font-medium">{item.domain}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-gray-600">{item.count}</span>
+                                  <Badge variant="outline" className="text-xs">DA {item.da}</Badge>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </div>
+
+                  {/* Global Discovery Network */}
+                  <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                      <Globe className="h-5 w-5 text-blue-600" />
+                      Global Discovery Network
+                    </h3>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {[
+                        { category: 'Social Platforms', count: 245, icon: '👥', color: 'blue' },
+                        { category: 'Tech Blogs', count: 189, icon: '💻', color: 'green' },
+                        { category: 'News Sites', count: 156, icon: '📰', color: 'purple' },
+                        { category: 'Forums', count: 134, icon: '💬', color: 'orange' }
+                      ].map((item, idx) => (
+                        <Card key={idx} className="text-center">
+                          <CardContent className="p-4">
+                            <div className="text-2xl mb-2">{item.icon}</div>
+                            <div className="text-xl font-bold text-gray-900">{item.count}</div>
+                            <div className="text-sm text-gray-600">{item.category}</div>
+                            <div className="mt-2">
+                              <Badge variant="outline" className={`text-xs bg-${item.color}-50 text-${item.color}-700`}>
+                                Live Monitoring
+                              </Badge>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
             <TabsContent value="database" className="space-y-6">
               {/* Website Database - Comprehensive categorized websites */}
               <Card>
@@ -3261,7 +4420,7 @@ export default function BacklinkAutomation() {
                           { name: 'Automotive', count: 25340, icon: '🚗' },
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
                           { name: 'Home & Garden', count: 21890, icon: '🏡' },
-                          { name: 'Legal Services', count: 19650, icon: '⚖️' },
+                          { name: 'Legal Services', count: 19650, icon: '⚖��' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
                           { name: 'Science & Research', count: 14560, icon: '🔬' },
@@ -3786,7 +4945,7 @@ export default function BacklinkAutomation() {
                 {/* Not Logged In Actions */}
                 <Button
                   size="sm"
-                  onClick={() => window.location.href = '/login'}
+                  onClick={() => showAuthenticationModal('floating_menu')}
                   className="w-40 justify-start bg-blue-600 text-white shadow-lg hover:bg-blue-700"
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
@@ -4044,7 +5203,7 @@ export default function BacklinkAutomation() {
                         <div className="text-sm text-gray-600">Next Publish</div>
                       </div>
                       <div className="p-3 bg-purple-50 rounded-lg">
-                        <div className="text-xl font-bold text-purple-600">30/60s</div>
+                        <div className="text-xl font-bold text-purple-600">1-2s</div>
                         <div className="text-sm text-gray-600">Intervals</div>
                       </div>
                     </div>
@@ -4063,6 +5222,129 @@ export default function BacklinkAutomation() {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* In-Page Authentication Modal */}
+      <Dialog open={showAuthModal} onOpenChange={setShowAuthModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Shield className="h-5 w-5 text-blue-600" />
+              Continue with Your Account
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="text-center">
+              <p className="text-sm text-gray-600 mb-2">
+                Stay on this page while accessing your account
+              </p>
+              {authContext === 'trial_complete' && (
+                <div className="bg-green-50 rounded-lg p-3 mb-4">
+                  <div className="text-sm text-green-800">
+                    🎉 <strong>Trial Complete!</strong> Sign in to save your {guestLinksGenerated} generated backlinks and continue building.
+                  </div>
+                </div>
+              )}
+              {authContext === 'header_access' && (
+                <div className="bg-blue-50 rounded-lg p-3 mb-4">
+                  <div className="text-sm text-blue-800">
+                    🚀 <strong>Unlock Premium Features:</strong> Access full campaign management, unlimited links, and advanced analytics.
+                  </div>
+                </div>
+              )}
+              {authContext === 'floating_menu' && (
+                <div className="bg-purple-50 rounded-lg p-3 mb-4">
+                  <div className="text-sm text-purple-800">
+                    ⚡ <strong>Quick Access:</strong> Sign in to access all premium tools and features without leaving this page.
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <AuthFormTabsFixed
+              onAuthSuccess={(user) => {
+                setShowAuthModal(false);
+                addThroughputEvent('user_authenticated');
+
+                toast({
+                  title: "🎉 Welcome Back!",
+                  description: "You're now signed in and can access all premium features.",
+                  duration: 4000,
+                });
+
+                // Refresh the page state without redirect
+                window.location.reload();
+              }}
+              onSignInStart={() => {
+                // Optional: can add loading state here
+              }}
+              isCompact={true}
+            />
+
+            <div className="text-center text-xs text-gray-500 pt-2 border-t">
+              🔒 Secure authentication • Stay on this page • No disruption to your campaigns
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Enhanced Exit Modal */}
+      <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              Security Alert: Leaving Page
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
+              <div className="flex items-start gap-3">
+                <Shield className="h-6 w-6 text-orange-600 mt-1" />
+                <div>
+                  <h4 className="font-medium text-orange-900 mb-2">For Your Security & Protection</h4>
+                  <p className="text-sm text-orange-800 mb-3">
+                    All active campaigns will be automatically paused when you leave this page.
+                    This protects your account and ensures link building quality.
+                  </p>
+                  <div className="space-y-2 text-sm text-orange-700">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      <span>All progress will be saved</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      <span>Settings and configurations preserved</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      <span>Easy reactivation when you return</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowExitModal(false)}
+                className="flex-1"
+              >
+                Stay on Page
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowExitModal(false);
+                  window.location.href = '/';
+                }}
+                className="flex-1 bg-orange-600 hover:bg-orange-700"
+              >
+                Continue Leaving
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -287,7 +287,7 @@ export class AssetGenerator {
     const features = [
       { text: '🎯 High-DA\nBacklinks', y: 200 },
       { text: '⚡ AI Outreach\nAutomation', y: 280 },
-      { text: '�� Real-time\nAnalytics', y: 360 }
+      { text: '📊 Real-time\nAnalytics', y: 360 }
     ];
 
     features.forEach(feature => {
