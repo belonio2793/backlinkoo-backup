@@ -292,7 +292,7 @@ export class UserManagementService {
       const profileUpdates: any = {};
       if (updates.role !== undefined) profileUpdates.role = updates.role;
       if (updates.subscription_tier !== undefined) profileUpdates.subscription_tier = updates.subscription_tier;
-      if (updates.subscription_status !== undefined) profileUpdates.subscription_status = updates.subscription_status;
+      // subscription_status column doesn't exist, skip it
       if (updates.credits !== undefined) profileUpdates.credits = updates.credits;
       if (updates.metadata !== undefined) profileUpdates.metadata = updates.metadata;
 
