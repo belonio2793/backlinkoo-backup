@@ -1599,6 +1599,9 @@ export default function BacklinkAutomation() {
   const handleFormChange = (field: string, value: string | number) => {
     setCampaignForm(prev => ({ ...prev, [field]: value }));
     setUnsavedChanges(true);
+
+    // Track form changes as user activity for throughput
+    addThroughputEvent('form_interaction');
   };
 
   const generateCampaignName = (url: string, keywords: string) => {
