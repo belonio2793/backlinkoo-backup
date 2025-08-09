@@ -46,7 +46,8 @@ const App = () => (
         <Sonner />
         <UnifiedModalManager />
         <BrowserRouter>
-          <Routes>
+          <ReportSyncProvider>
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route
               path="/login"
@@ -200,7 +201,8 @@ const App = () => (
                 </Suspense>
               }
             />
-          </Routes>
+            </Routes>
+          </ReportSyncProvider>
         </BrowserRouter>
       </ModalProvider>
     </TooltipProvider>
