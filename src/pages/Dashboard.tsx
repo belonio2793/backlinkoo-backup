@@ -1065,7 +1065,7 @@ const Dashboard = () => {
           console.error('🚪 Sign out error (background):', error);
           // Don't show error to user since they're already signed out from UI perspective
         } else {
-          console.log('🚪 Background sign out successful');
+          console.log('��� Background sign out successful');
         }
       } catch (backgroundError) {
         console.error('🚪 Background sign out error:', backgroundError);
@@ -1077,7 +1077,9 @@ const Dashboard = () => {
 
       // Force navigation even if sign out fails
       setUser(null);
-      navigate('/');
+      startTransition(() => {
+        navigate('/');
+      });
     }
   };
 
