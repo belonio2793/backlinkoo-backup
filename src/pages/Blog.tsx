@@ -132,7 +132,7 @@ function Blog() {
         const sortedPosts = sortPosts(allPosts, sortBy);
         setBlogPosts(sortedPosts);
 
-        console.log('��� Blog posts loaded:', {
+        console.log('📄 Blog posts loaded:', {
           databasePosts: posts.length,
           localBlogPosts: localBlogPosts.length,
           totalPosts: allPosts.length,
