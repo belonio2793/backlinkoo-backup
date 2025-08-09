@@ -2981,88 +2981,165 @@ export default function BacklinkAutomation() {
                     {/* For logged-in users - show database campaigns */}
                     {user && campaigns.length > 0 ? (
                       campaigns.map((campaign) => (
-                        <div key={campaign.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
-                          <div className="flex items-start justify-between mb-3">
+                        <div key={campaign.id} className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-lg transition-all duration-300">
+                          {/* Campaign Header */}
+                          <div className="flex items-start justify-between mb-4">
                             <div className="flex-1">
-                              <h3 className="font-semibold text-gray-900 truncate">{campaign.name}</h3>
-                              <p className="text-sm text-gray-500 truncate">{campaign.targetUrl}</p>
-                            </div>
-                            <Badge
-                              variant={campaign.status === 'active' ? 'default' :
-                                      campaign.status === 'completed' ? 'secondary' :
-                                      campaign.status === 'paused' ? 'outline' : 'destructive'}
-                              className="ml-2 flex-shrink-0"
-                            >
-                              {campaign.status}
-                            </Badge>
-                          </div>
-
-                          <div className="grid grid-cols-3 gap-4 mb-3">
-                            <div className="text-center">
-                              <div className="text-lg font-bold text-green-600">{campaign.linksGenerated}</div>
-                              <div className="text-xs text-gray-500">Links</div>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-lg font-bold text-blue-600">{Math.round(campaign.progress)}%</div>
-                              <div className="text-xs text-gray-500">Progress</div>
-                            </div>
-                            <div className="text-center">
-                              <div className="text-lg font-bold text-purple-600">{campaign.dailyLimit}</div>
-                              <div className="text-xs text-gray-500">Daily Limit</div>
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <div className="flex flex-wrap gap-1">
-                              {campaign.keywords.slice(0, 3).map((keyword, idx) => (
-                                <span key={idx} className="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-                                  {keyword}
-                                </span>
-                              ))}
-                              {campaign.keywords.length > 3 && (
-                                <span className="inline-flex items-center px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-                                  +{campaign.keywords.length - 3} more
-                                </span>
-                              )}
-                            </div>
-
-                            <Progress value={campaign.progress} className="h-2" />
-
-                            <div className="flex items-center justify-between text-xs text-gray-500">
-                              <span>Created {new Date(campaign.createdAt).toLocaleDateString()}</span>
-                              <div className="flex items-center gap-3">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-7 px-2 text-xs"
-                                  onClick={() => setSelectedCampaignDetails(campaign)}
-                                >
-                                  <Eye className="h-3 w-3 mr-1" />
-                                  View
-                                </Button>
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-bold text-gray-900 text-lg">{campaign.name}</h3>
                                 {campaign.status === 'active' && (
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-7 px-2 text-xs text-orange-600 hover:text-orange-700"
-                                    onClick={() => pauseCampaign(campaign.id)}
-                                  >
-                                    <Pause className="h-3 w-3 mr-1" />
-                                    Pause
-                                  </Button>
-                                )}
-                                {campaign.status === 'paused' && (
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-7 px-2 text-xs text-green-600 hover:text-green-700"
-                                    onClick={() => resumeCampaign(campaign.id)}
-                                  >
-                                    <Play className="h-3 w-3 mr-1" />
-                                    Resume
-                                  </Button>
+                                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
                                 )}
                               </div>
+                              <p className="text-sm text-gray-600 mb-2">{campaign.targetUrl}</p>
+                              <div className="flex items-center gap-2">
+                                <Badge
+                                  variant={campaign.status === 'active' ? 'default' :
+                                          campaign.status === 'completed' ? 'secondary' :
+                                          campaign.status === 'paused' ? 'outline' : 'destructive'}
+                                  className="text-xs"
+                                >
+                                  {campaign.status === 'active' && <Activity className="h-3 w-3 mr-1" />}
+                                  {campaign.status}
+                                </Badge>
+                                {checkPremiumLimits(campaign) && (
+                                  <Badge variant="destructive" className="text-xs">
+                                    <AlertTriangle className="h-3 w-3 mr-1" />
+                                    Limit Reached
+                                  </Badge>
+                                )}
+                                <span className="text-xs text-gray-500">
+                                  Last activity: {campaign.lastActivity ? new Date(campaign.lastActivity).toLocaleTimeString() : 'Never'}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Real-Time Stats Grid */}
+                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                            <div className="text-center p-3 bg-green-50 rounded-lg">
+                              <div className="text-2xl font-bold text-green-600">
+                                {campaign.linksGenerated}
+                                {!isPremium && <span className="text-sm text-gray-500">/20</span>}
+                              </div>
+                              <div className="text-xs text-green-700">Links Built</div>
+                            </div>
+                            <div className="text-center p-3 bg-blue-50 rounded-lg">
+                              <div className="text-2xl font-bold text-blue-600">{campaign.linksLive || 0}</div>
+                              <div className="text-xs text-blue-700">Live Links</div>
+                            </div>
+                            <div className="text-center p-3 bg-purple-50 rounded-lg">
+                              <div className="text-2xl font-bold text-purple-600">{campaign.quality?.averageAuthority || 0}</div>
+                              <div className="text-xs text-purple-700">Avg Authority</div>
+                            </div>
+                            <div className="text-center p-3 bg-orange-50 rounded-lg">
+                              <div className="text-2xl font-bold text-orange-600">{campaign.quality?.successRate || 0}%</div>
+                              <div className="text-xs text-orange-700">Success Rate</div>
+                            </div>
+                          </div>
+
+                          {/* Progress Bar with Premium Warning */}
+                          <div className="mb-4">
+                            <div className="flex justify-between text-sm mb-2">
+                              <span className="font-medium">Progress</span>
+                              <span className="text-gray-600">{Math.round(campaign.progress)}%</span>
+                            </div>
+                            <Progress
+                              value={campaign.progress}
+                              className={`h-3 ${checkPremiumLimits(campaign) ? 'bg-red-100' : ''}`}
+                            />
+                            {!isPremium && campaign.linksGenerated >= 15 && (
+                              <div className="mt-2 text-xs text-amber-600 flex items-center gap-1">
+                                <AlertTriangle className="h-3 w-3" />
+                                Approaching 20-link limit. Upgrade for unlimited links!
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Real-Time Activity Feed */}
+                          {campaign.realTimeActivity && campaign.realTimeActivity.length > 0 && (
+                            <div className="mb-4">
+                              <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                                <Zap className="h-3 w-3" />
+                                Live Activity
+                              </h4>
+                              <div className="space-y-1 max-h-24 overflow-y-auto">
+                                {campaign.realTimeActivity.slice(0, 3).map((activity) => (
+                                  <div key={activity.id} className="text-xs text-gray-600 flex items-center gap-2 p-2 bg-gray-50 rounded">
+                                    <div className="w-1 h-1 bg-green-500 rounded-full"></div>
+                                    <span>{activity.message}</span>
+                                    <span className="text-gray-400 ml-auto">
+                                      {new Date(activity.timestamp).toLocaleTimeString()}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Keywords */}
+                          <div className="flex flex-wrap gap-1 mb-4">
+                            {campaign.keywords.slice(0, 4).map((keyword, idx) => (
+                              <span key={idx} className="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
+                                {keyword}
+                              </span>
+                            ))}
+                            {campaign.keywords.length > 4 && (
+                              <span className="inline-flex items-center px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                                +{campaign.keywords.length - 4} more
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex items-center justify-between">
+                            <div className="text-xs text-gray-500">
+                              Created {new Date(campaign.createdAt).toLocaleDateString()}
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-8 px-3 text-xs"
+                                onClick={() => setSelectedCampaignDetails(campaign)}
+                              >
+                                <Eye className="h-3 w-3 mr-1" />
+                                View Details
+                              </Button>
+                              {campaign.status === 'active' && !checkPremiumLimits(campaign) && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-8 px-3 text-xs text-orange-600 hover:text-orange-700"
+                                  onClick={() => pauseCampaign(campaign.id)}
+                                  disabled={isLoading}
+                                >
+                                  <Pause className="h-3 w-3 mr-1" />
+                                  Pause
+                                </Button>
+                              )}
+                              {campaign.status === 'paused' && (
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-8 px-3 text-xs text-green-600 hover:text-green-700"
+                                  onClick={() => resumeCampaign(campaign.id)}
+                                  disabled={isLoading}
+                                >
+                                  <Play className="h-3 w-3 mr-1" />
+                                  Resume
+                                </Button>
+                              )}
+                              {checkPremiumLimits(campaign) && (
+                                <Button
+                                  size="sm"
+                                  className="h-8 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                                  onClick={() => showPremiumUpgrade(campaign.id)}
+                                >
+                                  <Crown className="h-3 w-3 mr-1" />
+                                  Upgrade
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </div>
