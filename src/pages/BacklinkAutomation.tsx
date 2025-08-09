@@ -4443,9 +4443,9 @@ export default function BacklinkAutomation() {
                                   <Button size="sm" variant="ghost" className="h-7 px-2">
                                     <Eye className="h-3 w-3" />
                                   </Button>
-                                  <Button size="sm" variant="ghost" className="h-7 px-2 text-green-600">
-                                    <Plus className="h-3 w-3" />
-                                  </Button>
+                                  <Badge variant="outline" className="text-green-600 bg-green-50 text-xs">
+                                    Auto-Added
+                                  </Badge>
                                 </div>
                               </div>
                             </div>
