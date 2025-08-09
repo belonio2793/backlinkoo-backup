@@ -298,6 +298,11 @@ export default function BacklinkAutomation() {
   const [guestCampaignToDelete, setGuestCampaignToDelete] = useState<any>(null);
   const [showFabMenu, setShowFabMenu] = useState(false);
 
+  // Random rotation state for website discovery
+  const [randomizedDiscoveries, setRandomizedDiscoveries] = useState<any[]>([]);
+  const [randomizedWebsites, setRandomizedWebsites] = useState<any[]>([]);
+  const [lastRotationTime, setLastRotationTime] = useState<Date>(new Date());
+
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
     name: '',
@@ -316,6 +321,80 @@ export default function BacklinkAutomation() {
   });
 
   const { toast } = useToast();
+
+  // Full website database for rotation
+  const fullDiscoverySites = [
+    { domain: 'techcrunch.com', da: 92, status: 'Publishing Live', type: 'Guest Article', verified: true },
+    { domain: 'medium.com', da: 96, status: 'Link Published', type: 'Author Bio', verified: true },
+    { domain: 'forbes.com', da: 95, status: 'Processing', type: 'Expert Quote', verified: false },
+    { domain: 'entrepreneur.com', da: 91, status: 'Link Published', type: 'Case Study', verified: true },
+    { domain: 'inc.com', da: 89, status: 'Publishing Live', type: 'Interview', verified: false },
+    { domain: 'mashable.com', da: 88, status: 'Link Published', type: 'Product Review', verified: true },
+    { domain: 'wired.com', da: 87, status: 'Processing', type: 'Tech News', verified: false },
+    { domain: 'venturebeat.com', da: 85, status: 'Link Published', type: 'Startup Feature', verified: true },
+    { domain: 'hackernews.ycombinator.com', da: 89, status: 'Link Published', type: 'Community Post', verified: true },
+    { domain: 'reddit.com', da: 91, status: 'Processing', type: 'Discussion', verified: false },
+    { domain: 'producthunt.com', da: 85, status: 'Publishing Live', type: 'Product Launch', verified: true },
+    { domain: 'dev.to', da: 87, status: 'Link Published', type: 'Technical Article', verified: true },
+    { domain: 'indiegogo.com', da: 83, status: 'Processing', type: 'Campaign Feature', verified: false },
+    { domain: 'kickstarter.com', da: 84, status: 'Link Published', type: 'Project Spotlight', verified: true },
+    { domain: 'github.com', da: 96, status: 'Publishing Live', type: 'Repository Link', verified: true },
+    { domain: 'stackoverflow.com', da: 95, status: 'Link Published', type: 'Answer', verified: true },
+    { domain: 'quora.com', da: 90, status: 'Processing', type: 'Q&A Response', verified: false },
+    { domain: 'linkedin.com', da: 98, status: 'Publishing Live', type: 'Professional Post', verified: true },
+    { domain: 'twitter.com', da: 99, status: 'Link Published', type: 'Tweet Thread', verified: true },
+    { domain: 'youtube.com', da: 100, status: 'Processing', type: 'Video Description', verified: false }
+  ];
+
+  const fullWebsiteDatabase = [
+    { domain: 'techcrunch.com', authority: 94, traffic: 'Very High', type: 'News/Blog', opportunities: 245 },
+    { domain: 'github.com', authority: 96, traffic: 'Very High', type: 'Platform', opportunities: 189 },
+    { domain: 'stackoverflow.com', authority: 95, traffic: 'Very High', type: 'Community', opportunities: 312 },
+    { domain: 'medium.com', authority: 93, traffic: 'Very High', type: 'Blog Platform', opportunities: 567 },
+    { domain: 'dev.to', authority: 87, traffic: 'High', type: 'Community', opportunities: 234 },
+    { domain: 'hackernews.ycombinator.com', authority: 89, traffic: 'High', type: 'News/Community', opportunities: 156 },
+    { domain: 'producthunt.com', authority: 85, traffic: 'High', type: 'Directory', opportunities: 198 },
+    { domain: 'indiehackers.com', authority: 82, traffic: 'Medium', type: 'Community', opportunities: 134 },
+    { domain: 'betalist.com', authority: 76, traffic: 'Medium', type: 'Directory', opportunities: 89 },
+    { domain: 'reddit.com/r/programming', authority: 91, traffic: 'Very High', type: 'Community', opportunities: 423 },
+    { domain: 'linkedin.com', authority: 98, traffic: 'Very High', type: 'Social/Professional', opportunities: 678 },
+    { domain: 'twitter.com', authority: 99, traffic: 'Very High', type: 'Social Media', opportunities: 534 },
+    { domain: 'quora.com', authority: 90, traffic: 'Very High', type: 'Q&A Platform', opportunities: 345 },
+    { domain: 'youtube.com', authority: 100, traffic: 'Very High', type: 'Video Platform', opportunities: 789 },
+    { domain: 'forbes.com', authority: 92, traffic: 'Very High', type: 'News/Business', opportunities: 267 },
+    { domain: 'wired.com', authority: 88, traffic: 'High', type: 'Tech News', opportunities: 178 },
+    { domain: 'techradar.com', authority: 86, traffic: 'High', type: 'Tech Reviews', opportunities: 156 },
+    { domain: 'venturebeat.com', authority: 84, traffic: 'High', type: 'Tech News', opportunities: 143 },
+    { domain: 'mashable.com', authority: 87, traffic: 'High', type: 'Tech/Culture', opportunities: 189 },
+    { domain: 'engadget.com', authority: 85, traffic: 'High', type: 'Tech News', opportunities: 167 },
+    { domain: 'arstechnica.com', authority: 83, traffic: 'High', type: 'Tech Analysis', opportunities: 142 },
+    { domain: 'theverge.com', authority: 86, traffic: 'High', type: 'Tech/Culture', opportunities: 198 },
+    { domain: 'gizmodo.com', authority: 81, traffic: 'High', type: 'Tech Gadgets', opportunities: 134 },
+    { domain: 'cnet.com', authority: 84, traffic: 'High', type: 'Tech Reviews', opportunities: 156 },
+    { domain: 'zdnet.com', authority: 82, traffic: 'Medium', type: 'Business Tech', opportunities: 123 },
+    { domain: 'techrepublic.com', authority: 80, traffic: 'Medium', type: 'IT Professional', opportunities: 109 },
+    { domain: 'computerworld.com', authority: 78, traffic: 'Medium', type: 'Enterprise Tech', opportunities: 98 },
+    { domain: 'infoworld.com', authority: 77, traffic: 'Medium', type: 'Developer News', opportunities: 87 },
+    { domain: 'slashgear.com', authority: 75, traffic: 'Medium', type: 'Tech Lifestyle', opportunities: 76 },
+    { domain: 'digitaltrends.com', authority: 79, traffic: 'Medium', type: 'Consumer Tech', opportunities: 104 }
+  ];
+
+  // Shuffle function using Fisher-Yates algorithm
+  const shuffleArray = (array: any[]) => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Randomize websites function
+  const randomizeWebsites = useCallback(() => {
+    setRandomizedDiscoveries(shuffleArray(fullDiscoverySites).slice(0, 8));
+    setRandomizedWebsites(shuffleArray(fullWebsiteDatabase).slice(0, 20));
+    setLastRotationTime(new Date());
+  }, []);
 
   // Clipboard helper with fallback for when Clipboard API is blocked
   const copyToClipboard = async (text: string) => {
@@ -652,7 +731,7 @@ export default function BacklinkAutomation() {
           }
           loadRealTimeMetrics();
         } else {
-          console.warn('⚠️ Database not ready:', status);
+          console.warn('⚠��� Database not ready:', status);
         }
       } catch (error) {
         console.error('❌ Database check failed:', error);
