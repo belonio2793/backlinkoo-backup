@@ -150,7 +150,8 @@ export class GlobalErrorHandler {
    * Handle RLS recursion errors - immediate action required
    */
   private handleRLSRecursionError(error: any, source: string): void {
-    console.error(`🚨 CRITICAL: RLS Recursion Detected (${source}):`, error.message);
+    const errorMessage = this.formatError(error);
+    console.error(`🚨 CRITICAL: RLS Recursion Detected (${source}):`, errorMessage);
     console.error('This will prevent login and database operations. Applying emergency fix...');
 
     // Apply emergency fix immediately
