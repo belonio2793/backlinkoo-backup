@@ -86,7 +86,7 @@ interface RealTimeMetrics {
 
 export default function BacklinkAutomation() {
   // Auth Hook
-  const { user } = useAuth();
+  const { user, isPremium } = useAuth();
 
   // State Management
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
