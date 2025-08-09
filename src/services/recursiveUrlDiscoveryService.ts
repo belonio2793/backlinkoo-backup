@@ -908,7 +908,8 @@ class RecursiveUrlDiscoveryService {
       };
 
     } catch (error) {
-      console.error('Failed to calculate stats manually:', error);
+      console.error('Failed to calculate stats manually:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
+      console.log('Returning demo stats as fallback from calculateStatsManually');
       return this.getDemoStats();
     }
   }
