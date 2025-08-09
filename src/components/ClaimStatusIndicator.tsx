@@ -66,7 +66,7 @@ export function ClaimStatusIndicator({ onUpgrade, onSignIn }: ClaimStatusIndicat
                 Sign in to claim posts permanently
               </span>
             </div>
-            <Button size="sm" variant="outline" onClick={() => window.location.href = '/login'}>
+            <Button size="sm" variant="outline" onClick={onSignIn}>
               Sign In
             </Button>
           </div>
