@@ -2692,7 +2692,7 @@ export default function BacklinkAutomation() {
                             ) : (
                               <Rocket className="h-4 w-4 mr-2" />
                             )}
-                            {isPremium ? "Deploy Premium Campaign" : "Deploy Campaign (20 Links)"}
+                            {isPremium ? "Deploy Premium Campaign" : "Deploy Campaign"}
                           </Button>
 
                           {!isPremium && (
