@@ -215,21 +215,21 @@ const Affiliate: React.FC = () => {
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Credits Earned</span>
-                        <span className="text-2xl font-bold text-purple-600">{affiliateStats.thisMonthCredits}</span>
+                        <span className="text-2xl font-bold text-purple-600">{stats.thisMonthCredits}</span>
                       </div>
-                      <Progress value={75} className="h-2" />
-                      
+                      <Progress value={Math.min(100, (stats.thisMonthCredits / 50) * 100)} className="h-2" />
+
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">New Referrals</span>
-                        <span className="text-2xl font-bold text-blue-600">{affiliateStats.thisMonthReferrals}</span>
+                        <span className="text-2xl font-bold text-blue-600">{stats.thisMonthReferrals}</span>
                       </div>
-                      <Progress value={40} className="h-2" />
-                      
+                      <Progress value={Math.min(100, (stats.thisMonthReferrals / 10) * 100)} className="h-2" />
+
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">Conversion Rate</span>
-                        <span className="text-2xl font-bold text-green-600">{affiliateStats.conversionRate}%</span>
+                        <span className="text-2xl font-bold text-green-600">{stats.conversionRate.toFixed(1)}%</span>
                       </div>
-                      <Progress value={affiliateStats.conversionRate} className="h-2" />
+                      <Progress value={Math.min(100, stats.conversionRate)} className="h-2" />
                     </div>
                   </CardContent>
                 </Card>
