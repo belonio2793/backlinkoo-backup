@@ -4648,6 +4648,22 @@ export default function BacklinkAutomation() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Sign In Modal */}
+      <LoginModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        onAuthSuccess={(user) => {
+          console.log('User signed in:', user);
+          setShowSignInModal(false);
+          // Optionally reload campaigns or update user state
+          if (user) {
+            window.location.reload(); // Refresh to load user campaigns
+          }
+        }}
+        defaultTab="signup"
+        pendingAction="access campaign automation features"
+      />
     </div>
   );
 }
