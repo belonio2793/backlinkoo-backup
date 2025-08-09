@@ -3139,12 +3139,65 @@ export default function BacklinkAutomation() {
                         <div key={campaign.id} className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow">
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1">
-                              <h3 className="font-semibold text-gray-900 truncate">{campaign.name}</h3>
+                              <div className="flex items-center gap-2 mb-1">
+                                <h3 className="font-semibold text-gray-900 truncate">{campaign.name}</h3>
+                                {campaign.status === 'active' && (
+                                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                )}
+                              </div>
                               <p className="text-sm text-gray-500 truncate">{campaign.targetUrl}</p>
+                              <div className="flex items-center gap-2 mt-1">
+                                <Badge
+                                  variant={campaign.status === 'active' ? 'default' : 'outline'}
+                                  className="text-xs"
+                                >
+                                  {campaign.status === 'active' && <Activity className="h-3 w-3 mr-1" />}
+                                  {campaign.status === 'paused' && <Pause className="h-3 w-3 mr-1" />}
+                                  {campaign.status || 'active'}
+                                </Badge>
+                                <Badge variant="secondary" className="text-xs">
+                                  Trial
+                                </Badge>
+                              </div>
                             </div>
-                            <Badge variant="secondary" className="ml-2 flex-shrink-0">
-                              Trial
-                            </Badge>
+
+                            {/* Guest Campaign Controls */}
+                            <div className="flex items-center gap-1 ml-2">
+                              {(!campaign.status || campaign.status === 'active') ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setGuestCampaignResults(prev =>
+                                      prev.map(c => c.id === campaign.id ? { ...c, status: 'paused' } : c)
+                                    );
+                                    toast({
+                                      title: "⏸️ Trial Campaign Paused",
+                                      description: "You can resume anytime during your trial.",
+                                    });
+                                  }}
+                                  className="h-8 px-2 border-orange-300 text-orange-600 hover:bg-orange-50"
+                                >
+                                  <Pause className="h-3 w-3" />
+                                </Button>
+                              ) : (
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    setGuestCampaignResults(prev =>
+                                      prev.map(c => c.id === campaign.id ? { ...c, status: 'active' } : c)
+                                    );
+                                    toast({
+                                      title: "▶️ Trial Campaign Resumed",
+                                      description: "Link building activity has resumed.",
+                                    });
+                                  }}
+                                  className="h-8 px-2 bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                  <Play className="h-3 w-3" />
+                                </Button>
+                              )}
+                            </div>
                           </div>
 
                           <div className="grid grid-cols-2 gap-4 mb-3">
@@ -3705,7 +3758,7 @@ export default function BacklinkAutomation() {
                         {[
                           { name: 'Technology & Software', count: 125420, icon: '💻' },
                           { name: 'Business & Finance', count: 98750, icon: '💼' },
-                          { name: 'Health & Medicine', count: 87320, icon: '🏥' },
+                          { name: 'Health & Medicine', count: 87320, icon: '��' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
