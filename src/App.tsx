@@ -41,14 +41,21 @@ const queryClient = new QueryClient({
   },
 });
 
+// Global Symbol Cleaner Component
+const SymbolCleanerProvider = ({ children }: { children: React.ReactNode }) => {
+  useSymbolCleaner(true); // Enable automatic symbol cleaning
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ModalProvider>
-        <Toaster />
-        <Sonner />
-        <UnifiedModalManager />
-        <BrowserRouter>
+        <SymbolCleanerProvider>
+          <Toaster />
+          <Sonner />
+          <UnifiedModalManager />
+          <BrowserRouter>
           <ReportSyncProvider>
             <Routes>
             <Route path="/" element={<Index />} />
@@ -231,6 +238,7 @@ const App = () => (
             </Routes>
           </ReportSyncProvider>
         </BrowserRouter>
+        </SymbolCleanerProvider>
       </ModalProvider>
     </TooltipProvider>
   </QueryClientProvider>
