@@ -117,6 +117,18 @@ export default function BacklinkAutomation() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [selectedLinkType, setSelectedLinkType] = useState('all');
 
+  // Link Aggregation State
+  const [isAggregating, setIsAggregating] = useState(false);
+  const [aggregationSpeed, setAggregationSpeed] = useState(50); // 1-100 scale
+  const [aggregationStats, setAggregationStats] = useState({
+    totalLinks: 15847,
+    aggregatedToday: 2456,
+    successRate: 94.2,
+    avgResponseTime: 1.8,
+    activeThreads: 32,
+    throttleLevel: 'medium'
+  });
+
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
     name: '',
