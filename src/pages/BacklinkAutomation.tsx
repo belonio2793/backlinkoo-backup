@@ -837,12 +837,27 @@ export default function BacklinkAutomation() {
 
   const resumeCampaign = async (campaignId: string) => {
     try {
-      // Use campaign service for backend call
-      await campaignService.resumeCampaign(campaignId);
+      // Update database status
+      try {
+        await directCampaignService.updateCampaignStatus(campaignId, 'active');
+      } catch (dbError) {
+        console.error('Direct database resume failed:', dbError);
+        // Try campaign service as fallback
+        try {
+          await campaignService.resumeCampaign(campaignId);
+        } catch (apiError) {
+          console.error('Campaign service resume failed:', apiError);
+        }
+      }
 
       // Also resume in queue manager
-      await queueManager.resumeCampaign(campaignId);
+      try {
+        await queueManager.resumeCampaign(campaignId);
+      } catch (queueError) {
+        console.error('Queue manager resume failed:', queueError);
+      }
 
+      // Update local state
       setCampaigns(prev => prev.map(c =>
         c.id === campaignId ? { ...c, status: 'active' as const, lastActive: new Date() } : c
       ));
