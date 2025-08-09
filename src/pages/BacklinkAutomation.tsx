@@ -87,7 +87,7 @@ interface Campaign {
   keywords: string[];
   anchorTexts?: string[];
   dailyLimit?: number;
-  status: 'active' | 'paused' | 'stopped' | 'completed' | 'failed';
+  status: 'active' | 'paused' | 'stopped' | 'failed';
   progress: number;
   linksGenerated: number;
   linksLive: number;
@@ -1224,7 +1224,7 @@ export default function BacklinkAutomation() {
             // Show real-time toast for high-authority links
             if (newPostback.domainAuthority >= 90) {
               toast({
-                title: "���� High-Authority Link Published!",
+                title: "🚀 High-Authority Link Published!",
                 description: `DA ${newPostback.domainAuthority} link live on ${newPostback.domain}`,
                 duration: 3000,
               });
