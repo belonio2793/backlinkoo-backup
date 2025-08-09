@@ -472,7 +472,9 @@ export function BeautifulBlogPost() {
                   title: "Post Deleted (Admin)",
                   description: "The blog post has been successfully deleted using admin privileges.",
                 });
-                navigate('/blog');
+                startTransition(() => {
+                  navigate('/blog');
+                });
                 return;
               }
             } catch (adminError) {
