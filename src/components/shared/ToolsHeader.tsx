@@ -31,7 +31,6 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: Target },
     { name: "Tools", path: "#", icon: Sparkles, hasDropdown: true },
-    { name: "Reports", path: "/backlink-report", icon: FileText },
   ];
 
   const toolsDropdown = [
