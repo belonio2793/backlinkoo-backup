@@ -718,7 +718,7 @@ export function BeautifulBlogPost() {
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
-              onClick={() => navigate('/blog')}
+              onClick={() => startTransition(() => navigate('/blog'))}
               className="flex items-center gap-2 hover:bg-transparent hover:text-blue-600 px-4 py-2 rounded-full transition-all duration-300 border border-transparent hover:border-blue-200/50 hover:shadow-md"
             >
               <ArrowLeft className="h-4 w-4" />
