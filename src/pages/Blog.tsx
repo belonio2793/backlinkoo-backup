@@ -39,7 +39,7 @@ import {
   Loader2
 } from 'lucide-react';
 
-export function Blog() {
+function Blog() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
