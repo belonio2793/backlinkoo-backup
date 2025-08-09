@@ -1470,7 +1470,7 @@ export default function BacklinkAutomation() {
                   <CardContent className="space-y-4">
                     {/* Campaign Monitor Tabs */}
                     <Tabs value={selectedMonitorTab} onValueChange={setSelectedMonitorTab} className="w-full">
-                      <TabsList className="grid w-full" style={{gridTemplateColumns: `repeat(${2 + (user ? campaigns.filter(c => c.status === 'active' || c.status === 'completed').length : guestCampaignResults.length)}, minmax(0, 1fr))`}}>
+                      <TabsList className="grid w-full grid-cols-2">
                         <TabsTrigger value="overview" className="text-xs">
                           <BarChart3 className="h-3 w-3 mr-1" />
                           Overview
@@ -1483,18 +1483,6 @@ export default function BacklinkAutomation() {
                             <div className="absolute -top-1 -right-1 h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
                           )}
                         </TabsTrigger>
-                        {user && campaigns.filter(c => c.status === 'active' || c.status === 'completed').map((campaign, idx) => (
-                          <TabsTrigger key={campaign.id} value={`campaign-${campaign.id}`} className="text-xs">
-                            <LinkIcon className="h-3 w-3 mr-1" />
-                            {campaign.name.split(' - ')[0]}
-                          </TabsTrigger>
-                        ))}
-                        {!user && guestCampaignResults.map((campaign, idx) => (
-                          <TabsTrigger key={campaign.id} value={`guest-campaign-${campaign.id}`} className="text-xs">
-                            <LinkIcon className="h-3 w-3 mr-1" />
-                            {campaign.name.split(' - ')[0]}
-                          </TabsTrigger>
-                        ))}
                       </TabsList>
 
                       <TabsContent value="overview" className="space-y-4">
