@@ -190,6 +190,97 @@ function Blog() {
 
   const categories = Array.from(new Set(blogPosts.map(post => post.category)));
 
+  const handleRefreshPosts = async () => {
+    setRefreshing(true);
+    try {
+      console.log('🔄 Manually refreshing blog posts...');
+
+      // Clear existing posts first for visual feedback
+      setBlogPosts([]);
+
+      // Use UnifiedClaimService to get posts consistently
+      let posts: any[] = [];
+      try {
+        posts = await UnifiedClaimService.getClaimablePosts(50);
+        console.log('✅ Claimable posts loaded:', posts.length);
+      } catch (dbError) {
+        console.warn('❌ Database unavailable, trying fallback:', dbError);
+        try {
+          posts = await ClaimableBlogService.getClaimablePosts(50);
+          console.log('✅ Fallback posts loaded:', posts.length);
+        } catch (fallbackError) {
+          console.warn('❌ Fallback also failed, using localStorage:', fallbackError);
+        }
+      }
+
+      // Also load from localStorage (traditional blog posts)
+      const localBlogPosts: BlogPost[] = [];
+      try {
+        const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+
+        for (const blogMeta of allBlogPosts) {
+          const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
+          if (blogData) {
+            const blogPost = JSON.parse(blogData);
+
+            // Check if trial post is expired
+            if (blogPost.is_trial_post && blogPost.expires_at) {
+              const isExpired = new Date() > new Date(blogPost.expires_at);
+              if (isExpired) {
+                // Remove expired trial post
+                localStorage.removeItem(`blog_post_${blogMeta.slug}`);
+                continue;
+              }
+            }
+
+            localBlogPosts.push(blogPost);
+          }
+        }
+
+        // Update the all_blog_posts list to remove expired ones
+        const validBlogMetas = allBlogPosts.filter((meta: any) => {
+          return localBlogPosts.some(post => post.slug === meta.slug);
+        });
+        localStorage.setItem('all_blog_posts', JSON.stringify(validBlogMetas));
+
+      } catch (storageError) {
+        console.warn('Failed to load from localStorage:', storageError);
+      }
+
+      // Combine database and localStorage posts, removing duplicates
+      const allPosts = [...posts];
+      localBlogPosts.forEach(localPost => {
+        if (!allPosts.find(dbPost => dbPost.slug === localPost.slug)) {
+          allPosts.push(localPost);
+        }
+      });
+
+      // Sort posts based on selected criteria
+      const sortedPosts = sortPosts(allPosts, sortBy);
+      setBlogPosts(sortedPosts);
+
+      toast({
+        title: "Posts refreshed!",
+        description: `Loaded ${allPosts.length} blog posts.`,
+      });
+
+      console.log('✅ Blog posts refreshed:', {
+        databasePosts: posts.length,
+        localBlogPosts: localBlogPosts.length,
+        totalPosts: allPosts.length,
+      });
+    } catch (error) {
+      console.error('❌ Failed to refresh blog posts:', error);
+      toast({
+        title: "Refresh failed",
+        description: "Failed to refresh posts. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
