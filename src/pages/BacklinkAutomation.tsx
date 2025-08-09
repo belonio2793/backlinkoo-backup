@@ -826,6 +826,52 @@ export default function BacklinkAutomation() {
             </div>
           </div>
 
+          {/* Database Status Alert */}
+          {isCheckingDatabase && (
+            <Alert className="border-blue-200 bg-blue-50">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <AlertDescription>
+                <strong>Checking Database:</strong> Verifying database connection and table structure...
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {databaseStatus && !databaseStatus.isConnected && (
+            <Alert className="border-red-200 bg-red-50">
+              <XCircle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Database Connection Failed:</strong> Unable to connect to the database.
+                {databaseStatus.errors.length > 0 && (
+                  <details className="mt-2">
+                    <summary className="cursor-pointer text-sm">View Details</summary>
+                    <ul className="mt-1 text-xs">
+                      {databaseStatus.errors.map((error, idx) => (
+                        <li key={idx}>• {error}</li>
+                      ))}
+                    </ul>
+                  </details>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {databaseStatus && databaseStatus.isConnected && databaseStatus.needsSetup && (
+            <Alert className="border-yellow-200 bg-yellow-50">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Database Setup Required:</strong> Some database tables are missing.
+                The system is running in limited mode. Contact support to complete database setup.
+                <div className="mt-2 text-xs">
+                  Missing tables: {Object.entries(databaseStatus.tablesExist)
+                    .filter(([_, exists]) => !exists)
+                    .map(([table]) => table)
+                    .join(', ')
+                  }
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="campaigns">Campaign Manager</TabsTrigger>
