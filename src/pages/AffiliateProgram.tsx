@@ -424,7 +424,7 @@ export const AffiliateProgram: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="users" className="mt-0 p-6">
-          <ReferredUsers
+          <ReferredUsersSimple
             affiliateId={affiliateProfile.affiliate_id}
             affiliateCode={affiliateProfile.affiliate_id}
           />
