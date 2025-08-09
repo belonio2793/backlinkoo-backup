@@ -1024,13 +1024,13 @@ export default function BacklinkAutomation() {
                       )
                     ) : (
                       <>
-                        <UserPlus className="h-3 w-3 text-gray-600" />
-                        <span className="text-lg font-bold text-gray-600">--</span>
+                        <Zap className="h-3 w-3 text-green-600" />
+                        <span className="text-lg font-bold text-green-600">{guestLinksGenerated}/20</span>
                       </>
                     )}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {user ? (isPremium ? "Unlimited" : "Monthly Links") : "Sign In"}
+                    {user ? (isPremium ? "Unlimited" : "Monthly Links") : "Free Trial"}
                   </div>
                 </div>
               </div>
