@@ -1790,7 +1790,7 @@ export default function BacklinkAutomation() {
                   {!user && (
                     <Button
                       size="sm"
-                      onClick={() => window.location.href = '/login'}
+                      onClick={() => setShowSignInModal(true)}
                       className="h-8 bg-blue-600 hover:bg-blue-700"
                     >
                       <UserPlus className="h-3 w-3 mr-1" />
