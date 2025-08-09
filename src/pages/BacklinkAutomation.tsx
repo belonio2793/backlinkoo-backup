@@ -487,11 +487,41 @@ export default function BacklinkAutomation() {
     setGuestCampaignResults(prev =>
       prev.map(campaign => {
         if (campaign.status === 'active') {
-          const updatedPublishedUrls = [...(campaign.publishedUrls || []), linkToPublish];
+          // Create new published URLs array with blog post always first (if it exists)
+          const existingUrls = campaign.publishedUrls || [];
+          const blogPostUrl = campaign.blogPostUrl;
+
+          // Separate blog post from other URLs
+          const otherUrls = existingUrls.filter(url =>
+            !blogPostUrl || url.url !== blogPostUrl
+          );
+
+          // Add new link to other URLs
+          const updatedOtherUrls = [...otherUrls, linkToPublish];
+
+          // Reconstruct array with blog post first (if exists)
+          let finalPublishedUrls = [];
+          if (blogPostUrl && campaign.blogPostTitle) {
+            const blogLink = {
+              domain: 'backlinkoo.com',
+              url: blogPostUrl,
+              publishedAt: campaign.createdAt || new Date().toISOString(),
+              anchorText: campaign.keywords?.[0] || 'learn more',
+              verified: true,
+              destinationUrl: campaign.targetUrl,
+              type: 'guest_post',
+              status: 'live',
+              isPrimaryBlogPost: true // Flag to identify the main blog post
+            };
+            finalPublishedUrls = [blogLink, ...updatedOtherUrls];
+          } else {
+            finalPublishedUrls = updatedOtherUrls;
+          }
+
           return {
             ...campaign,
-            linksGenerated: updatedPublishedUrls.length,
-            publishedUrls: updatedPublishedUrls,
+            linksGenerated: finalPublishedUrls.length,
+            publishedUrls: finalPublishedUrls,
             domains: [...new Set([...campaign.domains, linkToPublish.domain])]
           };
         }
