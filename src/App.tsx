@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ModalProvider } from "@/contexts/ModalContext";
 import { UnifiedModalManager } from "@/components/UnifiedModalManager";
+import { LoadingSpinner } from "@/components/LoadingSpinner";
 import Index from "./pages/Index";
 
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
