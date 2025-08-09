@@ -641,11 +641,6 @@ export default function BacklinkAutomation() {
                 Recursive Link Discovery Engine
               </h1>
               <div className="flex items-center gap-2">
-                {!isPremium && (
-                  <Badge variant="outline" className="text-orange-600 bg-orange-50">
-                    {usageStats.linksPosted}/{usageStats.freeLimit} FREE
-                  </Badge>
-                )}
                 {isPremium && (
                   <Badge variant="outline" className="text-purple-600 bg-purple-50">
                     <Crown className="h-3 w-3 mr-1" />
