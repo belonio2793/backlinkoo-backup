@@ -363,10 +363,10 @@ export default function BacklinkAutomation() {
       return;
     }
 
-    if (!campaignForm.targetUrl.trim() || !campaignForm.keywords.trim() || !campaignForm.anchorTexts.trim()) {
+    if (!campaignForm.targetUrl.trim() || !campaignForm.keywords.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please fill in Target URL, Keywords, and Anchor Texts",
+        description: "Please fill in Target URL and Keywords",
         variant: "destructive"
       });
       return;
