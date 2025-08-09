@@ -204,16 +204,54 @@ export function GuestPremiumUpsellModal({
             </Card>
           </div>
 
+          {/* Paused Campaign Highlight */}
+          {trigger === 'link_limit' && campaigns.some(c => c.linksGenerated >= 20) && (
+            <div className="mb-8">
+              <div className="bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-6">
+                <h3 className="text-xl font-bold mb-4 flex items-center gap-2 text-red-800">
+                  <AlertTriangle className="h-5 w-5" />
+                  Campaign Paused
+                </h3>
+                {campaigns.filter(c => c.linksGenerated >= 20).map((campaign) => (
+                  <div key={campaign.id} className="bg-white rounded-lg p-4 border border-red-200">
+                    <div className="flex items-center justify-between mb-3">
+                      <div>
+                        <div className="font-semibold text-gray-900">{campaign.name}</div>
+                        <div className="text-sm text-gray-600">{campaign.targetUrl}</div>
+                      </div>
+                      <Badge variant="destructive" className="bg-red-600">
+                        <Pause className="h-3 w-3 mr-1" />
+                        Paused at 20/20
+                      </Badge>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
+                      <div className="bg-red-500 h-3 rounded-full" style={{ width: '100%' }}></div>
+                    </div>
+                    <div className="text-sm text-red-700 bg-red-50 rounded p-2">
+                      <strong>Campaign Status:</strong> This campaign reached the 20-link limit and has been automatically paused.
+                      Your progress and all {campaign.linksGenerated} links are saved permanently.
+                    </div>
+                  </div>
+                ))}
+                <div className="mt-4 text-center">
+                  <p className="text-red-800 font-medium">
+                    🔓 Upgrade to Premium to reactivate and continue building unlimited links!
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Current Campaigns */}
           {campaigns.length > 0 && (
             <div className="mb-8">
               <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                 <BarChart3 className="h-5 w-5" />
-                Your Active Campaigns
+                Your Campaign Progress
               </h3>
               <div className="space-y-3 max-h-32 overflow-y-auto">
                 {campaigns.map((campaign) => (
-                  <Card key={campaign.id} className="bg-gray-50">
+                  <Card key={campaign.id} className={campaign.linksGenerated >= 20 ? "bg-red-50 border-red-200" : "bg-gray-50"}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between">
                         <div>
@@ -224,14 +262,14 @@ export function GuestPremiumUpsellModal({
                           </div>
                         </div>
                         <div className="text-right">
-                          <Badge 
+                          <Badge
                             variant={campaign.linksGenerated >= 20 ? "destructive" : "outline"}
-                            className={campaign.linksGenerated >= 20 ? "bg-red-50 text-red-600" : "text-green-600 bg-green-50"}
+                            className={campaign.linksGenerated >= 20 ? "bg-red-600 text-white" : "text-green-600 bg-green-50"}
                           >
                             {campaign.linksGenerated}/20 links
                           </Badge>
                           {campaign.linksGenerated >= 20 && (
-                            <div className="text-xs text-red-600 mt-1">Limit reached!</div>
+                            <div className="text-xs text-red-600 mt-1 font-medium">PAUSED - Upgrade to continue!</div>
                           )}
                         </div>
                       </div>
