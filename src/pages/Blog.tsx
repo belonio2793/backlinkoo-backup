@@ -519,32 +519,32 @@ function Blog() {
       </div>
 
       {/* Claim Feature Banner */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-8 text-white relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-6 md:p-8 text-white relative overflow-hidden">
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="relative z-10">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-3xl font-bold mb-2">💾 Save Blog Posts to Dashboard</h2>
-                <p className="text-blue-100 text-lg mb-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div className="flex-1">
+                <h2 className="text-2xl md:text-3xl font-bold mb-3">💾 Save Blog Posts to Dashboard</h2>
+                <p className="text-blue-100 text-base md:text-lg mb-4">
                   Save your favorite blog posts to your personal dashboard! Access them anytime and prevent auto-deletion.
                 </p>
-                <div className="flex items-center gap-6 text-sm">
+                <div className="flex flex-wrap items-center gap-4 md:gap-6 text-sm">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-300" />
+                    <CheckCircle2 className="h-4 w-4 text-green-300 flex-shrink-0" />
                     <span>Personal dashboard access</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-300" />
+                    <CheckCircle2 className="h-4 w-4 text-green-300 flex-shrink-0" />
                     <span>Protection from deletion</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-300" />
+                    <CheckCircle2 className="h-4 w-4 text-green-300 flex-shrink-0" />
                     <span>Up to 3 free (unlimited with subscription)</span>
                   </div>
                 </div>
               </div>
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 text-center md:text-left">
                 {user ? (
                   <div className="text-center">
                     <div className="text-2xl font-bold">{filteredPosts.filter(p => p.is_trial_post && !p.user_id).length}</div>
