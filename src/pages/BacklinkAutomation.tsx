@@ -1033,6 +1033,16 @@ export default function BacklinkAutomation() {
           startThrottledPublishing();
         }
 
+        // Generate blog post for guest campaign
+        const blogResult = await CampaignBlogIntegrationService.generateGuestCampaignBlogPost({
+          targetUrl: campaignForm.targetUrl,
+          keywords: campaignForm.keywords.split(',').map(k => k.trim()),
+          anchorTexts: campaignForm.anchorTexts.trim()
+            ? campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a)
+            : undefined,
+          primaryKeyword: campaignForm.keywords.split(',')[0]?.trim()
+        });
+
         // Add campaign result for guest with initially empty published URLs
         const campaignResult = {
           id: Date.now().toString(),
@@ -1044,7 +1054,9 @@ export default function BacklinkAutomation() {
           createdAt: new Date().toISOString(),
           status: 'active', // Changed to active since we're still publishing
           domains: [],
-          publishedUrls: []
+          publishedUrls: [],
+          blogPostUrl: blogResult.success ? blogResult.blogPostUrl : undefined,
+          blogPostTitle: blogResult.success ? blogResult.title : undefined
         };
 
         addGuestCampaignResult(campaignResult);
@@ -2002,7 +2014,7 @@ export default function BacklinkAutomation() {
                             <div className="flex items-center justify-center gap-2 text-sm">
                               <Crown className="h-4 w-4 text-purple-600" />
                               <span className="text-purple-700 font-medium">Premium Active:</span>
-                              <span className="text-gray-600">Unlimited campaigns • Priority processing • Advanced analytics</span>
+                              <span className="text-gray-600">Unlimited campaigns • Priority processing �� Advanced analytics</span>
                             </div>
                           </div>
                         )}
