@@ -3556,7 +3556,7 @@ export default function BacklinkAutomation() {
                                     setPremiumUpsellTrigger('link_limit');
                                     setShowGuestPremiumModal(true);
                                   }}
-                                  className="text-xs h-5 px-2 border-purple-200 text-purple-600 hover:bg-purple-50 mt-1"
+                                  className="text-xs h-5 px-2 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100 mt-1"
                                 >
                                   <Crown className="h-2 w-2 mr-1" />
                                   Upgrade
