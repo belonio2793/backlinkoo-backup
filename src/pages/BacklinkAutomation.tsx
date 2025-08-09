@@ -643,38 +643,6 @@ export default function BacklinkAutomation() {
     );
   };
 
-  const toggleAggregation = () => {
-    setIsAggregating(!isAggregating);
-
-    if (!isAggregating) {
-      toast({
-        title: "Link Aggregation Started",
-        description: "Maximum link discovery and aggregation in progress",
-      });
-    } else {
-      toast({
-        title: "Link Aggregation Paused",
-        description: "All aggregation threads have been paused",
-      });
-    }
-  };
-
-  const handleSpeedChange = (speed: number) => {
-    setAggregationSpeed(speed);
-
-    const throttleLevel = speed > 80 ? 'maximum' : speed > 50 ? 'high' : speed > 20 ? 'medium' : 'conservative';
-
-    setAggregationStats(prev => ({
-      ...prev,
-      throttleLevel,
-      activeThreads: Math.floor((speed / 100) * 64)
-    }));
-
-    toast({
-      title: "Throttle Adjusted",
-      description: `Aggregation speed set to ${throttleLevel} (${speed}%)`,
-    });
-  };
 
   const getStatusIcon = (status: Campaign['status']) => {
     switch (status) {
