@@ -202,7 +202,8 @@ export default function BacklinkAutomation() {
   const [discoveredUrls, setDiscoveredUrls] = useState<DiscoveredUrl[]>([]);
   const [discoveryStats, setDiscoveryStats] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedTab, setSelectedTab] = useState('campaigns\');\n  const [selectedCampaignTab, setSelectedCampaignTab] = useState(\'create');
+  const [selectedTab, setSelectedTab] = useState('campaigns');
+  const [selectedCampaignTab, setSelectedCampaignTab] = useState('create');
   const [selectedLinkType, setSelectedLinkType] = useState('all');
   const [expandedCampaigns, setExpandedCampaigns] = useState<Set<string>>(new Set());
   const [selectedCampaignDetails, setSelectedCampaignDetails] = useState<any>(null);
