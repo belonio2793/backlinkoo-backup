@@ -4046,7 +4046,13 @@ export default function BacklinkAutomation() {
                               {campaign.status === 'paused' && campaign.linksGenerated > 0 && (
                                 <div className="text-xs text-green-600 font-medium flex items-center justify-center gap-1">
                                   <CheckCircle className="h-3 w-3" />
-                                  {campaign.linksGenerated} links preserved
+                                  {campaign.progressiveLinkCount || campaign.linksGenerated} links stored permanently
+                                </div>
+                              )}
+                              {campaign.isLiveMonitored && (
+                                <div className="text-xs text-blue-600 font-medium flex items-center justify-center gap-1">
+                                  <Activity className="h-3 w-3 animate-pulse" />
+                                  Live monitored • Progressive count active
                                 </div>
                               )}
                               {campaign.linksGenerated >= 15 && campaign.linksGenerated < 20 && (
@@ -4078,11 +4084,15 @@ export default function BacklinkAutomation() {
                             <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
                               <span>Link Building Progress</span>
                               <span>
-                                {isPremium ? (
-                                  <>∞ unlimited links</>
-                                ) : (
-                                  `${campaign.linksGenerated || 0}/20 free links`
-                                )}
+                                {(() => {
+                                  const progressiveCount = campaign.progressiveLinkCount || campaign.linksGenerated || 0;
+                                  if (isPremium) {
+                                    return <>∞ unlimited links • {progressiveCount} total</>;
+                                  } else {
+                                    const displayCount = Math.min(progressiveCount, 20);
+                                    return `${displayCount}/20 free links`;
+                                  }
+                                })()}
                               </span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
