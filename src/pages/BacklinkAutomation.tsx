@@ -1245,7 +1245,7 @@ export default function BacklinkAutomation() {
 
         const updatedLinksGenerated = campaign.linksGenerated + newLinks.length;
         const liveLinks = newLinks.filter(link => link.status === 'live').length;
-        const updatedProgress = Math.min(100, (updatedLinksGenerated / (isPremium ? 200 : 20)) * 100);
+        const updatedProgress = campaign.status === 'completed' ? 100 : Math.min(100, (updatedLinksGenerated / (isPremium ? 200 : 20)) * 100);
 
         // Update campaign metrics
         setCampaignMetrics(prev => {
@@ -4259,7 +4259,7 @@ export default function BacklinkAutomation() {
                           { name: 'Real Estate', count: 27450, icon: '🏠' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
-                          { name: 'Home & Garden', count: 21890, icon: '��' },
+                          { name: 'Home & Garden', count: 21890, icon: '🏡' },
                           { name: 'Legal Services', count: 19650, icon: '⚖️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
