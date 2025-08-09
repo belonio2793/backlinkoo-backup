@@ -245,7 +245,13 @@ export default function BacklinkAutomation() {
         setCampaigns(displayCampaigns);
 
       } catch (apiError) {
-        console.error('API error loading campaigns:', apiError);
+        console.log('API service not available, using offline mode');
+        // Check if it's a network error
+        if (apiError instanceof TypeError && apiError.message.includes('Failed to fetch')) {
+          console.log('Network error: Backend API not available, operating in demo mode');
+        } else {
+          console.error('API error loading campaigns:', apiError);
+        }
         setCampaigns([]);
         setDatabaseCampaigns([]);
       }
