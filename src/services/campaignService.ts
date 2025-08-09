@@ -521,7 +521,19 @@ class CampaignService {
     status: 'active' | 'paused' | 'stopped'
   ): Promise<{ success: boolean; message: string; error?: string }> {
     try {
+      // Get current user for RLS policy compliance
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        return {
+          success: false,
+          message: 'User authentication required to update campaigns',
+          error: 'Authentication required'
+        };
+      }
+
       // Update via Supabase directly for better real-time response
+      // RLS policy will automatically ensure user can only update their own campaigns
       const { data, error } = await supabase
         .from('backlink_campaigns')
         .update({
