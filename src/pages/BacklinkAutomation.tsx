@@ -611,6 +611,13 @@ export default function BacklinkAutomation() {
           });
         }
       } else {
+        // Logged-in user flow - check if they have any campaigns and if they're premium
+        if (!isPremium && campaigns.length > 0) {
+          // Non-premium users can only have one campaign with 20 links max
+          setShowTrialExhaustedModal(true);
+          return;
+        }
+
         // Logged-in user flow - use real API
         const campaignData = {
           name: generateCampaignName(campaignForm.targetUrl, campaignForm.keywords),
@@ -619,7 +626,7 @@ export default function BacklinkAutomation() {
           anchor_texts: campaignForm.anchorTexts.trim()
             ? campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a)
             : ['click here', 'learn more', 'read more', 'visit site'],
-          daily_limit: campaignForm.dailyLimit,
+          daily_limit: isPremium ? campaignForm.dailyLimit : 20, // Limit to 20 links for non-premium
           strategy_blog_comments: campaignForm.linkType === 'blog_comment' || campaignForm.linkType === 'all',
           strategy_forum_profiles: campaignForm.linkType === 'forum_profile' || campaignForm.linkType === 'all',
           strategy_web2_platforms: campaignForm.linkType === 'web2_platform' || campaignForm.linkType === 'all',
@@ -661,10 +668,22 @@ export default function BacklinkAutomation() {
           });
         }
 
-        toast({
-          title: "Campaign Created",
-          description: "Your campaign has been successfully created and is now active.",
-        });
+        if (isPremium) {
+          toast({
+            title: "Campaign Deployed",
+            description: "Your premium campaign has been successfully deployed and is now active.",
+          });
+        } else {
+          toast({
+            title: "Campaign Deployed (20 Links)",
+            description: "Your campaign has been deployed with a 20-link limit. Upgrade to premium for unlimited campaigns!",
+            action: (
+              <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
+                Upgrade
+              </Button>
+            ),
+          });
+        }
       }
 
       setCampaignForm({
