@@ -217,6 +217,9 @@ export default function BacklinkAutomation() {
         // Try to get campaigns directly, don't block on availability check
         console.log('Attempting to load campaigns from backend...');
         const dbCampaigns = await campaignService.getCampaigns();
+
+        // If we get here, backend is working
+        setBackendStatus('available');
         setDatabaseCampaigns(dbCampaigns);
         
         const displayCampaigns: Campaign[] = dbCampaigns.map(dbCampaign => ({
