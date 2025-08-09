@@ -4804,7 +4804,7 @@ export default function BacklinkAutomation() {
                 <Button
                   size="sm"
                   onClick={() => {
-                    setSelectedTab('discovery');
+                    setSelectedTab('database');
                     setShowFabMenu(false);
                   }}
                   className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
