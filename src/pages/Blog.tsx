@@ -56,6 +56,7 @@ function Blog() {
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentDefaultTab, setPaymentDefaultTab] = useState<'credits' | 'premium'>('credits');
   const [refreshing, setRefreshing] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
