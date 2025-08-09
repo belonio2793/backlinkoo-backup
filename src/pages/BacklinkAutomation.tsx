@@ -2791,31 +2791,109 @@ export default function BacklinkAutomation() {
                               </div>
 
                               <div className="space-y-3 max-h-96 overflow-y-auto">
-                                {/* No links fallback */}
-                                {((user && campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) === 0) &&
-                                  (!user && guestLinksGenerated === 0)) && (
-                                  <div className="text-center py-12">
-                                    <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                      <FileText className="h-8 w-8 text-gray-400" />
-                                    </div>
-                                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Published Links Yet</h3>
-                                    <p className="text-gray-600 mb-4">
-                                      Start a campaign to see real-time link postbacks here
-                                    </p>
-                                    <Button
-                                      onClick={() => {
-                                        // Focus on the target URL input
-                                        const targetUrlInput = document.getElementById('targetUrl') as HTMLInputElement;
-                                        if (targetUrlInput) {
-                                          targetUrlInput.focus();
-                                        }
-                                      }}
-                                      className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                                    >
-                                      <Rocket className="h-4 w-4 mr-2" />
-                                      Deploy Campaign
-                                    </Button>
+                                {/* Real-time link postbacks */}
+                                {realTimeLinkPostbacks.length > 0 ? (
+                                  <div className="space-y-3">
+                                    {realTimeLinkPostbacks.map((postback, index) => (
+                                      <div
+                                        key={postback.id}
+                                        className={`p-4 rounded-lg border-l-4 ${
+                                          postback.status === 'live' ? 'border-green-500 bg-green-50' :
+                                          postback.status === 'pending' ? 'border-yellow-500 bg-yellow-50' :
+                                          'border-red-500 bg-red-50'
+                                        } animate-fade-in`}
+                                        style={{ animationDelay: `${index * 0.1}s` }}
+                                      >
+                                        <div className="flex items-start justify-between">
+                                          <div className="flex-1">
+                                            <div className="flex items-center gap-2 mb-2">
+                                              <div className={`w-2 h-2 rounded-full ${
+                                                postback.status === 'live' ? 'bg-green-500 animate-pulse' :
+                                                postback.status === 'pending' ? 'bg-yellow-500' :
+                                                'bg-red-500'
+                                              }`}></div>
+                                              <span className="font-medium text-gray-900">
+                                                {postback.domain}
+                                              </span>
+                                              <Badge variant="outline" className="text-xs">
+                                                DA {postback.domainAuthority}
+                                              </Badge>
+                                              <Badge variant="outline" className="text-xs capitalize">
+                                                {postback.linkType.replace('_', ' ')}
+                                              </Badge>
+                                            </div>
+
+                                            <div className="text-sm text-gray-600 mb-2">
+                                              <strong>Campaign:</strong> {postback.campaignName}
+                                            </div>
+
+                                            <div className="text-sm text-gray-600 mb-2">
+                                              <strong>Anchor:</strong> "{postback.anchorText}"
+                                            </div>
+
+                                            <div className="flex items-center gap-4 text-xs text-gray-500">
+                                              <span>{postback.traffic.toLocaleString()} monthly visits</span>
+                                              <span>CTR: {postback.clickThroughRate}</span>
+                                              <span>{postback.indexingStatus}</span>
+                                              <span>{new Date(postback.publishedAt).toLocaleTimeString()}</span>
+                                            </div>
+                                          </div>
+
+                                          <div className="flex items-center gap-2 ml-4">
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              className="h-8 px-2"
+                                              onClick={() => {
+                                                copyToClipboard(postback.url);
+                                                toast({
+                                                  title: "URL Copied!",
+                                                  description: "Link URL copied to clipboard",
+                                                });
+                                              }}
+                                            >
+                                              <LinkIcon className="h-3 w-3" />
+                                            </Button>
+                                            <Button
+                                              size="sm"
+                                              variant="outline"
+                                              className="h-8 px-2"
+                                              onClick={() => window.open(postback.url, '_blank')}
+                                            >
+                                              <ExternalLink className="h-3 w-3" />
+                                            </Button>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    ))}
                                   </div>
+                                ) : (
+                                  /* No links fallback */
+                                  ((user && campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) === 0) &&
+                                    (!user && guestLinksGenerated === 0)) && (
+                                    <div className="text-center py-12">
+                                      <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <FileText className="h-8 w-8 text-gray-400" />
+                                      </div>
+                                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No Published Links Yet</h3>
+                                      <p className="text-gray-600 mb-4">
+                                        Start a campaign to see real-time link postbacks here
+                                      </p>
+                                      <Button
+                                        onClick={() => {
+                                          // Focus on the target URL input
+                                          const targetUrlInput = document.getElementById('targetUrl') as HTMLInputElement;
+                                          if (targetUrlInput) {
+                                            targetUrlInput.focus();
+                                          }
+                                        }}
+                                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                                      >
+                                        <Rocket className="h-4 w-4 mr-2" />
+                                        Deploy Campaign
+                                      </Button>
+                                    </div>
+                                  )
                                 )}
                               </div>
                             </div>
