@@ -1207,13 +1207,18 @@ export default function BacklinkAutomation() {
 
         if (isPremium) {
           toast({
-            title: "Campaign Deployed",
-            description: "Your premium campaign is now active. View real-time progress in the live monitor above!",
+            title: "✨ Premium Campaign Deployed!",
+            description: `Your campaign is live${blogResult.success ? ' + blog post published' : ''}! View real-time progress in the monitor above.`,
+            action: blogResult.success ? (
+              <Button size="sm" onClick={() => window.open(blogResult.blogPostUrl, '_blank')}>
+                View Blog Post
+              </Button>
+            ) : undefined,
           });
         } else {
           toast({
-            title: "Campaign Deployed",
-            description: "Your campaign is live with 20-link limit. View progress in the live monitor above!",
+            title: "🚀 Campaign Deployed!",
+            description: `Your campaign is live${blogResult.success ? ' + blog post published' : ''} with 20-link limit. View progress in the monitor above!`,
             action: (
               <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
                 Upgrade
