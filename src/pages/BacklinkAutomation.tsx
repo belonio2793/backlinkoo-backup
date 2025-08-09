@@ -748,7 +748,7 @@ export default function BacklinkAutomation() {
               setTimeout(() => setShowTrialExhaustedModal(true), 3000);
             } else {
               toast({
-                title: "🔍 Discovery Complete!",
+                title: "���� Discovery Complete!",
                 description: `Found ${additionalLinks} new high-value opportunities! Total progress: ${newTotal} backlinks built.`,
               });
             }
@@ -1156,8 +1156,9 @@ export default function BacklinkAutomation() {
           )}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="campaigns">Campaign Manager</TabsTrigger>
+              <TabsTrigger value="results">Live Results</TabsTrigger>
               <TabsTrigger value="discovery">URL Discovery</TabsTrigger>
             </TabsList>
 
