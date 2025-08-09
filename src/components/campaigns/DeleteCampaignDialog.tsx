@@ -48,7 +48,6 @@ interface DeleteCampaignDialogProps {
 
 interface DeletionOptions {
   forceDelete: boolean;
-  reason: string;
   confirmationText: string;
   archiveLinks: boolean;
   notifyStakeholders: boolean;
@@ -62,7 +61,6 @@ export default function DeleteCampaignDialog({
   isDeleting = false
 }: DeleteCampaignDialogProps) {
   const [confirmationText, setConfirmationText] = useState('');
-  const [reason, setReason] = useState('');
   const [forceDelete, setForceDelete] = useState(false);
   const [archiveLinks, setArchiveLinks] = useState(true);
   const [notifyStakeholders, setNotifyStakeholders] = useState(false);
@@ -75,14 +73,12 @@ export default function DeleteCampaignDialog({
   const expectedText = 'delete';
   const isConfirmationValid = confirmationText === expectedText;
   
-  const canProceed = isConfirmationValid && 
-    reason.trim().length > 0 && 
+  const canProceed = isConfirmationValid &&
     (!isActive || (isActive && forceDelete && acknowledgeWarning));
 
   const handleClose = () => {
     // Reset all state when closing
     setConfirmationText('');
-    setReason('');
     setForceDelete(false);
     setArchiveLinks(true);
     setNotifyStakeholders(false);
@@ -95,7 +91,6 @@ export default function DeleteCampaignDialog({
 
     const options: DeletionOptions = {
       forceDelete,
-      reason: reason.trim(),
       confirmationText,
       archiveLinks,
       notifyStakeholders
@@ -290,24 +285,6 @@ export default function DeleteCampaignDialog({
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Reason for Deletion */}
-          <div className="space-y-2">
-            <Label htmlFor="reason" className="text-sm font-medium">
-              Reason for deletion <span className="text-red-500">*</span>
-            </Label>
-            <Textarea
-              id="reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Please provide a reason for deleting this campaign..."
-              className="min-h-[80px]"
-              maxLength={500}
-            />
-            <p className="text-xs text-gray-500">
-              This reason will be logged for audit purposes. {500 - reason.length} characters remaining.
-            </p>
           </div>
 
           {/* Confirmation Text */}
