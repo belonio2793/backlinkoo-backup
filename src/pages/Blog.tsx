@@ -216,10 +216,16 @@ function Blog() {
     if (!title) return '';
 
     return title
-      // Remove HTML tag prefixes like "H1:", "H2:", etc.
+      // Remove HTML tag prefixes like "H1:", "H2:", "Title:", etc.
       .replace(/^H[1-6]:\s*/i, '')
-      // Remove HTML tags
+      .replace(/^Title:\s*/i, '')
+      .replace(/^Heading:\s*/i, '')
+      // Remove HTML tags completely
       .replace(/<[^>]*>/g, '')
+      // Remove common markdown syntax
+      .replace(/^#+\s*/, '') // Remove markdown headers
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+      .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
       // Remove common HTML entities
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
@@ -227,8 +233,13 @@ function Blog() {
       .replace(/&gt;/g, '>')
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
-      // Clean up extra whitespace
+      .replace(/&rsquo;/g, "'")
+      .replace(/&lsquo;/g, "'")
+      .replace(/&rdquo;/g, '"')
+      .replace(/&ldquo;/g, '"')
+      // Clean up extra whitespace and special characters
       .replace(/\s+/g, ' ')
+      .replace(/^\W+/, '') // Remove leading non-word characters
       .trim();
   };
 
@@ -237,8 +248,12 @@ function Blog() {
     if (!description) return '';
 
     return description
-      // Remove HTML tags
+      // Remove HTML tags completely
       .replace(/<[^>]*>/g, '')
+      // Remove common markdown syntax
+      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+      .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
+      .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove markdown links, keep text
       // Remove common HTML entities
       .replace(/&nbsp;/g, ' ')
       .replace(/&amp;/g, '&')
@@ -246,8 +261,13 @@ function Blog() {
       .replace(/&gt;/g, '>')
       .replace(/&quot;/g, '"')
       .replace(/&#39;/g, "'")
+      .replace(/&rsquo;/g, "'")
+      .replace(/&lsquo;/g, "'")
+      .replace(/&rdquo;/g, '"')
+      .replace(/&ldquo;/g, '"')
       // Clean up extra whitespace and line breaks
       .replace(/\s+/g, ' ')
+      .replace(/^\W+/, '') // Remove leading non-word characters
       .trim();
   };
 
