@@ -924,7 +924,7 @@ export default function BacklinkAutomation() {
           });
         } else {
           toast({
-            title: "Campaign Deployed (20 Links)",
+            title: "Campaign Deployed",
             description: "Your campaign is live with 20-link limit. View progress in the live monitor above!",
             action: (
               <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
