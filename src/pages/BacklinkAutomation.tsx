@@ -2360,9 +2360,8 @@ export default function BacklinkAutomation() {
                             Continue with Premium
                           </Button>
                           <Button
-                            variant="outline"
                             onClick={() => setShowSignInModal(true)}
-                            className="h-12 px-6"
+                            className="h-12 px-6 bg-blue-600 hover:bg-blue-700 text-white"
                           >
                             <UserPlus className="h-4 w-4 mr-2" />
                             Sign In Free
