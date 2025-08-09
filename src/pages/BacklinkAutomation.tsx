@@ -45,6 +45,9 @@ import { internetProliferationService } from '@/services/internetProliferationSe
 import { liveLinkBuildingService } from '@/services/liveLinkBuildingService';
 import { recursiveUrlDiscoveryService } from '@/services/recursiveUrlDiscoveryService';
 
+// Import database utilities
+import { checkDatabaseStatus, initializeDatabase, type DatabaseStatus } from '@/utils/databaseSetup';
+
 interface DatabaseCampaign {
   id: string;
   user_id: string;
