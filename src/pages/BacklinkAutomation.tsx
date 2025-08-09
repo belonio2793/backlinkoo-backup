@@ -3833,41 +3833,30 @@ export default function BacklinkAutomation() {
                         </div>
 
                         <div className="space-y-2 font-mono text-xs">
-                          {/* Generate real-time posting activity */}
-                          {Array.from({ length: 20 }, (_, idx) => {
-                            const domains = [
-                              'techcrunch.com', 'medium.com', 'dev.to', 'reddit.com',
-                              'stackoverflow.com', 'github.com', 'hackernews.ycombinator.com',
-                              'producthunt.com', 'indiehackers.com', 'linkedin.com',
-                              'twitter.com', 'facebook.com', 'quora.com', 'pinterest.com',
-                              'youtube.com', 'instagram.com', 'behance.net', 'dribbble.com',
-                              'forbes.com', 'wired.com', 'venturebeat.com', 'mashable.com'
-                            ];
-
-                            const actions = [
-                              'POSTED', 'VERIFIED', 'INDEXED', 'DISCOVERED', 'APPROVED'
-                            ];
-
-                            const domain = domains[idx % domains.length];
-                            const action = actions[idx % actions.length];
-                            const timestamp = new Date(Date.now() - idx * 15000).toLocaleTimeString();
-                            const da = 60 + Math.floor(Math.random() * 40);
-
-                            return (
-                              <div key={idx} className={`flex gap-2 animate-pulse ${
-                                action === 'POSTED' ? 'text-green-400' :
-                                action === 'VERIFIED' ? 'text-blue-400' :
-                                action === 'INDEXED' ? 'text-yellow-400' :
-                                action === 'DISCOVERED' ? 'text-purple-400' :
+                          {/* Real-time posting feed */}
+                          {realtimePostingFeed.length > 0 ? (
+                            realtimePostingFeed.slice(0, 20).map((entry) => (
+                              <div key={entry.id} className={`flex gap-2 animate-pulse ${
+                                entry.action === 'POSTED' ? 'text-green-400' :
+                                entry.action === 'VERIFIED' ? 'text-blue-400' :
+                                entry.action === 'INDEXED' ? 'text-yellow-400' :
+                                entry.action === 'DISCOVERED' ? 'text-purple-400' :
                                 'text-cyan-400'
                               }`}>
-                                <span className="text-gray-500 w-20">[{timestamp}]</span>
-                                <span className="text-white w-16">{action}</span>
-                                <span className="flex-1">{domain}</span>
-                                <span className="text-gray-400">DA:{da}</span>
+                                <span className="text-gray-500 w-20">[{entry.timestamp.toLocaleTimeString()}]</span>
+                                <span className="text-white w-16">{entry.action}</span>
+                                <span className="flex-1">{entry.domain}</span>
+                                <span className="text-gray-400">DA:{entry.da}</span>
+                                <span className="text-gray-500 text-xs">{entry.type}</span>
                               </div>
-                            );
-                          })}
+                            ))
+                          ) : (
+                            <div className="text-center py-8 text-gray-400">
+                              <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                              <div>Initializing real-time feed...</div>
+                              <div className="animate-pulse mt-2">▋</div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
