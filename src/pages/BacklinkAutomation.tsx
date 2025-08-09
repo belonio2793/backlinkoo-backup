@@ -374,10 +374,10 @@ export default function BacklinkAutomation() {
     if ((activeCampaignCount > 0 || hasGuestResults) && selectedTab === 'campaigns') {
       // Auto-switch to results tab after 3 seconds of campaign deployment
       const timer = setTimeout(() => {
-        setSelectedTab('results');
+        // Results are now embedded in campaigns tab, no need to switch
         toast({
-          title: "���� Campaign Results Ready!",
-          description: "Your campaigns are now running. View real-time progress in the Results tab.",
+          title: "🚀 Campaign Results Ready!",
+          description: "Your campaigns are now running. View real-time progress in the live monitor above.",
           duration: 4000,
         });
       }, 3000);
@@ -1601,7 +1601,13 @@ export default function BacklinkAutomation() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => setSelectedTab('results')}
+                              onClick={() => {
+                                // Scroll to the live monitor section since results are embedded
+                                const liveMonitor = document.querySelector('.border-green-200');
+                                if (liveMonitor) {
+                                  liveMonitor.scrollIntoView({ behavior: 'smooth' });
+                                }
+                              }}
                               className="mt-3 bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
                             >
                               <BarChart3 className="h-3 w-3 mr-1" />
