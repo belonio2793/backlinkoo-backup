@@ -593,7 +593,7 @@ export default function BacklinkAutomation() {
     }
 
     try {
-      await mockRecursiveUrlDiscoveryService.reportUrl(urlId, reason);
+      await recursiveUrlDiscoveryService.reportUrl(urlId, reason);
       
       setDiscoveredUrls(prev => prev.map(url => 
         url.id === urlId 
