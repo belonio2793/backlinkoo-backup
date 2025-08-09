@@ -240,6 +240,14 @@ export default function BacklinkAutomation() {
   const [selectedGuestCampaign, setSelectedGuestCampaign] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authContext, setAuthContext] = useState<string>('');
+  const [realtimePostingFeed, setRealtimePostingFeed] = useState<Array<{
+    id: string;
+    timestamp: Date;
+    action: string;
+    domain: string;
+    da: number;
+    type: string;
+  }>>([]);
   const [selectedTab, setSelectedTab] = useState('campaigns');
   const [selectedCampaignTab, setSelectedCampaignTab] = useState('create');
   const [selectedLinkType, setSelectedLinkType] = useState('all');
@@ -2473,7 +2481,7 @@ export default function BacklinkAutomation() {
                     Your Campaigns
                   </CardTitle>
                   <CardDescription>
-                    {user ? `${campaigns.length} campaigns • ${campaigns.filter(c => c.status === 'active').length} active` : `${guestCampaignResults.length} campaigns created`}
+                    {user ? `${campaigns.length} campaigns �� ${campaigns.filter(c => c.status === 'active').length} active` : `${guestCampaignResults.length} campaigns created`}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
