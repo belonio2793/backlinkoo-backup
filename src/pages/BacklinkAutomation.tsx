@@ -1805,12 +1805,41 @@ export default function BacklinkAutomation() {
             </div>
           </div>
 
+          {/* Page Leave Protection Notification */}
+          {showPageLeaveNotification && (
+            <Alert className="border-orange-200 bg-orange-50 mb-4">
+              <AlertTriangle className="h-4 w-4 text-orange-600" />
+              <AlertDescription>
+                <strong>⚠️ Important:</strong> Leaving this page or closing this tab will automatically pause your campaigns.
+                Please keep this page open at all times while your campaigns are running.
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowPageLeaveNotification(false)}
+                  className="ml-2 h-6 px-2 text-orange-700 hover:text-orange-800"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Database Status Alert */}
           {isCheckingDatabase && (
             <Alert className="border-blue-200 bg-blue-50">
               <Loader2 className="h-4 w-4 animate-spin" />
               <AlertDescription>
                 <strong>Checking Database:</strong> Verifying database connection and table structure...
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Auto-save indicator */}
+          {unsavedChanges && (campaignForm.targetUrl || campaignForm.keywords) && (
+            <Alert className="border-blue-200 bg-blue-50">
+              <Clock className="h-4 w-4 text-blue-600" />
+              <AlertDescription>
+                <strong>Auto-save Active:</strong> Your campaign draft will be automatically saved in 30 seconds.
               </AlertDescription>
             </Alert>
           )}
