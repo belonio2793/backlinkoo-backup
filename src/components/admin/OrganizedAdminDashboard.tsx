@@ -125,7 +125,7 @@ export function OrganizedAdminDashboard() {
         {activeSection === "users" && (
           <div className="space-y-6">
             <DatabaseSchemaFix />
-            <AdminUserDashboard />
+            <EnhancedUserManagement />
           </div>
         )}
 
