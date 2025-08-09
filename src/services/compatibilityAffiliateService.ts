@@ -331,8 +331,9 @@ export class CompatibilityAffiliateService {
         conversionRate: monthMetrics.conversion_rate
       };
     } catch (error: any) {
-      console.error('Get dashboard metrics error:', error);
-      throw error;
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      console.error('Get dashboard metrics error:', errorMessage, error);
+      throw new Error(`Failed to get dashboard metrics: ${errorMessage}`);
     }
   }
 
