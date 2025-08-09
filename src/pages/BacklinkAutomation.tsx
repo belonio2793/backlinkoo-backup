@@ -1209,7 +1209,7 @@ export default function BacklinkAutomation() {
                                 </Badge>
                               </div>
                               <div className="text-xs text-gray-500 bg-gray-100 rounded px-2 py-1 font-mono">
-                                {url.url}
+                                {url.url || 'No URL available'}
                               </div>
                             </div>
 
