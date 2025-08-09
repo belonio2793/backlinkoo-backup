@@ -1149,7 +1149,7 @@ export default function BacklinkAutomation() {
                     Create Targeted Campaign
                   </CardTitle>
                   <CardDescription>
-                    Deploy a focused campaign for a specific link building strategy
+                    Deploy a focused campaign for a specific link building strategy{!user ? ' - something special awaits!' : ''}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
