@@ -224,6 +224,8 @@ export default function BacklinkAutomation() {
   const [discoveredUrls, setDiscoveredUrls] = useState<DiscoveredUrl[]>([]);
   const [discoveryStats, setDiscoveryStats] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [unsavedChanges, setUnsavedChanges] = useState(false);
+  const [showPageLeaveNotification, setShowPageLeaveNotification] = useState(false);
   const [selectedTab, setSelectedTab] = useState('campaigns');
   const [selectedCampaignTab, setSelectedCampaignTab] = useState('create');
   const [selectedLinkType, setSelectedLinkType] = useState('all');
