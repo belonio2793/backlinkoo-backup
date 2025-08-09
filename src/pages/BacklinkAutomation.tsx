@@ -28,6 +28,7 @@ import { useAuth } from '@/hooks/useAuth';
 import ToolsHeader from '@/components/shared/ToolsHeader';
 import { Footer } from '@/components/Footer';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
+import PremiumPlanPopup from '@/components/PremiumPlanPopup';
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
 
 // Import our enterprise engines
