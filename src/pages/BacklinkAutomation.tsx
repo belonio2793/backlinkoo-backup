@@ -3397,18 +3397,24 @@ export default function BacklinkAutomation() {
                                 size="sm"
                                 variant="outline"
                                 onClick={() => {
-                                  setGuestCampaignResults(prev =>
-                                    prev.filter(c => c.id !== campaign.id)
-                                  );
-                                  // Also remove from localStorage
-                                  const updatedResults = JSON.parse(localStorage.getItem('guest_campaign_results') || '[]')
-                                    .filter((c: any) => c.id !== campaign.id);
-                                  localStorage.setItem('guest_campaign_results', JSON.stringify(updatedResults));
-
-                                  toast({
-                                    title: "🗑️ Trial Campaign Deleted",
-                                    description: "Campaign has been removed from your trial.",
-                                  });
+                                  // Use tracking service to delete campaign
+                                  const deleted = guestTrackingService.deleteCampaign(campaign.id);
+                                  if (deleted) {
+                                    setGuestCampaignResults(prev =>
+                                      prev.filter(c => c.id !== campaign.id)
+                                    );
+                                    updateGuestRestrictions();
+                                    toast({
+                                      title: "🗑️ Trial Campaign Deleted",
+                                      description: "Campaign has been removed from your trial.",
+                                    });
+                                  } else {
+                                    toast({
+                                      title: "Error",
+                                      description: "Could not delete campaign. Please try again.",
+                                      variant: "destructive"
+                                    });
+                                  }
                                 }}
                                 className="h-8 px-2 border-red-300 text-red-600 hover:bg-red-50"
                               >
