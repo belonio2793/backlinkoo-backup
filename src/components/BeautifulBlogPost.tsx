@@ -452,7 +452,9 @@ export function BeautifulBlogPost() {
               title: "Post Deleted",
               description: "The blog post has been successfully deleted.",
             });
-            navigate('/blog');
+            startTransition(() => {
+              navigate('/blog');
+            });
           } else {
             throw new Error(result.message || 'Delete failed');
           }
