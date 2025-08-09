@@ -237,11 +237,25 @@ class InternetProliferationService {
    */
   public async addCampaignToProliferation(campaign: CampaignProliferation) {
     this.proliferationQueue.push(campaign);
-    
+
+    console.log('🚀 Campaign added to proliferation queue:', {
+      campaignId: campaign.campaignId,
+      queueLength: this.proliferationQueue.length,
+      strategies: campaign.strategies
+    });
+
     // Start immediate proliferation for new campaigns
     setTimeout(() => {
+      console.log('🔥 Starting immediate proliferation for campaign:', campaign.campaignId);
       this.proliferateCampaign(campaign);
     }, 2000);
+
+    // Also trigger queue processing immediately
+    if (!this.isProliferating) {
+      setTimeout(() => {
+        this.processProliferationQueue();
+      }, 1000);
+    }
   }
 
   /**
