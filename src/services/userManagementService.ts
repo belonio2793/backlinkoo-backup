@@ -89,7 +89,6 @@ export class UserManagementService {
           subscription_status,
           credits,
           created_at,
-          last_sign_in_at,
           metadata
         `, { count: 'exact' });
 
