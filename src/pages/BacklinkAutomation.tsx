@@ -76,6 +76,7 @@ interface DatabaseCampaign {
   created_at: string;
   updated_at: string;
   last_active_at: string;
+  completed_at?: string;
   settings: any;
 }
 
@@ -1070,7 +1071,7 @@ export default function BacklinkAutomation() {
       startRealTimeActivity(campaignId);
 
       toast({
-        title: "▶��� Campaign Resumed",
+        title: "▶️ Campaign Resumed",
         description: "Link building is now active and generating high-quality backlinks.",
       });
     } catch (error) {
