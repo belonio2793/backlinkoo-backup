@@ -36,7 +36,8 @@ import {
   CheckCircle2,
   Globe,
   Infinity,
-  Loader2
+  Loader2,
+  Plus
 } from 'lucide-react';
 
 function Blog() {
