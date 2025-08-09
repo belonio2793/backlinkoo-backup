@@ -323,27 +323,27 @@ export function GuestPremiumUpsellModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
+                <span><strong>Unlimited Links</strong> - No more 20 link limits</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span><strong>SEO Academy Access</strong> - Complete training courses</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span><strong>Priority Support</strong> - Skip the line for help</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
                 <span>Advanced Analytics & Reporting</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
-                <span>Bulk Data Export</span>
+                <span>Bulk Data Export & API Access</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
-                <span>Custom Domain Integration</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>API Access</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>White-label Options</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Priority Link Building</span>
+                <span>White-label & Custom Branding</span>
               </div>
             </div>
           </div>
