@@ -350,31 +350,69 @@ export default function BacklinkAutomation() {
     }
   };
 
+  // Initialize guest tracking on component mount
+  useEffect(() => {
+    if (!user && !guestTrackingInitialized) {
+      const guestUserId = guestTrackingService.initializeGuestTracking();
+      console.log('🍪 Guest tracking initialized:', guestUserId);
+      setGuestTrackingInitialized(true);
+      updateGuestRestrictions();
+    }
+  }, [user, guestTrackingInitialized]);
+
+  // Update guest restrictions
+  const updateGuestRestrictions = () => {
+    if (!user) {
+      const restrictions = guestTrackingService.getGuestCampaignsWithRestrictions();
+      setGuestCampaignRestrictions(restrictions);
+
+      // Load guest campaigns into state
+      const guestCampaigns = restrictions.campaigns.map(guestCamp => ({
+        id: guestCamp.id,
+        name: guestCamp.name,
+        targetUrl: guestCamp.targetUrl,
+        keywords: guestCamp.keywords,
+        anchorTexts: [],
+        status: guestCamp.status,
+        progress: Math.min((guestCamp.linksGenerated / 20) * 100, 100),
+        linksGenerated: guestCamp.linksGenerated,
+        linksLive: guestCamp.linksGenerated,
+        quality: {
+          averageAuthority: 75,
+          successRate: 95,
+          velocity: 0.5
+        },
+        createdAt: new Date(guestCamp.createdAt),
+        lastActive: new Date(guestCamp.lastActivityAt)
+      }));
+
+      setCampaigns(guestCampaigns);
+    }
+  };
+
   // Guest tracking functions
   const getGuestLinkCount = () => {
-    const stored = localStorage.getItem('guest_links_generated');
-    return stored ? parseInt(stored) : 0;
+    if (user) return 0;
+    const guestData = guestTrackingService.getGuestData();
+    return guestData?.totalLinksGenerated || 0;
   };
 
   const updateGuestLinkCount = (newCount: number) => {
-    localStorage.setItem('guest_links_generated', newCount.toString());
     setGuestLinksGenerated(newCount);
-
     if (newCount >= 20 && !user) {
       setShowTrialExhaustedModal(true);
     }
   };
 
   const getGuestCampaignResults = () => {
-    const stored = localStorage.getItem('guest_campaign_results');
-    return stored ? JSON.parse(stored) : [];
+    if (user) return [];
+    const restrictions = guestTrackingService.getGuestCampaignsWithRestrictions();
+    return restrictions.campaigns;
   };
 
   const addGuestCampaignResult = (result: any) => {
-    const existing = getGuestCampaignResults();
-    const updated = [...existing, result];
-    localStorage.setItem('guest_campaign_results', JSON.stringify(updated));
-    setGuestCampaignResults(updated);
+    if (user) return;
+    updateGuestRestrictions();
   };
 
   // Throttled publishing system
