@@ -421,20 +421,41 @@ export default function BacklinkAutomation() {
       })
     );
 
-    // Show toast notification for new link
+    // Show toast notification for new link with progress indicator
     toast({
       title: "🔗 New Backlink Published!",
-      description: `Link published on ${linkToPublish.domain} • Total: ${newCount} links built`,
-      duration: 3000,
+      description: `Link published on ${linkToPublish.domain} • Progress: ${newCount}/20 links built`,
+      duration: 2000,
     });
 
-    // Schedule next link publication with alternating intervals
-    const nextDelay = currentThrottleDelay === 30000 ? 60000 : 30000; // Alternate between 30s and 60s
+    // Check if we've reached the 20 link cap for guests
+    if (newCount >= 20) {
+      setIsThrottling(false);
+      if (throttleIntervalId) {
+        clearTimeout(throttleIntervalId);
+        setThrottleIntervalId(null);
+      }
+
+      // Show premium upgrade modal
+      setTimeout(() => {
+        setShowTrialExhaustedModal(true);
+        toast({
+          title: "🚀 Amazing! 20 Premium Backlinks Built!",
+          description: "See your incredible results and unlock unlimited campaigns with premium!",
+          duration: 6000,
+        });
+      }, 1500);
+
+      return;
+    }
+
+    // Schedule next link publication with fast 1-2 second intervals for guests
+    const nextDelay = Math.floor(Math.random() * 1000) + 1000; // Random between 1-2 seconds
     setCurrentThrottleDelay(nextDelay);
 
     const timeoutId = setTimeout(() => {
       publishNextLink();
-    }, currentThrottleDelay);
+    }, nextDelay);
 
     setThrottleIntervalId(timeoutId);
   };
@@ -3441,7 +3462,7 @@ export default function BacklinkAutomation() {
                         {[
                           { name: 'Technology & Software', count: 125420, icon: '💻' },
                           { name: 'Business & Finance', count: 98750, icon: '💼' },
-                          { name: 'Health & Medicine', count: 87320, icon: '🏥' },
+                          { name: 'Health & Medicine', count: 87320, icon: '��' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
