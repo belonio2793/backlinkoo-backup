@@ -248,6 +248,16 @@ export default function BacklinkAutomation() {
     da: number;
     type: string;
   }>>([]);
+  const [realtimeReportingData, setRealtimeReportingData] = useState<{[key: string]: Array<{
+    id: string;
+    timestamp: Date;
+    type: 'discovery' | 'propagation' | 'execution' | 'verification' | 'analysis';
+    message: string;
+    status: 'running' | 'completed' | 'paused' | 'error';
+    progress: number;
+    metadata?: any;
+  }>}>({});
+  const [reportingIntervals, setReportingIntervals] = useState<{[key: string]: NodeJS.Timeout}>({});
   const [selectedTab, setSelectedTab] = useState('campaigns');
   const [selectedCampaignTab, setSelectedCampaignTab] = useState('create');
   const [selectedLinkType, setSelectedLinkType] = useState('all');
