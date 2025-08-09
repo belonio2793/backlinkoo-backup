@@ -116,46 +116,21 @@ export default function EnhancedUserManagement() {
     }
   };
 
-  const loadUserStats = async () => {
+  const handleUpdateUser = async () => {
+    if (!editingUser) return;
+
     try {
-      // Get total users
-      const { count: totalUsers } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
-
-      // Get premium users
-      const { count: premiumUsers } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .in('subscription_tier', ['monthly', 'premium', 'enterprise']);
-
-      // Get new users today
-      const today = new Date().toISOString().split('T')[0];
-      const { count: newUsersToday } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .gte('created_at', today);
-
-      // Calculate active users (signed in within last 30 days)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
-      const { count: activeUsers } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true })
-        .gte('last_sign_in_at', thirtyDaysAgo.toISOString());
-
-      setUserStats({
-        totalUsers: totalUsers || 0,
-        activeUsers: activeUsers || 0,
-        premiumUsers: premiumUsers || 0,
-        totalRevenue: (premiumUsers || 0) * 29, // Estimate
-        newUsersToday: newUsersToday || 0,
-        activeUsersToday: Math.floor((activeUsers || 0) * 0.1) // Estimate
+      await updateUser(editingUser.id, {
+        role: editingUser.role,
+        subscription_tier: editingUser.subscription_tier,
+        subscription_status: editingUser.subscription_status,
+        credits: editingUser.credits
       });
 
+      setEditingUser(null);
+      setIsEditModalOpen(false);
     } catch (error) {
-      console.error('Error loading user stats:', error);
+      // Error is handled by the hook
     }
   };
 
