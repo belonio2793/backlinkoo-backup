@@ -14,6 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -4107,7 +4108,7 @@ export default function BacklinkAutomation() {
                         {[
                           { name: 'Technology & Software', count: 125420, icon: '💻' },
                           { name: 'Business & Finance', count: 98750, icon: '💼' },
-                          { name: 'Health & Medicine', count: 87320, icon: '���' },
+                          { name: 'Health & Medicine', count: 87320, icon: '��' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
