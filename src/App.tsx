@@ -29,6 +29,7 @@ const LazyTermsOfService = lazy(() => import("./pages/TermsOfService"));
 const LazyPrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const LazyNotFound = lazy(() => import("./pages/NotFound"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
+const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -91,6 +92,14 @@ const App = () => (
               }
             />
             <Route
+              path="/view"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyBacklinkAutomation />
+                </Suspense>
+              }
+            />
+            <Route
               path="/backlink-report"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
@@ -119,6 +128,14 @@ const App = () => (
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazyTwitterAdGenerator />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/affiliate"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyAffiliate />
                 </Suspense>
               }
             />

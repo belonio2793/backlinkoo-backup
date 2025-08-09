@@ -288,7 +288,7 @@ export const supabase = hasValidCredentials ?
               return retryResponse;
 
             } catch (bypassError) {
-              console.error('❌ Bypass retry also failed:', bypassError);
+              console.error('❌ Bypass retry also failed:', bypassError.message || bypassError.toString() || JSON.stringify(bypassError));
               // If bypass also fails, provide a more helpful error message
               throw new Error(`Network request failed due to third-party script interference. Please try refreshing the page or disabling browser extensions.`);
             }

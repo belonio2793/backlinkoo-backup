@@ -61,7 +61,7 @@ export class BlogCleanupService {
 
       return { success: true, deletedCount: result.deletedCount };
     } catch (error: any) {
-      console.error('🧹 Cleanup service error:', error);
+      console.error('🧹 Cleanup service error:', error.message || error.toString() || JSON.stringify(error));
       return { success: false, deletedCount: 0, error: error.message };
     }
   }

@@ -75,7 +75,7 @@ export class SupabaseConfigSync {
       this.isInitialized = true;
 
     } catch (error) {
-      console.error('❌ Failed to initialize real-time sync:', error);
+      console.error('❌ Failed to initialize real-time sync:', error.message || error.toString() || JSON.stringify(error));
       // Fall back to localStorage-only mode
       await this.loadFromLocalStorageOnly();
       this.isInitialized = true;
@@ -191,7 +191,7 @@ export class SupabaseConfigSync {
 
       console.log(`✅ Config synced: ${config.key}`);
     } catch (error) {
-      console.error(`❌ Failed to sync config ${config.key}:`, error);
+      console.error(`❌ Failed to sync config ${config.key}:`, error.message || error.toString() || JSON.stringify(error));
     }
   }
 

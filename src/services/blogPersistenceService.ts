@@ -79,7 +79,7 @@ export class BlogPersistenceService {
       };
 
     } catch (error: any) {
-      console.error('💥 BlogPersistenceService: Maximum persistence storage failed:', error);
+      console.error('💥 BlogPersistenceService: Maximum persistence storage failed:', error.message || error.toString() || JSON.stringify(error));
       return {
         success: false,
         message: 'Failed to store blog post with maximum persistence',
@@ -150,7 +150,7 @@ export class BlogPersistenceService {
       };
 
     } catch (error: any) {
-      console.error('💥 BlogPersistenceService: Permanent claim protection failed:', error);
+      console.error('💥 BlogPersistenceService: Permanent claim protection failed:', error.message || error.toString() || JSON.stringify(error));
       return {
         success: false,
         message: 'Failed to claim post with permanent protection',

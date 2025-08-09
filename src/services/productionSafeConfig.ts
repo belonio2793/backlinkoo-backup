@@ -86,7 +86,7 @@ export class ProductionSafeConfig {
       return result;
 
     } catch (error) {
-      console.error('❌ Production safety validation failed:', error);
+      console.error('❌ Production safety validation failed:', error.message || error.toString() || JSON.stringify(error));
       result.criticalIssues.push('Configuration validation system failed');
       result.isProductionSafe = false;
       result.userExperience = 'broken';
@@ -195,7 +195,7 @@ export class ProductionSafeConfig {
       return true;
 
     } catch (error) {
-      console.error('❌ Auto-fix failed:', error);
+      console.error('❌ Auto-fix failed:', error.message || error.toString() || JSON.stringify(error));
       return false;
     }
   }

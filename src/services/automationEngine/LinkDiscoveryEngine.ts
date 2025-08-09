@@ -492,25 +492,47 @@ export class LinkDiscoveryEngine {
       id: opp.id,
       campaign_id: campaignId,
       url: opp.url,
-      type: opp.type,
-      discovery_method: opp.discoveryMethod,
-      authority: opp.authority,
-      page_authority: opp.pageAuthority,
-      spam_score: opp.spamScore,
+      domain: this.extractDomain(opp.url),
+      link_type: this.mapToLinkType(opp.type),
+      authority_score: opp.authority,
       relevance_score: opp.relevanceScore,
-      content_relevance: opp.contentRelevance,
-      competitor_links: opp.competitorLinks,
-      estimated_success_rate: opp.estimatedSuccessRate,
       status: opp.status,
-      verification: opp.verification,
-      metadata: opp.metadata,
-      discovered_at: opp.discoveredAt.toISOString(),
-      last_verified: opp.lastVerified.toISOString()
+      discovery_method: opp.discoveryMethod,
+      metadata: {
+        page_authority: opp.pageAuthority,
+        spam_score: opp.spamScore,
+        content_relevance: opp.contentRelevance,
+        competitor_links: opp.competitorLinks,
+        estimated_success_rate: opp.estimatedSuccessRate,
+        verification: opp.verification,
+        discovered_at: opp.discoveredAt.toISOString(),
+        last_verified: opp.lastVerified.toISOString(),
+        ...opp.metadata
+      }
     }));
 
     await supabase
       .from('link_opportunities')
       .insert(opportunityData);
+  }
+
+  private extractDomain(url: string): string {
+    try {
+      return new URL(url.startsWith('http') ? url : `https://${url}`).hostname;
+    } catch {
+      return url.split('/')[0];
+    }
+  }
+
+  private mapToLinkType(type: string): string {
+    const typeMap: { [key: string]: string } = {
+      'blog_comment': 'blog_comment',
+      'forum_profile': 'forum_profile',
+      'web2_platform': 'web2_platform',
+      'social_profile': 'social_profile',
+      'contact_form': 'contact_form'
+    };
+    return typeMap[type] || 'blog_comment';
   }
 
   // Helper methods implementations

@@ -40,7 +40,7 @@ class AILiveContentService {
 
       return response.ok;
     } catch (error) {
-      console.error('OpenAI health check failed:', error);
+      console.error('OpenAI health check failed:', error.message || error.toString() || JSON.stringify(error));
       return false;
     }
   }
@@ -148,7 +148,7 @@ Please create a comprehensive, well-structured blog post that naturally incorpor
       };
 
     } catch (error) {
-      console.error('OpenAI content generation failed:', error);
+      console.error('OpenAI content generation failed:', error.message || error.toString() || JSON.stringify(error));
 
       // Retry logic with exponential backoff
       if (retryCount > 0 && (error instanceof Error &&

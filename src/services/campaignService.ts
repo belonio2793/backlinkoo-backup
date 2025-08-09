@@ -512,6 +512,131 @@ class CampaignService {
       };
     }
   }
+
+  /**
+   * Update campaign status (pause, resume, stop)
+   */
+  async updateCampaignStatus(
+    campaignId: string,
+    status: 'active' | 'paused' | 'stopped'
+  ): Promise<{ success: boolean; message: string; error?: string }> {
+    try {
+      // Get current user for RLS policy compliance
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        return {
+          success: false,
+          message: 'User authentication required to update campaigns',
+          error: 'Authentication required'
+        };
+      }
+
+      // Update via Supabase directly for better real-time response
+      // RLS policy will automatically ensure user can only update their own campaigns
+      const { data, error } = await supabase
+        .from('backlink_campaigns')
+        .update({
+          status,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', campaignId)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating campaign status:', error.message || error.toString() || JSON.stringify(error));
+        return {
+          success: false,
+          message: `Failed to ${status} campaign`,
+          error: error.message
+        };
+      }
+
+      return {
+        success: true,
+        message: `Campaign ${status === 'active' ? 'resumed' : status} successfully`
+      };
+    } catch (error) {
+      console.error('Error updating campaign status:', error.message || error.toString() || JSON.stringify(error));
+      return {
+        success: false,
+        message: `Failed to ${status} campaign`,
+        error: error.message || 'Unknown error occurred'
+      };
+    }
+  }
+
+  /**
+   * Create a new campaign with enhanced tracking
+   */
+  async createCampaign(campaignData: any): Promise<{ campaign?: any; error?: string }> {
+    try {
+      // Get current user for RLS policy compliance
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        return {
+          error: 'User authentication required to create campaigns'
+        };
+      }
+
+      const { data, error } = await supabase
+        .from('backlink_campaigns')
+        .insert({
+          ...campaignData,
+          user_id: user.id, // Required for RLS policy
+          status: 'active',
+          progress: 0,
+          links_generated: 0,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating campaign:', error.message || error.toString() || JSON.stringify(error));
+        return { error: error.message };
+      }
+
+      return { campaign: data };
+    } catch (error) {
+      console.error('Error creating campaign:', error.message || error.toString() || JSON.stringify(error));
+      return { error: error.message || 'Unknown error occurred' };
+    }
+  }
+
+  /**
+   * Load user's campaigns with proper authentication
+   */
+  async loadUserCampaigns(): Promise<{ campaigns?: any[]; error?: string }> {
+    try {
+      // Get current user for RLS policy compliance
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        return {
+          error: 'User authentication required to load campaigns'
+        };
+      }
+
+      const { data, error } = await supabase
+        .from('backlink_campaigns')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading campaigns:', error.message || error.toString() || JSON.stringify(error));
+        return { error: error.message };
+      }
+
+      return { campaigns: data || [] };
+    } catch (error) {
+      console.error('Error loading campaigns:', error.message || error.toString() || JSON.stringify(error));
+      return { error: error.message || 'Unknown error occurred' };
+    }
+  }
 }
 
 // Export singleton instance
