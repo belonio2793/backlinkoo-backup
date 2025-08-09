@@ -3219,7 +3219,7 @@ export default function BacklinkAutomation() {
                                   variant="outline"
                                   onClick={() => pauseCampaign(campaign.id)}
                                   disabled={isLoading}
-                                  className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                                  className="bg-orange-50 border-orange-300 text-orange-600 hover:bg-orange-100"
                                 >
                                   <Pause className="h-3 w-3 mr-1" />
                                   Pause
