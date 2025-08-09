@@ -30,6 +30,7 @@ import { Footer } from '@/components/Footer';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
 import { PremiumUpgradeModal } from '@/components/PremiumUpgradeModal';
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
+import { directCampaignService, type DirectCampaignData } from '@/services/directCampaignService';
 import { liveLinkBuildingService, type LinkBuildingConfig, type PremiumLimitResult } from '@/services/liveLinkBuildingService';
 
 // Import our enterprise engines
