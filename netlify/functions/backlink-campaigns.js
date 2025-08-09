@@ -404,6 +404,18 @@ exports.handler = async (event, context) => {
             };
           }
 
+        case 'health_check':
+          return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+              success: true,
+              message: 'Backlink campaigns service is operational',
+              timestamp: new Date().toISOString(),
+              functionVersion: '1.0.0'
+            }),
+          };
+
         default:
           return {
             statusCode: 400,
