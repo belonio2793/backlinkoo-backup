@@ -1358,7 +1358,7 @@ export default function BacklinkAutomation() {
                               {isThrottling ? 'Publishing Queue' : 'Throughput'}
                             </p>
                             <p className="text-xl font-bold text-orange-600">
-                              {controlPanelData.currentThroughput}/hr
+                              {isThrottling ? `${pendingLinksToPublish.length} queued` : `${controlPanelData.currentThroughput}/hr`}
                             </p>
                           </div>
                           <Zap className="h-6 w-6 text-orange-600" />
