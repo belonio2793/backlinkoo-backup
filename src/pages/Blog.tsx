@@ -1039,7 +1039,7 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <User className="h-4 w-4" />
-            <span>{post.author_name || 'Backlink ∞'}</span>
+            <span>{post.author_name === 'AI Writer' ? 'Backlink ∞' : (post.author_name || 'Backlink ∞')}</span>
             {isOwnedByUser && (
               <Badge className="bg-green-50 text-green-700 border-green-200 text-xs ml-2">
                 Yours
