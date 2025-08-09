@@ -17,6 +17,7 @@ import {
 import { guestTrackingService, type PremiumLimitWarning } from '@/services/guestTrackingService';
 import { LoginModal } from '@/components/LoginModal';
 import { useToast } from '@/hooks/use-toast';
+import { paymentIntegrationService } from '@/services/paymentIntegrationService';
 
 interface GuestPremiumUpsellModalProps {
   open: boolean;
@@ -35,6 +36,7 @@ export function GuestPremiumUpsellModal({
 }: GuestPremiumUpsellModalProps) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isProcessingUpgrade, setIsProcessingUpgrade] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
   const { toast } = useToast();
 
   const guestStats = guestTrackingService.getGuestStats();
@@ -50,21 +52,84 @@ export function GuestPremiumUpsellModal({
   const handleUpgrade = async () => {
     setIsProcessingUpgrade(true);
     try {
-      // Redirect to payment page with guest tracking data
-      const checkoutUrl = `/subscription-success?guest_id=${guestTrackingService.getGuestData()?.userId}&source=guest_upsell&trigger=${trigger}`;
-      
-      if (onUpgrade) {
-        onUpgrade();
+      const guestData = guestTrackingService.getGuestData();
+      const guestEmail = guestData?.email || '';
+
+      // Show processing message
+      toast({
+        title: "🚀 Creating Secure Checkout!",
+        description: "Opening payment window...",
+      });
+
+      // Create subscription checkout session
+      const result = await paymentIntegrationService.createSubscription(
+        selectedPlan,
+        true, // isGuest
+        guestEmail
+      );
+
+      if (result.success && result.url) {
+        // Check if this is a demo/mock checkout
+        const isDemoCheckout = result.url.includes('mock=true') || result.sessionId?.startsWith('mock_');
+
+        if (isDemoCheckout) {
+          // Handle demo checkout differently
+          toast({
+            title: "🚧 Demo Checkout Mode",
+            description: "Payment system is in demo mode. No actual payment will be processed.",
+            duration: 5000,
+          });
+
+          // For demo, just navigate to success page
+          onOpenChange(false);
+          window.location.href = result.url;
+
+          if (onUpgrade) {
+            onUpgrade();
+          }
+        } else {
+          // Open real checkout in new window/tab
+          const checkoutWindow = window.open(
+            result.url,
+            'stripe-checkout',
+            'width=800,height=600,scrollbars=yes,resizable=yes'
+          );
+
+          if (checkoutWindow) {
+            // Close modal since checkout opened
+            onOpenChange(false);
+
+            // Monitor the checkout window
+            const checkClosed = setInterval(() => {
+              if (checkoutWindow.closed) {
+                clearInterval(checkClosed);
+                toast({
+                  title: "Checkout Complete",
+                  description: "If you completed your purchase, please refresh the page to see your premium features!",
+                });
+              }
+            }, 1000);
+
+            if (onUpgrade) {
+              onUpgrade();
+            }
+          } else {
+            // Popup was blocked, fallback to same window
+            toast({
+              title: "Popup Blocked",
+              description: "Opening checkout in current window...",
+            });
+            window.location.href = result.url;
+          }
+        }
+      } else {
+        throw new Error(result.error || 'Failed to create checkout session');
       }
-      
-      // Close modal and redirect
-      onOpenChange(false);
-      window.location.href = checkoutUrl;
     } catch (error) {
       console.error('Upgrade error:', error);
       toast({
-        title: "Upgrade Error",
-        description: "Something went wrong. Please try again.",
+        title: "Checkout Error",
+        description: error instanceof Error ? error.message : "Something went wrong. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -298,24 +363,24 @@ export function GuestPremiumUpsellModal({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
               <div className="text-center">
                 <div className="h-12 w-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Play className="h-6 w-6" />
+                  <Infinity className="h-6 w-6" />
                 </div>
-                <div className="text-xl font-bold">Resume Campaigns</div>
-                <div className="text-sm opacity-90">Continue from where you left off</div>
+                <div className="text-xl font-bold">Unlimited Everything</div>
+                <div className="text-sm opacity-90">500+ links per campaign, unlimited campaigns</div>
               </div>
               <div className="text-center">
                 <div className="h-12 w-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Infinity className="h-6 w-6" />
+                  <Star className="h-6 w-6" />
                 </div>
-                <div className="text-xl font-bold">∞ Links</div>
-                <div className="text-sm opacity-90">No more 20-link limits</div>
+                <div className="text-xl font-bold">SEO Academy</div>
+                <div className="text-sm opacity-90">Complete video courses & expert guidance</div>
               </div>
               <div className="text-center">
                 <div className="h-12 w-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Shield className="h-6 w-6" />
                 </div>
-                <div className="text-xl font-bold">Keep Progress</div>
-                <div className="text-sm opacity-90">All your links are preserved</div>
+                <div className="text-xl font-bold">Priority Support</div>
+                <div className="text-sm opacity-90">Skip the line, get expert help fast</div>
               </div>
             </div>
 
@@ -323,27 +388,27 @@ export function GuestPremiumUpsellModal({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
+                <span><strong>Unlimited Links</strong> - No more 20 link limits</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span><strong>SEO Academy Access</strong> - Complete training courses</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span><strong>Priority Support</strong> - Skip the line for help</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
                 <span>Advanced Analytics & Reporting</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
-                <span>Bulk Data Export</span>
+                <span>Bulk Data Export & API Access</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4" />
-                <span>Custom Domain Integration</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>API Access</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>White-label Options</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Priority Link Building</span>
+                <span>White-label & Custom Branding</span>
               </div>
             </div>
           </div>
@@ -366,6 +431,46 @@ export function GuestPremiumUpsellModal({
             </div>
           </div>
 
+          {/* Plan Selection */}
+          <div className="mb-8">
+            <h3 className="text-lg font-bold mb-4 text-center">Choose Your Plan</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div
+                className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                  selectedPlan === 'monthly'
+                    ? 'border-purple-600 bg-purple-50'
+                    : 'border-gray-200 bg-white hover:border-purple-300'
+                }`}
+                onClick={() => setSelectedPlan('monthly')}
+              >
+                <div className="text-center">
+                  <div className="text-xl font-bold text-purple-600">Monthly</div>
+                  <div className="text-2xl font-bold">$29</div>
+                  <div className="text-sm text-gray-600">per month</div>
+                  <div className="text-xs text-gray-500 mt-2">Cancel anytime</div>
+                </div>
+              </div>
+              <div
+                className={`p-4 rounded-lg border-2 cursor-pointer transition-all relative ${
+                  selectedPlan === 'yearly'
+                    ? 'border-purple-600 bg-purple-50'
+                    : 'border-gray-200 bg-white hover:border-purple-300'
+                }`}
+                onClick={() => setSelectedPlan('yearly')}
+              >
+                <div className="absolute -top-2 -right-2">
+                  <Badge className="bg-green-600 text-white text-xs">Save 40%</Badge>
+                </div>
+                <div className="text-center">
+                  <div className="text-xl font-bold text-purple-600">Yearly</div>
+                  <div className="text-2xl font-bold">$17</div>
+                  <div className="text-sm text-gray-600">per month</div>
+                  <div className="text-xs text-gray-500 mt-2">Billed $199/year</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Action Buttons */}
           <div className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-3">
@@ -383,7 +488,7 @@ export function GuestPremiumUpsellModal({
                 ) : (
                   <>
                     <Crown className="h-5 w-5 mr-2" />
-                    Upgrade to Premium - $29/month
+                    Upgrade to Premium - {selectedPlan === 'monthly' ? '$29/month' : '$17/month (billed yearly)'}
                     <ArrowRight className="h-5 w-5 ml-2" />
                   </>
                 )}

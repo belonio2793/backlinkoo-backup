@@ -2,15 +2,17 @@
  * Trial Exhausted Modal - Shows compelling results and drives conversion
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { 
-  Crown, CheckCircle, TrendingUp, Target, Zap, 
-  UserPlus, BarChart3, Globe, Link, Sparkles, ArrowRight 
+import {
+  Crown, CheckCircle, TrendingUp, Target, Zap,
+  UserPlus, BarChart3, Globe, Link, Sparkles, ArrowRight
 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { paymentIntegrationService } from '@/services/paymentIntegrationService';
 
 interface TrialExhaustedModalProps {
   open: boolean;
@@ -19,6 +21,7 @@ interface TrialExhaustedModalProps {
   totalLinks: number;
   isLoggedIn?: boolean;
   userName?: string;
+  onUpgrade?: () => void;
 }
 
 export function TrialExhaustedModal({
@@ -27,15 +30,104 @@ export function TrialExhaustedModal({
   guestResults,
   totalLinks,
   isLoggedIn = false,
-  userName
+  userName,
+  onUpgrade
 }: TrialExhaustedModalProps) {
-  
-  const totalDomains = guestResults.reduce((acc, campaign) => 
+  const { toast } = useToast();
+  const [isProcessingUpgrade, setIsProcessingUpgrade] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
+
+  const totalDomains = guestResults.reduce((acc, campaign) =>
     acc + (campaign.domains?.length || 0), 0
   );
 
   const topDomains = guestResults.flatMap(c => c.domains || [])
     .slice(0, 6);
+
+  const handleUpgradeClick = async () => {
+    setIsProcessingUpgrade(true);
+    try {
+      // Show processing message
+      toast({
+        title: "🚀 Creating Secure Checkout!",
+        description: "Opening payment window...",
+      });
+
+      // Create subscription checkout session
+      const result = await paymentIntegrationService.createSubscription(
+        selectedPlan,
+        !isLoggedIn, // isGuest (opposite of isLoggedIn)
+        !isLoggedIn ? 'guest@example.com' : undefined // Guest email placeholder
+      );
+
+      if (result.success && result.url) {
+        // Check if this is a demo/mock checkout
+        const isDemoCheckout = result.url.includes('mock=true') || result.sessionId?.startsWith('mock_');
+
+        if (isDemoCheckout) {
+          // Handle demo checkout differently
+          toast({
+            title: "🚧 Demo Checkout Mode",
+            description: "Payment system is in demo mode. No actual payment will be processed.",
+            duration: 5000,
+          });
+
+          // For demo, just navigate to success page
+          onOpenChange(false);
+          window.location.href = result.url;
+
+          if (onUpgrade) {
+            onUpgrade();
+          }
+        } else {
+          // Open real checkout in new window/tab
+          const checkoutWindow = window.open(
+            result.url,
+            'stripe-checkout',
+            'width=800,height=600,scrollbars=yes,resizable=yes'
+          );
+
+          if (checkoutWindow) {
+            // Close modal since checkout opened
+            onOpenChange(false);
+
+            // Monitor the checkout window
+            const checkClosed = setInterval(() => {
+              if (checkoutWindow.closed) {
+                clearInterval(checkClosed);
+                toast({
+                  title: "Checkout Complete",
+                  description: "If you completed your purchase, please refresh the page to see your premium features!",
+                });
+              }
+            }, 1000);
+
+            if (onUpgrade) {
+              onUpgrade();
+            }
+          } else {
+            // Popup was blocked, fallback to same window
+            toast({
+              title: "Popup Blocked",
+              description: "Opening checkout in current window...",
+            });
+            window.location.href = result.url;
+          }
+        }
+      } else {
+        throw new Error(result.error || 'Failed to create checkout session');
+      }
+    } catch (error) {
+      console.error('Upgrade error:', error);
+      toast({
+        title: "Checkout Error",
+        description: error instanceof Error ? error.message : "Something went wrong. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsProcessingUpgrade(false);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -139,7 +231,7 @@ export function TrialExhaustedModal({
           </h3>
           <div className="flex flex-wrap gap-2">
             {topDomains.map((domain, idx) => (
-              <Badge key={idx} variant="outline" className="bg-blue-50 text-blue-700">
+              <Badge key={idx} variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
                 {domain}
               </Badge>
             ))}
@@ -155,15 +247,83 @@ export function TrialExhaustedModal({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="text-center">
                 <div className="text-3xl font-bold">∞</div>
-                <div className="text-sm opacity-90">Unlimited Campaigns</div>
+                <div className="text-sm opacity-90">Unlimited Links per Campaign</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold">500+</div>
-                <div className="text-sm opacity-90">Links per Month</div>
+                <div className="text-3xl font-bold">🎓</div>
+                <div className="text-sm opacity-90">SEO Academy Access</div>
               </div>
               <div className="text-center">
-                <div className="text-3xl font-bold">24/7</div>
-                <div className="text-sm opacity-90">Automated Building</div>
+                <div className="text-3xl font-bold">⚡</div>
+                <div className="text-sm opacity-90">Priority Support</div>
+              </div>
+            </div>
+
+            {/* Additional Premium Features */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mt-6">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span>More than 20 links per campaign</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span>Complete SEO Academy courses</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span>Priority customer support</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span>Advanced analytics & reporting</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span>White-label options</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
+                <span>API access & bulk exports</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Plan Selection */}
+        <div className="mb-8">
+          <h3 className="text-lg font-bold mb-4 text-center text-white">Choose Your Plan</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div
+              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                selectedPlan === 'monthly'
+                  ? 'border-white bg-white/10 backdrop-blur-sm'
+                  : 'border-white/30 bg-white/5 hover:border-white/50'
+              }`}
+              onClick={() => setSelectedPlan('monthly')}
+            >
+              <div className="text-center text-white">
+                <div className="text-xl font-bold">Monthly</div>
+                <div className="text-2xl font-bold">$29</div>
+                <div className="text-sm opacity-90">per month</div>
+                <div className="text-xs opacity-75 mt-2">Cancel anytime</div>
+              </div>
+            </div>
+            <div
+              className={`p-4 rounded-lg border-2 cursor-pointer transition-all relative ${
+                selectedPlan === 'yearly'
+                  ? 'border-white bg-white/10 backdrop-blur-sm'
+                  : 'border-white/30 bg-white/5 hover:border-white/50'
+              }`}
+              onClick={() => setSelectedPlan('yearly')}
+            >
+              <div className="absolute -top-2 -right-2">
+                <Badge className="bg-green-600 text-white text-xs">Save 40%</Badge>
+              </div>
+              <div className="text-center text-white">
+                <div className="text-xl font-bold">Yearly</div>
+                <div className="text-2xl font-bold">$17</div>
+                <div className="text-sm opacity-90">per month</div>
+                <div className="text-xs opacity-75 mt-2">Billed $199/year</div>
               </div>
             </div>
           </div>
@@ -175,21 +335,31 @@ export function TrialExhaustedModal({
             <Button
               size="lg"
               className="flex-1 h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              onClick={() => window.location.href = '/subscription-success'}
+              onClick={handleUpgradeClick}
+              disabled={isProcessingUpgrade}
             >
-              <Crown className="h-5 w-5 mr-2" />
-              Upgrade to Premium - $29/month
-              <ArrowRight className="h-5 w-5 ml-2" />
+              {isProcessingUpgrade ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Creating Checkout...
+                </>
+              ) : (
+                <>
+                  <Crown className="h-5 w-5 mr-2" />
+                  Upgrade to Premium - {selectedPlan === 'monthly' ? '$29/month' : '$17/month (billed yearly)'}
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </>
+              )}
             </Button>
             {!isLoggedIn && (
               <Button
                 size="lg"
                 variant="outline"
                 className="h-14 border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
-                onClick={() => window.location.href = '/login'}
+                onClick={() => onOpenChange(false)}
               >
                 <UserPlus className="h-5 w-5 mr-2" />
-                Start Free Account
+                Create Free Account
               </Button>
             )}
           </div>

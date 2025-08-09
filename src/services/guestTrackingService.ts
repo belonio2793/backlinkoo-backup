@@ -188,7 +188,7 @@ class GuestTrackingService {
     if (newTotal >= this.MAX_LINKS_PER_CAMPAIGN) {
       campaign.status = 'paused';
       campaignPaused = true;
-      console.log(`🛑 Campaign ${campaignId} auto-paused at ${newTotal} links`);
+      console.log(`🛑 Campaign ${campaignId} auto-paused at ${newTotal} links - upgrade to continue`);
     }
 
     this.saveGuestData(guestData);

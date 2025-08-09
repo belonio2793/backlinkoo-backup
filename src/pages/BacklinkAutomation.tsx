@@ -64,7 +64,7 @@ interface DatabaseCampaign {
   target_url: string;
   keywords: string[];
   anchor_texts: string[];
-  status: 'active' | 'paused' | 'stopped' | 'completed';
+  status: 'active' | 'paused' | 'stopped';
   progress: number;
   links_generated: number;
   daily_limit: number;
@@ -86,7 +86,7 @@ interface Campaign {
   keywords: string[];
   anchorTexts?: string[];
   dailyLimit?: number;
-  status: 'active' | 'paused' | 'stopped' | 'completed' | 'failed';
+  status: 'active' | 'paused' | 'stopped' | 'failed';
   progress: number;
   linksGenerated: number;
   linksLive: number;
@@ -296,6 +296,7 @@ export default function BacklinkAutomation() {
   const [premiumUpsellTrigger, setPremiumUpsellTrigger] = useState<'campaign_limit' | 'link_limit' | 'feature_limit' | 'manual'>('manual');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [guestCampaignToDelete, setGuestCampaignToDelete] = useState<any>(null);
+  const [showFabMenu, setShowFabMenu] = useState(false);
 
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
@@ -595,6 +596,24 @@ export default function BacklinkAutomation() {
       });
     };
   }, []);
+
+  // Close FAB menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const fabContainer = document.querySelector('.fixed.bottom-6.right-6');
+      if (fabContainer && !fabContainer.contains(event.target as Node)) {
+        setShowFabMenu(false);
+      }
+    };
+
+    if (showFabMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showFabMenu]);
 
   // Start real-time monitoring for active campaigns on load
   useEffect(() => {
@@ -1072,12 +1091,16 @@ export default function BacklinkAutomation() {
 
   const showPremiumUpgrade = (campaignId: string) => {
     setShowTrialExhaustedModal(true);
+    const message = user && !isPremium
+      ? "Campaign paused at 20-link limit. Upgrade to Premium to continue building unlimited links!"
+      : "You've built 20 high-quality backlinks! Upgrade to Premium for unlimited campaigns and links.";
+
     toast({
-      title: "🚀 20 Link Limit Reached!",
-      description: "Upgrade to Premium for unlimited link building and advanced features!",
+      title: "🛑 Campaign Paused - Link Limit Reached",
+      description: message,
       action: (
         <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
-          Upgrade Now
+          {user && !isPremium ? "Upgrade to Continue" : "Upgrade Now"}
         </Button>
       ),
     });
@@ -2415,7 +2438,14 @@ export default function BacklinkAutomation() {
                           {!isPremium && (
                             <Button
                               variant="outline"
-                              onClick={() => window.location.href = '/subscription-success'}
+                              onClick={() => {
+                                setPremiumUpsellTrigger('manual');
+                                if (user) {
+                                  setShowTrialExhaustedModal(true);
+                                } else {
+                                  setShowGuestPremiumModal(true);
+                                }
+                              }}
                               className="w-full h-12 px-6 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100"
                             >
                               <Crown className="h-4 w-4 mr-2" />
@@ -2497,7 +2527,14 @@ export default function BacklinkAutomation() {
                               <Button
                                 variant="link"
                                 size="sm"
-                                onClick={() => window.location.href = '/subscription-success'}
+                                onClick={() => {
+                                  setPremiumUpsellTrigger('manual');
+                                  if (user) {
+                                    setShowTrialExhaustedModal(true);
+                                  } else {
+                                    setShowGuestPremiumModal(true);
+                                  }
+                                }}
                                 className="p-0 h-auto text-amber-700 hover:text-amber-800"
                               >
                                 Upgrade →
@@ -3190,15 +3227,16 @@ export default function BacklinkAutomation() {
                               <p className="text-sm text-gray-600 mb-2">{campaign.targetUrl}</p>
                               <div className="flex items-center gap-2">
                                 <Badge
-                                  variant={campaign.status === 'active' ? 'default' :
-                                          campaign.status === 'completed' ? 'secondary' :
-                                          campaign.status === 'paused' ? 'outline' : 'destructive'}
-                                  className="text-xs"
-                                >
-                                  {campaign.status === 'active' && <Activity className="h-3 w-3 mr-1" />}
-                                  {campaign.status === 'paused' && <Pause className="h-3 w-3 mr-1" />}
-                                  {campaign.status}
-                                </Badge>
+                                variant={campaign.status === 'active' ? 'default' :
+                                        campaign.status === 'completed' ? 'secondary' :
+                                        campaign.status === 'paused' ? 'outline' : 'destructive'}
+                                className="text-xs"
+                              >
+                                {campaign.status === 'active' && <Activity className="h-3 w-3 mr-1" />}
+                                {campaign.status === 'paused' && <Pause className="h-3 w-3 mr-1" />}
+                                {campaign.status === 'completed' && <CheckCircle className="h-3 w-3 mr-1" />}
+                                {campaign.status === 'completed' ? 'Completed - Saved Forever' : campaign.status}
+                              </Badge>
                                 {checkPremiumLimits(campaign) && (
                                   <Badge variant="destructive" className="text-xs">
                                     <AlertTriangle className="h-3 w-3 mr-1" />
@@ -4691,40 +4729,62 @@ export default function BacklinkAutomation() {
 
       {/* Floating Action Button */}
       <div className="fixed bottom-6 right-6 z-50">
-        <div className="relative group">
+        <div className="relative">
           {/* Quick Actions Menu */}
-          <div className="absolute bottom-16 right-0 space-y-2 opacity-0 group-hover:opacity-100 transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
+          <div className={`absolute bottom-16 right-0 space-y-2 transition-all duration-200 ${
+            showFabMenu
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-2 pointer-events-none'
+          }`}>
             {user ? (
               <>
                 {/* Logged In User Actions */}
                 <Button
                   size="sm"
-                  onClick={() => setSelectedTab('campaigns')}
-                  className="w-40 justify-start bg-white shadow-lg border hover:bg-gray-50"
+                  onClick={() => {
+                    setSelectedTab('campaigns');
+                    setSelectedCampaignTab('create');
+                    setShowFabMenu(false);
+                  }}
+                  className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
                   <Target className="h-4 w-4 mr-2" />
                   New Campaign
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => setSelectedTab('discovery')}
-                  className="w-40 justify-start bg-white shadow-lg border hover:bg-gray-50"
+                  onClick={() => {
+                    setSelectedTab('database');
+                    setShowFabMenu(false);
+                  }}
+                  className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
                   <Search className="h-4 w-4 mr-2" />
-                  Discover URLs
+                  Website Database
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => window.location.href = '/backlink-report'}
-                  className="w-40 justify-start bg-white shadow-lg border hover:bg-gray-50"
+                  onClick={() => {
+                    setSelectedTab('recursive');
+                    setShowFabMenu(false);
+                  }}
+                  className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                  View Reports
+                  <Network className="h-4 w-4 mr-2" />
+                  Recursive Discovery
                 </Button>
                 {!isPremium && (
                   <Button
                     size="sm"
-                    onClick={() => window.location.href = '/subscription-success'}
+                    onClick={() => {
+                      setPremiumUpsellTrigger('manual');
+                      if (user) {
+                        setShowTrialExhaustedModal(true);
+                      } else {
+                        setShowGuestPremiumModal(true);
+                      }
+                      setShowFabMenu(false);
+                    }}
                     className="w-40 justify-start bg-purple-600 text-white shadow-lg hover:bg-purple-700"
                   >
                     <Crown className="h-4 w-4 mr-2" />
@@ -4737,7 +4797,10 @@ export default function BacklinkAutomation() {
                 {/* Not Logged In Actions */}
                 <Button
                   size="sm"
-                  onClick={() => setShowSignInModal(true)}
+                  onClick={() => {
+                    setShowSignInModal(true);
+                    setShowFabMenu(false);
+                  }}
                   className="w-40 justify-start bg-blue-600 text-white shadow-lg hover:bg-blue-700"
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
@@ -4745,11 +4808,14 @@ export default function BacklinkAutomation() {
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => setSelectedTab('discovery')}
-                  className="w-40 justify-start bg-white shadow-lg border hover:bg-gray-50"
+                  onClick={() => {
+                    setSelectedTab('database');
+                    setShowFabMenu(false);
+                  }}
+                  className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
                   <Eye className="h-4 w-4 mr-2" />
-                  Preview Features
+                  Website Database
                 </Button>
               </>
             )}
@@ -4758,17 +4824,16 @@ export default function BacklinkAutomation() {
           {/* Main FAB */}
           <Button
             size="lg"
-            className={`h-14 w-14 rounded-full shadow-lg ${
+            onClick={() => setShowFabMenu(!showFabMenu)}
+            className={`h-14 w-14 rounded-full shadow-lg transition-transform ${
+              showFabMenu ? 'rotate-45' : 'rotate-0'
+            } ${
               user
                 ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
                 : 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800'
             }`}
           >
-            {user ? (
-              <Plus className="h-6 w-6" />
-            ) : (
-              <UserPlus className="h-6 w-6" />
-            )}
+            <Plus className="h-6 w-6" />
           </Button>
         </div>
       </div>
@@ -4781,6 +4846,10 @@ export default function BacklinkAutomation() {
         totalLinks={user ? (campaigns.reduce((sum, c) => sum + c.linksGenerated, 0)) : guestLinksGenerated}
         isLoggedIn={!!user}
         userName={user?.user_metadata?.full_name || user?.email}
+        onUpgrade={() => {
+          // The TrialExhaustedModal now handles its own checkout integration
+          console.log('User upgrading to premium from trial exhausted modal');
+        }}
       />
 
       {/* Guest Premium Upsell Modal */}
@@ -4821,8 +4890,63 @@ export default function BacklinkAutomation() {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         campaign={campaignToDelete}
-        onDelete={async (options) => {
-          console.log('Deleting campaign with options:', options);
+        onDelete={async (campaignId, options) => {
+          try {
+            setIsDeleting(true);
+
+            if (user) {
+              // For logged-in users, use the campaign service
+              const result = await campaignService.deleteCampaign(campaignId, {
+                confirmationText: options.confirmationText
+              });
+
+              if (result.success) {
+                // Remove from local state
+                setCampaigns(prev => prev.filter(c => c.id !== campaignId));
+
+                // Stop any active intervals for this campaign
+                const interval = activeCampaignIntervals.get(campaignId);
+                if (interval) {
+                  clearInterval(interval);
+                  setActiveCampaignIntervals(prev => {
+                    const updated = new Map(prev);
+                    updated.delete(campaignId);
+                    return updated;
+                  });
+                }
+
+                toast({
+                  title: "🗑️ Campaign Deleted",
+                  description: "Campaign and all associated data have been permanently removed.",
+                });
+              } else {
+                throw new Error(result.error || 'Failed to delete campaign');
+              }
+            } else {
+              // For guest users, use guest tracking service
+              const deleted = guestTrackingService.deleteCampaign(campaignId);
+              if (deleted) {
+                setCampaigns(prev => prev.filter(c => c.id !== campaignId));
+                updateGuestRestrictions();
+
+                toast({
+                  title: "����️ Campaign Deleted",
+                  description: "Campaign has been permanently removed.",
+                });
+              } else {
+                throw new Error('Could not delete guest campaign');
+              }
+            }
+          } catch (error) {
+            console.error('Campaign deletion failed:', error);
+            toast({
+              title: "Error",
+              description: error instanceof Error ? error.message : "Could not delete campaign. Please try again.",
+              variant: "destructive"
+            });
+          } finally {
+            setIsDeleting(false);
+          }
         }}
         isDeleting={isDeleting}
       />

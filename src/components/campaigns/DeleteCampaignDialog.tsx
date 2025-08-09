@@ -39,9 +39,9 @@ interface Campaign {
 }
 
 interface DeleteCampaignDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: (campaignId: string, options: DeletionOptions) => Promise<void>;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onDelete: (campaignId: string, options: DeletionOptions) => Promise<void>;
   campaign: Campaign | null;
   isDeleting?: boolean;
 }
@@ -51,9 +51,9 @@ interface DeletionOptions {
 }
 
 export default function DeleteCampaignDialog({
-  isOpen,
-  onClose,
-  onConfirm,
+  open,
+  onOpenChange,
+  onDelete,
   campaign,
   isDeleting = false
 }: DeleteCampaignDialogProps) {
@@ -71,7 +71,7 @@ export default function DeleteCampaignDialog({
   const handleClose = () => {
     // Reset all state when closing
     setConfirmationText('');
-    onClose();
+    onOpenChange(false);
   };
 
   const handleConfirm = async () => {
@@ -82,7 +82,7 @@ export default function DeleteCampaignDialog({
     };
 
     try {
-      await onConfirm(campaign.id, options);
+      await onDelete(campaign.id, options);
       handleClose();
     } catch (error) {
       console.error('Delete confirmation failed:', error);
@@ -136,7 +136,7 @@ export default function DeleteCampaignDialog({
   };
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={handleClose}>
+    <AlertDialog open={open} onOpenChange={handleClose}>
       <AlertDialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-3 text-xl">
