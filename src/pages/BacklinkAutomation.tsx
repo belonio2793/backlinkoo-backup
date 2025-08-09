@@ -806,12 +806,67 @@ export default function BacklinkAutomation() {
                 Discovery Engine
               </h1>
               <div className="flex items-center gap-2">
-                {isPremium && (
+                {/* User Status Badges */}
+                {user && isPremium && (
                   <Badge variant="outline" className="text-purple-600 bg-purple-50">
                     <Crown className="h-3 w-3 mr-1" />
                     PREMIUM
                   </Badge>
                 )}
+                {user && !isPremium && (
+                  <Badge variant="outline" className="text-blue-600 bg-blue-50">
+                    <User className="h-3 w-3 mr-1" />
+                    FREE
+                  </Badge>
+                )}
+                {!user && (
+                  <Badge variant="outline" className="text-gray-600 bg-gray-50">
+                    <UserPlus className="h-3 w-3 mr-1" />
+                    GUEST
+                  </Badge>
+                )}
+
+                {/* Quick Action Buttons */}
+                <div className="flex items-center gap-1 ml-2">
+                  {user && (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => window.location.href = '/dashboard'}
+                        className="h-8 px-2"
+                      >
+                        <BarChart3 className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => {
+                          loadRealTimeMetrics();
+                          loadDiscoveryStats();
+                          toast({
+                            title: "Dashboard Refreshed",
+                            description: "All metrics updated!",
+                          });
+                        }}
+                        className="h-8 px-2"
+                      >
+                        <RefreshCw className="h-3 w-3" />
+                      </Button>
+                    </>
+                  )}
+
+                  {!user && (
+                    <Button
+                      size="sm"
+                      onClick={() => window.location.href = '/login'}
+                      className="h-8 bg-blue-600 hover:bg-blue-700"
+                    >
+                      <UserPlus className="h-3 w-3 mr-1" />
+                      Sign In
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
             <p className="text-gray-600 max-w-4xl mx-auto text-lg">
