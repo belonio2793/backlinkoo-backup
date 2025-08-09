@@ -198,32 +198,45 @@ function Blog() {
   const cleanTitle = (title: string): string => {
     if (!title) return '';
 
-    return title
-      // Remove HTML tag prefixes like "H1:", "H2:", "Title:", etc.
-      .replace(/^H[1-6]:\s*/i, '')
-      .replace(/^Title:\s*/i, '')
-      .replace(/^Heading:\s*/i, '')
-      // Remove HTML tags completely
-      .replace(/<[^>]*>/g, '')
-      // Remove common markdown syntax
-      .replace(/^#+\s*/, '') // Remove markdown headers
-      .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
-      .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
-      // Remove common HTML entities
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/&rsquo;/g, "'")
-      .replace(/&lsquo;/g, "'")
-      .replace(/&rdquo;/g, '"')
-      .replace(/&ldquo;/g, '"')
-      // Clean up extra whitespace and special characters
-      .replace(/\s+/g, ' ')
-      .replace(/^\W+/, '') // Remove leading non-word characters
-      .trim();
+    let cleaned = title;
+
+    // Apply multiple passes to ensure thorough cleaning
+    for (let i = 0; i < 3; i++) {
+      cleaned = cleaned
+        // Remove HTML tag prefixes like "H1:", "H2:", "Title:", etc. (case insensitive, multiple variations)
+        .replace(/^(?:H[1-6]|Title|Heading|Header):\s*/gi, '')
+        .replace(/^(?:h[1-6]|title|heading|header):\s*/g, '')
+        // Remove leading "t " that might be leftover
+        .replace(/^t\s+/gi, '')
+        // Remove HTML tags completely
+        .replace(/<[^>]*>/g, '')
+        // Remove common markdown syntax
+        .replace(/^#+\s*/, '') // Remove markdown headers
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+        .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
+        .replace(/__(.*?)__/g, '$1') // Remove underline markdown
+        // Remove common HTML entities
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&rsquo;/g, "'")
+        .replace(/&lsquo;/g, "'")
+        .replace(/&rdquo;/g, '"')
+        .replace(/&ldquo;/g, '"')
+        .replace(/&hellip;/g, '...')
+        // Remove common prefixes that might appear
+        .replace(/^(?:Blog post|Article|Post):\s*/gi, '')
+        // Clean up extra whitespace and special characters
+        .replace(/\s+/g, ' ')
+        .replace(/^[\W\s]+/, '') // Remove leading non-word characters and whitespace
+        .replace(/[\s]+$/, '') // Remove trailing whitespace
+        .trim();
+    }
+
+    return cleaned;
   };
 
   // Utility function to clean descriptions/content
