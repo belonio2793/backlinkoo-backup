@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,124 +8,30 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Users, DollarSign, Gift, Copy, Share2, Trophy, Target,
-  TrendingUp, Calendar, Clock, CheckCircle, Star, 
+  TrendingUp, Calendar, Clock, CheckCircle, Star,
   CreditCard, Wallet, Link2, Eye, RefreshCw, Download,
   Crown, Zap, Heart, Award, Sparkles
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useAffiliate } from '@/hooks/useAffiliate';
 import ToolsHeader from '@/components/shared/ToolsHeader';
 import { Footer } from '@/components/Footer';
-
-interface ReferralData {
-  id: string;
-  email: string;
-  joinDate: string;
-  totalSpent: number;
-  creditsGenerated: number;
-  status: 'active' | 'inactive';
-  lastActivity: string;
-}
-
-interface CreditTransaction {
-  id: string;
-  type: 'referral_signup' | 'referral_purchase' | 'bonus' | 'spent';
-  amount: number;
-  description: string;
-  date: string;
-  referralId?: string;
-}
 
 const Affiliate: React.FC = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
-  const [isLoading, setIsLoading] = useState(false);
-  const [affiliateStats, setAffiliateStats] = useState({
-    totalCredits: 47,
-    totalReferrals: 12,
-    totalEarnings: 156.50,
-    conversionRate: 24.5,
-    thisMonthCredits: 15,
-    thisMonthReferrals: 4
-  });
+  const {
+    isLoading,
+    stats,
+    referrals,
+    creditHistory,
+    generateReferralLink,
+    refreshData
+  } = useAffiliate();
 
-  // Mock referral data
-  const [referrals] = useState<ReferralData[]>([
-    {
-      id: '1',
-      email: 'john.doe@example.com',
-      joinDate: '2024-01-15',
-      totalSpent: 45.00,
-      creditsGenerated: 15,
-      status: 'active',
-      lastActivity: '2024-01-20'
-    },
-    {
-      id: '2',
-      email: 'sarah.smith@company.com',
-      joinDate: '2024-01-12',
-      totalSpent: 27.00,
-      creditsGenerated: 9,
-      status: 'active',
-      lastActivity: '2024-01-19'
-    },
-    {
-      id: '3',
-      email: 'mike.wilson@startup.io',
-      joinDate: '2024-01-10',
-      totalSpent: 63.00,
-      creditsGenerated: 21,
-      status: 'active',
-      lastActivity: '2024-01-18'
-    },
-    {
-      id: '4',
-      email: 'lisa.brown@agency.com',
-      joinDate: '2024-01-08',
-      totalSpent: 21.00,
-      creditsGenerated: 7,
-      status: 'inactive',
-      lastActivity: '2024-01-16'
-    }
-  ]);
-
-  // Mock credit transactions
-  const [creditHistory] = useState<CreditTransaction[]>([
-    {
-      id: '1',
-      type: 'referral_purchase',
-      amount: 5,
-      description: 'Referral purchase: john.doe@example.com spent $15',
-      date: '2024-01-20',
-      referralId: '1'
-    },
-    {
-      id: '2',
-      type: 'referral_purchase',
-      amount: 3,
-      description: 'Referral purchase: sarah.smith@company.com spent $9',
-      date: '2024-01-19',
-      referralId: '2'
-    },
-    {
-      id: '3',
-      type: 'bonus',
-      amount: 10,
-      description: 'Milestone bonus: 10 active referrals',
-      date: '2024-01-18'
-    },
-    {
-      id: '4',
-      type: 'referral_signup',
-      amount: 2,
-      description: 'New referral signup: mike.wilson@startup.io',
-      date: '2024-01-17',
-      referralId: '3'
-    }
-  ]);
-
-  const referralLink = `https://backlinkoo.com/signup?ref=${user?.id || 'demo123'}`;
+  const referralLink = generateReferralLink();
   
   const copyReferralLink = async () => {
     try {
