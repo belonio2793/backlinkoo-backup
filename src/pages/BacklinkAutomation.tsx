@@ -33,7 +33,7 @@ import ToolsHeader from '@/components/shared/ToolsHeader';
 import { Footer } from '@/components/Footer';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
 import { TrialExhaustedModal } from '@/components/TrialExhaustedModal';
-import AuthFormTabsFixed from '@/components/shared/AuthFormTabsFixed';
+import { AuthFormTabsFixed } from '@/components/shared/AuthFormTabsFixed';
 
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
 
