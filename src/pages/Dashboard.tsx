@@ -796,7 +796,9 @@ const Dashboard = () => {
 
       if (event === 'SIGNED_OUT' || !session) {
         console.log('🚪 Dashboard - User signed out, redirecting to home...');
-        navigate('/');
+        startTransition(() => {
+          navigate('/');
+        });
       } else if (event === 'SIGNED_IN' && session) {
         console.log('🏠 Dashboard - User signed in, updating user state');
         setUser(session.user);
@@ -1065,7 +1067,7 @@ const Dashboard = () => {
           console.error('🚪 Sign out error (background):', error);
           // Don't show error to user since they're already signed out from UI perspective
         } else {
-          console.log('��� Background sign out successful');
+          console.log('🚪 Background sign out successful');
         }
       } catch (backgroundError) {
         console.error('🚪 Background sign out error:', backgroundError);
