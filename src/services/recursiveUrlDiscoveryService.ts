@@ -688,6 +688,17 @@ class RecursiveUrlDiscoveryService {
    */
   private async saveDiscoveredUrl(urlData: any): Promise<void> {
     try {
+      // Check if table exists first
+      const { data: tableCheck, error: tableError } = await supabase
+        .from('discovered_urls')
+        .select('id')
+        .limit(1);
+
+      if (tableError && tableError.code === '42P01') {
+        console.log('Table discovered_urls does not exist, URL saved locally only');
+        return;
+      }
+
       const { error } = await supabase
         .from('discovered_urls')
         .insert({
