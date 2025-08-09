@@ -291,8 +291,9 @@ export class CompatibilityAffiliateService {
         ]
       };
     } catch (error: any) {
-      console.error('Get affiliate analytics error:', error);
-      throw error;
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      console.error('Get affiliate analytics error:', errorMessage, error);
+      throw new Error(`Failed to get affiliate analytics: ${errorMessage}`);
     }
   }
 
