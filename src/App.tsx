@@ -102,6 +102,94 @@ const App = () => (
                 </Suspense>
               }
             />
+
+            {/* Authentication routes */}
+            <Route
+              path="/auth/callback"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyAuthCallback />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/auth/confirm"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyEmailConfirmation />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/auth/reset-password"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyPasswordReset />
+                </Suspense>
+              }
+            />
+
+            {/* Payment routes */}
+            <Route
+              path="/payment-success"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyPaymentSuccess />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/payment-cancelled"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyPaymentCancelled />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/subscription-success"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazySubscriptionSuccess />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/subscription-cancelled"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazySubscriptionCancelled />
+                </Suspense>
+              }
+            />
+
+            {/* Legal routes */}
+            <Route
+              path="/terms-of-service"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyTermsOfService />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/privacy-policy"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyPrivacyPolicy />
+                </Suspense>
+              }
+            />
+
+            {/* 404 Catch-all route */}
+            <Route
+              path="*"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyNotFound />
+                </Suspense>
+              }
+            />
           </Routes>
         </BrowserRouter>
       </ModalProvider>
