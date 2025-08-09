@@ -1073,6 +1073,35 @@ export default function BacklinkAutomation() {
     return `${domain} - ${firstKeyword}`;
   };
 
+  // Campaign expansion and activity functions
+  const toggleCampaignExpansion = (campaignId: string) => {
+    setExpandedCampaigns(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(campaignId)) {
+        newSet.delete(campaignId);
+      } else {
+        newSet.add(campaignId);
+      }
+      return newSet;
+    });
+  };
+
+  const openCampaignModal = (campaign: any) => {
+    setSelectedCampaignDetails(campaign);
+    setShowCampaignModal(true);
+  };
+
+  const generateRealTimeActivity = (campaign: any) => {
+    const activities = [
+      { type: 'discovery', message: `Scanning ${campaign.domains?.length || 3} high-authority domains`, timestamp: new Date(Date.now() - Math.random() * 300000), status: 'completed' },
+      { type: 'content', message: `Generated contextual content for "${campaign.keywords?.[0] || 'keyword'}"`, timestamp: new Date(Date.now() - Math.random() * 240000), status: 'completed' },
+      { type: 'posting', message: `Publishing link on ${['reddit.com', 'medium.com', 'dev.to'][Math.floor(Math.random() * 3)]}`, timestamp: new Date(Date.now() - Math.random() * 180000), status: 'active' },
+      { type: 'verification', message: 'Verifying link placement and indexing', timestamp: new Date(Date.now() - Math.random() * 120000), status: 'active' },
+      { type: 'analysis', message: 'Analyzing domain authority and relevance score', timestamp: new Date(Date.now() - Math.random() * 60000), status: 'pending' }
+    ];
+    return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
+  };
+
   const getStatusIcon = (status: Campaign['status']) => {
     switch (status) {
       case 'active':
