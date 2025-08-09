@@ -318,11 +318,20 @@ export function BeautifulBlogPost() {
       }
     } catch (error: any) {
       console.error('Failed to load blog post:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load blog post",
-        variant: "destructive"
-      });
+
+      if (!post) {
+        toast({
+          title: "Blog Post Not Found",
+          description: "This blog post may have expired or been removed.",
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to load blog post",
+          variant: "destructive"
+        });
+      }
     } finally {
       setLoading(false);
     }
