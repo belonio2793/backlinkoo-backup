@@ -103,6 +103,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/ad"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyTwitterAdGenerator />
+                </Suspense>
+              }
+            />
 
             {/* Authentication routes */}
             <Route
