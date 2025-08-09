@@ -182,6 +182,9 @@ export default function BacklinkAutomation() {
   const contentEngine = ContentGenerationEngine.getInstance();
   const errorEngine = ErrorHandlingEngine.getInstance();
 
+  // Ensure proliferation service is available
+  console.log('🔧 Proliferation Service Status:', internetProliferationService.getProliferationStats());
+
   // Load campaigns and metrics on mount and when user changes
   useEffect(() => {
     loadCampaigns();
