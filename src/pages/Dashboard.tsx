@@ -742,12 +742,14 @@ const Dashboard = () => {
           PremiumService.checkPremiumStatus(session.user.id).then(isPremium => {
             if (isMounted) {
               setIsPremiumSubscriber(isPremium);
+              setPremiumCheckComplete(true);
             }
             return isPremium;
           }).catch(err => {
             console.warn('🏠 Dashboard - premium status check failed:', err);
             if (isMounted) {
               setIsPremiumSubscriber(false); // Explicitly set to false on error
+              setPremiumCheckComplete(true);
             }
             return false;
           }),
