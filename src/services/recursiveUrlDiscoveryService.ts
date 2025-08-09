@@ -732,9 +732,13 @@ class RecursiveUrlDiscoveryService {
   private async runAutoCleanup(): Promise<void> {
     try {
       const { data, error } = await supabase.rpc('auto_clean_urls');
-      
+
       if (error) {
-        console.error('Auto cleanup failed:', error);
+        if (error.code === '42883') {
+          console.log('Auto cleanup function does not exist, skipping cleanup');
+        } else {
+          console.error('Auto cleanup failed:', error);
+        }
       } else {
         console.log(`Auto cleanup completed: ${data} URLs cleaned`);
       }
