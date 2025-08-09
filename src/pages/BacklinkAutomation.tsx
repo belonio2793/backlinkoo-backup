@@ -2082,6 +2082,9 @@ export default function BacklinkAutomation() {
           // Add to campaigns state immediately
           setCampaigns(prev => [...prev, enhancedCampaign]);
 
+          // Immediately save to permanent storage to prevent any data loss
+          await saveCampaignPermanently(enhancedCampaign);
+
           const proliferationCampaign: CampaignProliferation = {
             campaignId: result.campaign.id,
             targetUrl: campaignForm.targetUrl,
