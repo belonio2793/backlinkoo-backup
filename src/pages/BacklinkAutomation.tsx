@@ -1304,20 +1304,179 @@ export default function BacklinkAutomation() {
                     </div>
                   </div>
 
-                  <Button
-                    onClick={startUrlDiscovery}
-                    className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                    disabled={isDiscovering || !user || (databaseStatus && !databaseStatus.isConnected)}
-                  >
-                    {isDiscovering ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Search className="h-4 w-4 mr-2" />
+                  {/* User State-Aware Discovery Buttons */}
+                  <div className="space-y-4">
+                    {/* Not Logged In State */}
+                    {!user && (
+                      <div className="space-y-3">
+                        <Button
+                          onClick={() => window.location.href = '/login'}
+                          className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                        >
+                          <UserPlus className="h-4 w-4 mr-2" />
+                          Sign In to Start Discovery
+                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="outline"
+                            onClick={() => setSelectedTab('campaigns')}
+                            className="flex-1"
+                          >
+                            <Target className="h-4 w-4 mr-2" />
+                            View Campaigns
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              // Show sample data
+                              toast({
+                                title: "Preview Mode",
+                                description: "Sign in to access live URL discovery with real-time data!",
+                              });
+                            }}
+                            className="flex-1"
+                          >
+                            <Eye className="h-4 w-4 mr-2" />
+                            Preview Mode
+                          </Button>
+                        </div>
+                      </div>
                     )}
-                    {!user ? "Login Required" :
-                     (databaseStatus && !databaseStatus.isConnected) ? "System Initializing..." :
-                     "Start Recursive Discovery"}
-                  </Button>
+
+                    {/* Logged In but System Initializing */}
+                    {user && databaseStatus && !databaseStatus.isConnected && (
+                      <div className="space-y-3">
+                        <Button
+                          disabled
+                          className="w-full h-12 bg-gradient-to-r from-gray-400 to-gray-500"
+                        >
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Discovery Engine Initializing...
+                        </Button>
+                        <div className="text-center">
+                          <Button
+                            variant="outline"
+                            onClick={() => window.open('mailto:support@backlinkoo.com?subject=Discovery Engine Setup', '_blank')}
+                            className="h-10"
+                          >
+                            <Settings className="h-4 w-4 mr-2" />
+                            Get Help with Setup
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Logged In and Ready */}
+                    {user && databaseStatus && databaseStatus.isConnected && (
+                      <div className="space-y-3">
+                        <Button
+                          onClick={startUrlDiscovery}
+                          className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                          disabled={isDiscovering || !discoveryForm.keywords.trim()}
+                        >
+                          {isDiscovering ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : (
+                            <Search className="h-4 w-4 mr-2" />
+                          )}
+                          {isPremium ? "Start Advanced Discovery" : "Start Discovery"}
+                        </Button>
+
+                        {/* Additional Discovery Actions */}
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setDiscoveryForm({
+                                keywords: 'AI tools, software',
+                                depth: 2,
+                                maxResults: 100
+                              });
+                            }}
+                          >
+                            <Sparkles className="h-3 w-3 mr-1" />
+                            Quick Start
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              if (isPremium) {
+                                setDiscoveryForm(prev => ({ ...prev, depth: 3, maxResults: 200 }));
+                                toast({
+                                  title: "Premium Mode Activated",
+                                  description: "Using advanced depth and maximum results!",
+                                });
+                              } else {
+                                toast({
+                                  title: "Premium Feature",
+                                  description: "Upgrade to unlock advanced discovery settings!",
+                                  action: (
+                                    <Button size="sm" onClick={() => window.location.href = '/subscription-success'}>
+                                      Upgrade
+                                    </Button>
+                                  ),
+                                });
+                              }
+                            }}
+                          >
+                            <Brain className="h-3 w-3 mr-1" />
+                            {isPremium ? "Max Power" : "Premium Mode"}
+                          </Button>
+                        </div>
+
+                        {/* Discovery Stats & Actions */}
+                        <div className="flex flex-wrap gap-2 justify-center">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              loadDiscoveredUrls();
+                              loadDiscoveryStats();
+                              toast({
+                                title: "Data Refreshed",
+                                description: "Latest discovery results loaded!",
+                              });
+                            }}
+                          >
+                            <RefreshCw className="h-3 w-3 mr-1" />
+                            Refresh Data
+                          </Button>
+
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.location.href = '/backlink-report'}
+                          >
+                            <BarChart3 className="h-3 w-3 mr-1" />
+                            View Analytics
+                          </Button>
+                        </div>
+
+                        {/* User Plan Status */}
+                        {!isPremium && (
+                          <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-3">
+                            <div className="flex items-center justify-between text-sm">
+                              <div className="flex items-center gap-2">
+                                <AlertTriangle className="h-4 w-4 text-purple-600" />
+                                <span className="text-purple-700">Free Plan: Limited to {discoveryForm.maxResults} URLs</span>
+                              </div>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => window.location.href = '/subscription-success'}
+                                className="border-purple-200 text-purple-600 hover:bg-purple-100"
+                              >
+                                Unlock More
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 
