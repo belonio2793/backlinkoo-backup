@@ -511,7 +511,7 @@ export default function EnhancedUserManagement() {
                               <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
                                 <AlertDialogAction
-                                  onClick={() => deleteUser(user)}
+                                  onClick={() => handleDeleteUser(user)}
                                   className="bg-red-600 hover:bg-red-700"
                                 >
                                   Delete
