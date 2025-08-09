@@ -286,6 +286,14 @@ export default function BacklinkAutomation() {
     dailyLimit: 25,
     linkType: 'all'
   });
+  const [originalCampaignForm, setOriginalCampaignForm] = useState({
+    name: '',
+    targetUrl: '',
+    keywords: '',
+    anchorTexts: '',
+    dailyLimit: 25,
+    linkType: 'all'
+  });
 
   // URL Discovery State
   const [discoveryForm, setDiscoveryForm] = useState({
