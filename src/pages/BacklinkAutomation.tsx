@@ -1618,7 +1618,91 @@ export default function BacklinkAutomation() {
       </div>
 
       <Footer />
-      
+
+      {/* Floating Action Button */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <div className="relative group">
+          {/* Quick Actions Menu */}
+          <div className="absolute bottom-16 right-0 space-y-2 opacity-0 group-hover:opacity-100 transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
+            {user ? (
+              <>
+                {/* Logged In User Actions */}
+                <Button
+                  size="sm"
+                  onClick={() => setSelectedTab('campaigns')}
+                  className="w-40 justify-start bg-white shadow-lg border hover:bg-gray-50"
+                >
+                  <Target className="h-4 w-4 mr-2" />
+                  New Campaign
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => setSelectedTab('discovery')}
+                  className="w-40 justify-start bg-white shadow-lg border hover:bg-gray-50"
+                >
+                  <Search className="h-4 w-4 mr-2" />
+                  Discover URLs
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => window.location.href = '/backlink-report'}
+                  className="w-40 justify-start bg-white shadow-lg border hover:bg-gray-50"
+                >
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  View Reports
+                </Button>
+                {!isPremium && (
+                  <Button
+                    size="sm"
+                    onClick={() => window.location.href = '/subscription-success'}
+                    className="w-40 justify-start bg-purple-600 text-white shadow-lg hover:bg-purple-700"
+                  >
+                    <Crown className="h-4 w-4 mr-2" />
+                    Upgrade Now
+                  </Button>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Not Logged In Actions */}
+                <Button
+                  size="sm"
+                  onClick={() => window.location.href = '/login'}
+                  className="w-40 justify-start bg-blue-600 text-white shadow-lg hover:bg-blue-700"
+                >
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Sign In
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => setSelectedTab('discovery')}
+                  className="w-40 justify-start bg-white shadow-lg border hover:bg-gray-50"
+                >
+                  <Eye className="h-4 w-4 mr-2" />
+                  Preview Features
+                </Button>
+              </>
+            )}
+          </div>
+
+          {/* Main FAB */}
+          <Button
+            size="lg"
+            className={`h-14 w-14 rounded-full shadow-lg ${
+              user
+                ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
+                : 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800'
+            }`}
+          >
+            {user ? (
+              <Plus className="h-6 w-6" />
+            ) : (
+              <UserPlus className="h-6 w-6" />
+            )}
+          </Button>
+        </div>
+      </div>
+
       {/* Delete Campaign Dialog */}
       <DeleteCampaignDialog
         open={deleteDialogOpen}
