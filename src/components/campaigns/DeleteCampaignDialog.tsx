@@ -47,11 +47,7 @@ interface DeleteCampaignDialogProps {
 }
 
 interface DeletionOptions {
-  forceDelete: boolean;
-  reason: string;
   confirmationText: string;
-  archiveLinks: boolean;
-  notifyStakeholders: boolean;
 }
 
 export default function DeleteCampaignDialog({
@@ -62,31 +58,19 @@ export default function DeleteCampaignDialog({
   isDeleting = false
 }: DeleteCampaignDialogProps) {
   const [confirmationText, setConfirmationText] = useState('');
-  const [reason, setReason] = useState('');
-  const [forceDelete, setForceDelete] = useState(false);
-  const [archiveLinks, setArchiveLinks] = useState(true);
-  const [notifyStakeholders, setNotifyStakeholders] = useState(false);
-  const [acknowledgeWarning, setAcknowledgeWarning] = useState(false);
 
   if (!campaign) return null;
 
   const isActive = campaign.status === 'active';
   const hasGeneratedLinks = campaign.linksGenerated > 0;
-  const expectedText = `DELETE ${campaign.name}`;
+  const expectedText = 'delete';
   const isConfirmationValid = confirmationText === expectedText;
   
-  const canProceed = isConfirmationValid && 
-    reason.trim().length > 0 && 
-    (!isActive || (isActive && forceDelete && acknowledgeWarning));
+  const canProceed = isConfirmationValid;
 
   const handleClose = () => {
     // Reset all state when closing
     setConfirmationText('');
-    setReason('');
-    setForceDelete(false);
-    setArchiveLinks(true);
-    setNotifyStakeholders(false);
-    setAcknowledgeWarning(false);
     onClose();
   };
 
@@ -94,11 +78,7 @@ export default function DeleteCampaignDialog({
     if (!canProceed) return;
 
     const options: DeletionOptions = {
-      forceDelete,
-      reason: reason.trim(),
-      confirmationText,
-      archiveLinks,
-      notifyStakeholders
+      confirmationText
     };
 
     try {
@@ -124,7 +104,7 @@ export default function DeleteCampaignDialog({
     if (hasGeneratedLinks) {
       impacts.push({
         icon: ExternalLink,
-        text: `${campaign.linksGenerated} generated links will be archived${archiveLinks ? '' : ' (or deleted if unchecked)'}`,
+        text: `${campaign.linksGenerated} generated links will be archived`,
         severity: 'medium' as const
       });
     }
@@ -232,83 +212,6 @@ export default function DeleteCampaignDialog({
               </AlertDescription>
             </Alert>
           )}
-
-          {/* Deletion Options */}
-          <div className="space-y-4">
-            <h4 className="font-semibold">Deletion Options</h4>
-            
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="archiveLinks"
-                  checked={archiveLinks}
-                  onCheckedChange={(checked) => setArchiveLinks(checked as boolean)}
-                />
-                <Label htmlFor="archiveLinks" className="text-sm">
-                  Archive generated links instead of deleting them (recommended)
-                </Label>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="notifyStakeholders"
-                  checked={notifyStakeholders}
-                  onCheckedChange={(checked) => setNotifyStakeholders(checked as boolean)}
-                />
-                <Label htmlFor="notifyStakeholders" className="text-sm">
-                  Notify team members about campaign deletion
-                </Label>
-              </div>
-
-              {isActive && (
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="forceDelete"
-                      checked={forceDelete}
-                      onCheckedChange={(checked) => setForceDelete(checked as boolean)}
-                    />
-                    <Label htmlFor="forceDelete" className="text-sm font-medium text-red-700">
-                      Force delete active campaign
-                    </Label>
-                  </div>
-                  
-                  {forceDelete && (
-                    <div className="ml-6 space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="acknowledgeWarning"
-                          checked={acknowledgeWarning}
-                          onCheckedChange={(checked) => setAcknowledgeWarning(checked as boolean)}
-                        />
-                        <Label htmlFor="acknowledgeWarning" className="text-sm text-red-700">
-                          I understand this will immediately stop all active processing
-                        </Label>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Reason for Deletion */}
-          <div className="space-y-2">
-            <Label htmlFor="reason" className="text-sm font-medium">
-              Reason for deletion <span className="text-red-500">*</span>
-            </Label>
-            <Textarea
-              id="reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              placeholder="Please provide a reason for deleting this campaign..."
-              className="min-h-[80px]"
-              maxLength={500}
-            />
-            <p className="text-xs text-gray-500">
-              This reason will be logged for audit purposes. {500 - reason.length} characters remaining.
-            </p>
-          </div>
 
           {/* Confirmation Text */}
           <div className="space-y-2">

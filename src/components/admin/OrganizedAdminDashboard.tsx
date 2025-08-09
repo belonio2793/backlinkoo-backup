@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useEnhancedAdminMetrics } from "@/hooks/useEnhancedAdminMetrics";
 import { EnhancedAdminOverview } from "@/components/admin/EnhancedAdminOverview";
 import { AdminNavigationHeader } from "@/components/admin/AdminNavigationHeader";
-import { AdminUserDashboard } from "@/components/admin/AdminUserDashboard";
+import SimplifiedUserManagement from "@/components/admin/SimplifiedUserManagement";
 import { supabase } from '@/integrations/supabase/client';
 
 // Admin Components
@@ -125,7 +125,7 @@ export function OrganizedAdminDashboard() {
         {activeSection === "users" && (
           <div className="space-y-6">
             <DatabaseSchemaFix />
-            <AdminUserDashboard />
+            <SimplifiedUserManagement />
           </div>
         )}
 

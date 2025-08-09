@@ -66,7 +66,9 @@ import {
   Mail,
   Calendar as CalendarIcon,
   Eye,
-  Loader2
+  Loader2,
+  Zap,
+  RotateCcw
 } from "lucide-react";
 import {
   realAdminUserService,
@@ -112,6 +114,48 @@ export function AdminUserDashboard() {
   });
   const { toast } = useToast();
 
+  // RLS Recursion Fix Function
+  const fixRLSRecursion = async () => {
+    try {
+      console.log('🔧 Attempting to fix RLS recursion...');
+
+      const response = await fetch('/.netlify/functions/fix-rls-recursion', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        console.log('✅ RLS recursion fix successful');
+        toast({
+          title: "RLS Fix Applied",
+          description: "Database policies have been fixed. Retesting connection...",
+        });
+
+        // Wait a moment then retry connection
+        setTimeout(() => {
+          testDatabaseConnection();
+        }, 2000);
+      } else {
+        throw new Error(result.error || 'RLS fix failed');
+      }
+    } catch (error) {
+      console.error('❌ RLS fix failed:', error);
+      setConnectionStatus({
+        connected: false,
+        error: `RLS fix failed: ${error instanceof Error ? error.message : 'Unknown error'}. Manual intervention required.`,
+        lastTested: new Date()
+      });
+
+      toast({
+        title: "RLS Fix Failed",
+        description: "Manual database policy review required. Check console for details.",
+        variant: "destructive"
+      });
+    }
+  };
+
   // Initialize connection and load data
   useEffect(() => {
     initializeConnection();
@@ -155,7 +199,14 @@ export function AdminUserDashboard() {
   const testDatabaseConnection = async () => {
     try {
       console.log('🔍 Testing database connection...');
-      
+
+      // Check for RLS recursion specifically first
+      if (connectionStatus.error?.includes('infinite recursion')) {
+        console.log('🔧 RLS recursion detected, attempting to fix...');
+        await fixRLSRecursion();
+        return;
+      }
+
       // Direct test of profiles table
       const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
@@ -163,6 +214,12 @@ export function AdminUserDashboard() {
         .limit(1);
 
       if (profilesError) {
+        // Check if this is an RLS recursion error
+        if (profilesError.message.includes('infinite recursion')) {
+          console.log('🔧 RLS recursion detected in profiles query, attempting fix...');
+          await fixRLSRecursion();
+          return;
+        }
         throw new Error(`Database connection failed: ${profilesError.message}`);
       }
 
@@ -510,9 +567,32 @@ export function AdminUserDashboard() {
               </Badge>
             )}
             {connectionStatus.error && (
-              <div className="flex items-center gap-2 text-red-600">
-                <AlertTriangle className="h-4 w-4" />
-                <span className="text-sm">{connectionStatus.error}</span>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-red-600">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="text-sm">{connectionStatus.error}</span>
+                </div>
+                {connectionStatus.error.includes('infinite recursion') && (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={fixRLSRecursion}
+                      variant="outline"
+                      size="sm"
+                      className="text-orange-600 border-orange-200 hover:bg-orange-50"
+                    >
+                      <Zap className="h-4 w-4 mr-2" />
+                      Auto-Fix RLS Recursion
+                    </Button>
+                    <Button
+                      onClick={testDatabaseConnection}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      Retry Connection
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
