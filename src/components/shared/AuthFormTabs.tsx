@@ -259,7 +259,7 @@ export function AuthFormTabs({
                 <Input
                   id="login-password"
                   type={showPassword ? "text" : "password"}
-                  placeholder="•••���••••"
+                  placeholder="••••••••••"
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   className={inputHeight}
