@@ -793,13 +793,10 @@ export default function BacklinkAutomation() {
         </div>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
             <TabsTrigger value="discovery">Discovery Engine</TabsTrigger>
-            <TabsTrigger value="aggregation">Link Aggregation</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="content">Content AI</TabsTrigger>
-            <TabsTrigger value="monitoring">System Health</TabsTrigger>
             <TabsTrigger value="settings">Advanced Settings</TabsTrigger>
           </TabsList>
 
