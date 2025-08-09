@@ -323,10 +323,22 @@ export default function BacklinkAutomation() {
 
   const { toast } = useToast();
 
-  // Live Campaign Monitor with Indefinite Storage
+  // Get user-specific storage key
+  const getUserStorageKey = useCallback(() => {
+    if (user?.id) {
+      return `permanent_campaigns_${user.id}`;
+    } else {
+      // For guest users, use a persistent guest ID
+      const guestId = guestTrackingService.getGuestData()?.guestId || 'guest_default';
+      return `permanent_campaigns_guest_${guestId}`;
+    }
+  }, [user]);
+
+  // Live Campaign Monitor with User-Specific Indefinite Storage
   const saveCampaignPermanently = useCallback(async (campaign: any) => {
     try {
-      const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
+      const storageKey = getUserStorageKey();
+      const savedCampaigns = JSON.parse(localStorage.getItem(storageKey) || '[]');
       const existingIndex = savedCampaigns.findIndex((c: any) => c.id === campaign.id);
 
       // Progressive link counting - can only increase unless deleted
@@ -384,8 +396,8 @@ export default function BacklinkAutomation() {
         savedCampaigns.push(enhancedCampaign);
       }
 
-      localStorage.setItem('permanent_campaigns', JSON.stringify(savedCampaigns));
-      console.log('🔄 Live Campaign Monitor: Saved with progressive count:', progressiveLinkCount);
+      localStorage.setItem(storageKey, JSON.stringify(savedCampaigns));
+      console.log('🔄 Live Campaign Monitor: Saved for user', user?.id || 'guest', 'with progressive count:', progressiveLinkCount);
 
       // Show success notification for monitoring updates
       if (Math.random() > 0.9) {
@@ -401,15 +413,16 @@ export default function BacklinkAutomation() {
       console.warn('⚠️ Failed to save campaign permanently:', error);
       return campaign;
     }
-  }, [user, isPremium]);
+  }, [user, isPremium, getUserStorageKey]);
 
   // Campaign deletion with complete data removal
   const deleteCampaignPermanently = useCallback(async (campaignId: string) => {
     try {
-      const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
+      const storageKey = getUserStorageKey();
+      const savedCampaigns = JSON.parse(localStorage.getItem(storageKey) || '[]');
       const updatedCampaigns = savedCampaigns.filter((c: any) => c.id !== campaignId);
 
-      localStorage.setItem('permanent_campaigns', JSON.stringify(updatedCampaigns));
+      localStorage.setItem(storageKey, JSON.stringify(updatedCampaigns));
 
       // Remove from active state
       setCampaigns(prev => prev.filter(c => c.id !== campaignId));
@@ -428,11 +441,12 @@ export default function BacklinkAutomation() {
       console.error('Failed to delete campaign permanently:', error);
       return false;
     }
-  }, []);
+  }, [getUserStorageKey]);
 
   // Auto-detection system to prevent link count issues
   const autoDetectionSystem = useCallback(() => {
-    const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
+    const storageKey = getUserStorageKey();
+    const savedCampaigns = JSON.parse(localStorage.getItem(storageKey) || '[]');
     let hasUpdates = false;
 
     const updatedCampaigns = savedCampaigns.map((campaign: any) => {
@@ -460,15 +474,16 @@ export default function BacklinkAutomation() {
     });
 
     if (hasUpdates) {
-      localStorage.setItem('permanent_campaigns', JSON.stringify(updatedCampaigns));
-      console.log('🚀 Auto-detection: Applied limit prevention for free accounts');
+      localStorage.setItem(storageKey, JSON.stringify(updatedCampaigns));
+      console.log('🚀 Auto-detection: Applied limit prevention for', user?.id || 'guest');
     }
-  }, []);
+  }, [getUserStorageKey, user]);
 
   // Load live monitored campaigns with progressive data
   const loadPermanentCampaigns = useCallback((): any[] => {
     try {
-      const saved = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
+      const storageKey = getUserStorageKey();
+      const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
       return saved.map((campaign: any) => {
         // Apply auto-detection logic
         const isPremiumCampaign = campaign.autoDetection?.isPremium || false;
@@ -501,7 +516,7 @@ export default function BacklinkAutomation() {
     } catch {
       return [];
     }
-  }, []);
+  }, [getUserStorageKey]);
 
   // Full website database for rotation
   const fullDiscoverySites = [
