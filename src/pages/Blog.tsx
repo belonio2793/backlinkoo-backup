@@ -469,15 +469,15 @@ function Blog() {
 
           {/* Filter Summary */}
           {(searchTerm || selectedCategory) && (
-            <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
-              <span>Showing {filteredPosts.length} posts</span>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+              <span className="font-medium">Showing {filteredPosts.length} posts</span>
               {searchTerm && (
-                <Badge variant="outline" className="px-2 py-1">
+                <Badge variant="outline" className="px-2 py-1 bg-blue-50 border-blue-200 text-blue-700">
                   Search: "{searchTerm}"
                 </Badge>
               )}
               {selectedCategory && (
-                <Badge variant="outline" className="px-2 py-1">
+                <Badge variant="outline" className="px-2 py-1 bg-green-50 border-green-200 text-green-700">
                   Category: {selectedCategory}
                 </Badge>
               )}
@@ -495,7 +495,7 @@ function Blog() {
                     });
                   }
                 }}
-                className="text-blue-600 hover:text-blue-800"
+                className="text-blue-600 hover:text-blue-800 ml-auto"
               >
                 Clear filters
               </Button>
