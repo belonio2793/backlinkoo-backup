@@ -114,10 +114,7 @@ class CampaignService {
           body: JSON.stringify({
             action: 'delete',
             campaignId,
-            forceDelete: options.forceDelete,
-            reason: options.reason,
-            archiveLinks: options.archiveLinks,
-            notifyStakeholders: options.notifyStakeholders
+            confirmationText: options.confirmationText
           }),
         }
       );
