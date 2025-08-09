@@ -321,21 +321,72 @@ class GuestTrackingService {
   }
 
   /**
-   * Update campaign status
+   * Check if campaign can be reactivated (not at link limit)
    */
-  public updateCampaignStatus(campaignId: string, status: 'active' | 'paused' | 'stopped'): boolean {
+  public canReactivateCampaign(campaignId: string): {
+    canReactivate: boolean;
+    reason?: string;
+    warning?: PremiumLimitWarning;
+  } {
     const guestData = this.getGuestData();
-    if (!guestData) return false;
+    if (!guestData) {
+      return { canReactivate: false, reason: 'No guest data found' };
+    }
 
     const campaign = guestData.campaigns.find(c => c.id === campaignId);
-    if (!campaign) return false;
+    if (!campaign) {
+      return { canReactivate: false, reason: 'Campaign not found' };
+    }
+
+    // Check if campaign is at link limit
+    if (campaign.linksGenerated >= this.MAX_LINKS_PER_CAMPAIGN) {
+      return {
+        canReactivate: false,
+        reason: 'Link limit reached',
+        warning: {
+          type: 'link_limit',
+          message: `This campaign has reached the ${this.MAX_LINKS_PER_CAMPAIGN} link limit. Upgrade to Premium for unlimited links and to continue this campaign.`,
+          action: 'block',
+          upgradeCTA: 'Upgrade to Premium - Continue Campaign'
+        }
+      };
+    }
+
+    return { canReactivate: true };
+  }
+
+  /**
+   * Update campaign status
+   */
+  public updateCampaignStatus(campaignId: string, status: 'active' | 'paused' | 'stopped'): {
+    success: boolean;
+    warning?: PremiumLimitWarning;
+    shouldShowPremiumModal?: boolean;
+  } {
+    const guestData = this.getGuestData();
+    if (!guestData) return { success: false };
+
+    const campaign = guestData.campaigns.find(c => c.id === campaignId);
+    if (!campaign) return { success: false };
+
+    // If trying to reactivate, check if allowed
+    if (status === 'active') {
+      const reactivationCheck = this.canReactivateCampaign(campaignId);
+      if (!reactivationCheck.canReactivate) {
+        return {
+          success: false,
+          warning: reactivationCheck.warning,
+          shouldShowPremiumModal: true
+        };
+      }
+    }
 
     campaign.status = status;
     campaign.lastActivityAt = new Date().toISOString();
     guestData.lastVisit = new Date().toISOString();
 
     this.saveGuestData(guestData);
-    return true;
+    return { success: true };
   }
 
   /**
