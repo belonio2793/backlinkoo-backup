@@ -420,17 +420,17 @@ export default function BacklinkAutomation() {
 
   // Handle campaign deletion with confirmation
   const handleDeleteCampaign = () => {
-    if (!campaignToDelete) return;
+    if (!guestCampaignToDelete) return;
 
-    const deleted = guestTrackingService.deleteCampaign(campaignToDelete.id);
+    const deleted = guestTrackingService.deleteCampaign(guestCampaignToDelete.id);
     if (deleted) {
       setGuestCampaignResults(prev =>
-        prev.filter(c => c.id !== campaignToDelete.id)
+        prev.filter(c => c.id !== guestCampaignToDelete.id)
       );
       updateGuestRestrictions();
       toast({
         title: "🗑️ Campaign Deleted",
-        description: `"${campaignToDelete.name}" has been permanently removed.`,
+        description: `"${guestCampaignToDelete.name}" has been permanently removed.`,
       });
     } else {
       toast({
@@ -441,7 +441,7 @@ export default function BacklinkAutomation() {
     }
 
     setShowDeleteConfirmation(false);
-    setCampaignToDelete(null);
+    setGuestCampaignToDelete(null);
   };
 
   // Throttled publishing system
@@ -1445,7 +1445,7 @@ export default function BacklinkAutomation() {
         } else {
           // Progress update
           toast({
-            title: `🔥 +${linksToGenerate} More Backlinks Generated!`,
+            title: `��� +${linksToGenerate} More Backlinks Generated!`,
             description: `Total: ${newTotal} premium backlinks built! Keep going - you're on fire!`,
           });
         }
