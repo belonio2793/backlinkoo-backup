@@ -381,6 +381,19 @@ export default function BacklinkAutomation() {
     });
   };
 
+  // Authentication modal handler
+  const showAuthenticationModal = (context: string) => {
+    setAuthContext(context);
+    setShowAuthModal(true);
+    addThroughputEvent('auth_modal_opened');
+
+    toast({
+      title: "🔐 Sign In Required",
+      description: "Please sign in to access premium features without leaving this page.",
+      duration: 3000,
+    });
+  };
+
   // Dynamic throughput tracking
   const addThroughputEvent = (eventType: string) => {
     const now = Date.now();
