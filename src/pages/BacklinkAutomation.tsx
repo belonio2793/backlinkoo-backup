@@ -2927,6 +2927,7 @@ export default function BacklinkAutomation() {
                                   className="text-xs"
                                 >
                                   {campaign.status === 'active' && <Activity className="h-3 w-3 mr-1" />}
+                                  {campaign.status === 'paused' && <Pause className="h-3 w-3 mr-1" />}
                                   {campaign.status}
                                 </Badge>
                                 {checkPremiumLimits(campaign) && (
@@ -2939,6 +2940,45 @@ export default function BacklinkAutomation() {
                                   Last activity: {campaign.lastActivity ? new Date(campaign.lastActivity).toLocaleTimeString() : 'Never'}
                                 </span>
                               </div>
+                            </div>
+
+                            {/* Campaign Controls */}
+                            <div className="flex items-center gap-2 ml-4">
+                              {campaign.status === 'active' ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => pauseCampaign(campaign.id)}
+                                  disabled={isLoading}
+                                  className="border-orange-300 text-orange-600 hover:bg-orange-50"
+                                >
+                                  <Pause className="h-3 w-3 mr-1" />
+                                  Pause
+                                </Button>
+                              ) : campaign.status === 'paused' ? (
+                                <Button
+                                  size="sm"
+                                  onClick={() => resumeCampaign(campaign.id)}
+                                  disabled={isLoading}
+                                  className="bg-green-600 hover:bg-green-700 text-white"
+                                >
+                                  <Play className="h-3 w-3 mr-1" />
+                                  Resume
+                                </Button>
+                              ) : null}
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setCampaignToDelete(campaign);
+                                  setDeleteDialogOpen(true);
+                                }}
+                                className="border-red-300 text-red-600 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-3 w-3 mr-1" />
+                                Delete
+                              </Button>
                             </div>
                           </div>
 
