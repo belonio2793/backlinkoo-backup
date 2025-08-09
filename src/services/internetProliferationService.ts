@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { logError, serializeError } from '@/utils/errorSerializer';
 
 export interface ProliferationTarget {
   id: string;
