@@ -17,13 +17,17 @@ interface TrialExhaustedModalProps {
   onOpenChange: (open: boolean) => void;
   guestResults: any[];
   totalLinks: number;
+  isLoggedIn?: boolean;
+  userName?: string;
 }
 
-export function TrialExhaustedModal({ 
-  open, 
-  onOpenChange, 
-  guestResults, 
-  totalLinks 
+export function TrialExhaustedModal({
+  open,
+  onOpenChange,
+  guestResults,
+  totalLinks,
+  isLoggedIn = false,
+  userName
 }: TrialExhaustedModalProps) {
   
   const totalDomains = guestResults.reduce((acc, campaign) => 
@@ -49,10 +53,16 @@ export function TrialExhaustedModal({
           </div>
           
           <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            🎉 SURPRISE! Look What You Just Built!
+            {isLoggedIn ?
+              `🚀 ${userName ? `Hey ${userName.split(' ')[0]}!` : 'Hey there!'} Ready for Unlimited Campaigns?` :
+              '🎉 SURPRISE! Look What You Just Built!'
+            }
           </DialogTitle>
           <DialogDescription className="text-lg text-gray-600">
-            While you were creating campaigns, our AI was secretly building premium backlinks for you!
+            {isLoggedIn ?
+              'You\'ve reached your free campaign limit. Upgrade to premium for unlimited campaigns and advanced features!' :
+              'While you were creating campaigns, our AI was secretly building premium backlinks for you!'
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -139,7 +149,9 @@ export function TrialExhaustedModal({
         {/* Value Proposition */}
         <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 text-white mb-8">
           <div className="text-center">
-            <h3 className="text-2xl font-bold mb-3">This Was Just a Free Preview!</h3>
+            <h3 className="text-2xl font-bold mb-3">
+              {isLoggedIn ? 'Unlock Premium Power!' : 'This Was Just a Free Preview!'}
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
               <div className="text-center">
                 <div className="text-3xl font-bold">∞</div>
@@ -169,20 +181,25 @@ export function TrialExhaustedModal({
               Upgrade to Premium - $49/month
               <ArrowRight className="h-5 w-5 ml-2" />
             </Button>
-            <Button
-              size="lg"
-              variant="outline"
-              className="h-14 border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
-              onClick={() => window.location.href = '/login'}
-            >
-              <UserPlus className="h-5 w-5 mr-2" />
-              Start Free Account
-            </Button>
+            {!isLoggedIn && (
+              <Button
+                size="lg"
+                variant="outline"
+                className="h-14 border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
+                onClick={() => window.location.href = '/login'}
+              >
+                <UserPlus className="h-5 w-5 mr-2" />
+                Start Free Account
+              </Button>
+            )}
           </div>
           
           <div className="text-center">
             <p className="text-sm text-gray-600 mb-2">
-              🔥 Limited Time: Get your first month 50% off when you upgrade now!
+              {isLoggedIn ?
+                '🔥 Special offer: Get 50% off your first premium month!' :
+                '🔥 Limited Time: Get your first month 50% off when you upgrade now!'
+              }
             </p>
             <div className="flex justify-center gap-4 text-xs text-gray-500">
               <span>✓ 30-day money back guarantee</span>
@@ -197,7 +214,7 @@ export function TrialExhaustedModal({
             onClick={() => onOpenChange(false)}
             className="w-full text-gray-500"
           >
-            Continue browsing (limited features)
+            {isLoggedIn ? 'Continue with free account (1 campaign limit)' : 'Continue browsing (limited features)'}
           </Button>
         </div>
       </DialogContent>
