@@ -93,8 +93,9 @@ export class CompatibilityAffiliateService {
         total_conversions: 0
       };
     } catch (error: any) {
-      console.error('Create affiliate profile error:', error);
-      throw error;
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      console.error('Create affiliate profile error:', errorMessage, error);
+      throw new Error(`Failed to create affiliate profile: ${errorMessage}`);
     }
   }
 
