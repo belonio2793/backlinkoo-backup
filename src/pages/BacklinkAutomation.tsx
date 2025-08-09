@@ -1209,37 +1209,80 @@ export default function BacklinkAutomation() {
 
                   {/* User State-Aware Action Buttons */}
                   <div className="space-y-4">
-                    {/* Not Logged In State */}
-                    {!user && (
+                    {/* Guest Trial State */}
+                    {!user && guestLinksGenerated < 20 && (
                       <div className="space-y-3">
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                           <Button
-                            onClick={() => window.location.href = '/login'}
-                            className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                            onClick={createCampaign}
+                            className="h-12 px-8 bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                            disabled={isLoading || !campaignForm.targetUrl || !campaignForm.keywords || (databaseStatus && !databaseStatus.isConnected)}
                           >
-                            <UserPlus className="h-4 w-4 mr-2" />
-                            Sign In to Create Campaign
+                            {isLoading ? (
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            ) : (
+                              <Zap className="h-4 w-4 mr-2" />
+                            )}
+                            Start Free Trial Campaign
                           </Button>
                           <Button
                             variant="outline"
                             onClick={() => window.location.href = '/login'}
                             className="h-12 px-6"
                           >
-                            <Eye className="h-4 w-4 mr-2" />
-                            Preview Features
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            Sign In for More
                           </Button>
                         </div>
                         <div className="text-center">
                           <p className="text-sm text-gray-600 mb-2">
-                            Join thousands building high-quality backlinks automatically
+                            🎯 Get your first 20 backlinks instantly - no signup required!
                           </p>
+                          <div className="flex justify-center gap-4 text-xs text-gray-500">
+                            <span>✓ High-authority domains</span>
+                            <span>✓ Instant results</span>
+                            <span>✓ No credit card</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Trial Exhausted State */}
+                    {!user && guestLinksGenerated >= 20 && (
+                      <div className="space-y-3">
+                        <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-4 border-2 border-purple-200">
+                          <div className="text-center">
+                            <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-3" />
+                            <h3 className="text-lg font-bold text-gray-900 mb-2">
+                              🎉 Trial Complete! Amazing Results:
+                            </h3>
+                            <div className="grid grid-cols-2 gap-4 mb-4">
+                              <div className="bg-white rounded-lg p-3">
+                                <div className="text-2xl font-bold text-green-600">{guestLinksGenerated}</div>
+                                <div className="text-sm text-gray-600">Backlinks Created</div>
+                              </div>
+                              <div className="bg-white rounded-lg p-3">
+                                <div className="text-2xl font-bold text-blue-600">{guestCampaignResults.length}</div>
+                                <div className="text-sm text-gray-600">Campaigns Run</div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-3 justify-center">
                           <Button
-                            variant="link"
-                            size="sm"
-                            onClick={() => setSelectedTab('discovery')}
-                            className="text-blue-600"
+                            onClick={() => setShowTrialExhaustedModal(true)}
+                            className="h-12 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                           >
-                            Explore URL Discovery →
+                            <Crown className="h-4 w-4 mr-2" />
+                            Continue with Premium
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => window.location.href = '/login'}
+                            className="h-12 px-6"
+                          >
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            Sign In Free
                           </Button>
                         </div>
                       </div>
