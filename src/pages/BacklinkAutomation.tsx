@@ -76,7 +76,6 @@ interface DatabaseCampaign {
   created_at: string;
   updated_at: string;
   last_active_at: string;
-  completed_at?: string;
   settings: any;
 }
 
