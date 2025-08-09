@@ -256,6 +256,33 @@ export default function BacklinkAutomation() {
 
   const { toast } = useToast();
 
+  // Guest tracking functions
+  const getGuestLinkCount = () => {
+    const stored = localStorage.getItem('guest_links_generated');
+    return stored ? parseInt(stored) : 0;
+  };
+
+  const updateGuestLinkCount = (newCount: number) => {
+    localStorage.setItem('guest_links_generated', newCount.toString());
+    setGuestLinksGenerated(newCount);
+
+    if (newCount >= 20 && !user) {
+      setShowTrialExhaustedModal(true);
+    }
+  };
+
+  const getGuestCampaignResults = () => {
+    const stored = localStorage.getItem('guest_campaign_results');
+    return stored ? JSON.parse(stored) : [];
+  };
+
+  const addGuestCampaignResult = (result: any) => {
+    const existing = getGuestCampaignResults();
+    const updated = [...existing, result];
+    localStorage.setItem('guest_campaign_results', JSON.stringify(updated));
+    setGuestCampaignResults(updated);
+  };
+
   // Engine Instances
   const queueManager = CampaignQueueManager.getInstance();
   const discoveryEngine = LinkDiscoveryEngine.getInstance();
