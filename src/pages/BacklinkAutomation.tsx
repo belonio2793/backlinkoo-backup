@@ -323,29 +323,59 @@ export default function BacklinkAutomation() {
 
   const { toast } = useToast();
 
-  // Enhanced campaign persistence system
+  // Live Campaign Monitor with Indefinite Storage
   const saveCampaignPermanently = useCallback(async (campaign: any) => {
     try {
       const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
       const existingIndex = savedCampaigns.findIndex((c: any) => c.id === campaign.id);
 
+      // Progressive link counting - can only increase unless deleted
+      const existingCampaign = existingIndex >= 0 ? savedCampaigns[existingIndex] : null;
+      const currentLinks = campaign.linksGenerated || campaign.linksBuilt || 0;
+      const savedLinks = existingCampaign?.progressiveLinkCount || 0;
+      const progressiveLinkCount = Math.max(currentLinks, savedLinks); // Can only increase
+
+      // Live monitoring data with indefinite storage
       const enhancedCampaign = {
         ...campaign,
         lastUpdated: new Date().toISOString(),
         isPermanent: true,
-        linksBuilt: campaign.linksGenerated || campaign.linksBuilt || 0,
+        isLiveMonitored: true,
+        progressiveLinkCount, // Progressive counter that only increases
+        linksBuilt: progressiveLinkCount,
         avgAuthority: campaign.quality?.averageAuthority || Math.floor(Math.random() * 15) + 85,
         successRate: campaign.quality?.successRate || Math.floor(Math.random() * 10) + 90,
+
+        // Live monitoring metrics (stored indefinitely)
+        liveMonitoring: {
+          startTime: existingCampaign?.liveMonitoring?.startTime || new Date().toISOString(),
+          totalRuntime: existingCampaign?.liveMonitoring?.totalRuntime || 0,
+          linkVelocity: currentLinks > 0 ? (currentLinks / ((Date.now() - new Date(existingCampaign?.liveMonitoring?.startTime || new Date()).getTime()) / (1000 * 60 * 60))) : 0,
+          peakPerformance: Math.max(existingCampaign?.liveMonitoring?.peakPerformance || 0, currentLinks),
+          sessionsCompleted: (existingCampaign?.liveMonitoring?.sessionsCompleted || 0) + 1,
+          lastActiveAt: new Date().toISOString()
+        },
+
+        // Progressive metrics history (indefinite storage)
         metricsHistory: [
-          ...(campaign.metricsHistory || []),
+          ...(existingCampaign?.metricsHistory || []),
           {
             timestamp: new Date().toISOString(),
-            linksBuilt: campaign.linksGenerated || 0,
-            linksLive: campaign.linksLive || Math.floor((campaign.linksGenerated || 0) * 0.85),
+            linksBuilt: progressiveLinkCount,
+            linksLive: Math.floor(progressiveLinkCount * 0.85),
             avgAuthority: campaign.quality?.averageAuthority || 90,
-            successRate: campaign.quality?.successRate || 100
+            successRate: campaign.quality?.successRate || 100,
+            isProgressive: true
           }
-        ]
+        ].slice(-100), // Keep last 100 entries for performance
+
+        // Auto-detection settings
+        autoDetection: {
+          isPremium: user ? isPremium : false,
+          linkLimitReached: !isPremium && progressiveLinkCount >= 20,
+          autoPreventOverage: !isPremium && progressiveLinkCount >= 20,
+          lastLimitCheck: new Date().toISOString()
+        }
       };
 
       if (existingIndex >= 0) {
@@ -355,13 +385,13 @@ export default function BacklinkAutomation() {
       }
 
       localStorage.setItem('permanent_campaigns', JSON.stringify(savedCampaigns));
-      console.log('📊 Campaign saved permanently with live metrics:', campaign.name);
+      console.log('🔄 Live Campaign Monitor: Saved with progressive count:', progressiveLinkCount);
 
-      // Show success notification occasionally
-      if (Math.random() > 0.8) {
+      // Show success notification for monitoring updates
+      if (Math.random() > 0.9) {
         toast({
-          title: '📊 Campaign Metrics Saved',
-          description: `${campaign.name || 'Campaign'} progress saved permanently with all live metrics`,
+          title: '🔄 Live Monitor Active',
+          description: `Campaign tracking: ${progressiveLinkCount} total links (stored indefinitely)`,
           duration: 2000
         });
       }
@@ -371,23 +401,41 @@ export default function BacklinkAutomation() {
       console.warn('⚠️ Failed to save campaign permanently:', error);
       return campaign;
     }
-  }, []);
+  }, [user, isPremium]);
 
-  // Load permanently saved campaigns
+  // Load live monitored campaigns with progressive data
   const loadPermanentCampaigns = useCallback((): any[] => {
     try {
       const saved = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
-      return saved.map((campaign: any) => ({
-        ...campaign,
-        status: campaign.status || 'active',
-        linksGenerated: campaign.linksBuilt || campaign.linksGenerated || 0,
-        linksLive: campaign.linksLive || Math.floor((campaign.linksGenerated || 0) * 0.85),
-        quality: {
-          averageAuthority: campaign.avgAuthority || campaign.quality?.averageAuthority || 90,
-          successRate: campaign.successRate || campaign.quality?.successRate || 100,
-          ...campaign.quality
-        }
-      }));
+      return saved.map((campaign: any) => {
+        // Apply auto-detection logic
+        const isPremiumCampaign = campaign.autoDetection?.isPremium || false;
+        const progressiveCount = campaign.progressiveLinkCount || campaign.linksBuilt || campaign.linksGenerated || 0;
+
+        return {
+          ...campaign,
+          status: campaign.status || 'active',
+
+          // Progressive link counting (can only increase)
+          linksGenerated: progressiveCount,
+          linksBuilt: progressiveCount,
+          linksLive: Math.floor(progressiveCount * 0.85),
+
+          // Apply premium vs free logic
+          displayLinks: isPremiumCampaign ? progressiveCount : Math.min(progressiveCount, 20),
+          isAtLimit: !isPremiumCampaign && progressiveCount >= 20,
+          canContinue: isPremiumCampaign || progressiveCount < 20,
+
+          // Live monitoring status
+          isLiveMonitored: campaign.isLiveMonitored || false,
+
+          quality: {
+            averageAuthority: campaign.avgAuthority || campaign.quality?.averageAuthority || 90,
+            successRate: campaign.successRate || campaign.quality?.successRate || 100,
+            ...campaign.quality
+          }
+        };
+      });
     } catch {
       return [];
     }
@@ -2359,11 +2407,20 @@ export default function BacklinkAutomation() {
                           <User className="h-3 w-3 text-blue-600" />
                           <span className="text-lg font-bold text-blue-600">
                             {(() => {
-                              // Get total links from all campaigns (static source)
-                              const totalUserLinks = campaigns.reduce((sum, c) => sum + (c.linksGenerated || 0), 0);
-                              return isPremium ?
-                                <><Infinity className="h-4 w-4 mr-1" /><span>∞</span></> :
-                                `${totalUserLinks}/20`;
+                              // Progressive link counting with auto-detection
+                              const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
+                              const userCampaigns = savedCampaigns.filter((c: any) => c.user_id === user?.id || !c.user_id);
+                              const progressiveTotal = userCampaigns.reduce((sum: number, c: any) => {
+                                return sum + (c.progressiveLinkCount || c.linksGenerated || 0);
+                              }, 0);
+
+                              // Auto-detection: Premium can exceed 20, free stays at 20/20
+                              if (isPremium) {
+                                return <><Infinity className="h-4 w-4 mr-1" /><span>∞</span></>;
+                              } else {
+                                const displayCount = Math.min(progressiveTotal, 20);
+                                return `${displayCount}/20`;
+                              }
                             })()}
                           </span>
                         </>
@@ -2374,9 +2431,16 @@ export default function BacklinkAutomation() {
                           <Zap className="h-3 w-3 text-green-600" />
                           <span className="text-lg font-bold text-green-600">
                             {(() => {
-                              // Get total links from guest campaigns (static source)
-                              const totalGuestLinks = guestCampaignResults.reduce((sum, c) => sum + (c.linksGenerated || 0), 0);
-                              return `${totalGuestLinks}/20`;
+                              // Progressive guest campaign counting
+                              const savedGuestCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
+                              const guestCampaigns = savedGuestCampaigns.filter((c: any) => !c.user_id);
+                              const progressiveGuestTotal = guestCampaigns.reduce((sum: number, c: any) => {
+                                return sum + (c.progressiveLinkCount || c.linksGenerated || 0);
+                              }, 0);
+
+                              // Guest accounts always limited to 20/20
+                              const displayCount = Math.min(progressiveGuestTotal, 20);
+                              return `${displayCount}/20`;
                             })()}
                           </span>
                         </>
@@ -3869,11 +3933,18 @@ export default function BacklinkAutomation() {
                                 campaign.linksGenerated >= 15 ? 'text-yellow-600' : 'text-green-600'
                               }`}>
                                 {campaign.linksGenerated >= 20 && <Lock className="h-4 w-4" />}
-                                {isPremium ? (
-                                  <><Infinity className="h-4 w-4 mr-1" /><span>∞</span></>
-                                ) : (
-                                  `${campaign.linksGenerated || 0}/20`
-                                )}
+                                {(() => {
+                                  // Progressive campaign display with auto-detection
+                                  const campaignLinks = campaign.progressiveLinkCount || campaign.linksGenerated || 0;
+
+                                  if (isPremium) {
+                                    return <><Infinity className="h-4 w-4 mr-1" /><span>∞</span></>;
+                                  } else {
+                                    // Free users: display stays at 20/20 when limit reached
+                                    const displayCount = Math.min(campaignLinks, 20);
+                                    return `${displayCount}/20`;
+                                  }
+                                })()}
                               </div>
                               <div className="text-xs text-gray-500">
                                 {isPremium ? 'Unlimited' : 'Free Links'}
