@@ -424,7 +424,7 @@ export default function BacklinkAutomation() {
     // Show toast notification for new link
     toast({
       title: "🔗 New Backlink Published!",
-      description: `Link published on ${linkToPublish.domain} • Total: ${newCount} links built`,
+      description: `Link published on ${linkToPublish.domain} �� Total: ${newCount} links built`,
       duration: 3000,
     });
 
@@ -1408,7 +1408,7 @@ export default function BacklinkAutomation() {
               setTimeout(() => setShowTrialExhaustedModal(true), 3000);
             } else {
               toast({
-                title: "��������� Discovery Complete!",
+                title: "�������� Discovery Complete!",
                 description: `Found ${additionalLinks} new high-value opportunities! Total progress: ${newTotal} backlinks built.`,
               });
             }
@@ -1925,7 +1925,7 @@ export default function BacklinkAutomation() {
                       <Textarea
                         id="anchorTexts"
                         value={campaignForm.anchorTexts}
-                        onChange={(e) => setCampaignForm(prev => ({ ...prev, anchorTexts: e.target.value }))}
+                        onChange={(e) => handleFormChange('anchorTexts', e.target.value)}
                         placeholder="click here, learn more, enterprise solution, your brand name"
                         rows={3}
                       />
