@@ -156,10 +156,11 @@ export default function AdminSetupHelper() {
           });
         }
       } catch (error: any) {
+        const errorMsg = error?.message || error?.toString() || 'Unknown error';
         results.push({
           check: 'Profiles Table Write Access',
           status: 'warning',
-          message: `Write access error: ${error.message}`,
+          message: `Write access error: ${errorMsg}`,
           solution: 'Check RLS policies for UPDATE operations'
         });
       }
