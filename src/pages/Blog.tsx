@@ -549,7 +549,7 @@ function Blog() {
                   </div>
                 ) : (
                   <Button
-                    onClick={() => navigate('/login')}
+                    onClick={() => setLoginModalOpen(true)}
                     size="lg"
                     className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4"
                   >
