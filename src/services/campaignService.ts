@@ -94,6 +94,23 @@ class CampaignService {
   }
 
   /**
+   * FullStory-proof fetch implementation
+   */
+  private createSafeFetch() {
+    // Store original fetch before any third-party modifications
+    const originalFetch = (() => {
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+      const safeFetch = iframe.contentWindow?.fetch;
+      document.body.removeChild(iframe);
+      return safeFetch || window.fetch;
+    })();
+
+    return originalFetch;
+  }
+
+  /**
    * Make authenticated API request with enhanced error handling
    */
   private async makeRequest<T>(
@@ -114,20 +131,36 @@ class CampaignService {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
-      // Use native fetch directly to avoid third-party interference
-      const originalFetch = window.fetch;
+      // Use XMLHttpRequest as fallback to avoid FullStory interference completely
+      const useXHR = true;
 
-      response = await originalFetch.call(window, url, {
-        ...options,
-        signal: controller.signal,
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-          'Cache-Control': 'no-cache',
-          'X-Requested-With': 'XMLHttpRequest',
-          ...options.headers,
-        },
-      });
+      if (useXHR) {
+        response = await this.makeXHRRequest(url, {
+          ...options,
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache',
+            'X-Requested-With': 'XMLHttpRequest',
+            ...options.headers,
+          },
+        });
+      } else {
+        // Fallback to safe fetch
+        const safeFetch = this.createSafeFetch();
+        response = await safeFetch(url, {
+          ...options,
+          signal: controller.signal,
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+            'Cache-Control': 'no-cache',
+            'X-Requested-With': 'XMLHttpRequest',
+            ...options.headers,
+          },
+        });
+      }
 
       clearTimeout(timeoutId);
     } catch (networkError) {
