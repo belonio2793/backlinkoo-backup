@@ -57,6 +57,7 @@ export default function AdminLanding() {
         const isAdminByEmail = adminEmails.includes(user.email || '');
 
         if (isAdminByEmail) {
+          console.log('👑 Admin access granted by email');
           clearTimeout(timeoutId);
           setIsAdmin(true);
           setLoading(false);
