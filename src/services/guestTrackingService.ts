@@ -183,12 +183,12 @@ class GuestTrackingService {
     guestData.totalLinksGenerated += newLinksCount;
     guestData.lastVisit = new Date().toISOString();
 
-    // Auto-pause campaign at exactly 20 links
+    // Auto-complete campaign at exactly 20 links
     let campaignPaused = false;
     if (newTotal >= this.MAX_LINKS_PER_CAMPAIGN) {
-      campaign.status = 'paused';
+      campaign.status = 'completed';
       campaignPaused = true;
-      console.log(`🛑 Campaign ${campaignId} auto-paused at ${newTotal} links`);
+      console.log(`✅ Campaign ${campaignId} completed at ${newTotal} links - saved indefinitely`);
     }
 
     this.saveGuestData(guestData);
