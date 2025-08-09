@@ -1345,35 +1345,37 @@ export default function BacklinkAutomation() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {[
-                    { domain: 'techcrunch.com', da: 94, traffic: '52M', type: 'Blog Comments', automated: true },
-                    { domain: 'medium.com', da: 96, traffic: '160M', type: 'Web 2.0', automated: true },
-                    { domain: 'reddit.com', da: 100, traffic: '1.2B', type: 'Forum Profile', automated: true },
-                    { domain: 'quora.com', da: 98, traffic: '300M', type: 'Q&A Platform', automated: true },
-                    { domain: 'forbes.com', da: 95, traffic: '180M', type: 'Guest Posts', automated: true },
-                    { domain: 'entrepreneur.com', da: 91, traffic: '15M', type: 'Blog Comments', automated: true },
-                    { domain: 'wordpress.com', da: 94, traffic: '400M', type: 'Web 2.0', automated: true },
-                    { domain: 'blogger.com', da: 100, traffic: '350M', type: 'Web 2.0', automated: true },
-                    { domain: 'stackofverflow.com', da: 97, traffic: '85M', type: 'Forum Profile', automated: true },
-                    { domain: 'github.com', da: 96, traffic: '73M', type: 'Social Profile', automated: true },
-                    { domain: 'linkedin.com', da: 98, traffic: '310M', type: 'Social Profile', automated: true },
-                    { domain: 'twitter.com', da: 99, traffic: '450M', type: 'Social Profile', automated: true }
-                  ].map((target, index) => (
-                    <div key={index} className="p-4 border rounded-lg bg-white hover:shadow-md transition-shadow">
+                  {internetProliferationService.getAvailableTargets()
+                    .filter(target => selectedLinkType === 'all' || target.linkType === selectedLinkType)
+                    .slice(0, 12)
+                    .map((target, index) => (
+                    <div key={target.id} className="p-4 border rounded-lg bg-white hover:shadow-md transition-shadow">
                       <div className="flex items-center justify-between mb-2">
                         <div className="font-medium text-blue-600">{target.domain}</div>
                         <div className="flex items-center gap-1">
-                          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                          <span className="text-xs text-green-600">LIVE</span>
+                          <div className={`w-2 h-2 rounded-full ${target.automated ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`} />
+                          <span className={`text-xs ${target.automated ? 'text-green-600' : 'text-yellow-600'}`}>
+                            {target.automated ? 'AUTO' : 'MANUAL'}
+                          </span>
                         </div>
                       </div>
                       <div className="text-xs text-gray-600 space-y-1">
-                        <div>DA: {target.da} • Traffic: {target.traffic}</div>
-                        <div>Type: {target.type}</div>
-                        <Badge variant="outline" className="text-xs">
-                          <Sparkles className="h-2 w-2 mr-1" />
-                          Auto-Proliferation Ready
-                        </Badge>
+                        <div>DA: {target.domainAuthority} • Traffic: {target.traffic}</div>
+                        <div>Type: {target.linkType.replace('_', ' ').toUpperCase()}</div>
+                        <div>Method: {target.postingMethod.replace('_', ' ').toUpperCase()}</div>
+                        <div className="flex gap-1 flex-wrap mt-2">
+                          {target.automated && (
+                            <Badge variant="outline" className="text-xs">
+                              <Sparkles className="h-2 w-2 mr-1" />
+                              Auto-Ready
+                            </Badge>
+                          )}
+                          {target.requirements.moderation && (
+                            <Badge variant="outline" className="text-xs text-yellow-600">
+                              Moderated
+                            </Badge>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
