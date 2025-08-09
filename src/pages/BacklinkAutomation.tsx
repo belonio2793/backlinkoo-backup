@@ -719,10 +719,19 @@ export default function BacklinkAutomation() {
             const newTotal = guestLinksGenerated + additionalLinks;
             updateGuestLinkCount(newTotal);
 
-            toast({
-              title: "🎉 Discovery Complete!",
-              description: `Found ${additionalLinks} new link opportunities! ${newTotal >= 20 ? 'Trial complete!' : `${20 - newTotal} links remaining.`}`,
-            });
+            if (newTotal >= 20) {
+              toast({
+                title: "🎉 Incredible Discovery Results!",
+                description: `Found ${additionalLinks} premium opportunities! You've now built ${newTotal} total backlinks!`,
+                duration: 5000,
+              });
+              setTimeout(() => setShowTrialExhaustedModal(true), 3000);
+            } else {
+              toast({
+                title: "🔍 Discovery Complete!",
+                description: `Found ${additionalLinks} new high-value opportunities! Total progress: ${newTotal} backlinks built.`,
+              });
+            }
           }
         }, 3000);
       }
