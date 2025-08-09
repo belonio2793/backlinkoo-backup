@@ -4134,7 +4134,7 @@ export default function BacklinkAutomation() {
                                       <div className="flex items-center gap-2 text-xs">
                                         <span className="text-gray-600">Anchor:</span>
                                         <span className="font-medium text-blue-700">"{anchorText}"</span>
-                                        <span className="text-gray-600">��</span>
+                                        <span className="text-gray-600">→</span>
                                         <span className="text-green-600 truncate max-w-24">{campaign.targetUrl}</span>
                                         <Button
                                           size="sm"
@@ -4259,13 +4259,32 @@ export default function BacklinkAutomation() {
               {/* New Discoveries - Priority Publishing */}
               <Card className="border-green-200 bg-gradient-to-r from-green-50 to-blue-50">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-green-800">
-                    <Sparkles className="h-5 w-5" />
-                    🎯 New Discoveries - Priority Publishing
-                  </CardTitle>
-                  <CardDescription>
-                    Fresh websites automatically discovered and prioritized for immediate link building
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2 text-green-800">
+                        <Sparkles className="h-5 w-5" />
+                        🎯 New Discoveries - Priority Publishing
+                      </CardTitle>
+                      <CardDescription>
+                        Fresh websites automatically discovered and prioritized for immediate link building
+                      </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs text-green-600">
+                        <RefreshCw className="h-3 w-3 mr-1" />
+                        Fresh rotation
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={randomizeWebsites}
+                        className="h-8 w-8 p-0"
+                        title="Refresh discoveries"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -4307,13 +4326,32 @@ export default function BacklinkAutomation() {
               {/* Website Database - Comprehensive categorized websites */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Database className="h-5 w-5" />
-                    Global Website Database
-                  </CardTitle>
-                  <CardDescription>
-                    Access millions of categorically organized websites and domains for strategic link building
-                  </CardDescription>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Database className="h-5 w-5" />
+                        Global Website Database
+                      </CardTitle>
+                      <CardDescription>
+                        Access millions of categorically organized websites and domains for strategic link building
+                      </CardDescription>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="text-xs text-blue-600">
+                        <RefreshCw className="h-3 w-3 mr-1" />
+                        Auto-rotated
+                      </Badge>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={randomizeWebsites}
+                        className="h-8 w-8 p-0"
+                        title="Refresh website list"
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
