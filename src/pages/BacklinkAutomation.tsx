@@ -381,7 +381,9 @@ export default function BacklinkAutomation() {
         name: generatedName,
         target_url: campaignForm.targetUrl,
         keywords: campaignForm.keywords.split(',').map(k => k.trim()),
-        anchor_texts: campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a),
+        anchor_texts: campaignForm.anchorTexts.trim()
+          ? campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a)
+          : ['click here', 'learn more', 'read more', 'visit site'],
         daily_limit: campaignForm.dailyLimit,
         strategy_blog_comments: campaignForm.linkType === 'blog_comment' || campaignForm.linkType === 'all',
         strategy_forum_profiles: campaignForm.linkType === 'forum_profile' || campaignForm.linkType === 'all',
