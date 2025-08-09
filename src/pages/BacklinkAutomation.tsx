@@ -227,6 +227,9 @@ export default function BacklinkAutomation() {
   const [isLoading, setIsLoading] = useState(false);
   const [unsavedChanges, setUnsavedChanges] = useState(false);
   const [showPageLeaveNotification, setShowPageLeaveNotification] = useState(false);
+  const [isPageInitializing, setIsPageInitializing] = useState(true);
+  const [showExitModal, setShowExitModal] = useState(false);
+  const [campaignsInitialized, setCampaignsInitialized] = useState(false);
   const [realtimeThroughput, setRealtimeThroughput] = useState(0);
   const [throughputEvents, setThroughputEvents] = useState<Array<{ timestamp: number; type: string }>>([]);
   const [guestConsoleLogs, setGuestConsoleLogs] = useState<Array<{
@@ -779,17 +782,22 @@ export default function BacklinkAutomation() {
   const contentEngine = ContentGenerationEngine.getInstance();
   const errorEngine = ErrorHandlingEngine.getInstance();
 
-  // Check database status on mount
+  // Check database status on mount with security initialization
   useEffect(() => {
-    const checkDatabase = async () => {
+    const initializePageSecurity = async () => {
       setIsCheckingDatabase(true);
+      setIsPageInitializing(true);
+
       try {
+        // First, pause all campaigns by default for security
+        await pauseAllCampaignsOnInit();
+
         const status = await checkDatabaseStatus();
         setDatabaseStatus(status);
 
         if (status.isConnected && !status.needsSetup) {
           // Database is ready, load data
-          loadCampaigns();
+          await loadCampaigns();
           loadDiscoveredUrls();
           loadDiscoveryStats();
           if (user) {
@@ -804,6 +812,8 @@ export default function BacklinkAutomation() {
         console.error('❌ Database check failed:', error);
       } finally {
         setIsCheckingDatabase(false);
+        setIsPageInitializing(false);
+        setCampaignsInitialized(true);
       }
     };
 
@@ -815,7 +825,7 @@ export default function BacklinkAutomation() {
       setGuestCampaignResults(guestResults);
     }
 
-    checkDatabase();
+    initializePageSecurity();
 
     // Show page leave notification on mount
     setShowPageLeaveNotification(true);
@@ -888,7 +898,7 @@ export default function BacklinkAutomation() {
     }
   }, []);
 
-  // Page leave protection and campaign pausing
+  // Enhanced page leave protection with exit modal
   useEffect(() => {
     const handleBeforeUnload = async (e: BeforeUnloadEvent) => {
       // Pause all active campaigns when user tries to leave
@@ -897,7 +907,10 @@ export default function BacklinkAutomation() {
       if (activeCampaigns.length > 0) {
         // Prevent immediate page leave to show warning
         e.preventDefault();
-        e.returnValue = 'Leaving this page will automatically pause your active campaigns. Are you sure you want to continue?';
+        e.returnValue = '⚠️ SECURITY ALERT: Leaving this page will automatically pause your active campaigns for security. All progress will be saved. Are you sure you want to continue?';
+
+        // Set exit modal state for enhanced user experience
+        setShowExitModal(true);
 
         // Pause campaigns in the background
         for (const campaign of activeCampaigns) {
@@ -917,8 +930,8 @@ export default function BacklinkAutomation() {
 
         // Show final toast (may not be visible due to page unload)
         toast({
-          title: "⏸️ Campaigns Paused",
-          description: `${activeCampaigns.length} active campaign${activeCampaigns.length > 1 ? 's' : ''} automatically paused.`,
+          title: "🛡️ Security: Campaigns Paused",
+          description: `${activeCampaigns.length} active campaign${activeCampaigns.length > 1 ? 's' : ''} automatically paused for security.`,
           duration: 3000,
         });
 
@@ -1335,6 +1348,40 @@ export default function BacklinkAutomation() {
   };
 
   // Campaign Management Functions
+  // Security: Initialize campaigns as paused on page load/refresh
+  const pauseAllCampaignsOnInit = async () => {
+    try {
+      if (!user) return; // Skip for guests
+
+      // Load current campaigns first
+      const result = await campaignService.loadUserCampaigns();
+      if (result.campaigns) {
+        const activeCampaigns = result.campaigns.filter(c => c.status === 'active');
+
+        if (activeCampaigns.length > 0) {
+          console.log('🛡️ Security: Pausing', activeCampaigns.length, 'active campaigns on page initialization');
+
+          // Pause all active campaigns for security
+          for (const campaign of activeCampaigns) {
+            try {
+              await campaignService.updateCampaignStatus(campaign.id, 'paused');
+            } catch (error) {
+              console.error('Error pausing campaign on init:', campaign.id, error);
+            }
+          }
+
+          toast({
+            title: "🛡️ Security Initialized",
+            description: `${activeCampaigns.length} campaign${activeCampaigns.length > 1 ? 's' : ''} paused for security. You can reactivate them below.`,
+            duration: 5000,
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Error in security initialization:', error);
+    }
+  };
+
   const pauseCampaign = async (campaignId: string) => {
     try {
       setIsLoading(true);
@@ -1365,14 +1412,60 @@ export default function BacklinkAutomation() {
   const resumeCampaign = async (campaignId: string) => {
     try {
       setIsLoading(true);
+
+      // Initialize all settings and configurations for active campaign
+      const campaign = campaigns.find(c => c.id === campaignId);
+      if (campaign) {
+        // Reinitialize all automation engines and proprietary strategies
+        console.log('🚀 Initializing automation engines for campaign:', campaign.name);
+
+        // Start all link building processes
+        const linkBuildingConfig: LinkBuildingConfig = {
+          campaignId: campaign.id,
+          targetUrl: campaign.targetUrl,
+          keywords: campaign.keywords,
+          anchorTexts: campaign.anchorTexts || [],
+          userId: user?.id || '',
+          isUserPremium: isPremium
+        };
+
+        // Initialize proprietary strategy engines
+        await liveLinkBuildingService.initializeCampaign(linkBuildingConfig);
+
+        // Start recursive discovery
+        const proliferationCampaign: CampaignProliferation = {
+          campaignId: campaign.id,
+          targetUrl: campaign.targetUrl,
+          keywords: campaign.keywords,
+          anchorTexts: campaign.anchorTexts || [],
+          dailyLimit: campaign.dailyLimit || 25,
+          strategies: {
+            blog_comments: true,
+            forum_profiles: true,
+            web2_platforms: true,
+            social_profiles: true,
+            contact_forms: true,
+            guest_posts: true,
+            resource_pages: true,
+            directory_listings: true
+          }
+        };
+
+        await internetProliferationService.addCampaignToProliferation(proliferationCampaign);
+
+        // Start real-time activity tracking
+        startRealTimeActivity(campaign.id);
+      }
+
       const result = await campaignService.updateCampaignStatus(campaignId, 'active');
       if (result.success) {
         setCampaigns(prev => prev.map(c =>
           c.id === campaignId ? { ...c, status: 'active' } : c
         ));
         toast({
-          title: "Campaign Resumed",
-          description: "Campaign is now active and generating links.",
+          title: "🚀 Campaign Activated",
+          description: "All automation engines initialized and campaign is now building links with our proprietary strategy.",
+          duration: 4000,
         });
 
         // Track campaign resume for dynamic throughput
@@ -2236,13 +2329,23 @@ export default function BacklinkAutomation() {
             </div>
           </div>
 
+          {/* Page Initialization Security Alert */}
+          {isPageInitializing && (
+            <Alert className="border-blue-200 bg-blue-50 mb-4">
+              <Shield className="h-4 w-4 text-blue-600 animate-pulse" />
+              <AlertDescription>
+                <strong>🛡️ Security Check:</strong> Initializing page security and pausing active campaigns for safety...
+              </AlertDescription>
+            </Alert>
+          )}
+
           {/* Page Leave Protection Notification */}
-          {showPageLeaveNotification && (
+          {showPageLeaveNotification && !isPageInitializing && (
             <Alert className="border-orange-200 bg-orange-50 mb-4">
               <AlertTriangle className="h-4 w-4 text-orange-600" />
               <AlertDescription>
-                <strong>⚠️ Important:</strong> Leaving this page or closing this tab will automatically pause your campaigns.
-                Please keep this page open at all times while your campaigns are running.
+                <strong>🛡️ Security Policy:</strong> For your protection, all campaigns are paused by default when you refresh or re-enter this page.
+                You can safely reactivate campaigns below - all settings and configurations will be automatically initialized.
                 <Button
                   variant="ghost"
                   size="sm"
@@ -2251,6 +2354,17 @@ export default function BacklinkAutomation() {
                 >
                   <X className="h-3 w-3" />
                 </Button>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Campaign Reactivation Helper */}
+          {campaignsInitialized && campaigns.filter(c => c.status === 'paused').length > 0 && (
+            <Alert className="border-green-200 bg-green-50 mb-4">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription>
+                <strong>✅ Ready to Reactivate:</strong> {campaigns.filter(c => c.status === 'paused').length} paused campaign{campaigns.filter(c => c.status === 'paused').length > 1 ? 's' : ''} available below.
+                Click "Resume" to reinitialize all automation engines and proprietary link building strategies.
               </AlertDescription>
             </Alert>
           )}
