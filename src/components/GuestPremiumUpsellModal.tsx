@@ -383,7 +383,7 @@ export function GuestPremiumUpsellModal({
                 ) : (
                   <>
                     <Crown className="h-5 w-5 mr-2" />
-                    Upgrade to Premium - $24.50/month
+                    Upgrade to Premium - $29/month
                     <ArrowRight className="h-5 w-5 ml-2" />
                   </>
                 )}
