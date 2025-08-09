@@ -1188,7 +1188,7 @@ export default function BacklinkAutomation() {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      {discoveredUrls.map((url) => (
+                      {discoveredUrls.filter(url => url && url.id).map((url) => (
                         <div key={url.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
                           <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
