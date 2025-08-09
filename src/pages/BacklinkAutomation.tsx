@@ -418,6 +418,32 @@ export default function BacklinkAutomation() {
     updateGuestRestrictions();
   };
 
+  // Handle campaign deletion with confirmation
+  const handleDeleteCampaign = () => {
+    if (!campaignToDelete) return;
+
+    const deleted = guestTrackingService.deleteCampaign(campaignToDelete.id);
+    if (deleted) {
+      setGuestCampaignResults(prev =>
+        prev.filter(c => c.id !== campaignToDelete.id)
+      );
+      updateGuestRestrictions();
+      toast({
+        title: "🗑️ Campaign Deleted",
+        description: `"${campaignToDelete.name}" has been permanently removed.`,
+      });
+    } else {
+      toast({
+        title: "Error",
+        description: "Could not delete campaign. Please try again.",
+        variant: "destructive"
+      });
+    }
+
+    setShowDeleteConfirmation(false);
+    setCampaignToDelete(null);
+  };
+
   // Throttled publishing system
   const startThrottledPublishing = () => {
     if (isThrottling) return;
@@ -4097,7 +4123,7 @@ export default function BacklinkAutomation() {
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '🛒' },
-                          { name: 'Travel & Tourism', count: 38920, icon: '✈���' },
+                          { name: 'Travel & Tourism', count: 38920, icon: '✈️' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
                           { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
