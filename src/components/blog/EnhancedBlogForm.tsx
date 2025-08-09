@@ -47,7 +47,6 @@ const keywordSuggestions = [
   'social media automation',
   'email marketing optimization',
   'conversion rate optimization',
-  'affiliate marketing guide',
   'e-commerce growth hacks',
   'SaaS customer retention',
   'local SEO techniques'
