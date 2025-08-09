@@ -208,6 +208,7 @@ export default function BacklinkAutomation() {
   const [selectedCampaignDetails, setSelectedCampaignDetails] = useState<any>(null);
   const [showCampaignModal, setShowCampaignModal] = useState(false);
   const [realTimeActivity, setRealTimeActivity] = useState<any[]>([]);
+  const [selectedMonitorTab, setSelectedMonitorTab] = useState('overview');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [campaignToDelete, setCampaignToDelete] = useState<Campaign | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
