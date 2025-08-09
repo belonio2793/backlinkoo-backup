@@ -201,7 +201,7 @@ export class ProductionBlogGenerator {
         reading_time: content.readingTime,
         word_count: content.wordCount,
         featured_image: `https://images.unsplash.com/1600x900/?${encodeURIComponent(input.targetKeyword)}`,
-        author_name: 'Editorial Team',
+        author_name: 'Backlink ∞',
         author_avatar: '/placeholder.svg',
         tags: content.tags,
         category: content.category,
