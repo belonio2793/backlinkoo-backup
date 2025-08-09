@@ -1408,7 +1408,7 @@ export default function BacklinkAutomation() {
               setTimeout(() => setShowTrialExhaustedModal(true), 3000);
             } else {
               toast({
-                title: "�������� Discovery Complete!",
+                title: "��������� Discovery Complete!",
                 description: `Found ${additionalLinks} new high-value opportunities! Total progress: ${newTotal} backlinks built.`,
               });
             }
@@ -1914,7 +1914,7 @@ export default function BacklinkAutomation() {
                       <Input
                         id="keywords"
                         value={campaignForm.keywords}
-                        onChange={(e) => setCampaignForm(prev => ({ ...prev, keywords: e.target.value }))}
+                        onChange={(e) => handleFormChange('keywords', e.target.value)}
                         placeholder="enterprise software, business automation, AI solutions"
                         className="h-12"
                       />
@@ -3414,7 +3414,7 @@ export default function BacklinkAutomation() {
                           { name: 'Travel & Tourism', count: 38920, icon: '✈️' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
                           { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
-                          { name: 'Food & Restaurants', count: 29870, icon: '���' },
+                          { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
                           { name: 'Real Estate', count: 27450, icon: '🏠' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
