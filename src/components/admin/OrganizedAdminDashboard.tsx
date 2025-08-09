@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useEnhancedAdminMetrics } from "@/hooks/useEnhancedAdminMetrics";
 import { EnhancedAdminOverview } from "@/components/admin/EnhancedAdminOverview";
 import { AdminNavigationHeader } from "@/components/admin/AdminNavigationHeader";
-import { AdminUserDashboard } from "@/components/admin/AdminUserDashboard";
+import EnhancedUserManagement from "@/components/admin/EnhancedUserManagement";
 import { supabase } from '@/integrations/supabase/client';
 
 // Admin Components
