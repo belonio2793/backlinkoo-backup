@@ -136,7 +136,7 @@ export default function DeleteCampaignDialog({
   };
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={handleClose}>
+    <AlertDialog open={open} onOpenChange={handleClose}>
       <AlertDialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <AlertDialogHeader>
           <AlertDialogTitle className="flex items-center gap-3 text-xl">
