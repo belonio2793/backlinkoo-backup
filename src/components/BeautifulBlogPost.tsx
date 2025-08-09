@@ -829,7 +829,7 @@ export function BeautifulBlogPost() {
                                 <p className="text-sm">
                                   Permanently delete this post. As the owner, you have full permission to remove it at any time.
                                 </p>
-                                <p className="text-xs text-red-400">⚠��� This action cannot be undone</p>
+                                <p className="text-xs text-red-400">⚠️ This action cannot be undone</p>
                               </div>
                             </TooltipContent>
                           </Tooltip>
