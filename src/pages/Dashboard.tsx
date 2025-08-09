@@ -1796,15 +1796,28 @@ const Dashboard = () => {
               </div>
             ) : activeSection === "premium-plan" ? (
               <div className="space-y-6">
-                <StreamlinedPremiumProvider>
-                  <PremiumPlanTab
-                    isSubscribed={isPremiumSubscriber}
-                    onUpgrade={() => {
-                      // Refresh premium status after successful upgrade
-                      PremiumService.checkPremiumStatus(user?.id || '').then(setIsPremiumSubscriber);
-                    }}
-                  />
-                </StreamlinedPremiumProvider>
+                {!premiumCheckComplete ? (
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                      <p className="text-muted-foreground">Checking premium status...</p>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <StreamlinedPremiumProvider>
+                    <PremiumPlanTab
+                      isSubscribed={isPremiumSubscriber}
+                      onUpgrade={() => {
+                        // Refresh premium status after successful upgrade
+                        setPremiumCheckComplete(false);
+                        PremiumService.checkPremiumStatus(user?.id || '').then(isPremium => {
+                          setIsPremiumSubscriber(isPremium);
+                          setPremiumCheckComplete(true);
+                        });
+                      }}
+                    />
+                  </StreamlinedPremiumProvider>
+                )}
               </div>
             ) : null}
           </>
