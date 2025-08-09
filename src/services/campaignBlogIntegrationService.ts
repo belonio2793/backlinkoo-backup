@@ -219,21 +219,45 @@ export class CampaignBlogIntegrationService {
         }
       };
 
-      const response = await fetch('/.netlify/functions/global-blog-generator', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(blogRequest)
-      });
-
-      if (!response.ok) {
-        throw new Error(`Blog generation failed: ${response.status}`);
+      let response;
+      try {
+        response = await fetch('/.netlify/functions/global-blog-generator', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(blogRequest)
+        });
+      } catch (networkError) {
+        console.error('Network error calling blog generator:', networkError);
+        throw new Error(`Network error: ${networkError.message}`);
       }
 
-      const result = await response.json();
+      if (!response.ok) {
+        console.error('Blog generation HTTP error:', {
+          status: response.status,
+          statusText: response.statusText,
+          url: response.url
+        });
+
+        // If it's a 404, the function might not be deployed
+        if (response.status === 404) {
+          throw new Error('Blog generation service not available (404). Please check Netlify function deployment.');
+        }
+
+        throw new Error(`Blog generation failed: ${response.status} ${response.statusText}`);
+      }
+
+      let result;
+      try {
+        result = await response.json();
+      } catch (jsonError) {
+        console.error('Error parsing blog generator response:', jsonError);
+        throw new Error('Invalid response from blog generation service');
+      }
 
       if (!result.success || !result.data?.blogPost) {
+        console.error('Blog generation service returned error:', result);
         throw new Error(result.error || 'Failed to generate blog post');
       }
 
