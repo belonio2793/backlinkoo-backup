@@ -324,15 +324,15 @@ export default function BacklinkAutomation() {
 
       const newCampaign: Campaign = {
         id: campaignId,
-        name: campaignForm.name,
+        name: generatedName,
         targetUrl: campaignForm.targetUrl,
         keywords: campaignConfig.keywords,
         status: 'active',
         progress: 0,
         linksGenerated: 0,
         linksLive: 0,
-        dailyTarget: campaignForm.dailyLimit,
-        totalTarget: campaignForm.totalTarget,
+        dailyTarget: 25,
+        totalTarget: 1000,
         quality: {
           averageAuthority: 0,
           averageRelevance: 0,
