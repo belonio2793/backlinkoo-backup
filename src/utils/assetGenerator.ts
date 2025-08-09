@@ -887,7 +887,7 @@ export class AssetGenerator {
     this.ctx.fillStyle = '#10b981';
     this.ctx.font = 'bold 16px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
     this.ctx.textAlign = 'center';
-    this.ctx.fillText('🔥 TRENDING: New affiliate earned $15,247 in their first month!', 750, 65);
+    this.ctx.fillText('🔥 TRENDING: New user generated 15,247 backlinks in their first month!', 750, 65);
 
     return this.canvas.toDataURL('image/png');
   }
