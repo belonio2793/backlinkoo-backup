@@ -86,7 +86,6 @@ export class UserManagementService {
           email,
           role,
           subscription_tier,
-          subscription_status,
           credits,
           created_at,
           metadata
