@@ -127,12 +127,12 @@ const Affiliate: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Total Earnings</p>
-                    <p className="text-3xl font-bold text-green-600">${affiliateStats.totalEarnings}</p>
+                    <p className="text-3xl font-bold text-green-600">${stats.totalEarnings.toFixed(2)}</p>
                   </div>
                   <DollarSign className="h-8 w-8 text-green-600" />
                 </div>
                 <div className="mt-2 flex items-center gap-1">
-                  <span className="text-xs text-gray-600">Credits: ${(affiliateStats.totalCredits * 3.33).toFixed(0)} value</span>
+                  <span className="text-xs text-gray-600">Credits: ${(stats.totalCredits * 3.33).toFixed(0)} value</span>
                 </div>
               </CardContent>
             </Card>
