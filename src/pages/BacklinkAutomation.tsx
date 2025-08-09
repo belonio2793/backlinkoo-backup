@@ -1434,7 +1434,7 @@ export default function BacklinkAutomation() {
           )}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="campaigns" className="relative">
                 Campaign Manager
                 {((user && campaigns.filter(c => c.status === 'active').length > 0) ||
@@ -1442,7 +1442,9 @@ export default function BacklinkAutomation() {
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="discovery">URL Discovery</TabsTrigger>
+              <TabsTrigger value="database">Website Database</TabsTrigger>
+              <TabsTrigger value="recursive">Recursive Discovery</TabsTrigger>
+              <TabsTrigger value="discovery">Legacy Discovery</TabsTrigger>
             </TabsList>
 
             <TabsContent value="campaigns" className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
