@@ -9,10 +9,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { 
+import {
   Crown, CheckCircle, TrendingUp, Target, Zap, AlertTriangle,
   UserPlus, BarChart3, Globe, Link, Sparkles, ArrowRight, X,
-  Clock, Shield, Infinity, Star, Gift, Rocket
+  Clock, Shield, Infinity, Star, Gift, Rocket, Play, Pause
 } from 'lucide-react';
 import { guestTrackingService, type PremiumLimitWarning } from '@/services/guestTrackingService';
 import { LoginModal } from '@/components/LoginModal';
