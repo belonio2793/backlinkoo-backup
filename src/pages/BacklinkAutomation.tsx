@@ -272,20 +272,20 @@ export default function BacklinkAutomation() {
       setIsLoading(true);
 
       const campaignConfig: CampaignConfig = {
-        name: campaignForm.name,
+        name: generatedName,
         targetUrl: campaignForm.targetUrl,
         keywords: campaignForm.keywords.split(',').map(k => k.trim()),
         anchorTexts: campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a),
-        dailyLimit: campaignForm.dailyLimit,
-        totalLinksTarget: campaignForm.totalTarget,
+        dailyLimit: 25,
+        totalLinksTarget: 1000,
         strategy: {
-          blogComments: campaignForm.strategy.blogComments,
-          forumProfiles: campaignForm.strategy.forumProfiles,
-          web2Platforms: campaignForm.strategy.web2Platforms,
-          socialProfiles: campaignForm.strategy.socialProfiles,
-          contactForms: campaignForm.strategy.contactForms,
-          guestPosts: campaignForm.strategy.guestPosts,
-          resourcePages: campaignForm.strategy.resourcePages,
+          blogComments: { enabled: true, weight: 25, dailyLimit: 8, qualityThreshold: 70 },
+          forumProfiles: { enabled: true, weight: 20, dailyLimit: 5, qualityThreshold: 75 },
+          web2Platforms: { enabled: true, weight: 20, dailyLimit: 6, qualityThreshold: 65 },
+          socialProfiles: { enabled: true, weight: 10, dailyLimit: 3, qualityThreshold: 60 },
+          contactForms: { enabled: true, weight: 5, dailyLimit: 1, qualityThreshold: 80 },
+          guestPosts: { enabled: true, weight: 15, dailyLimit: 3, qualityThreshold: 85 },
+          resourcePages: { enabled: true, weight: 5, dailyLimit: 1, qualityThreshold: 90 },
           brokenLinkBuilding: { enabled: false, weight: 0, dailyLimit: 0, qualityThreshold: 80 }
         },
         contentGenerationConfig: {
@@ -297,21 +297,25 @@ export default function BacklinkAutomation() {
           languageModel: 'gpt-4',
           creativity: 70
         },
-        qualityFilters: campaignForm.qualityFilters,
+        qualityFilters: {
+          minDomainAuthority: 30,
+          maxSpamScore: 20,
+          contentRelevanceThreshold: 75
+        },
         timingConfig: {
           operatingHours: { start: '09:00', end: '17:00', timezone: 'UTC' },
-          operatingDays: [1, 2, 3, 4, 5], // Monday to Friday
-          delayBetweenActions: { min: 300, max: 1800 }, // 5-30 minutes
+          operatingDays: [1, 2, 3, 4, 5],
+          delayBetweenActions: { min: 300, max: 1800 },
           dailyDistribution: 'even'
         },
         antiDetectionConfig: {
-          userAgentRotation: campaignForm.antiDetection.userAgentRotation,
+          userAgentRotation: true,
           proxyRotation: true,
           randomizeFingerprints: true,
-          humanLikeDelays: campaignForm.antiDetection.humanLikeDelays,
-          contentVariation: campaignForm.antiDetection.contentVariation,
+          humanLikeDelays: true,
+          contentVariation: true,
           ipDistribution: 'global',
-          maxActionsPerIp: campaignForm.antiDetection.maxActionsPerIp
+          maxActionsPerIp: 5
         }
       };
 
