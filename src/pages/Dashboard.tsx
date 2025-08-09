@@ -142,7 +142,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
         console.warn('Error loading local posts:', error);
       }
 
-      setLoadingStatus('Combining and deduplicating posts...');
+      // setLoadingStatus('Combining and deduplicating posts...');
       // Combine and deduplicate posts (prioritize database posts)
       const combinedPosts = [...dbPosts];
       localPosts.forEach(localPost => {
