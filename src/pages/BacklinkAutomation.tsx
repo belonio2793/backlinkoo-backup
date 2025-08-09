@@ -521,8 +521,20 @@ export default function BacklinkAutomation() {
         anchorTexts: ''
       }));
 
-      // Start link building simulation for this campaign
-      setIsLinkBuildingActive(true);
+      // Start live link building for this campaign
+      if (user?.id) {
+        const linkBuildingConfig: LinkBuildingConfig = {
+          campaignId,
+          targetUrl: campaignForm.targetUrl,
+          keywords: campaignConfig.keywords,
+          anchorTexts: campaignConfig.anchorTexts,
+          userId: user.id,
+          isUserPremium: isUserPremium
+        };
+
+        await liveLinkBuildingService.startLinkBuilding(linkBuildingConfig);
+        setIsLinkBuildingActive(true);
+      }
 
       toast({
         title: "Campaign Created Successfully",
@@ -1183,7 +1195,7 @@ export default function BacklinkAutomation() {
                                             </Badge>
                                           </div>
                                           <p className="text-sm text-gray-600 truncate">
-                                            <strong>Anchor:</strong> "{link.anchorText}" �� {link.targetUrl}
+                                            <strong>Anchor:</strong> "{link.anchorText}" → {link.targetUrl}
                                           </p>
                                           <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                                             <span className="flex items-center gap-1">
