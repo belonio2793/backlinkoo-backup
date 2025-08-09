@@ -1258,17 +1258,41 @@ export default function BacklinkAutomation() {
         }
       }
 
-      // Update local state
-      setCampaigns(prev => prev.map(c =>
-        c.id === campaignId ? { ...c, status: 'paused' } : c
-      ));
+      // Update local state with preserved data
+      setCampaigns(prev => prev.map(c => {
+        if (c.id === campaignId) {
+          const pausedCampaign = {
+            ...c,
+            status: 'paused',
+            pausedAt: new Date().toISOString(),
+            linksPreserved: c.linksGenerated || 0,
+            preservationNote: 'All links and metrics permanently preserved'
+          };
+          // Save to permanent storage
+          saveCampaignPermanently(pausedCampaign);
+          return pausedCampaign;
+        }
+        return c;
+      }));
 
-      // Update guest campaigns if applicable
+      // Update guest campaigns with preservation
       if (!user) {
         setGuestCampaignResults(prev =>
-          prev.map(campaign =>
-            campaign.id === campaignId ? { ...campaign, status: 'paused' } : campaign
-          )
+          prev.map(campaign => {
+            if (campaign.id === campaignId) {
+              const pausedGuestCampaign = {
+                ...campaign,
+                status: 'paused',
+                pausedAt: new Date().toISOString(),
+                linksPreserved: campaign.linksGenerated || 0,
+                preservationNote: 'All guest links permanently saved in database'
+              };
+              // Save guest campaign permanently too
+              saveCampaignPermanently(pausedGuestCampaign);
+              return pausedGuestCampaign;
+            }
+            return campaign;
+          })
         );
       }
 
@@ -1669,7 +1693,7 @@ export default function BacklinkAutomation() {
           );
 
           if (existingBlogPost) {
-            console.log('🔄 Found existing blog post for this URL/keyword combination:', existingBlogPost.url);
+            console.log('��� Found existing blog post for this URL/keyword combination:', existingBlogPost.url);
             blogResult = {
               success: true,
               blogPostUrl: existingBlogPost.url,
@@ -3851,7 +3875,9 @@ export default function BacklinkAutomation() {
                                   `${campaign.linksGenerated || 0}/20`
                                 )}
                               </div>
-                              <div className="text-xs text-gray-500">Free Links</div>
+                              <div className="text-xs text-gray-500">
+                                {isPremium ? 'Unlimited' : 'Free Links'}
+                              </div>
                               {campaign.linksGenerated >= 20 && (
                                 <div className="text-xs text-red-600 font-medium flex items-center justify-center gap-1">
                                   <AlertTriangle className="h-3 w-3" />
