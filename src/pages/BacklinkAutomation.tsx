@@ -3367,12 +3367,13 @@ export default function BacklinkAutomation() {
                               <p className="text-sm text-gray-500 truncate">{campaign.targetUrl}</p>
                               <div className="flex items-center gap-2 mt-1">
                                 <Badge
-                                  variant={campaign.status === 'active' ? 'default' : 'outline'}
+                                  variant={campaign.status === 'active' ? 'default' :
+                                          campaign.linksGenerated >= 20 ? 'destructive' : 'outline'}
                                   className="text-xs"
                                 >
                                   {campaign.status === 'active' && <Activity className="h-3 w-3 mr-1" />}
                                   {campaign.status === 'paused' && <Pause className="h-3 w-3 mr-1" />}
-                                  {campaign.status || 'active'}
+                                  {campaign.linksGenerated >= 20 ? 'Limit Reached' : (campaign.status || 'active')}
                                 </Badge>
                                 <Badge variant="secondary" className="text-xs">
                                   Trial
