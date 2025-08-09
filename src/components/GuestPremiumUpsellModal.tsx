@@ -78,6 +78,9 @@ export function GuestPremiumUpsellModal({
   };
 
   const getModalContent = () => {
+    // Check if this is a campaign that's been auto-paused
+    const hasLimitReachedCampaign = campaigns.some(c => c.linksGenerated >= 20);
+
     switch (trigger) {
       case 'campaign_limit':
         return {
@@ -88,10 +91,12 @@ export function GuestPremiumUpsellModal({
         };
       case 'link_limit':
         return {
-          icon: <Link className="h-10 w-10 text-white" />,
-          title: '⚡ Link Limit Hit!',
-          subtitle: 'This campaign has reached the 20-link free limit.',
-          color: 'from-blue-500 to-purple-500'
+          icon: <AlertTriangle className="h-10 w-10 text-white" />,
+          title: hasLimitReachedCampaign ? '🛑 Campaign Paused - Limit Reached!' : '⚡ Link Limit Hit!',
+          subtitle: hasLimitReachedCampaign
+            ? 'Your campaign reached 20 links and has been paused. Upgrade to continue building unlimited links!'
+            : 'This campaign has reached the 20-link free limit.',
+          color: 'from-red-500 to-orange-500'
         };
       case 'feature_limit':
         return {
