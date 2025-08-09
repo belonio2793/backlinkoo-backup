@@ -224,7 +224,9 @@ export default function ComprehensiveUserManagement() {
 
           // Approach 3: Create demo data to show the interface
           profiles = [];
-          setError(`Database access denied: ${firstError.message}. Please ensure you have admin privileges and proper RLS policies are set up.`);
+          const firstErrorMsg = firstError?.message || firstError?.toString() || 'Unknown database error';
+          const secondErrorMsg = secondError?.message || secondError?.toString() || 'Unknown profile error';
+          setError(`Database access denied: ${firstErrorMsg}. Secondary error: ${secondErrorMsg}. Please ensure you have admin privileges and proper RLS policies are set up.`);
         }
       }
 
