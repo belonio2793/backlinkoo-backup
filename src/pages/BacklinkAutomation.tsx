@@ -1786,8 +1786,10 @@ export default function BacklinkAutomation() {
                     controlPanelData.systemStatus === 'active' ? 'bg-green-500 animate-pulse' :
                     controlPanelData.systemStatus === 'operational' ? 'bg-blue-500' : 'bg-red-500'
                   }`} />
-                  <span className="text-sm font-medium text-slate-700">
+                  <span className="text-sm font-medium text-slate-700 flex items-center gap-1">
                     Discovery Engine
+                    <Activity className="h-3 w-3 text-blue-500 animate-pulse" />
+                    <span className="text-xs text-blue-600">LIVE</span>
                   </span>
                   {backendStatus === 'unavailable' && (
                     <Badge variant="outline" className="text-orange-600 bg-orange-50 text-xs ml-2">
