@@ -1627,6 +1627,9 @@ export default function BacklinkAutomation() {
   const openCampaignModal = (campaign: any) => {
     setSelectedCampaignDetails(campaign);
     setShowCampaignModal(true);
+
+    // Track campaign viewing for dynamic throughput
+    addThroughputEvent('campaign_viewed');
   };
 
   const generateRealTimeActivity = (campaign: any) => {
@@ -3531,7 +3534,7 @@ export default function BacklinkAutomation() {
                           { name: 'Real Estate', count: 27450, icon: '🏠' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
-                          { name: 'Home & Garden', count: 21890, icon: '🏡' },
+                          { name: 'Home & Garden', count: 21890, icon: '���' },
                           { name: 'Legal Services', count: 19650, icon: '⚖️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
