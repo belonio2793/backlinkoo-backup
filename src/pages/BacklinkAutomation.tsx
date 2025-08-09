@@ -1959,7 +1959,10 @@ export default function BacklinkAutomation() {
             </Alert>
           )}
 
-          <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+          <Tabs value={selectedTab} onValueChange={(tab) => {
+            setSelectedTab(tab);
+            addThroughputEvent('tab_switched');
+          }} className="w-full">
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="campaigns" className="relative">
                 Campaign Manager
