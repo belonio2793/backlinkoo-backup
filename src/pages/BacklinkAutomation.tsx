@@ -366,13 +366,13 @@ export default function BacklinkAutomation() {
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-switch to results tab when campaigns are active
+  // Show notification when campaigns become active
   useEffect(() => {
     const activeCampaignCount = campaigns.filter(c => c.status === 'active').length;
     const hasGuestResults = !user && guestCampaignResults.length > 0;
 
     if ((activeCampaignCount > 0 || hasGuestResults) && selectedTab === 'campaigns') {
-      // Auto-switch to results tab after 3 seconds of campaign deployment
+      // Show notification after 3 seconds of campaign deployment
       const timer = setTimeout(() => {
         // Results are now embedded in campaigns tab, no need to switch
         toast({
@@ -716,7 +716,7 @@ export default function BacklinkAutomation() {
           // First campaign - surprise reveal
           toast({
             title: "🎉 Surprise! Your Backlinks Are Ready!",
-            description: `We've generated ${linksToGenerate} premium backlinks for you instantly! Check the Results tab!`,
+            description: `We've generated ${linksToGenerate} premium backlinks for you instantly! View them in the live monitor above!`,
             duration: 5000,
           });
         } else if (newTotal >= 20) {
@@ -795,12 +795,12 @@ export default function BacklinkAutomation() {
         if (isPremium) {
           toast({
             title: "Campaign Deployed",
-            description: "Your premium campaign is now active. Check the Results tab for real-time progress!",
+            description: "Your premium campaign is now active. View real-time progress in the live monitor above!",
           });
         } else {
           toast({
             title: "Campaign Deployed (20 Links)",
-            description: "Your campaign is live with 20-link limit. View progress in Results tab!",
+            description: "Your campaign is live with 20-link limit. View progress in the live monitor above!",
             action: (
               <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
                 Upgrade
