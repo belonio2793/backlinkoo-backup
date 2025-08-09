@@ -4700,7 +4700,7 @@ export default function BacklinkAutomation() {
                 <Button
                   size="sm"
                   onClick={() => setSelectedTab('campaigns')}
-                  className="w-40 justify-start bg-white shadow-lg border hover:bg-gray-50"
+                  className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
                   <Target className="h-4 w-4 mr-2" />
                   New Campaign
@@ -4708,7 +4708,7 @@ export default function BacklinkAutomation() {
                 <Button
                   size="sm"
                   onClick={() => setSelectedTab('discovery')}
-                  className="w-40 justify-start bg-white shadow-lg border hover:bg-gray-50"
+                  className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
                   <Search className="h-4 w-4 mr-2" />
                   Discover URLs
@@ -4716,7 +4716,7 @@ export default function BacklinkAutomation() {
                 <Button
                   size="sm"
                   onClick={() => window.location.href = '/backlink-report'}
-                  className="w-40 justify-start bg-white shadow-lg border hover:bg-gray-50"
+                  className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
                   <BarChart3 className="h-4 w-4 mr-2" />
                   View Reports
@@ -4746,7 +4746,7 @@ export default function BacklinkAutomation() {
                 <Button
                   size="sm"
                   onClick={() => setSelectedTab('discovery')}
-                  className="w-40 justify-start bg-white shadow-lg border hover:bg-gray-50"
+                  className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   Preview Features
