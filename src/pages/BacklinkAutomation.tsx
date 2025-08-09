@@ -158,9 +158,9 @@ export default function BacklinkAutomation() {
     loadCampaigns();
     loadSystemMetrics();
     
-    // Set up real-time updates
-    const metricsInterval = setInterval(loadRealTimeMetrics, 10000); // Every 10 seconds
-    const systemInterval = setInterval(loadSystemMetrics, 30000); // Every 30 seconds
+    // Set up real-time updates with different intervals for transparency
+    const fastMetricsInterval = setInterval(loadRealTimeMetrics, 3000); // Every 3 seconds for active campaigns
+    const systemInterval = setInterval(loadSystemMetrics, 30000); // Every 30 seconds for system health
     
     return () => {
       clearInterval(metricsInterval);
