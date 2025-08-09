@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +8,7 @@ import { ModalProvider } from "@/contexts/ModalContext";
 import { ReportSyncProvider } from "@/contexts/ReportSyncContext";
 import { UnifiedModalManager } from "@/components/UnifiedModalManager";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { useSymbolCleaner } from "@/utils/symbolCleaner";
 import Index from "./pages/Index";
 
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
