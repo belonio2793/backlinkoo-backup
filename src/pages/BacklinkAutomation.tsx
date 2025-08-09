@@ -32,6 +32,7 @@ import { Footer } from '@/components/Footer';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
 import PremiumPlanPopup from '@/components/PremiumPlanPopup';
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
+import { internetProliferationService, type CampaignProliferation } from '@/services/internetProliferationService';
 import { supabase } from '@/integrations/supabase/client';
 
 // Import our enterprise engines
