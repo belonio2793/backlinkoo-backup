@@ -1243,12 +1243,12 @@ export default function BacklinkAutomation() {
                         </div>
                         <div className="text-center">
                           <p className="text-sm text-gray-600 mb-2">
-                            🎯 Get your first 20 backlinks instantly - no signup required!
+                            🚀 Launch your automated backlink building campaign
                           </p>
                           <div className="flex justify-center gap-4 text-xs text-gray-500">
                             <span>✓ High-authority domains</span>
                             <span>✓ Instant results</span>
-                            <span>✓ No credit card</span>
+                            <span>✓ No signup required</span>
                           </div>
                         </div>
                       </div>
