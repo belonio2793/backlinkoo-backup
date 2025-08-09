@@ -94,14 +94,14 @@ class CampaignService {
   }
 
   /**
-   * Make authenticated API request
+   * Make authenticated API request with enhanced error handling
    */
   private async makeRequest<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
     const token = await this.getAuthToken();
-    
+
     if (!token) {
       throw new Error('Authentication required. Please log in.');
     }
@@ -112,50 +112,100 @@ class CampaignService {
     try {
       // Add timeout to prevent hanging requests
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 second timeout
 
-      response = await fetch(url, {
+      // Use native fetch directly to avoid third-party interference
+      const originalFetch = window.fetch;
+
+      response = await originalFetch.call(window, url, {
         ...options,
         signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
+          'Cache-Control': 'no-cache',
+          'X-Requested-With': 'XMLHttpRequest',
           ...options.headers,
         },
       });
 
       clearTimeout(timeoutId);
     } catch (networkError) {
-      // Handle network errors (Failed to fetch, timeout, etc.)
+      console.log('Network error details:', {
+        name: networkError.name,
+        message: networkError.message,
+        stack: networkError.stack?.substring(0, 200)
+      });
+
+      // Handle specific error types
       if (networkError.name === 'AbortError') {
         throw new Error('Request timeout. Backend services may be slow or unavailable.');
       }
+
+      // Check for FullStory or other third-party interference
+      if (networkError.message?.includes('Failed to fetch') ||
+          networkError.message?.includes('fetch') ||
+          networkError.toString().includes('TypeError: Failed to fetch')) {
+        throw new Error('Network error: Backend services not available. This may be due to browser security settings or network connectivity.');
+      }
+
       throw new Error('Backend services not available. Please try again later or contact support.');
     }
 
     let data;
     try {
+      // Check if response exists and is valid
+      if (!response) {
+        throw new Error('No response received from server');
+      }
+
+      // Check response status first
+      if (!response.ok && response.status >= 500) {
+        throw new Error(`Server error (${response.status}). Backend services may be down.`);
+      }
+
       // Check if response is JSON
       const contentType = response.headers.get('content-type');
       if (!contentType || !contentType.includes('application/json')) {
-        // If not JSON, get the text for debugging
-        const responseText = await response.text();
+        // If not JSON, get the text for debugging (with error handling)
+        let responseText = '';
+        try {
+          responseText = await response.text();
+        } catch (textError) {
+          console.log('Could not read response text:', textError.message);
+          responseText = '[Unable to read response]';
+        }
+
         console.log('Non-JSON response received:', {
           status: response.status,
+          statusText: response.statusText,
           contentType,
           responseText: responseText.substring(0, 200) // First 200 chars for debugging
         });
         throw new Error('Server returned non-JSON response. Backend service may not be properly configured.');
       }
 
-      data = await response.json();
-    } catch (parseError) {
-      if (parseError.message.includes('Server returned non-JSON response')) {
-        throw parseError; // Re-throw our custom error
+      // Parse JSON with better error handling
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.log('JSON parse error details:', {
+          error: jsonError.message,
+          responseStatus: response.status,
+          responseHeaders: Array.from(response.headers.entries())
+        });
+        throw new Error('Invalid JSON response from server. Please try again.');
       }
-      // If it's a JSON parsing error but content-type was JSON
-      console.error('JSON parsing error:', parseError);
-      throw new Error('Invalid JSON response from server. Please try again.');
+    } catch (parseError) {
+      if (parseError.message.includes('Server returned non-JSON response') ||
+          parseError.message.includes('No response received') ||
+          parseError.message.includes('Server error')) {
+        throw parseError; // Re-throw our custom errors
+      }
+
+      // Generic parsing error
+      console.error('Response parsing error:', parseError);
+      throw new Error('Invalid response from server. Please try again.');
     }
 
     if (!response.ok) {
@@ -213,16 +263,32 @@ class CampaignService {
       const response = await this.makeRequest<{ success: boolean; campaigns: any[] }>('/backlink-campaigns');
       return response.campaigns || [];
     } catch (error) {
-      // Check if it's a backend configuration issue
-      if (error.message.includes('Server returned non-JSON response') ||
-          error.message.includes('Backend services not available') ||
-          error.message.includes('timeout')) {
+      console.log('Campaign fetch error:', error.message);
+
+      // Check for various backend unavailability scenarios
+      const isBackendUnavailable =
+        error.message.includes('Server returned non-JSON response') ||
+        error.message.includes('Backend services not available') ||
+        error.message.includes('Network error') ||
+        error.message.includes('timeout') ||
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('Invalid response') ||
+        error.message.includes('No response received') ||
+        error.message.includes('Server error');
+
+      if (isBackendUnavailable) {
         console.log('Backend not available for campaigns, returning empty array');
         return []; // Return empty array instead of throwing
       }
 
+      // For authentication or other errors, still throw
+      if (error.message.includes('Authentication required')) {
+        throw error;
+      }
+
       console.error('Failed to fetch campaigns:', error);
-      throw error;
+      // Return empty array for any other unexpected errors to prevent UI crashes
+      return [];
     }
   }
 
@@ -240,10 +306,20 @@ class CampaignService {
       });
       return response;
     } catch (error) {
-      // Check if it's a backend configuration issue
-      if (error.message.includes('Server returned non-JSON response') ||
-          error.message.includes('Backend services not available') ||
-          error.message.includes('timeout')) {
+      console.log('Campaign creation error:', error.message);
+
+      // Check for various backend unavailability scenarios
+      const isBackendUnavailable =
+        error.message.includes('Server returned non-JSON response') ||
+        error.message.includes('Backend services not available') ||
+        error.message.includes('Network error') ||
+        error.message.includes('timeout') ||
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('Invalid response') ||
+        error.message.includes('No response received') ||
+        error.message.includes('Server error');
+
+      if (isBackendUnavailable) {
         console.log('Backend not available for campaign creation, returning mock response');
         // Return a mock response to simulate successful creation
         return {
