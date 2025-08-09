@@ -8,7 +8,7 @@ export interface GuestCampaign {
   name: string;
   targetUrl: string;
   keywords: string[];
-  status: 'active' | 'paused' | 'stopped' | 'completed';
+  status: 'active' | 'paused' | 'stopped';
   linksGenerated: number;
   createdAt: string;
   lastActivityAt: string;
