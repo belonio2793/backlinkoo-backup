@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
 const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDiscoveryDashboard"));
+const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
 
 const queryClient = new QueryClient();
 
