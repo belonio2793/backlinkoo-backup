@@ -120,19 +120,19 @@ export class UserManagementService {
         throw new Error(`Failed to fetch users: ${error.message}`);
       }
 
-      // Transform the data
+      // Transform the data - only use guaranteed fields
       const users: UserProfile[] = (data || []).map((profile: any) => ({
         id: profile.user_id,
-        email: profile.email,
-        role: profile.role,
-        subscription_tier: profile.subscription_tier,
+        email: profile.email || 'No email',
+        role: profile.role || 'user',
+        subscription_tier: profile.subscription_tier || 'free',
         subscription_status: 'active', // Default since column doesn't exist
-        credits: profile.credits || 0,
+        credits: 0, // Default since column doesn't exist
         created_at: profile.created_at,
-        last_sign_in_at: null, // This would need to be fetched from auth separately if needed
-        email_confirmed_at: profile.email_confirmed_at || null,
-        banned_until: null, // This would need to be fetched separately from auth if needed
-        metadata: profile.metadata || {},
+        last_sign_in_at: null, // Not available in profiles table
+        email_confirmed_at: null, // Not available in profiles table
+        banned_until: null, // Not available in profiles table
+        metadata: {},
         raw_user_meta_data: {},
         user_metadata: {}
       }));
