@@ -328,7 +328,7 @@ export const TrialBlogShowcase = ({ limit = 6 }: TrialBlogShowcaseProps) => {
                 <div className="flex items-center justify-between text-xs text-gray-500 pt-2 border-t border-gray-100">
                   <div className="flex items-center gap-2">
                     <User className="h-3 w-3" />
-                    <span>{post.author_name || 'Backlink ∞'}</span>
+                    <span>{post.author_name === 'AI Writer' ? 'Backlink ∞' : (post.author_name || 'Backlink ∞')}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Calendar className="h-3 w-3" />
