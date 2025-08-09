@@ -686,7 +686,7 @@ export default function BacklinkAutomation() {
     const permanentCampaigns = loadPermanentCampaigns();
     if (permanentCampaigns.length > 0) {
       setGuestCampaignResults(permanentCampaigns);
-      console.log('🔄 Live Monitor: Loaded', permanentCampaigns.length, 'campaigns with progressive counts');
+      console.log('��� Live Monitor: Loaded', permanentCampaigns.length, 'campaigns with progressive counts');
     }
 
     // Run initial auto-detection
@@ -696,12 +696,13 @@ export default function BacklinkAutomation() {
     const monitoringInterval = setInterval(() => {
       autoDetectionSystem();
 
-      // Update live monitoring metrics
-      const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
+      // Update live monitoring metrics for current user
+      const storageKey = getUserStorageKey();
+      const savedCampaigns = JSON.parse(localStorage.getItem(storageKey) || '[]');
       const activeCampaigns = savedCampaigns.filter((c: any) => c.status === 'active');
 
       if (activeCampaigns.length > 0) {
-        console.log('🔄 Live Monitor: Tracking', activeCampaigns.length, 'active campaigns');
+        console.log('🔄 Live Monitor: Tracking', activeCampaigns.length, 'active campaigns for', user?.id || 'guest');
       }
     }, 30000);
 
