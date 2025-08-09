@@ -259,6 +259,7 @@ export default function BacklinkAutomation() {
 
       } catch (apiError) {
         console.log('API service not available, using offline mode');
+        setBackendStatus('unavailable');
         // Check if it's a network error
         if (apiError instanceof TypeError && apiError.message.includes('Failed to fetch')) {
           console.log('Network error: Backend API not available, operating in demo mode');
