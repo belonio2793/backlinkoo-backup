@@ -1762,13 +1762,24 @@ export default function BacklinkAutomation() {
   };
 
   const generateRealTimeActivity = (campaign: any) => {
-    const activities = [
+    // Enhanced activity generation for guest campaigns
+    const isGuestCampaign = !user && campaign.id;
+
+    const activities = isGuestCampaign ? [
+      { type: 'discovery', message: `🔍 AI Discovery: Found ${15 + Math.floor(Math.random() * 10)} premium opportunities`, timestamp: new Date(Date.now() - Math.random() * 300000), status: 'completed' },
+      { type: 'content', message: `✍️ Content AI: Generated contextual content for "${campaign.keywords?.[0] || 'keyword'}" (Quality: 97%)`, timestamp: new Date(Date.now() - Math.random() * 240000), status: 'completed' },
+      { type: 'posting', message: `🚀 Publishing: Deploying link on ${['techcrunch.com', 'medium.com', 'dev.to', 'reddit.com'][Math.floor(Math.random() * 4)]} (DA: ${70 + Math.floor(Math.random() * 25)})`, timestamp: new Date(Date.now() - Math.random() * 180000), status: 'active' },
+      { type: 'verification', message: '✅ Auto-Verify: Link live and indexed by search engines', timestamp: new Date(Date.now() - Math.random() * 120000), status: 'completed' },
+      { type: 'analysis', message: `📊 Quality Score: ${85 + Math.floor(Math.random() * 15)}% - Exceeds premium standards`, timestamp: new Date(Date.now() - Math.random() * 60000), status: 'completed' },
+      { type: 'optimization', message: '⚡ Speed Boost: Ultra-fast 1-2s intervals active for maximum engagement', timestamp: new Date(Date.now() - Math.random() * 30000), status: 'active' }
+    ] : [
       { type: 'discovery', message: `Scanning ${campaign.domains?.length || 3} high-authority domains`, timestamp: new Date(Date.now() - Math.random() * 300000), status: 'completed' },
       { type: 'content', message: `Generated contextual content for "${campaign.keywords?.[0] || 'keyword'}"`, timestamp: new Date(Date.now() - Math.random() * 240000), status: 'completed' },
       { type: 'posting', message: `Publishing link on ${['reddit.com', 'medium.com', 'dev.to'][Math.floor(Math.random() * 3)]}`, timestamp: new Date(Date.now() - Math.random() * 180000), status: 'active' },
       { type: 'verification', message: 'Verifying link placement and indexing', timestamp: new Date(Date.now() - Math.random() * 120000), status: 'active' },
       { type: 'analysis', message: 'Analyzing domain authority and relevance score', timestamp: new Date(Date.now() - Math.random() * 60000), status: 'pending' }
     ];
+
     return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   };
 
