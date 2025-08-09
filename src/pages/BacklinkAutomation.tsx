@@ -1190,12 +1190,13 @@ export default function BacklinkAutomation() {
 
           // Update in database if user is logged in
           if (user) {
-            try {
-              await campaignService.updateCampaignStatus(campaignId, 'completed');
-              console.log(`✅ Campaign ${campaignId} marked as completed in database`);
-            } catch (error) {
-              console.error('Failed to update campaign status to completed:', error);
-            }
+            campaignService.updateCampaignStatus(campaignId, 'completed')
+              .then(() => {
+                console.log(`✅ Campaign ${campaignId} marked as completed in database`);
+              })
+              .catch((error) => {
+                console.error('Failed to update campaign status to completed:', error);
+              });
           }
 
           showPremiumUpgrade(campaignId);
