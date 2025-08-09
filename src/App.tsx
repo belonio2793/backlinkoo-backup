@@ -13,6 +13,7 @@ const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDisc
 const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
 const LazyAffiliateProgram = lazy(() => import("./pages/AffiliateProgram"));
 const LazyBlog = lazy(() => import("./pages/SimpleBlog"));
+const LazyDashboard = lazy(() => import("./pages/Dashboard"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +39,14 @@ const App = () => (
               element={
                 <Suspense fallback={<div>Loading...</div>}>
                   <LazyBlog />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <LazyDashboard />
                 </Suspense>
               }
             />
