@@ -127,18 +127,18 @@ export class UserManagementService {
       // Transform the data
       const users: UserProfile[] = (data || []).map((profile: any) => ({
         id: profile.user_id,
-        email: profile.email || profile.auth.users.email,
+        email: profile.email,
         role: profile.role,
         subscription_tier: profile.subscription_tier,
         subscription_status: profile.subscription_status || 'inactive',
         credits: profile.credits || 0,
         created_at: profile.created_at,
-        last_sign_in_at: profile.auth.users.last_sign_in_at,
-        email_confirmed_at: profile.auth.users.email_confirmed_at,
-        banned_until: profile.auth.users.banned_until,
-        metadata: profile.metadata,
-        raw_user_meta_data: profile.auth.users.raw_user_meta_data,
-        user_metadata: profile.auth.users.user_metadata
+        last_sign_in_at: profile.last_sign_in_at,
+        email_confirmed_at: profile.email_confirmed_at || null,
+        banned_until: null, // This would need to be fetched separately from auth if needed
+        metadata: profile.metadata || {},
+        raw_user_meta_data: {},
+        user_metadata: {}
       }));
 
       const totalPages = Math.ceil((count || 0) / limit);
