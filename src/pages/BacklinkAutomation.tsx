@@ -400,14 +400,14 @@ export default function BacklinkAutomation() {
           anchorTexts: campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a),
           dailyLimit: campaignForm.dailyLimit,
           strategies: {
-            blog_comments: campaignForm.linkType === 'blog_comment',
-            forum_profiles: campaignForm.linkType === 'forum_profile',
-            web2_platforms: campaignForm.linkType === 'web2_platform',
-            social_profiles: campaignForm.linkType === 'social_profile',
-            contact_forms: false,
-            guest_posts: false,
-            resource_pages: false,
-            directory_listings: false
+            blog_comments: campaignForm.linkType === 'blog_comment' || campaignForm.linkType === 'all',
+            forum_profiles: campaignForm.linkType === 'forum_profile' || campaignForm.linkType === 'all',
+            web2_platforms: campaignForm.linkType === 'web2_platform' || campaignForm.linkType === 'all',
+            social_profiles: campaignForm.linkType === 'social_profile' || campaignForm.linkType === 'all',
+            contact_forms: campaignForm.linkType === 'all',
+            guest_posts: campaignForm.linkType === 'all',
+            resource_pages: campaignForm.linkType === 'all',
+            directory_listings: campaignForm.linkType === 'all'
           }
         };
 
