@@ -1324,6 +1324,17 @@ export default function BacklinkAutomation() {
                             <span>✓ Instant results</span>
                             <span>✓ No signup required</span>
                           </div>
+                          {guestCampaignResults.length > 0 && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSelectedTab('results')}
+                              className="mt-3 bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                            >
+                              <BarChart3 className="h-3 w-3 mr-1" />
+                              View Campaign Results ({guestLinksGenerated} links built)
+                            </Button>
+                          )}
                         </div>
                       </div>
                     )}
