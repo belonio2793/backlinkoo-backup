@@ -37,6 +37,7 @@ import { TrialExhaustedModal } from '@/components/TrialExhaustedModal';
 
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
 import { CampaignBlogIntegrationService } from '@/services/campaignBlogIntegrationService';
+import { campaignMetricsService, type CampaignMetrics } from '@/services/campaignMetricsService';
 import { LoginModal } from '@/components/LoginModal';
 import { guestTrackingService } from '@/services/guestTrackingService';
 import { GuestPremiumUpsellModal } from '@/components/GuestPremiumUpsellModal';
@@ -1112,7 +1113,7 @@ export default function BacklinkAutomation() {
           }
           loadRealTimeMetrics();
         } else {
-          console.warn('⚠��� Database not ready:', status);
+          console.warn('⚠����� Database not ready:', status);
         }
       } catch (error) {
         console.error('❌ Database check failed:', error);
@@ -4794,7 +4795,7 @@ export default function BacklinkAutomation() {
                   </div>
                   <div className="mt-6 text-center">
                     <p className="text-sm text-gray-600 mb-3">
-                      🚀 Live feed showing verified link placements from campaigns running across our {Math.floor(Math.random() * 5000) + 15000}+ user network
+                      �� Live feed showing verified link placements from campaigns running across our {Math.floor(Math.random() * 5000) + 15000}+ user network
                     </p>
                   </div>
                 </CardContent>
