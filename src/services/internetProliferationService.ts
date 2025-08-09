@@ -675,8 +675,20 @@ class InternetProliferationService {
       queueLength: this.proliferationQueue.length,
       isProliferating: this.isProliferating,
       highAuthorityTargets: this.proliferationTargets.filter(t => t.domainAuthority >= 90).length,
-      automatedTargets: this.proliferationTargets.filter(t => t.automated).length
+      automatedTargets: this.proliferationTargets.filter(t => t.automated).length,
+      activeCampaigns: this.proliferationQueue.map(c => c.campaignId)
     };
+  }
+
+  /**
+   * Force start proliferation engine (for troubleshooting)
+   */
+  public forceStartEngine() {
+    console.log('🔧 Force starting proliferation engine...');
+    if (this.proliferationQueue.length > 0) {
+      this.processProliferationQueue();
+    }
+    return this.getProliferationStats();
   }
 
   /**
