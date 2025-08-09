@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ModalProvider } from "@/contexts/ModalContext";
+import { UnifiedModalManager } from "@/components/UnifiedModalManager";
 import Index from "./pages/Index";
 
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
@@ -27,6 +28,7 @@ const App = () => (
       <ModalProvider>
         <Toaster />
         <Sonner />
+        <UnifiedModalManager />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
