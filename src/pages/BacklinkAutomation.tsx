@@ -1196,16 +1196,16 @@ export default function BacklinkAutomation() {
                                 <Badge variant="outline" className="capitalize">
                                   {url.type?.replace('_', ' ') || 'Unknown'}
                                 </Badge>
-                                <Badge 
-                                  variant="outline" 
-                                  className={url.quality_score >= 80 ? 'text-green-600 bg-green-50' : 
-                                           url.quality_score >= 60 ? 'text-yellow-600 bg-yellow-50' : 
+                                <Badge
+                                  variant="outline"
+                                  className={(url.quality_score || 0) >= 80 ? 'text-green-600 bg-green-50' :
+                                           (url.quality_score || 0) >= 60 ? 'text-yellow-600 bg-yellow-50' :
                                            'text-red-600 bg-red-50'}
                                 >
-                                  {url.quality_score}% Quality
+                                  {url.quality_score || 0}% Quality
                                 </Badge>
                                 <Badge variant="outline" className="text-blue-600 bg-blue-50">
-                                  {url.domain}
+                                  {url.domain || 'Unknown Domain'}
                                 </Badge>
                               </div>
                               <div className="text-xs text-gray-500 bg-gray-100 rounded px-2 py-1 font-mono">
