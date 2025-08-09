@@ -35,43 +35,23 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route
               path="/blog"
-              element={
-                <Suspense fallback={<div>Loading...</div>}>
-                  <LazyBlog />
-                </Suspense>
-              }
+              element={<LazyBlog />}
             />
             <Route
               path="/dashboard"
-              element={
-                <Suspense fallback={<div>Loading...</div>}>
-                  <LazyDashboard />
-                </Suspense>
-              }
+              element={<LazyDashboard />}
             />
             <Route
               path="/automation"
-              element={
-                <Suspense fallback={<div>Loading...</div>}>
-                  <LazyBacklinkAutomation />
-                </Suspense>
-              }
+              element={<LazyBacklinkAutomation />}
             />
             <Route
               path="/recursive-discovery"
-              element={
-                <Suspense fallback={<div>Loading...</div>}>
-                  <LazyRecursiveDiscoveryDashboard />
-                </Suspense>
-              }
+              element={<LazyRecursiveDiscoveryDashboard />}
             />
             <Route
               path="/admin"
-              element={
-                <Suspense fallback={<div>Loading...</div>}>
-                  <LazyAdminLanding />
-                </Suspense>
-              }
+              element={<LazyAdminLanding />}
             />
           </Routes>
         </BrowserRouter>
