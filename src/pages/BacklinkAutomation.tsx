@@ -1303,7 +1303,7 @@ export default function BacklinkAutomation() {
                           <Activity className="h-5 w-5 text-green-600" />
                           <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
                         </div>
-                        Real-Time Campaign Monitor
+                        Live Campaign Monitor
                       </div>
                       <div className="flex items-center gap-2 text-sm">
                         <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
