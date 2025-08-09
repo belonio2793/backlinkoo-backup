@@ -823,31 +823,30 @@ class RecursiveUrlDiscoveryService {
    */
   public async getDiscoveryStats(): Promise<any> {
     console.log('Getting discovery stats...');
+
+    // For now, always return demo stats to avoid database issues
+    console.log('Returning demo stats (database functions not yet available)');
+    const demoStats = this.getDemoStats();
+    console.log('Demo stats ready:', Object.keys(demoStats));
+    return demoStats;
+
+    /* TODO: Enable when database functions are available
     try {
-      // Try to get stats from database function
-      console.log('Attempting to call supabase.rpc(get_discovery_stats)...');
       const { data, error } = await supabase.rpc('get_discovery_stats');
 
       if (error) {
-        console.log('RPC error:', error);
-        // If RPC function doesn't exist, calculate stats manually
         if (error.code === '42883') {
-          console.log('RPC function not found, calculating stats manually...');
           return await this.calculateStatsManually();
         }
         throw error;
       }
 
-      console.log('RPC succeeded, returning data:', data);
       return data;
     } catch (error) {
       console.error('Failed to get discovery stats:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
-      console.log('Returning demo stats as fallback');
-      // Return demo stats as fallback
-      const demoStats = this.getDemoStats();
-      console.log('Demo stats:', demoStats);
-      return demoStats;
+      return this.getDemoStats();
     }
+    */
   }
 
   /**
