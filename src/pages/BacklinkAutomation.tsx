@@ -4283,10 +4283,9 @@ export default function BacklinkAutomation() {
                                   <ExternalLink className="h-3 w-3 mr-1" />
                                   Visit
                                 </Button>
-                                <Button size="sm" variant="default">
-                                  <Plus className="h-3 w-3 mr-1" />
-                                  Target
-                                </Button>
+                                <Badge variant="outline" className="text-green-600 bg-green-50">
+                                  Auto-Target
+                                </Badge>
                               </div>
                             </div>
                           </div>
