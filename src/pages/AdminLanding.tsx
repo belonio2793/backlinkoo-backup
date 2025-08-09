@@ -84,6 +84,7 @@ export default function AdminLanding() {
         const adminEmails = ['admin@backlinkoo.com', 'support@backlinkoo.com'];
         const isAdminByEmail = adminEmails.includes(user.email || '');
 
+        console.log('🔧 Fallback admin check by email:', isAdminByEmail);
         clearTimeout(timeoutId);
         setIsAdmin(isAdminByEmail);
         setLoading(false);
