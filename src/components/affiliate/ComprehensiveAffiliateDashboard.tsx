@@ -282,8 +282,9 @@ export const ComprehensiveAffiliateDashboard: React.FC<DashboardProps> = ({ user
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="referred">Referred Users</TabsTrigger>
             <TabsTrigger value="links">Links & UTMs</TabsTrigger>
             <TabsTrigger value="assets">Marketing Assets</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
