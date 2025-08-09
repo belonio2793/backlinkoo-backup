@@ -207,6 +207,7 @@ export default function ComprehensiveUserManagement() {
 
         // Approach 2: Try to get current user's profile only (fallback)
         try {
+          console.log(`Attempting to fetch profile for user ${currentUser.id}...`);
           const { data, error } = await supabase
             .from('profiles')
             .select(`
@@ -224,22 +225,36 @@ export default function ComprehensiveUserManagement() {
             .single();
 
           if (error) {
+            console.error('User profile query error:', {
+              message: error.message,
+              code: error.code,
+              details: error.details,
+              hint: error.hint
+            });
             throw error;
           }
 
           // If we can only see our own profile, show a limited view
           profiles = data ? [data] : [];
+          console.log('Successfully fetched user profile:', data);
 
           setError('Limited access: Only showing your own profile. Full user management requires admin privileges.');
 
         } catch (secondError: any) {
-          console.error('Profile access completely failed:', secondError);
+          console.error('Profile access completely failed:', {
+            error: secondError,
+            message: secondError?.message,
+            code: secondError?.code,
+            details: secondError?.details,
+            type: typeof secondError,
+            stringified: JSON.stringify(secondError, null, 2)
+          });
 
           // Approach 3: Create demo data to show the interface
           profiles = [];
           const firstErrorMsg = firstError?.message || firstError?.toString() || 'Unknown database error';
           const secondErrorMsg = secondError?.message || secondError?.toString() || 'Unknown profile error';
-          setError(`Database access denied: ${firstErrorMsg}. Secondary error: ${secondErrorMsg}. Please ensure you have admin privileges and proper RLS policies are set up.`);
+          setError(`Database access denied: ${firstErrorMsg}. Profile access error: ${secondErrorMsg}. This usually means the profiles table doesn't exist or RLS policies are blocking access. Please check your database setup.`);
         }
       }
 
