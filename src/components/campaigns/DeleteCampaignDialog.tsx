@@ -49,8 +49,6 @@ interface DeleteCampaignDialogProps {
 interface DeletionOptions {
   forceDelete: boolean;
   confirmationText: string;
-  archiveLinks: boolean;
-  notifyStakeholders: boolean;
 }
 
 export default function DeleteCampaignDialog({
@@ -62,9 +60,6 @@ export default function DeleteCampaignDialog({
 }: DeleteCampaignDialogProps) {
   const [confirmationText, setConfirmationText] = useState('');
   const [forceDelete, setForceDelete] = useState(false);
-  const [archiveLinks, setArchiveLinks] = useState(true);
-  const [notifyStakeholders, setNotifyStakeholders] = useState(false);
-  const [acknowledgeWarning, setAcknowledgeWarning] = useState(false);
 
   if (!campaign) return null;
 
@@ -74,15 +69,12 @@ export default function DeleteCampaignDialog({
   const isConfirmationValid = confirmationText === expectedText;
   
   const canProceed = isConfirmationValid &&
-    (!isActive || (isActive && forceDelete && acknowledgeWarning));
+    (!isActive || (isActive && forceDelete));
 
   const handleClose = () => {
     // Reset all state when closing
     setConfirmationText('');
     setForceDelete(false);
-    setArchiveLinks(true);
-    setNotifyStakeholders(false);
-    setAcknowledgeWarning(false);
     onClose();
   };
 
@@ -91,9 +83,7 @@ export default function DeleteCampaignDialog({
 
     const options: DeletionOptions = {
       forceDelete,
-      confirmationText,
-      archiveLinks,
-      notifyStakeholders
+      confirmationText
     };
 
     try {
@@ -228,64 +218,20 @@ export default function DeleteCampaignDialog({
             </Alert>
           )}
 
-          {/* Deletion Options */}
-          <div className="space-y-4">
-            <h4 className="font-semibold">Deletion Options</h4>
-            
-            <div className="space-y-3">
+          {isActive && (
+            <div className="mb-4">
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="archiveLinks"
-                  checked={archiveLinks}
-                  onCheckedChange={(checked) => setArchiveLinks(checked as boolean)}
+                  id="forceDelete"
+                  checked={forceDelete}
+                  onCheckedChange={(checked) => setForceDelete(checked as boolean)}
                 />
-                <Label htmlFor="archiveLinks" className="text-sm">
-                  Archive generated links instead of deleting them (recommended)
+                <Label htmlFor="forceDelete" className="text-sm font-medium text-red-700">
+                  Force delete active campaign (will immediately stop all processing)
                 </Label>
               </div>
-
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="notifyStakeholders"
-                  checked={notifyStakeholders}
-                  onCheckedChange={(checked) => setNotifyStakeholders(checked as boolean)}
-                />
-                <Label htmlFor="notifyStakeholders" className="text-sm">
-                  Notify team members about campaign deletion
-                </Label>
-              </div>
-
-              {isActive && (
-                <div className="space-y-2">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="forceDelete"
-                      checked={forceDelete}
-                      onCheckedChange={(checked) => setForceDelete(checked as boolean)}
-                    />
-                    <Label htmlFor="forceDelete" className="text-sm font-medium text-red-700">
-                      Force delete active campaign
-                    </Label>
-                  </div>
-                  
-                  {forceDelete && (
-                    <div className="ml-6 space-y-2">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="acknowledgeWarning"
-                          checked={acknowledgeWarning}
-                          onCheckedChange={(checked) => setAcknowledgeWarning(checked as boolean)}
-                        />
-                        <Label htmlFor="acknowledgeWarning" className="text-sm text-red-700">
-                          I understand this will immediately stop all active processing
-                        </Label>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
-          </div>
+          )}
 
           {/* Confirmation Text */}
           <div className="space-y-2">
