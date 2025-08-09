@@ -195,7 +195,7 @@ export class ProductionSafeConfig {
       return true;
 
     } catch (error) {
-      console.error('❌ Auto-fix failed:', error);
+      console.error('❌ Auto-fix failed:', error.message || error.toString() || JSON.stringify(error));
       return false;
     }
   }
