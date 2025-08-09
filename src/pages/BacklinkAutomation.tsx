@@ -218,9 +218,15 @@ export default function BacklinkAutomation() {
         console.log('Attempting to load campaigns from backend...');
         const dbCampaigns = await campaignService.getCampaigns();
 
-        // If we get here, backend is working
-        setBackendStatus('available');
-        setDatabaseCampaigns(dbCampaigns);
+        // If we get campaigns (even empty array), backend responded successfully
+        if (Array.isArray(dbCampaigns)) {
+          setBackendStatus('available');
+          setDatabaseCampaigns(dbCampaigns);
+        } else {
+          // This shouldn't happen with our new error handling, but just in case
+          setBackendStatus('unavailable');
+          setDatabaseCampaigns([]);
+        }
         
         const displayCampaigns: Campaign[] = dbCampaigns.map(dbCampaign => ({
           id: dbCampaign.id,
