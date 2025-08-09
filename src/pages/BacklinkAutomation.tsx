@@ -1602,35 +1602,111 @@ export default function BacklinkAutomation() {
                             </div>
 
                             <div className="flex flex-col gap-2 ml-4">
-                              <div className="flex gap-1">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => voteOnUrl(url.id, 'up')}
-                                  className="text-green-600 hover:text-green-700 hover:bg-green-50"
-                                >
-                                  <ThumbsUp className="h-3 w-3 mr-1" />
-                                  {url.upvotes || 0}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => voteOnUrl(url.id, 'down')}
-                                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                                >
-                                  <ThumbsDown className="h-3 w-3 mr-1" />
-                                  {url.downvotes || 0}
-                                </Button>
-                              </div>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => reportUrl(url.id, 'poor_quality')}
-                                className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
-                              >
-                                <Flag className="h-3 w-3 mr-1" />
-                                Report
-                              </Button>
+                              {/* User State-Aware Action Buttons */}
+                              {user ? (
+                                <>
+                                  {/* Logged In User Actions */}
+                                  <div className="flex gap-1">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => voteOnUrl(url.id, 'up')}
+                                      className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                    >
+                                      <ThumbsUp className="h-3 w-3 mr-1" />
+                                      {url.upvotes || 0}
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => voteOnUrl(url.id, 'down')}
+                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                      <ThumbsDown className="h-3 w-3 mr-1" />
+                                      {url.downvotes || 0}
+                                    </Button>
+                                  </div>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => reportUrl(url.id, 'poor_quality')}
+                                    className="text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                                  >
+                                    <Flag className="h-3 w-3 mr-1" />
+                                    Report
+                                  </Button>
+                                  {isPremium && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        navigator.clipboard.writeText(url.url || '');
+                                        toast({
+                                          title: "URL Copied",
+                                          description: "URL copied to clipboard for campaign use!",
+                                        });
+                                      }}
+                                      className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                    >
+                                      <Link className="h-3 w-3 mr-1" />
+                                      Copy
+                                    </Button>
+                                  )}
+                                </>
+                              ) : (
+                                <>
+                                  {/* Not Logged In - View Only */}
+                                  <div className="flex gap-1">
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        toast({
+                                          title: "Sign In Required",
+                                          description: "Please sign in to vote on URLs",
+                                          action: (
+                                            <Button size="sm" onClick={() => window.location.href = '/login'}>
+                                              Sign In
+                                            </Button>
+                                          ),
+                                        });
+                                      }}
+                                      className="text-green-600 hover:text-green-700 hover:bg-green-50"
+                                    >
+                                      <ThumbsUp className="h-3 w-3 mr-1" />
+                                      {url.upvotes || 0}
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => {
+                                        toast({
+                                          title: "Sign In Required",
+                                          description: "Please sign in to vote on URLs",
+                                          action: (
+                                            <Button size="sm" onClick={() => window.location.href = '/login'}>
+                                              Sign In
+                                            </Button>
+                                          ),
+                                        });
+                                      }}
+                                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    >
+                                      <ThumbsDown className="h-3 w-3 mr-1" />
+                                      {url.downvotes || 0}
+                                    </Button>
+                                  </div>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => window.location.href = '/login'}
+                                    className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                                  >
+                                    <UserPlus className="h-3 w-3 mr-1" />
+                                    Sign In
+                                  </Button>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>
