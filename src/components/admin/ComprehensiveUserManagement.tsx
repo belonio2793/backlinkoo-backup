@@ -318,7 +318,7 @@ export default function ComprehensiveUserManagement() {
     }
   };
 
-  // Create new user
+  // Create new user (requires Supabase admin privileges)
   const createUser = async () => {
     if (!newUser.email || !newUser.password) {
       toast({
@@ -332,18 +332,15 @@ export default function ComprehensiveUserManagement() {
     try {
       setLoading(true);
 
-      // Note: Creating users requires admin privileges and proper RLS setup
-      // For now, we'll just create a profile entry and show a warning
-      toast({
-        title: "User Creation",
-        description: "User creation requires admin API access. Please use Supabase Auth to create users first, then they will appear here.",
-        variant: "destructive"
-      });
+      // This requires admin API access which is not available in browser clients
+      // Users should be created through Supabase Auth admin or manual invitation
+      throw new Error('User creation through browser is not supported. Please create users through Supabase Auth admin panel or invite system.');
 
     } catch (error: any) {
+      const errorMessage = error?.message || error?.toString() || 'Failed to create user';
       toast({
         title: "Error Creating User",
-        description: error.message || 'Failed to create user',
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
