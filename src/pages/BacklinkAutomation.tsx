@@ -354,18 +354,23 @@ export default function BacklinkAutomation() {
       const activeCampaignsCount = campaigns.filter(c => c.status === 'active').length;
       const totalLinksGenerated = campaigns.reduce((sum, c) => sum + c.linksGenerated, 0);
 
+      // Get proliferation engine stats
+      const proliferationStats = internetProliferationService.getProliferationStats();
+
       setControlPanelData(prev => ({
         ...prev,
         systemStatus: activeCampaignsCount > 0 ? 'active' : 'operational',
         activeConnections: 24 + activeCampaignsCount * 8 + Math.floor(Math.random() * 10),
-        queueProcessing: activeCampaignsCount * Math.floor(Math.random() * 3),
+        queueProcessing: proliferationStats.queueLength,
         successfulLinks: totalLinksGenerated,
         failedAttempts: Math.floor(totalLinksGenerated * 0.08),
         averageResponseTime: 1.2 + (activeCampaignsCount * 0.3) + (Math.random() - 0.5) * 0.4,
-        currentThroughput: activeCampaignsCount * (15 + Math.floor(Math.random() * 10)),
+        currentThroughput: proliferationStats.isProliferating ? activeCampaignsCount * (15 + Math.floor(Math.random() * 10)) : 0,
         lastUpdate: new Date(),
         networkHealth: Math.max(85, 100 - (activeCampaignsCount * 2) + Math.random() * 5),
-        apiCallsUsed: prev.apiCallsUsed + activeCampaignsCount * 2
+        apiCallsUsed: prev.apiCallsUsed + activeCampaignsCount * 2,
+        proliferationTargets: proliferationStats.totalTargets,
+        isProliferating: proliferationStats.isProliferating
       }));
 
     } catch (error) {
