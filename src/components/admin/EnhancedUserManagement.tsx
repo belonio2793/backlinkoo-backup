@@ -527,25 +527,29 @@ export default function EnhancedUserManagement() {
               </Table>
 
               {/* Pagination */}
-              {totalPages > 1 && (
+              {pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between px-4 py-3 border-t">
                   <div className="text-sm text-muted-foreground">
-                    Page {currentPage} of {totalPages}
+                    Page {pagination.page} of {pagination.totalPages} ({pagination.total} total users)
                   </div>
                   <div className="flex items-center gap-2">
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                      disabled={currentPage === 1}
+                      onClick={() => handleFiltersChange({
+                        offset: Math.max(0, (pagination.page - 2) * (filters.limit || 20))
+                      })}
+                      disabled={pagination.page === 1}
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
                     <Button
                       size="sm"
                       variant="outline"
-                      onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                      disabled={currentPage === totalPages}
+                      onClick={() => handleFiltersChange({
+                        offset: pagination.page * (filters.limit || 20)
+                      })}
+                      disabled={pagination.page === pagination.totalPages}
                     >
                       <ChevronRight className="h-4 w-4" />
                     </Button>
