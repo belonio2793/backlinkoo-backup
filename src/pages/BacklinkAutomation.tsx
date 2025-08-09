@@ -327,7 +327,7 @@ export default function BacklinkAutomation() {
 
   const loadDiscoveredUrls = async () => {
     try {
-      const urls = await mockRecursiveUrlDiscoveryService.getDiscoveredUrls(
+      const urls = await recursiveUrlDiscoveryService.getDiscoveredUrls(
         selectedLinkType === 'all' ? undefined : selectedLinkType,
         'verified',
         50,
