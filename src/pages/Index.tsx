@@ -31,7 +31,6 @@ import { BlogForm } from "@/components/blog/BlogForm";
 import { RotatingTagline } from "@/components/RotatingTagline";
 import { RotatingStats } from "@/components/RotatingStats";
 import { RotatingTrustIndicators } from "@/components/RotatingTrustIndicators";
-import { RotatingNotificationBanner } from "@/components/RotatingNotificationBanner";
 
 import { supabase } from "@/integrations/supabase/client";
 import type { User } from '@supabase/supabase-js';
