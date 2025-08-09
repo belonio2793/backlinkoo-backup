@@ -348,8 +348,12 @@ class PaymentIntegrationService {
 
         // Use mock service as final fallback
         if (mockPaymentService.isAvailable()) {
-          console.log('🔄 Network error, falling back to mock subscription service...');
-          return await mockPaymentService.createSubscription(plan, isGuest, guestEmail);
+          console.log('🔄 Network error, using demo checkout...');
+          const result = await mockPaymentService.createSubscription(plan, isGuest, guestEmail);
+          if (result.success) {
+            console.warn('⚠️ Using demo checkout due to network issues - no actual payment will be processed');
+          }
+          return result;
         }
 
         return {
