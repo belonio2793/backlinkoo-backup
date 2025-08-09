@@ -1095,6 +1095,25 @@ export default function BacklinkAutomation() {
 
         const result = await campaignService.createCampaign(campaignData);
 
+        if (result.error) {
+          // Handle specific RLS or authentication errors
+          if (result.error.includes('row-level security') || result.error.includes('authentication')) {
+            toast({
+              title: "Authentication Error",
+              description: "Please log in again to create campaigns.",
+              variant: "destructive",
+            });
+            return;
+          } else {
+            toast({
+              title: "Campaign Creation Failed",
+              description: result.error,
+              variant: "destructive",
+            });
+            return;
+          }
+        }
+
         if (result.campaign) {
           // Create enhanced campaign object with real-time tracking
           const enhancedCampaign: Campaign = {
