@@ -4122,7 +4122,7 @@ export default function BacklinkAutomation() {
                         {[
                           { name: 'Technology & Software', count: 125420, icon: '💻' },
                           { name: 'Business & Finance', count: 98750, icon: '💼' },
-                          { name: 'Health & Medicine', count: 87320, icon: '��' },
+                          { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
