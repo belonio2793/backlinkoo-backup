@@ -4315,10 +4315,6 @@ export default function BacklinkAutomation() {
                     <p className="text-sm text-gray-600 mb-3">
                       🚀 Our AI continuously discovers and validates new high-authority websites for your campaigns
                     </p>
-                    <Button className="bg-green-600 hover:bg-green-700">
-                      <Zap className="h-4 w-4 mr-2" />
-                      View All New Discoveries
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -4461,13 +4457,16 @@ export default function BacklinkAutomation() {
                         </div>
                         <div className="flex items-center gap-2">
                           <Button variant="outline" size="sm">
-                            <ChevronDown className="h-4 w-4 mr-1" />
-                            Previous
+                            <Plus className="h-4 w-4 mr-1" />
+                            New Campaigns
                           </Button>
-                          <span className="text-sm text-gray-600">1 of 6,271</span>
                           <Button variant="outline" size="sm">
-                            Next
-                            <ChevronRight className="h-4 w-4 ml-1" />
+                            <Database className="h-4 w-4 mr-1" />
+                            Websites and Discoveries
+                          </Button>
+                          <Button variant="default" size="sm" className="bg-purple-600 hover:bg-purple-700">
+                            <Crown className="h-4 w-4 mr-1" />
+                            Upgrade Now
                           </Button>
                         </div>
                       </div>
