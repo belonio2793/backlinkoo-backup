@@ -14,6 +14,7 @@ import type { User } from '@supabase/supabase-js';
 
 interface ClaimStatusIndicatorProps {
   onUpgrade?: () => void;
+  onSignIn?: () => void;
 }
 
 export function ClaimStatusIndicator({ onUpgrade }: ClaimStatusIndicatorProps) {
