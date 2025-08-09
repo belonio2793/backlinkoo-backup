@@ -339,7 +339,7 @@ class LiveLinkBuildingService {
       // Get current campaign stats
       const { data: links } = await supabase
         .from('posted_links')
-        .select('id, domain_authority, status')
+        .select('id, status')
         .eq('campaign_id', campaignId);
 
       if (links && links.length > 0) {
