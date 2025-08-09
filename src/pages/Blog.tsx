@@ -53,6 +53,7 @@ function Blog() {
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'trending'>('newest');
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentDefaultTab, setPaymentDefaultTab] = useState<'credits' | 'premium'>('credits');
+  const [refreshing, setRefreshing] = useState(false);
 
   useEffect(() => {
     const loadBlogPosts = async () => {
