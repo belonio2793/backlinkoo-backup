@@ -248,8 +248,9 @@ export class CompatibilityAffiliateService {
         status: 'pending'
       };
     } catch (error: any) {
-      console.error('Record conversion error:', error);
-      throw error;
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      console.error('Record conversion error:', errorMessage, error);
+      throw new Error(`Failed to record conversion: ${errorMessage}`);
     }
   }
 
