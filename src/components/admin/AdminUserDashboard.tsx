@@ -565,9 +565,32 @@ export function AdminUserDashboard() {
               </Badge>
             )}
             {connectionStatus.error && (
-              <div className="flex items-center gap-2 text-red-600">
-                <AlertTriangle className="h-4 w-4" />
-                <span className="text-sm">{connectionStatus.error}</span>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-red-600">
+                  <AlertTriangle className="h-4 w-4" />
+                  <span className="text-sm">{connectionStatus.error}</span>
+                </div>
+                {connectionStatus.error.includes('infinite recursion') && (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={fixRLSRecursion}
+                      variant="outline"
+                      size="sm"
+                      className="text-orange-600 border-orange-200 hover:bg-orange-50"
+                    >
+                      <Zap className="h-4 w-4 mr-2" />
+                      Auto-Fix RLS Recursion
+                    </Button>
+                    <Button
+                      onClick={testDatabaseConnection}
+                      variant="outline"
+                      size="sm"
+                    >
+                      <RotateCcw className="h-4 w-4 mr-2" />
+                      Retry Connection
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </div>
