@@ -1611,7 +1611,7 @@ export default function BacklinkAutomation() {
         if (guestLinksGenerated === 0) {
           // First campaign - surprise reveal
           toast({
-            title: "�� Surprise! Your Backlinks Are Ready!",
+            title: "🎉 Surprise! Your Backlinks Are Ready!",
             description: `We've generated ${linksToGenerate} premium backlinks for you instantly! View them in the live monitor above!`,
             duration: 5000,
           });
@@ -4281,7 +4281,7 @@ export default function BacklinkAutomation() {
                       <div className="space-y-2 max-h-96 overflow-y-auto">
                         {[
                           { name: 'Technology & Software', count: 125420, icon: '💻' },
-                          { name: 'Business & Finance', count: 98750, icon: '💼' },
+                          { name: 'Business & Finance', count: 98750, icon: '����' },
                           { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
