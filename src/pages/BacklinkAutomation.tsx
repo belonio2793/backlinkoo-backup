@@ -246,14 +246,27 @@ export default function BacklinkAutomation() {
   };
 
   const createCampaign = async () => {
-    if (!campaignForm.name.trim() || !campaignForm.targetUrl.trim() || !campaignForm.keywords.trim()) {
+    if (!campaignForm.targetUrl.trim() || !campaignForm.keywords.trim() || !campaignForm.anchorTexts.trim()) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all required fields",
+        description: "Please fill in Target URL, Keywords, and Anchor Texts",
         variant: "destructive"
       });
       return;
     }
+
+    // Check for duplicate URL
+    if (checkDuplicateUrl(campaignForm.targetUrl)) {
+      toast({
+        title: "Duplicate Campaign",
+        description: "An active campaign already exists for this URL",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Auto-generate campaign name
+    const generatedName = generateCampaignName(campaignForm.targetUrl, campaignForm.keywords);
 
     try {
       setIsLoading(true);
