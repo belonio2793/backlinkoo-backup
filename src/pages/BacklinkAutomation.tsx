@@ -668,8 +668,15 @@ export default function BacklinkAutomation() {
     setIsDeleting(true);
 
     try {
+      // Remove from proliferation service first
+      internetProliferationService.removeCampaignFromProliferation(campaignId);
+
+      // Delete from database
       await campaignService.deleteCampaign(campaignId, options);
+
+      // Reload campaigns and stats
       await loadCampaigns();
+      loadProliferationStats();
 
       toast({
         title: "Campaign Deleted Successfully",
