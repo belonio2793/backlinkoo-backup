@@ -652,8 +652,8 @@ export function BeautifulBlogPost() {
               <p className="text-gray-600 mb-8 text-lg leading-relaxed">
                 The requested blog post could not be found or may have expired.
               </p>
-              <Button 
-                onClick={() => navigate('/blog')}
+              <Button
+                onClick={() => startTransition(() => navigate('/blog'))}
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-6 text-lg"
               >
                 <ArrowLeft className="mr-2 h-5 w-5" />
