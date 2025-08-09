@@ -65,13 +65,13 @@ export class AffiliateService {
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching affiliate profile:', error);
+        console.error('Error fetching affiliate profile:', error.message || error.toString() || JSON.stringify(error));
         return null;
       }
 
       return data;
     } catch (error) {
-      console.error('Affiliate fetch error:', error);
+      console.error('Affiliate fetch error:', error.message || error.toString() || JSON.stringify(error));
       return null;
     }
   }
