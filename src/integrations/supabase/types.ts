@@ -836,6 +836,41 @@ export type Database = {
       }
     }
     Views: {
+      live_campaign_monitor: {
+        Row: {
+          user_id: string | null
+          email: string | null
+          total_campaigns: number | null
+          active_campaigns: number | null
+          paused_campaigns: number | null
+          total_links_generated: number | null
+          total_links_live: number | null
+          total_links_pending: number | null
+          avg_authority: number | null
+          avg_success_rate: number | null
+          total_runtime_seconds: number | null
+          last_activity: string | null
+        }
+        Relationships: []
+      }
+      user_dashboard_summary: {
+        Row: {
+          user_id: string | null
+          email: string | null
+          subscription_tier: string | null
+          subscription_status: string | null
+          current_month_links: number | null
+          monthly_limit: number | null
+          is_premium: boolean | null
+          lifetime_links: number | null
+          total_campaigns: number | null
+          active_campaigns: number | null
+          average_authority: number | null
+          average_success_rate: number | null
+          last_activity: string | null
+        }
+        Relationships: []
+      }
       ranking_dashboard: {
         Row: {
           average_position: number | null
