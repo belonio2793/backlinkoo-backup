@@ -631,7 +631,7 @@ export default function BacklinkAutomation() {
           }
           loadRealTimeMetrics();
         } else {
-          console.warn('⚠�� Database not ready:', status);
+          console.warn('⚠️ Database not ready:', status);
         }
       } catch (error) {
         console.error('❌ Database check failed:', error);
