@@ -1108,29 +1108,7 @@ export default function BacklinkAutomation() {
             </TabsList>
 
             <TabsContent value="campaigns" className="space-y-6">
-              {/* Guest Trial Info */}
-              {!user && (
-                <Alert className="border-green-200 bg-green-50">
-                  <CheckCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Free Trial Active:</strong> Create campaigns and get your first 20 backlinks absolutely free!
-                    No signup required.
-                    <div className="mt-2 text-sm">
-                      <div className="flex items-center gap-2">
-                        <div className="bg-green-600 h-2 rounded-full flex-1 relative overflow-hidden">
-                          <div
-                            className="bg-green-300 h-full rounded-full transition-all duration-500"
-                            style={{ width: `${Math.min((guestLinksGenerated / 20) * 100, 100)}%` }}
-                          />
-                        </div>
-                        <span className="text-green-700 font-medium">
-                          {guestLinksGenerated}/20 links generated
-                        </span>
-                      </div>
-                    </div>
-                  </AlertDescription>
-                </Alert>
-              )}
+              {/* Hidden initially - only show as surprise after links delivered */}
 
               {/* Campaign Creation */}
               <Card>
