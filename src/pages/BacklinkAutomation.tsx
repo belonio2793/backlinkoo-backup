@@ -440,7 +440,17 @@ export default function BacklinkAutomation() {
           }
         };
 
+        // Start the proliferation engine for this campaign
         await internetProliferationService.addCampaignToProliferation(proliferationCampaign);
+
+        // Get proliferation stats to confirm engine is running
+        const proliferationStats = internetProliferationService.getProliferationStats();
+        console.log('🚀 Proliferation Engine Status:', {
+          totalTargets: proliferationStats.totalTargets,
+          queueLength: proliferationStats.queueLength,
+          isProliferating: proliferationStats.isProliferating,
+          campaignId: result.campaign.id
+        });
       }
 
       setCampaignForm({
@@ -455,8 +465,8 @@ export default function BacklinkAutomation() {
       await loadCampaigns();
 
       toast({
-        title: "Campaign Created Successfully",
-        description: `${generatedName} deployed for ${campaignForm.linkType.replace('_', ' ')} strategy`,
+        title: "🚀 Campaign Engine Started",
+        description: `${generatedName} is now propagating across ${internetProliferationService.getProliferationStats().totalTargets}+ platforms`,
       });
 
     } catch (error) {
