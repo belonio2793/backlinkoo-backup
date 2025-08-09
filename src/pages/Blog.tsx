@@ -729,7 +729,7 @@ function Blog() {
 }
 
 // Blog Post Card Component
-function BlogPostCard({ post, navigate, formatDate }: any) {
+function BlogPostCard({ post, navigate, formatDate, onLoginRequired }: any) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [claiming, setClaiming] = useState(false);
