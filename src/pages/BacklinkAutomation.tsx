@@ -364,7 +364,7 @@ export default function BacklinkAutomation() {
 
       toast({
         title: "Campaign Created Successfully",
-        description: `${campaignForm.name} has been queued and will begin processing shortly.`,
+        description: `${generatedName} has been queued and will begin processing shortly.`,
       });
 
     } catch (error) {
