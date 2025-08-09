@@ -2335,6 +2335,9 @@ export default function BacklinkAutomation() {
                                   <p className="text-xl font-bold text-green-600">
                                     {user ? campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) : guestLinksGenerated}
                                   </p>
+                                  <p className="text-xs text-green-700">
+                                    +{recentPostbacks.filter(p => Date.now() - new Date(p.publishedAt).getTime() < 60000).length} last minute
+                                  </p>
                                 </div>
                                 <Link className="h-6 w-6 text-green-600" />
                               </div>
@@ -2345,8 +2348,13 @@ export default function BacklinkAutomation() {
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">Domains Reached</p>
                                   <p className="text-xl font-bold text-blue-600">
-                                    {user ? Math.min(campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) * 0.8, 50) :
-                                     guestCampaignResults.reduce((acc, campaign) => acc + (campaign.domains?.length || 0), 0)}
+                                    {user ?
+                                      new Set(realTimeLinkPostbacks.map(p => p.domain)).size :
+                                      guestCampaignResults.reduce((acc, campaign) => acc + (campaign.domains?.length || 0), 0)
+                                    }
+                                  </p>
+                                  <p className="text-xs text-blue-700">
+                                    {realTimeLinkPostbacks.filter(p => p.domainAuthority >= 90).length} high DA
                                   </p>
                                 </div>
                                 <Globe className="h-6 w-6 text-blue-600" />
@@ -2358,7 +2366,13 @@ export default function BacklinkAutomation() {
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">Success Rate</p>
                                   <p className="text-xl font-bold text-purple-600">
-                                    {user ? Math.round(campaigns.reduce((sum, c) => sum + (c.quality?.successRate || 85), 0) / Math.max(campaigns.length, 1)) : 94}%
+                                    {realTimeLinkPostbacks.length > 0 ?
+                                      Math.round((realTimeLinkPostbacks.filter(p => p.status === 'live').length / realTimeLinkPostbacks.length) * 100) :
+                                      user ? Math.round(campaigns.reduce((sum, c) => sum + (c.quality?.successRate || 85), 0) / Math.max(campaigns.length, 1)) : 94
+                                    }%
+                                  </p>
+                                  <p className="text-xs text-purple-700">
+                                    {realTimeLinkPostbacks.filter(p => p.verified).length} verified
                                   </p>
                                 </div>
                                 <TrendingUp className="h-6 w-6 text-purple-600" />
@@ -2369,15 +2383,18 @@ export default function BacklinkAutomation() {
                               <div className="flex items-center justify-between">
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">
-                                    {isThrottling ? 'Publishing Queue' : 'Throughput'}
+                                    Active Campaigns
                                   </p>
                                   <p className="text-xl font-bold text-orange-600">
-                                    {isThrottling ? `${pendingLinksToPublish.length} queued` : `${controlPanelData.currentThroughput}/hr`}
+                                    {user ? campaigns.filter(c => c.status === 'active').length : guestCampaignResults.filter(c => c.status === 'active' || !c.status).length}
+                                  </p>
+                                  <p className="text-xs text-orange-700">
+                                    Avg DA: {realTimeLinkPostbacks.length > 0 ? Math.round(realTimeLinkPostbacks.reduce((sum, p) => sum + p.domainAuthority, 0) / realTimeLinkPostbacks.length) : 85}
                                   </p>
                                 </div>
                                 <div className="relative">
-                                  <Zap className="h-6 w-6 text-orange-600" />
-                                  {isThrottling && (
+                                  <Activity className="h-6 w-6 text-orange-600" />
+                                  {(user ? campaigns.filter(c => c.status === 'active').length : guestCampaignResults.filter(c => c.status === 'active' || !c.status).length) > 0 && (
                                     <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
                                   )}
                                 </div>
