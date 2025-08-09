@@ -420,7 +420,7 @@ export default function BacklinkAutomation() {
         keywords: '',
         anchorTexts: '',
         dailyLimit: 25,
-        linkType: 'blog_comment'
+        linkType: 'all'
       });
 
       await loadCampaigns();
