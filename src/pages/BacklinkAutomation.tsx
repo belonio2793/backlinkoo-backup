@@ -339,7 +339,7 @@ export default function BacklinkAutomation() {
     }
   }, [user]);
 
-  // Live Campaign Monitor with User-Specific Indefinite Storage
+  // Live Campaign Monitor with Database-Backed Indefinite Storage
   const saveCampaignPermanently = useCallback(async (campaign: any) => {
     try {
       const storageKey = getUserStorageKey();
