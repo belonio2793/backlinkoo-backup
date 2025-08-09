@@ -78,7 +78,7 @@ export class UserManagementService {
         offset = 0
       } = filters;
 
-      // Build the query - simplified to only select from profiles table
+      // Build the query - only select guaranteed fields that exist
       let query = supabase
         .from('profiles')
         .select(`
@@ -86,9 +86,7 @@ export class UserManagementService {
           email,
           role,
           subscription_tier,
-          credits,
-          created_at,
-          metadata
+          created_at
         `, { count: 'exact' });
 
       // Apply filters
