@@ -123,7 +123,6 @@ export default function EnhancedUserManagement() {
       await updateUser(editingUser.id, {
         role: editingUser.role,
         subscription_tier: editingUser.subscription_tier,
-        subscription_status: editingUser.subscription_status,
         credits: editingUser.credits
       });
 
