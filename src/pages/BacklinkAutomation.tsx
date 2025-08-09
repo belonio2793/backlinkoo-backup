@@ -1630,46 +1630,117 @@ export default function BacklinkAutomation() {
                         {/* User Campaigns */}
                         {user && campaigns.filter(c => c.status === 'active' || c.status === 'completed').length > 0 && (
                           <div className="p-4 space-y-3">
-                            {campaigns.filter(c => c.status === 'active' || c.status === 'completed').map((campaign, idx) => (
-                              <div key={idx} className="border rounded-lg p-3 bg-gradient-to-r from-blue-50 to-purple-50">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2">
-                                    {getStatusIcon(campaign.status)}
-                                    <span className="font-medium text-sm">{campaign.name}</span>
+                            {campaigns.filter(c => c.status === 'active' || c.status === 'completed').map((campaign, idx) => {
+                              const isExpanded = expandedCampaigns.has(campaign.id);
+                              const realTimeActivities = generateRealTimeActivity(campaign);
+
+                              return (
+                                <div key={idx} className="border rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 overflow-hidden">
+                                  <div className="p-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center gap-2">
+                                        {getStatusIcon(campaign.status)}
+                                        <span className="font-medium text-sm">{campaign.name}</span>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => toggleCampaignExpansion(campaign.id)}
+                                          className="h-6 w-6 p-0 hover:bg-white/50"
+                                        >
+                                          {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                                        </Button>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className={`text-xs ${
+                                          campaign.status === 'active' ? 'bg-green-100 text-green-700 border-green-300' :
+                                          campaign.status === 'completed' ? 'bg-blue-100 text-blue-700 border-blue-300' :
+                                          'bg-gray-100 text-gray-700 border-gray-300'
+                                        }`}>
+                                          {campaign.status}
+                                        </Badge>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => openCampaignModal(campaign)}
+                                          className="h-6 w-6 p-0 hover:bg-white/50"
+                                        >
+                                          <Monitor className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-4 gap-2 text-xs">
+                                      <div className="text-center">
+                                        <div className="font-bold text-green-600">{campaign.linksGenerated}</div>
+                                        <div className="text-gray-600">Generated</div>
+                                      </div>
+                                      <div className="text-center">
+                                        <div className="font-bold text-blue-600">{campaign.linksLive}</div>
+                                        <div className="text-gray-600">Live</div>
+                                      </div>
+                                      <div className="text-center">
+                                        <div className="font-bold text-purple-600">{Math.round(campaign.progress)}%</div>
+                                        <div className="text-gray-600">Progress</div>
+                                      </div>
+                                      <div className="text-center">
+                                        <div className="font-bold text-orange-600">{campaign.quality?.successRate || 85}%</div>
+                                        <div className="text-gray-600">Success</div>
+                                      </div>
+                                    </div>
+
+                                    <div className="mt-2">
+                                      <Progress value={campaign.progress} className="h-1" />
+                                    </div>
                                   </div>
-                                  <div className="flex items-center gap-2">
-                                    <Badge variant="outline" className={`text-xs ${
-                                      campaign.status === 'active' ? 'bg-green-100 text-green-700 border-green-300' :
-                                      campaign.status === 'completed' ? 'bg-blue-100 text-blue-700 border-blue-300' :
-                                      'bg-gray-100 text-gray-700 border-gray-300'
-                                    }`}>
-                                      {campaign.status}
-                                    </Badge>
-                                  </div>
+
+                                  {/* Expanded Details */}
+                                  {isExpanded && (
+                                    <div className="border-t bg-white/50 p-3 space-y-3">
+                                      <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
+                                        <Activity className="h-4 w-4 text-blue-600" />
+                                        Campaign Analytics & Activity
+                                      </div>
+
+                                      <div className="grid grid-cols-2 gap-4 text-xs">
+                                        <div className="space-y-2">
+                                          <div className="font-medium text-gray-700">Performance Metrics</div>
+                                          <div className="space-y-1">
+                                            <div className="flex justify-between">
+                                              <span>Velocity:</span>
+                                              <span className="font-medium">{campaign.performance?.velocity || 12}/hr</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                              <span>Avg DA:</span>
+                                              <span className="font-medium">{campaign.quality?.averageAuthority || 45}</span>
+                                            </div>
+                                            <div className="flex justify-between">
+                                              <span>Efficiency:</span>
+                                              <span className="font-medium">{campaign.performance?.efficiency || 92}%</span>
+                                            </div>
+                                          </div>
+                                        </div>
+
+                                        <div className="space-y-2">
+                                          <div className="font-medium text-gray-700">Current Status</div>
+                                          <div className="space-y-1">
+                                            {realTimeActivities.slice(0, 3).map((activity, actIdx) => (
+                                              <div key={actIdx} className="flex items-center gap-2">
+                                                <div className={`h-1.5 w-1.5 rounded-full ${
+                                                  activity.status === 'completed' ? 'bg-green-500' :
+                                                  activity.status === 'active' ? 'bg-orange-500 animate-pulse' :
+                                                  'bg-gray-400'
+                                                }`}></div>
+                                                <span className="text-gray-700 truncate">{activity.message}</span>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
-                                <div className="grid grid-cols-4 gap-2 text-xs">
-                                  <div className="text-center">
-                                    <div className="font-bold text-green-600">{campaign.linksGenerated}</div>
-                                    <div className="text-gray-600">Generated</div>
-                                  </div>
-                                  <div className="text-center">
-                                    <div className="font-bold text-blue-600">{campaign.linksLive}</div>
-                                    <div className="text-gray-600">Live</div>
-                                  </div>
-                                  <div className="text-center">
-                                    <div className="font-bold text-purple-600">{Math.round(campaign.progress)}%</div>
-                                    <div className="text-gray-600">Progress</div>
-                                  </div>
-                                  <div className="text-center">
-                                    <div className="font-bold text-orange-600">{campaign.quality?.successRate || 85}%</div>
-                                    <div className="text-gray-600">Success</div>
-                                  </div>
-                                </div>
-                                <div className="mt-2">
-                                  <Progress value={campaign.progress} className="h-1" />
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
 
