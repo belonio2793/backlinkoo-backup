@@ -1318,18 +1318,6 @@ const Dashboard = () => {
                 )}
               </Button>
 
-              {/* Premium status fix button for specific user */}
-              {user?.email === 'labindalawamaryrose@gmail.com' && !isPremiumSubscriber && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={fixPremiumStatus}
-                  className="ml-2 text-xs border-orange-200 text-orange-600 hover:bg-orange-50"
-                >
-                  Fix Premium
-                </Button>
-              )}
-
             </nav>
           </div>
         </div>
