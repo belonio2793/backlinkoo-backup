@@ -1130,6 +1130,16 @@ export default function BacklinkAutomation() {
         }
 
         if (result.campaign) {
+          // Generate blog post for the campaign
+          const blogResult = await CampaignBlogIntegrationService.generateCampaignBlogPost({
+            campaignId: result.campaign.id,
+            targetUrl: result.campaign.target_url,
+            keywords: result.campaign.keywords,
+            anchorTexts: result.campaign.anchor_texts,
+            primaryKeyword: result.campaign.keywords[0],
+            campaignName: result.campaign.name
+          });
+
           // Create enhanced campaign object with real-time tracking
           const enhancedCampaign: Campaign = {
             id: result.campaign.id,
@@ -1144,6 +1154,8 @@ export default function BacklinkAutomation() {
             progress: 0,
             createdAt: new Date(),
             lastActivity: new Date(),
+            blogPostUrl: blogResult.success ? blogResult.blogPostUrl : undefined,
+            blogPostTitle: blogResult.success ? blogResult.title : undefined,
             quality: {
               averageAuthority: 0,
               successRate: 0,
@@ -2014,7 +2026,7 @@ export default function BacklinkAutomation() {
                             <div className="flex items-center justify-center gap-2 text-sm">
                               <Crown className="h-4 w-4 text-purple-600" />
                               <span className="text-purple-700 font-medium">Premium Active:</span>
-                              <span className="text-gray-600">Unlimited campaigns • Priority processing �� Advanced analytics</span>
+                              <span className="text-gray-600">Unlimited campaigns • Priority processing • Advanced analytics</span>
                             </div>
                           </div>
                         )}
