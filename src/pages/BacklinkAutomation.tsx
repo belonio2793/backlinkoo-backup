@@ -345,7 +345,7 @@ export default function BacklinkAutomation() {
         },
         createdAt: new Date(),
         lastActive: new Date(),
-        estimatedCompletion: new Date(Date.now() + 86400000 * Math.ceil(campaignForm.totalTarget / campaignForm.dailyLimit))
+        estimatedCompletion: new Date(Date.now() + 86400000 * Math.ceil(1000 / 25))
       };
 
       setCampaigns(prev => [...prev, newCampaign]);
