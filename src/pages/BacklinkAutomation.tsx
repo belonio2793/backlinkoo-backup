@@ -554,12 +554,9 @@ export default function BacklinkAutomation() {
   };
 
   const createCampaign = async () => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to create campaigns",
-        variant: "destructive"
-      });
+    // Check guest trial limit
+    if (!user && guestLinksGenerated >= 20) {
+      setShowTrialExhaustedModal(true);
       return;
     }
 
