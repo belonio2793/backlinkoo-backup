@@ -625,7 +625,7 @@ export default function BacklinkAutomation() {
           console.warn('⚠�� Database not ready:', status);
         }
       } catch (error) {
-        console.error('❌ Database check failed:', error);
+        console.error('��� Database check failed:', error);
       } finally {
         setIsCheckingDatabase(false);
       }
@@ -2648,6 +2648,67 @@ export default function BacklinkAutomation() {
                                             </div>
                                           )}
                                         </div>
+
+                                        {/* Real-Time Console Logs */}
+                                        {selectedGuestCampaign === campaign.id && (
+                                          <div className="border-t bg-gray-900 text-green-400 p-3">
+                                            <div className="flex items-center justify-between mb-2">
+                                              <div className="flex items-center gap-2">
+                                                <div className="h-2 w-2 bg-green-400 rounded-full animate-pulse"></div>
+                                                <span className="text-sm font-mono font-bold">LIVE CONSOLE</span>
+                                                <Badge variant="outline" className="bg-green-900 text-green-300 border-green-500 text-xs">
+                                                  REAL-TIME
+                                                </Badge>
+                                              </div>
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => setSelectedGuestCampaign(null)}
+                                                className="h-6 w-6 p-0 text-green-400 hover:text-green-300"
+                                              >
+                                                <X className="h-3 w-3" />
+                                              </Button>
+                                            </div>
+
+                                            <div className="bg-black rounded p-3 h-48 overflow-y-auto font-mono text-xs space-y-1">
+                                              {guestConsoleLogs
+                                                .filter(log => !log.campaignId || log.campaignId === campaign.id)
+                                                .slice(0, 20)
+                                                .map((log, logIdx) => (
+                                                <div key={log.id} className={`flex gap-2 ${
+                                                  log.type === 'success' ? 'text-green-400' :
+                                                  log.type === 'warning' ? 'text-yellow-400' :
+                                                  log.type === 'error' ? 'text-red-400' :
+                                                  'text-blue-400'
+                                                } animate-pulse`}>
+                                                  <span className="text-gray-500 text-xs">
+                                                    [{log.timestamp.toLocaleTimeString()}]
+                                                  </span>
+                                                  <span className="flex-1">{log.message}</span>
+                                                </div>
+                                              ))}
+
+                                              {guestConsoleLogs.length === 0 && (
+                                                <div className="text-gray-500 text-center py-8">
+                                                  <Monitor className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                                  <div>Console initialized... Waiting for activity...</div>
+                                                  <div className="animate-pulse mt-2">▋</div>
+                                                </div>
+                                              )}
+                                            </div>
+
+                                            <div className="mt-2 flex items-center justify-between text-xs">
+                                              <div className="flex items-center gap-4">
+                                                <span className="text-green-400">● {guestConsoleLogs.filter(l => l.type === 'success').length} Success</span>
+                                                <span className="text-yellow-400">● {guestConsoleLogs.filter(l => l.type === 'warning').length} Warning</span>
+                                                <span className="text-red-400">● {guestConsoleLogs.filter(l => l.type === 'error').length} Error</span>
+                                              </div>
+                                              <div className="text-gray-400">
+                                                Logs: {guestConsoleLogs.length}/100
+                                              </div>
+                                            </div>
+                                          </div>
+                                        )}
 
                                         {/* Expanded Details */}
                                         {isExpanded && (
