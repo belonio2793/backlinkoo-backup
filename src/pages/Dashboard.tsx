@@ -13,6 +13,7 @@ import { Footer } from "@/components/Footer";
 import { PremiumService } from "@/services/premiumService";
 import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
 import { PricingModal } from "@/components/PricingModal";
+import { setPremiumStatus } from "@/utils/setPremiumStatus";
 import {
   DropdownMenu,
   DropdownMenuContent,
