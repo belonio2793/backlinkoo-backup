@@ -6,11 +6,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export interface CampaignDeletionOptions {
-  forceDelete: boolean;
-  reason: string;
   confirmationText: string;
-  archiveLinks: boolean;
-  notifyStakeholders: boolean;
 }
 
 export interface CampaignDeletionSummary {
