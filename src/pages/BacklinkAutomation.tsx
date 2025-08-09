@@ -286,6 +286,16 @@ export default function BacklinkAutomation() {
     setIsLinkBuildingActive(activeCampaignCount > 0);
   }, [campaigns]);
 
+  // Periodic metrics update
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadRealTimeMetrics();
+      loadDiscoveryStats();
+    }, 10000); // Update every 10 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Aggregate successful links for discovery engine
   useEffect(() => {
     if (publishedLinks.length > 0) {
