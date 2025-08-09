@@ -2710,7 +2710,7 @@ export default function BacklinkAutomation() {
                         {!isPremium && (
                           <div className="text-center">
                             <p className="text-sm text-gray-600 mb-2">
-                              �� Free accounts get 1 campaign with 20 premium backlinks
+                              Get started with your campaign
                             </p>
                             <div className="flex justify-center gap-4 text-xs text-gray-500">
                               <span>✓ High-authority domains</span>
