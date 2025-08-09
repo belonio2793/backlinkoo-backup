@@ -9,7 +9,7 @@ import { compatibilityAffiliateService } from '../services/compatibilityAffiliat
 import ComprehensiveAffiliateDashboard from '../components/affiliate/ComprehensiveAffiliateDashboard';
 import EnhancedAffiliateRegistration from '../components/affiliate/EnhancedAffiliateRegistration';
 import AffiliateAssetLibrary from '../components/affiliate/AffiliateAssetLibrary';
-import ReferredUsers from '../components/affiliate/ReferredUsers';
+import ReferredUsersSimple from '../components/affiliate/ReferredUsersSimple';
 import AffiliateSetupGuide from '../components/AffiliateSetupGuide';
 import { Footer } from '../components/Footer';
 import {
