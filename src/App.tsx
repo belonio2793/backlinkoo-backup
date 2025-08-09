@@ -38,7 +38,7 @@ const App = () => (
             <Route
               path="/blog"
               element={
-                <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                <Suspense fallback={<LoadingSpinner />}>
                   <LazyBlog />
                 </Suspense>
               }
@@ -46,7 +46,7 @@ const App = () => (
             <Route
               path="/blog/:slug"
               element={
-                <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                <Suspense fallback={<LoadingSpinner />}>
                   <LazyBeautifulBlogPost />
                 </Suspense>
               }
@@ -54,7 +54,7 @@ const App = () => (
             <Route
               path="/dashboard"
               element={
-                <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                <Suspense fallback={<LoadingSpinner />}>
                   <LazyDashboard />
                 </Suspense>
               }
@@ -62,7 +62,7 @@ const App = () => (
             <Route
               path="/automation"
               element={
-                <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                <Suspense fallback={<LoadingSpinner />}>
                   <LazyBacklinkAutomation />
                 </Suspense>
               }
@@ -70,7 +70,7 @@ const App = () => (
             <Route
               path="/recursive-discovery"
               element={
-                <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                <Suspense fallback={<LoadingSpinner />}>
                   <LazyRecursiveDiscoveryDashboard />
                 </Suspense>
               }
@@ -78,7 +78,7 @@ const App = () => (
             <Route
               path="/admin"
               element={
-                <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                <Suspense fallback={<LoadingSpinner />}>
                   <LazyAdminLanding />
                 </Suspense>
               }
