@@ -1437,7 +1437,7 @@ export default function BacklinkAutomation() {
         } else if (newTotal >= 20) {
           // Trial complete
           toast({
-            title: "🚀 Amazing! You've Built 20+ Backlinks!",
+            title: "��� Amazing! You've Built 20+ Backlinks!",
             description: "See your incredible results and unlock unlimited campaigns!",
             duration: 6000,
           });
@@ -4719,7 +4719,7 @@ export default function BacklinkAutomation() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Campaign?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete "{campaignToDelete?.name}"? This will permanently remove the campaign and all {campaignToDelete?.linksGenerated || 0} generated links. This action cannot be undone.
+              Are you sure you want to delete "{guestCampaignToDelete?.name}"? This will permanently remove the campaign and all {guestCampaignToDelete?.linksGenerated || 0} generated links. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
