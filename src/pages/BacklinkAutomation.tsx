@@ -374,7 +374,7 @@ export default function BacklinkAutomation() {
     if ((activeCampaignCount > 0 || hasGuestResults) && selectedTab === 'campaigns') {
       // Show notification after 3 seconds of campaign deployment
       const timer = setTimeout(() => {
-        // Results are now embedded in campaigns tab, no need to switch
+        // Switch to live results sub-tab when campaigns are active\n        setSelectedCampaignTab('live-results');
         toast({
           title: "🚀 Campaign Results Ready!",
           description: "Your campaigns are now running. View real-time progress in the live monitor above.",
@@ -1717,7 +1717,7 @@ export default function BacklinkAutomation() {
                         {!isPremium && (
                           <div className="text-center">
                             <p className="text-sm text-gray-600 mb-2">
-                              🎯 Free accounts get 1 campaign with 20 premium backlinks
+                              �� Free accounts get 1 campaign with 20 premium backlinks
                             </p>
                             <div className="flex justify-center gap-4 text-xs text-gray-500">
                               <span>✓ High-authority domains</span>
