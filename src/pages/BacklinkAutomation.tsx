@@ -4649,7 +4649,7 @@ export default function BacklinkAutomation() {
             </div>
 
             <AuthFormTabsFixed
-              onSuccess={(user) => {
+              onAuthSuccess={(user) => {
                 setShowAuthModal(false);
                 addThroughputEvent('user_authenticated');
 
@@ -4665,7 +4665,7 @@ export default function BacklinkAutomation() {
               onSignInStart={() => {
                 // Optional: can add loading state here
               }}
-              loadingMessage="Signing you in..."
+              isCompact={true}
             />
 
             <div className="text-center text-xs text-gray-500 pt-2 border-t">
