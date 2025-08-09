@@ -3243,7 +3243,7 @@ export default function BacklinkAutomation() {
                                   setCampaignToDelete(campaign);
                                   setDeleteDialogOpen(true);
                                 }}
-                                className="border-red-300 text-red-600 hover:bg-red-50"
+                                className="bg-red-50 border-red-300 text-red-600 hover:bg-red-100"
                               >
                                 <Trash2 className="h-3 w-3 mr-1" />
                                 Delete
