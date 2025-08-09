@@ -389,7 +389,7 @@ export default function BacklinkAutomation() {
       const activeCampaignsCount = campaigns.filter(c => c.status === 'active').length;
       const totalLinksGenerated = campaigns.reduce((sum, c) => sum + c.linksGenerated, 0);
 
-      const proliferationStats = mockInternetProliferationService.getProliferationStats();
+      const proliferationStats = internetProliferationService.getProliferationStats();
 
       setControlPanelData(prev => ({
         ...prev,
