@@ -4802,6 +4802,19 @@ export default function BacklinkAutomation() {
         totalLinks={user ? (campaigns.reduce((sum, c) => sum + c.linksGenerated, 0)) : guestLinksGenerated}
         isLoggedIn={!!user}
         userName={user?.user_metadata?.full_name || user?.email}
+        onUpgrade={() => {
+          // This could trigger a payment flow modal or redirect
+          console.log('User upgrading to premium from trial exhausted modal');
+          // For now, we can show an alert or open another modal
+          toast({
+            title: "🚀 Upgrading to Premium!",
+            description: "Redirecting to secure checkout...",
+          });
+          // You could also open a payment modal here instead
+          setTimeout(() => {
+            window.location.href = '/subscription-success';
+          }, 1000);
+        }}
       />
 
       {/* Guest Premium Upsell Modal */}
