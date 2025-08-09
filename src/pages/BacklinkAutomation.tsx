@@ -119,7 +119,7 @@ export default function BacklinkAutomation() {
   const [discoveryStats, setDiscoveryStats] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
   const [selectedTab, setSelectedTab] = useState('campaigns');
-  const [selectedLinkType, setSelectedLinkType] = useState('blog_comment');
+  const [selectedLinkType, setSelectedLinkType] = useState('all');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [campaignToDelete, setCampaignToDelete] = useState<Campaign | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
