@@ -1175,7 +1175,7 @@ export default function BacklinkAutomation() {
               </Card>
 
               {/* Discovered URLs */}
-              {discoveredUrls.length > 0 && (
+              {discoveredUrls && discoveredUrls.length > 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
