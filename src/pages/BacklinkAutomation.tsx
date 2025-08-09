@@ -3335,9 +3335,23 @@ export default function BacklinkAutomation() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => {
+                                    // Check if campaign has reached link limit
+                                    if (campaign.linksGenerated >= 20) {
+                                      setPremiumUpsellTrigger('link_limit');
+                                      setShowGuestPremiumModal(true);
+                                      toast({
+                                        title: "🚀 Upgrade to Continue",
+                                        description: "This campaign has reached the 20-link free limit. Upgrade for unlimited links!",
+                                        variant: "default"
+                                      });
+                                      return;
+                                    }
+
+                                    guestTrackingService.updateCampaignStatus(campaign.id, 'paused');
                                     setGuestCampaignResults(prev =>
                                       prev.map(c => c.id === campaign.id ? { ...c, status: 'paused' } : c)
                                     );
+                                    updateGuestRestrictions();
                                     toast({
                                       title: "⏸️ Trial Campaign Paused",
                                       description: "You can resume anytime during your trial.",
