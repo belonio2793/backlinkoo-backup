@@ -835,7 +835,8 @@ class RecursiveUrlDiscoveryService {
 
       return data;
     } catch (error) {
-      console.error('Failed to get discovery stats:', error);
+      console.error('Failed to get discovery stats:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
+      console.log('Returning demo stats as fallback');
       // Return demo stats as fallback
       return this.getDemoStats();
     }
