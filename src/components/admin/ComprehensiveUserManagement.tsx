@@ -167,6 +167,7 @@ export default function ComprehensiveUserManagement() {
 
       // Approach 1: Try to get all profiles (requires admin RLS policy)
       try {
+        console.log('Attempting to fetch all profiles...');
         const { data, error } = await supabase
           .from('profiles')
           .select(`
@@ -183,14 +184,26 @@ export default function ComprehensiveUserManagement() {
           .order('created_at', { ascending: false });
 
         if (error) {
+          console.error('Profiles query error details:', {
+            message: error.message,
+            code: error.code,
+            details: error.details,
+            hint: error.hint
+          });
           profilesError = error;
           throw error;
         }
 
         profiles = data || [];
+        console.log(`Successfully fetched ${profiles.length} profiles`);
 
       } catch (firstError: any) {
-        console.warn('Direct profiles query failed:', firstError);
+        console.warn('Direct profiles query failed:', {
+          error: firstError,
+          message: firstError?.message,
+          code: firstError?.code,
+          details: firstError?.details
+        });
 
         // Approach 2: Try to get current user's profile only (fallback)
         try {
