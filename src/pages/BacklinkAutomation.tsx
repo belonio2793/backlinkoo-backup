@@ -737,10 +737,13 @@ export default function BacklinkAutomation() {
         }, 3000);
       }
 
-      setTimeout(() => {
-        loadDiscoveredUrls();
-        loadDiscoveryStats();
-      }, 5000);
+      // Only load fresh data for logged-in users
+      if (user) {
+        setTimeout(() => {
+          loadDiscoveredUrls();
+          loadDiscoveryStats();
+        }, 5000);
+      }
 
     } catch (error) {
       console.error('URL discovery failed:', error);
