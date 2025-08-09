@@ -204,40 +204,38 @@ export default function ComprehensiveUserManagement() {
 
       console.log(`Successfully fetched ${profiles.length} user profiles from database`);
 
-      // Transform the data
-      const combinedUsers: CombinedUser[] = profiles.map((profile: UserProfile) => ({
-        id: profile.user_id,
+      // Transform database profiles to UI format
+      const combinedUsers: CombinedUser[] = profiles.map((profile: any) => ({
+        id: profile.user_id || profile.id,
         email: profile.email,
         role: profile.role || 'user',
         subscription_tier: profile.subscription_tier || 'free',
-        subscription_status: profile.subscription_status,
+        subscription_status: profile.subscription_status || 'active',
         display_name: profile.display_name,
         created_at: profile.created_at,
-        last_sign_in_at: null, // Would need admin API to get this
-        email_confirmed_at: null, // Would need admin API to get this
-        banned_until: null, // Would need admin API to get this
+        last_sign_in_at: null, // Not available in profiles table
+        email_confirmed_at: null, // Not available in profiles table
+        banned_until: null, // Not available in profiles table
         user_metadata: {}
       }));
 
       setUsers(combinedUsers);
       setFilteredUsers(combinedUsers);
 
-      // Calculate stats
+      // Calculate real stats from database data
       const today = new Date().toISOString().split('T')[0];
       const stats = {
         totalUsers: combinedUsers.length,
-        activeUsers: combinedUsers.filter(u => u.email_confirmed_at || true).length, // Assume most are active
+        activeUsers: combinedUsers.filter(u => u.subscription_status === 'active').length,
         premiumUsers: combinedUsers.filter(u => ['monthly', 'premium', 'enterprise'].includes(u.subscription_tier)).length,
         newUsersToday: combinedUsers.filter(u => u.created_at.startsWith(today)).length
       };
       setUserStats(stats);
 
-      if (combinedUsers.length > 0) {
-        toast({
-          title: "Users Loaded",
-          description: `Successfully loaded ${combinedUsers.length} user${combinedUsers.length === 1 ? '' : 's'} from database.`,
-        });
-      }
+      toast({
+        title: "Real User Data Loaded",
+        description: `Successfully loaded ${combinedUsers.length} users from profiles database table.`,
+      });
 
     } catch (error: any) {
       const errorMessage = error?.message || error?.toString() || JSON.stringify(error) || 'Failed to load users';
