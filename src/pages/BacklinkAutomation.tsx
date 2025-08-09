@@ -706,6 +706,11 @@ export default function BacklinkAutomation() {
                   <span className="text-sm font-medium text-slate-700">
                     Discovery Engine {controlPanelData.systemStatus.toUpperCase()}
                   </span>
+                  {backendStatus === 'unavailable' && (
+                    <Badge variant="outline" className="text-orange-600 bg-orange-50 text-xs ml-2">
+                      DEMO MODE
+                    </Badge>
+                  )}
                   {isFetching && <Loader2 className="h-3 w-3 animate-spin text-blue-500" />}
                 </div>
                 <div className="text-xs text-slate-500">
