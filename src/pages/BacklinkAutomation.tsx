@@ -813,16 +813,44 @@ export default function BacklinkAutomation() {
   const pauseCampaign = async (campaignId: string) => {
     try {
       setIsLoading(true);
-      const result = await campaignService.updateCampaignStatus(campaignId, 'paused');
-      if (result.success) {
-        setCampaigns(prev => prev.map(c =>
-          c.id === campaignId ? { ...c, status: 'paused' } : c
-        ));
-        toast({
-          title: "Campaign Paused",
-          description: "Campaign has been paused successfully.",
+
+      // Stop real-time activity immediately
+      const interval = activeCampaignIntervals.get(campaignId);
+      if (interval) {
+        clearInterval(interval);
+        setActiveCampaignIntervals(prev => {
+          const updated = new Map(prev);
+          updated.delete(campaignId);
+          return updated;
         });
       }
+
+      // Update via API if user is authenticated
+      if (user) {
+        const result = await campaignService.updateCampaignStatus(campaignId, 'paused');
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to pause campaign');
+        }
+      }
+
+      // Update local state
+      setCampaigns(prev => prev.map(c =>
+        c.id === campaignId ? { ...c, status: 'paused' } : c
+      ));
+
+      // Update guest campaigns if applicable
+      if (!user) {
+        setGuestCampaignResults(prev =>
+          prev.map(campaign =>
+            campaign.id === campaignId ? { ...campaign, status: 'paused' } : campaign
+          )
+        );
+      }
+
+      toast({
+        title: "⏸️ Campaign Paused",
+        description: "Link building activity has been paused. Resume anytime to continue.",
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -837,16 +865,36 @@ export default function BacklinkAutomation() {
   const resumeCampaign = async (campaignId: string) => {
     try {
       setIsLoading(true);
-      const result = await campaignService.updateCampaignStatus(campaignId, 'active');
-      if (result.success) {
-        setCampaigns(prev => prev.map(c =>
-          c.id === campaignId ? { ...c, status: 'active' } : c
-        ));
-        toast({
-          title: "Campaign Resumed",
-          description: "Campaign is now active and generating links.",
-        });
+
+      // Update via API if user is authenticated
+      if (user) {
+        const result = await campaignService.updateCampaignStatus(campaignId, 'active');
+        if (!result.success) {
+          throw new Error(result.error || 'Failed to resume campaign');
+        }
       }
+
+      // Update local state
+      setCampaigns(prev => prev.map(c =>
+        c.id === campaignId ? { ...c, status: 'active' } : c
+      ));
+
+      // Update guest campaigns if applicable
+      if (!user) {
+        setGuestCampaignResults(prev =>
+          prev.map(campaign =>
+            campaign.id === campaignId ? { ...campaign, status: 'active' } : campaign
+          )
+        );
+      }
+
+      // Start real-time activity
+      startRealTimeActivity(campaignId);
+
+      toast({
+        title: "▶️ Campaign Resumed",
+        description: "Link building is now active and generating high-quality backlinks.",
+      });
     } catch (error) {
       toast({
         title: "Error",
@@ -3526,14 +3574,14 @@ export default function BacklinkAutomation() {
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
                           { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
-                          { name: 'Real Estate', count: 27450, icon: '���' },
+                          { name: 'Real Estate', count: 27450, icon: '🏠' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
                           { name: 'Home & Garden', count: 21890, icon: '🏡' },
                           { name: 'Legal Services', count: 19650, icon: '⚖️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
-                          { name: 'Science & Research', count: 14560, icon: '🔬' },
+                          { name: 'Science & Research', count: 14560, icon: '���' },
                           { name: 'Arts & Culture', count: 13290, icon: '🎨' }
                         ].map((category, idx) => (
                           <div key={idx} className="p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors">
