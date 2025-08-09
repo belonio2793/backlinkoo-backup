@@ -1060,14 +1060,21 @@ export default function BacklinkAutomation() {
                         </>
                       )
                     ) : (
-                      <>
-                        <Zap className="h-3 w-3 text-green-600" />
-                        <span className="text-lg font-bold text-green-600">{guestLinksGenerated}/20</span>
-                      </>
+                      guestLinksGenerated > 0 ? (
+                        <>
+                          <Zap className="h-3 w-3 text-green-600" />
+                          <span className="text-lg font-bold text-green-600">{guestLinksGenerated}/20</span>
+                        </>
+                      ) : (
+                        <>
+                          <Target className="h-3 w-3 text-blue-600" />
+                          <span className="text-lg font-bold text-blue-600">--</span>
+                        </>
+                      )
                     )}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {user ? (isPremium ? "Unlimited" : "Monthly Links") : "Free Trial"}
+                    {user ? (isPremium ? "Unlimited" : "Monthly Links") : (guestLinksGenerated > 0 ? "Trial Progress" : "Get Started")}
                   </div>
                 </div>
               </div>
