@@ -296,7 +296,9 @@ const Index = () => {
                       <QuickTrialUpgrade
                         onSuccess={(user) => {
                           setUser(user);
-                          navigate('/dashboard');
+                          startTransition(() => {
+                            navigate('/dashboard');
+                          });
                         }}
                         variant="default"
                         size="sm"
