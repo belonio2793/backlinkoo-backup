@@ -494,7 +494,9 @@ export function BeautifulBlogPost() {
           title: "Post Deleted",
           description: "The blog post has been successfully deleted.",
         });
-        navigate('/blog');
+        startTransition(() => {
+          navigate('/blog');
+        });
       }
     } catch (error: any) {
       console.error('❌ Unexpected delete error:', error);
