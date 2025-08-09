@@ -360,6 +360,9 @@ export default function BacklinkAutomation() {
         : campaign
     ));
 
+    // Stop real-time reporting
+    stopRealtimeReporting(campaignId);
+
     addGuestConsoleLog('warning', `Campaign "${campaignId}" paused by user`, campaignId);
     addThroughputEvent('guest_campaign_paused');
 
@@ -4074,7 +4077,7 @@ export default function BacklinkAutomation() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                       {[
-                        { category: 'Social Platforms', count: 245, icon: '��', color: 'blue' },
+                        { category: 'Social Platforms', count: 245, icon: '👥', color: 'blue' },
                         { category: 'Tech Blogs', count: 189, icon: '💻', color: 'green' },
                         { category: 'News Sites', count: 156, icon: '📰', color: 'purple' },
                         { category: 'Forums', count: 134, icon: '💬', color: 'orange' }
