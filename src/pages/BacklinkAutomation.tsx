@@ -1358,6 +1358,13 @@ export default function BacklinkAutomation() {
         // Track campaign deployment for dynamic throughput
         addThroughputEvent('campaign_deployed');
 
+        // Add comprehensive console logs for guest campaign launch
+        addGuestConsoleLog('info', `🚀 CAMPAIGN LAUNCHED: "${campaignResult.name}" initialized`, campaignResult.id);
+        addGuestConsoleLog('info', `📊 TARGET CONFIG: ${linksToGenerate} links scheduled for ${campaignForm.targetUrl}`, campaignResult.id);
+        addGuestConsoleLog('info', `⚙️ STRATEGY: Using "${linkTypeConfig[campaignForm.linkType as keyof typeof linkTypeConfig]?.title}" approach`, campaignResult.id);
+        addGuestConsoleLog('success', `✅ SYSTEMS READY: AI engines online, discovery active, publishing queue loaded`, campaignResult.id);
+        addGuestConsoleLog('info', `⚡ THROTTLE MODE: Ultra-fast 1-2s intervals enabled for maximum engagement`, campaignResult.id);
+
         // Show different messages based on progress to build excitement
         if (guestLinksGenerated === 0) {
           // First campaign - surprise reveal
@@ -3625,7 +3632,7 @@ export default function BacklinkAutomation() {
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
                           { name: 'Real Estate', count: 27450, icon: '🏠' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
-                          { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
+                          { name: 'Fashion & Beauty', count: 23120, icon: '���' },
                           { name: 'Home & Garden', count: 21890, icon: '���' },
                           { name: 'Legal Services', count: 19650, icon: '⚖️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
