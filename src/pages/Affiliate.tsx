@@ -101,7 +101,7 @@ const Affiliate: React.FC = () => {
                 </div>
                 <div className="mt-2 flex items-center gap-1">
                   <TrendingUp className="h-3 w-3 text-green-600" />
-                  <span className="text-xs text-green-600">+{affiliateStats.thisMonthCredits} this month</span>
+                  <span className="text-xs text-green-600">+{stats.thisMonthCredits} this month</span>
                 </div>
               </CardContent>
             </Card>
