@@ -2541,7 +2541,23 @@ export default function BacklinkAutomation() {
                     )}
                   </div>
                   <div className="text-xs text-gray-500">
-                    {user ? (isPremium ? "Unlimited" : "Monthly Links") : (guestLinksGenerated > 0 ? "Trial Progress" : "Get Started")}
+                    {(() => {
+                      const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
+                      const activeCampaigns = savedCampaigns.filter((c: any) => c.status === 'active').length;
+                      const liveMonitored = savedCampaigns.filter((c: any) => c.isLiveMonitored).length;
+
+                      if (user) {
+                        if (isPremium) {
+                          return `Unlimited • ${liveMonitored} live monitored`;
+                        } else {
+                          return `Monthly Links • ${activeCampaigns} active`;
+                        }
+                      } else {
+                        return guestLinksGenerated > 0 ?
+                          `Trial Progress • ${liveMonitored} monitored` :
+                          "Get Started";
+                      }
+                    })()}
                   </div>
                 </div>
               </div>
