@@ -278,6 +278,13 @@ export default function BacklinkAutomation() {
     isProliferating: false
   });
 
+  // Real-time campaign monitoring state
+  const [activeCampaignIntervals, setActiveCampaignIntervals] = useState<Map<string, NodeJS.Timeout>>(new Map());
+  const [realTimeLinkPostbacks, setRealTimeLinkPostbacks] = useState<any[]>([]);
+  const [campaignMetrics, setCampaignMetrics] = useState<Map<string, any>>(new Map());
+  const [linkBuildingQueue, setLinkBuildingQueue] = useState<any[]>([]);
+  const [recentPostbacks, setRecentPostbacks] = useState<any[]>([]);
+
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
     name: '',
