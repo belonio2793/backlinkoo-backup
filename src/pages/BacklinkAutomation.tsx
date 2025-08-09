@@ -3425,13 +3425,67 @@ export default function BacklinkAutomation() {
 
                           <div className="grid grid-cols-2 gap-4 mb-3">
                             <div className="text-center">
-                              <div className="text-lg font-bold text-green-600">{campaign.domains?.length || 0}</div>
-                              <div className="text-xs text-gray-500">Domains</div>
+                              <div className={`text-lg font-bold ${campaign.linksGenerated >= 20 ? 'text-red-600' : campaign.linksGenerated >= 15 ? 'text-yellow-600' : 'text-green-600'}`}>
+                                {campaign.linksGenerated || 0}/20
+                              </div>
+                              <div className="text-xs text-gray-500">Free Links</div>
+                              {campaign.linksGenerated >= 20 && (
+                                <div className="text-xs text-red-600 font-medium">Limit reached!</div>
+                              )}
+                              {campaign.linksGenerated >= 15 && campaign.linksGenerated < 20 && (
+                                <div className="text-xs text-yellow-600">Almost full</div>
+                              )}
                             </div>
                             <div className="text-center">
-                              <div className="text-lg font-bold text-blue-600">{Math.round((campaign.domains?.length || 0) / 10 * 100)}%</div>
-                              <div className="text-xs text-gray-500">Progress</div>
+                              <div className="text-lg font-bold text-blue-600">{campaign.domains?.length || 0}</div>
+                              <div className="text-xs text-gray-500">Domains</div>
+                              {campaign.linksGenerated >= 18 && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => {
+                                    setPremiumUpsellTrigger('link_limit');
+                                    setShowGuestPremiumModal(true);
+                                  }}
+                                  className="text-xs h-5 px-2 border-purple-200 text-purple-600 hover:bg-purple-50 mt-1"
+                                >
+                                  <Crown className="h-2 w-2 mr-1" />
+                                  Upgrade
+                                </Button>
+                              )}
                             </div>
+                          </div>
+
+                          {/* Link Progress Bar */}
+                          <div className="mb-3">
+                            <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+                              <span>Link Building Progress</span>
+                              <span>{campaign.linksGenerated || 0}/20 free links</span>
+                            </div>
+                            <div className="w-full bg-gray-200 rounded-full h-2">
+                              <div
+                                className={`h-2 rounded-full transition-all duration-300 ${
+                                  campaign.linksGenerated >= 20 ? 'bg-red-500' :
+                                  campaign.linksGenerated >= 15 ? 'bg-yellow-500' : 'bg-green-500'
+                                }`}
+                                style={{ width: `${Math.min(((campaign.linksGenerated || 0) / 20) * 100, 100)}%` }}
+                              />
+                            </div>
+                            {campaign.linksGenerated >= 15 && (
+                              <div className="text-center mt-2">
+                                <Button
+                                  size="sm"
+                                  onClick={() => {
+                                    setPremiumUpsellTrigger('link_limit');
+                                    setShowGuestPremiumModal(true);
+                                  }}
+                                  className="h-6 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                                >
+                                  <Crown className="h-3 w-3 mr-1" />
+                                  Get Unlimited Links
+                                </Button>
+                              </div>
+                            )}
                           </div>
 
                           <div className="space-y-2">
