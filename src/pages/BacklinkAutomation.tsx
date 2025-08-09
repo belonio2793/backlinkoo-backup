@@ -289,6 +289,10 @@ export default function BacklinkAutomation() {
   const [linkBuildingQueue, setLinkBuildingQueue] = useState<any[]>([]);
   const [recentPostbacks, setRecentPostbacks] = useState<any[]>([]);
   const [showSignInModal, setShowSignInModal] = useState(false);
+  const [showGuestPremiumModal, setShowGuestPremiumModal] = useState(false);
+  const [guestTrackingInitialized, setGuestTrackingInitialized] = useState(false);
+  const [guestCampaignRestrictions, setGuestCampaignRestrictions] = useState<any>({});
+  const [premiumUpsellTrigger, setPremiumUpsellTrigger] = useState<'campaign_limit' | 'link_limit' | 'feature_limit' | 'manual'>('manual');
 
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
