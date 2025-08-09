@@ -194,23 +194,6 @@ function Blog() {
     return Math.ceil(wordCount / wordsPerMinute);
   };
 
-  const filteredPosts = blogPosts.filter(post => {
-    const cleanedTitle = cleanTitle(post.title).toLowerCase();
-    const cleanedDescription = cleanDescription(post.meta_description || '').toLowerCase();
-    const searchLower = searchTerm.toLowerCase();
-
-    const matchesSearch = searchTerm === '' ||
-      cleanedTitle.includes(searchLower) ||
-      cleanedDescription.includes(searchLower) ||
-      post.keywords.some(keyword => keyword.toLowerCase().includes(searchLower));
-
-    const matchesCategory = selectedCategory === '' || post.category === selectedCategory;
-
-    return matchesSearch && matchesCategory;
-  });
-
-  const categories = Array.from(new Set(blogPosts.map(post => post.category)));
-
   // Utility function to clean HTML syntax and common prefixes from titles
   const cleanTitle = (title: string): string => {
     if (!title) return '';
@@ -270,6 +253,23 @@ function Blog() {
       .replace(/^\W+/, '') // Remove leading non-word characters
       .trim();
   };
+
+  const filteredPosts = blogPosts.filter(post => {
+    const cleanedTitle = cleanTitle(post.title).toLowerCase();
+    const cleanedDescription = cleanDescription(post.meta_description || '').toLowerCase();
+    const searchLower = searchTerm.toLowerCase();
+
+    const matchesSearch = searchTerm === '' ||
+      cleanedTitle.includes(searchLower) ||
+      cleanedDescription.includes(searchLower) ||
+      post.keywords.some(keyword => keyword.toLowerCase().includes(searchLower));
+
+    const matchesCategory = selectedCategory === '' || post.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  const categories = Array.from(new Set(blogPosts.map(post => post.category)));
 
   const handleRefreshPosts = async () => {
     setRefreshing(true);
