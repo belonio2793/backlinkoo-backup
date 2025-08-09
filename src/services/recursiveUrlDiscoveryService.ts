@@ -947,6 +947,8 @@ class RecursiveUrlDiscoveryService {
         last_discovery: new Date().toISOString()
       }
     };
+    console.log('Demo stats generated successfully');
+    return stats;
   }
 
   /**
