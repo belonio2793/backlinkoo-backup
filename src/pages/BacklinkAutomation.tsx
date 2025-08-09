@@ -1184,6 +1184,202 @@ export default function BacklinkAutomation() {
             )}
           </TabsContent>
 
+          <TabsContent value="results" className="space-y-6">
+            {/* Results Header with Counters */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <CheckCircle className="h-5 w-5 text-green-600" />
+                  Live Results Dashboard
+                </CardTitle>
+                <CardDescription>
+                  Real-time tracking of posted links across all campaigns
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  <Card className="p-4 text-center bg-green-50 border-green-200">
+                    <div className="text-2xl font-bold text-green-600">
+                      {postedLinks.filter(link => link.status === 'live').length}
+                    </div>
+                    <div className="text-sm text-green-700">Live Links</div>
+                  </Card>
+                  <Card className="p-4 text-center bg-yellow-50 border-yellow-200">
+                    <div className="text-2xl font-bold text-yellow-600">
+                      {postedLinks.filter(link => link.status === 'pending').length}
+                    </div>
+                    <div className="text-sm text-yellow-700">Pending</div>
+                  </Card>
+                  <Card className="p-4 text-center bg-blue-50 border-blue-200">
+                    <div className="text-2xl font-bold text-blue-600">
+                      {postedLinks.length}
+                    </div>
+                    <div className="text-sm text-blue-700">Total Posts</div>
+                  </Card>
+                  <Card className="p-4 text-center bg-purple-50 border-purple-200">
+                    <div className="text-2xl font-bold text-purple-600">
+                      {new Set(postedLinks.map(link => link.domain)).size}
+                    </div>
+                    <div className="text-sm text-purple-700">Unique Domains</div>
+                  </Card>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Live Posted Links Feed */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Activity className="h-5 w-5 text-blue-600" />
+                  Posted Links Feed
+                  {postedLinks.length > 0 && (
+                    <Badge variant="outline" className="ml-2">
+                      {postedLinks.length} results
+                    </Badge>
+                  )}
+                </CardTitle>
+                <CardDescription>
+                  Real-time feed of successfully posted backlinks
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {postedLinks.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ExternalLink className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+                    <p className="text-gray-500">No links posted yet</p>
+                    <p className="text-sm text-gray-400 mt-1">
+                      Start a campaign to see live results here
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-[600px] overflow-y-auto">
+                    {postedLinks.map((link) => (
+                      <div
+                        key={link.id}
+                        className={`p-4 rounded-lg border transition-all hover:shadow-md ${
+                          link.status === 'live'
+                            ? 'bg-green-50 border-green-200'
+                            : link.status === 'pending'
+                            ? 'bg-yellow-50 border-yellow-200'
+                            : 'bg-red-50 border-red-200'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1 space-y-2">
+                            {/* Header */}
+                            <div className="flex items-center gap-3">
+                              <div className={`w-2 h-2 rounded-full ${
+                                link.status === 'live' ? 'bg-green-500 animate-pulse' :
+                                link.status === 'pending' ? 'bg-yellow-500' : 'bg-red-500'
+                              }`} />
+                              <div className="font-medium text-blue-600">{link.domain}</div>
+                              <Badge variant={
+                                link.status === 'live' ? 'default' :
+                                link.status === 'pending' ? 'secondary' : 'destructive'
+                              } className="text-xs">
+                                {link.status.toUpperCase()}
+                              </Badge>
+                              <span className="text-xs text-gray-500">
+                                DA: {link.domainAuthority}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {link.traffic} traffic
+                              </span>
+                            </div>
+
+                            {/* Content */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                              <div>
+                                <span className="text-gray-600">Campaign: </span>
+                                <span className="font-medium">{link.campaignName}</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Position: </span>
+                                <span className="font-medium">{link.position}</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Anchor: </span>
+                                <span className="font-medium">"{link.anchorText}"</span>
+                              </div>
+                              <div>
+                                <span className="text-gray-600">Posted: </span>
+                                <span className="font-medium">{link.timestamp.toLocaleTimeString()}</span>
+                              </div>
+                            </div>
+
+                            {/* URL */}
+                            <div className="text-xs text-gray-500 bg-gray-100 rounded px-2 py-1 font-mono">
+                              {link.url}
+                            </div>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className="flex flex-col gap-2 ml-4">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(link.url, '_blank')}
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            >
+                              <Eye className="h-3 w-3 mr-1" />
+                              Preview
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                navigator.clipboard.writeText(link.url);
+                                toast({
+                                  title: "URL Copied",
+                                  description: "Link URL copied to clipboard",
+                                });
+                              }}
+                              className="text-gray-600 hover:text-gray-700 hover:bg-gray-50"
+                            >
+                              <ExternalLink className="h-3 w-3 mr-1" />
+                              Copy
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Domain Statistics */}
+            {postedLinks.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="h-5 w-5 text-purple-600" />
+                    Domain Distribution
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {Object.entries(
+                      postedLinks.reduce((acc, link) => {
+                        acc[link.domain] = (acc[link.domain] || 0) + 1;
+                        return acc;
+                      }, {} as Record<string, number>)
+                    )
+                    .sort(([,a], [,b]) => b - a)
+                    .slice(0, 12)
+                    .map(([domain, count]) => (
+                      <div key={domain} className="p-3 bg-gray-50 rounded-lg text-center">
+                        <div className="font-medium text-sm text-gray-900">{domain}</div>
+                        <div className="text-lg font-bold text-blue-600">{count}</div>
+                        <div className="text-xs text-gray-500">links</div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
           <TabsContent value="discovery" className="space-y-6">
             {/* Secondary Navigation Bar for Link Types */}
             <Card className="border-blue-200 bg-blue-50/50">
