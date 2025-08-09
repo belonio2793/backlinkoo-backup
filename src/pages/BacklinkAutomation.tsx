@@ -1018,6 +1018,9 @@ export default function BacklinkAutomation() {
           title: "Campaign Paused",
           description: "Campaign has been paused successfully.",
         });
+
+        // Track campaign pause for dynamic throughput
+        addThroughputEvent('campaign_paused');
       }
     } catch (error) {
       toast({
