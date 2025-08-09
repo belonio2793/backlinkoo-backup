@@ -12,6 +12,7 @@ export interface GuestCampaign {
   linksGenerated: number;
   createdAt: string;
   lastActivityAt: string;
+  completedAt?: string;
 }
 
 export interface GuestTrackingData {
