@@ -645,13 +645,28 @@ export default function BacklinkAutomation() {
 
         addGuestCampaignResult(campaignResult);
 
-        toast({
-          title: "🎉 Campaign Completed!",
-          description: `Generated ${linksToGenerate} high-quality backlinks! ${newTotal >= 20 ? 'Trial complete - see your results!' : `${20 - newTotal} links remaining in trial.`}`,
-        });
-
-        if (newTotal >= 20) {
-          setTimeout(() => setShowTrialExhaustedModal(true), 2000);
+        // Show different messages based on progress to build excitement
+        if (guestLinksGenerated === 0) {
+          // First campaign - surprise reveal
+          toast({
+            title: "🎉 Surprise! Your Backlinks Are Ready!",
+            description: `We've generated ${linksToGenerate} premium backlinks for you instantly! This usually costs $${linksToGenerate * 20}+`,
+            duration: 5000,
+          });
+        } else if (newTotal >= 20) {
+          // Trial complete
+          toast({
+            title: "🚀 Amazing! You've Built 20+ Backlinks!",
+            description: "See your incredible results and unlock unlimited campaigns!",
+            duration: 6000,
+          });
+          setTimeout(() => setShowTrialExhaustedModal(true), 3000);
+        } else {
+          // Progress update
+          toast({
+            title: `🔥 +${linksToGenerate} More Backlinks Generated!`,
+            description: `Total: ${newTotal} premium backlinks built! Keep going - you're on fire!`,
+          });
         }
       } else {
         toast({
