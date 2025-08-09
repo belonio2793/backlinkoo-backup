@@ -79,7 +79,7 @@ export class BlogPersistenceService {
       };
 
     } catch (error: any) {
-      console.error('💥 BlogPersistenceService: Maximum persistence storage failed:', error);
+      console.error('💥 BlogPersistenceService: Maximum persistence storage failed:', error.message || error.toString() || JSON.stringify(error));
       return {
         success: false,
         message: 'Failed to store blog post with maximum persistence',
