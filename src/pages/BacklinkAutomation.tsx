@@ -1881,7 +1881,7 @@ export default function BacklinkAutomation() {
                   <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
                     <div>
                       <Label htmlFor="linkType">Link Building Strategy</Label>
-                      <Select value={campaignForm.linkType} onValueChange={(value) => setCampaignForm(prev => ({ ...prev, linkType: value }))}>
+                      <Select value={campaignForm.linkType} onValueChange={(value) => handleFormChange('linkType', value)}>
                         <SelectTrigger className="h-12">
                           <SelectValue placeholder="Select strategy" />
                         </SelectTrigger>
@@ -3408,13 +3408,13 @@ export default function BacklinkAutomation() {
                           { name: 'Business & Finance', count: 98750, icon: '💼' },
                           { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
-                          { name: 'News & Media', count: 65430, icon: '��' },
+                          { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '🛒' },
                           { name: 'Travel & Tourism', count: 38920, icon: '✈️' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
                           { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
-                          { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
+                          { name: 'Food & Restaurants', count: 29870, icon: '���' },
                           { name: 'Real Estate', count: 27450, icon: '🏠' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
