@@ -49,10 +49,10 @@ export function TrialExhaustedModal({
           </div>
           
           <DialogTitle className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-            🎉 Incredible Results!
+            🎉 SURPRISE! Look What You Just Built!
           </DialogTitle>
           <DialogDescription className="text-lg text-gray-600">
-            You've just experienced the power of automated backlink building
+            While you were creating campaigns, our AI was secretly building premium backlinks for you!
           </DialogDescription>
         </DialogHeader>
 
