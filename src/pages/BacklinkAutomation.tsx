@@ -220,6 +220,13 @@ export default function BacklinkAutomation() {
   const [backendStatus, setBackendStatus] = useState('available');
   const [databaseStatus, setDatabaseStatus] = useState<DatabaseStatus | null>(null);
   const [isCheckingDatabase, setIsCheckingDatabase] = useState(true);
+
+  // Throttling state for controlled link publishing
+  const [isThrottling, setIsThrottling] = useState(false);
+  const [throttleIntervalId, setThrottleIntervalId] = useState<NodeJS.Timeout | null>(null);
+  const [currentThrottleDelay, setCurrentThrottleDelay] = useState(30000); // Start with 30 seconds
+  const [pendingLinksToPublish, setPendingLinksToPublish] = useState<any[]>([]);
+  const [recentlyPublishedLinks, setRecentlyPublishedLinks] = useState<any[]>([]);
   const [controlPanelData, setControlPanelData] = useState({
     systemStatus: 'operational' as 'active' | 'operational' | 'error',
     totalUrls: 0,
@@ -636,8 +643,7 @@ export default function BacklinkAutomation() {
         const linksToGenerate = Math.min(Math.floor(Math.random() * 8) + 3, 20 - guestLinksGenerated); // 3-10 links
         const newTotal = guestLinksGenerated + linksToGenerate;
 
-        updateGuestLinkCount(newTotal);
-
+        // Instead of immediately adding all links, add them to throttled publishing queue
         // Generate realistic published URLs with verification
         const generatePublishedUrls = (count: number, targetUrl: string, keywords: string[]) => {
           const platforms = [
@@ -676,19 +682,28 @@ export default function BacklinkAutomation() {
           });
         };
 
-        const publishedUrls = generatePublishedUrls(linksToGenerate, campaignForm.targetUrl, campaignForm.keywords.split(',').map(k => k.trim()));
+        const urlsToPublish = generatePublishedUrls(linksToGenerate, campaignForm.targetUrl, campaignForm.keywords.split(',').map(k => k.trim()));
 
-        // Add campaign result for guest
+        // Add to pending queue for throttled publishing
+        setPendingLinksToPublish(prev => [...prev, ...urlsToPublish]);
+
+        // Start throttled publishing if not already running
+        if (!isThrottling) {
+          startThrottledPublishing();
+        }
+
+        // Add campaign result for guest with initially empty published URLs
         const campaignResult = {
           id: Date.now().toString(),
           name: generateCampaignName(campaignForm.targetUrl, campaignForm.keywords),
           targetUrl: campaignForm.targetUrl,
           keywords: campaignForm.keywords.split(',').map(k => k.trim()),
-          linksGenerated: linksToGenerate,
+          linksGenerated: 0, // Start at 0, will increment as links are published
+          totalLinksToGenerate: linksToGenerate,
           createdAt: new Date().toISOString(),
-          status: 'completed',
-          domains: publishedUrls.map(url => url.domain),
-          publishedUrls: publishedUrls
+          status: 'active', // Changed to active since we're still publishing
+          domains: [],
+          publishedUrls: []
         };
 
         addGuestCampaignResult(campaignResult);
