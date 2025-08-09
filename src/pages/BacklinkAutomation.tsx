@@ -644,6 +644,21 @@ export default function BacklinkAutomation() {
         c.id === campaignId ? { ...c, status: 'active' as const, lastActive: new Date() } : c
       ));
 
+      // Restart live link building
+      const campaign = campaigns.find(c => c.id === campaignId);
+      if (campaign && user?.id) {
+        const linkBuildingConfig: LinkBuildingConfig = {
+          campaignId,
+          targetUrl: campaign.targetUrl,
+          keywords: campaign.keywords,
+          anchorTexts: [], // Will be extracted from campaign data
+          userId: user.id,
+          isUserPremium: isUserPremium
+        };
+
+        await liveLinkBuildingService.startLinkBuilding(linkBuildingConfig);
+      }
+
       toast({
         title: "Campaign Resumed",
         description: "Link building has been resumed successfully",
