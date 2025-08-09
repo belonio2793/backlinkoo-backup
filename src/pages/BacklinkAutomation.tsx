@@ -707,12 +707,12 @@ export default function BacklinkAutomation() {
         if (isPremium) {
           toast({
             title: "Campaign Deployed",
-            description: "Your premium campaign has been successfully deployed and is now active.",
+            description: "Your premium campaign is now active. Check the Results tab for real-time progress!",
           });
         } else {
           toast({
             title: "Campaign Deployed (20 Links)",
-            description: "Your campaign has been deployed with a 20-link limit. Upgrade to premium for unlimited campaigns!",
+            description: "Your campaign is live with 20-link limit. View progress in Results tab!",
             action: (
               <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
                 Upgrade
