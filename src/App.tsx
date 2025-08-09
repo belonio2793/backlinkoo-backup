@@ -10,6 +10,7 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import Index from "./pages/Index";
 
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
+const LazyBacklinkReport = lazy(() => import("./pages/BacklinkReport"));
 const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDiscoveryDashboard"));
 const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
 const LazyBlog = lazy(() => import("./pages/Blog"));
