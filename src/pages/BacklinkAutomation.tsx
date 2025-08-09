@@ -437,6 +437,9 @@ export default function BacklinkAutomation() {
     const newCount = guestLinksGenerated + 1;
     updateGuestLinkCount(newCount);
 
+    // Track this publishing event for dynamic throughput
+    addThroughputEvent('link_published');
+
     // Update campaign results
     setGuestCampaignResults(prev =>
       prev.map(campaign => {
