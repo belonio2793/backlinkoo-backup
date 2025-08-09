@@ -3488,12 +3488,19 @@ export default function BacklinkAutomation() {
 
                           <div className="grid grid-cols-2 gap-4 mb-3">
                             <div className="text-center">
-                              <div className={`text-lg font-bold ${campaign.linksGenerated >= 20 ? 'text-red-600' : campaign.linksGenerated >= 15 ? 'text-yellow-600' : 'text-green-600'}`}>
+                              <div className={`text-lg font-bold flex items-center justify-center gap-1 ${
+                                campaign.linksGenerated >= 20 ? 'text-red-600' :
+                                campaign.linksGenerated >= 15 ? 'text-yellow-600' : 'text-green-600'
+                              }`}>
+                                {campaign.linksGenerated >= 20 && <Lock className="h-4 w-4" />}
                                 {campaign.linksGenerated || 0}/20
                               </div>
                               <div className="text-xs text-gray-500">Free Links</div>
                               {campaign.linksGenerated >= 20 && (
-                                <div className="text-xs text-red-600 font-medium">Limit reached!</div>
+                                <div className="text-xs text-red-600 font-medium flex items-center justify-center gap-1">
+                                  <AlertTriangle className="h-3 w-3" />
+                                  Locked - Upgrade to continue
+                                </div>
                               )}
                               {campaign.linksGenerated >= 15 && campaign.linksGenerated < 20 && (
                                 <div className="text-xs text-yellow-600">Almost full</div>
@@ -4112,7 +4119,7 @@ export default function BacklinkAutomation() {
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
                           { name: 'Home & Garden', count: 21890, icon: '🏡' },
                           { name: 'Legal Services', count: 19650, icon: '��️' },
-                          { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
+                          { name: 'Non-profit & Charity', count: 17430, icon: '���️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
                           { name: 'Science & Research', count: 14560, icon: '🔬' },
                           { name: 'Arts & Culture', count: 13290, icon: '🎨' }
