@@ -2319,7 +2319,7 @@ export default function BacklinkAutomation() {
                           </Button>
                           <Button
                             variant="outline"
-                            onClick={() => window.location.href = '/login'}
+                            onClick={() => showAuthenticationModal('trial_complete')}
                             className="h-12 px-6"
                           >
                             <UserPlus className="h-4 w-4 mr-2" />
@@ -2637,7 +2637,7 @@ export default function BacklinkAutomation() {
                                                 campaign.status === 'paused' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
                                                 'bg-blue-100 text-blue-700 border-blue-300'
                                               }`}>
-                                                {campaign.status === 'active' ? '��� ACTIVE' :
+                                                {campaign.status === 'active' ? '�� ACTIVE' :
                                                  campaign.status === 'paused' ? '⏸️ PAUSED' : '✓ COMPLETE'}
                                               </Badge>
 
