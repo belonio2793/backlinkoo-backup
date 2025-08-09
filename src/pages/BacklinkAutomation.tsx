@@ -2475,7 +2475,7 @@ export default function BacklinkAutomation() {
               )}
 
               {/* Campaign Creation - Right Side or Full Width */}
-              <Card className={((user && campaigns.filter(c => c.status === 'active').length > 0) || (!user && guestCampaignResults.length > 0)) ? "xl:col-span-1" : "xl:col-span-2 mx-auto max-w-4xl"}>
+              <Card className={`${((user && campaigns.filter(c => c.status === 'active').length > 0) || (!user && guestCampaignResults.length > 0)) ? "xl:col-span-1" : "xl:col-span-2 mx-auto max-w-4xl"} border-0 shadow-none`}>
                 <CardHeader className="text-center">
                   <CardTitle className="flex items-center justify-center gap-2">
                     <Target className="h-5 w-5" />
