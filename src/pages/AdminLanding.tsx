@@ -38,12 +38,15 @@ export default function AdminLanding() {
       const { data: { user }, error } = await supabase.auth.getUser();
 
       if (error || !user) {
+        console.log('❌ No authenticated user found:', error?.message);
         clearTimeout(timeoutId);
         setIsAuthenticated(false);
         setIsAdmin(false);
         setLoading(false);
         return;
       }
+
+      console.log('✅ User authenticated:', user.email);
 
       setIsAuthenticated(true);
 
