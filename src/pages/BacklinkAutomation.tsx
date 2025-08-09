@@ -972,17 +972,17 @@ export default function BacklinkAutomation() {
 
           <TabsContent value="campaigns" className="space-y-6">
             {/* Campaign Creation */}
-            <Card className="max-w-2xl mx-auto">
-              <CardHeader className="text-center">
-                <CardTitle className="flex items-center justify-center gap-2">
+            <div className="max-w-2xl mx-auto bg-white rounded-xl p-6 shadow-sm">
+              <div className="text-center mb-6">
+                <h2 className="text-xl font-semibold flex items-center justify-center gap-2 mb-2">
                   <Target className="h-5 w-5" />
                   Create Enterprise Campaign
-                </CardTitle>
-                <CardDescription className="text-center">
+                </h2>
+                <p className="text-gray-600 text-center">
                   Deploy an AI-powered link building campaign with advanced targeting and quality controls
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
+                </p>
+              </div>
+              <div className="space-y-6">
                 <div className="space-y-4 max-w-md mx-auto">
                   <div>
                     <Label htmlFor="targetUrl">Target URL</Label>
@@ -1032,8 +1032,8 @@ export default function BacklinkAutomation() {
                     Deploy Campaign
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
             {/* Live Results - Only show when campaigns are active */}
             {campaigns.filter(c => c.status === 'active').length > 0 && (
@@ -1479,7 +1479,7 @@ export default function BacklinkAutomation() {
                           { url: 'medium.com', da: 96, traffic: '160M', niche: 'Various', automated: true },
                           { url: 'weebly.com', da: 92, traffic: '45M', niche: 'Various', automated: true },
                           { url: 'wix.com', da: 91, traffic: '110M', niche: 'Various', automated: true },
-                          { url: 'sites.google.com', da: 100, traffic: '∞', niche: 'Various', automated: true },
+                          { url: 'sites.google.com', da: 100, traffic: '���', niche: 'Various', automated: true },
                           { url: 'hubpages.com', da: 89, traffic: '12M', niche: 'Various', automated: true },
                           { url: 'livejournal.com', da: 85, traffic: '8M', niche: 'Various', automated: true },
                           { url: 'ghost.org', da: 88, traffic: '2M', niche: 'Various', automated: true }
