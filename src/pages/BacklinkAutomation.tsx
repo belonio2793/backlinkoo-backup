@@ -312,21 +312,32 @@ export default function BacklinkAutomation() {
 
       let dbCampaigns: Campaign[] = [];
 
+      // Only try to load if user is authenticated
+      if (!user?.id) {
+        console.log('⚠️ User not authenticated, skipping campaign load');
+        setCampaigns([]);
+        return;
+      }
+
       // Try to load campaigns from database
       try {
         let campaignsData = [];
 
-        // Try campaign service first
+        // Skip campaign service API and use direct database by default for now
+        // This avoids authentication issues with Netlify functions
         try {
-          campaignsData = await campaignService.getCampaigns();
-          console.log('📊 Loaded campaigns via campaign service:', campaignsData.length);
-        } catch (apiError) {
-          console.error('❌ Campaign service failed, trying direct database:', apiError);
+          campaignsData = await directCampaignService.getCampaigns(user.id);
+          console.log('📊 Loaded campaigns via direct service:', campaignsData.length);
+        } catch (directError) {
+          console.error('❌ Direct database failed, trying campaign service:', directError);
 
-          // Fallback to direct database
-          if (user?.id) {
-            campaignsData = await directCampaignService.getCampaigns(user.id);
-            console.log('📊 Loaded campaigns via direct service:', campaignsData.length);
+          // Fallback to campaign service API
+          try {
+            campaignsData = await campaignService.getCampaigns();
+            console.log('📊 Loaded campaigns via campaign service:', campaignsData.length);
+          } catch (apiError) {
+            console.error('❌ Both services failed:', apiError);
+            // Continue with empty array
           }
         }
 
