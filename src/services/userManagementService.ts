@@ -132,7 +132,7 @@ export class UserManagementService {
         subscription_status: profile.subscription_status || 'inactive',
         credits: profile.credits || 0,
         created_at: profile.created_at,
-        last_sign_in_at: profile.last_sign_in_at,
+        last_sign_in_at: null, // This would need to be fetched from auth separately if needed
         email_confirmed_at: profile.email_confirmed_at || null,
         banned_until: null, // This would need to be fetched separately from auth if needed
         metadata: profile.metadata || {},
