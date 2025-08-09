@@ -409,8 +409,9 @@ export const AffiliateProgram: React.FC = () => {
       <Tabs defaultValue="dashboard" className="max-w-7xl mx-auto">
         <div className="border-b bg-white sticky top-0 z-40">
           <div className="px-6 py-4">
-            <TabsList className="grid w-full grid-cols-3 max-w-md">
+            <TabsList className="grid w-full grid-cols-4 max-w-lg">
               <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+              <TabsTrigger value="users">Referred Users</TabsTrigger>
               <TabsTrigger value="assets">Assets</TabsTrigger>
               <TabsTrigger value="support">Support</TabsTrigger>
             </TabsList>
