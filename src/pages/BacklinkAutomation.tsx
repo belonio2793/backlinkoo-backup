@@ -1693,7 +1693,7 @@ export default function BacklinkAutomation() {
           );
 
           if (existingBlogPost) {
-            console.log('��� Found existing blog post for this URL/keyword combination:', existingBlogPost.url);
+            console.log('🔄 Found existing blog post for this URL/keyword combination:', existingBlogPost.url);
             blogResult = {
               success: true,
               blogPostUrl: existingBlogPost.url,
@@ -3881,7 +3881,13 @@ export default function BacklinkAutomation() {
                               {campaign.linksGenerated >= 20 && (
                                 <div className="text-xs text-red-600 font-medium flex items-center justify-center gap-1">
                                   <AlertTriangle className="h-3 w-3" />
-                                  Locked - Upgrade to continue
+                                  Paused - All links saved
+                                </div>
+                              )}
+                              {campaign.status === 'paused' && campaign.linksGenerated > 0 && (
+                                <div className="text-xs text-green-600 font-medium flex items-center justify-center gap-1">
+                                  <CheckCircle className="h-3 w-3" />
+                                  {campaign.linksGenerated} links preserved
                                 </div>
                               )}
                               {campaign.linksGenerated >= 15 && campaign.linksGenerated < 20 && (
