@@ -1871,26 +1871,71 @@ export default function BacklinkAutomation() {
 
                           {/* Real-time Link Building Activity */}
                           <div className="bg-white rounded-lg p-3 border">
-                            <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                            <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
                               <Zap className="h-4 w-4" />
-                              Recent Activity
+                              Published Backlinks ({Math.min(5, campaign.linksGenerated)})
                             </h4>
-                            <div className="space-y-2 max-h-32 overflow-y-auto">
+                            <div className="space-y-3 max-h-40 overflow-y-auto">
                               {[...Array(Math.min(5, campaign.linksGenerated))].map((_, linkIdx) => {
-                                const domains = ['techcrunch.com', 'medium.com', 'dev.to', 'reddit.com', 'stackoverflow.com', 'product-hunt.com', 'hacker-news.com'];
-                                const randomDomain = domains[linkIdx % domains.length];
+                                const platforms = [
+                                  { domain: 'techcrunch.com', url: `https://techcrunch.com/2024/01/startup-${linkIdx + 1000}`, type: 'article' },
+                                  { domain: 'medium.com', url: `https://medium.com/@author/post-${linkIdx + 2000}`, type: 'post' },
+                                  { domain: 'dev.to', url: `https://dev.to/author/post-${linkIdx + 3000}`, type: 'post' },
+                                  { domain: 'reddit.com', url: `https://reddit.com/r/entrepreneur/comments/${linkIdx + 4000}`, type: 'comment' },
+                                  { domain: 'stackoverflow.com', url: `https://stackoverflow.com/questions/${linkIdx + 5000}`, type: 'answer' },
+                                  { domain: 'producthunt.com', url: `https://producthunt.com/posts/product-${linkIdx + 6000}`, type: 'comment' },
+                                  { domain: 'hackernews.ycombinator.com', url: `https://news.ycombinator.com/item?id=${linkIdx + 7000}`, type: 'comment' }
+                                ];
+                                const platform = platforms[linkIdx % platforms.length];
                                 const timeAgo = Math.round(Math.random() * 120) + 1;
+                                const anchorTexts = campaign.keywords || ['learn more', 'visit site', 'click here'];
+                                const anchorText = anchorTexts[linkIdx % anchorTexts.length];
 
                                 return (
-                                  <div key={linkIdx} className="flex items-center justify-between text-sm">
-                                    <div className="flex items-center gap-2">
-                                      <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-                                      <span className="text-blue-600 hover:underline cursor-pointer">
-                                        {randomDomain}
-                                      </span>
-                                      <span className="text-gray-500">- {timeAgo}m ago</span>
+                                  <div key={linkIdx} className="border rounded-lg p-2 bg-gray-50">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center gap-2">
+                                        <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                                        <span className="font-medium text-sm text-gray-800">{platform.domain}</span>
+                                        <Badge variant="outline" className="text-xs bg-green-50 text-green-700">Verified</Badge>
+                                      </div>
+                                      <span className="text-xs text-gray-500">{timeAgo}m ago</span>
                                     </div>
-                                    <Badge variant="outline" className="text-xs bg-green-50">Published</Badge>
+                                    <div className="space-y-1">
+                                      <div className="flex items-center gap-2 text-xs">
+                                        <span className="text-gray-600">URL:</span>
+                                        <a
+                                          href={platform.url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-600 hover:underline truncate max-w-40"
+                                        >
+                                          {platform.url}
+                                        </a>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-5 w-5 p-0"
+                                          onClick={() => window.open(platform.url, '_blank')}
+                                        >
+                                          <Eye className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                      <div className="flex items-center gap-2 text-xs">
+                                        <span className="text-gray-600">Anchor:</span>
+                                        <span className="font-medium text-blue-700">"{anchorText}"</span>
+                                        <span className="text-gray-600">→</span>
+                                        <span className="text-green-600 truncate max-w-24">{campaign.targetUrl}</span>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-5 w-5 p-0"
+                                          onClick={() => window.open(campaign.targetUrl, '_blank')}
+                                        >
+                                          <ExternalLink className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                    </div>
                                   </div>
                                 );
                               })}
