@@ -3246,6 +3246,28 @@ export default function BacklinkAutomation() {
                                   <Play className="h-3 w-3" />
                                 </Button>
                               )}
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => {
+                                  setGuestCampaignResults(prev =>
+                                    prev.filter(c => c.id !== campaign.id)
+                                  );
+                                  // Also remove from localStorage
+                                  const updatedResults = JSON.parse(localStorage.getItem('guest_campaign_results') || '[]')
+                                    .filter((c: any) => c.id !== campaign.id);
+                                  localStorage.setItem('guest_campaign_results', JSON.stringify(updatedResults));
+
+                                  toast({
+                                    title: "🗑️ Trial Campaign Deleted",
+                                    description: "Campaign has been removed from your trial.",
+                                  });
+                                }}
+                                className="h-8 px-2 border-red-300 text-red-600 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
                             </div>
                           </div>
 
