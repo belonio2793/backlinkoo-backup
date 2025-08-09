@@ -160,7 +160,7 @@ export function GuestCampaignRestrictionsOverlay({
                 </Button>
                 
                 <div className="text-xs text-gray-500">
-                  Upgrade to Premium • $49/month
+                  Upgrade to Premium • $29/month
                 </div>
               </div>
             </CardContent>
