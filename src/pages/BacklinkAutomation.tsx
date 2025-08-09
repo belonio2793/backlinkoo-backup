@@ -620,6 +620,24 @@ export default function BacklinkAutomation() {
     setCampaignToDelete(null);
   };
 
+  const generateCampaignName = (url: string, keywords: string) => {
+    try {
+      const domain = new URL(url).hostname.replace('www.', '');
+      const primaryKeyword = keywords.split(',')[0]?.trim() || 'SEO';
+      const timestamp = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      return `${domain} ${primaryKeyword} ${timestamp}`;
+    } catch {
+      return `Campaign ${new Date().toLocaleDateString()}`;
+    }
+  };
+
+  const checkDuplicateUrl = (url: string) => {
+    return campaigns.some(campaign =>
+      campaign.targetUrl === url &&
+      (campaign.status === 'active' || campaign.status === 'paused')
+    );
+  };
+
   const toggleAggregation = () => {
     setIsAggregating(!isAggregating);
 
