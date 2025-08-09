@@ -1049,6 +1049,11 @@ export default function BacklinkAutomation() {
         } catch (blogError) {
           console.warn('Blog generation failed for guest campaign:', blogError.message);
           // Continue with campaign creation even if blog generation fails
+
+          // If it's a 404 error, log helpful message
+          if (blogError.message?.includes('404')) {
+            console.log('ℹ️ Blog generation service not available - campaign will continue without blog post');
+          }
         }
 
         // Add campaign result for guest with initially empty published URLs
