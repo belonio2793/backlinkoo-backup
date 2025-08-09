@@ -1133,44 +1133,6 @@ export default function BacklinkAutomation() {
           </TabsContent>
 
 
-          <TabsContent value="content" className="space-y-6">
-            {/* Content Generation AI */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Bot className="h-5 w-5" />
-                  AI Content Generation Engine
-                </CardTitle>
-                <CardDescription>
-                  Advanced natural language processing for authentic, high-converting content
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Alert>
-                  <Brain className="h-4 w-4" />
-                  <AlertDescription>
-                    Content generation engine is active and learning from campaign performance. 
-                    {campaigns.filter(c => c.status === 'active').length} campaigns are currently generating content.
-                  </AlertDescription>
-                </Alert>
-                
-                <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="text-2xl font-bold text-blue-600">GPT-4</div>
-                    <div className="text-sm text-gray-600">Primary Language Model</div>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="text-2xl font-bold text-green-600">95%</div>
-                    <div className="text-sm text-gray-600">Content Uniqueness</div>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="text-2xl font-bold text-purple-600">12</div>
-                    <div className="text-sm text-gray-600">Content Types</div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
 
           <TabsContent value="settings" className="space-y-6">
