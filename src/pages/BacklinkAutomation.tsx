@@ -219,16 +219,6 @@ export default function BacklinkAutomation() {
         averageResponseTime: Math.max(50, prev.averageResponseTime + (Math.random() - 0.5) * 20)
       }));
 
-      // Update aggregation stats in real-time if aggregating
-      if (isAggregating) {
-        setAggregationStats(prev => ({
-          ...prev,
-          aggregatedToday: prev.aggregatedToday + Math.floor(Math.random() * (aggregationSpeed / 10)),
-          totalLinks: prev.totalLinks + Math.floor(Math.random() * 5),
-          successRate: Math.min(100, Math.max(85, prev.successRate + (Math.random() - 0.5) * 2)),
-          avgResponseTime: Math.max(0.5, prev.avgResponseTime + (Math.random() - 0.5) * 0.3)
-        }));
-      }
     } catch (error) {
       console.error('Failed to update real-time metrics:', error);
     }
