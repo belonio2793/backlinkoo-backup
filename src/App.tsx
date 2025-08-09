@@ -13,7 +13,6 @@ const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
 const LazyAffiliateProgram = lazy(() => import("./pages/AffiliateProgram"));
 const LazyBlog = lazy(() => import("./pages/Blog").then(module => ({ default: module.Blog })));
 const LazyDashboard = lazy(() => import("./pages/Dashboard"));
-const LazyAffiliateProgram = lazy(() => import("./pages/AffiliateProgram"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
