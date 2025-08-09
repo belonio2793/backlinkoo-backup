@@ -5,12 +5,15 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ModalProvider } from "@/contexts/ModalContext";
+import { UnifiedModalManager } from "@/components/UnifiedModalManager";
 import Index from "./pages/Index";
 
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
 const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDiscoveryDashboard"));
 const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
 const LazyAffiliateProgram = lazy(() => import("./pages/AffiliateProgram"));
+const LazyBlog = lazy(() => import("./pages/Blog"));
+const LazyDashboard = lazy(() => import("./pages/Dashboard"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,9 +30,34 @@ const App = () => (
       <ModalProvider>
         <Toaster />
         <Sonner />
+        <UnifiedModalManager />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route
+              path="/blog"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <LazyBlog />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <LazyDashboard />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/affiliate"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <LazyAffiliateProgram />
+                </Suspense>
+              }
+            />
             <Route
               path="/automation"
               element={
