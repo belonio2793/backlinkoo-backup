@@ -1430,7 +1430,7 @@ export default function BacklinkAutomation() {
         if (guestLinksGenerated === 0) {
           // First campaign - surprise reveal
           toast({
-            title: "�� Surprise! Your Backlinks Are Ready!",
+            title: "🎉 Surprise! Your Backlinks Are Ready!",
             description: `We've generated ${linksToGenerate} premium backlinks for you instantly! View them in the live monitor above!`,
             duration: 5000,
           });
