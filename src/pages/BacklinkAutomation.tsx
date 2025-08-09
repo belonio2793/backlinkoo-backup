@@ -628,7 +628,7 @@ export default function BacklinkAutomation() {
           // First campaign - surprise reveal
           toast({
             title: "🎉 Surprise! Your Backlinks Are Ready!",
-            description: `We've generated ${linksToGenerate} premium backlinks for you instantly! This usually costs $${linksToGenerate * 20}+`,
+            description: `We've generated ${linksToGenerate} premium backlinks for you instantly! Check the Results tab!`,
             duration: 5000,
           });
         } else if (newTotal >= 20) {
