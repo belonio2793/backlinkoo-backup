@@ -1634,15 +1634,15 @@ export default function BacklinkAutomation() {
                     <div className="space-y-3">
                       <div className="flex items-center justify-between">
                         <Label>User Agent Rotation</Label>
-                        <Switch checked={campaignForm.antiDetection.userAgentRotation} />
+                        <Switch checked={true} disabled />
                       </div>
                       <div className="flex items-center justify-between">
                         <Label>Human-like Delays</Label>
-                        <Switch checked={campaignForm.antiDetection.humanLikeDelays} />
+                        <Switch checked={true} disabled />
                       </div>
                       <div className="flex items-center justify-between">
                         <Label>Content Variation</Label>
-                        <Switch checked={campaignForm.antiDetection.contentVariation} />
+                        <Switch checked={true} disabled />
                       </div>
                     </div>
                   </div>
