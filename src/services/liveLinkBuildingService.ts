@@ -169,7 +169,7 @@ class LiveLinkBuildingService {
         };
       }
 
-      const linksPublished = campaigns?.reduce((total, campaign) => total + (campaign.links_delivered || 0), 0) || 0;
+      const linksPublished = publishedLinks?.length || 0;
       const maxLinks = 20;
       const remainingLinks = Math.max(0, maxLinks - linksPublished);
       const isLimitReached = linksPublished >= maxLinks;
