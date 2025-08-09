@@ -344,10 +344,10 @@ function Blog() {
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" onClick={() => navigate("/login")} className="font-medium">
+                  <Button variant="ghost" onClick={() => setLoginModalOpen(true)} className="font-medium">
                     Sign In
                   </Button>
-                  <Button onClick={() => navigate("/login")} className="font-medium">
+                  <Button onClick={() => setLoginModalOpen(true)} className="font-medium">
                     Get Started
                   </Button>
                 </>
