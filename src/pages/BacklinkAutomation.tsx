@@ -847,18 +847,17 @@ export default function BacklinkAutomation() {
                   )}
                 </div>
 
-                <Button 
-                  onClick={createCampaign} 
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 h-12"
-                  size="lg"
+                <Button
+                  onClick={createCampaign}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                   disabled={isLoading}
                 >
                   {isLoading ? (
-                    <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                   ) : (
-                    <Bot className="h-5 w-5 mr-2" />
+                    <Bot className="h-4 w-4 mr-2" />
                   )}
-                  Deploy AI-Powered Campaign
+                  Deploy Campaign
                 </Button>
               </CardContent>
             </Card>
