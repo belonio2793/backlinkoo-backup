@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Progress } from '../ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { compatibilityAffiliateService } from '../../services/compatibilityAffiliateService';
+import ReferredUsers from './ReferredUsers';
 import {
   DollarSign,
   Users,
