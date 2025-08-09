@@ -308,35 +308,97 @@ export default function BacklinkAutomation() {
   const loadCampaigns = async () => {
     try {
       setIsLoading(true);
-      
+
+      let dbCampaigns: Campaign[] = [];
+
+      // Try to load campaigns from database
+      try {
+        const campaignsData = await campaignService.getCampaigns();
+        console.log('📊 Loaded campaigns from database:', campaignsData);
+
+        dbCampaigns = campaignsData.map((campaign: any) => ({
+          id: campaign.id,
+          name: campaign.name,
+          targetUrl: campaign.target_url,
+          keywords: campaign.keywords ? campaign.keywords.split(',').map((k: string) => k.trim()) : [],
+          status: campaign.status as 'active' | 'paused' | 'stopped' | 'completed' | 'failed',
+          progress: Math.round((campaign.links_generated / campaign.total_target) * 100) || 0,
+          linksGenerated: campaign.links_generated || 0,
+          linksLive: campaign.links_live || 0,
+          dailyTarget: campaign.daily_limit || 10,
+          totalTarget: campaign.total_target || 100,
+          quality: {
+            averageAuthority: campaign.average_authority || 0,
+            averageRelevance: campaign.average_relevance || 0,
+            successRate: campaign.success_rate || 0
+          },
+          performance: {
+            velocity: campaign.velocity || 0,
+            trend: campaign.trend as 'up' | 'down' | 'stable' || 'stable',
+            efficiency: campaign.efficiency || 0
+          },
+          createdAt: new Date(campaign.created_at),
+          lastActive: new Date(campaign.last_activity || campaign.created_at),
+          estimatedCompletion: new Date(campaign.estimated_completion || Date.now() + 86400000 * 7)
+        }));
+
+        console.log('✅ Converted campaigns:', dbCampaigns);
+      } catch (dbError) {
+        console.error('❌ Database load failed:', dbError);
+        // Continue with empty array if database fails
+      }
+
       // Get queue stats from campaign manager
       const queueStats = queueManager.getQueueStats();
-      
-      // No demo campaigns - start with empty array
-      const demoCampaigns: Campaign[] = [];
 
-      setCampaigns(demoCampaigns);
-      
+      setCampaigns(dbCampaigns);
+
       // Update system metrics
+      const activeCampaigns = dbCampaigns.filter(c => c.status === 'active').length;
+      const avgSuccess = dbCampaigns.length > 0 ?
+        dbCampaigns.reduce((sum, c) => sum + c.quality.successRate, 0) / dbCampaigns.length : 0;
+      const avgQuality = dbCampaigns.length > 0 ?
+        dbCampaigns.reduce((sum, c) => sum + c.quality.averageAuthority, 0) / dbCampaigns.length : 0;
+
       setSystemMetrics(prev => ({
         ...prev,
-        activeCampaigns: demoCampaigns.filter(c => c.status === 'active').length,
+        activeCampaigns,
         usedCapacity: queueStats.processing,
         queueLength: queueStats.queued,
-        successRate: demoCampaigns.reduce((sum, c) => sum + c.quality.successRate, 0) / demoCampaigns.length,
-        averageQuality: demoCampaigns.reduce((sum, c) => sum + c.quality.averageAuthority, 0) / demoCampaigns.length
+        successRate: avgSuccess,
+        averageQuality: avgQuality
       }));
+
+      // Start live link building for active campaigns
+      if (user?.id) {
+        for (const campaign of dbCampaigns.filter(c => c.status === 'active')) {
+          const linkBuildingConfig: LinkBuildingConfig = {
+            campaignId: campaign.id,
+            targetUrl: campaign.targetUrl,
+            keywords: campaign.keywords,
+            anchorTexts: [], // Will be extracted from database later
+            userId: user.id,
+            isUserPremium: isUserPremium
+          };
+
+          await liveLinkBuildingService.startLinkBuilding(linkBuildingConfig);
+        }
+
+        if (activeCampaigns > 0) {
+          setIsLinkBuildingActive(true);
+        }
+      }
 
       toast({
         title: "Enterprise System Loaded",
-        description: `${demoCampaigns.length} campaigns loaded. System capacity: ${queueStats.totalCapacity} concurrent campaigns.`,
+        description: `${dbCampaigns.length} campaigns loaded. ${activeCampaigns} active. System capacity: ${queueStats.totalCapacity} concurrent campaigns.`,
       });
 
     } catch (error) {
       console.error('Failed to load campaigns:', error);
       toast({
         title: "System Load Error",
-        description: "Failed to load campaign data. Using offline mode.",
+        description: "Failed to load campaign data. Please check database connection.",
         variant: "destructive"
       });
     } finally {
