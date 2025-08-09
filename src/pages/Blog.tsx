@@ -15,6 +15,7 @@ import { Footer } from '@/components/Footer';
 import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
 import { ClaimStatusIndicator } from '@/components/ClaimStatusIndicator';
 import { ClaimSystemStatus } from '@/components/ClaimSystemStatus';
+import { LoginModal } from '@/components/LoginModal';
 import { useToast } from '@/hooks/use-toast';
 import {
   Calendar,
