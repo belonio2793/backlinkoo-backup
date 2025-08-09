@@ -356,6 +356,16 @@ export default function BacklinkAutomation() {
 
       localStorage.setItem('permanent_campaigns', JSON.stringify(savedCampaigns));
       console.log('📊 Campaign saved permanently with live metrics:', campaign.name);
+
+      // Show success notification occasionally
+      if (Math.random() > 0.8) {
+        toast({
+          title: '📊 Campaign Metrics Saved',
+          description: `${campaign.name || 'Campaign'} progress saved permanently with all live metrics`,
+          duration: 2000
+        });
+      }
+
       return enhancedCampaign;
     } catch (error) {
       console.warn('⚠️ Failed to save campaign permanently:', error);
