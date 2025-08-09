@@ -2049,6 +2049,58 @@ export default function BacklinkAutomation() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+
+                  {/* Guest Restrictions Banner */}
+                  {!user && (
+                    <div className="space-y-3">
+                      {/* Campaign Limit Warning */}
+                      {guestCampaignRestrictions?.restrictions?.campaignsUsed >= guestCampaignRestrictions?.restrictions?.campaignsLimit - 1 && (
+                        <Alert className="border-yellow-200 bg-gradient-to-r from-yellow-50 to-orange-50">
+                          <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                          <AlertDescription>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <span className="font-medium text-yellow-800">
+                                  Campaign Limit: {guestCampaignRestrictions?.restrictions?.campaignsUsed || 0}/{guestCampaignRestrictions?.restrictions?.campaignsLimit || 3}
+                                </span>
+                                <div className="text-yellow-700 text-sm mt-1">
+                                  Upgrade to Premium for unlimited campaigns and 500+ links each!
+                                </div>
+                              </div>
+                              <Button
+                                size="sm"
+                                onClick={() => {
+                                  setPremiumUpsellTrigger('campaign_limit');
+                                  setShowGuestPremiumModal(true);
+                                }}
+                                className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-xs"
+                              >
+                                <Crown className="h-3 w-3 mr-1" />
+                                Upgrade Now
+                              </Button>
+                            </div>
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
+                      {/* Usage Stats for Guests */}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="bg-blue-50 rounded-lg p-3 text-center">
+                          <div className="text-lg font-bold text-blue-600">
+                            {guestCampaignRestrictions?.restrictions?.campaignsUsed || 0}/{guestCampaignRestrictions?.restrictions?.campaignsLimit || 3}
+                          </div>
+                          <div className="text-xs text-blue-700">Free Campaigns</div>
+                        </div>
+                        <div className="bg-green-50 rounded-lg p-3 text-center">
+                          <div className="text-lg font-bold text-green-600">
+                            {guestLinksGenerated}/60
+                          </div>
+                          <div className="text-xs text-green-700">Total Links Built</div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
                     <div>
                       <Label htmlFor="linkType">Link Building Strategy</Label>
