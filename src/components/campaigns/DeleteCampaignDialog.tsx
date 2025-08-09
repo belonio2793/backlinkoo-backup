@@ -47,7 +47,6 @@ interface DeleteCampaignDialogProps {
 }
 
 interface DeletionOptions {
-  forceDelete: boolean;
   confirmationText: string;
 }
 
@@ -59,7 +58,6 @@ export default function DeleteCampaignDialog({
   isDeleting = false
 }: DeleteCampaignDialogProps) {
   const [confirmationText, setConfirmationText] = useState('');
-  const [forceDelete, setForceDelete] = useState(false);
 
   if (!campaign) return null;
 
@@ -68,13 +66,11 @@ export default function DeleteCampaignDialog({
   const expectedText = 'delete';
   const isConfirmationValid = confirmationText === expectedText;
   
-  const canProceed = isConfirmationValid &&
-    (!isActive || (isActive && forceDelete));
+  const canProceed = isConfirmationValid;
 
   const handleClose = () => {
     // Reset all state when closing
     setConfirmationText('');
-    setForceDelete(false);
     onClose();
   };
 
@@ -82,7 +78,6 @@ export default function DeleteCampaignDialog({
     if (!canProceed) return;
 
     const options: DeletionOptions = {
-      forceDelete,
       confirmationText
     };
 
@@ -216,21 +211,6 @@ export default function DeleteCampaignDialog({
                 Deletion will immediately stop all ongoing operations and may disrupt the link building process.
               </AlertDescription>
             </Alert>
-          )}
-
-          {isActive && (
-            <div className="mb-4">
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="forceDelete"
-                  checked={forceDelete}
-                  onCheckedChange={(checked) => setForceDelete(checked as boolean)}
-                />
-                <Label htmlFor="forceDelete" className="text-sm font-medium text-red-700">
-                  Force delete active campaign (will immediately stop all processing)
-                </Label>
-              </div>
-            </div>
           )}
 
           {/* Confirmation Text */}
