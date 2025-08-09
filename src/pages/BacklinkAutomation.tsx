@@ -237,60 +237,109 @@ export default function BacklinkAutomation() {
   const loadCampaigns = async () => {
     try {
       setIsLoading(true);
-      
-      // Load campaigns from database via API
-      const dbCampaigns = await campaignService.getCampaigns();
-      setDatabaseCampaigns(dbCampaigns);
-      
-      // Convert database campaigns to display format
-      const displayCampaigns: Campaign[] = dbCampaigns.map(dbCampaign => ({
-        id: dbCampaign.id,
-        name: dbCampaign.name,
-        targetUrl: dbCampaign.target_url,
-        keywords: dbCampaign.keywords,
-        status: dbCampaign.status,
-        progress: dbCampaign.progress,
-        linksGenerated: dbCampaign.links_generated,
-        linksLive: Math.floor(dbCampaign.links_generated * 0.92), // 92% success rate
-        dailyTarget: dbCampaign.daily_limit,
-        totalTarget: 1000,
-        quality: {
-          averageAuthority: 75 + Math.random() * 20,
-          averageRelevance: 80 + Math.random() * 15,
-          successRate: 85 + Math.random() * 10
-        },
-        performance: {
-          velocity: Math.random() * 10,
-          trend: Math.random() > 0.5 ? 'up' : 'stable' as 'up' | 'down' | 'stable',
-          efficiency: 70 + Math.random() * 25
-        },
-        createdAt: new Date(dbCampaign.created_at),
-        lastActive: new Date(dbCampaign.last_active_at),
-        estimatedCompletion: new Date(Date.now() + 86400000 * Math.ceil(1000 / dbCampaign.daily_limit))
-      }));
 
-      setCampaigns(displayCampaigns);
-      
-      // Update system metrics
-      setSystemMetrics(prev => ({
-        ...prev,
-        activeCampaigns: displayCampaigns.filter(c => c.status === 'active').length,
-        usedCapacity: displayCampaigns.length,
-        queueLength: displayCampaigns.filter(c => c.status === 'active').length,
-        successRate: displayCampaigns.reduce((sum, c) => sum + c.quality.successRate, 0) / Math.max(displayCampaigns.length, 1),
-        averageQuality: displayCampaigns.reduce((sum, c) => sum + c.quality.averageAuthority, 0) / Math.max(displayCampaigns.length, 1)
-      }));
+      // Check if user is authenticated before making API calls
+      if (!user) {
+        console.log('User not authenticated, loading demo campaigns...');
+        // Load demo campaigns for unauthenticated users
+        const demoCampaigns: Campaign[] = [];
+        setCampaigns(demoCampaigns);
+        setDatabaseCampaigns([]);
 
-      toast({
-        title: "Enterprise System Loaded",
-        description: `${displayCampaigns.length} campaigns loaded from database. System ready for internet proliferation.`,
-      });
+        setSystemMetrics(prev => ({
+          ...prev,
+          activeCampaigns: 0,
+          usedCapacity: 0,
+          queueLength: 0,
+          successRate: 0,
+          averageQuality: 0
+        }));
+
+        return;
+      }
+
+      try {
+        // Load campaigns from database via API
+        const dbCampaigns = await campaignService.getCampaigns();
+        setDatabaseCampaigns(dbCampaigns);
+
+        // Convert database campaigns to display format
+        const displayCampaigns: Campaign[] = dbCampaigns.map(dbCampaign => ({
+          id: dbCampaign.id,
+          name: dbCampaign.name,
+          targetUrl: dbCampaign.target_url,
+          keywords: dbCampaign.keywords,
+          status: dbCampaign.status,
+          progress: dbCampaign.progress,
+          linksGenerated: dbCampaign.links_generated,
+          linksLive: Math.floor(dbCampaign.links_generated * 0.92), // 92% success rate
+          dailyTarget: dbCampaign.daily_limit,
+          totalTarget: 1000,
+          quality: {
+            averageAuthority: 75 + Math.random() * 20,
+            averageRelevance: 80 + Math.random() * 15,
+            successRate: 85 + Math.random() * 10
+          },
+          performance: {
+            velocity: Math.random() * 10,
+            trend: Math.random() > 0.5 ? 'up' : 'stable' as 'up' | 'down' | 'stable',
+            efficiency: 70 + Math.random() * 25
+          },
+          createdAt: new Date(dbCampaign.created_at),
+          lastActive: new Date(dbCampaign.last_active_at),
+          estimatedCompletion: new Date(Date.now() + 86400000 * Math.ceil(1000 / dbCampaign.daily_limit))
+        }));
+
+        setCampaigns(displayCampaigns);
+
+        // Update system metrics
+        setSystemMetrics(prev => ({
+          ...prev,
+          activeCampaigns: displayCampaigns.filter(c => c.status === 'active').length,
+          usedCapacity: displayCampaigns.length,
+          queueLength: displayCampaigns.filter(c => c.status === 'active').length,
+          successRate: displayCampaigns.reduce((sum, c) => sum + c.quality.successRate, 0) / Math.max(displayCampaigns.length, 1),
+          averageQuality: displayCampaigns.reduce((sum, c) => sum + c.quality.averageAuthority, 0) / Math.max(displayCampaigns.length, 1)
+        }));
+
+        toast({
+          title: "Enterprise System Loaded",
+          description: `${displayCampaigns.length} campaigns loaded from database. System ready for internet proliferation.`,
+        });
+
+      } catch (apiError) {
+        console.error('API error loading campaigns:', apiError);
+
+        // Fall back to empty state if API fails
+        setCampaigns([]);
+        setDatabaseCampaigns([]);
+
+        setSystemMetrics(prev => ({
+          ...prev,
+          activeCampaigns: 0,
+          usedCapacity: 0,
+          queueLength: 0,
+          successRate: 0,
+          averageQuality: 0
+        }));
+
+        toast({
+          title: "Connection Issue",
+          description: "Unable to connect to campaign service. Please try refreshing the page.",
+          variant: "destructive"
+        });
+      }
 
     } catch (error) {
       console.error('Failed to load campaigns:', error);
+
+      // Final fallback
+      setCampaigns([]);
+      setDatabaseCampaigns([]);
+
       toast({
         title: "System Load Error",
-        description: "Failed to load campaign data. Using offline mode.",
+        description: "Failed to load campaign data. Please refresh the page.",
         variant: "destructive"
       });
     } finally {
