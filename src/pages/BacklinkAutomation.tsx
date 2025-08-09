@@ -725,6 +725,73 @@ export default function BacklinkAutomation() {
     }
   };
 
+  // Campaign Management Functions
+  const pauseCampaign = async (campaignId: string) => {
+    try {
+      setIsLoading(true);
+      const result = await campaignService.updateCampaignStatus(campaignId, 'paused');
+      if (result.success) {
+        setCampaigns(prev => prev.map(c =>
+          c.id === campaignId ? { ...c, status: 'paused' } : c
+        ));
+        toast({
+          title: "Campaign Paused",
+          description: "Campaign has been paused successfully.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to pause campaign. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const resumeCampaign = async (campaignId: string) => {
+    try {
+      setIsLoading(true);
+      const result = await campaignService.updateCampaignStatus(campaignId, 'active');
+      if (result.success) {
+        setCampaigns(prev => prev.map(c =>
+          c.id === campaignId ? { ...c, status: 'active' } : c
+        ));
+        toast({
+          title: "Campaign Resumed",
+          description: "Campaign is now active and generating links.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to resume campaign. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const checkPremiumLimits = (campaign: Campaign) => {
+    if (!user || isPremium) return false;
+    return campaign.linksGenerated >= 20;
+  };
+
+  const showPremiumUpgrade = (campaignId: string) => {
+    setShowTrialExhaustedModal(true);
+    toast({
+      title: "🚀 20 Link Limit Reached!",
+      description: "Upgrade to Premium for unlimited link building and advanced features!",
+      action: (
+        <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
+          Upgrade Now
+        </Button>
+      ),
+    });
+  };
+
   const deployCampaign = async () => {
     // Validation
     if (!campaignForm.targetUrl.trim()) {
