@@ -131,6 +131,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/affiliate"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyAffiliate />
+                </Suspense>
+              }
+            />
 
             {/* Authentication routes */}
             <Route
