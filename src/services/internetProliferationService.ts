@@ -599,9 +599,12 @@ class InternetProliferationService {
             domain: result.metadata.domain,
             link_type: result.metadata.linkType,
             authority_score: result.metadata.domainAuthority,
-            relevance_score: 80 + Math.floor(Math.random() * 20),
             status: result.success ? 'posted' : 'failed',
-            discovery_method: 'automated_proliferation'
+            metadata: {
+              discovery_method: 'automated_proliferation',
+              relevance_score: 80 + Math.floor(Math.random() * 20),
+              ...result.metadata
+            }
           })
           .select()
           .single();
