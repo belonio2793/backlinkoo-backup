@@ -86,9 +86,10 @@ export function CleanAuthForm({
         });
       }
     } catch (error: any) {
+      console.error("Authentication error:", error?.message || error);
       toast({
         title: "Connection error",
-        description: "Unable to connect to authentication service.",
+        description: error?.message || "Unable to connect to authentication service.",
         variant: "destructive",
       });
     } finally {
