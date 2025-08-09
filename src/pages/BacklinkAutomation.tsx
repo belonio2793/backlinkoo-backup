@@ -212,6 +212,9 @@ export default function BacklinkAutomation() {
   const [premiumLimitData, setPremiumLimitData] = useState<any>({});
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [usageStats, setUsageStats] = useState({ linksPosted: 0, isLimitReached: false });
+  const [guestLinksGenerated, setGuestLinksGenerated] = useState(0);
+  const [showTrialExhaustedModal, setShowTrialExhaustedModal] = useState(false);
+  const [guestCampaignResults, setGuestCampaignResults] = useState<any[]>([]);
   const [isFetching, setIsFetching] = useState(false);
   const [backendStatus, setBackendStatus] = useState('available');
   const [databaseStatus, setDatabaseStatus] = useState<DatabaseStatus | null>(null);
