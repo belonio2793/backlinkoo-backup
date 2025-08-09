@@ -5289,6 +5289,64 @@ export default function BacklinkAutomation() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Enhanced Exit Modal */}
+      <Dialog open={showExitModal} onOpenChange={setShowExitModal}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-orange-600" />
+              Security Alert: Leaving Page
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="bg-orange-50 rounded-lg p-4 border border-orange-200">
+              <div className="flex items-start gap-3">
+                <Shield className="h-6 w-6 text-orange-600 mt-1" />
+                <div>
+                  <h4 className="font-medium text-orange-900 mb-2">For Your Security & Protection</h4>
+                  <p className="text-sm text-orange-800 mb-3">
+                    All active campaigns will be automatically paused when you leave this page.
+                    This protects your account and ensures link building quality.
+                  </p>
+                  <div className="space-y-2 text-sm text-orange-700">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      <span>All progress will be saved</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      <span>Settings and configurations preserved</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" />
+                      <span>Easy reactivation when you return</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowExitModal(false)}
+                className="flex-1"
+              >
+                Stay on Page
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowExitModal(false);
+                  window.location.href = '/';
+                }}
+                className="flex-1 bg-orange-600 hover:bg-orange-700"
+              >
+                Continue Leaving
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
