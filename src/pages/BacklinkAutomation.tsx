@@ -1272,9 +1272,24 @@ export default function BacklinkAutomation() {
         );
       }
 
+      // Ensure all links are preserved in permanent storage when paused
+      if (!user) {
+        guestCampaignResults.forEach(camp => {
+          if (camp.id === campaignId) {
+            saveCampaignPermanently({
+              ...camp,
+              status: 'paused',
+              pausedAt: new Date().toISOString(),
+              linksPreserved: camp.linksGenerated || 0,
+              preservationNote: 'All links and metrics saved permanently upon pause'
+            });
+          }
+        });
+      }
+
       toast({
-        title: "⏸️ Campaign Paused",
-        description: "Link building activity has been paused. Resume anytime to continue.",
+        title: "⏸️ Campaign Paused Successfully",
+        description: `All ${campaigns.find(c => c.id === campaignId)?.linksGenerated || 0} links and metrics permanently saved. Resume anytime to continue.`,
       });
     } catch (error) {
       toast({
@@ -2318,14 +2333,28 @@ export default function BacklinkAutomation() {
                       ) : (
                         <>
                           <User className="h-3 w-3 text-blue-600" />
-                          <span className="text-lg font-bold text-blue-600">{usageStats.linksPosted}/20</span>
+                          <span className="text-lg font-bold text-blue-600">
+                            {(() => {
+                              // Get total links from all campaigns (static source)
+                              const totalUserLinks = campaigns.reduce((sum, c) => sum + (c.linksGenerated || 0), 0);
+                              return isPremium ?
+                                <><Infinity className="h-4 w-4 mr-1" /><span>∞</span></> :
+                                `${totalUserLinks}/20`;
+                            })()}
+                          </span>
                         </>
                       )
                     ) : (
                       guestLinksGenerated > 0 ? (
                         <>
                           <Zap className="h-3 w-3 text-green-600" />
-                          <span className="text-lg font-bold text-green-600">{guestLinksGenerated}/20</span>
+                          <span className="text-lg font-bold text-green-600">
+                            {(() => {
+                              // Get total links from guest campaigns (static source)
+                              const totalGuestLinks = guestCampaignResults.reduce((sum, c) => sum + (c.linksGenerated || 0), 0);
+                              return `${totalGuestLinks}/20`;
+                            })()}
+                          </span>
                         </>
                       ) : (
                         <>
@@ -3816,7 +3845,11 @@ export default function BacklinkAutomation() {
                                 campaign.linksGenerated >= 15 ? 'text-yellow-600' : 'text-green-600'
                               }`}>
                                 {campaign.linksGenerated >= 20 && <Lock className="h-4 w-4" />}
-                                {campaign.linksGenerated || 0}/20
+                                {isPremium ? (
+                                  <><Infinity className="h-4 w-4 mr-1" /><span>∞</span></>
+                                ) : (
+                                  `${campaign.linksGenerated || 0}/20`
+                                )}
                               </div>
                               <div className="text-xs text-gray-500">Free Links</div>
                               {campaign.linksGenerated >= 20 && (
@@ -3853,7 +3886,13 @@ export default function BacklinkAutomation() {
                           <div className="mb-3">
                             <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
                               <span>Link Building Progress</span>
-                              <span>{campaign.linksGenerated || 0}/20 free links</span>
+                              <span>
+                                {isPremium ? (
+                                  <>∞ unlimited links</>
+                                ) : (
+                                  `${campaign.linksGenerated || 0}/20 free links`
+                                )}
+                              </span>
                             </div>
                             <div className="w-full bg-gray-200 rounded-full h-2">
                               <div
