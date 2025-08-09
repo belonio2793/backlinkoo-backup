@@ -901,6 +901,38 @@ export default function BacklinkAutomation() {
                   </div>
                 </CardHeader>
                 <CardContent>
+                  {/* Free Tier Progress Bar */}
+                  {!isPremium && (
+                    <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-blue-900">Free Tier Usage</span>
+                        <Badge variant={
+                          campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) >= 20 ? 'destructive' :
+                          campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) >= 15 ? 'default' : 'secondary'
+                        }>
+                          {campaigns.reduce((sum, c) => sum + c.linksGenerated, 0)}/20 Links
+                        </Badge>
+                      </div>
+                      <Progress
+                        value={(campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) / 20) * 100}
+                        className="h-2"
+                      />
+                      <div className="flex justify-between mt-2 text-xs text-gray-600">
+                        <span>Free limit</span>
+                        {campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) >= 20 ? (
+                          <Button
+                            size="sm"
+                            onClick={() => setShowPremiumModal(true)}
+                            className="text-xs h-6 px-2"
+                          >
+                            Upgrade Now
+                          </Button>
+                        ) : (
+                          <span>Upgrade for unlimited</span>
+                        )}
+                      </div>
+                    </div>
+                  )}
                   <div className="space-y-4">
                     {campaigns.map((campaign) => (
                       <div key={campaign.id} className="border rounded-lg p-6 bg-gradient-to-r from-white to-gray-50 hover:shadow-md transition-shadow">
