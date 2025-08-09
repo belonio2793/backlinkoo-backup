@@ -452,12 +452,34 @@ export default function BacklinkAutomation() {
     const newCount = guestLinksGenerated + 1;
     updateGuestLinkCount(newCount);
 
-    // Track link generation for guest users
+    // Track link generation for guest users and handle auto-pause
     if (!user) {
-      const trackingResult = guestTrackingService.trackLinkGeneration('current_campaign', 1);
-      if (trackingResult.shouldShowPremiumModal) {
-        setPremiumUpsellTrigger('link_limit');
-        setShowGuestPremiumModal(true);
+      // Find the active campaign to track against
+      const activeGuestCampaign = getGuestCampaignResults().find(c => c.status === 'active');
+      if (activeGuestCampaign) {
+        const trackingResult = guestTrackingService.trackLinkGeneration(activeGuestCampaign.id, 1);
+
+        if (trackingResult.campaignPaused) {
+          // Update local state to reflect paused campaign
+          setGuestCampaignResults(prev =>
+            prev.map(c => c.id === activeGuestCampaign.id ? { ...c, status: 'paused' } : c)
+          );
+          updateGuestRestrictions();
+
+          // Show premium modal for auto-paused campaign
+          setPremiumUpsellTrigger('link_limit');
+          setShowGuestPremiumModal(true);
+
+          toast({
+            title: "🛑 Campaign Paused - Limit Reached",
+            description: "This campaign reached the 20 link limit and has been paused. Upgrade to Premium to continue!",
+            variant: "default",
+            duration: 5000
+          });
+        } else if (trackingResult.shouldShowPremiumModal) {
+          setPremiumUpsellTrigger('link_limit');
+          setShowGuestPremiumModal(true);
+        }
       }
     }
 
@@ -2590,7 +2612,7 @@ export default function BacklinkAutomation() {
                                             </div>
                                             <div className="flex items-center gap-2">
                                               <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
-                                                ✓ {campaign.status}
+                                                �� {campaign.status}
                                               </Badge>
                                               <Button
                                                 variant="ghost"
@@ -4048,7 +4070,7 @@ export default function BacklinkAutomation() {
                           { name: 'Automotive', count: 25340, icon: '🚗' },
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
                           { name: 'Home & Garden', count: 21890, icon: '🏡' },
-                          { name: 'Legal Services', count: 19650, icon: '⚖️' },
+                          { name: 'Legal Services', count: 19650, icon: '��️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
                           { name: 'Science & Research', count: 14560, icon: '🔬' },
