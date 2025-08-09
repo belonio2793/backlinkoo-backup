@@ -148,115 +148,61 @@ export default function ComprehensiveUserManagement() {
 
   const { toast } = useToast();
 
-  // Load users from profiles table with proper error handling
+  // Load users from profiles table - requires real database access
   const loadUsers = async () => {
     try {
       setLoading(true);
       setError(null);
 
-      // Check current user's admin status first
+      // Check current user authentication
       const { data: { user: currentUser } } = await supabase.auth.getUser();
 
       if (!currentUser) {
         throw new Error('You must be logged in to access user management');
       }
 
-      // Try multiple approaches to get user data
-      let profiles: UserProfile[] = [];
-      let profilesError: any = null;
+      console.log('Fetching all user profiles from database...');
 
-      // Approach 1: Try to get all profiles (requires admin RLS policy)
-      try {
-        console.log('Attempting to fetch all profiles...');
-        const { data, error } = await supabase
-          .from('profiles')
-          .select(`
-            id,
-            user_id,
-            email,
-            role,
-            subscription_tier,
-            subscription_status,
-            display_name,
-            created_at,
-            updated_at
-          `)
-          .order('created_at', { ascending: false });
+      // Fetch all profiles from database
+      const { data: profiles, error } = await supabase
+        .from('profiles')
+        .select(`
+          id,
+          user_id,
+          email,
+          role,
+          subscription_tier,
+          subscription_status,
+          display_name,
+          created_at,
+          updated_at
+        `)
+        .order('created_at', { ascending: false });
 
-        if (error) {
-          console.error('Profiles query error details:', {
-            message: error.message,
-            code: error.code,
-            details: error.details,
-            hint: error.hint
-          });
-          profilesError = error;
-          throw error;
-        }
-
-        profiles = data || [];
-        console.log(`Successfully fetched ${profiles.length} profiles`);
-
-      } catch (firstError: any) {
-        console.warn('Direct profiles query failed:', {
-          error: firstError,
-          message: firstError?.message,
-          code: firstError?.code,
-          details: firstError?.details
+      if (error) {
+        console.error('Database query failed:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
         });
-
-        // Approach 2: Try to get current user's profile only (fallback)
-        try {
-          console.log(`Attempting to fetch profile for user ${currentUser.id}...`);
-          const { data, error } = await supabase
-            .from('profiles')
-            .select(`
-              id,
-              user_id,
-              email,
-              role,
-              subscription_tier,
-              subscription_status,
-              display_name,
-              created_at,
-              updated_at
-            `)
-            .eq('user_id', currentUser.id)
-            .single();
-
-          if (error) {
-            console.error('User profile query error:', {
-              message: error.message,
-              code: error.code,
-              details: error.details,
-              hint: error.hint
-            });
-            throw error;
-          }
-
-          // If we can only see our own profile, show a limited view
-          profiles = data ? [data] : [];
-          console.log('Successfully fetched user profile:', data);
-
-          setError('Limited access: Only showing your own profile. Full user management requires admin privileges.');
-
-        } catch (secondError: any) {
-          console.error('Profile access completely failed:', {
-            error: secondError,
-            message: secondError?.message,
-            code: secondError?.code,
-            details: secondError?.details,
-            type: typeof secondError,
-            stringified: JSON.stringify(secondError, null, 2)
-          });
-
-          // No fallback - force proper database setup
-          profiles = [];
-          const firstErrorMsg = firstError?.message || firstError?.toString() || 'Unknown database error';
-          const secondErrorMsg = secondError?.message || secondError?.toString() || 'Unknown profile error';
-          throw new Error(`Database access completely failed. First error: ${firstErrorMsg}. Second error: ${secondErrorMsg}. You must have proper database access and admin privileges to use user management.`);
-        }
+        throw new Error(`Database access failed: ${error.message}. Ensure you have admin privileges and RLS policies allow access to profiles table.`);
       }
+
+      if (!profiles || profiles.length === 0) {
+        setError('No user profiles found in database. Users may need to sign in first to create their profiles.');
+        setUsers([]);
+        setFilteredUsers([]);
+        setUserStats({
+          totalUsers: 0,
+          activeUsers: 0,
+          premiumUsers: 0,
+          newUsersToday: 0
+        });
+        return;
+      }
+
+      console.log(`Successfully fetched ${profiles.length} user profiles from database`);
 
       // Transform the data
       const combinedUsers: CombinedUser[] = profiles.map((profile: UserProfile) => ({
