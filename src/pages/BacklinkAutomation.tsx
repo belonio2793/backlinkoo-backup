@@ -298,12 +298,11 @@ export default function BacklinkAutomation() {
   const [guestCampaignToDelete, setGuestCampaignToDelete] = useState<any>(null);
   const [showFabMenu, setShowFabMenu] = useState(false);
 
-  // Random rotation state for website discovery
+  // Live campaign data state
   const [randomizedDiscoveries, setRandomizedDiscoveries] = useState<any[]>([]);
   const [randomizedWebsites, setRandomizedWebsites] = useState<any[]>([]);
   const [lastRotationTime, setLastRotationTime] = useState<Date>(new Date());
-  const [rotationInterval, setRotationInterval] = useState<NodeJS.Timeout | null>(null);
-  const [chaoticRotationEnabled, setChaoticRotationEnabled] = useState(false);
+  const [liveUpdateInterval, setLiveUpdateInterval] = useState<NodeJS.Timeout | null>(null);
 
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
@@ -422,32 +421,30 @@ export default function BacklinkAutomation() {
     setLastRotationTime(new Date());
   }, []);
 
-  // Start chaotic continuous rotation with varying intervals
-  const startChaoticRotation = useCallback(() => {
-    if (rotationInterval) clearInterval(rotationInterval);
+  // Start live updates to simulate real campaign data
+  const startLiveUpdates = useCallback(() => {
+    if (liveUpdateInterval) clearInterval(liveUpdateInterval);
 
-    const scheduleNextRotation = () => {
-      const randomDelay = Math.random() * 2000 + 1000; // Random 1-3 seconds
+    const scheduleNextUpdate = () => {
+      const updateDelay = Math.random() * 3000 + 2000; // Random 2-5 seconds
       setTimeout(() => {
-        if (chaoticRotationEnabled || selectedTab === 'database') {
+        if (selectedTab === 'database') {
           randomizeWebsites();
-          scheduleNextRotation(); // Schedule the next one
+          scheduleNextUpdate(); // Schedule the next update
         }
-      }, randomDelay);
+      }, updateDelay);
     };
 
-    setChaoticRotationEnabled(true);
-    scheduleNextRotation();
-  }, [randomizeWebsites, chaoticRotationEnabled, selectedTab]);
+    scheduleNextUpdate();
+  }, [randomizeWebsites, selectedTab, liveUpdateInterval]);
 
-  // Stop chaotic rotation
-  const stopChaoticRotation = useCallback(() => {
-    if (rotationInterval) {
-      clearInterval(rotationInterval);
-      setRotationInterval(null);
+  // Stop live updates
+  const stopLiveUpdates = useCallback(() => {
+    if (liveUpdateInterval) {
+      clearInterval(liveUpdateInterval);
+      setLiveUpdateInterval(null);
     }
-    setChaoticRotationEnabled(false);
-  }, [rotationInterval]);
+  }, [liveUpdateInterval]);
 
   // Clipboard helper with fallback for when Clipboard API is blocked
   const copyToClipboard = async (text: string) => {
@@ -491,27 +488,27 @@ export default function BacklinkAutomation() {
     randomizeWebsites();
   }, [randomizeWebsites]);
 
-  // Start chaotic rotation when database tab is accessed
+  // Start live updates when database tab is accessed
   useEffect(() => {
     if (selectedTab === 'database') {
-      startChaoticRotation();
+      startLiveUpdates();
     } else {
-      stopChaoticRotation();
+      stopLiveUpdates();
     }
 
     return () => {
-      stopChaoticRotation();
+      stopLiveUpdates();
     };
-  }, [selectedTab, startChaoticRotation, stopChaoticRotation]);
+  }, [selectedTab, startLiveUpdates, stopLiveUpdates]);
 
-  // Cleanup rotation on unmount
+  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (rotationInterval) {
-        clearInterval(rotationInterval);
+      if (liveUpdateInterval) {
+        clearInterval(liveUpdateInterval);
       }
     };
-  }, [rotationInterval]);
+  }, [liveUpdateInterval]);
 
   // Initialize guest tracking on component mount
   useEffect(() => {
