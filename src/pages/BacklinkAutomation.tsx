@@ -265,7 +265,7 @@ export default function BacklinkAutomation() {
     if (!user?.id) return;
 
     try {
-      const premiumCheck = await mockLiveLinkBuildingService.checkPremiumLimits(user.id);
+      const premiumCheck = await liveLinkBuildingService.checkPremiumLimits(user.id);
       setPremiumLimitData(premiumCheck);
       setIsUserPremium(!premiumCheck.isLimitReached || premiumCheck.maxLinks === -1);
     } catch (error) {
