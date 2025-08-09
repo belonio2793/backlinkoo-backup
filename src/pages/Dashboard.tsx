@@ -1795,9 +1795,9 @@ const Dashboard = () => {
               </Tabs>
             ) : activeSection === "seo-tools" ? (
               <div className="space-y-6">
-                <StreamlinedPremiumProvider>
+                <PremiumPopupProvider>
                   <SEOToolsSection user={user} />
-                </StreamlinedPremiumProvider>
+                </PremiumPopupProvider>
               </div>
             ) : activeSection === "trial" ? (
               <div className="space-y-6">
