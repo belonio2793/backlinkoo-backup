@@ -11,6 +11,9 @@ const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
 const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDiscoveryDashboard"));
 const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
 const LazyAffiliateProgram = lazy(() => import("./pages/AffiliateProgram"));
+const LazyBlog = lazy(() => import("./pages/Blog").then(module => ({ default: module.Blog })));
+const LazyDashboard = lazy(() => import("./pages/Dashboard"));
+const LazyAffiliateProgram = lazy(() => import("./pages/AffiliateProgram"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,6 +33,30 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route
+              path="/blog"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <LazyBlog />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <LazyDashboard />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/affiliate"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <LazyAffiliateProgram />
+                </Suspense>
+              }
+            />
             <Route
               path="/automation"
               element={
