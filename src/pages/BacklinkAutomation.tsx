@@ -1369,7 +1369,9 @@ export default function BacklinkAutomation() {
           await internetProliferationService.addCampaignToProliferation(proliferationCampaign);
 
           // Start real-time activity simulation
-          startRealTimeActivity(result.campaign.id);
+          setTimeout(() => {
+            startRealTimeActivity(result.campaign.id);
+          }, 2000); // Start after 2 seconds to let UI update
 
           const proliferationStats = internetProliferationService.getProliferationStats();
           console.log('🚀 Proliferation Engine Status:', {
@@ -3581,7 +3583,7 @@ export default function BacklinkAutomation() {
                           { name: 'Legal Services', count: 19650, icon: '⚖️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
-                          { name: 'Science & Research', count: 14560, icon: '���' },
+                          { name: 'Science & Research', count: 14560, icon: '🔬' },
                           { name: 'Arts & Culture', count: 13290, icon: '🎨' }
                         ].map((category, idx) => (
                           <div key={idx} className="p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors">
