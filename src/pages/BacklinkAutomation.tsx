@@ -3514,7 +3514,7 @@ export default function BacklinkAutomation() {
                                   setGuestCampaignToDelete(campaign);
                                   setShowDeleteConfirmation(true);
                                 }}
-                                className="h-8 px-2 border-red-300 text-red-600 hover:bg-red-50"
+                                className="h-8 px-2 bg-red-50 border-red-300 text-red-600 hover:bg-red-100"
                               >
                                 <img
                                   src="https://cdn.builder.io/api/v1/image/assets%2Ff46c5d7eff8944e5a95f821756152c6c%2F86a21f366429404d94ae2b74ae7bf964?format=webp&width=800"
