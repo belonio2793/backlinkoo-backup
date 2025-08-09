@@ -3,6 +3,8 @@
  * Detects and removes problematic Unicode symbols that appear as encoding issues
  */
 
+import React from 'react';
+
 // Preserve intentional infinity symbol as it's part of the brand
 const PRESERVED_SYMBOLS = ['∞'];
 
