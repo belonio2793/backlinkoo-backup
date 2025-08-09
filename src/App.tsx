@@ -5,11 +5,13 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ModalProvider } from "@/contexts/ModalContext";
+import { ReportSyncProvider } from "@/contexts/ReportSyncContext";
 import { UnifiedModalManager } from "@/components/UnifiedModalManager";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import Index from "./pages/Index";
 
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
+const LazyBacklinkReport = lazy(() => import("./pages/BacklinkReport"));
 const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDiscoveryDashboard"));
 const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
 const LazyBlog = lazy(() => import("./pages/Blog"));
@@ -45,7 +47,8 @@ const App = () => (
         <Sonner />
         <UnifiedModalManager />
         <BrowserRouter>
-          <Routes>
+          <ReportSyncProvider>
+            <Routes>
             <Route path="/" element={<Index />} />
             <Route
               path="/login"
@@ -84,6 +87,14 @@ const App = () => (
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazyBacklinkAutomation />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/backlink-report"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyBacklinkReport />
                 </Suspense>
               }
             />
@@ -199,7 +210,8 @@ const App = () => (
                 </Suspense>
               }
             />
-          </Routes>
+            </Routes>
+          </ReportSyncProvider>
         </BrowserRouter>
       </ModalProvider>
     </TooltipProvider>
