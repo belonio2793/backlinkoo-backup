@@ -23,6 +23,7 @@ export default function AdminLanding() {
   }, []);
 
   const checkAuthStatus = async () => {
+    console.log('🔍 Checking admin auth status...');
     setLoading(true);
 
     // Set aggressive timeout
