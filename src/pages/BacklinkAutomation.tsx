@@ -1254,6 +1254,9 @@ export default function BacklinkAutomation() {
 
         addGuestCampaignResult(campaignResult);
 
+        // Track campaign deployment for dynamic throughput
+        addThroughputEvent('campaign_deployed');
+
         // Show different messages based on progress to build excitement
         if (guestLinksGenerated === 0) {
           // First campaign - surprise reveal
