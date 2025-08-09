@@ -59,14 +59,14 @@ export function ClaimStatusIndicator({ onUpgrade, onSignIn }: ClaimStatusIndicat
     return (
       <Card className="border-orange-200 bg-orange-50/50">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-6">
             <div className="flex items-center space-x-2">
               <Lock className="w-4 h-4 text-orange-600" />
               <span className="text-sm text-orange-700">
                 Sign in to claim posts permanently
               </span>
             </div>
-            <Button size="sm" variant="outline" onClick={onSignIn}>
+            <Button size="sm" variant="outline" onClick={onSignIn} className="flex-shrink-0">
               Sign In
             </Button>
           </div>
