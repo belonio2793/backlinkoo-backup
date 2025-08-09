@@ -271,7 +271,7 @@ class AffiliateService {
 
       return data?.map(referral => ({
         id: referral.id,
-        email: referral.referred_email || referral.referred_user?.email || 'Unknown',
+        email: referral.referred_email || 'Unknown',
         joinDate: referral.created_at,
         totalSpent: referral.total_spent || 0,
         creditsGenerated: Math.floor((referral.total_spent || 0) / 3),
