@@ -41,13 +41,13 @@ export class AffiliateService {
         .single();
 
       if (error) {
-        console.error('Error creating affiliate profile:', error);
+        console.error('Error creating affiliate profile:', error.message || error.toString() || JSON.stringify(error));
         throw new Error(`Failed to create affiliate profile: ${error.message}`);
       }
 
       return data;
     } catch (error) {
-      console.error('Affiliate creation error:', error);
+      console.error('Affiliate creation error:', error.message || error.toString() || JSON.stringify(error));
       throw error;
     }
   }
