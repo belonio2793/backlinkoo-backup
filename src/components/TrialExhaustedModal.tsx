@@ -35,6 +35,7 @@ export function TrialExhaustedModal({
 }: TrialExhaustedModalProps) {
   const { toast } = useToast();
   const [isProcessingUpgrade, setIsProcessingUpgrade] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
 
   const totalDomains = guestResults.reduce((acc, campaign) =>
     acc + (campaign.domains?.length || 0), 0
