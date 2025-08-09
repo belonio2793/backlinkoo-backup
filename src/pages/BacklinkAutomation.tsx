@@ -391,28 +391,54 @@ export default function BacklinkAutomation() {
     return shuffled;
   };
 
-  // Enhanced chaotic randomize function
+  // Enhanced chaotic randomize function with status mutations
   const randomizeWebsites = useCallback(() => {
-    // More chaotic randomization - different slice sizes and multiple shuffles
-    const chaoticDiscoveries = shuffleArray(shuffleArray(fullDiscoverySites)).slice(0, Math.floor(Math.random() * 4) + 6);
-    const chaoticWebsites = shuffleArray(shuffleArray(fullWebsiteDatabase)).slice(0, Math.floor(Math.random() * 10) + 15);
+    const statuses = ['Publishing Live', 'Link Published', 'Processing', 'Verifying', 'Pending Review', 'Active'];
+    const types = ['Guest Article', 'Author Bio', 'Expert Quote', 'Case Study', 'Interview', 'Product Review', 'Tech News', 'Startup Feature', 'Community Post', 'Discussion'];
+
+    // Chaotic discoveries with random status mutations
+    const chaoticDiscoveries = shuffleArray(shuffleArray(fullDiscoverySites))
+      .slice(0, Math.floor(Math.random() * 4) + 6)
+      .map(site => ({
+        ...site,
+        status: statuses[Math.floor(Math.random() * statuses.length)],
+        type: types[Math.floor(Math.random() * types.length)],
+        da: Math.floor(Math.random() * 20) + 80, // Random DA between 80-100
+        verified: Math.random() > 0.5
+      }));
+
+    // Chaotic websites with random property mutations
+    const chaoticWebsites = shuffleArray(shuffleArray(fullWebsiteDatabase))
+      .slice(0, Math.floor(Math.random() * 10) + 15)
+      .map(site => ({
+        ...site,
+        authority: Math.floor(Math.random() * 25) + 75, // Random authority 75-100
+        opportunities: Math.floor(Math.random() * 500) + 100, // Random opportunities 100-600
+        traffic: ['Very High', 'High', 'Medium', 'Growing'][Math.floor(Math.random() * 4)]
+      }));
 
     setRandomizedDiscoveries(chaoticDiscoveries);
     setRandomizedWebsites(chaoticWebsites);
     setLastRotationTime(new Date());
   }, []);
 
-  // Start chaotic continuous rotation
+  // Start chaotic continuous rotation with varying intervals
   const startChaoticRotation = useCallback(() => {
     if (rotationInterval) clearInterval(rotationInterval);
 
-    const newInterval = setInterval(() => {
-      randomizeWebsites();
-    }, Math.random() * 3000 + 2000); // Random interval between 2-5 seconds
+    const scheduleNextRotation = () => {
+      const randomDelay = Math.random() * 2000 + 1000; // Random 1-3 seconds
+      setTimeout(() => {
+        if (chaoticRotationEnabled || selectedTab === 'database') {
+          randomizeWebsites();
+          scheduleNextRotation(); // Schedule the next one
+        }
+      }, randomDelay);
+    };
 
-    setRotationInterval(newInterval);
     setChaoticRotationEnabled(true);
-  }, [randomizeWebsites, rotationInterval]);
+    scheduleNextRotation();
+  }, [randomizeWebsites, chaoticRotationEnabled, selectedTab]);
 
   // Stop chaotic rotation
   const stopChaoticRotation = useCallback(() => {
