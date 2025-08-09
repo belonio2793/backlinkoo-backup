@@ -1354,7 +1354,9 @@ export default function BacklinkAutomation() {
                       <div className="bg-white rounded-lg p-3 border border-orange-200">
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="text-xs font-medium text-muted-foreground">Throughput</p>
+                            <p className="text-xs font-medium text-muted-foreground">
+                              {isThrottling ? 'Publishing Queue' : 'Throughput'}
+                            </p>
                             <p className="text-xl font-bold text-orange-600">
                               {controlPanelData.currentThroughput}/hr
                             </p>
