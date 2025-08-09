@@ -1049,88 +1049,238 @@ export default function BacklinkAutomation() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    {campaigns.map((campaign) => (
-                      <div key={campaign.id} className="border rounded-lg p-6 bg-gradient-to-r from-white to-gray-50 hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="flex items-center gap-3">
-                            {getStatusIcon(campaign.status)}
-                            <div>
-                              <h3 className="font-semibold text-lg">{campaign.name}</h3>
-                              <p className="text-sm text-gray-600">{campaign.targetUrl}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3">
-                            <Badge variant={campaign.status === 'active' ? 'default' : 'secondary'}>
-                              {campaign.status.toUpperCase()}
-                            </Badge>
-                            <div className="flex items-center gap-1">
-                              {getTrendIcon(campaign.performance.trend)}
-                              <span className="text-sm font-medium">{campaign.performance.velocity.toFixed(1)}/day</span>
-                            </div>
-                            <div className="flex gap-2">
-                              {campaign.status === 'active' ? (
-                                <Button size="sm" variant="outline" onClick={() => pauseCampaign(campaign.id)}>
-                                  <Pause className="h-3 w-3" />
-                                </Button>
-                              ) : campaign.status === 'paused' ? (
-                                <Button size="sm" variant="outline" onClick={() => resumeCampaign(campaign.id)}>
-                                  <Play className="h-3 w-3" />
-                                </Button>
-                              ) : null}
-                              <Button size="sm" variant="outline" onClick={() => loadCampaignAnalytics(campaign.id)}>
-                                <BarChart3 className="h-3 w-3" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleDeleteClick(campaign)}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 hover:border-red-300"
-                                title="Delete Campaign"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-blue-600">{campaign.linksGenerated}</div>
-                            <div className="text-xs text-gray-500">Links Generated</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-green-600">{campaign.linksLive}</div>
-                            <div className="text-xs text-gray-500">Live Links</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-purple-600">{campaign.quality.averageAuthority}</div>
-                            <div className="text-xs text-gray-500">Avg Authority</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-orange-600">{campaign.quality.successRate}%</div>
-                            <div className="text-xs text-gray-500">Success Rate</div>
-                          </div>
-                          <div className="text-center">
-                            <div className="text-2xl font-bold text-indigo-600">{campaign.performance.efficiency}%</div>
-                            <div className="text-xs text-gray-500">Efficiency</div>
-                          </div>
-                        </div>
+                  <Tabs defaultValue="campaigns" className="w-full">
+                    <TabsList className="grid w-full grid-cols-2 mb-6">
+                      <TabsTrigger value="campaigns">Campaign Status</TabsTrigger>
+                      <TabsTrigger value="liveresults" className="flex items-center gap-2">
+                        Live Results
+                        {isLinkBuildingActive && (
+                          <div className="w-2 h-2 bg-green-600 rounded-full animate-ping"></div>
+                        )}
+                      </TabsTrigger>
+                    </TabsList>
 
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span>Campaign Progress</span>
-                            <span>{campaign.progress}% ({campaign.linksGenerated}/{campaign.totalTarget})</span>
+                    <TabsContent value="campaigns">
+                      <div className="space-y-4">
+                        {campaigns.map((campaign) => (
+                          <div key={campaign.id} className="border rounded-lg p-6 bg-gradient-to-r from-white to-gray-50 hover:shadow-md transition-shadow">
+                            <div className="flex items-center justify-between mb-4">
+                              <div className="flex items-center gap-3">
+                                {getStatusIcon(campaign.status)}
+                                <div>
+                                  <h3 className="font-semibold text-lg">{campaign.name}</h3>
+                                  <p className="text-sm text-gray-600">{campaign.targetUrl}</p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-3">
+                                <Badge variant={campaign.status === 'active' ? 'default' : 'secondary'}>
+                                  {campaign.status.toUpperCase()}
+                                </Badge>
+                                <div className="flex items-center gap-1">
+                                  {getTrendIcon(campaign.performance.trend)}
+                                  <span className="text-sm font-medium">{campaign.performance.velocity.toFixed(1)}/day</span>
+                                </div>
+                                <div className="flex gap-2">
+                                  {campaign.status === 'active' ? (
+                                    <Button size="sm" variant="outline" onClick={() => pauseCampaign(campaign.id)}>
+                                      <Pause className="h-3 w-3" />
+                                    </Button>
+                                  ) : campaign.status === 'paused' ? (
+                                    <Button size="sm" variant="outline" onClick={() => resumeCampaign(campaign.id)}>
+                                      <Play className="h-3 w-3" />
+                                    </Button>
+                                  ) : null}
+                                  <Button size="sm" variant="outline" onClick={() => loadCampaignAnalytics(campaign.id)}>
+                                    <BarChart3 className="h-3 w-3" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handleDeleteClick(campaign)}
+                                    className="text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200 hover:border-red-300"
+                                    title="Delete Campaign"
+                                  >
+                                    <Trash2 className="h-3 w-3" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
+                              <div className="text-center">
+                                <div className="text-2xl font-bold text-blue-600">{campaign.linksGenerated}</div>
+                                <div className="text-xs text-gray-500">Links Generated</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-2xl font-bold text-green-600">{campaign.linksLive}</div>
+                                <div className="text-xs text-gray-500">Live Links</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-2xl font-bold text-purple-600">{campaign.quality.averageAuthority}</div>
+                                <div className="text-xs text-gray-500">Avg Authority</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-2xl font-bold text-orange-600">{campaign.quality.successRate}%</div>
+                                <div className="text-xs text-gray-500">Success Rate</div>
+                              </div>
+                              <div className="text-center">
+                                <div className="text-2xl font-bold text-indigo-600">{campaign.performance.efficiency}%</div>
+                                <div className="text-xs text-gray-500">Efficiency</div>
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span>Campaign Progress</span>
+                                <span>{campaign.progress}% ({campaign.linksGenerated}/{campaign.totalTarget})</span>
+                              </div>
+                              <Progress value={campaign.progress} className="h-3" />
+                              <div className="flex justify-between text-xs text-gray-500">
+                                <span>Target: {campaign.dailyTarget}/day</span>
+                                <span>Est. completion: {campaign.estimatedCompletion.toLocaleDateString()}</span>
+                              </div>
+                            </div>
                           </div>
-                          <Progress value={campaign.progress} className="h-3" />
-                          <div className="flex justify-between text-xs text-gray-500">
-                            <span>Target: {campaign.dailyTarget}/day</span>
-                            <span>Est. completion: {campaign.estimatedCompletion.toLocaleDateString()}</span>
-                          </div>
-                        </div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
+                    </TabsContent>
+
+                    <TabsContent value="liveresults">
+                      {/* Live Activity and Postback - Only show if campaigns are active */}
+                      {campaigns.filter(c => c.status === 'active').length > 0 ? (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Activity className="h-5 w-5 text-green-600" />
+                                Live Link Building Activity
+                                {isLinkBuildingActive && (
+                                  <Badge variant="outline" className="text-green-600 bg-green-50 animate-pulse">
+                                    <div className="w-2 h-2 bg-green-600 rounded-full mr-1 animate-ping"></div>
+                                    ACTIVE
+                                  </Badge>
+                                )}
+                              </CardTitle>
+                              <CardDescription>
+                                Real-time feed of link placements across the internet
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-3 max-h-96 overflow-y-auto">
+                                {activityLog.length === 0 ? (
+                                  <div className="text-center text-gray-500 py-8">
+                                    <Bot className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                                    <p>Building links automatically...</p>
+                                  </div>
+                                ) : (
+                                  activityLog.map((activity) => (
+                                    <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                                      <div className="flex-shrink-0 mt-1">
+                                        {activity.type === 'link_published' && <ExternalLink className="h-4 w-4 text-blue-600" />}
+                                        {activity.type === 'content_generated' && <Bot className="h-4 w-4 text-purple-600" />}
+                                        {activity.type === 'opportunity_found' && <Target className="h-4 w-4 text-green-600" />}
+                                        {activity.type === 'verification_complete' && <CheckCircle className="h-4 w-4 text-emerald-600" />}
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <p className="text-sm font-medium text-gray-900">{activity.message}</p>
+                                        <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                                          <Clock className="h-3 w-3" />
+                                          <span>{activity.timestamp.toLocaleTimeString()}</span>
+                                          {activity.campaignId && (
+                                            <>
+                                              <span>•</span>
+                                              <span>Campaign {activity.campaignId.slice(-6)}</span>
+                                            </>
+                                          )}
+                                        </div>
+                                      </div>
+                                      <Badge variant={activity.success ? 'default' : 'destructive'} className="text-xs">
+                                        {activity.success ? 'SUCCESS' : 'FAILED'}
+                                      </Badge>
+                                    </div>
+                                  ))
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+
+                          {/* Published Links Table */}
+                          <Card>
+                            <CardHeader>
+                              <CardTitle className="flex items-center gap-2">
+                                <Database className="h-5 w-5 text-blue-600" />
+                                Published Links Postback
+                                <Badge variant="outline" className="text-blue-600 bg-blue-50">
+                                  {publishedLinks.length} Links
+                                </Badge>
+                              </CardTitle>
+                              <CardDescription>
+                                Real-time tracking of all published backlinks with postback verification
+                              </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                              <div className="space-y-3 max-h-96 overflow-y-auto">
+                                {publishedLinks.length === 0 ? (
+                                  <div className="text-center text-gray-500 py-8">
+                                    <ExternalLink className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                                    <p>Links will appear here as campaigns build them...</p>
+                                  </div>
+                                ) : (
+                                  publishedLinks.map((link) => (
+                                    <div key={link.id} className="border rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
+                                      <div className="flex items-start justify-between mb-2">
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-center gap-2 mb-1">
+                                            <span className="font-medium text-blue-600 truncate">{link.platform}</span>
+                                            <Badge variant="outline" className={`text-xs ${
+                                              link.domainAuthority >= 90 ? 'text-green-600 bg-green-50' :
+                                              link.domainAuthority >= 80 ? 'text-yellow-600 bg-yellow-50' :
+                                              'text-orange-600 bg-orange-50'
+                                            }`}>
+                                              DA: {link.domainAuthority}
+                                            </Badge>
+                                            <Badge variant="default" className="text-xs">
+                                              {link.status.toUpperCase()}
+                                            </Badge>
+                                          </div>
+                                          <p className="text-sm text-gray-600 truncate">
+                                            <strong>Anchor:</strong> "{link.anchorText}" → {link.targetUrl}
+                                          </p>
+                                          <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                                            <span className="flex items-center gap-1">
+                                              <Clock className="h-3 w-3" />
+                                              {link.publishedAt.toLocaleString()}
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                              <Activity className="h-3 w-3" />
+                                              {link.clicks} clicks
+                                            </span>
+                                            <span className="flex items-center gap-1">
+                                              <TrendingUp className="h-3 w-3" />
+                                              {link.linkJuice.toFixed(1)}% juice
+                                            </span>
+                                          </div>
+                                        </div>
+                                        <Button size="sm" variant="ghost" className="flex-shrink-0" onClick={() => window.open(link.sourceUrl, '_blank')}>
+                                          <ExternalLink className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                    </div>
+                                  ))
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        </div>
+                      ) : (
+                        <div className="text-center py-12 text-gray-500">
+                          <Activity className="h-12 w-12 mx-auto mb-4 text-gray-400" />
+                          <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Campaigns</h3>
+                          <p>Create and start a campaign to see live results here.</p>
+                        </div>
+                      )}
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
             )}
