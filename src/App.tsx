@@ -91,6 +91,14 @@ const App = () => (
               }
             />
             <Route
+              path="/view"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyBacklinkAutomation />
+                </Suspense>
+              }
+            />
+            <Route
               path="/backlink-report"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
