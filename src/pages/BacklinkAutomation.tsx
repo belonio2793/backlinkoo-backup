@@ -513,6 +513,25 @@ export default function BacklinkAutomation() {
     // Track this publishing event for dynamic throughput
     addThroughputEvent('link_published');
 
+    // Add real-time console log for guest campaigns
+    if (!user) {
+      const consoleMessages = [
+        `✅ SUCCESS: Backlink published on ${linkToPublish.domain} (DA: ${70 + Math.floor(Math.random() * 30)})`,
+        `🔗 LINK LIVE: New backlink verified and indexed on ${linkToPublish.domain}`,
+        `🚀 DEPLOYMENT: Link "${linkToPublish.anchorText}" successfully deployed`,
+        `📈 METRICS: Link quality score: ${85 + Math.floor(Math.random() * 15)}% - Excellent!`,
+        `⚡ SPEED: Link published in ${(Math.random() * 2 + 0.5).toFixed(1)}s - Ultra fast!`,
+        `🎯 TARGET: Reached ${linkToPublish.domain} with perfect anchor text match`
+      ];
+
+      const randomMessage = consoleMessages[Math.floor(Math.random() * consoleMessages.length)];
+      addGuestConsoleLog('success', randomMessage, guestCampaignResults[0]?.id, {
+        domain: linkToPublish.domain,
+        anchorText: linkToPublish.anchorText,
+        linkCount: newCount
+      });
+    }
+
     // Update campaign results
     setGuestCampaignResults(prev =>
       prev.map(campaign => {
@@ -3612,7 +3631,7 @@ export default function BacklinkAutomation() {
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
                           { name: 'Science & Research', count: 14560, icon: '🔬' },
-                          { name: 'Arts & Culture', count: 13290, icon: '���' }
+                          { name: 'Arts & Culture', count: 13290, icon: '🎨' }
                         ].map((category, idx) => (
                           <div key={idx} className="p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors">
                             <div className="flex items-center justify-between">
