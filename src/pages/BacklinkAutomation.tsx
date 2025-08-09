@@ -285,6 +285,7 @@ export default function BacklinkAutomation() {
   const [campaignMetrics, setCampaignMetrics] = useState<Map<string, any>>(new Map());
   const [linkBuildingQueue, setLinkBuildingQueue] = useState<any[]>([]);
   const [recentPostbacks, setRecentPostbacks] = useState<any[]>([]);
+  const [showSignInModal, setShowSignInModal] = useState(false);
 
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
