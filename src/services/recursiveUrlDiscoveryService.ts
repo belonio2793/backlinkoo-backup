@@ -854,16 +854,21 @@ class RecursiveUrlDiscoveryService {
    * Calculate stats manually if RPC function doesn't exist
    */
   private async calculateStatsManually(): Promise<any> {
+    console.log('Calculating stats manually...');
     try {
       // Check if table exists
+      console.log('Checking if discovered_urls table exists...');
       const { data: tableCheck, error: tableError } = await supabase
         .from('discovered_urls')
         .select('id')
         .limit(1);
 
       if (tableError && tableError.code === '42P01') {
+        console.log('Table does not exist, returning demo stats');
         return this.getDemoStats();
       }
+
+      console.log('Table exists, fetching data...');
 
       // Get basic counts
       const { data: allUrls, error: countError } = await supabase
