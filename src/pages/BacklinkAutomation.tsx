@@ -1230,7 +1230,7 @@ export default function BacklinkAutomation() {
                             ) : (
                               <Zap className="h-4 w-4 mr-2" />
                             )}
-                            Start Free Trial Campaign
+                            Create Campaign
                           </Button>
                           <Button
                             variant="outline"
