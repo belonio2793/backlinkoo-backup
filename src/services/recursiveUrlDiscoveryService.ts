@@ -915,7 +915,8 @@ class RecursiveUrlDiscoveryService {
    * Get demo statistics for fallback
    */
   private getDemoStats(): any {
-    return {
+    console.log('Generating demo stats...');
+    const stats = {
       total_urls: 15847,
       verified_urls: 12456,
       working_urls: 11234,
