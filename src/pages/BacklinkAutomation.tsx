@@ -4821,8 +4821,63 @@ export default function BacklinkAutomation() {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         campaign={campaignToDelete}
-        onDelete={async (options) => {
-          console.log('Deleting campaign with options:', options);
+        onDelete={async (campaignId, options) => {
+          try {
+            setIsDeleting(true);
+
+            if (user) {
+              // For logged-in users, use the campaign service
+              const result = await campaignService.deleteCampaign(campaignId, {
+                confirmationText: options.confirmationText
+              });
+
+              if (result.success) {
+                // Remove from local state
+                setCampaigns(prev => prev.filter(c => c.id !== campaignId));
+
+                // Stop any active intervals for this campaign
+                const interval = activeCampaignIntervals.get(campaignId);
+                if (interval) {
+                  clearInterval(interval);
+                  setActiveCampaignIntervals(prev => {
+                    const updated = new Map(prev);
+                    updated.delete(campaignId);
+                    return updated;
+                  });
+                }
+
+                toast({
+                  title: "🗑️ Campaign Deleted",
+                  description: "Campaign and all associated data have been permanently removed.",
+                });
+              } else {
+                throw new Error(result.error || 'Failed to delete campaign');
+              }
+            } else {
+              // For guest users, use guest tracking service
+              const deleted = guestTrackingService.deleteCampaign(campaignId);
+              if (deleted) {
+                setCampaigns(prev => prev.filter(c => c.id !== campaignId));
+                updateGuestRestrictions();
+
+                toast({
+                  title: "����️ Campaign Deleted",
+                  description: "Campaign has been permanently removed.",
+                });
+              } else {
+                throw new Error('Could not delete guest campaign');
+              }
+            }
+          } catch (error) {
+            console.error('Campaign deletion failed:', error);
+            toast({
+              title: "Error",
+              description: error instanceof Error ? error.message : "Could not delete campaign. Please try again.",
+              variant: "destructive"
+            });
+          } finally {
+            setIsDeleting(false);
+          }
         }}
         isDeleting={isDeleting}
       />
