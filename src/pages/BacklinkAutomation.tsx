@@ -1078,6 +1078,24 @@ export default function BacklinkAutomation() {
                     </TabsList>
 
                     <TabsContent value="campaigns">
+                      {/* Live Status Indicator */}
+                      {campaigns.filter(c => c.status === 'active').length > 0 && (
+                        <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border border-blue-200 mb-4">
+                          <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                              <span className="text-xs font-medium text-green-700">LIVE</span>
+                            </div>
+                            <div className="text-sm text-gray-700">
+                              <span className="font-medium">Status:</span> {liveStatus}
+                            </div>
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            Last update: {lastActivity.toLocaleTimeString()}
+                          </div>
+                        </div>
+                      )}
+
                       <div className="space-y-4">
                         {campaigns.map((campaign) => (
                           <div key={campaign.id} className="border rounded-lg p-6 bg-gradient-to-r from-white to-gray-50 hover:shadow-md transition-shadow">
