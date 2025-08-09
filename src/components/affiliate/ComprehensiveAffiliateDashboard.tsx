@@ -429,7 +429,7 @@ export const ComprehensiveAffiliateDashboard: React.FC<DashboardProps> = ({ user
 
           {/* Referred Users Tab */}
           <TabsContent value="referred" className="space-y-6">
-            <ReferredUsers
+            <ReferredUsersSimple
               affiliateId={affiliateProfile.affiliate_id}
               affiliateCode={affiliateProfile.affiliate_id}
             />
