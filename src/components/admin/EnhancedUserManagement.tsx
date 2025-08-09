@@ -490,7 +490,7 @@ export default function EnhancedUserManagement() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => toggleUserStatus(user)}
+                            onClick={() => handleToggleUserBan(user)}
                             className={user.banned_until ? 'text-green-600' : 'text-red-600'}
                           >
                             {user.banned_until ? <Unlock className="h-4 w-4" /> : <Ban className="h-4 w-4" />}
