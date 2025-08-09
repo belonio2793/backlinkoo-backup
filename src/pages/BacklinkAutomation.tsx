@@ -1291,7 +1291,7 @@ export default function BacklinkAutomation() {
               <TabsTrigger value="discovery">URL Discovery</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="campaigns" className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            <TabsContent value="campaigns" className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
               {/* Live Results Embedded Interface - Show when campaigns are active */}
               {((user && campaigns.filter(c => c.status === 'active').length > 0) ||
                 (!user && guestCampaignResults.length > 0)) && (
