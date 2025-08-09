@@ -383,11 +383,11 @@ export default function BacklinkAutomation() {
         keywords: campaignForm.keywords.split(',').map(k => k.trim()),
         anchor_texts: campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a),
         daily_limit: campaignForm.dailyLimit,
-        strategy_blog_comments: campaignForm.linkType === 'blog_comment',
-        strategy_forum_profiles: campaignForm.linkType === 'forum_profile',
-        strategy_web2_platforms: campaignForm.linkType === 'web2_platform',
-        strategy_social_profiles: campaignForm.linkType === 'social_profile',
-        strategy_contact_forms: false
+        strategy_blog_comments: campaignForm.linkType === 'blog_comment' || campaignForm.linkType === 'all',
+        strategy_forum_profiles: campaignForm.linkType === 'forum_profile' || campaignForm.linkType === 'all',
+        strategy_web2_platforms: campaignForm.linkType === 'web2_platform' || campaignForm.linkType === 'all',
+        strategy_social_profiles: campaignForm.linkType === 'social_profile' || campaignForm.linkType === 'all',
+        strategy_contact_forms: campaignForm.linkType === 'all'
       };
 
       const result = await campaignService.createCampaign(campaignData);
