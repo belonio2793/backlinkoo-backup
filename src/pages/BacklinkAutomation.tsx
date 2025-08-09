@@ -801,38 +801,87 @@ export default function BacklinkAutomation() {
             advanced content generation, real-time monitoring, and intelligent quality control.
           </p>
           
-          {/* Real-time metrics bar */}
-          <div className="flex justify-center gap-8 text-sm bg-white rounded-lg p-4 shadow-sm border">
-            <div className="flex items-center gap-2">
-              <Activity className="h-4 w-4 text-green-600" />
-              <span className="font-medium">{realTimeMetrics.linksPostedToday}</span>
-              <span className="text-gray-500">Links Today</span>
+          {/* Real-time Control Panel */}
+          <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+            {/* Control Panel Header */}
+            <div className="bg-gradient-to-r from-slate-50 to-blue-50 px-4 py-2 border-b flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <div className={`w-2 h-2 rounded-full ${
+                  controlPanelData.systemStatus === 'active' ? 'bg-green-500 animate-pulse' :
+                  controlPanelData.systemStatus === 'operational' ? 'bg-blue-500' : 'bg-red-500'
+                }`} />
+                <span className="text-sm font-medium text-slate-700">
+                  System {controlPanelData.systemStatus.toUpperCase()}
+                </span>
+                {isFetching && <Loader2 className="h-3 w-3 animate-spin text-blue-500" />}
+              </div>
+              <div className="text-xs text-slate-500">
+                Last update: {controlPanelData.lastUpdate.toLocaleTimeString()}
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Search className="h-4 w-4 text-blue-600" />
-              <span className="font-medium">{realTimeMetrics.opportunitiesDiscovered}</span>
-              <span className="text-gray-500">Opportunities</span>
+
+            {/* Metrics Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 p-4">
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  <Activity className="h-3 w-3 text-green-600" />
+                  <span className="text-lg font-bold text-green-600">{controlPanelData.successfulLinks}</span>
+                </div>
+                <div className="text-xs text-gray-500">Links Generated</div>
+              </div>
+
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  <Users className="h-3 w-3 text-blue-600" />
+                  <span className="text-lg font-bold text-blue-600">{controlPanelData.activeConnections}</span>
+                </div>
+                <div className="text-xs text-gray-500">Active Connections</div>
+              </div>
+
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  <Zap className="h-3 w-3 text-purple-600" />
+                  <span className="text-lg font-bold text-purple-600">{controlPanelData.currentThroughput}</span>
+                </div>
+                <div className="text-xs text-gray-500">Links/Hour</div>
+              </div>
+
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  <Clock className="h-3 w-3 text-orange-600" />
+                  <span className="text-lg font-bold text-orange-600">{controlPanelData.averageResponseTime.toFixed(1)}s</span>
+                </div>
+                <div className="text-xs text-gray-500">Avg Response</div>
+              </div>
+
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  <Search className="h-3 w-3 text-teal-600" />
+                  <span className="text-lg font-bold text-teal-600">{controlPanelData.discoveryRate}</span>
+                </div>
+                <div className="text-xs text-gray-500">Discovery/Hour</div>
+              </div>
+
+              <div className="text-center">
+                <div className="flex items-center justify-center gap-1 mb-1">
+                  <Shield className="h-3 w-3 text-indigo-600" />
+                  <span className="text-lg font-bold text-indigo-600">{controlPanelData.networkHealth.toFixed(0)}%</span>
+                </div>
+                <div className="text-xs text-gray-500">Network Health</div>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-purple-600" />
-              <span className="font-medium">{realTimeMetrics.campaignsActive}</span>
-              <span className="text-gray-500">Active Campaigns</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Server className="h-4 w-4 text-orange-600" />
-              <span className="font-medium">{realTimeMetrics.systemLoad.toFixed(1)}%</span>
-              <span className="text-gray-500">System Load</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Database className="h-4 w-4 text-teal-600" />
-              <span className="font-medium">{realTimeMetrics.apiCallsRemaining}</span>
-              <span className="text-gray-500">API Calls Left</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="h-4 w-4 text-indigo-600" />
-              <span className="font-medium">{realTimeMetrics.averageResponseTime.toFixed(0)}ms</span>
-              <span className="text-gray-500">Response Time</span>
-            </div>
+
+            {/* Live Activity Indicator */}
+            {controlPanelData.queueProcessing > 0 && (
+              <div className="bg-blue-50 border-t px-4 py-2">
+                <div className="flex items-center gap-2 text-sm">
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                  <span className="text-blue-700 font-medium">
+                    Processing {controlPanelData.queueProcessing} link{controlPanelData.queueProcessing !== 1 ? 's' : ''} in queue
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
