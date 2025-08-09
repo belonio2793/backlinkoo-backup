@@ -465,9 +465,9 @@ export default function BacklinkAutomation() {
           }
         };
 
-        await mockInternetProliferationService.addCampaignToProliferation(proliferationCampaign);
+        await internetProliferationService.addCampaignToProliferation(proliferationCampaign);
 
-        const proliferationStats = mockInternetProliferationService.getProliferationStats();
+        const proliferationStats = internetProliferationService.getProliferationStats();
         console.log('🚀 Proliferation Engine Status:', {
           totalTargets: proliferationStats.totalTargets,
           queueLength: proliferationStats.queueLength,
