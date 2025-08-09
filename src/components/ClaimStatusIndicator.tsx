@@ -17,7 +17,7 @@ interface ClaimStatusIndicatorProps {
   onSignIn?: () => void;
 }
 
-export function ClaimStatusIndicator({ onUpgrade }: ClaimStatusIndicatorProps) {
+export function ClaimStatusIndicator({ onUpgrade, onSignIn }: ClaimStatusIndicatorProps) {
   const [user, setUser] = useState<User | null>(null);
   const [claimedCount, setClaimedCount] = useState(0);
   const [loading, setLoading] = useState(true);
