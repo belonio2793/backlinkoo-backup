@@ -480,7 +480,7 @@ export class CompatibilityAffiliateService {
   private getTrackingCookie(): { affiliateCode: string; trackingId: string; timestamp: number } | null {
     const cookies = document.cookie.split(';');
     const cookie = cookies.find(c => c.trim().startsWith(`${this.COOKIE_NAME}=`));
-    
+
     if (cookie) {
       try {
         const value = decodeURIComponent(cookie.split('=')[1]);
@@ -489,8 +489,37 @@ export class CompatibilityAffiliateService {
         return null;
       }
     }
-    
+
     return null;
+  }
+
+  /**
+   * Generate mock affiliate profile for demo when database is not set up
+   */
+  private getMockAffiliateProfile(userId: string): AffiliateProfile {
+    const affiliateCode = 'BL' + userId.substring(0, 6).toUpperCase();
+    return {
+      id: `mock-affiliate-${userId}`,
+      user_id: userId,
+      affiliate_code: affiliateCode,
+      custom_id: `custom-${affiliateCode}`,
+      status: 'active' as const,
+      commission_rate: 0.25,
+      total_earnings: 1250.00,
+      total_paid: 800.00,
+      pending_earnings: 450.00,
+      referral_url: `https://backlinkoo.com?ref=${affiliateCode}`,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      // Extended compatibility fields
+      affiliate_id: affiliateCode,
+      tier: 'silver',
+      first_name: 'Demo',
+      last_name: 'Affiliate',
+      email: 'demo@affiliate.com',
+      total_referrals: 25,
+      total_conversions: 12
+    };
   }
 }
 
