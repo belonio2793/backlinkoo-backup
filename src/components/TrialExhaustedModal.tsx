@@ -269,6 +269,46 @@ export function TrialExhaustedModal({
           </div>
         </div>
 
+        {/* Plan Selection */}
+        <div className="mb-8">
+          <h3 className="text-lg font-bold mb-4 text-center text-white">Choose Your Plan</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div
+              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+                selectedPlan === 'monthly'
+                  ? 'border-white bg-white/10 backdrop-blur-sm'
+                  : 'border-white/30 bg-white/5 hover:border-white/50'
+              }`}
+              onClick={() => setSelectedPlan('monthly')}
+            >
+              <div className="text-center text-white">
+                <div className="text-xl font-bold">Monthly</div>
+                <div className="text-2xl font-bold">$29</div>
+                <div className="text-sm opacity-90">per month</div>
+                <div className="text-xs opacity-75 mt-2">Cancel anytime</div>
+              </div>
+            </div>
+            <div
+              className={`p-4 rounded-lg border-2 cursor-pointer transition-all relative ${
+                selectedPlan === 'yearly'
+                  ? 'border-white bg-white/10 backdrop-blur-sm'
+                  : 'border-white/30 bg-white/5 hover:border-white/50'
+              }`}
+              onClick={() => setSelectedPlan('yearly')}
+            >
+              <div className="absolute -top-2 -right-2">
+                <Badge className="bg-green-600 text-white text-xs">Save 40%</Badge>
+              </div>
+              <div className="text-center text-white">
+                <div className="text-xl font-bold">Yearly</div>
+                <div className="text-2xl font-bold">$17</div>
+                <div className="text-sm opacity-90">per month</div>
+                <div className="text-xs opacity-75 mt-2">Billed $199/year</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Action Buttons */}
         <div className="space-y-4">
           <div className="flex flex-col sm:flex-row gap-3">
@@ -286,7 +326,7 @@ export function TrialExhaustedModal({
               ) : (
                 <>
                   <Crown className="h-5 w-5 mr-2" />
-                  Upgrade to Premium - $29/month
+                  Upgrade to Premium - {selectedPlan === 'monthly' ? '$29/month' : '$17/month (billed yearly)'}
                   <ArrowRight className="h-5 w-5 ml-2" />
                 </>
               )}
