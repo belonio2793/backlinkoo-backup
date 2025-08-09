@@ -55,7 +55,7 @@ export function TrialExhaustedModal({
 
       // Create subscription checkout session
       const result = await paymentIntegrationService.createSubscription(
-        'monthly', // Default to monthly plan
+        selectedPlan,
         !isLoggedIn, // isGuest (opposite of isLoggedIn)
         !isLoggedIn ? 'guest@example.com' : undefined // Guest email placeholder
       );
