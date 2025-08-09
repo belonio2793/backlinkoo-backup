@@ -314,8 +314,21 @@ export default function BacklinkAutomation() {
 
       // Try to load campaigns from database
       try {
-        const campaignsData = await campaignService.getCampaigns();
-        console.log('📊 Loaded campaigns from database:', campaignsData);
+        let campaignsData = [];
+
+        // Try campaign service first
+        try {
+          campaignsData = await campaignService.getCampaigns();
+          console.log('📊 Loaded campaigns via campaign service:', campaignsData.length);
+        } catch (apiError) {
+          console.error('❌ Campaign service failed, trying direct database:', apiError);
+
+          // Fallback to direct database
+          if (user?.id) {
+            campaignsData = await directCampaignService.getCampaigns(user.id);
+            console.log('📊 Loaded campaigns via direct service:', campaignsData.length);
+          }
+        }
 
         dbCampaigns = campaignsData.map((campaign: any) => ({
           id: campaign.id,
