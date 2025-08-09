@@ -14,7 +14,18 @@ const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDisc
 const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
 const LazyBlog = lazy(() => import("./pages/Blog"));
 const LazyDashboard = lazy(() => import("./pages/Dashboard"));
+const LazyLogin = lazy(() => import("./pages/Login"));
 const LazyBeautifulBlogPost = lazy(() => import("./components/BeautifulBlogPost").then(module => ({ default: module.BeautifulBlogPost })));
+const LazyAuthCallback = lazy(() => import("./pages/AuthCallback"));
+const LazyEmailConfirmation = lazy(() => import("./pages/EmailConfirmation"));
+const LazyPasswordReset = lazy(() => import("./pages/PasswordReset"));
+const LazyPaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
+const LazyPaymentCancelled = lazy(() => import("./pages/PaymentCancelled"));
+const LazySubscriptionSuccess = lazy(() => import("./pages/SubscriptionSuccess"));
+const LazySubscriptionCancelled = lazy(() => import("./pages/SubscriptionCancelled"));
+const LazyTermsOfService = lazy(() => import("./pages/TermsOfService"));
+const LazyPrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const LazyNotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,6 +46,14 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route
+              path="/login"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyLogin />
+                </Suspense>
+              }
+            />
             <Route
               path="/blog"
               element={
@@ -80,6 +99,94 @@ const App = () => (
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazyAdminLanding />
+                </Suspense>
+              }
+            />
+
+            {/* Authentication routes */}
+            <Route
+              path="/auth/callback"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyAuthCallback />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/auth/confirm"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyEmailConfirmation />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/auth/reset-password"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyPasswordReset />
+                </Suspense>
+              }
+            />
+
+            {/* Payment routes */}
+            <Route
+              path="/payment-success"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyPaymentSuccess />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/payment-cancelled"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyPaymentCancelled />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/subscription-success"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazySubscriptionSuccess />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/subscription-cancelled"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazySubscriptionCancelled />
+                </Suspense>
+              }
+            />
+
+            {/* Legal routes */}
+            <Route
+              path="/terms-of-service"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyTermsOfService />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/privacy-policy"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyPrivacyPolicy />
+                </Suspense>
+              }
+            />
+
+            {/* 404 Catch-all route */}
+            <Route
+              path="*"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyNotFound />
                 </Suspense>
               }
             />

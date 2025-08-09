@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,11 +9,13 @@ import { UnifiedClaimService } from '@/services/unifiedClaimService';
 import { useAuth } from '@/hooks/useAuth';
 import { BlogClaimService } from '@/services/blogClaimService';
 import { supabase } from '@/integrations/supabase/client';
+import type { BlogPost } from '@/types/blogTypes';
 import { Footer } from '@/components/Footer';
 
 import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
 import { ClaimStatusIndicator } from '@/components/ClaimStatusIndicator';
 import { ClaimSystemStatus } from '@/components/ClaimSystemStatus';
+import { LoginModal } from '@/components/LoginModal';
 import { useToast } from '@/hooks/use-toast';
 import {
   Calendar,
@@ -37,7 +39,8 @@ import {
   Globe,
   Infinity,
   Loader2,
-  Plus
+  Plus,
+  RefreshCw
 } from 'lucide-react';
 
 function Blog() {
@@ -52,6 +55,9 @@ function Blog() {
   const [sortBy, setSortBy] = useState<'newest' | 'popular' | 'trending'>('newest');
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [paymentDefaultTab, setPaymentDefaultTab] = useState<'credits' | 'premium'>('credits');
+  const [refreshing, setRefreshing] = useState(false);
+  const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const loadBlogPosts = async () => {
@@ -145,6 +151,19 @@ function Blog() {
     loadBlogPosts();
   }, [sortBy]);
 
+  // Add keyboard shortcut for search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const sortPosts = (posts: BlogPost[], criteria: string) => {
     switch (criteria) {
       case 'popular':
@@ -175,18 +194,197 @@ function Blog() {
     return Math.ceil(wordCount / wordsPerMinute);
   };
 
+  // Utility function to clean HTML syntax and common prefixes from titles
+  const cleanTitle = (title: string): string => {
+    if (!title) return '';
+
+    let cleaned = title;
+
+    // Apply multiple passes to ensure thorough cleaning
+    for (let i = 0; i < 3; i++) {
+      cleaned = cleaned
+        // Remove HTML tag prefixes like "H1:", "H2:", "Title:", etc. (case insensitive, multiple variations)
+        .replace(/^(?:H[1-6]|Title|Heading|Header):\s*/gi, '')
+        .replace(/^(?:h[1-6]|title|heading|header):\s*/g, '')
+        // Remove leading "t " that might be leftover
+        .replace(/^t\s+/gi, '')
+        // Remove HTML tags completely
+        .replace(/<[^>]*>/g, '')
+        // Remove common markdown syntax
+        .replace(/^#+\s*/, '') // Remove markdown headers
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+        .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
+        .replace(/__(.*?)__/g, '$1') // Remove underline markdown
+        // Remove common HTML entities
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&rsquo;/g, "'")
+        .replace(/&lsquo;/g, "'")
+        .replace(/&rdquo;/g, '"')
+        .replace(/&ldquo;/g, '"')
+        .replace(/&hellip;/g, '...')
+        // Remove common prefixes that might appear
+        .replace(/^(?:Blog post|Article|Post):\s*/gi, '')
+        // Clean up extra whitespace and special characters
+        .replace(/\s+/g, ' ')
+        .replace(/^[\W\s]+/, '') // Remove leading non-word characters and whitespace
+        .replace(/[\s]+$/, '') // Remove trailing whitespace
+        .trim();
+    }
+
+    return cleaned;
+  };
+
+  // Utility function to clean descriptions/content
+  const cleanDescription = (description: string): string => {
+    if (!description) return '';
+
+    let cleaned = description;
+
+    // Apply multiple passes for thorough cleaning
+    for (let i = 0; i < 2; i++) {
+      cleaned = cleaned
+        // Remove HTML tags completely
+        .replace(/<[^>]*>/g, '')
+        // Remove common markdown syntax
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+        .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
+        .replace(/__(.*?)__/g, '$1') // Remove underline markdown
+        .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove markdown links, keep text
+        .replace(/`([^`]*)`/g, '$1') // Remove code markdown
+        // Remove common HTML entities
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'")
+        .replace(/&rsquo;/g, "'")
+        .replace(/&lsquo;/g, "'")
+        .replace(/&rdquo;/g, '"')
+        .replace(/&ldquo;/g, '"')
+        .replace(/&hellip;/g, '...')
+        // Clean up extra whitespace and line breaks
+        .replace(/\s+/g, ' ')
+        .replace(/^[\W\s]+/, '') // Remove leading non-word characters and whitespace
+        .replace(/[\s]+$/, '') // Remove trailing whitespace
+        .trim();
+    }
+
+    return cleaned;
+  };
+
   const filteredPosts = blogPosts.filter(post => {
-    const matchesSearch = searchTerm === '' || 
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.meta_description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+    const cleanedTitle = cleanTitle(post.title).toLowerCase();
+    const cleanedDescription = cleanDescription(post.meta_description || '').toLowerCase();
+    const searchLower = searchTerm.toLowerCase();
+
+    const matchesSearch = searchTerm === '' ||
+      cleanedTitle.includes(searchLower) ||
+      cleanedDescription.includes(searchLower) ||
+      post.keywords.some(keyword => keyword.toLowerCase().includes(searchLower));
+
     const matchesCategory = selectedCategory === '' || post.category === selectedCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
 
   const categories = Array.from(new Set(blogPosts.map(post => post.category)));
+
+  const handleRefreshPosts = async () => {
+    setRefreshing(true);
+    try {
+      console.log('🔄 Manually refreshing blog posts...');
+
+      // Clear existing posts first for visual feedback
+      setBlogPosts([]);
+
+      // Use UnifiedClaimService to get posts consistently
+      let posts: any[] = [];
+      try {
+        posts = await UnifiedClaimService.getClaimablePosts(50);
+        console.log('✅ Claimable posts loaded:', posts.length);
+      } catch (dbError) {
+        console.warn('❌ Database unavailable, trying fallback:', dbError);
+        try {
+          posts = await ClaimableBlogService.getClaimablePosts(50);
+          console.log('✅ Fallback posts loaded:', posts.length);
+        } catch (fallbackError) {
+          console.warn('❌ Fallback also failed, using localStorage:', fallbackError);
+        }
+      }
+
+      // Also load from localStorage (traditional blog posts)
+      const localBlogPosts: BlogPost[] = [];
+      try {
+        const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+
+        for (const blogMeta of allBlogPosts) {
+          const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
+          if (blogData) {
+            const blogPost = JSON.parse(blogData);
+
+            // Check if trial post is expired
+            if (blogPost.is_trial_post && blogPost.expires_at) {
+              const isExpired = new Date() > new Date(blogPost.expires_at);
+              if (isExpired) {
+                // Remove expired trial post
+                localStorage.removeItem(`blog_post_${blogMeta.slug}`);
+                continue;
+              }
+            }
+
+            localBlogPosts.push(blogPost);
+          }
+        }
+
+        // Update the all_blog_posts list to remove expired ones
+        const validBlogMetas = allBlogPosts.filter((meta: any) => {
+          return localBlogPosts.some(post => post.slug === meta.slug);
+        });
+        localStorage.setItem('all_blog_posts', JSON.stringify(validBlogMetas));
+
+      } catch (storageError) {
+        console.warn('Failed to load from localStorage:', storageError);
+      }
+
+      // Combine database and localStorage posts, removing duplicates
+      const allPosts = [...posts];
+      localBlogPosts.forEach(localPost => {
+        if (!allPosts.find(dbPost => dbPost.slug === localPost.slug)) {
+          allPosts.push(localPost);
+        }
+      });
+
+      // Sort posts based on selected criteria
+      const sortedPosts = sortPosts(allPosts, sortBy);
+      setBlogPosts(sortedPosts);
+
+      toast({
+        title: "Posts refreshed!",
+        description: `Loaded ${allPosts.length} blog posts.`,
+      });
+
+      console.log('✅ Blog posts refreshed:', {
+        databasePosts: posts.length,
+        localBlogPosts: localBlogPosts.length,
+        totalPosts: allPosts.length,
+      });
+    } catch (error) {
+      console.error('❌ Failed to refresh blog posts:', error);
+      toast({
+        title: "Refresh failed",
+        description: "Failed to refresh posts. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
 
   return (
@@ -210,7 +408,23 @@ function Blog() {
                     Dashboard
                   </Button>
                   <Button
-                    onClick={() => navigate("/login")}
+                    onClick={async () => {
+                      try {
+                        await supabase.auth.signOut();
+                        toast({
+                          title: "Signed out successfully",
+                          description: "You have been signed out of your account.",
+                        });
+                        navigate("/");
+                      } catch (error) {
+                        console.error('Sign out error:', error);
+                        toast({
+                          title: "Sign out failed",
+                          description: "There was an error signing you out. Please try again.",
+                          variant: "destructive"
+                        });
+                      }
+                    }}
                     className="bg-transparent hover:bg-red-50/50 border border-red-200/60 text-red-600 hover:text-red-700 hover:border-red-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
                   >
                     Sign Out
@@ -218,10 +432,10 @@ function Blog() {
                 </>
               ) : (
                 <>
-                  <Button variant="ghost" onClick={() => navigate("/login")} className="font-medium">
+                  <Button variant="ghost" onClick={() => setLoginModalOpen(true)} className="font-medium">
                     Sign In
                   </Button>
-                  <Button onClick={() => navigate("/login")} className="font-medium">
+                  <Button onClick={() => setLoginModalOpen(true)} className="font-medium">
                     Get Started
                   </Button>
                 </>
@@ -259,21 +473,29 @@ function Blog() {
 
       {/* Search and Filter Bar */}
       <div className="sticky top-0 z-40 bg-white/95 backdrop-blur-sm border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
             {/* Search */}
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
               <Input
-                placeholder="Search expert posts..."
+                ref={searchInputRef}
+                placeholder="Search expert posts... (Press / to focus)"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 h-12 text-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    setSearchTerm('');
+                    setSelectedCategory('');
+                    e.currentTarget.blur();
+                  }
+                }}
+                className="pl-10 h-12 text-base border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
 
             {/* Filters */}
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-3">
               {/* Category Filter */}
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4 text-gray-500" />
@@ -300,6 +522,17 @@ function Blog() {
                 <option value="trending">Highest SEO</option>
               </select>
 
+              {/* Refresh Button */}
+              <Button
+                onClick={handleRefreshPosts}
+                disabled={refreshing}
+                size="sm"
+                variant="outline"
+                className="px-3"
+              >
+                <RefreshCw className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+              </Button>
+
               {/* View Mode */}
               <div className="flex border border-gray-300 rounded-lg overflow-hidden">
                 <Button
@@ -324,15 +557,15 @@ function Blog() {
 
           {/* Filter Summary */}
           {(searchTerm || selectedCategory) && (
-            <div className="mt-4 flex items-center gap-2 text-sm text-gray-600">
-              <span>Showing {filteredPosts.length} posts</span>
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+              <span className="font-medium">Showing {filteredPosts.length} posts</span>
               {searchTerm && (
-                <Badge variant="outline" className="px-2 py-1">
+                <Badge variant="outline" className="px-2 py-1 bg-blue-50 border-blue-200 text-blue-700">
                   Search: "{searchTerm}"
                 </Badge>
               )}
               {selectedCategory && (
-                <Badge variant="outline" className="px-2 py-1">
+                <Badge variant="outline" className="px-2 py-1 bg-green-50 border-green-200 text-green-700">
                   Category: {selectedCategory}
                 </Badge>
               )}
@@ -340,10 +573,17 @@ function Blog() {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
+                  const hadFilters = searchTerm || selectedCategory;
                   setSearchTerm('');
                   setSelectedCategory('');
+                  if (hadFilters) {
+                    toast({
+                      title: "Filters cleared",
+                      description: "All search and filter criteria have been reset.",
+                    });
+                  }
                 }}
-                className="text-blue-600 hover:text-blue-800"
+                className="text-blue-600 hover:text-blue-800 ml-auto"
               >
                 Clear filters
               </Button>
@@ -353,43 +593,46 @@ function Blog() {
       </div>
 
       {/* Claim Status Indicator */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        <div className="flex items-center justify-between">
-          <ClaimStatusIndicator onUpgrade={() => {
-            setPaymentDefaultTab('credits');
-            setPaymentModalOpen(true);
-          }} />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex items-center justify-between gap-4">
+          <ClaimStatusIndicator
+            onUpgrade={() => {
+              setPaymentDefaultTab('credits');
+              setPaymentModalOpen(true);
+            }}
+            onSignIn={() => setLoginModalOpen(true)}
+          />
           {import.meta.env.DEV && <ClaimSystemStatus />}
         </div>
       </div>
 
       {/* Claim Feature Banner */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-8 text-white relative overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6">
+        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-6 md:p-8 text-white relative overflow-hidden">
           <div className="absolute inset-0 bg-black/10"></div>
           <div className="relative z-10">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-3xl font-bold mb-2">💾 Save Blog Posts to Dashboard</h2>
-                <p className="text-blue-100 text-lg mb-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+              <div className="flex-1">
+                <h2 className="text-2xl md:text-3xl font-bold mb-3">💾 Save Blog Posts to Dashboard</h2>
+                <p className="text-blue-100 text-base md:text-lg mb-4">
                   Save your favorite blog posts to your personal dashboard! Access them anytime and prevent auto-deletion.
                 </p>
-                <div className="flex items-center gap-6 text-sm">
+                <div className="flex flex-wrap items-center gap-4 md:gap-6 text-sm">
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-300" />
+                    <CheckCircle2 className="h-4 w-4 text-green-300 flex-shrink-0" />
                     <span>Personal dashboard access</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-300" />
+                    <CheckCircle2 className="h-4 w-4 text-green-300 flex-shrink-0" />
                     <span>Protection from deletion</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-300" />
+                    <CheckCircle2 className="h-4 w-4 text-green-300 flex-shrink-0" />
                     <span>Up to 3 free (unlimited with subscription)</span>
                   </div>
                 </div>
               </div>
-              <div className="flex-shrink-0">
+              <div className="flex-shrink-0 text-center md:text-left">
                 {user ? (
                   <div className="text-center">
                     <div className="text-2xl font-bold">{filteredPosts.filter(p => p.is_trial_post && !p.user_id).length}</div>
@@ -397,7 +640,7 @@ function Blog() {
                   </div>
                 ) : (
                   <Button
-                    onClick={() => navigate('/login')}
+                    onClick={() => setLoginModalOpen(true)}
                     size="lg"
                     className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4"
                   >
@@ -446,9 +689,23 @@ function Blog() {
             {filteredPosts.map((post) => (
               <div key={post.id}>
                 {viewMode === 'grid' ? (
-                  <BlogPostCard post={post} navigate={navigate} formatDate={formatDate} />
+                  <BlogPostCard
+                    post={post}
+                    navigate={navigate}
+                    formatDate={formatDate}
+                    onLoginRequired={() => setLoginModalOpen(true)}
+                    cleanTitle={cleanTitle}
+                    cleanDescription={cleanDescription}
+                  />
                 ) : (
-                  <BlogPostListItem post={post} navigate={navigate} formatDate={formatDate} />
+                  <BlogPostListItem
+                    post={post}
+                    navigate={navigate}
+                    formatDate={formatDate}
+                    onLoginRequired={() => setLoginModalOpen(true)}
+                    cleanTitle={cleanTitle}
+                    cleanDescription={cleanDescription}
+                  />
                 )}
               </div>
             ))}
@@ -507,6 +764,44 @@ function Blog() {
       {/* Footer */}
       <Footer />
 
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={loginModalOpen}
+        onClose={() => setLoginModalOpen(false)}
+        defaultTab="login"
+        pendingAction="premium blog features"
+        onAuthSuccess={(user) => {
+          setLoginModalOpen(false);
+          toast({
+            title: "Welcome back!",
+            description: "You have been successfully signed in.",
+          });
+
+          // Check for claim intent
+          const claimIntent = localStorage.getItem('claim_intent');
+          if (claimIntent) {
+            try {
+              const intent = JSON.parse(claimIntent);
+              localStorage.removeItem('claim_intent');
+              toast({
+                title: "Continuing with your claim...",
+                description: `Processing your request to claim "${intent.postTitle}"`,
+              });
+              setTimeout(() => {
+                navigate(`/blog/${intent.postSlug}`);
+              }, 1500);
+            } catch (error) {
+              console.warn('Failed to parse claim intent:', error);
+            }
+          }
+
+          // Refresh the page to show updated user state
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        }}
+      />
+
       {/* Pricing Modal */}
       <EnhancedUnifiedPaymentModal
         isOpen={paymentModalOpen}
@@ -529,7 +824,7 @@ function Blog() {
 }
 
 // Blog Post Card Component
-function BlogPostCard({ post, navigate, formatDate }: any) {
+function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle, cleanDescription }: any) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [claiming, setClaiming] = useState(false);
@@ -571,12 +866,12 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
     localStorage.setItem('claim_intent', JSON.stringify(claimIntent));
 
     toast({
-      title: "Redirecting to sign in...",
-      description: "We'll bring you back to complete your claim.",
+      title: "Sign in required",
+      description: "Please sign in to claim this blog post.",
     });
 
-    // Navigate to login page
-    navigate('/login');
+    // Open login modal instead of navigating
+    onLoginRequired();
   };
 
   const handleClaimPost = async (e: React.MouseEvent) => {
@@ -673,12 +968,12 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
         </div>
         
         <CardTitle className="text-xl font-bold line-clamp-2 leading-tight group-hover:text-blue-600 transition-colors duration-300 mb-3">
-          {post.title}
+          {cleanTitle(post.title)}
         </CardTitle>
 
         {post.meta_description && (
           <p className="text-gray-600 line-clamp-3 leading-relaxed text-sm font-light">
-            {post.meta_description}
+            {cleanDescription(post.meta_description)}
           </p>
         )}
       </CardHeader>
@@ -744,7 +1039,7 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <User className="h-4 w-4" />
-            <span>{post.author_name || 'Backlink ∞'}</span>
+            <span>{post.author_name === 'AI Writer' ? 'Backlink ∞' : (post.author_name || 'Backlink ∞')}</span>
             {isOwnedByUser && (
               <Badge className="bg-green-50 text-green-700 border-green-200 text-xs ml-2">
                 Yours
@@ -776,7 +1071,7 @@ function BlogPostCard({ post, navigate, formatDate }: any) {
 }
 
 // Blog Post List Item Component
-function BlogPostListItem({ post, navigate, formatDate }: any) {
+function BlogPostListItem({ post, navigate, formatDate, onLoginRequired, cleanTitle, cleanDescription }: any) {
   return (
     <Card 
       className="group hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-200 hover:border-blue-300"
@@ -810,12 +1105,12 @@ function BlogPostListItem({ post, navigate, formatDate }: any) {
             </div>
             
             <h3 className="text-2xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-              {post.title}
+              {cleanTitle(post.title)}
             </h3>
-            
+
             {post.meta_description && (
               <p className="text-gray-600 leading-relaxed line-clamp-2">
-                {post.meta_description}
+                {cleanDescription(post.meta_description)}
               </p>
             )}
             
@@ -825,7 +1120,7 @@ function BlogPostListItem({ post, navigate, formatDate }: any) {
                   <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
               <User className="h-4 w-4 text-white" />
             </div>
-            <span className="font-medium">{post.author_name || 'Backlink ∞'}</span>
+            <span className="font-medium">{post.author_name === 'AI Writer' ? 'Backlink ∞' : (post.author_name || 'Backlink ∞')}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />

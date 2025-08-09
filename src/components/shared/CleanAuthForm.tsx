@@ -86,9 +86,10 @@ export function CleanAuthForm({
         });
       }
     } catch (error: any) {
+      console.error("Authentication error:", error?.message || error);
       toast({
         title: "Connection error",
-        description: "Unable to connect to authentication service.",
+        description: error?.message || "Unable to connect to authentication service.",
         variant: "destructive",
       });
     } finally {
@@ -212,10 +213,11 @@ export function CleanAuthForm({
       setSignupPassword("");
       setConfirmPassword("");
       setFirstName("");
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Signup error:", error?.message || error);
       toast({
         title: "Sign up failed",
-        description: "An unexpected error occurred. Please try again.",
+        description: error?.message || "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
     } finally {

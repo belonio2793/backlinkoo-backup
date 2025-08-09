@@ -14,9 +14,10 @@ import type { User } from '@supabase/supabase-js';
 
 interface ClaimStatusIndicatorProps {
   onUpgrade?: () => void;
+  onSignIn?: () => void;
 }
 
-export function ClaimStatusIndicator({ onUpgrade }: ClaimStatusIndicatorProps) {
+export function ClaimStatusIndicator({ onUpgrade, onSignIn }: ClaimStatusIndicatorProps) {
   const [user, setUser] = useState<User | null>(null);
   const [claimedCount, setClaimedCount] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -58,14 +59,14 @@ export function ClaimStatusIndicator({ onUpgrade }: ClaimStatusIndicatorProps) {
     return (
       <Card className="border-orange-200 bg-orange-50/50">
         <CardContent className="p-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-6">
             <div className="flex items-center space-x-2">
               <Lock className="w-4 h-4 text-orange-600" />
               <span className="text-sm text-orange-700">
                 Sign in to claim posts permanently
               </span>
             </div>
-            <Button size="sm" variant="outline" onClick={() => window.location.href = '/login'}>
+            <Button size="sm" variant="outline" onClick={onSignIn} className="flex-shrink-0">
               Sign In
             </Button>
           </div>

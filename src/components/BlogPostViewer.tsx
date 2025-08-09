@@ -251,7 +251,7 @@ export function BlogPostViewer() {
             <div className="flex items-center gap-4 text-sm text-gray-500 mb-6">
               <div className="flex items-center gap-1">
                 <User className="h-4 w-4" />
-                {blogPost.author_name}
+                {blogPost.author_name === 'AI Writer' ? 'Backlink ∞' : (blogPost.author_name || 'Backlink ∞')}
               </div>
               <div className="flex items-center gap-1">
                 <Calendar className="h-4 w-4" />

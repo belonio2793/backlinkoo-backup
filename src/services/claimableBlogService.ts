@@ -85,7 +85,7 @@ export class ClaimableBlogService {
         seo_score: data.seoScore,
         reading_time: data.readingTime,
         word_count: data.wordCount,
-        author_name: user ? 'AI Generator' : 'Anonymous',
+        author_name: 'Backlink ∞',
         tags: this.generateTags(data.keyword),
         category: this.categorizeContent(data.keyword),
         published_at: new Date().toISOString()

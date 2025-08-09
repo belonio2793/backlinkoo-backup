@@ -344,7 +344,7 @@ export class BlogClaimService {
         return { success: false, message: 'Failed to claim blog post.' };
       }
 
-      console.log(`✅ Successfully claimed post ${blogSlug} in ${tableName}`);
+      console.log(`✅ Successfully claimed post ${blogSlug} in blog_posts table`);
       return {
         success: true,
         message: 'Blog post claimed successfully! It\'s now permanently yours.'

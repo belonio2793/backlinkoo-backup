@@ -276,7 +276,7 @@ export function HomepageBlogGenerator() {
           ],
           word_count: result.blogPost?.wordCount || 1200,
           reading_time: Math.ceil((result.blogPost?.wordCount || 1200) / 200),
-          author_name: 'Backlinkoo Editorial Team',
+          author_name: 'Backlink ∞',
           author_avatar: '/placeholder.svg',
           tags: [primaryKeyword, 'Professional Guide', 'SEO Content'],
           category: 'Professional Guides',

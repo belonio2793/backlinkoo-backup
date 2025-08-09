@@ -132,7 +132,8 @@ export class GlobalErrorHandler {
    */
   private handleThirdPartyError(error: any, source: string, count: number): void {
     if (count === 1) {
-      console.warn(`🔍 Third-party script error detected (${source}):`, error.message);
+      const errorMessage = this.formatError(error);
+      console.warn(`🔍 Third-party script error detected (${source}):`, errorMessage);
       console.warn('This error is likely caused by browser extensions or analytics tools and can be safely ignored.');
     }
   }
@@ -142,7 +143,8 @@ export class GlobalErrorHandler {
    */
   private handleNetworkError(error: any, source: string, count: number): void {
     if (count <= 3) {
-      console.warn(`🌐 Network error (${source}, occurrence ${count}):`, error.message);
+      const errorMessage = this.formatError(error);
+      console.warn(`🌐 Network error (${source}, occurrence ${count}):`, errorMessage);
     }
   }
 
@@ -150,7 +152,8 @@ export class GlobalErrorHandler {
    * Handle RLS recursion errors - immediate action required
    */
   private handleRLSRecursionError(error: any, source: string): void {
-    console.error(`🚨 CRITICAL: RLS Recursion Detected (${source}):`, error.message);
+    const errorMessage = this.formatError(error);
+    console.error(`🚨 CRITICAL: RLS Recursion Detected (${source}):`, errorMessage);
     console.error('This will prevent login and database operations. Applying emergency fix...');
 
     // Apply emergency fix immediately
@@ -237,7 +240,30 @@ export class GlobalErrorHandler {
    */
   private handleGenericError(error: any, source: string, count: number): void {
     if (count <= 5) {
-      console.error(`❌ Application error (${source}, occurrence ${count}):`, error);
+      const errorMessage = this.formatError(error);
+      console.error(`❌ Application error (${source}, occurrence ${count}):`, errorMessage);
+    }
+  }
+
+  /**
+   * Format error for proper display (prevent [object Object])
+   */
+  private formatError(error: any): string {
+    if (!error) return 'Unknown error';
+
+    if (typeof error === 'string') return error;
+
+    if (error.message) return error.message;
+
+    if (error.toString && typeof error.toString === 'function') {
+      const str = error.toString();
+      if (str !== '[object Object]') return str;
+    }
+
+    try {
+      return JSON.stringify(error, null, 2);
+    } catch {
+      return 'Error object could not be serialized';
     }
   }
 

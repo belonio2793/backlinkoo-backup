@@ -304,7 +304,7 @@ export class ChatGPTBlogGenerator {
         reading_time: Math.ceil(content.wordCount / 200),
         word_count: content.wordCount,
         featured_image: `https://images.unsplash.com/1600x900/?${encodeURIComponent(input.targetKeyword)}`,
-        author_name: 'Backlinkoo Editorial Team',
+        author_name: 'Backlink ∞',
         author_avatar: '/placeholder.svg',
         tags: [input.targetKeyword, 'Professional Guide', 'SEO Content'],
         category: 'Professional Guides',

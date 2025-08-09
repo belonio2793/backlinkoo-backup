@@ -382,7 +382,7 @@ Ensure the anchor text placement follows SEO best practices and genuinely helps 
           reading_time: blogPostData.readingTime,
           seo_score: blogPostData.seoScore,
           meta_description: blogPostData.metaDescription,
-          author_name: 'AI Generator',
+          author_name: 'Backlink ∞',
           is_trial_post: true,
           expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
           created_at: new Date().toISOString(),
