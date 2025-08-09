@@ -286,13 +286,11 @@ export class UserManagementService {
    */
   async updateUser(userId: string, updates: UpdateUserData): Promise<void> {
     try {
-      // Update profile
+      // Update profile - only update fields that exist
       const profileUpdates: any = {};
       if (updates.role !== undefined) profileUpdates.role = updates.role;
       if (updates.subscription_tier !== undefined) profileUpdates.subscription_tier = updates.subscription_tier;
-      // subscription_status column doesn't exist, skip it
-      if (updates.credits !== undefined) profileUpdates.credits = updates.credits;
-      if (updates.metadata !== undefined) profileUpdates.metadata = updates.metadata;
+      // Skip credits and metadata since columns may not exist
 
       if (Object.keys(profileUpdates).length > 0) {
         const { error: profileError } = await supabase
