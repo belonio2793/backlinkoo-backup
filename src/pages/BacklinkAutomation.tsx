@@ -184,39 +184,7 @@ interface LinkBuildingConfig {
   isUserPremium: boolean;
 }
 
-// Mock services to prevent undefined errors
-const mockInternetProliferationService = {
-  getProliferationStats: () => ({
-    totalTargets: 0,
-    queueLength: 0,
-    isProliferating: false
-  }),
-  addCampaignToProliferation: async (campaign: CampaignProliferation) => {
-    console.log('Mock: Adding campaign to proliferation', campaign);
-  }
-};
-
-const mockLiveLinkBuildingService = {
-  checkPremiumLimits: async (userId: string) => ({
-    isLimitReached: false,
-    maxLinks: -1
-  }),
-  startLinkBuilding: async (config: LinkBuildingConfig) => {
-    console.log('Mock: Starting link building', config);
-  }
-};
-
-const mockRecursiveUrlDiscoveryService = {
-  getDiscoveredUrls: async (type?: string, status?: string, limit?: number, offset?: number) => [],
-  getDiscoveryStats: async () => ({
-    total_urls: 0,
-    verified_urls: 0,
-    by_type: {}
-  }),
-  reportUrl: async (urlId: string, reason: string) => {
-    console.log('Mock: Reporting URL', urlId, reason);
-  }
-};
+// Real services are now imported above and used directly
 
 export default function BacklinkAutomation() {
   // Auth Hook
