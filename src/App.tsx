@@ -50,14 +50,6 @@ const App = () => (
               }
             />
             <Route
-              path="/affiliate"
-              element={
-                <Suspense fallback={<div>Loading...</div>}>
-                  <LazyAffiliateProgram />
-                </Suspense>
-              }
-            />
-            <Route
               path="/automation"
               element={
                 <Suspense fallback={<div>Loading...</div>}>
@@ -78,14 +70,6 @@ const App = () => (
               element={
                 <Suspense fallback={<div>Loading...</div>}>
                   <LazyAdminLanding />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/affiliate"
-              element={
-                <Suspense fallback={<div>Loading...</div>}>
-                  <LazyAffiliateProgram />
                 </Suspense>
               }
             />
