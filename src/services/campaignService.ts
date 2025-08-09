@@ -213,6 +213,14 @@ class CampaignService {
       const response = await this.makeRequest<{ success: boolean; campaigns: any[] }>('/backlink-campaigns');
       return response.campaigns || [];
     } catch (error) {
+      // Check if it's a backend configuration issue
+      if (error.message.includes('Server returned non-JSON response') ||
+          error.message.includes('Backend services not available') ||
+          error.message.includes('timeout')) {
+        console.log('Backend not available for campaigns, returning empty array');
+        return []; // Return empty array instead of throwing
+      }
+
       console.error('Failed to fetch campaigns:', error);
       throw error;
     }
