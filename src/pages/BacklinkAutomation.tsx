@@ -1136,7 +1136,7 @@ export default function BacklinkAutomation() {
                   <Button
                     onClick={startUrlDiscovery}
                     className="w-full h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                    disabled={isDiscovering || !user}
+                    disabled={isDiscovering || !user || (databaseStatus && !databaseStatus.isConnected)}
                   >
                     {isDiscovering ? (
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
