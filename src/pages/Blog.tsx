@@ -195,13 +195,17 @@ function Blog() {
   };
 
   const filteredPosts = blogPosts.filter(post => {
-    const matchesSearch = searchTerm === '' || 
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.meta_description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.keywords.some(keyword => keyword.toLowerCase().includes(searchTerm.toLowerCase()));
-    
+    const cleanedTitle = cleanTitle(post.title).toLowerCase();
+    const cleanedDescription = cleanDescription(post.meta_description || '').toLowerCase();
+    const searchLower = searchTerm.toLowerCase();
+
+    const matchesSearch = searchTerm === '' ||
+      cleanedTitle.includes(searchLower) ||
+      cleanedDescription.includes(searchLower) ||
+      post.keywords.some(keyword => keyword.toLowerCase().includes(searchLower));
+
     const matchesCategory = selectedCategory === '' || post.category === selectedCategory;
-    
+
     return matchesSearch && matchesCategory;
   });
 
