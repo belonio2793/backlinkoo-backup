@@ -111,6 +111,66 @@ class CampaignService {
   }
 
   /**
+   * XMLHttpRequest-based request to bypass fetch interception
+   */
+  private async makeXHRRequest(url: string, options: RequestInit): Promise<Response> {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      const method = options.method || 'GET';
+
+      xhr.open(method, url, true);
+
+      // Set headers
+      if (options.headers) {
+        const headers = options.headers as Record<string, string>;
+        Object.entries(headers).forEach(([key, value]) => {
+          xhr.setRequestHeader(key, value);
+        });
+      }
+
+      // Handle timeout
+      xhr.timeout = 8000;
+
+      xhr.onload = () => {
+        // Create a Response-like object
+        const response = {
+          ok: xhr.status >= 200 && xhr.status < 300,
+          status: xhr.status,
+          statusText: xhr.statusText,
+          headers: {
+            get: (name: string) => xhr.getResponseHeader(name),
+          },
+          json: async () => {
+            try {
+              return JSON.parse(xhr.responseText);
+            } catch (e) {
+              throw new Error('Invalid JSON response');
+            }
+          },
+          text: async () => xhr.responseText,
+        } as Response;
+
+        resolve(response);
+      };
+
+      xhr.onerror = () => {
+        reject(new Error('Network error occurred'));
+      };
+
+      xhr.ontimeout = () => {
+        reject(new Error('Request timeout'));
+      };
+
+      // Send request
+      if (options.body && typeof options.body === 'string') {
+        xhr.send(options.body);
+      } else {
+        xhr.send();
+      }
+    });
+  }
+
+  /**
    * Make authenticated API request with enhanced error handling
    */
   private async makeRequest<T>(
