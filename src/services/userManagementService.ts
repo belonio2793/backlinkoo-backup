@@ -196,15 +196,15 @@ export class UserManagementService {
         .select('*', { count: 'exact', head: true })
         .gte('created_at', monthAgo.toISOString());
 
-      // Calculate active users (signed in within last 30 days)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      // Calculate active users (estimate based on recent activity or creation date)
+      // Since we don't have direct access to last_sign_in_at, we'll use a different approach
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
-      // Note: This query might need adjustment based on your auth setup
       const { count: activeUsers } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true })
-        .gte('last_sign_in_at', thirtyDaysAgo.toISOString());
+        .gte('created_at', sevenDaysAgo.toISOString()); // Use recent signups as proxy for active users
 
       // Estimate revenue (this could be enhanced with actual subscription data)
       const estimatedRevenue = (premiumUsers || 0) * 29; // $29 per premium user
