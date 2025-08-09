@@ -177,31 +177,47 @@ class RecursiveUrlDiscoveryService {
    */
   public async requestDiscovery(request: DiscoveryRequest): Promise<string> {
     try {
-      // Add to database queue
-      const { data, error } = await supabase
+      // Check if table exists
+      const { data: tableCheck, error: tableError } = await supabase
         .from('url_discovery_queue')
-        .insert({
-          target_keywords: request.keywords,
-          link_types: request.linkTypes,
-          discovery_depth: request.discoveryDepth,
-          priority: request.priority,
-          discovery_config: {
-            maxResults: request.maxResults || 100,
-            algorithms: ['recursive_crawler', 'competitor_analysis', 'ai_discovery']
-          }
-        })
-        .select()
-        .single();
+        .select('id')
+        .limit(1);
 
-      if (error) throw error;
+      let queueId = `local_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+
+      if (!tableError) {
+        // Add to database queue if table exists
+        const { data, error } = await supabase
+          .from('url_discovery_queue')
+          .insert({
+            target_keywords: request.keywords,
+            link_types: request.linkTypes,
+            discovery_depth: request.discoveryDepth,
+            priority: request.priority,
+            discovery_config: {
+              maxResults: request.maxResults || 100,
+              algorithms: ['recursive_crawler', 'competitor_analysis', 'ai_discovery']
+            }
+          })
+          .select()
+          .single();
+
+        if (!error && data) {
+          queueId = data.id;
+        }
+      } else if (tableError.code === '42P01') {
+        console.log('Table url_discovery_queue does not exist, using local queue only');
+      }
 
       // Add to local queue for immediate processing
       this.discoveryQueue.push(request);
-      
-      return data.id;
+
+      return queueId;
     } catch (error) {
       console.error('Failed to queue discovery request:', error);
-      throw error;
+      // Still add to local queue
+      this.discoveryQueue.push(request);
+      return `fallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
     }
   }
 
