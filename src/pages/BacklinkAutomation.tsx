@@ -373,7 +373,7 @@ export default function BacklinkAutomation() {
         component: 'campaign_creation',
         operation: 'create_campaign',
         severity: 'high',
-        metadata: { campaignName: campaignForm.name }
+        metadata: { campaignName: generatedName }
       });
 
       toast({
