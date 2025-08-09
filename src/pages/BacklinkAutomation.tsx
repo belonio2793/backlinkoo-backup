@@ -619,6 +619,8 @@ export default function BacklinkAutomation() {
           linksLive: dbCampaign.links_generated ? Math.round(dbCampaign.links_generated * 0.95) : 0,
           createdAt: new Date(dbCampaign.created_at),
           lastActivity: dbCampaign.updated_at ? new Date(dbCampaign.updated_at) : new Date(),
+          blogPostUrl: dbCampaign.blog_post_url,
+          blogPostTitle: dbCampaign.blog_post_title,
           quality: {
             averageAuthority: 70 + Math.floor(Math.random() * 25),
             successRate: 85 + Math.floor(Math.random() * 10),
