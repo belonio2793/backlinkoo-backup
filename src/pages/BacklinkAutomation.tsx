@@ -125,6 +125,7 @@ export default function BacklinkAutomation() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [isDiscovering, setIsDiscovering] = useState(false);
+  const [backendStatus, setBackendStatus] = useState<'available' | 'unavailable' | 'checking'>('checking');
 
   // Premium Usage Tracking
   const [usageStats, setUsageStats] = useState({
