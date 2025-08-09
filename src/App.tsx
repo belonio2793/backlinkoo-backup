@@ -34,6 +34,14 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route
+              path="/blog"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <LazyBlog />
+                </Suspense>
+              }
+            />
+            <Route
               path="/automation"
               element={
                 <Suspense fallback={<div>Loading...</div>}>
