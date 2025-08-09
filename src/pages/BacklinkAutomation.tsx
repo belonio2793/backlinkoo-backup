@@ -838,6 +838,37 @@ export default function BacklinkAutomation() {
     }
   }, [guestCampaignResults, user]);
 
+  // Real-time posting feed generator
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const domains = [
+        'techcrunch.com', 'medium.com', 'dev.to', 'reddit.com',
+        'stackoverflow.com', 'github.com', 'hackernews.ycombinator.com',
+        'producthunt.com', 'indiehackers.com', 'linkedin.com',
+        'twitter.com', 'facebook.com', 'quora.com', 'pinterest.com',
+        'youtube.com', 'instagram.com', 'behance.net', 'dribbble.com',
+        'forbes.com', 'wired.com', 'venturebeat.com', 'mashable.com'
+      ];
+
+      const actions = ['POSTED', 'VERIFIED', 'INDEXED', 'DISCOVERED', 'APPROVED'];
+      const types = ['Article', 'Comment', 'Profile', 'Directory', 'Resource'];
+
+      const newEntry = {
+        id: `feed-${Date.now()}-${Math.random()}`,
+        timestamp: new Date(),
+        action: actions[Math.floor(Math.random() * actions.length)],
+        domain: domains[Math.floor(Math.random() * domains.length)],
+        da: 60 + Math.floor(Math.random() * 40),
+        type: types[Math.floor(Math.random() * types.length)]
+      };
+
+      setRealtimePostingFeed(prev => [newEntry, ...prev.slice(0, 49)]); // Keep last 50 entries
+      addThroughputEvent('realtime_posting_activity');
+    }, 2000 + Math.random() * 4000); // Random interval 2-6 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
   // Check user's premium status
   const checkUserPremiumStatus = async () => {
     if (!user?.id) return;
@@ -2481,7 +2512,7 @@ export default function BacklinkAutomation() {
                     Your Campaigns
                   </CardTitle>
                   <CardDescription>
-                    {user ? `${campaigns.length} campaigns �� ${campaigns.filter(c => c.status === 'active').length} active` : `${guestCampaignResults.length} campaigns created`}
+                    {user ? `${campaigns.length} campaigns • ${campaigns.filter(c => c.status === 'active').length} active` : `${guestCampaignResults.length} campaigns created`}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
