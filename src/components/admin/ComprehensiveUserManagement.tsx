@@ -341,6 +341,9 @@ export default function ComprehensiveUserManagement() {
         .eq('user_id', selectedUser.id);
 
       if (error) {
+        if (error.message.includes('permission denied')) {
+          throw new Error(`Permission denied: You need admin privileges to update users. Current error: ${error.message}`);
+        }
         throw new Error(`Failed to update user: ${error.message}`);
       }
 
@@ -354,11 +357,13 @@ export default function ComprehensiveUserManagement() {
       await loadUsers(); // Reload to get updated data
 
     } catch (error: any) {
+      const errorMessage = error.message || 'Failed to update user';
       toast({
         title: "Error Updating User",
-        description: error.message || 'Failed to update user',
+        description: errorMessage,
         variant: "destructive"
       });
+      console.error('Update user error:', error);
     } finally {
       setLoading(false);
     }
