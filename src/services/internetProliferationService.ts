@@ -261,7 +261,7 @@ class InternetProliferationService {
         await this.delay(5000);
       }
     } catch (error) {
-      console.error('Proliferation queue processing error:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
+      logError('Proliferation queue processing error:', error);
     } finally {
       this.isProliferating = false;
     }
@@ -287,7 +287,7 @@ class InternetProliferationService {
           await this.delay(Math.random() * 30000 + 10000); // 10-40 seconds
           
         } catch (error) {
-          console.error(`Failed to proliferate to ${target.domain}:`, error instanceof Error ? error.message : JSON.stringify(error, null, 2));
+          logError(`Failed to proliferate to ${target.domain}:`, error);
           
           // Save failed result
           const failedResult: ProliferationResult = {
@@ -317,7 +317,7 @@ class InternetProliferationService {
         }
       }
     } catch (error) {
-      console.error(`Campaign proliferation failed for ${campaign.campaignId}:`, error instanceof Error ? error.message : JSON.stringify(error, null, 2));
+      logError(`Campaign proliferation failed for ${campaign.campaignId}:`, error);
     }
   }
 
@@ -593,7 +593,7 @@ class InternetProliferationService {
           .single();
 
         if (createOpportunityError) {
-          console.error('Failed to create link opportunity:', createOpportunityError instanceof Error ? createOpportunityError.message : JSON.stringify(createOpportunityError, null, 2));
+          logError('Failed to create link opportunity:', createOpportunityError);
           return;
         }
 
@@ -624,7 +624,7 @@ class InternetProliferationService {
         });
 
       if (error) {
-        console.error('Failed to save proliferation result:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
+        logError('Failed to save proliferation result:', error);
       }
 
       // Update campaign progress
@@ -637,11 +637,11 @@ class InternetProliferationService {
         .eq('id', result.campaignId);
 
       if (updateError) {
-        console.error('Failed to update campaign progress:', updateError instanceof Error ? updateError.message : JSON.stringify(updateError, null, 2));
+        logError('Failed to update campaign progress:', updateError);
       }
 
     } catch (error) {
-      console.error('Failed to save proliferation result:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
+      logError('Failed to save proliferation result:', error);
     }
   }
 
