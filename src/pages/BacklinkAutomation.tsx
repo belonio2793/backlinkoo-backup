@@ -594,6 +594,13 @@ export default function BacklinkAutomation() {
   };
 
   const linkTypeConfig = {
+    all: {
+      title: 'All Strategies',
+      description: 'Use all available link building strategies for maximum reach',
+      icon: Sparkles,
+      color: 'gradient',
+      totalUrls: Object.values(discoveryStats?.by_type || {}).reduce((sum: number, count) => sum + (count as number), 0)
+    },
     blog_comment: {
       title: 'Blog Comments',
       description: 'High-authority blogs with comment sections',
