@@ -75,12 +75,12 @@ const statusConfig = {
     icon: Activity
   },
   completed: {
-    label: 'Completed',
-    color: 'bg-green-500',
-    bgColor: 'bg-green-50 dark:bg-green-950/20',
-    textColor: 'text-green-700 dark:text-green-300',
-    borderColor: 'border-green-200 dark:border-green-800',
-    icon: CheckCircle
+    label: 'Paused',
+    color: 'bg-orange-500',
+    bgColor: 'bg-orange-50 dark:bg-orange-950/20',
+    textColor: 'text-orange-700 dark:text-orange-300',
+    borderColor: 'border-orange-200 dark:border-orange-800',
+    icon: Pause
   },
   paused: {
     label: 'Paused',
