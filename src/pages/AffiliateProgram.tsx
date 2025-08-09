@@ -423,6 +423,13 @@ export const AffiliateProgram: React.FC = () => {
           <ComprehensiveAffiliateDashboard userId={user.id} />
         </TabsContent>
 
+        <TabsContent value="users" className="mt-0 p-6">
+          <ReferredUsers
+            affiliateId={affiliateProfile.affiliate_id}
+            affiliateCode={affiliateProfile.affiliate_id}
+          />
+        </TabsContent>
+
         <TabsContent value="assets" className="mt-0">
           <AffiliateAssetLibrary 
             affiliateId={affiliateProfile.affiliate_id}
