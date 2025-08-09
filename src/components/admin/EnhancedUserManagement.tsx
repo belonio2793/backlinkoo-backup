@@ -60,60 +60,11 @@ import {
 import { useUserManagement } from '@/hooks/useUserManagement';
 import type { UserProfile, UserFilters } from '@/services/userManagementService';
 
-interface User {
-  id: string;
-  email: string;
-  role: 'user' | 'admin' | 'premium';
-  subscription_tier: 'free' | 'monthly' | 'premium' | 'enterprise';
-  subscription_status: 'active' | 'inactive' | 'suspended' | 'cancelled';
-  credits: number;
-  created_at: string;
-  last_sign_in_at: string;
-  email_confirmed_at: string;
-  banned_until: string | null;
-  metadata: any;
-  raw_user_meta_data: any;
-  user_metadata: any;
-}
-
-interface UserStats {
-  totalUsers: number;
-  activeUsers: number;
-  premiumUsers: number;
-  totalRevenue: number;
-  newUsersToday: number;
-  activeUsersToday: number;
-}
-
-interface UserFilters {
-  search: string;
-  role: string;
-  subscription: string;
-  status: string;
-  dateFrom: string;
-  dateTo: string;
-}
-
 export default function EnhancedUserManagement() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const usersPerPage = 20;
-
-  const [userStats, setUserStats] = useState<UserStats>({
-    totalUsers: 0,
-    activeUsers: 0,
-    premiumUsers: 0,
-    totalRevenue: 0,
-    newUsersToday: 0,
-    activeUsersToday: 0
-  });
 
   const [filters, setFilters] = useState<UserFilters>({
     search: '',
@@ -121,7 +72,9 @@ export default function EnhancedUserManagement() {
     subscription: 'all',
     status: 'all',
     dateFrom: '',
-    dateTo: ''
+    dateTo: '',
+    limit: 20,
+    offset: 0
   });
 
   const [newUser, setNewUser] = useState({
@@ -132,7 +85,19 @@ export default function EnhancedUserManagement() {
     credits: 0
   });
 
-  const { toast } = useToast();
+  const {
+    users,
+    userStats,
+    loading,
+    pagination,
+    createUser,
+    updateUser,
+    deleteUser,
+    toggleUserBan,
+    exportUsers,
+    loadUsers,
+    refresh
+  } = useUserManagement();
 
   useEffect(() => {
     loadUsers();
