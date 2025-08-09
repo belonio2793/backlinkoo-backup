@@ -1295,7 +1295,7 @@ export default function BacklinkAutomation() {
               {/* Live Results Embedded Interface - Show when campaigns are active */}
               {((user && campaigns.filter(c => c.status === 'active').length > 0) ||
                 (!user && guestCampaignResults.length > 0)) && (
-                <Card className="border-2 border-green-200 bg-gradient-to-r from-green-50 to-blue-50">
+                <Card className="border-2 border-green-200 bg-gradient-to-r from-green-50 to-blue-50 xl:col-span-1 order-first xl:order-none">
                   <CardHeader>
                     <CardTitle className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
