@@ -676,59 +676,6 @@ export default function BacklinkAutomation() {
         linkType: 'all'
       });
 
-      // Simulate guest link generation if not logged in
-      if (!user) {
-        const linksToGenerate = Math.min(Math.floor(Math.random() * 8) + 3, 20 - guestLinksGenerated); // 3-10 links
-        const newTotal = guestLinksGenerated + linksToGenerate;
-
-        updateGuestLinkCount(newTotal);
-
-        // Add campaign result for guest
-        const campaignResult = {
-          id: Date.now().toString(),
-          name: generateCampaignName(campaignForm.targetUrl, campaignForm.keywords),
-          targetUrl: campaignForm.targetUrl,
-          keywords: campaignForm.keywords.split(',').map(k => k.trim()),
-          linksGenerated: linksToGenerate,
-          createdAt: new Date().toISOString(),
-          status: 'completed',
-          domains: [
-            'techcrunch.com', 'medium.com', 'reddit.com', 'dev.to', 'stackoverflow.com'
-          ].slice(0, Math.min(linksToGenerate, 5))
-        };
-
-        addGuestCampaignResult(campaignResult);
-
-        // Show different messages based on progress to build excitement
-        if (guestLinksGenerated === 0) {
-          // First campaign - surprise reveal
-          toast({
-            title: "🎉 Surprise! Your Backlinks Are Ready!",
-            description: `We've generated ${linksToGenerate} premium backlinks for you instantly! This usually costs $${linksToGenerate * 20}+`,
-            duration: 5000,
-          });
-        } else if (newTotal >= 20) {
-          // Trial complete
-          toast({
-            title: "🚀 Amazing! You've Built 20+ Backlinks!",
-            description: "See your incredible results and unlock unlimited campaigns!",
-            duration: 6000,
-          });
-          setTimeout(() => setShowTrialExhaustedModal(true), 3000);
-        } else {
-          // Progress update
-          toast({
-            title: `🔥 +${linksToGenerate} More Backlinks Generated!`,
-            description: `Total: ${newTotal} premium backlinks built! Keep going - you're on fire!`,
-          });
-        }
-      } else {
-        toast({
-          title: "Campaign Created",
-          description: "Your campaign has been successfully created and is now active.",
-        });
-      }
-
     } catch (error) {
       console.error('Failed to create campaign:', error);
       toast({
