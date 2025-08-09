@@ -429,7 +429,7 @@ export default function BacklinkAutomation() {
       );
       updateGuestRestrictions();
       toast({
-        title: "🗑️ Campaign Deleted",
+        title: "🗑�� Campaign Deleted",
         description: `"${guestCampaignToDelete.name}" has been permanently removed.`,
       });
     } else {
@@ -2417,7 +2417,7 @@ export default function BacklinkAutomation() {
                             <Button
                               variant="outline"
                               onClick={() => window.location.href = '/subscription-success'}
-                              className="w-full h-12 px-6 border-purple-200 text-purple-600 hover:bg-purple-50"
+                              className="w-full h-12 px-6 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100"
                             >
                               <Crown className="h-4 w-4 mr-2" />
                               Upgrade to Premium
