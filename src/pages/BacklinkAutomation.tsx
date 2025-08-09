@@ -744,6 +744,17 @@ export default function BacklinkAutomation() {
           // For guest users, directly restore campaigns
           setGuestCampaignResults(permanentCampaigns);
           console.log('✅ Guest Data Restored:', permanentCampaigns.length, 'campaigns with preserved metrics');
+
+          // Show notification about data preservation for guest users
+          if (permanentCampaigns.length > 0) {
+            setTimeout(() => {
+              toast({
+                title: "📊 Data Restored Successfully",
+                description: `${permanentCampaigns.length} campaigns restored with all metrics preserved. Your data is safe across sessions.`,
+                duration: 4000,
+              });
+            }, 1000);
+          }
         }
       }
     };
