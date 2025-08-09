@@ -1556,6 +1556,39 @@ export default function BacklinkAutomation() {
                       </div>
                     )}
 
+                    {/* Trial Exhausted Discovery State */}
+                    {!user && guestLinksGenerated >= 20 && (
+                      <div className="space-y-3">
+                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 border-2 border-amber-200">
+                          <div className="text-center">
+                            <div className="text-lg font-bold text-amber-800 mb-2">
+                              🎯 Trial Complete! Amazing Discovery Results
+                            </div>
+                            <p className="text-sm text-amber-700">
+                              You've discovered thousands of high-quality URLs. Sign in to continue exploring!
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-3">
+                          <Button
+                            onClick={() => setShowTrialExhaustedModal(true)}
+                            className="flex-1 h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                          >
+                            <Crown className="h-4 w-4 mr-2" />
+                            Unlock Premium
+                          </Button>
+                          <Button
+                            variant="outline"
+                            onClick={() => window.location.href = '/login'}
+                            className="flex-1 h-12"
+                          >
+                            <UserPlus className="h-4 w-4 mr-2" />
+                            Sign In Free
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Logged In but System Initializing */}
                     {user && databaseStatus && !databaseStatus.isConnected && (
                       <div className="space-y-3">
