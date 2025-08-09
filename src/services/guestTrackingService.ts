@@ -358,7 +358,7 @@ class GuestTrackingService {
   /**
    * Update campaign status
    */
-  public updateCampaignStatus(campaignId: string, status: 'active' | 'paused' | 'stopped'): {
+  public updateCampaignStatus(campaignId: string, status: 'active' | 'paused' | 'stopped' | 'completed'): {
     success: boolean;
     warning?: PremiumLimitWarning;
     shouldShowPremiumModal?: boolean;
