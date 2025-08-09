@@ -2552,7 +2552,7 @@ export default function BacklinkAutomation() {
                     </div>
 
                     {campaignForm.targetUrl && campaignForm.keywords && (
-                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="p-3 bg-blue-50 rounded-lg">
                         <div className="text-sm text-blue-700">
                           <strong>Campaign:</strong> {generateCampaignName(campaignForm.targetUrl, campaignForm.keywords)}
                         </div>
