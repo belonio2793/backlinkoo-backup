@@ -162,13 +162,13 @@ class RecursiveUrlDiscoveryService {
         .insert(seedData);
 
       if (insertError) {
-        console.error('Failed to initialize seed database:', insertError);
+        console.error('Failed to initialize seed database:', insertError instanceof Error ? insertError.message : JSON.stringify(insertError, null, 2));
       } else {
         console.log(`Initialized seed database with ${seedData.length} URLs`);
       }
 
     } catch (error) {
-      console.error('Error initializing seed database:', error);
+      console.error('Error initializing seed database:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
     }
   }
 
@@ -214,7 +214,7 @@ class RecursiveUrlDiscoveryService {
 
       return queueId;
     } catch (error) {
-      console.error('Failed to queue discovery request:', error);
+      console.error('Failed to queue discovery request:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
       // Still add to local queue
       this.discoveryQueue.push(request);
       return `fallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -237,7 +237,7 @@ class RecursiveUrlDiscoveryService {
         await this.executeDiscoveryRequest(request);
       }
     } catch (error) {
-      console.error('Discovery queue processing error:', error);
+      console.error('Discovery queue processing error:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
     } finally {
       this.isDiscovering = false;
     }
@@ -274,7 +274,7 @@ class RecursiveUrlDiscoveryService {
             urls.forEach(url => discoveredUrls.add(url));
             return { algorithm, count: urls.length, success: true };
           } catch (error) {
-            console.error(`${algorithm} failed:`, error);
+            console.error(`${algorithm} failed:`, error instanceof Error ? error.message : JSON.stringify(error, null, 2));
             return { algorithm, count: 0, success: false };
           }
         }
@@ -300,7 +300,7 @@ class RecursiveUrlDiscoveryService {
       console.log(`Discovery session completed: ${this.activeSession.workingUrls}/${this.activeSession.totalUrlsDiscovered} working URLs`);
 
     } catch (error) {
-      console.error('Discovery request execution failed:', error);
+      console.error('Discovery request execution failed:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
       if (this.activeSession) {
         this.activeSession.status = 'failed';
         this.activeSession.endedAt = new Date();
@@ -334,7 +334,7 @@ class RecursiveUrlDiscoveryService {
           }
         }
       } catch (error) {
-        console.error(`Recursive crawl failed for ${seedUrl}:`, error);
+        console.error(`Recursive crawl failed for ${seedUrl}:`, error instanceof Error ? error.message : JSON.stringify(error, null, 2));
       }
     }
 
@@ -581,7 +581,7 @@ class RecursiveUrlDiscoveryService {
           processedUrls.push(urlData);
         }
       } catch (error) {
-        console.error(`Failed to process URL ${url}:`, error);
+        console.error(`Failed to process URL ${url}:`, error instanceof Error ? error.message : JSON.stringify(error, null, 2));
       }
     }
 
@@ -638,7 +638,7 @@ class RecursiveUrlDiscoveryService {
       };
 
     } catch (error) {
-      console.error('URL validation failed:', error);
+      console.error('URL validation failed:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
       return null;
     }
   }
@@ -719,10 +719,10 @@ class RecursiveUrlDiscoveryService {
         });
 
       if (error) {
-        console.error('Failed to save discovered URL:', error);
+        console.error('Failed to save discovered URL:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
       }
     } catch (error) {
-      console.error('Database save error:', error);
+      console.error('Database save error:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
     }
   }
 
@@ -737,13 +737,13 @@ class RecursiveUrlDiscoveryService {
         if (error.code === '42883') {
           console.log('Auto cleanup function does not exist, skipping cleanup');
         } else {
-          console.error('Auto cleanup failed:', error);
+          console.error('Auto cleanup failed:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
         }
       } else {
         console.log(`Auto cleanup completed: ${data} URLs cleaned`);
       }
     } catch (error) {
-      console.error('Auto cleanup error:', error);
+      console.error('Auto cleanup error:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
     }
   }
 
@@ -1055,7 +1055,7 @@ class RecursiveUrlDiscoveryService {
       }
 
     } catch (error) {
-      console.error('Failed to vote on URL:', error);
+      console.error('Failed to vote on URL:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
       // Don't throw error, just log it
       console.log('Vote action logged locally');
     }
@@ -1101,7 +1101,7 @@ class RecursiveUrlDiscoveryService {
       }
 
     } catch (error) {
-      console.error('Failed to report URL:', error);
+      console.error('Failed to report URL:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
       // Don't throw error, just log it
       console.log('Report action logged locally');
     }
