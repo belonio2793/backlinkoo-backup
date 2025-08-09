@@ -4369,7 +4369,7 @@ export default function BacklinkAutomation() {
                 {/* Not Logged In Actions */}
                 <Button
                   size="sm"
-                  onClick={() => window.location.href = '/login'}
+                  onClick={() => setShowSignInModal(true)}
                   className="w-40 justify-start bg-blue-600 text-white shadow-lg hover:bg-blue-700"
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
