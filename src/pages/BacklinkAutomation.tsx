@@ -1570,6 +1570,16 @@ export default function BacklinkAutomation() {
           campaign={campaignToDelete}
           isDeleting={isDeleting}
         />
+
+        {/* Premium Upgrade Modal */}
+        <PremiumUpgradeModal
+          isOpen={premiumUpgradeModal}
+          onClose={handleUpgradeModalClose}
+          onUpgrade={handleUpgradeClick}
+          linksPublished={premiumLimitData?.linksPublished || 0}
+          maxLinks={premiumLimitData?.maxLinks || 20}
+          campaignName={campaigns.find(c => c.status === 'active')?.name}
+        />
         </div>
       </div>
 
