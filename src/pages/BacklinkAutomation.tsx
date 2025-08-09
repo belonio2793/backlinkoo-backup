@@ -4295,7 +4295,7 @@ export default function BacklinkAutomation() {
                           { name: 'Automotive', count: 25340, icon: '🚗' },
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
                           { name: 'Home & Garden', count: 21890, icon: '🏡' },
-                          { name: 'Legal Services', count: 19650, icon: '⚖️' },
+                          { name: 'Legal Services', count: 19650, icon: '⚖��' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
                           { name: 'Science & Research', count: 14560, icon: '🔬' },
@@ -5118,7 +5118,7 @@ export default function BacklinkAutomation() {
               {authContext === 'trial_complete' && (
                 <div className="bg-green-50 rounded-lg p-3 mb-4">
                   <div className="text-sm text-green-800">
-                    �� <strong>Trial Complete!</strong> Sign in to save your {guestLinksGenerated} generated backlinks and continue building.
+                    🎉 <strong>Trial Complete!</strong> Sign in to save your {guestLinksGenerated} generated backlinks and continue building.
                   </div>
                 </div>
               )}
