@@ -285,32 +285,37 @@ export function GuestPremiumUpsellModal({
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold mb-2 flex items-center justify-center gap-2">
                 <Crown className="h-6 w-6" />
-                Premium Unlimited Access
+                {campaigns.some(c => c.linksGenerated >= 20) ? 'Continue Your Paused Campaigns' : 'Premium Unlimited Access'}
               </h3>
-              <p className="opacity-90">Everything you need to dominate search results</p>
+              <p className="opacity-90">
+                {campaigns.some(c => c.linksGenerated >= 20)
+                  ? 'Upgrade now to reactivate paused campaigns and continue building unlimited links'
+                  : 'Everything you need to dominate search results'
+                }
+              </p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div className="text-center">
+                <div className="h-12 w-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Play className="h-6 w-6" />
+                </div>
+                <div className="text-xl font-bold">Resume Campaigns</div>
+                <div className="text-sm opacity-90">Continue from where you left off</div>
+              </div>
               <div className="text-center">
                 <div className="h-12 w-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Infinity className="h-6 w-6" />
                 </div>
-                <div className="text-xl font-bold">∞ Campaigns</div>
-                <div className="text-sm opacity-90">No limits on campaigns</div>
-              </div>
-              <div className="text-center">
-                <div className="h-12 w-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <Zap className="h-6 w-6" />
-                </div>
-                <div className="text-xl font-bold">500+ Links</div>
-                <div className="text-sm opacity-90">Per campaign, per month</div>
+                <div className="text-xl font-bold">∞ Links</div>
+                <div className="text-sm opacity-90">No more 20-link limits</div>
               </div>
               <div className="text-center">
                 <div className="h-12 w-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3">
                   <Shield className="h-6 w-6" />
                 </div>
-                <div className="text-xl font-bold">24/7 Support</div>
-                <div className="text-sm opacity-90">Priority assistance</div>
+                <div className="text-xl font-bold">Keep Progress</div>
+                <div className="text-sm opacity-90">All your links are preserved</div>
               </div>
             </div>
 
