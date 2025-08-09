@@ -238,10 +238,10 @@ export default function ComprehensiveUserManagement() {
       });
 
     } catch (error: any) {
-      const errorMessage = error?.message || error?.toString() || JSON.stringify(error) || 'Failed to load users';
+      const errorMessage = error?.message || error?.toString() || 'Failed to load users from database';
       setError(errorMessage);
 
-      // Set empty state
+      // Set empty state - no fallbacks
       setUsers([]);
       setFilteredUsers([]);
       setUserStats({
@@ -252,11 +252,11 @@ export default function ComprehensiveUserManagement() {
       });
 
       toast({
-        title: "Error Loading Users",
-        description: `${errorMessage}. Check console for details.`,
+        title: "Database Access Required",
+        description: `${errorMessage}. Real database access is required for user management.`,
         variant: "destructive"
       });
-      console.error('Error loading users:', error);
+      console.error('Database access error:', error);
     } finally {
       setLoading(false);
     }
