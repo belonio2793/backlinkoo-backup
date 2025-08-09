@@ -448,6 +448,26 @@ export default function BacklinkAutomation() {
     };
   }, [throttleIntervalId]);
 
+  // Clean up campaign intervals on unmount
+  useEffect(() => {
+    return () => {
+      activeCampaignIntervals.forEach((interval) => {
+        clearInterval(interval);
+      });
+    };
+  }, []);
+
+  // Start real-time monitoring for active campaigns on load
+  useEffect(() => {
+    campaigns.forEach(campaign => {
+      if (campaign.status === 'active' && !activeCampaignIntervals.has(campaign.id)) {
+        setTimeout(() => {
+          startRealTimeActivity(campaign.id);
+        }, Math.random() * 3000 + 1000); // Stagger starts
+      }
+    });
+  }, [campaigns.length]); // Only when campaign count changes
+
   // Engine Instances
   const queueManager = CampaignQueueManager.getInstance();
   const discoveryEngine = LinkDiscoveryEngine.getInstance();
