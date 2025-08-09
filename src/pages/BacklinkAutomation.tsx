@@ -246,6 +246,42 @@ export default function BacklinkAutomation() {
     setIsLinkBuildingActive(activeCampaignCount > 0);
   }, [campaigns]);
 
+  // Aggregate successful links for discovery engine
+  useEffect(() => {
+    if (publishedLinks.length > 0) {
+      const aggregated = publishedLinks.reduce((acc, link) => {
+        const key = `${link.platform}-${new URL(link.sourceUrl).hostname}`;
+        if (!acc[key]) {
+          acc[key] = {
+            platform: link.platform,
+            domain: new URL(link.sourceUrl).hostname,
+            successCount: 0,
+            lastSuccess: link.publishedAt,
+            averageDA: 0,
+            successRate: 0,
+            totalAttempts: 0,
+            recentLinks: []
+          };
+        }
+
+        acc[key].successCount += 1;
+        acc[key].totalAttempts += 1; // In real system, this would include failed attempts
+        acc[key].lastSuccess = link.publishedAt > acc[key].lastSuccess ? link.publishedAt : acc[key].lastSuccess;
+        acc[key].averageDA = Math.round((acc[key].averageDA * (acc[key].successCount - 1) + link.domainAuthority) / acc[key].successCount);
+        acc[key].successRate = (acc[key].successCount / acc[key].totalAttempts) * 100;
+        acc[key].recentLinks = [link, ...acc[key].recentLinks.slice(0, 2)];
+
+        return acc;
+      }, {} as Record<string, any>);
+
+      const sortedAggregated = Object.values(aggregated)
+        .sort((a: any, b: any) => b.successCount - a.successCount)
+        .slice(0, 20); // Top 20 performing domains
+
+      setAggregatedSuccessfulLinks(sortedAggregated as any);
+    }
+  }, [publishedLinks]);
+
   const loadCampaigns = async () => {
     try {
       setIsLoading(true);
@@ -370,7 +406,7 @@ export default function BacklinkAutomation() {
         id: `activity_${Date.now()}`,
         timestamp: new Date(),
         type: 'link_published',
-        message: `�� Link published on ${platform.name} with DA ${newLink.domainAuthority} using anchor "${selectedAnchor}"`,
+        message: `🚀 Link published on ${platform.name} with DA ${newLink.domainAuthority} using anchor "${selectedAnchor}"`,
         campaignId: randomCampaign.id,
         success: true,
         data: newLink
