@@ -142,7 +142,7 @@ const Affiliate: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Conversion Rate</p>
-                    <p className="text-3xl font-bold text-orange-600">{affiliateStats.conversionRate}%</p>
+                    <p className="text-3xl font-bold text-orange-600">{stats.conversionRate.toFixed(1)}%</p>
                   </div>
                   <Target className="h-8 w-8 text-orange-600" />
                 </div>
