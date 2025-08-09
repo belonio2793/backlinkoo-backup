@@ -776,7 +776,7 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired }: any) {
     });
 
     // Open login modal instead of navigating
-    setLoginModalOpen(true);
+    onLoginRequired();
   };
 
   const handleClaimPost = async (e: React.MouseEvent) => {
