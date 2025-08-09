@@ -72,7 +72,7 @@ export default function DeleteCampaignDialog({
 
   const isActive = campaign.status === 'active';
   const hasGeneratedLinks = campaign.linksGenerated > 0;
-  const expectedText = `DELETE ${campaign.name}`;
+  const expectedText = 'delete';
   const isConfirmationValid = confirmationText === expectedText;
   
   const canProceed = isConfirmationValid && 
