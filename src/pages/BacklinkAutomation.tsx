@@ -1118,6 +1118,9 @@ export default function BacklinkAutomation() {
           metadata: { domain: randomPlatform, authority: newLink.domainAuthority }
         };
 
+        // Track this activity for dynamic throughput
+        addThroughputEvent('user_link_published');
+
         const updatedLinksGenerated = campaign.linksGenerated + 1;
         const updatedProgress = Math.min(100, (updatedLinksGenerated / (isPremium ? 100 : 20)) * 100);
 
