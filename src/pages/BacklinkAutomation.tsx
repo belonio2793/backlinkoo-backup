@@ -815,166 +815,47 @@ export default function BacklinkAutomation() {
                   Deploy an AI-powered link building campaign with advanced targeting and quality controls
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="campaignName">Campaign Name</Label>
-                      <Input
-                        id="campaignName"
-                        value={campaignForm.name}
-                        onChange={(e) => setCampaignForm(prev => ({ ...prev, name: e.target.value }))}
-                        placeholder="e.g., Enterprise SEO Authority Q4 2024"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="targetUrl">Target URL</Label>
-                      <Input
-                        id="targetUrl"
-                        value={campaignForm.targetUrl}
-                        onChange={(e) => setCampaignForm(prev => ({ ...prev, targetUrl: e.target.value }))}
-                        placeholder="https://yourwebsite.com"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="keywords">Target Keywords (comma-separated)</Label>
-                      <Input
-                        id="keywords"
-                        value={campaignForm.keywords}
-                        onChange={(e) => setCampaignForm(prev => ({ ...prev, keywords: e.target.value }))}
-                        placeholder="enterprise software, business automation, AI solutions"
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="anchorTexts">Anchor Text Variations</Label>
-                      <Textarea
-                        id="anchorTexts"
-                        value={campaignForm.anchorTexts}
-                        onChange={(e) => setCampaignForm(prev => ({ ...prev, anchorTexts: e.target.value }))}
-                        placeholder="click here, learn more, enterprise solution, your brand name"
-                        rows={3}
-                      />
-                    </div>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
+                  <div>
+                    <Label htmlFor="targetUrl">Target URL *</Label>
+                    <Input
+                      id="targetUrl"
+                      value={campaignForm.targetUrl}
+                      onChange={(e) => setCampaignForm(prev => ({ ...prev, targetUrl: e.target.value }))}
+                      placeholder="https://yourwebsite.com"
+                      className="h-12"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="keywords">Target Keywords (comma-separated) *</Label>
+                    <Input
+                      id="keywords"
+                      value={campaignForm.keywords}
+                      onChange={(e) => setCampaignForm(prev => ({ ...prev, keywords: e.target.value }))}
+                      placeholder="enterprise software, business automation, AI solutions"
+                      className="h-12"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="anchorTexts">Anchor Text Variations (comma-separated) *</Label>
+                    <Textarea
+                      id="anchorTexts"
+                      value={campaignForm.anchorTexts}
+                      onChange={(e) => setCampaignForm(prev => ({ ...prev, anchorTexts: e.target.value }))}
+                      placeholder="click here, learn more, enterprise solution, your brand name"
+                      rows={3}
+                      className="resize-none"
+                    />
                   </div>
 
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="dailyLimit">Daily Target</Label>
-                        <Select
-                          value={campaignForm.dailyLimit.toString()}
-                          onValueChange={(value) => setCampaignForm(prev => ({ ...prev, dailyLimit: parseInt(value) }))}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="5">5 links/day</SelectItem>
-                            <SelectItem value="10">10 links/day</SelectItem>
-                            <SelectItem value="25">25 links/day</SelectItem>
-                            <SelectItem value="50">50 links/day</SelectItem>
-                            <SelectItem value="100">100 links/day</SelectItem>
-                            <SelectItem value="200">200 links/day</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label htmlFor="totalTarget">Total Target</Label>
-                        <Input
-                          id="totalTarget"
-                          type="number"
-                          value={campaignForm.totalTarget}
-                          onChange={(e) => setCampaignForm(prev => ({ ...prev, totalTarget: parseInt(e.target.value) }))}
-                          placeholder="1000"
-                        />
+                  {campaignForm.targetUrl && campaignForm.keywords && (
+                    <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="text-sm text-blue-700">
+                        <strong>Auto-generated campaign name:</strong> {generateCampaignName(campaignForm.targetUrl, campaignForm.keywords)}
                       </div>
                     </div>
-
-                    <div>
-                      <Label>Advanced Link Building Strategies</Label>
-                      <div className="grid grid-cols-2 gap-3 mt-2">
-                        {Object.entries(campaignForm.strategy).map(([strategy, config]) => (
-                          <div key={strategy} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                            <div className="flex items-center gap-2">
-                              {strategy === 'blogComments' && <MessageSquare className="h-4 w-4 text-blue-600" />}
-                              {strategy === 'forumProfiles' && <UserPlus className="h-4 w-4 text-green-600" />}
-                              {strategy === 'web2Platforms' && <Globe className="h-4 w-4 text-purple-600" />}
-                              {strategy === 'socialProfiles' && <UserPlus className="h-4 w-4 text-orange-600" />}
-                              {strategy === 'contactForms' && <Mail className="h-4 w-4 text-red-600" />}
-                              {strategy === 'guestPosts' && <FileText className="h-4 w-4 text-indigo-600" />}
-                              {strategy === 'resourcePages' && <ExternalLink className="h-4 w-4 text-teal-600" />}
-                              <span className="text-sm font-medium">
-                                {strategy.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                              </span>
-                            </div>
-                            <Switch
-                              checked={config.enabled}
-                              onCheckedChange={(checked) => 
-                                setCampaignForm(prev => ({
-                                  ...prev,
-                                  strategy: {
-                                    ...prev.strategy,
-                                    [strategy]: { ...config, enabled: checked }
-                                  }
-                                }))
-                              }
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label>Quality Control</Label>
-                      <div className="grid grid-cols-3 gap-2 mt-2">
-                        <div>
-                          <Label className="text-xs">Min Authority</Label>
-                          <Input
-                            type="number"
-                            value={campaignForm.qualityFilters.minDomainAuthority}
-                            onChange={(e) => setCampaignForm(prev => ({
-                              ...prev,
-                              qualityFilters: {
-                                ...prev.qualityFilters,
-                                minDomainAuthority: parseInt(e.target.value)
-                              }
-                            }))}
-                            className="h-8"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Max Spam Score</Label>
-                          <Input
-                            type="number"
-                            value={campaignForm.qualityFilters.maxSpamScore}
-                            onChange={(e) => setCampaignForm(prev => ({
-                              ...prev,
-                              qualityFilters: {
-                                ...prev.qualityFilters,
-                                maxSpamScore: parseInt(e.target.value)
-                              }
-                            }))}
-                            className="h-8"
-                          />
-                        </div>
-                        <div>
-                          <Label className="text-xs">Relevance %</Label>
-                          <Input
-                            type="number"
-                            value={campaignForm.qualityFilters.contentRelevanceThreshold}
-                            onChange={(e) => setCampaignForm(prev => ({
-                              ...prev,
-                              qualityFilters: {
-                                ...prev.qualityFilters,
-                                contentRelevanceThreshold: parseInt(e.target.value)
-                              }
-                            }))}
-                            className="h-8"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
 
                 <Button 
