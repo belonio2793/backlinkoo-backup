@@ -606,6 +606,37 @@ class CampaignService {
       return { error: error.message || 'Unknown error occurred' };
     }
   }
+
+  /**
+   * Load user's campaigns with proper authentication
+   */
+  async loadUserCampaigns(): Promise<{ campaigns?: any[]; error?: string }> {
+    try {
+      // Get current user for RLS policy compliance
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+      if (userError || !user) {
+        return {
+          error: 'User authentication required to load campaigns'
+        };
+      }
+
+      const { data, error } = await supabase
+        .from('backlink_campaigns')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error loading campaigns:', error.message || error.toString() || JSON.stringify(error));
+        return { error: error.message };
+      }
+
+      return { campaigns: data || [] };
+    } catch (error) {
+      console.error('Error loading campaigns:', error.message || error.toString() || JSON.stringify(error));
+      return { error: error.message || 'Unknown error occurred' };
+    }
+  }
 }
 
 // Export singleton instance
