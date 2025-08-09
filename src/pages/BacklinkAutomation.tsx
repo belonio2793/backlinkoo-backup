@@ -709,7 +709,48 @@ export default function BacklinkAutomation() {
     return () => {
       clearInterval(monitoringInterval);
     };
-  }, [randomizeWebsites, loadPermanentCampaigns, autoDetectionSystem]);
+  }, [randomizeWebsites, loadPermanentCampaigns, autoDetectionSystem, getUserStorageKey]);
+
+  // User-specific data restoration - triggers when user authentication changes
+  useEffect(() => {
+    const restoreUserData = () => {
+      console.log('🔄 Data Restoration: Restoring metrics for user:', user?.id || 'guest');
+
+      const permanentCampaigns = loadPermanentCampaigns();
+      if (permanentCampaigns.length > 0) {
+        if (user) {
+          // For authenticated users, merge with existing campaigns preserving highest counts
+          setCampaigns(prev => {
+            const existing = [...prev];
+            permanentCampaigns.forEach(permCamp => {
+              const existingIndex = existing.findIndex(c => c.id === permCamp.id);
+              if (existingIndex >= 0) {
+                // Always preserve the highest link count to prevent resets
+                existing[existingIndex] = {
+                  ...existing[existingIndex],
+                  ...permCamp,
+                  linksGenerated: Math.max(existing[existingIndex].linksGenerated || 0, permCamp.linksGenerated || 0),
+                  linksBuilt: Math.max(existing[existingIndex].linksBuilt || 0, permCamp.linksBuilt || 0),
+                  progressiveLinkCount: Math.max(existing[existingIndex].progressiveLinkCount || 0, permCamp.progressiveLinkCount || 0)
+                };
+              } else {
+                existing.push(permCamp);
+              }
+            });
+            console.log('✅ User Data Restored:', existing.length, 'campaigns with preserved metrics for user', user.id);
+            return existing;
+          });
+        } else {
+          // For guest users, directly restore campaigns
+          setGuestCampaignResults(permanentCampaigns);
+          console.log('✅ Guest Data Restored:', permanentCampaigns.length, 'campaigns with preserved metrics');
+        }
+      }
+    };
+
+    // Always restore data when user state changes or component mounts
+    restoreUserData();
+  }, [user, loadPermanentCampaigns]);
 
   // Start live updates when database tab is accessed
   useEffect(() => {
