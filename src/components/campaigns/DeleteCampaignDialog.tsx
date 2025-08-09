@@ -39,9 +39,9 @@ interface Campaign {
 }
 
 interface DeleteCampaignDialogProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onConfirm: (campaignId: string, options: DeletionOptions) => Promise<void>;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onDelete: (campaignId: string, options: DeletionOptions) => Promise<void>;
   campaign: Campaign | null;
   isDeleting?: boolean;
 }
