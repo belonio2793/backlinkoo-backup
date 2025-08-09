@@ -670,6 +670,8 @@ function Blog() {
                     navigate={navigate}
                     formatDate={formatDate}
                     onLoginRequired={() => setLoginModalOpen(true)}
+                    cleanTitle={cleanTitle}
+                    cleanDescription={cleanDescription}
                   />
                 ) : (
                   <BlogPostListItem
@@ -677,6 +679,8 @@ function Blog() {
                     navigate={navigate}
                     formatDate={formatDate}
                     onLoginRequired={() => setLoginModalOpen(true)}
+                    cleanTitle={cleanTitle}
+                    cleanDescription={cleanDescription}
                   />
                 )}
               </div>
