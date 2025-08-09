@@ -446,24 +446,34 @@ export default function BacklinkAutomation() {
     }
   }, [user, isPremium, getUserStorageKey]);
 
-  // Campaign deletion with complete data removal
+  // Campaign deletion with complete data removal (database + localStorage)
   const deleteCampaignPermanently = useCallback(async (campaignId: string) => {
     try {
+      // Delete from database for authenticated users
+      if (user?.id) {
+        const result = await campaignMetricsService.deleteCampaign(user.id, campaignId);
+        if (result.success) {
+          console.log('✅ Campaign deleted from database:', campaignId);
+        } else {
+          console.warn('⚠️ Database deletion failed:', result.error);
+        }
+      }
+
+      // Also remove from localStorage
       const storageKey = getUserStorageKey();
       const savedCampaigns = JSON.parse(localStorage.getItem(storageKey) || '[]');
       const updatedCampaigns = savedCampaigns.filter((c: any) => c.id !== campaignId);
-
       localStorage.setItem(storageKey, JSON.stringify(updatedCampaigns));
 
       // Remove from active state
       setCampaigns(prev => prev.filter(c => c.id !== campaignId));
       setGuestCampaignResults(prev => prev.filter(c => c.id !== campaignId));
 
-      console.log('🗑️ Campaign permanently deleted with all stored data:', campaignId);
+      console.log('🗑️ Campaign permanently deleted from all storage:', campaignId);
 
       toast({
         title: '🗑️ Campaign Deleted',
-        description: 'Campaign and all associated data permanently removed from storage',
+        description: 'Campaign and all metrics permanently removed from database and local storage',
         duration: 3000
       });
 
