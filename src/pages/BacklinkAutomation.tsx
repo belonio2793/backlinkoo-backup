@@ -538,9 +538,11 @@ export default function BacklinkAutomation() {
               anchorText: campaign.keywords?.[0] || 'learn more',
               verified: true,
               destinationUrl: campaign.targetUrl,
-              type: 'guest_post',
+              type: 'primary_blog_post',
               status: 'live',
-              isPrimaryBlogPost: true // Flag to identify the main blog post
+              isPrimaryBlogPost: true, // Flag to identify the main blog post
+              priority: 1, // Highest priority for sorting
+              verificationStatus: 'instantly_verifiable'
             };
             finalPublishedUrls = [blogLink, ...updatedOtherUrls];
           } else {
@@ -4199,7 +4201,7 @@ export default function BacklinkAutomation() {
                         {[
                           { name: 'Technology & Software', count: 125420, icon: '💻' },
                           { name: 'Business & Finance', count: 98750, icon: '💼' },
-                          { name: 'Health & Medicine', count: 87320, icon: '���' },
+                          { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
