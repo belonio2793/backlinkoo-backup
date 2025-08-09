@@ -3322,12 +3322,28 @@ export default function BacklinkAutomation() {
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => {
-                                        navigator.clipboard.writeText(url.url || '');
-                                        toast({
-                                          title: "URL Copied",
-                                          description: "URL copied to clipboard for campaign use!",
-                                        });
+                                      onClick={async () => {
+                                        try {
+                                          const success = await copyToClipboard(url.url || '');
+                                          if (success) {
+                                            toast({
+                                              title: "URL Copied",
+                                              description: "URL copied to clipboard for campaign use!",
+                                            });
+                                          } else {
+                                            toast({
+                                              title: "Copy Failed",
+                                              description: "Could not copy to clipboard. Please copy manually.",
+                                              variant: "destructive",
+                                            });
+                                          }
+                                        } catch (error) {
+                                          toast({
+                                            title: "Copy Failed",
+                                            description: "Could not copy to clipboard. Please copy manually.",
+                                            variant: "destructive",
+                                          });
+                                        }
                                       }}
                                       className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                                     >
