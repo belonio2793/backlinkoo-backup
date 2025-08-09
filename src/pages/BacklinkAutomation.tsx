@@ -1092,11 +1092,11 @@ export default function BacklinkAutomation() {
   const showPremiumUpgrade = (campaignId: string) => {
     setShowTrialExhaustedModal(true);
     toast({
-      title: "🚀 20 Link Limit Reached!",
-      description: "Upgrade to Premium for unlimited link building and advanced features!",
+      title: "🎉 Campaign Completed Successfully!",
+      description: "You've built 20 high-quality backlinks! Upgrade to Premium for unlimited campaigns and links.",
       action: (
         <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
-          Upgrade Now
+          Continue Building
         </Button>
       ),
     });
