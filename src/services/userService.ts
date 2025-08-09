@@ -34,9 +34,9 @@ class UserService {
         const errorMessage = error.message || error;
         console.error('❌ userService: Error fetching user profile:', errorMessage);
 
-        // Handle permission denied errors
-        if (errorMessage && errorMessage.includes('permission denied')) {
-          console.warn('⚠️ Permission denied for profiles table - returning minimal profile');
+        // Handle permission denied errors or table not found
+        if (errorMessage && (errorMessage.includes('permission denied') || errorMessage.includes('relation') || errorMessage.includes('does not exist'))) {
+          console.warn('⚠️ Database access issue for profiles table - returning minimal profile');
           return {
             id: user.id,
             user_id: user.id,
