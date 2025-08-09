@@ -846,6 +846,11 @@ export default function BacklinkAutomation() {
       }));
 
       setCampaigns(guestCampaigns);
+
+      // Also save guest campaigns to permanent storage to prevent data loss
+      guestCampaigns.forEach(guestCampaign => {
+        saveCampaignPermanently(guestCampaign);
+      });
     }
   };
 
