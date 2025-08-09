@@ -72,6 +72,7 @@ export default function AdminLanding() {
           .single();
 
         const isAdminByRole = profile?.role === 'admin';
+        console.log('🔍 Profile role check:', profile?.role, 'isAdmin:', isAdminByRole);
 
         clearTimeout(timeoutId);
         setIsAdmin(isAdminByRole);
