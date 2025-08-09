@@ -3378,6 +3378,12 @@ export default function BacklinkAutomation() {
                                 <Badge variant="secondary" className="text-xs">
                                   Trial
                                 </Badge>
+                                {campaign.linksGenerated >= 20 && (
+                                  <Badge variant="destructive" className="text-xs">
+                                    <Crown className="h-2 w-2 mr-1" />
+                                    Upgrade Required
+                                  </Badge>
+                                )}
                               </div>
                             </div>
 
