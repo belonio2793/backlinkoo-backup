@@ -3494,7 +3494,11 @@ export default function BacklinkAutomation() {
                                 }}
                                 className="h-8 px-2 border-red-300 text-red-600 hover:bg-red-50"
                               >
-                                <Trash2 className="h-3 w-3" />
+                                <img
+                                  src="https://cdn.builder.io/api/v1/image/assets%2Ff46c5d7eff8944e5a95f821756152c6c%2F86a21f366429404d94ae2b74ae7bf964?format=webp&width=800"
+                                  alt="Delete"
+                                  className="h-3 w-3 object-contain"
+                                />
                               </Button>
                             </div>
                           </div>
