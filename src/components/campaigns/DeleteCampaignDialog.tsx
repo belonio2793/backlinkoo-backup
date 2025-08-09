@@ -109,7 +109,7 @@ export default function DeleteCampaignDialog({
     if (hasGeneratedLinks) {
       impacts.push({
         icon: ExternalLink,
-        text: `${campaign.linksGenerated} generated links will be archived${archiveLinks ? '' : ' (or deleted if unchecked)'}`,
+        text: `${campaign.linksGenerated} generated links will be archived`,
         severity: 'medium' as const
       });
     }
