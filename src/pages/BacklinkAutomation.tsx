@@ -228,6 +228,15 @@ export default function BacklinkAutomation() {
   const [showPageLeaveNotification, setShowPageLeaveNotification] = useState(false);
   const [realtimeThroughput, setRealtimeThroughput] = useState(0);
   const [throughputEvents, setThroughputEvents] = useState<Array<{ timestamp: number; type: string }>>([]);
+  const [guestConsoleLogs, setGuestConsoleLogs] = useState<Array<{
+    id: string;
+    timestamp: Date;
+    type: 'info' | 'success' | 'warning' | 'error';
+    message: string;
+    campaignId?: string;
+    details?: any;
+  }>>([]);
+  const [selectedGuestCampaign, setSelectedGuestCampaign] = useState<string | null>(null);
   const [selectedTab, setSelectedTab] = useState('campaigns');
   const [selectedCampaignTab, setSelectedCampaignTab] = useState('create');
   const [selectedLinkType, setSelectedLinkType] = useState('all');
