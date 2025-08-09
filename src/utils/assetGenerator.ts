@@ -1409,8 +1409,6 @@ export async function generateAsset(name: string): Promise<string> {
     case 'Icon Only':
     case 'App Icon Collection':
       return generator.generateIconOnly();
-    case 'Affiliate Badge Set':
-      return generator.generateAffiliateBadge();
     case 'Social Media Kit':
       return generator.generateSocialMediaKit();
     case 'Presentation Template':
