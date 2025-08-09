@@ -1035,15 +1035,21 @@ export default function BacklinkAutomation() {
           startThrottledPublishing();
         }
 
-        // Generate blog post for guest campaign
-        const blogResult = await CampaignBlogIntegrationService.generateGuestCampaignBlogPost({
-          targetUrl: campaignForm.targetUrl,
-          keywords: campaignForm.keywords.split(',').map(k => k.trim()),
-          anchorTexts: campaignForm.anchorTexts.trim()
-            ? campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a)
-            : undefined,
-          primaryKeyword: campaignForm.keywords.split(',')[0]?.trim()
-        });
+        // Generate blog post for guest campaign (non-blocking)
+        let blogResult = { success: false };
+        try {
+          blogResult = await CampaignBlogIntegrationService.generateGuestCampaignBlogPost({
+            targetUrl: campaignForm.targetUrl,
+            keywords: campaignForm.keywords.split(',').map(k => k.trim()),
+            anchorTexts: campaignForm.anchorTexts.trim()
+              ? campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a)
+              : undefined,
+            primaryKeyword: campaignForm.keywords.split(',')[0]?.trim()
+          });
+        } catch (blogError) {
+          console.warn('Blog generation failed for guest campaign:', blogError.message);
+          // Continue with campaign creation even if blog generation fails
+        }
 
         // Add campaign result for guest with initially empty published URLs
         const campaignResult = {
