@@ -1052,8 +1052,10 @@ const Dashboard = () => {
       setCredits(0);
       setCampaigns([]);
 
-      // Navigate immediately
-      navigate('/');
+      // Navigate immediately with transition
+      startTransition(() => {
+        navigate('/');
+      });
 
       // Do actual sign out in background
       try {
