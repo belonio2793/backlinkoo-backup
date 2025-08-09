@@ -9,6 +9,7 @@ import { ReportSyncProvider } from "@/contexts/ReportSyncContext";
 import { UnifiedModalManager } from "@/components/UnifiedModalManager";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { useSymbolCleaner } from "@/utils/symbolCleaner";
+import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import Index from "./pages/Index";
 
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
