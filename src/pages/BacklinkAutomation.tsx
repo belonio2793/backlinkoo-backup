@@ -1723,22 +1723,77 @@ export default function BacklinkAutomation() {
 
                           {/* Published URLs */}
                           <div className="bg-white rounded-lg p-3 border">
-                            <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                            <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
                               <ExternalLink className="h-4 w-4" />
-                              Published Backlinks
+                              Published Backlinks ({campaign.publishedUrls?.length || campaign.domains?.length || 0})
                             </h4>
-                            <div className="space-y-2 max-h-32 overflow-y-auto">
-                              {campaign.domains?.map((domain, domainIdx) => (
-                                <div key={domainIdx} className="flex items-center justify-between text-sm">
-                                  <div className="flex items-center gap-2">
-                                    <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                                    <span className="text-blue-600 hover:underline cursor-pointer">
-                                      {domain}
-                                    </span>
+                            <div className="space-y-3 max-h-40 overflow-y-auto">
+                              {campaign.publishedUrls ? (
+                                campaign.publishedUrls.map((urlData, urlIdx) => (
+                                  <div key={urlIdx} className="border rounded-lg p-3 bg-gray-50">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center gap-2">
+                                        <div className={`h-2 w-2 rounded-full ${urlData.verified ? 'bg-green-500' : 'bg-orange-500'}`}></div>
+                                        <span className="font-medium text-sm text-gray-800">{urlData.domain}</span>
+                                        <Badge variant="outline" className={`text-xs ${urlData.verified ? 'bg-green-50 text-green-700' : 'bg-orange-50 text-orange-700'}`}>
+                                          {urlData.verified ? 'Verified' : 'Pending'}
+                                        </Badge>
+                                      </div>
+                                      <span className="text-xs text-gray-500">{urlData.type}</span>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2 text-xs">
+                                        <span className="text-gray-600">Published URL:</span>
+                                        <a
+                                          href={urlData.url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-600 hover:underline truncate max-w-48"
+                                        >
+                                          {urlData.url}
+                                        </a>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-6 w-6 p-0"
+                                          onClick={() => window.open(urlData.url, '_blank')}
+                                        >
+                                          <Eye className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                      <div className="flex items-center gap-2 text-xs">
+                                        <span className="text-gray-600">Anchor Text:</span>
+                                        <span className="font-medium text-blue-700">"{urlData.anchorText}"</span>
+                                        <span className="text-gray-600">→</span>
+                                        <span className="text-green-600 truncate max-w-32">{urlData.destinationUrl}</span>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-6 w-6 p-0"
+                                          onClick={() => window.open(urlData.destinationUrl, '_blank')}
+                                        >
+                                          <ExternalLink className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                      <div className="text-xs text-gray-500">
+                                        Published: {new Date(urlData.publishedAt).toLocaleString()}
+                                      </div>
+                                    </div>
                                   </div>
-                                  <Badge variant="outline" className="text-xs">Live</Badge>
-                                </div>
-                              ))}
+                                ))
+                              ) : (
+                                campaign.domains?.map((domain, domainIdx) => (
+                                  <div key={domainIdx} className="flex items-center justify-between text-sm">
+                                    <div className="flex items-center gap-2">
+                                      <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                                      <span className="text-blue-600 hover:underline cursor-pointer">
+                                        {domain}
+                                      </span>
+                                    </div>
+                                    <Badge variant="outline" className="text-xs">Live</Badge>
+                                  </div>
+                                ))
+                              )}
                             </div>
                           </div>
                         </div>
