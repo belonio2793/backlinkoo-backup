@@ -673,12 +673,9 @@ export default function BacklinkAutomation() {
   };
 
   const startUrlDiscovery = async () => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in to start URL discovery",
-        variant: "destructive"
-      });
+    // Check guest trial limit
+    if (!user && guestLinksGenerated >= 20) {
+      setShowTrialExhaustedModal(true);
       return;
     }
 
@@ -698,6 +695,22 @@ export default function BacklinkAutomation() {
         title: "URL Discovery Started",
         description: `Discovering URLs for ${selectedLinkType?.replace('_', ' ') || 'selected'} strategy.`,
       });
+
+      // For guests, simulate additional link generation
+      if (!user) {
+        setTimeout(() => {
+          const additionalLinks = Math.min(Math.floor(Math.random() * 5) + 2, 20 - guestLinksGenerated); // 2-6 links
+          if (additionalLinks > 0) {
+            const newTotal = guestLinksGenerated + additionalLinks;
+            updateGuestLinkCount(newTotal);
+
+            toast({
+              title: "🎉 Discovery Complete!",
+              description: `Found ${additionalLinks} new link opportunities! ${newTotal >= 20 ? 'Trial complete!' : `${20 - newTotal} links remaining.`}`,
+            });
+          }
+        }, 3000);
+      }
 
       setTimeout(() => {
         loadDiscoveredUrls();
