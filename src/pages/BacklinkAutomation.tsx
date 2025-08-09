@@ -722,37 +722,6 @@ export default function BacklinkAutomation() {
                 </div>
               </div>
 
-              {/* Premium Usage Bar */}
-              {!isPremium && (
-                <div className="bg-gradient-to-r from-orange-50 to-red-50 border-t px-4 py-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-orange-900">Free Tier Usage</span>
-                    <div className="flex items-center gap-2">
-                      <Badge variant={usageStats.isLimitReached ? 'destructive' : 'secondary'}>
-                        {usageStats.linksPosted}/{usageStats.freeLimit} Links
-                      </Badge>
-                      {usageStats.isLimitReached && (
-                        <Button
-                          size="sm"
-                          onClick={() => setShowPremiumModal(true)}
-                          className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                        >
-                          <Crown className="h-3 w-3 mr-1" />
-                          Upgrade ${usageStats.premiumPrice}/mo
-                        </Button>
-                      )}
-                    </div>
-                  </div>
-                  <Progress
-                    value={(usageStats.linksPosted / usageStats.freeLimit) * 100}
-                    className="h-2"
-                  />
-                  <div className="flex justify-between mt-1 text-xs text-gray-600">
-                    <span>Free limit</span>
-                    <span>Upgrade for unlimited discovery & posting</span>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
