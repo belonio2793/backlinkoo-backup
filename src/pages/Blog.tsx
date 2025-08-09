@@ -800,7 +800,7 @@ function Blog() {
 }
 
 // Blog Post Card Component
-function BlogPostCard({ post, navigate, formatDate, onLoginRequired }: any) {
+function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle, cleanDescription }: any) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [claiming, setClaiming] = useState(false);
