@@ -266,7 +266,7 @@ export default function ComprehensiveUserManagement() {
       }
 
     } catch (error: any) {
-      const errorMessage = error.message || 'Failed to load users';
+      const errorMessage = error?.message || error?.toString() || JSON.stringify(error) || 'Failed to load users';
       setError(errorMessage);
 
       // Set empty state
