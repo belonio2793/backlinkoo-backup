@@ -331,8 +331,13 @@ class PaymentIntegrationService {
             console.error('❌ Both subscription endpoints failed with 404. Check Netlify function deployment.');
             // Use mock service if available
             if (mockPaymentService.isAvailable()) {
-              console.log('🔄 All subscription endpoints failed, using mock service...');
-              return await mockPaymentService.createSubscription(plan, isGuest, guestEmail);
+              console.log('🔄 Payment endpoints unavailable, using demo checkout...');
+              const result = await mockPaymentService.createSubscription(plan, isGuest, guestEmail);
+              if (result.success) {
+                // Add helpful message about demo mode
+                console.warn('⚠️ Using demo checkout - no actual payment will be processed');
+              }
+              return result;
             }
           } else {
             console.log('✅ Fallback subscription endpoint worked');
