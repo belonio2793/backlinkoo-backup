@@ -110,16 +110,26 @@ class CampaignService {
 
     let response;
     try {
+      // Add timeout to prevent hanging requests
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+
       response = await fetch(url, {
         ...options,
+        signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
           ...options.headers,
         },
       });
+
+      clearTimeout(timeoutId);
     } catch (networkError) {
-      // Handle network errors (Failed to fetch, etc.)
+      // Handle network errors (Failed to fetch, timeout, etc.)
+      if (networkError.name === 'AbortError') {
+        throw new Error('Request timeout. Backend services may be slow or unavailable.');
+      }
       throw new Error('Backend services not available. Please try again later or contact support.');
     }
 
