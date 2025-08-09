@@ -237,12 +237,12 @@ export default function BacklinkAutomation() {
     // Set up real-time updates
     const metricsInterval = setInterval(loadRealTimeMetrics, 10000); // Every 10 seconds
     const systemInterval = setInterval(loadSystemMetrics, 30000); // Every 30 seconds
-    const linkBuildingInterval = setInterval(simulateLinkBuilding, 5000); // Every 5 seconds
+    const dataInterval = setInterval(loadRealTimeData, 5000); // Every 5 seconds
 
     return () => {
       clearInterval(metricsInterval);
       clearInterval(systemInterval);
-      clearInterval(linkBuildingInterval);
+      clearInterval(dataInterval);
     };
   }, []);
 
