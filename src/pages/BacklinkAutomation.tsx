@@ -302,6 +302,8 @@ export default function BacklinkAutomation() {
   const [randomizedDiscoveries, setRandomizedDiscoveries] = useState<any[]>([]);
   const [randomizedWebsites, setRandomizedWebsites] = useState<any[]>([]);
   const [lastRotationTime, setLastRotationTime] = useState<Date>(new Date());
+  const [rotationInterval, setRotationInterval] = useState<NodeJS.Timeout | null>(null);
+  const [chaoticRotationEnabled, setChaoticRotationEnabled] = useState(false);
 
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
@@ -389,12 +391,37 @@ export default function BacklinkAutomation() {
     return shuffled;
   };
 
-  // Randomize websites function
+  // Enhanced chaotic randomize function
   const randomizeWebsites = useCallback(() => {
-    setRandomizedDiscoveries(shuffleArray(fullDiscoverySites).slice(0, 8));
-    setRandomizedWebsites(shuffleArray(fullWebsiteDatabase).slice(0, 20));
+    // More chaotic randomization - different slice sizes and multiple shuffles
+    const chaoticDiscoveries = shuffleArray(shuffleArray(fullDiscoverySites)).slice(0, Math.floor(Math.random() * 4) + 6);
+    const chaoticWebsites = shuffleArray(shuffleArray(fullWebsiteDatabase)).slice(0, Math.floor(Math.random() * 10) + 15);
+
+    setRandomizedDiscoveries(chaoticDiscoveries);
+    setRandomizedWebsites(chaoticWebsites);
     setLastRotationTime(new Date());
   }, []);
+
+  // Start chaotic continuous rotation
+  const startChaoticRotation = useCallback(() => {
+    if (rotationInterval) clearInterval(rotationInterval);
+
+    const newInterval = setInterval(() => {
+      randomizeWebsites();
+    }, Math.random() * 3000 + 2000); // Random interval between 2-5 seconds
+
+    setRotationInterval(newInterval);
+    setChaoticRotationEnabled(true);
+  }, [randomizeWebsites, rotationInterval]);
+
+  // Stop chaotic rotation
+  const stopChaoticRotation = useCallback(() => {
+    if (rotationInterval) {
+      clearInterval(rotationInterval);
+      setRotationInterval(null);
+    }
+    setChaoticRotationEnabled(false);
+  }, [rotationInterval]);
 
   // Clipboard helper with fallback for when Clipboard API is blocked
   const copyToClipboard = async (text: string) => {
@@ -438,16 +465,27 @@ export default function BacklinkAutomation() {
     randomizeWebsites();
   }, [randomizeWebsites]);
 
-  // Randomize websites when database tab is accessed
+  // Start chaotic rotation when database tab is accessed
   useEffect(() => {
     if (selectedTab === 'database') {
-      const timeSinceLastRotation = new Date().getTime() - lastRotationTime.getTime();
-      // Rotate if more than 5 seconds have passed since last rotation
-      if (timeSinceLastRotation > 5000) {
-        randomizeWebsites();
-      }
+      startChaoticRotation();
+    } else {
+      stopChaoticRotation();
     }
-  }, [selectedTab, lastRotationTime, randomizeWebsites]);
+
+    return () => {
+      stopChaoticRotation();
+    };
+  }, [selectedTab, startChaoticRotation, stopChaoticRotation]);
+
+  // Cleanup rotation on unmount
+  useEffect(() => {
+    return () => {
+      if (rotationInterval) {
+        clearInterval(rotationInterval);
+      }
+    };
+  }, [rotationInterval]);
 
   // Initialize guest tracking on component mount
   useEffect(() => {
@@ -4270,18 +4308,18 @@ export default function BacklinkAutomation() {
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs text-green-600">
-                        <RefreshCw className="h-3 w-3 mr-1" />
-                        Fresh rotation
+                      <Badge variant="outline" className={`text-xs ${chaoticRotationEnabled ? 'text-red-600 animate-pulse' : 'text-green-600'}`}>
+                        <RefreshCw className={`h-3 w-3 mr-1 ${chaoticRotationEnabled ? 'animate-spin' : ''}`} />
+                        {chaoticRotationEnabled ? 'Chaotic Live' : 'Fresh rotation'}
                       </Badge>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={randomizeWebsites}
+                        onClick={chaoticRotationEnabled ? stopChaoticRotation : startChaoticRotation}
                         className="h-8 w-8 p-0"
-                        title="Refresh discoveries"
+                        title={chaoticRotationEnabled ? 'Stop chaotic rotation' : 'Start chaotic rotation'}
                       >
-                        <RefreshCw className="h-4 w-4" />
+                        {chaoticRotationEnabled ? <X className="h-4 w-4" /> : <RefreshCw className="h-4 w-4" />}
                       </Button>
                     </div>
                   </div>
@@ -4333,16 +4371,16 @@ export default function BacklinkAutomation() {
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="text-xs text-blue-600">
-                        <RefreshCw className="h-3 w-3 mr-1" />
-                        Auto-rotated
+                      <Badge variant="outline" className={`text-xs ${chaoticRotationEnabled ? 'text-orange-600 animate-pulse' : 'text-blue-600'}`}>
+                        <RefreshCw className={`h-3 w-3 mr-1 ${chaoticRotationEnabled ? 'animate-spin' : ''}`} />
+                        {chaoticRotationEnabled ? 'Chaos Mode' : 'Auto-rotated'}
                       </Badge>
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={randomizeWebsites}
                         className="h-8 w-8 p-0"
-                        title="Refresh website list"
+                        title="Manual refresh"
                       >
                         <RefreshCw className="h-4 w-4" />
                       </Button>
