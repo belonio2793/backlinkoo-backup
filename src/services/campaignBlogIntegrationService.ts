@@ -122,6 +122,13 @@ export class CampaignBlogIntegrationService {
 
     } catch (error) {
       console.error('❌ Campaign blog generation failed:', error);
+
+      // Check if it's a 404 or network error - try fallback
+      if (error.message?.includes('404') || error.message?.includes('Network error')) {
+        console.log('🔄 Attempting fallback blog generation...');
+        return this.generateFallbackBlogPost(request);
+      }
+
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error occurred'
