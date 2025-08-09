@@ -132,7 +132,8 @@ export class GlobalErrorHandler {
    */
   private handleThirdPartyError(error: any, source: string, count: number): void {
     if (count === 1) {
-      console.warn(`🔍 Third-party script error detected (${source}):`, error.message);
+      const errorMessage = this.formatError(error);
+      console.warn(`🔍 Third-party script error detected (${source}):`, errorMessage);
       console.warn('This error is likely caused by browser extensions or analytics tools and can be safely ignored.');
     }
   }
@@ -142,7 +143,8 @@ export class GlobalErrorHandler {
    */
   private handleNetworkError(error: any, source: string, count: number): void {
     if (count <= 3) {
-      console.warn(`🌐 Network error (${source}, occurrence ${count}):`, error.message);
+      const errorMessage = this.formatError(error);
+      console.warn(`🌐 Network error (${source}, occurrence ${count}):`, errorMessage);
     }
   }
 
