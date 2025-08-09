@@ -996,7 +996,7 @@ export default function BacklinkAutomation() {
               setTimeout(() => setShowTrialExhaustedModal(true), 3000);
             } else {
               toast({
-                title: "������ Discovery Complete!",
+                title: "�������� Discovery Complete!",
                 description: `Found ${additionalLinks} new high-value opportunities! Total progress: ${newTotal} backlinks built.`,
               });
             }
@@ -1433,11 +1433,14 @@ export default function BacklinkAutomation() {
           )}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="campaigns" className="relative">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="campaigns">
                 Campaign Manager
-                {((user && campaigns.filter(c => c.status === 'active').length > 0) ||
-                  (!user && guestCampaignResults.length > 0)) && (
+              </TabsTrigger>
+              <TabsTrigger value="reporting" className="relative">
+                Reporting
+                {((user && campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) > 0) ||
+                  (!user && guestLinksGenerated > 0)) && (
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
                 )}
               </TabsTrigger>
