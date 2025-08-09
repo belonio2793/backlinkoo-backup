@@ -94,10 +94,11 @@ export default function AdminSetupHelper() {
           }
         }
       } catch (error: any) {
+        const errorMsg = error?.message || error?.toString() || 'Unknown error';
         results.push({
           check: 'Profile Access',
           status: 'fail',
-          message: `Cannot access profile: ${error.message}`,
+          message: `Cannot access profile: ${errorMsg}`,
           solution: 'Check RLS policies for profiles table'
         });
       }
