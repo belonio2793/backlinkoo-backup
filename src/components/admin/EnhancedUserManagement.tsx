@@ -651,7 +651,7 @@ export default function EnhancedUserManagement() {
             <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={updateUser}>
+            <Button onClick={handleUpdateUser}>
               <Save className="h-4 w-4 mr-2" />
               Save Changes
             </Button>
