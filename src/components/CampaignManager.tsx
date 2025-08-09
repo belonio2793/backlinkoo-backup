@@ -39,6 +39,7 @@ import {
   TrendingDown
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format, formatDistanceToNow } from 'date-fns';
 
@@ -99,6 +100,7 @@ export function CampaignManager() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const { toast } = useToast();
+  const { isPremium, subscriptionTier } = useAuth();
 
   // New campaign form state
   const [newCampaign, setNewCampaign] = useState({
