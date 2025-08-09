@@ -2564,16 +2564,57 @@ export default function BacklinkAutomation() {
                                               </Button>
                                             </div>
                                             <div className="flex items-center gap-2">
-                                              <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
-                                                ✓ {campaign.status}
+                                              <Badge variant="outline" className={`text-xs ${
+                                                campaign.status === 'active' ? 'bg-green-100 text-green-700 border-green-300' :
+                                                campaign.status === 'paused' ? 'bg-yellow-100 text-yellow-700 border-yellow-300' :
+                                                'bg-blue-100 text-blue-700 border-blue-300'
+                                              }`}>
+                                                {campaign.status === 'active' ? '🟢 ACTIVE' :
+                                                 campaign.status === 'paused' ? '⏸️ PAUSED' : '✓ COMPLETE'}
                                               </Badge>
+
+                                              {/* Campaign Management Controls */}
+                                              {campaign.status === 'active' && (
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={() => pauseGuestCampaign(campaign.id)}
+                                                  className="h-6 px-2 text-xs text-orange-600 hover:text-orange-700 hover:bg-orange-50"
+                                                >
+                                                  <Pause className="h-3 w-3 mr-1" />
+                                                  Pause
+                                                </Button>
+                                              )}
+
+                                              {campaign.status === 'paused' && (
+                                                <Button
+                                                  variant="ghost"
+                                                  size="sm"
+                                                  onClick={() => resumeGuestCampaign(campaign.id)}
+                                                  className="h-6 px-2 text-xs text-green-600 hover:text-green-700 hover:bg-green-50"
+                                                >
+                                                  <Play className="h-3 w-3 mr-1" />
+                                                  Resume
+                                                </Button>
+                                              )}
+
                                               <Button
                                                 variant="ghost"
                                                 size="sm"
-                                                onClick={() => setSelectedMonitorTab(`guest-campaign-${campaign.id}`)}
-                                                className="h-6 w-6 p-0 hover:bg-white/50"
+                                                onClick={() => setSelectedGuestCampaign(selectedGuestCampaign === campaign.id ? null : campaign.id)}
+                                                className="h-6 px-2 text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                                               >
-                                                <ExternalLink className="h-3 w-3" />
+                                                <Monitor className="h-3 w-3 mr-1" />
+                                                Console
+                                              </Button>
+
+                                              <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => deleteGuestCampaign(campaign.id)}
+                                                className="h-6 px-2 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                                              >
+                                                <Trash2 className="h-3 w-3" />
                                               </Button>
                                             </div>
                                           </div>
@@ -3632,7 +3673,7 @@ export default function BacklinkAutomation() {
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
                           { name: 'Real Estate', count: 27450, icon: '🏠' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
-                          { name: 'Fashion & Beauty', count: 23120, icon: '���' },
+                          { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
                           { name: 'Home & Garden', count: 21890, icon: '���' },
                           { name: 'Legal Services', count: 19650, icon: '⚖️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
