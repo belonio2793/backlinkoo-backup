@@ -1916,12 +1916,28 @@ export default function BacklinkAutomation() {
                                             size="sm"
                                             variant="ghost"
                                             className="h-6 w-6 p-0 hover:bg-gray-50"
-                                            onClick={() => {
-                                              navigator.clipboard.writeText(platform.url);
-                                              toast({
-                                                title: "URL Copied",
-                                                description: "Link copied to clipboard!",
-                                              });
+                                            onClick={async () => {
+                                              try {
+                                                const success = await copyToClipboard(platform.url);
+                                                if (success) {
+                                                  toast({
+                                                    title: "URL Copied",
+                                                    description: "Link copied to clipboard!",
+                                                  });
+                                                } else {
+                                                  toast({
+                                                    title: "Copy Failed",
+                                                    description: "Could not copy to clipboard. Please copy manually.",
+                                                    variant: "destructive",
+                                                  });
+                                                }
+                                              } catch (error) {
+                                                toast({
+                                                  title: "Copy Failed",
+                                                  description: "Could not copy to clipboard. Please copy manually.",
+                                                  variant: "destructive",
+                                                });
+                                              }
                                             }}
                                           >
                                             <Link className="h-3 w-3 text-gray-600" />
