@@ -25,7 +25,7 @@ import {
   CheckCircle, XCircle, Clock3, Loader2, ArrowUp, ArrowDown, Trash2,
   Link, Sparkles, Network, Rocket, Crown, Heart, Flag, RefreshCw,
   ThumbsUp, ThumbsDown, Plus, Filter, ChevronRight, Zap as Lightning, User,
-  ChevronDown, ChevronUp, X, Monitor, LinkIcon, Send, Clock4, AlertCircle
+  ChevronDown, ChevronUp, X, Monitor, LinkIcon, Send, Clock4, AlertCircle, Lock
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -4119,7 +4119,7 @@ export default function BacklinkAutomation() {
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
                           { name: 'Home & Garden', count: 21890, icon: '🏡' },
                           { name: 'Legal Services', count: 19650, icon: '��️' },
-                          { name: 'Non-profit & Charity', count: 17430, icon: '���️' },
+                          { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
                           { name: 'Science & Research', count: 14560, icon: '🔬' },
                           { name: 'Arts & Culture', count: 13290, icon: '🎨' }
