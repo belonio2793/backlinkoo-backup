@@ -1593,6 +1593,11 @@ export default function BacklinkAutomation() {
         addGuestConsoleLog('success', `✅ SYSTEMS READY: AI engines online, discovery active, publishing queue loaded`, campaignResult.id);
         addGuestConsoleLog('info', `⚡ THROTTLE MODE: Ultra-fast 1-2s intervals enabled for maximum engagement`, campaignResult.id);
 
+        // Start real-time reporting for the new campaign
+        setTimeout(() => {
+          startRealtimeReporting(campaignResult.id, 'active');
+        }, 2000); // Start reporting after 2 seconds
+
         // Show different messages based on progress to build excitement
         if (guestLinksGenerated === 0) {
           // First campaign - surprise reveal
