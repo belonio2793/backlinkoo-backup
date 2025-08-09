@@ -159,7 +159,7 @@ class LiveLinkBuildingService {
         .gte('created_at', thirtyDaysAgo.toISOString());
 
       if (error) {
-        console.error('Error checking premium limits:', error);
+        console.error('Error checking premium limits:', error.message || error.toString() || JSON.stringify(error));
         // Fallback to allow some links on error
         return {
           isLimitReached: false,
