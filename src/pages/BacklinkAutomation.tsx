@@ -3960,13 +3960,13 @@ export default function BacklinkAutomation() {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button size="sm" variant="outline">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => window.open(`https://${site.url}`, '_blank')}
+                              >
                                 <ExternalLink className="h-3 w-3 mr-1" />
                                 Visit
-                              </Button>
-                              <Button size="sm" variant="default">
-                                <Plus className="h-3 w-3 mr-1" />
-                                Add to Campaign
                               </Button>
                             </div>
                           </div>
