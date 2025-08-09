@@ -2417,9 +2417,7 @@ export default function BacklinkAutomation() {
                                 </div>
                                 <div className="relative">
                                   <Zap className="h-6 w-6 text-orange-600" />
-                                  {isThrottling && (
-                                    <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
-                                  )}
+                                  <div className="absolute -top-1 -right-1 h-2 w-2 bg-blue-500 rounded-full animate-pulse"></div>
                                 </div>
                               </div>
                             </div>
