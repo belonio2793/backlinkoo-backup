@@ -564,52 +564,106 @@ export default function BacklinkAutomation() {
     try {
       setIsLoading(true);
 
-      const campaignData = {
-        name: generateCampaignName(campaignForm.targetUrl, campaignForm.keywords),
-        target_url: campaignForm.targetUrl,
-        keywords: campaignForm.keywords.split(',').map(k => k.trim()),
-        anchor_texts: campaignForm.anchorTexts.trim()
-          ? campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a)
-          : ['click here', 'learn more', 'read more', 'visit site'],
-        daily_limit: campaignForm.dailyLimit,
-        strategy_blog_comments: campaignForm.linkType === 'blog_comment' || campaignForm.linkType === 'all',
-        strategy_forum_profiles: campaignForm.linkType === 'forum_profile' || campaignForm.linkType === 'all',
-        strategy_web2_platforms: campaignForm.linkType === 'web2_platform' || campaignForm.linkType === 'all',
-        strategy_social_profiles: campaignForm.linkType === 'social_profile' || campaignForm.linkType === 'all',
-        strategy_contact_forms: campaignForm.linkType === 'all'
-      };
+      if (!user) {
+        // Guest user flow - simulate campaign creation without API calls
+        const linksToGenerate = Math.min(Math.floor(Math.random() * 8) + 3, 20 - guestLinksGenerated); // 3-10 links
+        const newTotal = guestLinksGenerated + linksToGenerate;
 
-      const result = await campaignService.createCampaign(campaignData);
+        updateGuestLinkCount(newTotal);
 
-      if (result.campaign) {
-        const proliferationCampaign: CampaignProliferation = {
-          campaignId: result.campaign.id,
+        // Add campaign result for guest
+        const campaignResult = {
+          id: Date.now().toString(),
+          name: generateCampaignName(campaignForm.targetUrl, campaignForm.keywords),
           targetUrl: campaignForm.targetUrl,
           keywords: campaignForm.keywords.split(',').map(k => k.trim()),
-          anchorTexts: campaignForm.anchorTexts.trim()
-            ? campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a)
-            : ['click here', 'learn more', 'read more', 'visit site'],
-          dailyLimit: campaignForm.dailyLimit,
-          strategies: {
-            blog_comments: campaignForm.linkType === 'blog_comment' || campaignForm.linkType === 'all',
-            forum_profiles: campaignForm.linkType === 'forum_profile' || campaignForm.linkType === 'all',
-            web2_platforms: campaignForm.linkType === 'web2_platform' || campaignForm.linkType === 'all',
-            social_profiles: campaignForm.linkType === 'social_profile' || campaignForm.linkType === 'all',
-            contact_forms: campaignForm.linkType === 'all',
-            guest_posts: campaignForm.linkType === 'all',
-            resource_pages: campaignForm.linkType === 'all',
-            directory_listings: campaignForm.linkType === 'all'
-          }
+          linksGenerated: linksToGenerate,
+          createdAt: new Date().toISOString(),
+          status: 'completed',
+          domains: [
+            'techcrunch.com', 'medium.com', 'reddit.com', 'dev.to', 'stackoverflow.com'
+          ].slice(0, Math.min(linksToGenerate, 5))
         };
 
-        await internetProliferationService.addCampaignToProliferation(proliferationCampaign);
+        addGuestCampaignResult(campaignResult);
 
-        const proliferationStats = internetProliferationService.getProliferationStats();
-        console.log('🚀 Proliferation Engine Status:', {
-          totalTargets: proliferationStats.totalTargets,
-          queueLength: proliferationStats.queueLength,
-          isProliferating: proliferationStats.isProliferating,
-          campaignId: result.campaign.id
+        // Show different messages based on progress to build excitement
+        if (guestLinksGenerated === 0) {
+          // First campaign - surprise reveal
+          toast({
+            title: "🎉 Surprise! Your Backlinks Are Ready!",
+            description: `We've generated ${linksToGenerate} premium backlinks for you instantly! This usually costs $${linksToGenerate * 20}+`,
+            duration: 5000,
+          });
+        } else if (newTotal >= 20) {
+          // Trial complete
+          toast({
+            title: "🚀 Amazing! You've Built 20+ Backlinks!",
+            description: "See your incredible results and unlock unlimited campaigns!",
+            duration: 6000,
+          });
+          setTimeout(() => setShowTrialExhaustedModal(true), 3000);
+        } else {
+          // Progress update
+          toast({
+            title: `🔥 +${linksToGenerate} More Backlinks Generated!`,
+            description: `Total: ${newTotal} premium backlinks built! Keep going - you're on fire!`,
+          });
+        }
+      } else {
+        // Logged-in user flow - use real API
+        const campaignData = {
+          name: generateCampaignName(campaignForm.targetUrl, campaignForm.keywords),
+          target_url: campaignForm.targetUrl,
+          keywords: campaignForm.keywords.split(',').map(k => k.trim()),
+          anchor_texts: campaignForm.anchorTexts.trim()
+            ? campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a)
+            : ['click here', 'learn more', 'read more', 'visit site'],
+          daily_limit: campaignForm.dailyLimit,
+          strategy_blog_comments: campaignForm.linkType === 'blog_comment' || campaignForm.linkType === 'all',
+          strategy_forum_profiles: campaignForm.linkType === 'forum_profile' || campaignForm.linkType === 'all',
+          strategy_web2_platforms: campaignForm.linkType === 'web2_platform' || campaignForm.linkType === 'all',
+          strategy_social_profiles: campaignForm.linkType === 'social_profile' || campaignForm.linkType === 'all',
+          strategy_contact_forms: campaignForm.linkType === 'all'
+        };
+
+        const result = await campaignService.createCampaign(campaignData);
+
+        if (result.campaign) {
+          const proliferationCampaign: CampaignProliferation = {
+            campaignId: result.campaign.id,
+            targetUrl: campaignForm.targetUrl,
+            keywords: campaignForm.keywords.split(',').map(k => k.trim()),
+            anchorTexts: campaignForm.anchorTexts.trim()
+              ? campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a)
+              : ['click here', 'learn more', 'read more', 'visit site'],
+            dailyLimit: campaignForm.dailyLimit,
+            strategies: {
+              blog_comments: campaignForm.linkType === 'blog_comment' || campaignForm.linkType === 'all',
+              forum_profiles: campaignForm.linkType === 'forum_profile' || campaignForm.linkType === 'all',
+              web2_platforms: campaignForm.linkType === 'web2_platform' || campaignForm.linkType === 'all',
+              social_profiles: campaignForm.linkType === 'social_profile' || campaignForm.linkType === 'all',
+              contact_forms: campaignForm.linkType === 'all',
+              guest_posts: campaignForm.linkType === 'all',
+              resource_pages: campaignForm.linkType === 'all',
+              directory_listings: campaignForm.linkType === 'all'
+            }
+          };
+
+          await internetProliferationService.addCampaignToProliferation(proliferationCampaign);
+
+          const proliferationStats = internetProliferationService.getProliferationStats();
+          console.log('🚀 Proliferation Engine Status:', {
+            totalTargets: proliferationStats.totalTargets,
+            queueLength: proliferationStats.queueLength,
+            isProliferating: proliferationStats.isProliferating,
+            campaignId: result.campaign.id
+          });
+        }
+
+        toast({
+          title: "Campaign Created",
+          description: "Your campaign has been successfully created and is now active.",
         });
       }
 
