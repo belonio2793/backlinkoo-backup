@@ -1459,6 +1459,9 @@ export default function BacklinkAutomation() {
         description: `Discovering URLs for ${selectedLinkType?.replace('_', ' ') || 'selected'} strategy.`,
       });
 
+      // Track discovery event for dynamic throughput
+      addThroughputEvent('url_discovery_started');
+
       // For guests, simulate additional link generation
       if (!user) {
         setTimeout(() => {
