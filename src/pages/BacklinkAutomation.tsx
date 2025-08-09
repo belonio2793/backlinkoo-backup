@@ -2068,7 +2068,7 @@ export default function BacklinkAutomation() {
                 <strong>Database Setup in Progress:</strong> Our automated link building system is initializing.
                 Please wait a moment while we prepare your workspace.
                 <div className="mt-2 text-sm text-red-700">
-                  ��� <strong>Quick Fix:</strong> If this persists, please contact support. We'll have you up and running within minutes!
+                  ⚠️ <strong>Quick Fix:</strong> If this persists, please contact support. We'll have you up and running within minutes!
                 </div>
               </AlertDescription>
             </Alert>
