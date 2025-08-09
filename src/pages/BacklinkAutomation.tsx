@@ -520,44 +520,85 @@ export default function BacklinkAutomation() {
     }
   }, [getUserStorageKey, user]);
 
-  // Load live monitored campaigns with progressive data
-  const loadPermanentCampaigns = useCallback((): any[] => {
+  // Load live monitored campaigns with progressive data (database + localStorage)
+  const loadPermanentCampaigns = useCallback(async (): Promise<any[]> => {
     try {
-      const storageKey = getUserStorageKey();
-      const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
-      return saved.map((campaign: any) => {
-        // Apply auto-detection logic
-        const isPremiumCampaign = campaign.autoDetection?.isPremium || false;
-        const progressiveCount = campaign.progressiveLinkCount || campaign.linksBuilt || campaign.linksGenerated || 0;
+      let campaigns: any[] = [];
 
-        return {
-          ...campaign,
-          status: campaign.status || 'active',
+      // For authenticated users, load from database first
+      if (user?.id) {
+        const result = await campaignMetricsService.getCampaignMetrics(user.id);
+        if (result.success && result.data) {
+          campaigns = result.data.map((dbCampaign: any) => ({
+            id: dbCampaign.campaign_id,
+            name: dbCampaign.campaign_name,
+            targetUrl: dbCampaign.target_url,
+            keywords: dbCampaign.keywords || [],
+            anchorTexts: dbCampaign.anchor_texts || [],
+            status: dbCampaign.status,
+            linksGenerated: dbCampaign.progressive_link_count,
+            linksBuilt: dbCampaign.progressive_link_count,
+            linksLive: dbCampaign.links_live,
+            linksPending: dbCampaign.links_pending,
+            progressiveLinkCount: dbCampaign.progressive_link_count,
+            dailyLimit: dbCampaign.daily_limit,
+            createdAt: new Date(dbCampaign.created_at),
+            lastActive: new Date(dbCampaign.last_active_time),
+            isDatabaseSynced: true,
+            isPermanent: true,
+            isLiveMonitored: true,
+            quality: {
+              averageAuthority: dbCampaign.average_authority,
+              successRate: dbCampaign.success_rate,
+              velocity: dbCampaign.velocity
+            },
+            // Apply premium vs free logic
+            displayLinks: isPremium ? dbCampaign.progressive_link_count : Math.min(dbCampaign.progressive_link_count, 20),
+            isAtLimit: !isPremium && dbCampaign.progressive_link_count >= 20,
+            canContinue: isPremium || dbCampaign.progressive_link_count < 20
+          }));
 
-          // Progressive link counting (can only increase)
-          linksGenerated: progressiveCount,
-          linksBuilt: progressiveCount,
-          linksLive: Math.floor(progressiveCount * 0.85),
+          console.log('✅ Loaded', campaigns.length, 'campaigns from database for user', user.id);
+        }
+      }
 
-          // Apply premium vs free logic
-          displayLinks: isPremiumCampaign ? progressiveCount : Math.min(progressiveCount, 20),
-          isAtLimit: !isPremiumCampaign && progressiveCount >= 20,
-          canContinue: isPremiumCampaign || progressiveCount < 20,
+      // Fallback to localStorage (for guest users or when database is empty)
+      if (campaigns.length === 0) {
+        const storageKey = getUserStorageKey();
+        const saved = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        campaigns = saved.map((campaign: any) => {
+          // Apply auto-detection logic
+          const isPremiumCampaign = campaign.autoDetection?.isPremium || false;
+          const progressiveCount = campaign.progressiveLinkCount || campaign.linksBuilt || campaign.linksGenerated || 0;
 
-          // Live monitoring status
-          isLiveMonitored: campaign.isLiveMonitored || false,
+          return {
+            ...campaign,
+            status: campaign.status || 'active',
+            linksGenerated: progressiveCount,
+            linksBuilt: progressiveCount,
+            linksLive: Math.floor(progressiveCount * 0.85),
+            displayLinks: isPremiumCampaign ? progressiveCount : Math.min(progressiveCount, 20),
+            isAtLimit: !isPremiumCampaign && progressiveCount >= 20,
+            canContinue: isPremiumCampaign || progressiveCount < 20,
+            isLiveMonitored: campaign.isLiveMonitored || false,
+            isDatabaseSynced: false,
+            quality: {
+              averageAuthority: campaign.avgAuthority || campaign.quality?.averageAuthority || 90,
+              successRate: campaign.successRate || campaign.quality?.successRate || 100,
+              ...campaign.quality
+            }
+          };
+        });
 
-          quality: {
-            averageAuthority: campaign.avgAuthority || campaign.quality?.averageAuthority || 90,
-            successRate: campaign.successRate || campaign.quality?.successRate || 100,
-            ...campaign.quality
-          }
-        };
-      });
-    } catch {
+        console.log('📦 Loaded', campaigns.length, 'campaigns from localStorage for', user?.id || 'guest');
+      }
+
+      return campaigns;
+    } catch (error) {
+      console.error('Failed to load permanent campaigns:', error);
       return [];
     }
-  }, [getUserStorageKey]);
+  }, [getUserStorageKey, user, isPremium]);
 
   // Full website database for rotation
   const fullDiscoverySites = [
