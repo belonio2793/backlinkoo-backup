@@ -218,16 +218,19 @@ export default function BacklinkAutomation() {
   useEffect(() => {
     loadCampaigns();
     loadSystemMetrics();
-    
+    loadProliferationStats();
+
     // Set up real-time updates with different intervals for transparency
     const fastMetricsInterval = setInterval(loadRealTimeMetrics, 3000); // Every 3 seconds for active campaigns
     const systemInterval = setInterval(loadSystemMetrics, 30000); // Every 30 seconds for system health
     const resultsInterval = setInterval(loadPostedResults, 5000); // Every 5 seconds for results
-    
+    const proliferationInterval = setInterval(loadProliferationStats, 10000); // Every 10 seconds for proliferation stats
+
     return () => {
       clearInterval(fastMetricsInterval);
       clearInterval(systemInterval);
       clearInterval(resultsInterval);
+      clearInterval(proliferationInterval);
     };
   }, []);
 
