@@ -76,16 +76,28 @@ class CampaignService {
     }
 
     const url = `${this.baseUrl}${endpoint}`;
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        ...options.headers,
-      },
-    });
 
-    const data = await response.json();
+    let response;
+    try {
+      response = await fetch(url, {
+        ...options,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          ...options.headers,
+        },
+      });
+    } catch (networkError) {
+      // Handle network errors (Failed to fetch, etc.)
+      throw new Error('Backend services not available. Please try again later or contact support.');
+    }
+
+    let data;
+    try {
+      data = await response.json();
+    } catch (parseError) {
+      throw new Error('Invalid response from server. Please try again.');
+    }
 
     if (!response.ok) {
       const error = new Error(data.error || 'API request failed') as CampaignApiError;
