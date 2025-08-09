@@ -846,7 +846,7 @@ export class AssetGenerator {
 
     // Metrics grid
     const metrics = [
-      { label: '5,847', desc: 'Active Affiliates', x: 1080, y: 240, color: '#06b6d4' },
+      { label: '5,847', desc: 'Active Users', x: 1080, y: 240, color: '#06b6d4' },
       { label: '$2.3M', desc: 'Paid Out', x: 1320, y: 240, color: '#10b981' },
       { label: '89%', desc: 'Success Rate', x: 1080, y: 320, color: '#ec4899' },
       { label: '24h', desc: 'Fast Approval', x: 1320, y: 320, color: '#f97316' }
