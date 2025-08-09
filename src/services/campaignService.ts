@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { protectedRequest } from '@/utils/fullstoryProtection';
 
 export interface CampaignDeletionOptions {
   confirmationText: string;
