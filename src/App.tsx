@@ -37,6 +37,14 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route
+              path="/login"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyLogin />
+                </Suspense>
+              }
+            />
+            <Route
               path="/blog"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
