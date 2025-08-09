@@ -121,7 +121,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
       // Load from database using the simplified claim service
       const { SimplifiedClaimService } = await import('@/services/simplifiedClaimService');
 
-      setLoadingStatus('Fetching published blog posts...');
+      // setLoadingStatus('Fetching published blog posts...');
       const dbPosts = await SimplifiedClaimService.getClaimablePosts(20);
 
       setLoadingStatus('Checking local storage...');
