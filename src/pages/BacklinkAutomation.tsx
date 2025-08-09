@@ -182,6 +182,15 @@ export default function BacklinkAutomation() {
   });
   const [isFetching, setIsFetching] = useState(false);
 
+  // Internet Proliferation state
+  const [proliferationStats, setProliferationStats] = useState({
+    totalTargets: 0,
+    queueLength: 0,
+    isProliferating: false,
+    highAuthorityTargets: 0,
+    automatedTargets: 0
+  });
+
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
     name: '',
