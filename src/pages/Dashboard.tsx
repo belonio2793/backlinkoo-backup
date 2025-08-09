@@ -768,7 +768,13 @@ const Dashboard = () => {
           })
         ];
 
-        await Promise.all(dataPromises);
+        const results = await Promise.all(dataPromises);
+        console.log('🏠 Dashboard - All data promises resolved:', {
+          userData: results[0] ? 'success' : 'failed',
+          campaigns: results[1] ? 'success' : 'failed',
+          premiumStatus: results[2],
+          userProgress: Object.keys(results[3] || {}).length
+        });
 
       } catch (error) {
         console.error('🏠 Dashboard - Initialization error:', error);
