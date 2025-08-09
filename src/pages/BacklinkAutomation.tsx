@@ -1033,13 +1033,35 @@ export default function BacklinkAutomation() {
                   )}
                   <div className="space-y-4">
                     {campaigns.map((campaign) => (
-                      <div key={campaign.id} className="border rounded-lg p-6 bg-gradient-to-r from-white to-gray-50 hover:shadow-md transition-shadow">
+                      <div key={campaign.id} className={`border rounded-lg p-6 transition-all ${
+                        campaign.status === 'active'
+                          ? 'bg-gradient-to-r from-green-50 to-blue-50 border-green-200 shadow-md'
+                          : 'bg-gradient-to-r from-white to-gray-50 hover:shadow-md'
+                      }`}>
                         <div className="flex items-center justify-between mb-4">
                           <div className="flex items-center gap-3">
-                            {getStatusIcon(campaign.status)}
+                            <div className="relative">
+                              {getStatusIcon(campaign.status)}
+                              {campaign.status === 'active' && (
+                                <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                              )}
+                            </div>
                             <div>
-                              <h3 className="font-semibold text-lg">{campaign.name}</h3>
+                              <div className="flex items-center gap-2">
+                                <h3 className="font-semibold text-lg">{campaign.name}</h3>
+                                {campaign.status === 'active' && (
+                                  <Badge variant="outline" className="text-green-600 bg-green-50 border-green-200 text-xs">
+                                    <Activity className="h-2 w-2 mr-1" />
+                                    LIVE
+                                  </Badge>
+                                )}
+                              </div>
                               <p className="text-sm text-gray-600">{campaign.targetUrl}</p>
+                              {campaign.status === 'active' && (
+                                <div className="text-xs text-green-600 mt-1">
+                                  Last activity: {campaign.lastActive.toLocaleTimeString()}
+                                </div>
+                              )}
                             </div>
                           </div>
                           <div className="flex items-center gap-3">
