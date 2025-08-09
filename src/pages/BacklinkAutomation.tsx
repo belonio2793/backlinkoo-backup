@@ -402,6 +402,18 @@ export default function BacklinkAutomation() {
           downvotes: 1,
           reports: 0,
           discovered_at: new Date().toISOString(),
+        },
+        {
+          id: 'demo-3',
+          url: 'https://reddit.com/r/startups',
+          domain: 'reddit.com',
+          type: 'social_profile',
+          quality_score: 85,
+          status: 'verified',
+          upvotes: 20,
+          downvotes: 3,
+          reports: 0,
+          discovered_at: new Date().toISOString(),
         }
       ]);
     }
