@@ -912,7 +912,7 @@ export default function BacklinkAutomation() {
 
                   <Button
                     onClick={createCampaign}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                    className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                     disabled={isLoading || !user || (!isPremium && usageStats.isLimitReached)}
                   >
                     {isLoading ? (
