@@ -188,6 +188,7 @@ class GuestTrackingService {
     let campaignPaused = false;
     if (newTotal >= this.MAX_LINKS_PER_CAMPAIGN) {
       campaign.status = 'completed';
+      campaign.completedAt = new Date().toISOString();
       campaignPaused = true;
       console.log(`✅ Campaign ${campaignId} completed at ${newTotal} links - saved indefinitely`);
     }
