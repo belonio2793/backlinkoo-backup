@@ -1025,7 +1025,7 @@ export default function BacklinkAutomation() {
                     <Button
                       onClick={createCampaign}
                       className="h-12 px-8 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                      disabled={isLoading || !user || !campaignForm.targetUrl || !campaignForm.keywords}
+                      disabled={isLoading || !user || !campaignForm.targetUrl || !campaignForm.keywords || (databaseStatus && !databaseStatus.isConnected)}
                     >
                       {isLoading ? (
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
