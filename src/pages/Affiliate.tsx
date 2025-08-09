@@ -95,7 +95,7 @@ const Affiliate: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Total Credits</p>
-                    <p className="text-3xl font-bold text-purple-600">{affiliateStats.totalCredits}</p>
+                    <p className="text-3xl font-bold text-purple-600">{stats.totalCredits}</p>
                   </div>
                   <Gift className="h-8 w-8 text-purple-600" />
                 </div>
