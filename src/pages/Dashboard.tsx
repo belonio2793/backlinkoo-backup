@@ -211,7 +211,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
         });
       }
     } finally {
-      setLoadingStatus('Ready');
+      // setLoadingStatus('Ready');
     }
   };
 
