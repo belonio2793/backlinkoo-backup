@@ -357,7 +357,11 @@ export default function BacklinkAutomation() {
   };
 
   const loadPostedResults = async () => {
-    if (!user) return;
+    if (!user) {
+      // Clear results if user is not authenticated
+      setPostedLinks([]);
+      return;
+    }
 
     try {
       // Load posted links from database for active campaigns only
@@ -385,6 +389,8 @@ export default function BacklinkAutomation() {
 
       if (error) {
         console.error('Failed to load posted results:', error);
+        // Don't show error to user for results loading, just log it
+        setPostedLinks([]);
         return;
       }
 
@@ -410,6 +416,8 @@ export default function BacklinkAutomation() {
 
     } catch (error) {
       console.error('Failed to load posted results:', error);
+      // Set empty results on error
+      setPostedLinks([]);
     }
   };
 
