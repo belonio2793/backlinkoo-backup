@@ -270,7 +270,7 @@ const Index = () => {
               ) : user ? (
                 <>
                   <Button
-                    onClick={() => navigate("/dashboard")}
+                    onClick={() => startTransition(() => navigate("/dashboard"))}
                     className="bg-transparent hover:bg-blue-50/50 border border-blue-200/60 text-blue-700 hover:text-blue-800 hover:border-blue-300/80 transition-all duration-200 font-medium px-4 py-1 text-sm backdrop-blur-sm shadow-sm hover:shadow-md"
                   >
                     Dashboard
