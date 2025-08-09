@@ -598,9 +598,19 @@ function Blog() {
             {filteredPosts.map((post) => (
               <div key={post.id}>
                 {viewMode === 'grid' ? (
-                  <BlogPostCard post={post} navigate={navigate} formatDate={formatDate} />
+                  <BlogPostCard
+                    post={post}
+                    navigate={navigate}
+                    formatDate={formatDate}
+                    onLoginRequired={() => setLoginModalOpen(true)}
+                  />
                 ) : (
-                  <BlogPostListItem post={post} navigate={navigate} formatDate={formatDate} />
+                  <BlogPostListItem
+                    post={post}
+                    navigate={navigate}
+                    formatDate={formatDate}
+                    onLoginRequired={() => setLoginModalOpen(true)}
+                  />
                 )}
               </div>
             ))}
