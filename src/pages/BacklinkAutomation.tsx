@@ -1191,6 +1191,20 @@ export default function BacklinkAutomation() {
           campaign={campaignToDelete}
           isDeleting={isDeleting}
         />
+
+        {/* Premium Upgrade Modal */}
+        <PremiumPlanPopup
+          isOpen={showPremiumModal}
+          onClose={() => setShowPremiumModal(false)}
+          onSuccess={() => {
+            setShowPremiumModal(false);
+            toast({
+              title: "Premium Activated!",
+              description: "You can now generate unlimited links. All campaigns will resume automatically.",
+            });
+          }}
+          defaultEmail={user?.email || ''}
+        />
         </div>
       </div>
 
