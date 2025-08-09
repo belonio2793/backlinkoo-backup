@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, startTransition } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -36,27 +36,51 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route
               path="/blog"
-              element={<LazyBlog />}
+              element={
+                <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <LazyBlog />
+                </Suspense>
+              }
             />
             <Route
               path="/blog/:slug"
-              element={<LazyBeautifulBlogPost />}
+              element={
+                <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <LazyBeautifulBlogPost />
+                </Suspense>
+              }
             />
             <Route
               path="/dashboard"
-              element={<LazyDashboard />}
+              element={
+                <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <LazyDashboard />
+                </Suspense>
+              }
             />
             <Route
               path="/automation"
-              element={<LazyBacklinkAutomation />}
+              element={
+                <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <LazyBacklinkAutomation />
+                </Suspense>
+              }
             />
             <Route
               path="/recursive-discovery"
-              element={<LazyRecursiveDiscoveryDashboard />}
+              element={
+                <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <LazyRecursiveDiscoveryDashboard />
+                </Suspense>
+              }
             />
             <Route
               path="/admin"
-              element={<LazyAdminLanding />}
+              element={
+                <Suspense fallback={<div className="flex items-center justify-center min-h-screen"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div></div>}>
+                  <LazyAdminLanding />
+                </Suspense>
+              }
             />
           </Routes>
         </BrowserRouter>
