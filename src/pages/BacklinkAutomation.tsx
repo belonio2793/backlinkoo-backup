@@ -115,6 +115,7 @@ export default function BacklinkAutomation() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [campaignToDelete, setCampaignToDelete] = useState<Campaign | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [selectedLinkType, setSelectedLinkType] = useState('all');
 
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
