@@ -990,7 +990,7 @@ export default function BacklinkAutomation() {
         successfulLinks: totalLinksGenerated,
         failedAttempts: Math.floor(totalLinksGenerated * 0.08),
         averageResponseTime: 1.2 + (activeCampaignsCount * 0.3) + (Math.random() - 0.5) * 0.4,
-        currentThroughput: proliferationStats.isProliferating ? activeCampaignsCount * (15 + Math.floor(Math.random() * 10)) : 0,
+        currentThroughput: realtimeThroughput + (activeCampaignsCount * Math.floor(Math.random() * 5)),
         lastUpdate: new Date(),
         networkHealth: Math.max(85, 100 - (activeCampaignsCount * 2) + Math.random() * 5),
         apiCallsUsed: prev.apiCallsUsed + activeCampaignsCount * 2,
