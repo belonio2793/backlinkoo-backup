@@ -368,7 +368,7 @@ export default function EnhancedUserManagement() {
             <div className="min-w-[120px]">
               <Select
                 value={filters.role}
-                onValueChange={(value) => setFilters({ ...filters, role: value })}
+                onValueChange={(value) => handleFiltersChange({ role: value })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Role" />
