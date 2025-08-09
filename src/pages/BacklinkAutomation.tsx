@@ -424,7 +424,7 @@ export default function BacklinkAutomation() {
     // Show toast notification for new link
     toast({
       title: "🔗 New Backlink Published!",
-      description: `Link published on ${linkToPublish.domain} • Total: ${newCount} links built`,
+      description: `Link published on ${linkToPublish.domain} ��� Total: ${newCount} links built`,
       duration: 3000,
     });
 
@@ -492,6 +492,16 @@ export default function BacklinkAutomation() {
     }
 
     checkDatabase();
+
+    // Show page leave notification on mount
+    setShowPageLeaveNotification(true);
+
+    // Hide notification after 8 seconds
+    const notificationTimer = setTimeout(() => {
+      setShowPageLeaveNotification(false);
+    }, 8000);
+
+    return () => clearTimeout(notificationTimer);
   }, [user, selectedLinkType]);
 
   // Check user's premium status
