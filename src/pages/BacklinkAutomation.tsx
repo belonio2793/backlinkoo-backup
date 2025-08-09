@@ -119,6 +119,21 @@ export default function BacklinkAutomation() {
   const [selectedLinkType, setSelectedLinkType] = useState('all');
   const [showPremiumModal, setShowPremiumModal] = useState(false);
 
+  // Results tracking state
+  const [postedLinks, setPostedLinks] = useState<Array<{
+    id: string;
+    domain: string;
+    url: string;
+    campaignId: string;
+    campaignName: string;
+    anchorText: string;
+    timestamp: Date;
+    status: 'live' | 'pending' | 'failed';
+    domainAuthority: number;
+    traffic: string;
+    position: string;
+  }>>([]);
+
   // Real-time control panel state
   const [controlPanelData, setControlPanelData] = useState({
     systemStatus: 'operational',
