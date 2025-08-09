@@ -3459,6 +3459,149 @@ export default function BacklinkAutomation() {
                                 View
                               </Button>
                             </div>
+
+                            {/* Real-Time Reporting Program Execution Interface */}
+                            <div className="mt-4 border-t pt-4">
+                              <div className="flex items-center gap-2 mb-3">
+                                <div className="relative">
+                                  <Server className="h-4 w-4 text-blue-600" />
+                                  {campaign.status === 'active' && (
+                                    <div className="absolute -top-1 -right-1 h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                                  )}
+                                </div>
+                                <span className="text-sm font-semibold text-gray-800">Real-Time Program Execution</span>
+                                <Badge variant="outline" className={`text-xs ${
+                                  campaign.status === 'active' ? 'bg-green-100 text-green-700 border-green-300' :
+                                  'bg-gray-100 text-gray-600 border-gray-300'
+                                }`}>
+                                  {campaign.status === 'active' ? 'LIVE' : 'PAUSED'}
+                                </Badge>
+                              </div>
+
+                              {/* Sophisticated Reporting Container */}
+                              <div className="bg-gradient-to-br from-slate-900 via-gray-900 to-black rounded-lg p-3 border border-gray-700">
+                                {/* Header with status indicators */}
+                                <div className="flex items-center justify-between mb-3">
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex items-center gap-1">
+                                      <div className={`h-2 w-2 rounded-full ${
+                                        campaign.status === 'active' ? 'bg-green-400 animate-pulse' : 'bg-gray-500'
+                                      }`}></div>
+                                      <span className="text-green-400 font-mono text-xs">EXEC</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <div className={`h-2 w-2 rounded-full ${
+                                        realtimeReportingData[campaign.id]?.some(r => r.type === 'discovery') ? 'bg-blue-400 animate-pulse' : 'bg-gray-500'
+                                      }`}></div>
+                                      <span className="text-blue-400 font-mono text-xs">DISC</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <div className={`h-2 w-2 rounded-full ${
+                                        realtimeReportingData[campaign.id]?.some(r => r.type === 'propagation') ? 'bg-purple-400 animate-pulse' : 'bg-gray-500'
+                                      }`}></div>
+                                      <span className="text-purple-400 font-mono text-xs">PROP</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <div className={`h-2 w-2 rounded-full ${
+                                        realtimeReportingData[campaign.id]?.some(r => r.type === 'verification') ? 'bg-yellow-400 animate-pulse' : 'bg-gray-500'
+                                      }`}></div>
+                                      <span className="text-yellow-400 font-mono text-xs">VERIFY</span>
+                                    </div>
+                                  </div>
+                                  <div className="text-gray-400 font-mono text-xs">
+                                    {campaign.status === 'active' ? 'PROCESSING' : 'SUSPENDED'}
+                                  </div>
+                                </div>
+
+                                {/* Real-time activity feed */}
+                                <div className="space-y-1 max-h-32 overflow-y-auto">
+                                  {realtimeReportingData[campaign.id]?.slice(0, 8).map((report) => (
+                                    <div key={report.id} className="flex items-center gap-2 text-xs font-mono">
+                                      <span className="text-gray-500 w-16">
+                                        [{report.timestamp.toLocaleTimeString().slice(0, -3)}]
+                                      </span>
+                                      <span className={`w-8 ${
+                                        report.type === 'discovery' ? 'text-blue-400' :
+                                        report.type === 'propagation' ? 'text-purple-400' :
+                                        report.type === 'execution' ? 'text-green-400' :
+                                        report.type === 'verification' ? 'text-yellow-400' :
+                                        'text-cyan-400'
+                                      }`}>
+                                        {report.type.toUpperCase().slice(0, 4)}
+                                      </span>
+                                      <span className={`flex-1 ${
+                                        report.status === 'running' ? 'text-white animate-pulse' :
+                                        report.status === 'completed' ? 'text-green-300' :
+                                        report.status === 'paused' ? 'text-yellow-300' :
+                                        'text-red-300'
+                                      }`}>
+                                        {report.message}
+                                      </span>
+                                      {report.metadata?.speed && (
+                                        <span className="text-gray-400 text-xs">{report.metadata.speed}</span>
+                                      )}
+                                    </div>
+                                  )) || (
+                                    <div className="text-center py-4 text-gray-500">
+                                      <div className="text-gray-400 mb-1">SYSTEM INITIALIZING...</div>
+                                      <div className="flex justify-center">
+                                        <div className="animate-pulse">▋</div>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Progress and metrics bar */}
+                                <div className="mt-3 pt-2 border-t border-gray-700 flex items-center justify-between">
+                                  <div className="flex items-center gap-4 text-xs">
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-gray-400">Found:</span>
+                                      <span className="text-green-400 font-mono">
+                                        {realtimeReportingData[campaign.id]?.filter(r => r.type === 'discovery').length || 0}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-gray-400">Exec:</span>
+                                      <span className="text-blue-400 font-mono">
+                                        {realtimeReportingData[campaign.id]?.filter(r => r.type === 'execution').length || 0}
+                                      </span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                      <span className="text-gray-400">Rate:</span>
+                                      <span className="text-purple-400 font-mono">
+                                        {campaign.status === 'active' ? '1.5/s' : '0/s'}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    {campaign.status === 'active' && (
+                                      <div className="flex items-center gap-1">
+                                        <div className="w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
+                                        <span className="text-green-400 text-xs font-mono">ACTIVE</span>
+                                      </div>
+                                    )}
+                                    {campaign.status === 'paused' && (
+                                      <div className="flex items-center gap-1">
+                                        <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                        <span className="text-yellow-400 text-xs font-mono">PAUSED</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Quick action indicators */}
+                              <div className="mt-2 flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2 text-gray-500">
+                                  <Database className="h-3 w-3" />
+                                  <span>URL Propagation: {campaign.status === 'active' ? 'Active' : 'Suspended'}</span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <span className="text-gray-400">Updates:</span>
+                                  <span className="text-blue-500 font-mono">Live</span>
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       ))
