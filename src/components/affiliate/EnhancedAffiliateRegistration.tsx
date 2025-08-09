@@ -80,7 +80,7 @@ export const EnhancedAffiliateRegistration: React.FC<RegistrationProps> = ({
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
-    email: userEmail,
+    email: userEmail || '',
     phone: '',
     company: '',
     website: '',

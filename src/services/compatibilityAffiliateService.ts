@@ -93,8 +93,9 @@ export class CompatibilityAffiliateService {
         total_conversions: 0
       };
     } catch (error: any) {
-      console.error('Create affiliate profile error:', error);
-      throw error;
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      console.error('Create affiliate profile error:', errorMessage, error);
+      throw new Error(`Failed to create affiliate profile: ${errorMessage}`);
     }
   }
 
@@ -130,8 +131,9 @@ export class CompatibilityAffiliateService {
         total_conversions: 0
       };
     } catch (error: any) {
-      console.error('Get affiliate profile error:', error);
-      throw error;
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      console.error('Get affiliate profile error:', errorMessage, error);
+      throw new Error(`Failed to get affiliate profile: ${errorMessage}`);
     }
   }
 
@@ -163,8 +165,9 @@ export class CompatibilityAffiliateService {
         total_conversions: updates.total_conversions || 0
       };
     } catch (error: any) {
-      console.error('Update affiliate profile error:', error);
-      throw error;
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      console.error('Update affiliate profile error:', errorMessage, error);
+      throw new Error(`Failed to update affiliate profile: ${errorMessage}`);
     }
   }
 
@@ -199,8 +202,9 @@ export class CompatibilityAffiliateService {
       this.setTrackingCookie(affiliateCode, trackingId);
       return trackingId;
     } catch (error: any) {
-      console.error('Track click error:', error);
-      throw error;
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      console.error('Track click error:', errorMessage, error);
+      throw new Error(`Failed to track click: ${errorMessage}`);
     }
   }
 
@@ -244,8 +248,9 @@ export class CompatibilityAffiliateService {
         status: 'pending'
       };
     } catch (error: any) {
-      console.error('Record conversion error:', error);
-      throw error;
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      console.error('Record conversion error:', errorMessage, error);
+      throw new Error(`Failed to record conversion: ${errorMessage}`);
     }
   }
 
@@ -286,8 +291,9 @@ export class CompatibilityAffiliateService {
         ]
       };
     } catch (error: any) {
-      console.error('Get affiliate analytics error:', error);
-      throw error;
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      console.error('Get affiliate analytics error:', errorMessage, error);
+      throw new Error(`Failed to get affiliate analytics: ${errorMessage}`);
     }
   }
 
@@ -325,8 +331,9 @@ export class CompatibilityAffiliateService {
         conversionRate: monthMetrics.conversion_rate
       };
     } catch (error: any) {
-      console.error('Get dashboard metrics error:', error);
-      throw error;
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      console.error('Get dashboard metrics error:', errorMessage, error);
+      throw new Error(`Failed to get dashboard metrics: ${errorMessage}`);
     }
   }
 

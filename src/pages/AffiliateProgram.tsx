@@ -58,9 +58,10 @@ export const AffiliateProgram: React.FC = () => {
       setDatabaseError(false);
       const profile = await compatibilityAffiliateService.getAffiliateProfile(user.id);
       setAffiliateProfile(profile);
-    } catch (error) {
-      console.error('Failed to check affiliate status:', error);
-      if (error.message && error.message.includes('not set up yet')) {
+    } catch (error: any) {
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      console.error('Failed to check affiliate status:', errorMessage, error);
+      if (errorMessage.includes('not set up yet') || errorMessage.includes('table') || errorMessage.includes('relation')) {
         setDatabaseError(true);
       }
     } finally {
