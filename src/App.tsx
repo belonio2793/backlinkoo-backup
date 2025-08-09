@@ -38,6 +38,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/admin"
+              element={
+                <Suspense fallback={<div>Loading...</div>}>
+                  <LazyAdminLanding />
+                </Suspense>
+              }
+            />
           </Routes>
         </BrowserRouter>
       </ModalProvider>
