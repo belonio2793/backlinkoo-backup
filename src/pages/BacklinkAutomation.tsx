@@ -797,7 +797,7 @@ export default function BacklinkAutomation() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="anchorTexts">Anchor Text Variations *</Label>
+                      <Label htmlFor="anchorTexts">Anchor Text Variations</Label>
                       <Textarea
                         id="anchorTexts"
                         value={campaignForm.anchorTexts}
