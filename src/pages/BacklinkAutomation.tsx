@@ -749,6 +749,15 @@ export default function BacklinkAutomation() {
   };
 
   const handleDeleteConfirm = async (campaignId: string, options: CampaignDeletionOptions) => {
+    if (!user) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to delete campaigns",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setIsDeleting(true);
 
     try {
