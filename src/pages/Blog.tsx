@@ -1053,12 +1053,12 @@ function BlogPostListItem({ post, navigate, formatDate, onLoginRequired }: any) 
             </div>
             
             <h3 className="text-2xl font-bold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-              {post.title}
+              {cleanTitle(post.title)}
             </h3>
-            
+
             {post.meta_description && (
               <p className="text-gray-600 leading-relaxed line-clamp-2">
-                {post.meta_description}
+                {cleanDescription(post.meta_description)}
               </p>
             )}
             
