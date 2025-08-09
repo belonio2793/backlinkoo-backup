@@ -597,6 +597,9 @@ export default function BacklinkAutomation() {
 
   const pauseCampaign = async (campaignId: string) => {
     try {
+      // Stop live link building
+      liveLinkBuildingService.stopLinkBuilding(campaignId);
+
       // Use campaign service for backend call
       await campaignService.pauseCampaign(campaignId);
 
