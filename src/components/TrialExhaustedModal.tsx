@@ -274,16 +274,21 @@ export function TrialExhaustedModal({
             <Button
               size="lg"
               className="flex-1 h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-              onClick={() => {
-                if (onUpgrade) {
-                  onUpgrade();
-                }
-                onOpenChange(false);
-              }}
+              onClick={handleUpgradeClick}
+              disabled={isProcessingUpgrade}
             >
-              <Crown className="h-5 w-5 mr-2" />
-              Upgrade to Premium - $29/month
-              <ArrowRight className="h-5 w-5 ml-2" />
+              {isProcessingUpgrade ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  Creating Checkout...
+                </>
+              ) : (
+                <>
+                  <Crown className="h-5 w-5 mr-2" />
+                  Upgrade to Premium - $29/month
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </>
+              )}
             </Button>
             {!isLoggedIn && (
               <Button
