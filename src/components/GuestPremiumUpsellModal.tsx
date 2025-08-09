@@ -36,6 +36,7 @@ export function GuestPremiumUpsellModal({
 }: GuestPremiumUpsellModalProps) {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [isProcessingUpgrade, setIsProcessingUpgrade] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
   const { toast } = useToast();
 
   const guestStats = guestTrackingService.getGuestStats();
