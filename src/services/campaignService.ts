@@ -69,10 +69,26 @@ class CampaignService {
     try {
       const response = await fetch(`${this.baseUrl}/api-status`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        timeout: 5000 // 5 second timeout
       });
-      return response.ok;
+
+      if (!response.ok) {
+        console.log('Backend health check failed:', response.status);
+        return false;
+      }
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        return data.status === 'ok' || data.healthy === true || response.ok;
+      }
+
+      // If not JSON but response is ok, assume it's available
+      return true;
     } catch (error) {
+      console.log('Backend availability check failed:', error.message);
       return false;
     }
   }
