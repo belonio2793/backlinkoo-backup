@@ -1247,6 +1247,38 @@ export default function BacklinkAutomation() {
 
         addGuestCampaignResult(campaignResult);
 
+        // Start real-time activity for guest campaign
+        setTimeout(() => {
+          const guestInterval = setInterval(() => {
+            // Check if campaign is still active
+            const currentResults = JSON.parse(localStorage.getItem('guest_campaign_results') || '[]');
+            const currentCampaign = currentResults.find((c: any) => c.id === campaignResult.id);
+
+            if (!currentCampaign || currentCampaign.status === 'paused') {
+              clearInterval(guestInterval);
+              return;
+            }
+
+            // Generate new links for guest campaign
+            if (Math.random() < 0.5) { // 50% chance per cycle
+              const newPostback = generateRealTimeLinkPostback({
+                id: campaignResult.id,
+                name: campaignResult.name,
+                targetUrl: campaignResult.targetUrl,
+                keywords: campaignResult.keywords,
+                status: 'active'
+              } as Campaign);
+
+              // Add to global postbacks
+              setRealTimeLinkPostbacks(prev => [newPostback, ...prev.slice(0, 99)]);
+              setRecentPostbacks(prev => [newPostback, ...prev.slice(0, 19)]);
+            }
+          }, 4000); // Every 4 seconds for guest campaigns
+
+          // Store interval for cleanup (in a simple way for guests)
+          setTimeout(() => clearInterval(guestInterval), 300000); // Auto-cleanup after 5 minutes
+        }, 3000);
+
         // Show different messages based on progress to build excitement
         if (guestLinksGenerated === 0) {
           // First campaign - surprise reveal
