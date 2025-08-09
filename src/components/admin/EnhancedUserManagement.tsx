@@ -106,88 +106,13 @@ export default function EnhancedUserManagement() {
     loadUsers(updatedFilters);
   };
 
-  const loadUsers = async () => {
-    setLoading(true);
+  const handleCreateUser = async () => {
     try {
-      let query = supabase
-        .from('profiles')
-        .select(`
-          *,
-          auth.users!inner(
-            id,
-            email,
-            created_at,
-            last_sign_in_at,
-            email_confirmed_at,
-            banned_until,
-            raw_user_meta_data,
-            user_metadata
-          )
-        `, { count: 'exact' });
-
-      // Apply filters
-      if (filters.search) {
-        query = query.or(`email.ilike.%${filters.search}%,auth.users.email.ilike.%${filters.search}%`);
-      }
-      if (filters.role !== 'all') {
-        query = query.eq('role', filters.role);
-      }
-      if (filters.subscription !== 'all') {
-        query = query.eq('subscription_tier', filters.subscription);
-      }
-      if (filters.dateFrom) {
-        query = query.gte('created_at', filters.dateFrom);
-      }
-      if (filters.dateTo) {
-        query = query.lte('created_at', filters.dateTo);
-      }
-
-      // Pagination
-      const from = (currentPage - 1) * usersPerPage;
-      const to = from + usersPerPage - 1;
-      query = query.range(from, to);
-
-      const { data, error, count } = await query;
-
-      if (error) {
-        console.error('Error loading users:', error);
-        toast({
-          title: "Error Loading Users",
-          description: error.message,
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Transform the data to match our User interface
-      const transformedUsers: User[] = data?.map((profile: any) => ({
-        id: profile.user_id,
-        email: profile.email || profile.auth?.users?.email,
-        role: profile.role,
-        subscription_tier: profile.subscription_tier,
-        subscription_status: profile.subscription_status || 'inactive',
-        credits: profile.credits || 0,
-        created_at: profile.created_at,
-        last_sign_in_at: profile.auth?.users?.last_sign_in_at,
-        email_confirmed_at: profile.auth?.users?.email_confirmed_at,
-        banned_until: profile.auth?.users?.banned_until,
-        metadata: profile.metadata,
-        raw_user_meta_data: profile.auth?.users?.raw_user_meta_data,
-        user_metadata: profile.auth?.users?.user_metadata
-      })) || [];
-
-      setUsers(transformedUsers);
-      setTotalPages(Math.ceil((count || 0) / usersPerPage));
-
+      await createUser(newUser);
+      setNewUser({ email: '', password: '', role: 'user', subscription_tier: 'free', credits: 0 });
+      setIsCreateModalOpen(false);
     } catch (error) {
-      console.error('Error in loadUsers:', error);
-      toast({
-        title: "Database Error",
-        description: "Failed to load users. Check console for details.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+      // Error is handled by the hook
     }
   };
 
