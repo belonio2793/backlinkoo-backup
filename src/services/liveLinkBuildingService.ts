@@ -152,9 +152,9 @@ class LiveLinkBuildingService {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const { data: publishedLinks, error } = await supabase
-        .from('posted_links')
-        .select('id')
+      const { data: campaigns, error } = await supabase
+        .from('campaigns')
+        .select('links_delivered')
         .eq('user_id', userId)
         .gte('created_at', thirtyDaysAgo.toISOString());
 
