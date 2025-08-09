@@ -1,9 +1,8 @@
-import { useState, useEffect } from "react";
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Table,
   TableBody,
@@ -12,506 +11,645 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { supabase } from '@/integrations/supabase/client';
-import { adminAuditLogger } from '@/services/adminAuditLogger';
-import { Users, Search, Crown, Gift, RefreshCw, AlertCircle, CheckCircle, Database } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { Label } from "@/components/ui/label";
+import {
+  Users,
+  Edit,
+  Crown,
+  Activity,
+  DollarSign,
+  Plus,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  UserPlus,
+  Loader2,
+  Trash2,
+  Save,
+  X,
+  Download,
+  Ban,
+  Unlock,
+  ChevronDown,
+  ChevronRight as ChevronRightIcon,
+  Eye,
+  Calendar
+} from "lucide-react";
+import { useUserManagement } from '@/hooks/useUserManagement';
+import type { UserProfile, UserFilters } from '@/services/userManagementService';
 
-interface User {
-  id: string;
-  user_id: string;
-  email: string;
-  display_name?: string;
-  role: 'admin' | 'user';
-  created_at: string;
-  is_premium?: boolean;
-  subscription_status?: string;
-}
+export default function SimplifiedUserManagement() {
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
-interface UserStats {
-  totalUsers: number;
-  adminUsers: number;
-  premiumUsers: number;
-  recentSignups: number;
-}
+  const [filters, setFilters] = useState<UserFilters>({
+    search: '',
+    role: 'all',
+    subscription: 'all',
+    limit: 20,
+    offset: 0
+  });
 
-export function SimplifiedUserManagement() {
-  const [users, setUsers] = useState<User[]>([]);
-  const [stats, setStats] = useState<UserStats>({ totalUsers: 0, adminUsers: 0, premiumUsers: 0, recentSignups: 0 });
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'disconnected' | 'checking'>('checking');
-  const [lastSync, setLastSync] = useState<Date | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [newUser, setNewUser] = useState({
+    email: '',
+    password: '',
+    role: 'user',
+    subscription_tier: 'free',
+    credits: 0
+  });
 
-  const fetchUsersAndStats = async () => {
-    setLoading(true);
-    setError(null);
+  const {
+    users,
+    userStats,
+    loading,
+    pagination,
+    createUser,
+    updateUser,
+    deleteUser,
+    toggleUserBan,
+    exportUsers,
+    refresh
+  } = useUserManagement();
+
+  // Update filters and reload when they change
+  const handleFiltersChange = (newFilters: Partial<UserFilters>) => {
+    const updatedFilters = { ...filters, ...newFilters };
+    setFilters(updatedFilters);
+  };
+
+  const handleCreateUser = async () => {
+    try {
+      await createUser(newUser);
+      setNewUser({ email: '', password: '', role: 'user', subscription_tier: 'free', credits: 0 });
+      setIsCreateModalOpen(false);
+    } catch (error) {
+      // Error is handled by the hook
+    }
+  };
+
+  const handleUpdateUser = async () => {
+    if (!editingUser) return;
 
     try {
-      console.log('🔄 Fetching user data (RLS-safe approach)...');
-
-      // Log that admin is accessing user data
-      await adminAuditLogger.logUserAction(
-        'METRICS_VIEWED',
-        'bulk_view',
-        {
-          section: 'user_management',
-          action: 'fetch_user_data',
-          timestamp: new Date().toISOString()
-        }
-      );
-      
-      // Method 1: Get ALL subscribers (not just active ones) to see more users
-      const { data: subscribers, error: subscribersError } = await supabase
-        .from('subscribers')
-        .select('id, user_id, email, subscribed, subscription_tier, created_at, payment_method')
-        .limit(100);
-
-      console.log('Subscribers data:', subscribers, 'Error:', subscribersError);
-
-      // Method 2: Get additional users from orders (all statuses)
-      const { data: orders, error: ordersError } = await supabase
-        .from('orders')
-        .select('email, created_at, user_id, status, product_name')
-        .limit(200);
-
-      console.log('Orders data:', orders, 'Error:', ordersError);
-
-      // Method 3: Try to get some data from campaigns table
-      const { data: campaigns, error: campaignsError } = await supabase
-        .from('campaigns')
-        .select('user_id, created_at, name')
-        .limit(50);
-
-      console.log('Campaigns data:', campaigns, 'Error:', campaignsError);
-      
-      // Process data to create user list
-      const userList: User[] = [];
-      const emailsSeen = new Set<string>();
-      
-      // Add current admin user first
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user?.email) {
-          userList.push({
-            id: 'current-admin',
-            user_id: user.id,
-            email: user.email,
-            display_name: 'Admin User',
-            role: 'admin',
-            created_at: user.created_at || new Date().toISOString(),
-            is_premium: false,
-            subscription_status: 'admin'
-          });
-          emailsSeen.add(user.email);
-        }
-      } catch (authError) {
-        console.warn('Could not get current user:', authError);
-      }
-      
-      // Add all subscribers (premium and non-premium)
-      (subscribers || []).forEach((sub, index) => {
-        if (sub.email && !emailsSeen.has(sub.email)) {
-          userList.push({
-            id: sub.id || `sub-${index}`,
-            user_id: sub.user_id || sub.id || `sub-${index}`,
-            email: sub.email,
-            display_name: sub.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' '),
-            role: 'user',
-            created_at: sub.created_at,
-            is_premium: sub.subscribed === true,
-            subscription_status: sub.subscribed ? (sub.subscription_tier || 'premium') : 'free'
-          });
-          emailsSeen.add(sub.email);
-        }
+      await updateUser(editingUser.id, {
+        role: editingUser.role,
+        subscription_tier: editingUser.subscription_tier
       });
       
-      // Add users from orders (all order statuses)
-      const uniqueOrderEmails = new Map<string, any>();
-      (orders || []).forEach(order => {
-        if (order.email && !uniqueOrderEmails.has(order.email) && !emailsSeen.has(order.email)) {
-          uniqueOrderEmails.set(order.email, order);
-        }
-      });
-
-      Array.from(uniqueOrderEmails.values()).forEach((order, index) => {
-        const isPremiumOrder = order.status === 'completed' && order.product_name?.toLowerCase().includes('premium');
-        userList.push({
-          id: `order-${index}`,
-          user_id: order.user_id || `order-user-${index}`,
-          email: order.email,
-          display_name: order.email.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' '),
-          role: 'user',
-          created_at: order.created_at,
-          is_premium: isPremiumOrder,
-          subscription_status: isPremiumOrder ? 'premium' : 'customer'
-        });
-      });
-
-      // Add users from campaigns (if they have user_ids)
-      const uniqueCampaignUsers = new Map<string, any>();
-      (campaigns || []).forEach(campaign => {
-        if (campaign.user_id && !uniqueCampaignUsers.has(campaign.user_id)) {
-          uniqueCampaignUsers.set(campaign.user_id, campaign);
-        }
-      });
-
-      Array.from(uniqueCampaignUsers.values()).forEach((campaign, index) => {
-        const isExistingUser = userList.some(u => u.user_id === campaign.user_id);
-        if (!isExistingUser) {
-          userList.push({
-            id: `campaign-${index}`,
-            user_id: campaign.user_id,
-            email: `user-${campaign.user_id.substring(0, 8)}@backlinkoo.com`,
-            display_name: campaign.name || `Campaign User ${index + 1}`,
-            role: 'user',
-            created_at: campaign.created_at,
-            is_premium: false,
-            subscription_status: 'active'
-          });
-        }
-      });
-      
-      setUsers(userList);
-      setConnectionStatus('connected');
-      
-      // Calculate stats
-      const totalUsers = userList.length;
-      const adminUsers = userList.filter(u => u.role === 'admin').length;
-      const premiumUserCount = userList.filter(u => u.is_premium).length;
-      
-      // Recent signups (last 7 days)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const recentSignups = userList.filter(u => 
-        new Date(u.created_at) > sevenDaysAgo
-      ).length;
-
-      setStats({
-        totalUsers,
-        adminUsers,
-        premiumUsers: premiumUserCount,
-        recentSignups
-      });
-      setLastSync(new Date());
-
-      console.log(`✅ User data synced: ${totalUsers} users (${premiumUserCount} premium, ${adminUsers} admin, ${recentSignups} recent)`);
-      console.log('Final user list:', userList);
-
-      // Log successful user data fetch
-      await adminAuditLogger.logUserAction(
-        'METRICS_VIEWED',
-        'bulk_view',
-        {
-          section: 'user_management',
-          action: 'fetch_user_data_success',
-          stats: {
-            total_users: totalUsers,
-            admin_users: adminUsers,
-            premium_users: premiumUserCount,
-            recent_signups: recentSignups
-          },
-          timestamp: new Date().toISOString()
-        }
-      );
-
-    } catch (error: any) {
-      console.error('❌ Failed to sync user data:', error);
-
-      // Log the error
-      await adminAuditLogger.logUserAction(
-        'METRICS_VIEWED',
-        'bulk_view',
-        {
-          section: 'user_management',
-          action: 'fetch_user_data_failed',
-          error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date().toISOString()
-        },
-        false,
-        error instanceof Error ? error.message : 'Failed to fetch user data'
-      );
-
-      // Provide fallback data instead of empty state
-      const fallbackUsers: User[] = [];
-
-      // Try to at least get the current admin user
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user?.email) {
-          fallbackUsers.push({
-            id: 'current-admin',
-            user_id: user.id,
-            email: user.email,
-            display_name: 'Admin User',
-            role: 'admin',
-            created_at: user.created_at || new Date().toISOString(),
-            is_premium: false,
-            subscription_status: 'admin'
-          });
-        }
-      } catch (authError) {
-        console.warn('Could not get current user:', authError);
-      }
-
-      setUsers(fallbackUsers);
-      setStats({
-        totalUsers: fallbackUsers.length,
-        adminUsers: fallbackUsers.filter(u => u.role === 'admin').length,
-        premiumUsers: 0,
-        recentSignups: 0
-      });
-
-      setError(`Showing available data: ${error.message || 'Unknown error'}`);
-      setConnectionStatus('disconnected');
-    } finally {
-      setLoading(false);
+      setEditingUser(null);
+      setIsEditModalOpen(false);
+    } catch (error) {
+      // Error is handled by the hook
     }
   };
 
-  useEffect(() => {
-    fetchUsersAndStats();
-  }, []);
-
-  const filteredUsers = users.filter(user => 
-    user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.display_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.user_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.role?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
-  const getRoleBadge = (user: User) => {
-    if (user.role === 'admin') {
-      return <Badge variant="destructive"><Crown className="h-3 w-3 mr-1" />Admin</Badge>;
+  const handleDeleteUser = async (user: UserProfile) => {
+    try {
+      await deleteUser(user.id, user.email);
+    } catch (error) {
+      // Error is handled by the hook
     }
-    if (user.is_premium) {
-      return <Badge variant="default"><Gift className="h-3 w-3 mr-1" />Premium</Badge>;
-    }
-    return <Badge variant="outline">Free</Badge>;
   };
 
-  const getConnectionBadge = () => {
-    switch (connectionStatus) {
-      case 'connected':
-        return <Badge variant="default" className="bg-green-500"><CheckCircle className="h-3 w-3 mr-1" />Connected</Badge>;
-      case 'disconnected':
-        return <Badge variant="destructive"><AlertCircle className="h-3 w-3 mr-1" />Disconnected</Badge>;
-      default:
-        return <Badge variant="outline">Checking...</Badge>;
+  const handleToggleUserBan = async (user: UserProfile) => {
+    try {
+      const isBanned = !!user.banned_until;
+      await toggleUserBan(user.id, user.email, !isBanned);
+    } catch (error) {
+      // Error is handled by the hook
     }
+  };
+
+  const toggleRowExpansion = (userId: string) => {
+    const newExpanded = new Set(expandedRows);
+    if (newExpanded.has(userId)) {
+      newExpanded.delete(userId);
+    } else {
+      newExpanded.add(userId);
+    }
+    setExpandedRows(newExpanded);
+  };
+
+  const getRoleBadge = (role: string) => {
+    const variants = {
+      admin: 'bg-red-100 text-red-800',
+      premium: 'bg-purple-100 text-purple-800',
+      user: 'bg-gray-100 text-gray-800'
+    };
+    return variants[role as keyof typeof variants] || variants.user;
+  };
+
+  const getSubscriptionBadge = (tier: string) => {
+    const variants = {
+      enterprise: 'bg-purple-100 text-purple-800',
+      premium: 'bg-blue-100 text-blue-800',
+      monthly: 'bg-green-100 text-green-800',
+      free: 'bg-gray-100 text-gray-800'
+    };
+    return variants[tier as keyof typeof variants] || variants.free;
+  };
+
+  const getStatusBadge = (user: UserProfile) => {
+    if (user.banned_until) {
+      return <Badge className="bg-red-100 text-red-800">Banned</Badge>;
+    }
+    if (user.email_confirmed_at) {
+      return <Badge className="bg-green-100 text-green-800">Active</Badge>;
+    }
+    return <Badge className="bg-blue-100 text-blue-800">Active</Badge>; // Default to active
   };
 
   return (
-    <div className="space-y-6">
-      {/* Stats Cards */}
+    <div className="space-y-6 p-6">
+      {/* Simplified Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers}</div>
-            <p className="text-xs text-muted-foreground">Registered users</p>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <Users className="h-8 w-8 text-blue-600" />
+              <div>
+                <p className="text-2xl font-bold">{userStats.totalUsers}</p>
+                <p className="text-xs text-muted-foreground">Total Users</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Admin Users</CardTitle>
-            <Crown className="h-4 w-4 text-red-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.adminUsers}</div>
-            <p className="text-xs text-muted-foreground">System administrators</p>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <Crown className="h-8 w-8 text-purple-600" />
+              <div>
+                <p className="text-2xl font-bold">{userStats.premiumUsers}</p>
+                <p className="text-xs text-muted-foreground">Premium Users</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Premium Users</CardTitle>
-            <Gift className="h-4 w-4 text-purple-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-purple-600">{stats.premiumUsers}</div>
-            <p className="text-xs text-muted-foreground">Active subscribers</p>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <UserPlus className="h-8 w-8 text-blue-600" />
+              <div>
+                <p className="text-2xl font-bold">{userStats.newUsersToday}</p>
+                <p className="text-xs text-muted-foreground">New Today</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
 
         <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Recent Signups</CardTitle>
-            <Users className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.recentSignups}</div>
-            <p className="text-xs text-muted-foreground">Last 7 days</p>
+          <CardContent className="pt-6">
+            <div className="flex items-center gap-2">
+              <Activity className="h-8 w-8 text-green-600" />
+              <div>
+                <p className="text-2xl font-bold">{userStats.activeUsers}</p>
+                <p className="text-xs text-muted-foreground">Active Users</p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* User Management */}
+      {/* Main User Management */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <Database className="h-5 w-5" />
-              User Management - RLS Safe
+          <div className="flex justify-between items-center">
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              User Management
+            </CardTitle>
+            <div className="flex gap-2">
+              <Button onClick={() => exportUsers()} variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </Button>
+              <Button onClick={refresh} variant="outline" size="sm">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Refresh
+              </Button>
+              <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm">
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add User
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Create New User</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <Label htmlFor="new-email">Email</Label>
+                      <Input
+                        id="new-email"
+                        type="email"
+                        value={newUser.email}
+                        onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                        placeholder="user@example.com"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="new-password">Password</Label>
+                      <Input
+                        id="new-password"
+                        type="password"
+                        value={newUser.password}
+                        onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                        placeholder="Secure password"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="new-role">Role</Label>
+                      <Select
+                        value={newUser.role}
+                        onValueChange={(value) => setNewUser({ ...newUser, role: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="user">User</SelectItem>
+                          <SelectItem value="premium">Premium</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="new-subscription">Subscription</Label>
+                      <Select
+                        value={newUser.subscription_tier}
+                        onValueChange={(value) => setNewUser({ ...newUser, subscription_tier: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="free">Free</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                          <SelectItem value="premium">Premium</SelectItem>
+                          <SelectItem value="enterprise">Enterprise</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setIsCreateModalOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={handleCreateUser} disabled={!newUser.email || !newUser.password}>
+                      Create User
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
-            <div className="flex items-center gap-2">
-              {getConnectionBadge()}
-            </div>
-          </CardTitle>
+          </div>
         </CardHeader>
-        <CardContent>
-          {/* Connection Status */}
-          {error ? (
-            <Alert className="mb-4 border-amber-200 bg-amber-50">
-              <AlertCircle className="h-4 w-4 text-amber-600" />
-              <AlertDescription className="text-amber-700">
-                <div className="font-medium">Partial Data Loaded</div>
-                <div className="text-sm mt-1">{error}</div>
-              </AlertDescription>
-            </Alert>
-          ) : connectionStatus === 'connected' && lastSync && (
-            <Alert className="mb-4 border-green-200 bg-green-50">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-green-700">
-                <div className="flex items-center justify-between">
-                  <span>✅ Successfully synced with database (RLS-safe approach)</span>
-                  <span className="text-xs">
-                    Last sync: {lastSync.toLocaleTimeString()}
-                  </span>
-                </div>
-              </AlertDescription>
-            </Alert>
-          )}
 
-          {/* Search and Refresh */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <CardContent>
+          {/* Simple Filters */}
+          <div className="flex gap-4 mb-6 p-4 bg-gray-50 rounded-lg">
+            <div className="flex-1">
               <Input
-                placeholder="Search users by email, name, role, or ID..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                placeholder="Search by email..."
+                value={filters.search}
+                onChange={(e) => handleFiltersChange({ search: e.target.value })}
               />
             </div>
-            <div className="flex gap-2">
-              <Button
-                onClick={fetchUsersAndStats}
-                disabled={loading}
-                variant="outline"
-                size="sm"
+            <div>
+              <Select
+                value={filters.role}
+                onValueChange={(value) => handleFiltersChange({ role: value })}
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-                Sync Data
-              </Button>
-              <Button
-                onClick={() => {
-                  console.log('Current users state:', users);
-                  console.log('Current stats:', stats);
-                  alert(`Current data: ${users.length} users loaded. Check console for details.`);
-                }}
-                variant="ghost"
-                size="sm"
-              >
-                Debug Info
-              </Button>
+                <SelectTrigger className="w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Roles</SelectItem>
+                  <SelectItem value="user">User</SelectItem>
+                  <SelectItem value="premium">Premium</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+            <Button
+              variant="outline"
+              onClick={() => handleFiltersChange({ search: '', role: 'all', subscription: 'all' })}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Clear
+            </Button>
           </div>
 
-          {/* Users Table */}
-          <div className="border rounded-md">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User Info</TableHead>
-                  <TableHead>Role & Status</TableHead>
-                  <TableHead>Subscription Tier</TableHead>
-                  <TableHead>Created</TableHead>
-                  <TableHead>User ID</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {loading && users.length === 0 ? (
+          {/* Simplified Users Table */}
+          {loading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-2">Loading users...</span>
+            </div>
+          ) : users.length === 0 ? (
+            <div className="text-center py-8">
+              <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold mb-2">No Users Found</h3>
+              <p className="text-muted-foreground">
+                {filters.search ? 'Try adjusting your search filters.' : 'No users exist yet.'}
+              </p>
+            </div>
+          ) : (
+            <div className="border rounded-lg">
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
-                      <div className="flex items-center justify-center gap-2">
-                        <RefreshCw className="h-4 w-4 animate-spin" />
-                        Syncing with database...
-                      </div>
-                    </TableCell>
+                    <TableHead className="w-8"></TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Subscription</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ) : filteredUsers.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
-                      {users.length === 0 ? 'No users found in database' : 'No users match your search'}
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  filteredUsers.map((user) => (
-                    <TableRow key={user.user_id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {user.display_name || user.email?.split('@')[0] || 'Unknown User'}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {user.email}
-                          </div>
-                          {user.subscription_status && (
-                            <div className="text-xs text-blue-600 mt-1">
-                              Tier: {user.subscription_status}
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          {getRoleBadge(user)}
+                </TableHeader>
+                <TableBody>
+                  {users.map((user) => (
+                    <React.Fragment key={user.id}>
+                      <TableRow>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleRowExpansion(user.id)}
+                            className="h-6 w-6 p-0"
+                          >
+                            {expandedRows.has(user.id) ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRightIcon className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableCell>
+                        <TableCell>
                           <div>
-                            <Badge variant={user.role === 'admin' ? 'destructive' : 'secondary'} className="text-xs">
-                              {user.role.toUpperCase()}
-                            </Badge>
+                            <div className="font-medium">{user.email}</div>
+                            <div className="text-xs text-muted-foreground">
+                              ID: {user.id.slice(0, 8)}...
+                            </div>
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          <Badge variant={user.is_premium ? 'default' : 'outline'} className="text-xs">
-                            {user.subscription_status || 'Unknown'}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={getRoleBadge(user.role)}>
+                            {user.role}
                           </Badge>
-                          <div className="text-xs text-muted-foreground">
-                            {user.is_premium ? 'Premium User' : 'Free/Basic User'}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-sm">
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline" className={getSubscriptionBadge(user.subscription_tier)}>
+                            {user.subscription_tier}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {getStatusBadge(user)}
+                        </TableCell>
+                        <TableCell>
                           {new Date(user.created_at).toLocaleDateString()}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="text-xs text-muted-foreground font-mono">
-                          {user.user_id.substring(0, 8)}...
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => {
+                                setEditingUser(user);
+                                setIsEditModalOpen(true);
+                              }}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleToggleUserBan(user)}
+                              className={`h-8 w-8 p-0 ${user.banned_until ? 'text-green-600' : 'text-red-600'}`}
+                            >
+                              {user.banned_until ? <Unlock className="h-3 w-3" /> : <Ban className="h-3 w-3" />}
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="outline" className="h-8 w-8 p-0 text-red-600">
+                                  <Trash2 className="h-3 w-3" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete User</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Are you sure you want to delete {user.email}? This cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction
+                                    onClick={() => handleDeleteUser(user)}
+                                    className="bg-red-600 hover:bg-red-700"
+                                  >
+                                    Delete
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                      
+                      {/* Expandable Details Row */}
+                      {expandedRows.has(user.id) && (
+                        <TableRow>
+                          <TableCell colSpan={7} className="bg-gray-50">
+                            <div className="p-4 space-y-3">
+                              <h4 className="font-semibold text-sm mb-3">User Details</h4>
+                              <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                  <span className="font-medium text-gray-600">Full ID:</span>
+                                  <p className="font-mono text-xs mt-1">{user.id}</p>
+                                </div>
+                                <div>
+                                  <span className="font-medium text-gray-600">Email:</span>
+                                  <p className="mt-1">{user.email}</p>
+                                </div>
+                                <div>
+                                  <span className="font-medium text-gray-600">Created At:</span>
+                                  <p className="mt-1">{new Date(user.created_at).toLocaleString()}</p>
+                                </div>
+                                <div>
+                                  <span className="font-medium text-gray-600">Last Sign In:</span>
+                                  <p className="mt-1">
+                                    {user.last_sign_in_at 
+                                      ? new Date(user.last_sign_in_at).toLocaleString()
+                                      : 'Not available'
+                                    }
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="font-medium text-gray-600">Account Status:</span>
+                                  <p className="mt-1">
+                                    {user.banned_until ? (
+                                      <span className="text-red-600">Banned until {new Date(user.banned_until).toLocaleString()}</span>
+                                    ) : (
+                                      <span className="text-green-600">Active</span>
+                                    )}
+                                  </p>
+                                </div>
+                                <div>
+                                  <span className="font-medium text-gray-600">Email Verified:</span>
+                                  <p className="mt-1">
+                                    {user.email_confirmed_at ? (
+                                      <span className="text-green-600">Yes</span>
+                                    ) : (
+                                      <span className="text-yellow-600">Not available</span>
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </TableBody>
+              </Table>
 
-          <div className="mt-4 text-sm text-muted-foreground">
-            Showing {filteredUsers.length} of {users.length} users
-            {searchTerm && ` (filtered by "${searchTerm}")`}
-            {lastSync && ` • Last synced: ${lastSync.toLocaleString()}`}
-          </div>
+              {/* Pagination */}
+              {pagination.totalPages > 1 && (
+                <div className="flex items-center justify-between px-4 py-3 border-t">
+                  <div className="text-sm text-muted-foreground">
+                    Page {pagination.page} of {pagination.totalPages} ({pagination.total} total)
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleFiltersChange({ 
+                        offset: Math.max(0, (pagination.page - 2) * (filters.limit || 20))
+                      })}
+                      disabled={pagination.page === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleFiltersChange({ 
+                        offset: pagination.page * (filters.limit || 20)
+                      })}
+                      disabled={pagination.page === pagination.totalPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </CardContent>
       </Card>
+
+      {/* Simplified Edit Modal */}
+      <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit User: {editingUser?.email}</DialogTitle>
+          </DialogHeader>
+          {editingUser && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-role">Role</Label>
+                <Select
+                  value={editingUser.role}
+                  onValueChange={(value) => setEditingUser({ ...editingUser, role: value as any })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="premium">Premium</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="edit-subscription">Subscription Tier</Label>
+                <Select
+                  value={editingUser.subscription_tier}
+                  onValueChange={(value) => setEditingUser({ ...editingUser, subscription_tier: value as any })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="free">Free</SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
+                    <SelectItem value="premium">Premium</SelectItem>
+                    <SelectItem value="enterprise">Enterprise</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="p-3 bg-gray-50 rounded text-sm">
+                <div><strong>ID:</strong> {editingUser.id}</div>
+                <div><strong>Created:</strong> {new Date(editingUser.created_at).toLocaleString()}</div>
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleUpdateUser}>
+              <Save className="h-4 w-4 mr-2" />
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
