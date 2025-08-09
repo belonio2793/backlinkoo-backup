@@ -3467,7 +3467,7 @@ export default function BacklinkAutomation() {
                                       description: "You can resume anytime during your trial.",
                                     });
                                   }}
-                                  className="h-8 px-2 border-orange-300 text-orange-600 hover:bg-orange-50"
+                                  className="h-8 px-2 bg-orange-50 border-orange-300 text-orange-600 hover:bg-orange-100"
                                 >
                                   <Pause className="h-3 w-3" />
                                 </Button>
