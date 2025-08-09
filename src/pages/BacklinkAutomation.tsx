@@ -562,6 +562,29 @@ export default function BacklinkAutomation() {
       // Create campaign in database
       const result = await campaignService.createCampaign(campaignData);
 
+      if (result.campaign) {
+        // Add campaign to Internet Proliferation Service
+        const proliferationCampaign: CampaignProliferation = {
+          campaignId: result.campaign.id,
+          targetUrl: campaignForm.targetUrl,
+          keywords: campaignForm.keywords.split(',').map(k => k.trim()),
+          anchorTexts: campaignForm.anchorTexts.split(',').map(a => a.trim()).filter(a => a),
+          dailyLimit: campaignForm.dailyLimit,
+          strategies: {
+            blog_comments: campaignForm.strategy_blog_comments,
+            forum_profiles: campaignForm.strategy_forum_profiles,
+            web2_platforms: campaignForm.strategy_web2_platforms,
+            social_profiles: campaignForm.strategy_social_profiles,
+            contact_forms: campaignForm.strategy_contact_forms,
+            guest_posts: false,
+            resource_pages: false,
+            directory_listings: true
+          }
+        };
+
+        await internetProliferationService.addCampaignToProliferation(proliferationCampaign);
+      }
+
       // Reset form
       setCampaignForm({
         name: '',
@@ -576,8 +599,9 @@ export default function BacklinkAutomation() {
         strategy_contact_forms: false
       });
 
-      // Reload campaigns
+      // Reload campaigns and stats
       await loadCampaigns();
+      loadProliferationStats();
 
       toast({
         title: "Campaign Created Successfully",
