@@ -214,6 +214,8 @@ export default function BacklinkAutomation() {
   const [usageStats, setUsageStats] = useState({ linksPosted: 0, isLimitReached: false });
   const [isFetching, setIsFetching] = useState(false);
   const [backendStatus, setBackendStatus] = useState('available');
+  const [databaseStatus, setDatabaseStatus] = useState<DatabaseStatus | null>(null);
+  const [isCheckingDatabase, setIsCheckingDatabase] = useState(true);
   const [controlPanelData, setControlPanelData] = useState({
     systemStatus: 'operational' as 'active' | 'operational' | 'error',
     totalUrls: 0,
