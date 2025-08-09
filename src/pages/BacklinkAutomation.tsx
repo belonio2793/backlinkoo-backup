@@ -317,7 +317,7 @@ export default function BacklinkAutomation() {
           }
           loadRealTimeMetrics();
         } else {
-          console.warn('⚠️ Database not ready:', status);
+          console.warn('⚠�� Database not ready:', status);
         }
       } catch (error) {
         console.error('❌ Database check failed:', error);
@@ -388,7 +388,10 @@ export default function BacklinkAutomation() {
 
   // Real-time results simulation for active campaigns
   useEffect(() => {
-    if (selectedTab === 'results') {
+    const hasActiveCampaigns = (user && campaigns.filter(c => c.status === 'active').length > 0) ||
+                               (!user && guestCampaignResults.length > 0);
+
+    if (selectedTab === 'campaigns' && hasActiveCampaigns) {
       const interval = setInterval(() => {
         // Simulate real-time updates by triggering re-renders
         setControlPanelData(prev => ({
@@ -396,11 +399,11 @@ export default function BacklinkAutomation() {
           lastUpdate: new Date(),
           currentThroughput: prev.currentThroughput + Math.floor(Math.random() * 3) - 1,
         }));
-      }, 5000); // Update every 5 seconds when on results tab
+      }, 5000); // Update every 5 seconds when viewing campaigns with active ones
 
       return () => clearInterval(interval);
     }
-  }, [selectedTab]);
+  }, [selectedTab, campaigns, guestCampaignResults, user]);
 
   // Aggregate successful links for discovery engine
   useEffect(() => {
