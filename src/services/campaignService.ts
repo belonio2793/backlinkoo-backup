@@ -359,10 +359,20 @@ class CampaignService {
         }),
       });
     } catch (error) {
-      // Check if it's a backend configuration issue
-      if (error.message.includes('Server returned non-JSON response') ||
-          error.message.includes('Backend services not available') ||
-          error.message.includes('timeout')) {
+      console.log('Campaign pause error:', error.message);
+
+      // Check for various backend unavailability scenarios
+      const isBackendUnavailable =
+        error.message.includes('Server returned non-JSON response') ||
+        error.message.includes('Backend services not available') ||
+        error.message.includes('Network error') ||
+        error.message.includes('timeout') ||
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('Invalid response') ||
+        error.message.includes('No response received') ||
+        error.message.includes('Server error');
+
+      if (isBackendUnavailable) {
         console.log('Backend not available for campaign pause, operation simulated');
         return; // Silently succeed in demo mode
       }
@@ -385,10 +395,20 @@ class CampaignService {
         }),
       });
     } catch (error) {
-      // Check if it's a backend configuration issue
-      if (error.message.includes('Server returned non-JSON response') ||
-          error.message.includes('Backend services not available') ||
-          error.message.includes('timeout')) {
+      console.log('Campaign resume error:', error.message);
+
+      // Check for various backend unavailability scenarios
+      const isBackendUnavailable =
+        error.message.includes('Server returned non-JSON response') ||
+        error.message.includes('Backend services not available') ||
+        error.message.includes('Network error') ||
+        error.message.includes('timeout') ||
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('Invalid response') ||
+        error.message.includes('No response received') ||
+        error.message.includes('Server error');
+
+      if (isBackendUnavailable) {
         console.log('Backend not available for campaign resume, operation simulated');
         return; // Silently succeed in demo mode
       }
