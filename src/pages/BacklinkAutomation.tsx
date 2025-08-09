@@ -1045,6 +1045,9 @@ export default function BacklinkAutomation() {
           title: "Campaign Resumed",
           description: "Campaign is now active and generating links.",
         });
+
+        // Track campaign resume for dynamic throughput
+        addThroughputEvent('campaign_resumed');
       }
     } catch (error) {
       toast({
