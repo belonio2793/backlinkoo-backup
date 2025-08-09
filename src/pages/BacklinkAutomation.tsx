@@ -185,6 +185,9 @@ export default function BacklinkAutomation() {
     ]
   });
   const [isLinkBuildingActive, setIsLinkBuildingActive] = useState(false);
+  const [premiumUpgradeModal, setPremiumUpgradeModal] = useState(false);
+  const [premiumLimitData, setPremiumLimitData] = useState<PremiumLimitResult | null>(null);
+  const [isUserPremium, setIsUserPremium] = useState(false);
 
   // Campaign Form State
   const [campaignForm, setCampaignForm] = useState({
