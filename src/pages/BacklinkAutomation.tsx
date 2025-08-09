@@ -35,6 +35,7 @@ import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
 import { TrialExhaustedModal } from '@/components/TrialExhaustedModal';
 
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
+import { CampaignBlogIntegrationService } from '@/services/campaignBlogIntegrationService';
 
 // Import our enterprise engines
 import { CampaignQueueManager, type CampaignConfig } from '@/services/automationEngine/CampaignQueueManager';
