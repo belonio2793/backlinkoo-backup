@@ -919,10 +919,9 @@ export default function BacklinkAutomation() {
         </div>
 
         <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
             <TabsTrigger value="discovery">Discovery Engine</TabsTrigger>
-            <TabsTrigger value="results">Live Results</TabsTrigger>
           </TabsList>
 
           <TabsContent value="campaigns" className="space-y-6">
@@ -989,6 +988,250 @@ export default function BacklinkAutomation() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Live Results - Only show when campaigns are active */}
+            {campaigns.filter(c => c.status === 'active').length > 0 && (
+              <div className="space-y-6">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  <Activity className="h-6 w-6 text-green-600" />
+                  Live Campaign Results
+                  <Badge variant="outline" className="text-green-600 bg-green-50 animate-pulse">
+                    <div className="w-2 h-2 bg-green-600 rounded-full mr-1 animate-ping"></div>
+                    {campaigns.filter(c => c.status === 'active').length} ACTIVE
+                  </Badge>
+                </h2>
+
+                {/* Live Activity Feed */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Activity className="h-5 w-5 text-green-600" />
+                        Live Link Building Activity
+                        {isLinkBuildingActive && (
+                          <Badge variant="outline" className="text-green-600 bg-green-50 animate-pulse">
+                            <div className="w-2 h-2 bg-green-600 rounded-full mr-1 animate-ping"></div>
+                            ACTIVE
+                          </Badge>
+                        )}
+                      </CardTitle>
+                      <CardDescription>
+                        Real-time feed of link placements across the internet
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                        {activityLog.length === 0 ? (
+                          <div className="text-center text-gray-500 py-8">
+                            <Bot className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                            <p>Building links automatically...</p>
+                          </div>
+                        ) : (
+                          activityLog.map((activity) => (
+                            <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                              <div className="flex-shrink-0 mt-1">
+                                {activity.type === 'link_published' && <ExternalLink className="h-4 w-4 text-blue-600" />}
+                                {activity.type === 'content_generated' && <Bot className="h-4 w-4 text-purple-600" />}
+                                {activity.type === 'opportunity_found' && <Target className="h-4 w-4 text-green-600" />}
+                                {activity.type === 'verification_complete' && <CheckCircle className="h-4 w-4 text-emerald-600" />}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900">{activity.message}</p>
+                                <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+                                  <Clock className="h-3 w-3" />
+                                  <span>{activity.timestamp.toLocaleTimeString()}</span>
+                                  {activity.campaignId && (
+                                    <>
+                                      <span>•</span>
+                                      <span>Campaign {activity.campaignId.slice(-6)}</span>
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                              <Badge variant={activity.success ? 'default' : 'destructive'} className="text-xs">
+                                {activity.success ? 'SUCCESS' : 'FAILED'}
+                              </Badge>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Published Links Table */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Database className="h-5 w-5 text-blue-600" />
+                        Published Links Postback
+                        <Badge variant="outline" className="text-blue-600 bg-blue-50">
+                          {publishedLinks.length} Links
+                        </Badge>
+                      </CardTitle>
+                      <CardDescription>
+                        Real-time tracking of all published backlinks with postback verification
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
+                        {publishedLinks.length === 0 ? (
+                          <div className="text-center text-gray-500 py-8">
+                            <ExternalLink className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                            <p>Links will appear here as campaigns build them...</p>
+                          </div>
+                        ) : (
+                          publishedLinks.map((link) => (
+                            <div key={link.id} className="border rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
+                              <div className="flex items-start justify-between mb-2">
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <span className="font-medium text-blue-600 truncate">{link.platform}</span>
+                                    <Badge variant="outline" className={`text-xs ${
+                                      link.domainAuthority >= 90 ? 'text-green-600 bg-green-50' :
+                                      link.domainAuthority >= 80 ? 'text-yellow-600 bg-yellow-50' :
+                                      'text-orange-600 bg-orange-50'
+                                    }`}>
+                                      DA: {link.domainAuthority}
+                                    </Badge>
+                                    <Badge variant="default" className="text-xs">
+                                      {link.status.toUpperCase()}
+                                    </Badge>
+                                  </div>
+                                  <p className="text-sm text-gray-600 truncate">
+                                    <strong>Anchor:</strong> "{link.anchorText}" → {link.targetUrl}
+                                  </p>
+                                  <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                                    <span className="flex items-center gap-1">
+                                      <Clock className="h-3 w-3" />
+                                      {link.publishedAt.toLocaleString()}
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <Activity className="h-3 w-3" />
+                                      {link.clicks} clicks
+                                    </span>
+                                    <span className="flex items-center gap-1">
+                                      <TrendingUp className="h-3 w-3" />
+                                      {link.linkJuice.toFixed(1)}% juice
+                                    </span>
+                                  </div>
+                                </div>
+                                <Button size="sm" variant="ghost" className="flex-shrink-0" onClick={() => window.open(link.sourceUrl, '_blank')}>
+                                  <ExternalLink className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {/* Global Success Model Dashboard */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Brain className="h-5 w-5 text-purple-600" />
+                      Recursive Reinforced Success Model
+                      <Badge variant="outline" className="text-purple-600 bg-purple-50">
+                        SHARED INTELLIGENCE
+                      </Badge>
+                    </CardTitle>
+                    <CardDescription>
+                      AI model that learns from all user successes and optimizes future campaigns across the platform
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      {/* Global Stats */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">Global Performance</h3>
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                            <span className="text-sm font-medium">Total Links Built</span>
+                            <span className="text-lg font-bold text-blue-600">{globalSuccessModel.totalLinksBuilt.toLocaleString()}</span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                            <span className="text-sm font-medium">Success Rate</span>
+                            <span className="text-lg font-bold text-green-600">94.7%</span>
+                          </div>
+                          <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                            <span className="text-sm font-medium">Active Users</span>
+                            <span className="text-lg font-bold text-purple-600">12,847</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Best Performing Platforms */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">Top Performing Platforms</h3>
+                        <div className="space-y-2">
+                          {globalSuccessModel.bestPerformingPlatforms.map((platform, index) => (
+                            <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                              <span className="text-sm font-medium">{platform.platform}</span>
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs">
+                                  {platform.successRate}%
+                                </Badge>
+                                <Badge variant="secondary" className="text-xs">
+                                  DA {platform.avgDA}
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Shared Strategies */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold">Proven Strategies</h3>
+                        <div className="space-y-2">
+                          {globalSuccessModel.sharedStrategies.map((strategy, index) => (
+                            <div key={index} className="p-3 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg border border-indigo-200">
+                              <div className="flex items-center justify-between mb-1">
+                                <span className="text-sm font-medium text-indigo-900">{strategy.strategy}</span>
+                                <Badge variant="outline" className="text-indigo-600 bg-indigo-100">
+                                  {strategy.successRate}%
+                                </Badge>
+                              </div>
+                              <div className="text-xs text-indigo-600">
+                                Used {strategy.timesUsed.toLocaleString()} times across all campaigns
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <Separator className="my-6" />
+
+                    {/* Optimal Posting Times */}
+                    <div className="space-y-4">
+                      <h3 className="text-lg font-semibold">AI-Optimized Posting Schedule</h3>
+                      <div className="grid grid-cols-3 gap-4">
+                        {globalSuccessModel.optimalPostingTimes.map((time, index) => (
+                          <div key={index} className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
+                            <div className="text-lg font-bold text-green-600">
+                              {time.hour}:00
+                            </div>
+                            <div className="text-sm text-green-700">
+                              {time.successRate}% Success Rate
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <Alert>
+                        <Brain className="h-4 w-4" />
+                        <AlertDescription>
+                          The AI model continuously learns from all user campaigns and automatically optimizes your posting schedule,
+                          content generation, and platform selection based on real-time global performance data.
+                        </AlertDescription>
+                      </Alert>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            )}
 
             {/* Active Campaigns */}
             {campaigns.length > 0 && (
@@ -1305,237 +1548,6 @@ export default function BacklinkAutomation() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="results" className="space-y-6">
-            {/* Live Activity Feed */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Activity className="h-5 w-5 text-green-600" />
-                    Live Link Building Activity
-                    {isLinkBuildingActive && (
-                      <Badge variant="outline" className="text-green-600 bg-green-50 animate-pulse">
-                        <div className="w-2 h-2 bg-green-600 rounded-full mr-1 animate-ping"></div>
-                        ACTIVE
-                      </Badge>
-                    )}
-                  </CardTitle>
-                  <CardDescription>
-                    Real-time feed of link placements across the internet
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {activityLog.length === 0 ? (
-                      <div className="text-center text-gray-500 py-8">
-                        <Bot className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                        <p>No activity yet. Create a campaign to start building links!</p>
-                      </div>
-                    ) : (
-                      activityLog.map((activity) => (
-                        <div key={activity.id} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                          <div className="flex-shrink-0 mt-1">
-                            {activity.type === 'link_published' && <ExternalLink className="h-4 w-4 text-blue-600" />}
-                            {activity.type === 'content_generated' && <Bot className="h-4 w-4 text-purple-600" />}
-                            {activity.type === 'opportunity_found' && <Target className="h-4 w-4 text-green-600" />}
-                            {activity.type === 'verification_complete' && <CheckCircle className="h-4 w-4 text-emerald-600" />}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900">{activity.message}</p>
-                            <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
-                              <Clock className="h-3 w-3" />
-                              <span>{activity.timestamp.toLocaleTimeString()}</span>
-                              {activity.campaignId && (
-                                <>
-                                  <span>•</span>
-                                  <span>Campaign {activity.campaignId.slice(-6)}</span>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                          <Badge variant={activity.success ? 'default' : 'destructive'} className="text-xs">
-                            {activity.success ? 'SUCCESS' : 'FAILED'}
-                          </Badge>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Published Links Table */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Database className="h-5 w-5 text-blue-600" />
-                    Published Links Postback
-                    <Badge variant="outline" className="text-blue-600 bg-blue-50">
-                      {publishedLinks.length} Links
-                    </Badge>
-                  </CardTitle>
-                  <CardDescription>
-                    Real-time tracking of all published backlinks with postback verification
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3 max-h-96 overflow-y-auto">
-                    {publishedLinks.length === 0 ? (
-                      <div className="text-center text-gray-500 py-8">
-                        <ExternalLink className="h-8 w-8 mx-auto mb-2 text-gray-400" />
-                        <p>No links published yet. Active campaigns will start building links automatically!</p>
-                      </div>
-                    ) : (
-                      publishedLinks.map((link) => (
-                        <div key={link.id} className="border rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
-                          <div className="flex items-start justify-between mb-2">
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="font-medium text-blue-600 truncate">{link.platform}</span>
-                                <Badge variant="outline" className={`text-xs ${
-                                  link.domainAuthority >= 90 ? 'text-green-600 bg-green-50' :
-                                  link.domainAuthority >= 80 ? 'text-yellow-600 bg-yellow-50' :
-                                  'text-orange-600 bg-orange-50'
-                                }`}>
-                                  DA: {link.domainAuthority}
-                                </Badge>
-                                <Badge variant="default" className="text-xs">
-                                  {link.status.toUpperCase()}
-                                </Badge>
-                              </div>
-                              <p className="text-sm text-gray-600 truncate">
-                                <strong>Anchor:</strong> "{link.anchorText}" → {link.targetUrl}
-                              </p>
-                              <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                                <span className="flex items-center gap-1">
-                                  <Clock className="h-3 w-3" />
-                                  {link.publishedAt.toLocaleString()}
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <Activity className="h-3 w-3" />
-                                  {link.clicks} clicks
-                                </span>
-                                <span className="flex items-center gap-1">
-                                  <TrendingUp className="h-3 w-3" />
-                                  {link.linkJuice.toFixed(1)}% juice
-                                </span>
-                              </div>
-                            </div>
-                            <Button size="sm" variant="ghost" className="flex-shrink-0" onClick={() => window.open(link.sourceUrl, '_blank')}>
-                              <ExternalLink className="h-3 w-3" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Global Success Model Dashboard */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Brain className="h-5 w-5 text-purple-600" />
-                  Recursive Reinforced Success Model
-                  <Badge variant="outline" className="text-purple-600 bg-purple-50">
-                    SHARED INTELLIGENCE
-                  </Badge>
-                </CardTitle>
-                <CardDescription>
-                  AI model that learns from all user successes and optimizes future campaigns across the platform
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Global Stats */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Global Performance</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
-                        <span className="text-sm font-medium">Total Links Built</span>
-                        <span className="text-lg font-bold text-blue-600">{globalSuccessModel.totalLinksBuilt.toLocaleString()}</span>
-                      </div>
-                      <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
-                        <span className="text-sm font-medium">Success Rate</span>
-                        <span className="text-lg font-bold text-green-600">94.7%</span>
-                      </div>
-                      <div className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-                        <span className="text-sm font-medium">Active Users</span>
-                        <span className="text-lg font-bold text-purple-600">12,847</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Best Performing Platforms */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Top Performing Platforms</h3>
-                    <div className="space-y-2">
-                      {globalSuccessModel.bestPerformingPlatforms.map((platform, index) => (
-                        <div key={index} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                          <span className="text-sm font-medium">{platform.platform}</span>
-                          <div className="flex items-center gap-2">
-                            <Badge variant="outline" className="text-xs">
-                              {platform.successRate}%
-                            </Badge>
-                            <Badge variant="secondary" className="text-xs">
-                              DA {platform.avgDA}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Shared Strategies */}
-                  <div className="space-y-4">
-                    <h3 className="text-lg font-semibold">Proven Strategies</h3>
-                    <div className="space-y-2">
-                      {globalSuccessModel.sharedStrategies.map((strategy, index) => (
-                        <div key={index} className="p-3 bg-gradient-to-r from-indigo-50 to-blue-50 rounded-lg border border-indigo-200">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-sm font-medium text-indigo-900">{strategy.strategy}</span>
-                            <Badge variant="outline" className="text-indigo-600 bg-indigo-100">
-                              {strategy.successRate}%
-                            </Badge>
-                          </div>
-                          <div className="text-xs text-indigo-600">
-                            Used {strategy.timesUsed.toLocaleString()} times across all campaigns
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-
-                <Separator className="my-6" />
-
-                {/* Optimal Posting Times */}
-                <div className="space-y-4">
-                  <h3 className="text-lg font-semibold">AI-Optimized Posting Schedule</h3>
-                  <div className="grid grid-cols-3 gap-4">
-                    {globalSuccessModel.optimalPostingTimes.map((time, index) => (
-                      <div key={index} className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-                        <div className="text-lg font-bold text-green-600">
-                          {time.hour}:00
-                        </div>
-                        <div className="text-sm text-green-700">
-                          {time.successRate}% Success Rate
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <Alert>
-                    <Brain className="h-4 w-4" />
-                    <AlertDescription>
-                      The AI model continuously learns from all user campaigns and automatically optimizes your posting schedule,
-                      content generation, and platform selection based on real-time global performance data.
-                    </AlertDescription>
-                  </Alert>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
 
         </Tabs>
 
