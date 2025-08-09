@@ -67,10 +67,9 @@ class CampaignService {
    */
   public async isBackendAvailable(): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/api-status`, {
+      const response = await this.makeXHRRequest(`${this.baseUrl}/api-status`, {
         method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        timeout: 5000 // 5 second timeout
+        headers: { 'Content-Type': 'application/json' }
       });
 
       if (!response.ok) {
