@@ -318,6 +318,14 @@ export default function BacklinkAutomation() {
       }
     };
 
+    // Initialize guest tracking
+    if (!user) {
+      const guestLinks = getGuestLinkCount();
+      const guestResults = getGuestCampaignResults();
+      setGuestLinksGenerated(guestLinks);
+      setGuestCampaignResults(guestResults);
+    }
+
     checkDatabase();
   }, [user, selectedLinkType]);
 
