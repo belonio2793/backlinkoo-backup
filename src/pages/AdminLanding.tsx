@@ -46,11 +46,42 @@ export default function AdminLanding() {
 
       setIsAuthenticated(true);
 
-      // Skip the problematic profile check for now
-      // Just show the sign-in form and let the sign-in process handle admin verification
-      clearTimeout(timeoutId);
-      setIsAdmin(false);
-      setLoading(false);
+      // Check if user is admin by email or profile
+      try {
+        // Check by email first (common admin emails)
+        const adminEmails = ['admin@backlinkoo.com', 'support@backlinkoo.com'];
+        const isAdminByEmail = adminEmails.includes(user.email || '');
+
+        if (isAdminByEmail) {
+          clearTimeout(timeoutId);
+          setIsAdmin(true);
+          setLoading(false);
+          return;
+        }
+
+        // Check profile role
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('user_id', user.id)
+          .single();
+
+        const isAdminByRole = profile?.role === 'admin';
+
+        clearTimeout(timeoutId);
+        setIsAdmin(isAdminByRole);
+        setLoading(false);
+
+      } catch (profileError) {
+        console.warn('Profile check failed, using email-based admin check:', profileError);
+        // Fallback to email-based admin check
+        const adminEmails = ['admin@backlinkoo.com', 'support@backlinkoo.com'];
+        const isAdminByEmail = adminEmails.includes(user.email || '');
+
+        clearTimeout(timeoutId);
+        setIsAdmin(isAdminByEmail);
+        setLoading(false);
+      }
 
     } catch (error) {
       console.error('Auth check failed:', error);
