@@ -2142,7 +2142,7 @@ export default function BacklinkAutomation() {
                           </Button>
                           <Button
                             variant="outline"
-                            onClick={() => window.location.href = '/login'}
+                            onClick={() => setShowSignInModal(true)}
                             className="h-12 px-6"
                           >
                             <UserPlus className="h-4 w-4 mr-2" />
