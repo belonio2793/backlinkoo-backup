@@ -461,8 +461,15 @@ function Blog() {
                 variant="ghost"
                 size="sm"
                 onClick={() => {
+                  const hadFilters = searchTerm || selectedCategory;
                   setSearchTerm('');
                   setSelectedCategory('');
+                  if (hadFilters) {
+                    toast({
+                      title: "Filters cleared",
+                      description: "All search and filter criteria have been reset.",
+                    });
+                  }
                 }}
                 className="text-blue-600 hover:text-blue-800"
               >
