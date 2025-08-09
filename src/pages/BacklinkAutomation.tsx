@@ -628,13 +628,11 @@ export default function BacklinkAutomation() {
       });
 
       // Log comprehensive deletion information
-      console.log('Campaign deletion completed:', {
+      console.log('Demo campaign deletion completed:', {
         campaignId,
         timestamp: new Date().toISOString(),
-        backendResult: result,
-        queueResult: queueDeletionResult,
-        options,
-        validationWarnings: validation.warnings
+        result: result,
+        options
       });
 
     } catch (error) {
