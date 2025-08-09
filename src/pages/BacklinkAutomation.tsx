@@ -291,7 +291,87 @@ export default function BacklinkAutomation() {
     setGuestCampaignResults(updated);
   };
 
-  // Throttled publishing system\n  const startThrottledPublishing = () => {\n    if (isThrottling) return;\n    \n    setIsThrottling(true);\n    publishNextLink();\n  };\n\n  const publishNextLink = () => {\n    if (pendingLinksToPublish.length === 0) {\n      // No more links to publish, stop throttling\n      setIsThrottling(false);\n      if (throttleIntervalId) {\n        clearTimeout(throttleIntervalId);\n        setThrottleIntervalId(null);\n      }\n      \n      // Mark all campaigns as completed\n      setGuestCampaignResults(prev => \n        prev.map(campaign => \n          campaign.status === 'active' ? { ...campaign, status: 'completed' } : campaign\n        )\n      );\n      return;\n    }\n\n    // Publish the next link\n    const linkToPublish = pendingLinksToPublish[0];\n    setPendingLinksToPublish(prev => prev.slice(1));\n    \n    // Add to recently published\n    setRecentlyPublishedLinks(prev => [linkToPublish, ...prev.slice(0, 9)]); // Keep last 10\n    \n    // Update guest link count\n    const newCount = guestLinksGenerated + 1;\n    updateGuestLinkCount(newCount);\n    \n    // Update campaign results\n    setGuestCampaignResults(prev => \n      prev.map(campaign => {\n        if (campaign.status === 'active') {\n          const updatedPublishedUrls = [...(campaign.publishedUrls || []), linkToPublish];\n          return {\n            ...campaign,\n            linksGenerated: updatedPublishedUrls.length,\n            publishedUrls: updatedPublishedUrls,\n            domains: [...new Set([...campaign.domains, linkToPublish.domain])]\n          };\n        }\n        return campaign;\n      })\n    );\n\n    // Show toast notification for new link\n    toast({\n      title: \"🔗 New Backlink Published!\",\n      description: `Link published on ${linkToPublish.domain} • Total: ${newCount} links built`,\n      duration: 3000,\n    });\n\n    // Schedule next link publication with alternating intervals\n    const nextDelay = currentThrottleDelay === 30000 ? 60000 : 30000; // Alternate between 30s and 60s\n    setCurrentThrottleDelay(nextDelay);\n    \n    const timeoutId = setTimeout(() => {\n      publishNextLink();\n    }, currentThrottleDelay);\n    \n    setThrottleIntervalId(timeoutId);\n  };\n\n  // Clean up throttling on unmount\n  useEffect(() => {\n    return () => {\n      if (throttleIntervalId) {\n        clearTimeout(throttleIntervalId);\n      }\n    };\n  }, [throttleIntervalId]);\n\n  // Engine Instances
+  // Throttled publishing system
+  const startThrottledPublishing = () => {
+    if (isThrottling) return;
+
+    setIsThrottling(true);
+    publishNextLink();
+  };
+
+  const publishNextLink = () => {
+    if (pendingLinksToPublish.length === 0) {
+      // No more links to publish, stop throttling
+      setIsThrottling(false);
+      if (throttleIntervalId) {
+        clearTimeout(throttleIntervalId);
+        setThrottleIntervalId(null);
+      }
+
+      // Mark all campaigns as completed
+      setGuestCampaignResults(prev =>
+        prev.map(campaign =>
+          campaign.status === 'active' ? { ...campaign, status: 'completed' } : campaign
+        )
+      );
+      return;
+    }
+
+    // Publish the next link
+    const linkToPublish = pendingLinksToPublish[0];
+    setPendingLinksToPublish(prev => prev.slice(1));
+
+    // Add to recently published
+    setRecentlyPublishedLinks(prev => [linkToPublish, ...prev.slice(0, 9)]); // Keep last 10
+
+    // Update guest link count
+    const newCount = guestLinksGenerated + 1;
+    updateGuestLinkCount(newCount);
+
+    // Update campaign results
+    setGuestCampaignResults(prev =>
+      prev.map(campaign => {
+        if (campaign.status === 'active') {
+          const updatedPublishedUrls = [...(campaign.publishedUrls || []), linkToPublish];
+          return {
+            ...campaign,
+            linksGenerated: updatedPublishedUrls.length,
+            publishedUrls: updatedPublishedUrls,
+            domains: [...new Set([...campaign.domains, linkToPublish.domain])]
+          };
+        }
+        return campaign;
+      })
+    );
+
+    // Show toast notification for new link
+    toast({
+      title: "🔗 New Backlink Published!",
+      description: `Link published on ${linkToPublish.domain} • Total: ${newCount} links built`,
+      duration: 3000,
+    });
+
+    // Schedule next link publication with alternating intervals
+    const nextDelay = currentThrottleDelay === 30000 ? 60000 : 30000; // Alternate between 30s and 60s
+    setCurrentThrottleDelay(nextDelay);
+
+    const timeoutId = setTimeout(() => {
+      publishNextLink();
+    }, currentThrottleDelay);
+
+    setThrottleIntervalId(timeoutId);
+  };
+
+  // Clean up throttling on unmount
+  useEffect(() => {
+    return () => {
+      if (throttleIntervalId) {
+        clearTimeout(throttleIntervalId);
+      }
+    };
+  }, [throttleIntervalId]);
+
+  // Engine Instances
   const queueManager = CampaignQueueManager.getInstance();
   const discoveryEngine = LinkDiscoveryEngine.getInstance();
   const analyticsEngine = AnalyticsEngine.getInstance();
