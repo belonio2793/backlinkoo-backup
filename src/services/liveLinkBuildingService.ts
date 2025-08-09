@@ -261,8 +261,7 @@ class LiveLinkBuildingService {
         .insert({
           id: publishedLink.id,
           campaign_id: config.campaignId,
-          user_id: config.userId,
-          source_url: publishedLink.sourceUrl,
+          posted_url: publishedLink.sourceUrl,
           target_url: publishedLink.targetUrl,
           anchor_text: publishedLink.anchorText,
           platform: publishedLink.platform,
