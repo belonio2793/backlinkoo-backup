@@ -258,6 +258,13 @@ export default function BacklinkAutomation() {
   // Load campaigns and metrics on mount and when user changes
   useEffect(() => {
     loadCampaigns();
+    loadDiscoveredUrls();
+    loadDiscoveryStats();
+    if (user) {
+      checkUserPremiumStatus();
+      loadUsageStats();
+    }
+    loadRealTimeMetrics();
   }, [user, selectedLinkType]);
 
   // Check user's premium status
