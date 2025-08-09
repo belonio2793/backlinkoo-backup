@@ -341,7 +341,7 @@ export default function BacklinkAutomation() {
 
   const loadDiscoveryStats = async () => {
     try {
-      const stats = await mockRecursiveUrlDiscoveryService.getDiscoveryStats();
+      const stats = await recursiveUrlDiscoveryService.getDiscoveryStats();
       setDiscoveryStats(stats);
       
       setControlPanelData(prev => ({
