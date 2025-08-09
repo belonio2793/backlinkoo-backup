@@ -617,6 +617,16 @@ export default function BacklinkAutomation() {
     setCampaignToDelete(null);
   };
 
+  const checkPremiumLimit = () => {
+    const totalLinksGenerated = campaigns.reduce((sum, c) => sum + c.linksGenerated, 0);
+
+    if (!isPremium && totalLinksGenerated >= 20) {
+      setShowPremiumModal(true);
+      return false; // Block further execution
+    }
+    return true; // Allow continuation
+  };
+
   const generateCampaignName = (url: string, keywords: string) => {
     try {
       const domain = new URL(url).hostname.replace('www.', '');
