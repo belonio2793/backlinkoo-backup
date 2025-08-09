@@ -403,6 +403,68 @@ export default function BacklinkAutomation() {
     }
   }, [user, isPremium]);
 
+  // Campaign deletion with complete data removal
+  const deleteCampaignPermanently = useCallback(async (campaignId: string) => {
+    try {
+      const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
+      const updatedCampaigns = savedCampaigns.filter((c: any) => c.id !== campaignId);
+
+      localStorage.setItem('permanent_campaigns', JSON.stringify(updatedCampaigns));
+
+      // Remove from active state
+      setCampaigns(prev => prev.filter(c => c.id !== campaignId));
+      setGuestCampaignResults(prev => prev.filter(c => c.id !== campaignId));
+
+      console.log('🗑️ Campaign permanently deleted with all stored data:', campaignId);
+
+      toast({
+        title: '🗑️ Campaign Deleted',
+        description: 'Campaign and all associated data permanently removed from storage',
+        duration: 3000
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Failed to delete campaign permanently:', error);
+      return false;
+    }
+  }, []);
+
+  // Auto-detection system to prevent link count issues
+  const autoDetectionSystem = useCallback(() => {
+    const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
+    let hasUpdates = false;
+
+    const updatedCampaigns = savedCampaigns.map((campaign: any) => {
+      const isUserPremium = campaign.autoDetection?.isPremium || false;
+      const currentLinks = campaign.progressiveLinkCount || 0;
+
+      // Auto-prevention for free users at 20/20
+      if (!isUserPremium && currentLinks >= 20) {
+        if (campaign.status === 'active') {
+          hasUpdates = true;
+          return {
+            ...campaign,
+            status: 'paused',
+            autoDetection: {
+              ...campaign.autoDetection,
+              autoPreventOverage: true,
+              autoPausedAt: new Date().toISOString(),
+              reason: 'Auto-paused: Free account reached 20/20 limit'
+            }
+          };
+        }
+      }
+
+      return campaign;
+    });
+
+    if (hasUpdates) {
+      localStorage.setItem('permanent_campaigns', JSON.stringify(updatedCampaigns));
+      console.log('🚀 Auto-detection: Applied limit prevention for free accounts');
+    }
+  }, []);
+
   // Load live monitored campaigns with progressive data
   const loadPermanentCampaigns = useCallback((): any[] => {
     try {
@@ -626,16 +688,22 @@ export default function BacklinkAutomation() {
     };
   }, [selectedTab, startLiveUpdates, stopLiveUpdates]);
 
-  // Auto-save campaigns whenever they change
+  // Live monitoring auto-save with progressive counting
   useEffect(() => {
     if (guestCampaignResults.length > 0) {
       guestCampaignResults.forEach(campaign => {
-        saveCampaignPermanently(campaign);
+        // Only save if there's actual progress or updates
+        if (campaign.linksGenerated > 0 || campaign.status) {
+          saveCampaignPermanently(campaign);
+        }
       });
     }
     if (campaigns.length > 0) {
       campaigns.forEach(campaign => {
-        saveCampaignPermanently(campaign);
+        // Only save if there's actual progress or updates
+        if (campaign.linksGenerated > 0 || campaign.status) {
+          saveCampaignPermanently(campaign);
+        }
       });
     }
   }, [guestCampaignResults, campaigns, saveCampaignPermanently]);
