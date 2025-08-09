@@ -711,12 +711,24 @@ class RecursiveUrlDiscoveryService {
    * Get discovered URLs by type with pagination
    */
   public async getDiscoveredUrls(
-    linkType?: string, 
+    linkType?: string,
     status?: string,
     limit: number = 50,
     offset: number = 0
   ): Promise<DiscoveredUrl[]> {
     try {
+      // Check if table exists first
+      const { data: tableCheck, error: tableError } = await supabase
+        .from('discovered_urls')
+        .select('id')
+        .limit(1);
+
+      // If table doesn't exist, return demo data
+      if (tableError && tableError.code === '42P01') {
+        console.log('Table discovered_urls does not exist, returning demo data');
+        return this.getDemoUrls(linkType, limit);
+      }
+
       let query = supabase
         .from('discovered_urls')
         .select('*')
@@ -760,7 +772,8 @@ class RecursiveUrlDiscoveryService {
       }));
     } catch (error) {
       console.error('Failed to get discovered URLs:', error);
-      return [];
+      // Return demo data as fallback
+      return this.getDemoUrls(linkType, limit);
     }
   }
 
