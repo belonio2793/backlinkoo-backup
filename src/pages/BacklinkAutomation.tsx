@@ -4706,15 +4706,23 @@ export default function BacklinkAutomation() {
 
       {/* Floating Action Button */}
       <div className="fixed bottom-6 right-6 z-50">
-        <div className="relative group">
+        <div className="relative">
           {/* Quick Actions Menu */}
-          <div className="absolute bottom-16 right-0 space-y-2 opacity-0 group-hover:opacity-100 transition-all duration-200 transform group-hover:translate-y-0 translate-y-2">
+          <div className={`absolute bottom-16 right-0 space-y-2 transition-all duration-200 ${
+            showFabMenu
+              ? 'opacity-100 translate-y-0'
+              : 'opacity-0 translate-y-2 pointer-events-none'
+          }`}>
             {user ? (
               <>
                 {/* Logged In User Actions */}
                 <Button
                   size="sm"
-                  onClick={() => setSelectedTab('campaigns')}
+                  onClick={() => {
+                    setSelectedTab('campaigns');
+                    setSelectedCampaignTab('create');
+                    setShowFabMenu(false);
+                  }}
                   className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
                   <Target className="h-4 w-4 mr-2" />
@@ -4722,19 +4730,26 @@ export default function BacklinkAutomation() {
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => setSelectedTab('discovery')}
+                  onClick={() => {
+                    setSelectedTab('discovery');
+                    setShowFabMenu(false);
+                  }}
                   className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
                   <Search className="h-4 w-4 mr-2" />
-                  Discover URLs
+                  Website Database
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => window.location.href = '/backlink-report'}
+                  onClick={() => {
+                    setSelectedTab('campaigns');
+                    setSelectedCampaignTab('live-results');
+                    setShowFabMenu(false);
+                  }}
                   className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
                   <BarChart3 className="h-4 w-4 mr-2" />
-                  View Reports
+                  View Results
                 </Button>
                 {!isPremium && (
                   <Button
@@ -4746,6 +4761,7 @@ export default function BacklinkAutomation() {
                       } else {
                         setShowGuestPremiumModal(true);
                       }
+                      setShowFabMenu(false);
                     }}
                     className="w-40 justify-start bg-purple-600 text-white shadow-lg hover:bg-purple-700"
                   >
@@ -4759,7 +4775,10 @@ export default function BacklinkAutomation() {
                 {/* Not Logged In Actions */}
                 <Button
                   size="sm"
-                  onClick={() => setShowSignInModal(true)}
+                  onClick={() => {
+                    setShowSignInModal(true);
+                    setShowFabMenu(false);
+                  }}
                   className="w-40 justify-start bg-blue-600 text-white shadow-lg hover:bg-blue-700"
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
@@ -4767,11 +4786,14 @@ export default function BacklinkAutomation() {
                 </Button>
                 <Button
                   size="sm"
-                  onClick={() => setSelectedTab('discovery')}
+                  onClick={() => {
+                    setSelectedTab('discovery');
+                    setShowFabMenu(false);
+                  }}
                   className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
                   <Eye className="h-4 w-4 mr-2" />
-                  Preview Features
+                  Website Database
                 </Button>
               </>
             )}
@@ -4780,17 +4802,16 @@ export default function BacklinkAutomation() {
           {/* Main FAB */}
           <Button
             size="lg"
-            className={`h-14 w-14 rounded-full shadow-lg ${
+            onClick={() => setShowFabMenu(!showFabMenu)}
+            className={`h-14 w-14 rounded-full shadow-lg transition-transform ${
+              showFabMenu ? 'rotate-45' : 'rotate-0'
+            } ${
               user
                 ? 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
                 : 'bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-700 hover:to-gray-800'
             }`}
           >
-            {user ? (
-              <Plus className="h-6 w-6" />
-            ) : (
-              <UserPlus className="h-6 w-6" />
-            )}
+            <Plus className="h-6 w-6" />
           </Button>
         </div>
       </div>
