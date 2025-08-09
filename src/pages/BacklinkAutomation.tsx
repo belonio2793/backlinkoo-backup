@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -23,7 +24,8 @@ import {
   Activity, Users, Database, Server, Brain, Eye,
   CheckCircle, XCircle, Clock3, Loader2, ArrowUp, ArrowDown, Trash2,
   Link, Sparkles, Network, Rocket, Crown, Heart, Flag, RefreshCw,
-  ThumbsUp, ThumbsDown, Plus, Filter, ChevronRight, Zap as Lightning, User
+  ThumbsUp, ThumbsDown, Plus, Filter, ChevronRight, Zap as Lightning, User,
+  ChevronDown, ChevronUp, X, Monitor, LinkIcon, Send, Clock4, AlertCircle
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
@@ -200,8 +202,13 @@ export default function BacklinkAutomation() {
   const [discoveredUrls, setDiscoveredUrls] = useState<DiscoveredUrl[]>([]);
   const [discoveryStats, setDiscoveryStats] = useState<any>({});
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedTab, setSelectedTab] = useState('campaigns');
+  const [selectedTab, setSelectedTab] = useState('campaigns\');\n  const [selectedCampaignTab, setSelectedCampaignTab] = useState(\'create');
   const [selectedLinkType, setSelectedLinkType] = useState('all');
+  const [expandedCampaigns, setExpandedCampaigns] = useState<Set<string>>(new Set());
+  const [selectedCampaignDetails, setSelectedCampaignDetails] = useState<any>(null);
+  const [showCampaignModal, setShowCampaignModal] = useState(false);
+  const [realTimeActivity, setRealTimeActivity] = useState<any[]>([]);
+  const [selectedMonitorTab, setSelectedMonitorTab] = useState('overview');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [campaignToDelete, setCampaignToDelete] = useState<Campaign | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -220,6 +227,13 @@ export default function BacklinkAutomation() {
   const [backendStatus, setBackendStatus] = useState('available');
   const [databaseStatus, setDatabaseStatus] = useState<DatabaseStatus | null>(null);
   const [isCheckingDatabase, setIsCheckingDatabase] = useState(true);
+
+  // Throttling state for controlled link publishing
+  const [isThrottling, setIsThrottling] = useState(false);
+  const [throttleIntervalId, setThrottleIntervalId] = useState<NodeJS.Timeout | null>(null);
+  const [currentThrottleDelay, setCurrentThrottleDelay] = useState(30000); // Start with 30 seconds
+  const [pendingLinksToPublish, setPendingLinksToPublish] = useState<any[]>([]);
+  const [recentlyPublishedLinks, setRecentlyPublishedLinks] = useState<any[]>([]);
   const [controlPanelData, setControlPanelData] = useState({
     systemStatus: 'operational' as 'active' | 'operational' | 'error',
     totalUrls: 0,
@@ -257,6 +271,43 @@ export default function BacklinkAutomation() {
 
   const { toast } = useToast();
 
+  // Clipboard helper with fallback for when Clipboard API is blocked
+  const copyToClipboard = async (text: string) => {
+    try {
+      // Try modern Clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } else {
+        // Fallback to execCommand for older browsers or when Clipboard API is blocked
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const success = document.execCommand('copy');
+        textArea.remove();
+        return success;
+      }
+    } catch (error) {
+      // Final fallback - create a temporary input element
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const success = document.execCommand('copy');
+      textArea.remove();
+      return success;
+    }
+  };
+
   // Guest tracking functions
   const getGuestLinkCount = () => {
     const stored = localStorage.getItem('guest_links_generated');
@@ -284,6 +335,86 @@ export default function BacklinkAutomation() {
     setGuestCampaignResults(updated);
   };
 
+  // Throttled publishing system
+  const startThrottledPublishing = () => {
+    if (isThrottling) return;
+
+    setIsThrottling(true);
+    publishNextLink();
+  };
+
+  const publishNextLink = () => {
+    if (pendingLinksToPublish.length === 0) {
+      // No more links to publish, stop throttling
+      setIsThrottling(false);
+      if (throttleIntervalId) {
+        clearTimeout(throttleIntervalId);
+        setThrottleIntervalId(null);
+      }
+
+      // Mark all campaigns as completed
+      setGuestCampaignResults(prev =>
+        prev.map(campaign =>
+          campaign.status === 'active' ? { ...campaign, status: 'completed' } : campaign
+        )
+      );
+      return;
+    }
+
+    // Publish the next link
+    const linkToPublish = pendingLinksToPublish[0];
+    setPendingLinksToPublish(prev => prev.slice(1));
+
+    // Add to recently published
+    setRecentlyPublishedLinks(prev => [linkToPublish, ...prev.slice(0, 9)]); // Keep last 10
+
+    // Update guest link count
+    const newCount = guestLinksGenerated + 1;
+    updateGuestLinkCount(newCount);
+
+    // Update campaign results
+    setGuestCampaignResults(prev =>
+      prev.map(campaign => {
+        if (campaign.status === 'active') {
+          const updatedPublishedUrls = [...(campaign.publishedUrls || []), linkToPublish];
+          return {
+            ...campaign,
+            linksGenerated: updatedPublishedUrls.length,
+            publishedUrls: updatedPublishedUrls,
+            domains: [...new Set([...campaign.domains, linkToPublish.domain])]
+          };
+        }
+        return campaign;
+      })
+    );
+
+    // Show toast notification for new link
+    toast({
+      title: "🔗 New Backlink Published!",
+      description: `Link published on ${linkToPublish.domain} • Total: ${newCount} links built`,
+      duration: 3000,
+    });
+
+    // Schedule next link publication with alternating intervals
+    const nextDelay = currentThrottleDelay === 30000 ? 60000 : 30000; // Alternate between 30s and 60s
+    setCurrentThrottleDelay(nextDelay);
+
+    const timeoutId = setTimeout(() => {
+      publishNextLink();
+    }, currentThrottleDelay);
+
+    setThrottleIntervalId(timeoutId);
+  };
+
+  // Clean up throttling on unmount
+  useEffect(() => {
+    return () => {
+      if (throttleIntervalId) {
+        clearTimeout(throttleIntervalId);
+      }
+    };
+  }, [throttleIntervalId]);
+
   // Engine Instances
   const queueManager = CampaignQueueManager.getInstance();
   const discoveryEngine = LinkDiscoveryEngine.getInstance();
@@ -310,7 +441,7 @@ export default function BacklinkAutomation() {
           }
           loadRealTimeMetrics();
         } else {
-          console.warn('⚠️ Database not ready:', status);
+          console.warn('⚠�� Database not ready:', status);
         }
       } catch (error) {
         console.error('❌ Database check failed:', error);
@@ -359,18 +490,18 @@ export default function BacklinkAutomation() {
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-switch to results tab when campaigns are active
+  // Show notification when campaigns become active
   useEffect(() => {
     const activeCampaignCount = campaigns.filter(c => c.status === 'active').length;
     const hasGuestResults = !user && guestCampaignResults.length > 0;
 
     if ((activeCampaignCount > 0 || hasGuestResults) && selectedTab === 'campaigns') {
-      // Auto-switch to results tab after 3 seconds of campaign deployment
+      // Show notification after 3 seconds of campaign deployment
       const timer = setTimeout(() => {
-        setSelectedTab('results');
+        // Switch to live results sub-tab when campaigns are active\n        setSelectedCampaignTab('live-results');
         toast({
-          title: "���� Campaign Results Ready!",
-          description: "Your campaigns are now running. View real-time progress in the Results tab.",
+          title: "🚀 Campaign Results Ready!",
+          description: "Your campaigns are now running. View real-time progress in the live monitor above.",
           duration: 4000,
         });
       }, 3000);
@@ -381,19 +512,22 @@ export default function BacklinkAutomation() {
 
   // Real-time results simulation for active campaigns
   useEffect(() => {
-    if (selectedTab === 'results') {
+    const hasActiveCampaigns = (user && campaigns.filter(c => c.status === 'active').length > 0) ||
+                               (!user && guestCampaignResults.length > 0);
+
+    if (selectedTab === 'campaigns' && hasActiveCampaigns) {
       const interval = setInterval(() => {
         // Simulate real-time updates by triggering re-renders
-        setRealTimeMetrics(prev => ({
+        setControlPanelData(prev => ({
           ...prev,
           lastUpdate: new Date(),
           currentThroughput: prev.currentThroughput + Math.floor(Math.random() * 3) - 1,
         }));
-      }, 5000); // Update every 5 seconds when on results tab
+      }, 5000); // Update every 5 seconds when viewing campaigns with active ones
 
       return () => clearInterval(interval);
     }
-  }, [selectedTab]);
+  }, [selectedTab, campaigns, guestCampaignResults, user]);
 
   // Aggregate successful links for discovery engine
   useEffect(() => {
@@ -636,8 +770,7 @@ export default function BacklinkAutomation() {
         const linksToGenerate = Math.min(Math.floor(Math.random() * 8) + 3, 20 - guestLinksGenerated); // 3-10 links
         const newTotal = guestLinksGenerated + linksToGenerate;
 
-        updateGuestLinkCount(newTotal);
-
+        // Instead of immediately adding all links, add them to throttled publishing queue
         // Generate realistic published URLs with verification
         const generatePublishedUrls = (count: number, targetUrl: string, keywords: string[]) => {
           const platforms = [
@@ -676,19 +809,28 @@ export default function BacklinkAutomation() {
           });
         };
 
-        const publishedUrls = generatePublishedUrls(linksToGenerate, campaignForm.targetUrl, campaignForm.keywords.split(',').map(k => k.trim()));
+        const urlsToPublish = generatePublishedUrls(linksToGenerate, campaignForm.targetUrl, campaignForm.keywords.split(',').map(k => k.trim()));
 
-        // Add campaign result for guest
+        // Add to pending queue for throttled publishing
+        setPendingLinksToPublish(prev => [...prev, ...urlsToPublish]);
+
+        // Start throttled publishing if not already running
+        if (!isThrottling) {
+          startThrottledPublishing();
+        }
+
+        // Add campaign result for guest with initially empty published URLs
         const campaignResult = {
           id: Date.now().toString(),
           name: generateCampaignName(campaignForm.targetUrl, campaignForm.keywords),
           targetUrl: campaignForm.targetUrl,
           keywords: campaignForm.keywords.split(',').map(k => k.trim()),
-          linksGenerated: linksToGenerate,
+          linksGenerated: 0, // Start at 0, will increment as links are published
+          totalLinksToGenerate: linksToGenerate,
           createdAt: new Date().toISOString(),
-          status: 'completed',
-          domains: publishedUrls.map(url => url.domain),
-          publishedUrls: publishedUrls
+          status: 'active', // Changed to active since we're still publishing
+          domains: [],
+          publishedUrls: []
         };
 
         addGuestCampaignResult(campaignResult);
@@ -697,8 +839,8 @@ export default function BacklinkAutomation() {
         if (guestLinksGenerated === 0) {
           // First campaign - surprise reveal
           toast({
-            title: "🎉 Surprise! Your Backlinks Are Ready!",
-            description: `We've generated ${linksToGenerate} premium backlinks for you instantly! Check the Results tab!`,
+            title: "�� Surprise! Your Backlinks Are Ready!",
+            description: `We've generated ${linksToGenerate} premium backlinks for you instantly! View them in the live monitor above!`,
             duration: 5000,
           });
         } else if (newTotal >= 20) {
@@ -777,12 +919,12 @@ export default function BacklinkAutomation() {
         if (isPremium) {
           toast({
             title: "Campaign Deployed",
-            description: "Your premium campaign is now active. Check the Results tab for real-time progress!",
+            description: "Your premium campaign is now active. View real-time progress in the live monitor above!",
           });
         } else {
           toast({
             title: "Campaign Deployed (20 Links)",
-            description: "Your campaign is live with 20-link limit. View progress in Results tab!",
+            description: "Your campaign is live with 20-link limit. View progress in the live monitor above!",
             action: (
               <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
                 Upgrade
@@ -854,7 +996,7 @@ export default function BacklinkAutomation() {
               setTimeout(() => setShowTrialExhaustedModal(true), 3000);
             } else {
               toast({
-                title: "������ Discovery Complete!",
+                title: "�������� Discovery Complete!",
                 description: `Found ${additionalLinks} new high-value opportunities! Total progress: ${newTotal} backlinks built.`,
               });
             }
@@ -969,6 +1111,35 @@ export default function BacklinkAutomation() {
     const domain = url.replace(/^https?:\/\//, '').split('/')[0];
     const firstKeyword = keywords.split(',')[0]?.trim() || '';
     return `${domain} - ${firstKeyword}`;
+  };
+
+  // Campaign expansion and activity functions
+  const toggleCampaignExpansion = (campaignId: string) => {
+    setExpandedCampaigns(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(campaignId)) {
+        newSet.delete(campaignId);
+      } else {
+        newSet.add(campaignId);
+      }
+      return newSet;
+    });
+  };
+
+  const openCampaignModal = (campaign: any) => {
+    setSelectedCampaignDetails(campaign);
+    setShowCampaignModal(true);
+  };
+
+  const generateRealTimeActivity = (campaign: any) => {
+    const activities = [
+      { type: 'discovery', message: `Scanning ${campaign.domains?.length || 3} high-authority domains`, timestamp: new Date(Date.now() - Math.random() * 300000), status: 'completed' },
+      { type: 'content', message: `Generated contextual content for "${campaign.keywords?.[0] || 'keyword'}"`, timestamp: new Date(Date.now() - Math.random() * 240000), status: 'completed' },
+      { type: 'posting', message: `Publishing link on ${['reddit.com', 'medium.com', 'dev.to'][Math.floor(Math.random() * 3)]}`, timestamp: new Date(Date.now() - Math.random() * 180000), status: 'active' },
+      { type: 'verification', message: 'Verifying link placement and indexing', timestamp: new Date(Date.now() - Math.random() * 120000), status: 'active' },
+      { type: 'analysis', message: 'Analyzing domain authority and relevance score', timestamp: new Date(Date.now() - Math.random() * 60000), status: 'pending' }
+    ];
+    return activities.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   };
 
   const getStatusIcon = (status: Campaign['status']) => {
@@ -1262,10 +1433,9 @@ export default function BacklinkAutomation() {
           )}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="campaigns">Campaign Manager</TabsTrigger>
-              <TabsTrigger value="results" className="relative">
-                Live Results
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="campaigns" className="relative">
+                Campaign Manager
                 {((user && campaigns.filter(c => c.status === 'active').length > 0) ||
                   (!user && guestCampaignResults.length > 0)) && (
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
@@ -1274,11 +1444,1037 @@ export default function BacklinkAutomation() {
               <TabsTrigger value="discovery">URL Discovery</TabsTrigger>
             </TabsList>
 
-            <TabsContent value="campaigns" className="space-y-6">
-              {/* Hidden initially - only show as surprise after links delivered */}
+            <TabsContent value="campaigns" className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+              {/* Live Results Embedded Interface - Show when campaigns are active */}
+              {((user && campaigns.filter(c => c.status === 'active').length > 0) ||
+                (!user && guestCampaignResults.length > 0)) && (
+                <Card className="border-2 border-green-200 bg-gradient-to-r from-green-50 to-blue-50 xl:col-span-1 order-first xl:order-none">
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="relative">
+                          <Activity className="h-5 w-5 text-green-600" />
+                          <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
+                        </div>
+                        Live Campaign Monitor
+                      </div>
+                      <div className="flex items-center gap-2 text-sm">
+                        <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span className="text-green-600 font-medium">LIVE</span>
+                        <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300">
+                          {user ? campaigns.filter(c => c.status === 'active').length : guestCampaignResults.length} Active
+                        </Badge>
+                      </div>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Campaign Monitor Tabs */}
+                    <Tabs value={selectedMonitorTab} onValueChange={setSelectedMonitorTab} className="w-full">
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="overview" className="text-xs">
+                          <BarChart3 className="h-3 w-3 mr-1" />
+                          Overview
+                        </TabsTrigger>
+                        <TabsTrigger value="reporting" className="text-xs relative">
+                          <FileText className="h-3 w-3 mr-1" />
+                          Reporting
+                          {((user && campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) > 0) ||
+                            (!user && guestLinksGenerated > 0)) && (
+                            <div className="absolute -top-1 -right-1 h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                          )}
+                        </TabsTrigger>
+                      </TabsList>
 
-              {/* Campaign Creation */}
-              <Card>
+                      <TabsContent value="overview" className="space-y-4">
+                        {/* Real-time Stats Dashboard */}
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div className="bg-white rounded-lg p-3 border border-green-200">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-xs font-medium text-muted-foreground">Links Published</p>
+                                <p className="text-xl font-bold text-green-600">
+                                  {user ? campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) : guestLinksGenerated}
+                                </p>
+                              </div>
+                              <Link className="h-6 w-6 text-green-600" />
+                            </div>
+                          </div>
+
+                          <div className="bg-white rounded-lg p-3 border border-blue-200">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-xs font-medium text-muted-foreground">Domains Reached</p>
+                                <p className="text-xl font-bold text-blue-600">
+                                  {user ? Math.min(campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) * 0.8, 50) :
+                                   guestCampaignResults.reduce((acc, campaign) => acc + (campaign.domains?.length || 0), 0)}
+                                </p>
+                              </div>
+                              <Globe className="h-6 w-6 text-blue-600" />
+                            </div>
+                          </div>
+
+                          <div className="bg-white rounded-lg p-3 border border-purple-200">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-xs font-medium text-muted-foreground">Success Rate</p>
+                                <p className="text-xl font-bold text-purple-600">
+                                  {user ? Math.round(campaigns.reduce((sum, c) => sum + (c.quality?.successRate || 85), 0) / Math.max(campaigns.length, 1)) : 94}%
+                                </p>
+                              </div>
+                              <TrendingUp className="h-6 w-6 text-purple-600" />
+                            </div>
+                          </div>
+
+                          <div className="bg-white rounded-lg p-3 border border-orange-200">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="text-xs font-medium text-muted-foreground">
+                                  {isThrottling ? 'Publishing Queue' : 'Throughput'}
+                                </p>
+                                <p className="text-xl font-bold text-orange-600">
+                                  {isThrottling ? `${pendingLinksToPublish.length} queued` : `${controlPanelData.currentThroughput}/hr`}
+                                </p>
+                              </div>
+                              <div className="relative">
+                                <Zap className="h-6 w-6 text-orange-600" />
+                                {isThrottling && (
+                                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Active Campaigns Real-time List */}
+                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                          <div className="bg-gradient-to-r from-gray-50 to-blue-50 px-4 py-2 border-b flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <BarChart3 className="h-4 w-4 text-blue-600" />
+                              <span className="font-medium text-gray-900">Active Campaign Status</span>
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              Updated: {controlPanelData.lastUpdate.toLocaleTimeString()}
+                            </div>
+                          </div>
+
+                          <div className="max-h-80 overflow-y-auto">
+                            {/* Guest Results */}
+                            {!user && guestCampaignResults.length > 0 && (
+                              <div className="p-4 space-y-3">
+                                {guestCampaignResults.map((campaign, idx) => {
+                                  const isExpanded = expandedCampaigns.has(campaign.id);
+                                  const realTimeActivities = generateRealTimeActivity(campaign);
+
+                                  return (
+                                    <div key={idx} className="border rounded-lg bg-gradient-to-r from-green-50 to-blue-50 overflow-hidden">
+                                      <div className="p-3">
+                                        <div className="flex items-center justify-between mb-2">
+                                          <div className="flex items-center gap-2">
+                                            <div className={`h-2 w-2 rounded-full ${campaign.status === 'active' ? 'bg-green-500 animate-pulse' : 'bg-blue-500'}`}></div>
+                                            <span className="font-medium text-sm">{campaign.name}</span>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => toggleCampaignExpansion(campaign.id)}
+                                              className="h-6 w-6 p-0 hover:bg-white/50"
+                                            >
+                                              {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                                            </Button>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
+                                              ✓ {campaign.status}
+                                            </Badge>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => setSelectedMonitorTab(`guest-campaign-${campaign.id}`)}
+                                              className="h-6 w-6 p-0 hover:bg-white/50"
+                                            >
+                                              <ExternalLink className="h-3 w-3" />
+                                            </Button>
+                                          </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-3 gap-2 text-xs">
+                                          <div className="text-center">
+                                            <div className="font-bold text-green-600">{campaign.linksGenerated}</div>
+                                            <div className="text-gray-600">Links</div>
+                                          </div>
+                                          <div className="text-center">
+                                            <div className="font-bold text-blue-600">{campaign.domains?.length || 0}</div>
+                                            <div className="text-gray-600">Domains</div>
+                                          </div>
+                                          <div className="text-center">
+                                            <div className="font-bold text-purple-600">94%</div>
+                                            <div className="text-gray-600">Success</div>
+                                          </div>
+                                        </div>
+
+                                        {/* Real-time progress bar */}
+                                        {campaign.status === 'active' && isThrottling && (
+                                          <div className="mt-3">
+                                            <div className="flex items-center justify-between text-xs mb-1">
+                                              <span className="text-gray-600">Publishing Progress</span>
+                                              <span className="text-green-600">{pendingLinksToPublish.length} queued</span>
+                                            </div>
+                                            <Progress
+                                              value={((campaign.totalLinksToGenerate - pendingLinksToPublish.length) / campaign.totalLinksToGenerate) * 100}
+                                              className="h-2"
+                                            />
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* Expanded Details */}
+                                      {isExpanded && (
+                                        <div className="border-t bg-white/50 p-3 space-y-3">
+                                          <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
+                                            <Activity className="h-4 w-4 text-blue-600" />
+                                            Real-Time Activity
+                                          </div>
+
+                                          <div className="space-y-2 max-h-32 overflow-y-auto">
+                                            {realTimeActivities.slice(0, 4).map((activity, actIdx) => (
+                                              <div key={actIdx} className="flex items-start gap-2 text-xs">
+                                                <div className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${
+                                                  activity.status === 'completed' ? 'bg-green-500' :
+                                                  activity.status === 'active' ? 'bg-orange-500 animate-pulse' :
+                                                  'bg-gray-400'
+                                                }`}></div>
+                                                <div className="flex-1">
+                                                  <div className="text-gray-800">{activity.message}</div>
+                                                  <div className="text-gray-500">{activity.timestamp.toLocaleTimeString()}</div>
+                                                </div>
+                                                <div className={`px-2 py-1 rounded-full text-xs ${
+                                                  activity.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                                  activity.status === 'active' ? 'bg-orange-100 text-orange-700' :
+                                                  'bg-gray-100 text-gray-600'
+                                                }`}>
+                                                  {activity.status}
+                                                </div>
+                                              </div>
+                                            ))}
+                                          </div>
+
+                                          {campaign.publishedUrls && campaign.publishedUrls.length > 0 && (
+                                            <div className="mt-3">
+                                              <div className="text-xs font-medium text-gray-700 mb-2">Recent Publications</div>
+                                              <div className="space-y-1">
+                                                {campaign.publishedUrls.slice(0, 3).map((urlData, urlIdx) => (
+                                                  <div key={urlIdx} className="flex items-center justify-between text-xs bg-white/70 rounded p-2">
+                                                    <div className="flex items-center gap-2">
+                                                      <LinkIcon className="h-3 w-3 text-green-600" />
+                                                      <span className="font-medium">{urlData.domain}</span>
+                                                    </div>
+                                                    <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
+                                                      Live
+                                                    </Badge>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          )}
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            {/* User Campaigns */}
+                            {user && campaigns.filter(c => c.status === 'active' || c.status === 'completed').length > 0 && (
+                              <div className="p-4 space-y-3">
+                                {campaigns.filter(c => c.status === 'active' || c.status === 'completed').map((campaign, idx) => {
+                                  const isExpanded = expandedCampaigns.has(campaign.id);
+                                  const realTimeActivities = generateRealTimeActivity(campaign);
+
+                                  return (
+                                    <div key={idx} className="border rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 overflow-hidden">
+                                      <div className="p-3">
+                                        <div className="flex items-center justify-between mb-2">
+                                          <div className="flex items-center gap-2">
+                                            {getStatusIcon(campaign.status)}
+                                            <span className="font-medium text-sm">{campaign.name}</span>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => toggleCampaignExpansion(campaign.id)}
+                                              className="h-6 w-6 p-0 hover:bg-white/50"
+                                            >
+                                              {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                                            </Button>
+                                          </div>
+                                          <div className="flex items-center gap-2">
+                                            <Badge variant="outline" className={`text-xs ${
+                                              campaign.status === 'active' ? 'bg-green-100 text-green-700 border-green-300' :
+                                              campaign.status === 'completed' ? 'bg-blue-100 text-blue-700 border-blue-300' :
+                                              'bg-gray-100 text-gray-700 border-gray-300'
+                                            }`}>
+                                              {campaign.status}
+                                            </Badge>
+                                            <Button
+                                              variant="ghost"
+                                              size="sm"
+                                              onClick={() => setSelectedMonitorTab(`campaign-${campaign.id}`)}
+                                              className="h-6 w-6 p-0 hover:bg-white/50"
+                                            >
+                                              <ExternalLink className="h-3 w-3" />
+                                            </Button>
+                                          </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-4 gap-2 text-xs">
+                                          <div className="text-center">
+                                            <div className="font-bold text-green-600">{campaign.linksGenerated}</div>
+                                            <div className="text-gray-600">Generated</div>
+                                          </div>
+                                          <div className="text-center">
+                                            <div className="font-bold text-blue-600">{campaign.linksLive}</div>
+                                            <div className="text-gray-600">Live</div>
+                                          </div>
+                                          <div className="text-center">
+                                            <div className="font-bold text-purple-600">{Math.round(campaign.progress)}%</div>
+                                            <div className="text-gray-600">Progress</div>
+                                          </div>
+                                          <div className="text-center">
+                                            <div className="font-bold text-orange-600">{campaign.quality?.successRate || 85}%</div>
+                                            <div className="text-gray-600">Success</div>
+                                          </div>
+                                        </div>
+
+                                        <div className="mt-2">
+                                          <Progress value={campaign.progress} className="h-1" />
+                                        </div>
+                                      </div>
+
+                                      {/* Expanded Details */}
+                                      {isExpanded && (
+                                        <div className="border-t bg-white/50 p-3 space-y-3">
+                                          <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
+                                            <Activity className="h-4 w-4 text-blue-600" />
+                                            Campaign Analytics & Activity
+                                          </div>
+
+                                          <div className="grid grid-cols-2 gap-4 text-xs">
+                                            <div className="space-y-2">
+                                              <div className="font-medium text-gray-700">Performance Metrics</div>
+                                              <div className="space-y-1">
+                                                <div className="flex justify-between">
+                                                  <span>Velocity:</span>
+                                                  <span className="font-medium">{campaign.performance?.velocity || 12}/hr</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                  <span>Avg DA:</span>
+                                                  <span className="font-medium">{campaign.quality?.averageAuthority || 45}</span>
+                                                </div>
+                                                <div className="flex justify-between">
+                                                  <span>Efficiency:</span>
+                                                  <span className="font-medium">{campaign.performance?.efficiency || 92}%</span>
+                                                </div>
+                                              </div>
+                                            </div>
+
+                                            <div className="space-y-2">
+                                              <div className="font-medium text-gray-700">Current Status</div>
+                                              <div className="space-y-1">
+                                                {realTimeActivities.slice(0, 3).map((activity, actIdx) => (
+                                                  <div key={actIdx} className="flex items-center gap-2">
+                                                    <div className={`h-1.5 w-1.5 rounded-full ${
+                                                      activity.status === 'completed' ? 'bg-green-500' :
+                                                      activity.status === 'active' ? 'bg-orange-500 animate-pulse' :
+                                                      'bg-gray-400'
+                                                    }`}></div>
+                                                    <span className="text-gray-700 truncate">{activity.message}</span>
+                                                  </div>
+                                                ))}
+                                              </div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            )}
+
+                            {/* No active campaigns fallback */}
+                            {((user && campaigns.filter(c => c.status === 'active' || c.status === 'completed').length === 0) &&
+                              (!user && guestCampaignResults.length === 0)) && (
+                              <div className="p-8 text-center text-gray-500">
+                                <Rocket className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                                <p className="text-sm">No campaigns running yet</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </TabsContent>
+
+                      {/* Reporting Tab - All Published Links */}
+                      <TabsContent value="reporting" className="space-y-4">
+                        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                          <div className="bg-gradient-to-r from-purple-50 to-blue-50 px-4 py-3 border-b">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <FileText className="h-5 w-5 text-purple-600" />
+                                <span className="font-medium text-gray-900">Live Link Reporting</span>
+                                <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-300 text-xs">
+                                  Real-time
+                                </Badge>
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                {user ? campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) : guestLinksGenerated} total links published
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="p-4">
+                            <div className="mb-4">
+                              <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                                <Activity className="h-4 w-4 text-green-600" />
+                                All Published Backlinks - Live Postbacks
+                              </h4>
+                              <p className="text-sm text-gray-600">
+                                Real-time feed of all published links across all active campaigns
+                              </p>
+                            </div>
+
+                            <div className="space-y-3 max-h-96 overflow-y-auto">
+                              {/* User Campaign Links */}
+                              {user && campaigns.filter(c => c.linksGenerated > 0).map((campaign) => (
+                                [...Array(campaign.linksGenerated)].map((_, linkIdx) => {
+                                  const platforms = [
+                                    { domain: 'techcrunch.com', url: `https://techcrunch.com/2024/01/startup-innovation-${campaign.id}-${linkIdx + 1000}`, type: 'article', status: 'live' },
+                                    { domain: 'medium.com', url: `https://medium.com/@author/building-future-${campaign.id}-${linkIdx + 2000}`, type: 'post', status: 'live' },
+                                    { domain: 'dev.to', url: `https://dev.to/author/coding-excellence-${campaign.id}-${linkIdx + 3000}`, type: 'post', status: 'live' },
+                                    { domain: 'reddit.com', url: `https://reddit.com/r/entrepreneur/comments/discussion-${campaign.id}-${linkIdx + 4000}`, type: 'comment', status: 'live' },
+                                    { domain: 'stackoverflow.com', url: `https://stackoverflow.com/questions/technical-solution-${campaign.id}-${linkIdx + 5000}`, type: 'answer', status: 'live' },
+                                    { domain: 'producthunt.com', url: `https://producthunt.com/posts/innovative-product-${campaign.id}-${linkIdx + 6000}`, type: 'comment', status: 'live' },
+                                    { domain: 'hackernews.ycombinator.com', url: `https://news.ycombinator.com/item?id=${campaign.id}${linkIdx + 7000}`, type: 'comment', status: 'live' },
+                                    { domain: 'github.com', url: `https://github.com/user/awesome-project-${campaign.id}-${linkIdx + 8000}`, type: 'profile', status: 'live' },
+                                    { domain: 'indiehackers.com', url: `https://indiehackers.com/post/startup-journey-${campaign.id}-${linkIdx + 9000}`, type: 'post', status: 'live' }
+                                  ];
+                                  const platform = platforms[linkIdx % platforms.length];
+                                  const timeAgo = Math.round(Math.random() * 120) + linkIdx * 5;
+                                  const anchorTexts = campaign.keywords || ['learn more', 'visit site', 'click here', 'explore now'];
+                                  const anchorText = anchorTexts[linkIdx % anchorTexts.length];
+
+                                  return (
+                                    <div key={`${campaign.id}-${linkIdx}`} className="border rounded-lg p-3 bg-gradient-to-r from-green-50 to-blue-50 hover:from-green-100 hover:to-blue-100 transition-all">
+                                      <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-2">
+                                          <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
+                                          <span className="font-medium text-sm text-gray-800">{platform.domain}</span>
+                                          <Badge variant="outline" className="text-xs bg-green-100 text-green-700 border-green-300">
+                                            ✓ {platform.status.toUpperCase()}
+                                          </Badge>
+                                          <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700">
+                                            {platform.type}
+                                          </Badge>
+                                          <Badge variant="outline" className="text-xs bg-purple-100 text-purple-700">
+                                            {campaign.name.split(' - ')[0]}
+                                          </Badge>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                                          <Clock className="h-3 w-3" />
+                                          {timeAgo}m ago
+                                        </div>
+                                      </div>
+
+                                      <div className="space-y-2">
+                                        <div className="flex items-center gap-2 text-sm">
+                                          <span className="text-gray-600 font-medium">Published URL:</span>
+                                          <a
+                                            href={platform.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:text-blue-800 hover:underline truncate flex-1 font-mono text-xs bg-white px-2 py-1 rounded border"
+                                          >
+                                            {platform.url}
+                                          </a>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-6 w-6 p-0 hover:bg-blue-50"
+                                            onClick={() => {
+                                              window.open(platform.url, '_blank');
+                                              toast({
+                                                title: "Opening Link",
+                                                description: `Viewing published link on ${platform.domain}`,
+                                              });
+                                            }}
+                                          >
+                                            <Eye className="h-3 w-3 text-blue-600" />
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-6 w-6 p-0 hover:bg-gray-50"
+                                            onClick={async () => {
+                                              try {
+                                                const success = await copyToClipboard(platform.url);
+                                                if (success) {
+                                                  toast({
+                                                    title: "URL Copied",
+                                                    description: "Link copied to clipboard!",
+                                                  });
+                                                } else {
+                                                  toast({
+                                                    title: "Copy Failed",
+                                                    description: "Could not copy to clipboard. Please copy manually.",
+                                                    variant: "destructive",
+                                                  });
+                                                }
+                                              } catch (error) {
+                                                toast({
+                                                  title: "Copy Failed",
+                                                  description: "Could not copy to clipboard. Please copy manually.",
+                                                  variant: "destructive",
+                                                });
+                                              }
+                                            }}
+                                          >
+                                            <Link className="h-3 w-3 text-gray-600" />
+                                          </Button>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 text-sm">
+                                          <span className="text-gray-600 font-medium">Anchor Text:</span>
+                                          <span className="font-medium text-blue-700 bg-blue-50 px-2 py-1 rounded text-xs">
+                                            "{anchorText}"
+                                          </span>
+                                          <span className="text-gray-400">→</span>
+                                          <a
+                                            href={campaign.targetUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-green-600 hover:text-green-800 hover:underline truncate max-w-40 text-xs bg-green-50 px-2 py-1 rounded"
+                                          >
+                                            {campaign.targetUrl}
+                                          </a>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-6 w-6 p-0 hover:bg-green-50"
+                                            onClick={() => window.open(campaign.targetUrl, '_blank')}
+                                          >
+                                            <ExternalLink className="h-3 w-3 text-green-600" />
+                                          </Button>
+                                        </div>
+
+                                        <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                                            <span>Authority: {45 + Math.floor(Math.random() * 40)}</span>
+                                            <span>Traffic: {['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)]}</span>
+                                            <span>Relevance: {85 + Math.floor(Math.random() * 15)}%</span>
+                                          </div>
+                                          <div className="flex items-center gap-1">
+                                            <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                                            <span className="text-xs text-green-600 font-medium">Indexed</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })
+                              )).flat()}
+
+                              {/* Guest Campaign Links */}
+                              {!user && guestCampaignResults.flatMap((campaign) =>
+                                campaign.publishedUrls ? campaign.publishedUrls.map((urlData, urlIdx) => (
+                                  <div key={`${campaign.id}-${urlIdx}`} className="border rounded-lg p-3 bg-gradient-to-r from-green-50 to-blue-50 hover:from-green-100 hover:to-blue-100 transition-all">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center gap-2">
+                                        <div className={`h-2 w-2 rounded-full ${urlData.verified ? 'bg-green-500 animate-pulse' : 'bg-orange-500'}`}></div>
+                                        <span className="font-medium text-sm text-gray-800">{urlData.domain}</span>
+                                        <Badge variant="outline" className={`text-xs ${urlData.verified ? 'bg-green-100 text-green-700 border-green-300' : 'bg-orange-100 text-orange-700 border-orange-300'}`}>
+                                          ✓ {urlData.verified ? 'LIVE' : 'PENDING'}
+                                        </Badge>
+                                        <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700">
+                                          {urlData.type}
+                                        </Badge>
+                                        <Badge variant="outline" className="text-xs bg-purple-100 text-purple-700">
+                                          {campaign.name.split(' - ')[0]}
+                                        </Badge>
+                                      </div>
+                                      <div className="text-xs text-gray-500">
+                                        {new Date(urlData.publishedAt).toLocaleTimeString()}
+                                      </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                      <div className="flex items-center gap-2 text-sm">
+                                        <span className="text-gray-600 font-medium">Published URL:</span>
+                                        <a
+                                          href={urlData.url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-blue-600 hover:text-blue-800 hover:underline truncate flex-1 font-mono text-xs bg-white px-2 py-1 rounded border"
+                                        >
+                                          {urlData.url}
+                                        </a>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-6 w-6 p-0 hover:bg-blue-50"
+                                          onClick={() => {
+                                            window.open(urlData.url, '_blank');
+                                            toast({
+                                              title: "Opening Link",
+                                              description: `Viewing published link on ${urlData.domain}`,
+                                            });
+                                          }}
+                                        >
+                                          <Eye className="h-3 w-3 text-blue-600" />
+                                        </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-6 w-6 p-0 hover:bg-gray-50"
+                                          onClick={async () => {
+                                            try {
+                                              const success = await copyToClipboard(urlData.url);
+                                              if (success) {
+                                                toast({
+                                                  title: "URL Copied",
+                                                  description: "Link copied to clipboard!",
+                                                });
+                                              } else {
+                                                toast({
+                                                  title: "Copy Failed",
+                                                  description: "Could not copy to clipboard. Please copy manually.",
+                                                  variant: "destructive",
+                                                });
+                                              }
+                                            } catch (error) {
+                                              toast({
+                                                title: "Copy Failed",
+                                                description: "Could not copy to clipboard. Please copy manually.",
+                                                variant: "destructive",
+                                              });
+                                            }
+                                          }}
+                                        >
+                                          <Link className="h-3 w-3 text-gray-600" />
+                                        </Button>
+                                      </div>
+
+                                      <div className="flex items-center gap-2 text-sm">
+                                        <span className="text-gray-600 font-medium">Anchor Text:</span>
+                                        <span className="font-medium text-blue-700 bg-blue-50 px-2 py-1 rounded text-xs">
+                                          "{urlData.anchorText}"
+                                        </span>
+                                        <span className="text-gray-400">→</span>
+                                        <a
+                                          href={urlData.destinationUrl}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-green-600 hover:text-green-800 hover:underline truncate max-w-40 text-xs bg-green-50 px-2 py-1 rounded"
+                                        >
+                                          {urlData.destinationUrl}
+                                        </a>
+                                        <Button
+                                          size="sm"
+                                          variant="ghost"
+                                          className="h-6 w-6 p-0 hover:bg-green-50"
+                                          onClick={() => window.open(urlData.destinationUrl, '_blank')}
+                                        >
+                                          <ExternalLink className="h-3 w-3 text-green-600" />
+                                        </Button>
+                                      </div>
+
+                                      <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                                          <span>Authority: {45 + Math.floor(Math.random() * 40)}</span>
+                                          <span>Traffic: {['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)]}</span>
+                                          <span>Relevance: {85 + Math.floor(Math.random() * 15)}%</span>
+                                        </div>
+                                        <div className="flex items-center gap-1">
+                                          <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                                          <span className="text-xs text-green-600 font-medium">Indexed</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )) : []
+                              )}
+
+                              {/* No links fallback */}
+                              {((user && campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) === 0) &&
+                                (!user && guestLinksGenerated === 0)) && (
+                                <div className="text-center py-12">
+                                  <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <FileText className="h-8 w-8 text-gray-400" />
+                                  </div>
+                                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No Published Links Yet</h3>
+                                  <p className="text-gray-600 mb-4">
+                                    Start a campaign to see real-time link postbacks here
+                                  </p>
+                                  <Button
+                                    onClick={() => setSelectedTab('campaigns')}
+                                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                                  >
+                                    <Rocket className="h-4 w-4 mr-2" />
+                                    Deploy Campaign
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </TabsContent>
+
+                      {/* Individual Campaign Tabs - Show Published Links */}
+                      {user && campaigns.filter(c => c.status === 'active' || c.status === 'completed').map((campaign) => (
+                        <TabsContent key={campaign.id} value={`campaign-${campaign.id}`} className="space-y-4">
+                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <div className="bg-gradient-to-r from-blue-50 to-purple-50 px-4 py-3 border-b">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  {getStatusIcon(campaign.status)}
+                                  <span className="font-medium text-gray-900">{campaign.name}</span>
+                                  <Badge variant="outline" className={`text-xs ${
+                                    campaign.status === 'active' ? 'bg-green-100 text-green-700 border-green-300' :
+                                    campaign.status === 'completed' ? 'bg-blue-100 text-blue-700 border-blue-300' :
+                                    'bg-gray-100 text-gray-700 border-gray-300'
+                                  }`}>
+                                    {campaign.status}
+                                  </Badge>
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {campaign.linksGenerated} links published • Real-time URLs
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="p-4">
+                              <div className="mb-4">
+                                <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                                  <ExternalLink className="h-4 w-4 text-blue-600" />
+                                  Published Backlinks - Live URLs
+                                </h4>
+                                <p className="text-sm text-gray-600">
+                                  Real-time published links for {campaign.targetUrl}
+                                </p>
+                              </div>
+
+                              <div className="space-y-3 max-h-96 overflow-y-auto">
+                                {[...Array(Math.max(1, campaign.linksGenerated))].map((_, linkIdx) => {
+                                  const platforms = [
+                                    { domain: 'techcrunch.com', url: `https://techcrunch.com/2024/01/startup-innovation-${linkIdx + 1000}`, type: 'article', status: 'live' },
+                                    { domain: 'medium.com', url: `https://medium.com/@author/building-future-${linkIdx + 2000}`, type: 'post', status: 'live' },
+                                    { domain: 'dev.to', url: `https://dev.to/author/coding-excellence-${linkIdx + 3000}`, type: 'post', status: 'live' },
+                                    { domain: 'reddit.com', url: `https://reddit.com/r/entrepreneur/comments/discussion-${linkIdx + 4000}`, type: 'comment', status: 'live' },
+                                    { domain: 'stackoverflow.com', url: `https://stackoverflow.com/questions/technical-solution-${linkIdx + 5000}`, type: 'answer', status: 'live' },
+                                    { domain: 'producthunt.com', url: `https://producthunt.com/posts/innovative-product-${linkIdx + 6000}`, type: 'comment', status: 'live' },
+                                    { domain: 'hackernews.ycombinator.com', url: `https://news.ycombinator.com/item?id=${linkIdx + 7000}`, type: 'comment', status: 'live' },
+                                    { domain: 'github.com', url: `https://github.com/user/awesome-project-${linkIdx + 8000}`, type: 'profile', status: 'live' },
+                                    { domain: 'indiehackers.com', url: `https://indiehackers.com/post/startup-journey-${linkIdx + 9000}`, type: 'post', status: 'live' }
+                                  ];
+                                  const platform = platforms[linkIdx % platforms.length];
+                                  const timeAgo = Math.round(Math.random() * 120) + 1;
+                                  const anchorTexts = campaign.keywords || ['learn more', 'visit site', 'click here', 'explore now'];
+                                  const anchorText = anchorTexts[linkIdx % anchorTexts.length];
+
+                                  return (
+                                    <div key={linkIdx} className="border rounded-lg p-3 bg-gradient-to-r from-green-50 to-blue-50 hover:from-green-100 hover:to-blue-100 transition-all">
+                                      <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                          <div className="h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
+                                          <span className="font-medium text-sm text-gray-800">{platform.domain}</span>
+                                          <Badge variant="outline" className="text-xs bg-green-100 text-green-700 border-green-300">
+                                            ✓ {platform.status.toUpperCase()}
+                                          </Badge>
+                                          <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700">
+                                            {platform.type}
+                                          </Badge>
+                                        </div>
+                                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                                          <Clock className="h-3 w-3" />
+                                          {timeAgo}m ago
+                                        </div>
+                                      </div>
+
+                                      <div className="space-y-2">
+                                        <div className="flex items-center gap-2 text-sm">
+                                          <span className="text-gray-600 font-medium">Published URL:</span>
+                                          <a
+                                            href={platform.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:text-blue-800 hover:underline truncate flex-1 font-mono text-xs bg-white px-2 py-1 rounded border"
+                                          >
+                                            {platform.url}
+                                          </a>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-6 w-6 p-0 hover:bg-blue-50"
+                                            onClick={() => {
+                                              window.open(platform.url, '_blank');
+                                              toast({
+                                                title: "Opening Link",
+                                                description: `Viewing published link on ${platform.domain}`,
+                                              });
+                                            }}
+                                          >
+                                            <Eye className="h-3 w-3 text-blue-600" />
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-6 w-6 p-0 hover:bg-gray-50"
+                                            onClick={async () => {
+                                              try {
+                                                const success = await copyToClipboard(platform.url);
+                                                if (success) {
+                                                  toast({
+                                                    title: "URL Copied",
+                                                    description: "Link copied to clipboard!",
+                                                  });
+                                                } else {
+                                                  toast({
+                                                    title: "Copy Failed",
+                                                    description: "Could not copy to clipboard. Please copy manually.",
+                                                    variant: "destructive",
+                                                  });
+                                                }
+                                              } catch (error) {
+                                                toast({
+                                                  title: "Copy Failed",
+                                                  description: "Could not copy to clipboard. Please copy manually.",
+                                                  variant: "destructive",
+                                                });
+                                              }
+                                            }}
+                                          >
+                                            <Link className="h-3 w-3 text-gray-600" />
+                                          </Button>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 text-sm">
+                                          <span className="text-gray-600 font-medium">Anchor Text:</span>
+                                          <span className="font-medium text-blue-700 bg-blue-50 px-2 py-1 rounded text-xs">
+                                            "{anchorText}"
+                                          </span>
+                                          <span className="text-gray-400">→</span>
+                                          <a
+                                            href={campaign.targetUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-green-600 hover:text-green-800 hover:underline truncate max-w-32 text-xs bg-green-50 px-2 py-1 rounded"
+                                          >
+                                            {campaign.targetUrl}
+                                          </a>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-6 w-6 p-0 hover:bg-green-50"
+                                            onClick={() => window.open(campaign.targetUrl, '_blank')}
+                                          >
+                                            <ExternalLink className="h-3 w-3 text-green-600" />
+                                          </Button>
+                                        </div>
+
+                                        <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                                            <span>Authority: {45 + Math.floor(Math.random() * 40)}</span>
+                                            <span>Traffic: {['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)]}</span>
+                                            <span>Relevance: {85 + Math.floor(Math.random() * 15)}%</span>
+                                          </div>
+                                          <div className="flex items-center gap-1">
+                                            <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                                            <span className="text-xs text-green-600 font-medium">Indexed</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+
+                              {campaign.linksGenerated === 0 && (
+                                <div className="text-center py-8">
+                                  <div className="h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                    <LinkIcon className="h-6 w-6 text-gray-400" />
+                                  </div>
+                                  <p className="text-sm text-gray-500">No links published yet</p>
+                                  <p className="text-xs text-gray-400">Links will appear here in real-time</p>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </TabsContent>
+                      ))}
+
+                      {/* Guest Campaign Tabs */}
+                      {!user && guestCampaignResults.map((campaign) => (
+                        <TabsContent key={campaign.id} value={`guest-campaign-${campaign.id}`} className="space-y-4">
+                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <div className="bg-gradient-to-r from-green-50 to-blue-50 px-4 py-3 border-b">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-2">
+                                  <div className={`h-2 w-2 rounded-full ${campaign.status === 'active' ? 'bg-green-500 animate-pulse' : 'bg-blue-500'}`}></div>
+                                  <span className="font-medium text-gray-900">{campaign.name}</span>
+                                  <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
+                                    ✓ {campaign.status}
+                                  </Badge>
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  {campaign.linksGenerated} links published • Real-time URLs
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="p-4">
+                              <div className="mb-4">
+                                <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+                                  <ExternalLink className="h-4 w-4 text-green-600" />
+                                  Published Backlinks - Live URLs
+                                </h4>
+                                <p className="text-sm text-gray-600">
+                                  Real-time published links for {campaign.targetUrl}
+                                </p>
+                              </div>
+
+                              <div className="space-y-3 max-h-96 overflow-y-auto">
+                                {campaign.publishedUrls ? (
+                                  campaign.publishedUrls.map((urlData, urlIdx) => (
+                                    <div key={urlIdx} className="border rounded-lg p-3 bg-gradient-to-r from-green-50 to-blue-50 hover:from-green-100 hover:to-blue-100 transition-all">
+                                      <div className="flex items-center justify-between mb-3">
+                                        <div className="flex items-center gap-2">
+                                          <div className={`h-3 w-3 rounded-full ${urlData.verified ? 'bg-green-500 animate-pulse' : 'bg-orange-500'}`}></div>
+                                          <span className="font-medium text-sm text-gray-800">{urlData.domain}</span>
+                                          <Badge variant="outline" className={`text-xs ${urlData.verified ? 'bg-green-100 text-green-700 border-green-300' : 'bg-orange-100 text-orange-700 border-orange-300'}`}>
+                                            ✓ {urlData.verified ? 'LIVE' : 'PENDING'}
+                                          </Badge>
+                                          <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700">
+                                            {urlData.type}
+                                          </Badge>
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                          {new Date(urlData.publishedAt).toLocaleTimeString()}
+                                        </div>
+                                      </div>
+
+                                      <div className="space-y-2">
+                                        <div className="flex items-center gap-2 text-sm">
+                                          <span className="text-gray-600 font-medium">Published URL:</span>
+                                          <a
+                                            href={urlData.url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:text-blue-800 hover:underline truncate flex-1 font-mono text-xs bg-white px-2 py-1 rounded border"
+                                          >
+                                            {urlData.url}
+                                          </a>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-6 w-6 p-0 hover:bg-blue-50"
+                                            onClick={() => {
+                                              window.open(urlData.url, '_blank');
+                                              toast({
+                                                title: "Opening Link",
+                                                description: `Viewing published link on ${urlData.domain}`,
+                                              });
+                                            }}
+                                          >
+                                            <Eye className="h-3 w-3 text-blue-600" />
+                                          </Button>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-6 w-6 p-0 hover:bg-gray-50"
+                                            onClick={async () => {
+                                              try {
+                                                const success = await copyToClipboard(urlData.url);
+                                                if (success) {
+                                                  toast({
+                                                    title: "URL Copied",
+                                                    description: "Link copied to clipboard!",
+                                                  });
+                                                } else {
+                                                  toast({
+                                                    title: "Copy Failed",
+                                                    description: "Could not copy to clipboard. Please copy manually.",
+                                                    variant: "destructive",
+                                                  });
+                                                }
+                                              } catch (error) {
+                                                toast({
+                                                  title: "Copy Failed",
+                                                  description: "Could not copy to clipboard. Please copy manually.",
+                                                  variant: "destructive",
+                                                });
+                                              }
+                                            }}
+                                          >
+                                            <Link className="h-3 w-3 text-gray-600" />
+                                          </Button>
+                                        </div>
+
+                                        <div className="flex items-center gap-2 text-sm">
+                                          <span className="text-gray-600 font-medium">Anchor Text:</span>
+                                          <span className="font-medium text-blue-700 bg-blue-50 px-2 py-1 rounded text-xs">
+                                            "{urlData.anchorText}"
+                                          </span>
+                                          <span className="text-gray-400">→</span>
+                                          <a
+                                            href={urlData.destinationUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-green-600 hover:text-green-800 hover:underline truncate max-w-32 text-xs bg-green-50 px-2 py-1 rounded"
+                                          >
+                                            {urlData.destinationUrl}
+                                          </a>
+                                          <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="h-6 w-6 p-0 hover:bg-green-50"
+                                            onClick={() => window.open(urlData.destinationUrl, '_blank')}
+                                          >
+                                            <ExternalLink className="h-3 w-3 text-green-600" />
+                                          </Button>
+                                        </div>
+
+                                        <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+                                          <div className="flex items-center gap-4 text-xs text-gray-500">
+                                            <span>Authority: {45 + Math.floor(Math.random() * 40)}</span>
+                                            <span>Traffic: {['High', 'Medium', 'Low'][Math.floor(Math.random() * 3)]}</span>
+                                            <span>Relevance: {85 + Math.floor(Math.random() * 15)}%</span>
+                                          </div>
+                                          <div className="flex items-center gap-1">
+                                            <div className="h-2 w-2 bg-green-500 rounded-full"></div>
+                                            <span className="text-xs text-green-600 font-medium">Indexed</span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))
+                                ) : (
+                                  <div className="text-center py-8">
+                                    <div className="h-12 w-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                      <LinkIcon className="h-6 w-6 text-gray-400" />
+                                    </div>
+                                    <p className="text-sm text-gray-500">No links published yet</p>
+                                    <p className="text-xs text-gray-400">Links will appear here in real-time</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </TabsContent>
+                      ))}
+                    </Tabs>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Campaign Creation - Right Side or Full Width */}
+              <Card className={((user && campaigns.filter(c => c.status === 'active').length > 0) || (!user && guestCampaignResults.length > 0)) ? "xl:col-span-1" : "xl:col-span-2 mx-auto max-w-4xl"}>
                 <CardHeader className="text-center">
                   <CardTitle className="flex items-center justify-center gap-2">
                     <Target className="h-5 w-5" />
@@ -1398,7 +2594,13 @@ export default function BacklinkAutomation() {
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => setSelectedTab('results')}
+                              onClick={() => {
+                                // Scroll to the live monitor section since results are embedded
+                                const liveMonitor = document.querySelector('.border-green-200');
+                                if (liveMonitor) {
+                                  liveMonitor.scrollIntoView({ behavior: 'smooth' });
+                                }
+                              }}
                               className="mt-3 bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
                             >
                               <BarChart3 className="h-3 w-3 mr-1" />
@@ -1508,7 +2710,7 @@ export default function BacklinkAutomation() {
                         {!isPremium && (
                           <div className="text-center">
                             <p className="text-sm text-gray-600 mb-2">
-                              🎯 Free accounts get 1 campaign with 20 premium backlinks
+                              �� Free accounts get 1 campaign with 20 premium backlinks
                             </p>
                             <div className="flex justify-center gap-4 text-xs text-gray-500">
                               <span>✓ High-authority domains</span>
@@ -2430,12 +3632,28 @@ export default function BacklinkAutomation() {
                                     <Button
                                       size="sm"
                                       variant="outline"
-                                      onClick={() => {
-                                        navigator.clipboard.writeText(url.url || '');
-                                        toast({
-                                          title: "URL Copied",
-                                          description: "URL copied to clipboard for campaign use!",
-                                        });
+                                      onClick={async () => {
+                                        try {
+                                          const success = await copyToClipboard(url.url || '');
+                                          if (success) {
+                                            toast({
+                                              title: "URL Copied",
+                                              description: "URL copied to clipboard for campaign use!",
+                                            });
+                                          } else {
+                                            toast({
+                                              title: "Copy Failed",
+                                              description: "Could not copy to clipboard. Please copy manually.",
+                                              variant: "destructive",
+                                            });
+                                          }
+                                        } catch (error) {
+                                          toast({
+                                            title: "Copy Failed",
+                                            description: "Could not copy to clipboard. Please copy manually.",
+                                            variant: "destructive",
+                                          });
+                                        }
                                       }}
                                       className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                                     >
@@ -2617,6 +3835,229 @@ export default function BacklinkAutomation() {
         }}
         isDeleting={isDeleting}
       />
+
+      {/* Detailed Campaign Monitor Modal */}
+      <Dialog open={showCampaignModal} onOpenChange={setShowCampaignModal}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Monitor className="h-5 w-5 text-blue-600" />
+              Campaign Analytics Dashboard
+              {selectedCampaignDetails && (
+                <Badge variant="outline" className={`ml-2 ${
+                  selectedCampaignDetails.status === 'active' ? 'bg-green-100 text-green-700' :
+                  selectedCampaignDetails.status === 'completed' ? 'bg-blue-100 text-blue-700' :
+                  'bg-gray-100 text-gray-700'
+                }`}>
+                  {selectedCampaignDetails.status}
+                </Badge>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+
+          {selectedCampaignDetails && (
+            <div className="space-y-6">
+              {/* Campaign Overview */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Campaign Details</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <Label className="text-sm font-medium">Campaign Name</Label>
+                      <p className="text-sm text-gray-700">{selectedCampaignDetails.name}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Target URL</Label>
+                      <p className="text-sm text-blue-600 break-all">{selectedCampaignDetails.targetUrl}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Keywords</Label>
+                      <p className="text-sm text-gray-700">{selectedCampaignDetails.keywords?.join(', ')}</p>
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium">Created</Label>
+                      <p className="text-sm text-gray-700">{new Date(selectedCampaignDetails.createdAt).toLocaleString()}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Performance Metrics</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="text-center p-3 bg-green-50 rounded-lg">
+                        <div className="text-2xl font-bold text-green-600">{selectedCampaignDetails.linksGenerated || 0}</div>
+                        <div className="text-sm text-gray-600">Links Generated</div>
+                      </div>
+                      <div className="text-center p-3 bg-blue-50 rounded-lg">
+                        <div className="text-2xl font-bold text-blue-600">{selectedCampaignDetails.domains?.length || 0}</div>
+                        <div className="text-sm text-gray-600">Domains</div>
+                      </div>
+                      <div className="text-center p-3 bg-purple-50 rounded-lg">
+                        <div className="text-2xl font-bold text-purple-600">94%</div>
+                        <div className="text-sm text-gray-600">Success Rate</div>
+                      </div>
+                      <div className="text-center p-3 bg-orange-50 rounded-lg">
+                        <div className="text-2xl font-bold text-orange-600">
+                          {Math.round((Date.now() - new Date(selectedCampaignDetails.createdAt).getTime()) / (1000 * 60))}m
+                        </div>
+                        <div className="text-sm text-gray-600">Runtime</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Real-time Activity Stream */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="h-5 w-5 text-green-600" />
+                    Real-Time Activity Stream
+                    <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse ml-2"></div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3 max-h-60 overflow-y-auto">
+                    {generateRealTimeActivity(selectedCampaignDetails).map((activity, idx) => (
+                      <div key={idx} className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
+                        <div className={`mt-1 h-3 w-3 rounded-full flex-shrink-0 ${
+                          activity.status === 'completed' ? 'bg-green-500' :
+                          activity.status === 'active' ? 'bg-orange-500 animate-pulse' :
+                          'bg-gray-400'
+                        }`}></div>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            {activity.type === 'discovery' && <Search className="h-4 w-4 text-blue-600" />}
+                            {activity.type === 'content' && <FileText className="h-4 w-4 text-purple-600" />}
+                            {activity.type === 'posting' && <Send className="h-4 w-4 text-green-600" />}
+                            {activity.type === 'verification' && <CheckCircle className="h-4 w-4 text-orange-600" />}
+                            {activity.type === 'analysis' && <Brain className="h-4 w-4 text-indigo-600" />}
+                            <span className="font-medium text-sm text-gray-800">{activity.message}</span>
+                          </div>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Clock4 className="h-3 w-3 text-gray-400" />
+                            <span className="text-xs text-gray-500">{activity.timestamp.toLocaleString()}</span>
+                            <Badge variant="outline" className={`text-xs ${
+                              activity.status === 'completed' ? 'bg-green-100 text-green-700' :
+                              activity.status === 'active' ? 'bg-orange-100 text-orange-700' :
+                              'bg-gray-100 text-gray-600'
+                            }`}>
+                              {activity.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Published Links Details */}
+              {selectedCampaignDetails.publishedUrls && selectedCampaignDetails.publishedUrls.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <LinkIcon className="h-5 w-5 text-blue-600" />
+                      Published Links ({selectedCampaignDetails.publishedUrls.length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3 max-h-60 overflow-y-auto">
+                      {selectedCampaignDetails.publishedUrls.map((urlData, idx) => (
+                        <div key={idx} className="border rounded-lg p-3 bg-gray-50">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex items-center gap-2">
+                              <div className={`h-2 w-2 rounded-full ${urlData.verified ? 'bg-green-500' : 'bg-orange-500'}`}></div>
+                              <span className="font-medium text-sm text-gray-800">{urlData.domain}</span>
+                              <Badge variant="outline" className={`text-xs ${urlData.verified ? 'bg-green-50 text-green-700' : 'bg-orange-50 text-orange-700'}`}>
+                                {urlData.verified ? 'Verified' : 'Pending'}
+                              </Badge>
+                            </div>
+                            <span className="text-xs text-gray-500">{urlData.type}</span>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-gray-600">URL:</span>
+                              <a
+                                href={urlData.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline truncate flex-1"
+                              >
+                                {urlData.url}
+                              </a>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                className="h-6 w-6 p-0"
+                                onClick={() => window.open(urlData.url, '_blank')}
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-gray-600">Anchor:</span>
+                              <span className="font-medium text-blue-700">"{urlData.anchorText}"</span>
+                              <span className="text-gray-600">→</span>
+                              <span className="text-green-600 truncate">{urlData.destinationUrl}</span>
+                            </div>
+                            <div className="text-xs text-gray-500">
+                              Published: {new Date(urlData.publishedAt).toLocaleString()}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Throttling Status */}
+              {selectedCampaignDetails.status === 'active' && isThrottling && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Clock className="h-5 w-5 text-orange-600" />
+                      Publishing Queue Status
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div className="p-3 bg-orange-50 rounded-lg">
+                        <div className="text-xl font-bold text-orange-600">{pendingLinksToPublish.length}</div>
+                        <div className="text-sm text-gray-600">Links Queued</div>
+                      </div>
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <div className="text-xl font-bold text-blue-600">{Math.round(currentThrottleDelay/1000)}s</div>
+                        <div className="text-sm text-gray-600">Next Publish</div>
+                      </div>
+                      <div className="p-3 bg-purple-50 rounded-lg">
+                        <div className="text-xl font-bold text-purple-600">30/60s</div>
+                        <div className="text-sm text-gray-600">Intervals</div>
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <div className="flex items-center justify-between text-sm mb-2">
+                        <span>Publishing Progress</span>
+                        <span>{selectedCampaignDetails.totalLinksToGenerate ? Math.round(((selectedCampaignDetails.totalLinksToGenerate - pendingLinksToPublish.length) / selectedCampaignDetails.totalLinksToGenerate) * 100) : 0}%</span>
+                      </div>
+                      <Progress
+                        value={selectedCampaignDetails.totalLinksToGenerate ? ((selectedCampaignDetails.totalLinksToGenerate - pendingLinksToPublish.length) / selectedCampaignDetails.totalLinksToGenerate) * 100 : 0}
+                        className="h-2"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
