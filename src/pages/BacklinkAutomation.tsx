@@ -64,7 +64,7 @@ interface DatabaseCampaign {
   target_url: string;
   keywords: string[];
   anchor_texts: string[];
-  status: 'active' | 'paused' | 'stopped' | 'completed';
+  status: 'active' | 'paused' | 'stopped';
   progress: number;
   links_generated: number;
   daily_limit: number;
@@ -1224,7 +1224,7 @@ export default function BacklinkAutomation() {
             // Show real-time toast for high-authority links
             if (newPostback.domainAuthority >= 90) {
               toast({
-                title: "🚀 High-Authority Link Published!",
+                title: "���� High-Authority Link Published!",
                 description: `DA ${newPostback.domainAuthority} link live on ${newPostback.domain}`,
                 duration: 3000,
               });
