@@ -374,125 +374,45 @@ export default function BacklinkAutomation() {
     }
   };
 
-  const simulateLinkBuilding = async () => {
-    if (!isLinkBuildingActive || campaigns.filter(c => c.status === 'active').length === 0) return;
-
+  // Real-time data loading from live link building service
+  const loadRealTimeData = async () => {
     const activeCampaigns = campaigns.filter(c => c.status === 'active');
-    const randomCampaign = activeCampaigns[Math.floor(Math.random() * activeCampaigns.length)];
 
-    if (!randomCampaign) return;
+    for (const campaign of activeCampaigns) {
+      try {
+        // Get published links from database
+        const publishedLinksData = await liveLinkBuildingService.getPublishedLinks(campaign.id);
+        const activityLogsData = await liveLinkBuildingService.getActivityLogs(campaign.id);
 
-    // Simulate link publishing
-    if (Math.random() > 0.3) { // 70% chance to publish a link
-      const platforms = [
-        { name: 'Medium', da: 96, baseUrl: 'medium.com' },
-        { name: 'WordPress', da: 94, baseUrl: 'wordpress.com' },
-        { name: 'Blogger', da: 100, baseUrl: 'blogger.com' },
-        { name: 'Tumblr', da: 99, baseUrl: 'tumblr.com' },
-        { name: 'Forbes Councils', da: 95, baseUrl: 'forbes.com' },
-        { name: 'TechCrunch', da: 94, baseUrl: 'techcrunch.com' },
-        { name: 'Entrepreneur', da: 91, baseUrl: 'entrepreneur.com' },
-        { name: 'HubSpot Blog', da: 92, baseUrl: 'hubspot.com' },
-        { name: 'Mashable', da: 92, baseUrl: 'mashable.com' },
-        { name: 'Inc.com', da: 90, baseUrl: 'inc.com' }
-      ];
+        // Update published links state
+        setPublishedLinks(prev => {
+          const existingIds = new Set(prev.map(link => link.id));
+          const newLinks = publishedLinksData.filter(link => !existingIds.has(link.id));
+          return [...newLinks, ...prev].slice(0, 100); // Keep last 100 links
+        });
 
-      const platform = platforms[Math.floor(Math.random() * platforms.length)];
-      const anchorTexts = randomCampaign.keywords.length > 0 ?
-        [...randomCampaign.keywords, 'learn more', 'click here', 'read full article', 'get started'] :
-        ['learn more', 'click here', 'read full article', 'get started'];
-      const selectedAnchor = anchorTexts[Math.floor(Math.random() * anchorTexts.length)];
+        // Update activity logs state
+        setActivityLog(prev => {
+          const existingIds = new Set(prev.map(activity => activity.id));
+          const newActivities = activityLogsData.filter(activity => !existingIds.has(activity.id));
+          return [...newActivities, ...prev].slice(0, 50); // Keep last 50 activities
+        });
 
-      const newLink: PublishedLink = {
-        id: `link_${Date.now()}_${Math.random().toString(36).substr(2, 8)}`,
-        sourceUrl: `https://${platform.baseUrl}/${Math.random().toString(36).substr(2, 12)}`,
-        targetUrl: randomCampaign.targetUrl,
-        anchorText: selectedAnchor,
-        campaignId: randomCampaign.id,
-        campaignName: randomCampaign.name,
-        publishedAt: new Date(),
-        platform: platform.name,
-        domainAuthority: platform.da + Math.floor(Math.random() * 5) - 2,
-        status: 'live',
-        clicks: Math.floor(Math.random() * 50),
-        linkJuice: Math.random() * 100
-      };
+        // Check for premium limit reached
+        if (user?.id) {
+          const premiumCheck = await liveLinkBuildingService.checkPremiumLimits(user.id);
+          setPremiumLimitData(premiumCheck);
 
-      setPublishedLinks(prev => [newLink, ...prev.slice(0, 99)]); // Keep last 100 links
-
-      // Add to activity log
-      const activity: ActivityLog = {
-        id: `activity_${Date.now()}`,
-        timestamp: new Date(),
-        type: 'link_published',
-        message: `🚀 Link published on ${platform.name} with DA ${newLink.domainAuthority} using anchor "${selectedAnchor}"`,
-        campaignId: randomCampaign.id,
-        success: true,
-        data: newLink
-      };
-
-      setActivityLog(prev => [activity, ...prev.slice(0, 49)]); // Keep last 50 activities
-
-      // Update campaign metrics
-      setCampaigns(prev => prev.map(c =>
-        c.id === randomCampaign.id ? {
-          ...c,
-          linksGenerated: c.linksGenerated + 1,
-          linksLive: c.linksLive + 1,
-          progress: Math.min(100, (c.linksGenerated + 1) / c.totalTarget * 100),
-          lastActive: new Date(),
-          quality: {
-            ...c.quality,
-            averageAuthority: Math.round((c.quality.averageAuthority * c.linksGenerated + newLink.domainAuthority) / (c.linksGenerated + 1)),
-            successRate: Math.min(100, c.quality.successRate + Math.random() * 2)
-          },
-          performance: {
-            ...c.performance,
-            velocity: c.linksGenerated / Math.max(1, (Date.now() - c.createdAt.getTime()) / (1000 * 60 * 60 * 24)),
-            trend: Math.random() > 0.3 ? 'up' : c.performance.trend,
-            efficiency: Math.min(100, c.performance.efficiency + Math.random() * 5)
+          if (premiumCheck.isLimitReached && !isUserPremium) {
+            setPremiumUpgradeModal(true);
+            // Stop the campaign
+            await pauseCampaign(campaign.id);
           }
-        } : c
-      ));
+        }
 
-      // Update global success model
-      setGlobalSuccessModel(prev => ({
-        ...prev,
-        totalLinksBuilt: prev.totalLinksBuilt + 1
-      }));
-
-      // Update real-time metrics
-      setRealTimeMetrics(prev => ({
-        ...prev,
-        linksPostedToday: prev.linksPostedToday + 1
-      }));
-    }
-
-    // Simulate other activities
-    if (Math.random() > 0.7) { // 30% chance for other activities
-      const activities = [
-        'content_generated',
-        'opportunity_found',
-        'verification_complete'
-      ] as const;
-
-      const activityType = activities[Math.floor(Math.random() * activities.length)];
-      const messages = {
-        content_generated: '🤖 AI generated unique content for blog comment placement',
-        opportunity_found: '🎯 Discovered new high-authority opportunity',
-        verification_complete: '✅ Link verification completed - all systems operational'
-      };
-
-      const activity: ActivityLog = {
-        id: `activity_${Date.now()}`,
-        timestamp: new Date(),
-        type: activityType,
-        message: messages[activityType],
-        campaignId: randomCampaign.id,
-        success: true
-      };
-
-      setActivityLog(prev => [activity, ...prev.slice(0, 49)]);
+      } catch (error) {
+        console.error('Error loading real-time data for campaign:', campaign.id, error);
+      }
     }
   };
 
@@ -1263,7 +1183,7 @@ export default function BacklinkAutomation() {
                                             </Badge>
                                           </div>
                                           <p className="text-sm text-gray-600 truncate">
-                                            <strong>Anchor:</strong> "{link.anchorText}" → {link.targetUrl}
+                                            <strong>Anchor:</strong> "{link.anchorText}" �� {link.targetUrl}
                                           </p>
                                           <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                                             <span className="flex items-center gap-1">
