@@ -16,7 +16,6 @@ import { supabase } from '@/integrations/supabase/client';
 // Admin Components
 import { EnhancedSecurityDashboard } from "@/components/EnhancedSecurityDashboard";
 import { CampaignManager } from "@/components/CampaignManager";
-import { AdminAffiliateManager } from "@/components/admin/AdminAffiliateManager";
 import { EmailSystemManagerSafe } from "@/components/admin/EmailSystemManagerSafe";
 import { AdminBlogManager } from "@/components/admin/AdminBlogManager";
 import { TrialPostCleanupManager } from "@/components/admin/TrialPostCleanupManager";
