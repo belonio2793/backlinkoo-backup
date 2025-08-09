@@ -670,6 +670,7 @@ const Dashboard = () => {
     return urlParams.get('section') || "dashboard";
   });
   const [isPremiumSubscriber, setIsPremiumSubscriber] = useState(false);
+  const [premiumCheckComplete, setPremiumCheckComplete] = useState(false);
   const [userProgress, setUserProgress] = useState<{ [key: string]: boolean }>({});
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const { toast } = useToast();
