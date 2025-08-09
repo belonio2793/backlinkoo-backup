@@ -193,12 +193,24 @@ class CampaignService {
         }
 
         console.log('Non-JSON response received:', {
+          url: response.url || 'unknown',
           status: response.status,
           statusText: response.statusText,
           contentType,
-          responseText: responseText.substring(0, 200) // First 200 chars for debugging
+          responseText: responseText.substring(0, 500) // More chars for debugging
         });
-        throw new Error('Server returned non-JSON response. Backend service may not be properly configured.');
+
+        // Check if this is a 404 which might indicate missing function
+        if (response.status === 404) {
+          throw new Error(`Backend function not found (404). The campaign management service may not be deployed properly. URL: ${response.url}`);
+        }
+
+        // Check if this is a 500 error with HTML (typical for server errors)
+        if (response.status >= 500 && responseText.includes('<html')) {
+          throw new Error(`Server error (${response.status}). The backend service encountered an internal error.`);
+        }
+
+        throw new Error(`Server returned non-JSON response (${response.status}). Backend service may not be properly configured.`);
       }
 
       // Parse JSON with better error handling
