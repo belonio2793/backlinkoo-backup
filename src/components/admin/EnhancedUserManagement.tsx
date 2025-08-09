@@ -134,55 +134,11 @@ export default function EnhancedUserManagement() {
     }
   };
 
-  const createUser = async () => {
+  const handleDeleteUser = async (user: UserProfile) => {
     try {
-      setLoading(true);
-
-      // Create user in Supabase Auth
-      const { data: authUser, error: authError } = await supabase.auth.admin.createUser({
-        email: newUser.email,
-        password: newUser.password,
-        email_confirm: true
-      });
-
-      if (authError) {
-        throw authError;
-      }
-
-      // Create profile
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({
-          user_id: authUser.user.id,
-          email: newUser.email,
-          role: newUser.role,
-          subscription_tier: newUser.subscription_tier,
-          credits: newUser.credits
-        });
-
-      if (profileError) {
-        throw profileError;
-      }
-
-      toast({
-        title: "User Created",
-        description: `Successfully created user ${newUser.email}`,
-      });
-
-      setNewUser({ email: '', password: '', role: 'user', subscription_tier: 'free', credits: 0 });
-      setIsCreateModalOpen(false);
-      loadUsers();
-      loadUserStats();
-
-    } catch (error: any) {
-      console.error('Error creating user:', error);
-      toast({
-        title: "Error Creating User",
-        description: error.message,
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
+      await deleteUser(user.id, user.email);
+    } catch (error) {
+      // Error is handled by the hook
     }
   };
 
