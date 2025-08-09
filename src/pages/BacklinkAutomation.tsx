@@ -271,6 +271,43 @@ export default function BacklinkAutomation() {
 
   const { toast } = useToast();
 
+  // Clipboard helper with fallback for when Clipboard API is blocked
+  const copyToClipboard = async (text: string) => {
+    try {
+      // Try modern Clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } else {
+        // Fallback to execCommand for older browsers or when Clipboard API is blocked
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const success = document.execCommand('copy');
+        textArea.remove();
+        return success;
+      }
+    } catch (error) {
+      // Final fallback - create a temporary input element
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+      const success = document.execCommand('copy');
+      textArea.remove();
+      return success;
+    }
+  };
+
   // Guest tracking functions
   const getGuestLinkCount = () => {
     const stored = localStorage.getItem('guest_links_generated');
