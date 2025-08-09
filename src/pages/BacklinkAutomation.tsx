@@ -1042,7 +1042,9 @@ export default function BacklinkAutomation() {
                       ) : (
                         <Rocket className="h-4 w-4 mr-2" />
                       )}
-                      {!user ? "Login Required" : "Launch Campaign"}
+                      {!user ? "Login Required" :
+                     (databaseStatus && !databaseStatus.isConnected) ? "System Initializing..." :
+                     "Launch Campaign"}
                     </Button>
                   </div>
                 </CardContent>
