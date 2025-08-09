@@ -1262,23 +1262,9 @@ export default function BacklinkAutomation() {
           }
         }
 
-        // Add campaign result for guest with initially empty published URLs
-        const campaignResult = {
-          id: Date.now().toString(),
-          name: generateCampaignName(campaignForm.targetUrl, campaignForm.keywords),
-          targetUrl: campaignForm.targetUrl,
-          keywords: campaignForm.keywords.split(',').map(k => k.trim()),
-          linksGenerated: 0, // Start at 0, will increment as links are published
-          totalLinksToGenerate: linksToGenerate,
-          createdAt: new Date().toISOString(),
-          status: 'active', // Changed to active since we're still publishing
-          domains: [],
-          publishedUrls: [],
-          blogPostUrl: blogResult.success ? blogResult.blogPostUrl : undefined,
-          blogPostTitle: blogResult.success ? blogResult.title : undefined
-        };
-
-        addGuestCampaignResult(campaignResult);
+        // The campaign was already created by trackCampaignCreation above
+        // Now just update our local state
+        updateGuestRestrictions();
 
         // Start real-time activity for guest campaign
         setTimeout(() => {
