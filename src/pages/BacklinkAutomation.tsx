@@ -1505,33 +1505,125 @@ export default function BacklinkAutomation() {
                         {/* Guest Results */}
                         {!user && guestCampaignResults.length > 0 && (
                           <div className="p-4 space-y-3">
-                            {guestCampaignResults.map((campaign, idx) => (
-                              <div key={idx} className="border rounded-lg p-3 bg-gradient-to-r from-green-50 to-blue-50">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <div className="h-2 w-2 bg-green-500 rounded-full animate-pulse"></div>
-                                    <span className="font-medium text-sm">{campaign.name}</span>
+                            {guestCampaignResults.map((campaign, idx) => {
+                              const isExpanded = expandedCampaigns.has(campaign.id);
+                              const realTimeActivities = generateRealTimeActivity(campaign);
+
+                              return (
+                                <div key={idx} className="border rounded-lg bg-gradient-to-r from-green-50 to-blue-50 overflow-hidden">
+                                  <div className="p-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center gap-2">
+                                        <div className={`h-2 w-2 rounded-full ${campaign.status === 'active' ? 'bg-green-500 animate-pulse' : 'bg-blue-500'}`}></div>
+                                        <span className="font-medium text-sm">{campaign.name}</span>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => toggleCampaignExpansion(campaign.id)}
+                                          className="h-6 w-6 p-0 hover:bg-white/50"
+                                        >
+                                          {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                                        </Button>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
+                                          ✓ {campaign.status}
+                                        </Badge>
+                                        <Button
+                                          variant="ghost"
+                                          size="sm"
+                                          onClick={() => openCampaignModal(campaign)}
+                                          className="h-6 w-6 p-0 hover:bg-white/50"
+                                        >
+                                          <Monitor className="h-3 w-3" />
+                                        </Button>
+                                      </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-3 gap-2 text-xs">
+                                      <div className="text-center">
+                                        <div className="font-bold text-green-600">{campaign.linksGenerated}</div>
+                                        <div className="text-gray-600">Links</div>
+                                      </div>
+                                      <div className="text-center">
+                                        <div className="font-bold text-blue-600">{campaign.domains?.length || 0}</div>
+                                        <div className="text-gray-600">Domains</div>
+                                      </div>
+                                      <div className="text-center">
+                                        <div className="font-bold text-purple-600">94%</div>
+                                        <div className="text-gray-600">Success</div>
+                                      </div>
+                                    </div>
+
+                                    {/* Real-time progress bar */}
+                                    {campaign.status === 'active' && isThrottling && (
+                                      <div className="mt-3">
+                                        <div className="flex items-center justify-between text-xs mb-1">
+                                          <span className="text-gray-600">Publishing Progress</span>
+                                          <span className="text-green-600">{pendingLinksToPublish.length} queued</span>
+                                        </div>
+                                        <Progress
+                                          value={((campaign.totalLinksToGenerate - pendingLinksToPublish.length) / campaign.totalLinksToGenerate) * 100}
+                                          className="h-2"
+                                        />
+                                      </div>
+                                    )}
                                   </div>
-                                  <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
-                                    ✓ {campaign.status}
-                                  </Badge>
+
+                                  {/* Expanded Details */}
+                                  {isExpanded && (
+                                    <div className="border-t bg-white/50 p-3 space-y-3">
+                                      <div className="flex items-center gap-2 text-sm font-medium text-gray-800">
+                                        <Activity className="h-4 w-4 text-blue-600" />
+                                        Real-Time Activity
+                                      </div>
+
+                                      <div className="space-y-2 max-h-32 overflow-y-auto">
+                                        {realTimeActivities.slice(0, 4).map((activity, actIdx) => (
+                                          <div key={actIdx} className="flex items-start gap-2 text-xs">
+                                            <div className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${
+                                              activity.status === 'completed' ? 'bg-green-500' :
+                                              activity.status === 'active' ? 'bg-orange-500 animate-pulse' :
+                                              'bg-gray-400'
+                                            }`}></div>
+                                            <div className="flex-1">
+                                              <div className="text-gray-800">{activity.message}</div>
+                                              <div className="text-gray-500">{activity.timestamp.toLocaleTimeString()}</div>
+                                            </div>
+                                            <div className={`px-2 py-1 rounded-full text-xs ${
+                                              activity.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                              activity.status === 'active' ? 'bg-orange-100 text-orange-700' :
+                                              'bg-gray-100 text-gray-600'
+                                            }`}>
+                                              {activity.status}
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+
+                                      {campaign.publishedUrls && campaign.publishedUrls.length > 0 && (
+                                        <div className="mt-3">
+                                          <div className="text-xs font-medium text-gray-700 mb-2">Recent Publications</div>
+                                          <div className="space-y-1">
+                                            {campaign.publishedUrls.slice(0, 3).map((urlData, urlIdx) => (
+                                              <div key={urlIdx} className="flex items-center justify-between text-xs bg-white/70 rounded p-2">
+                                                <div className="flex items-center gap-2">
+                                                  <LinkIcon className="h-3 w-3 text-green-600" />
+                                                  <span className="font-medium">{urlData.domain}</span>
+                                                </div>
+                                                <Badge variant="outline" className="bg-green-50 text-green-700 text-xs">
+                                                  Live
+                                                </Badge>
+                                              </div>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                  )}
                                 </div>
-                                <div className="grid grid-cols-3 gap-2 text-xs">
-                                  <div className="text-center">
-                                    <div className="font-bold text-green-600">{campaign.linksGenerated}</div>
-                                    <div className="text-gray-600">Links</div>
-                                  </div>
-                                  <div className="text-center">
-                                    <div className="font-bold text-blue-600">{campaign.domains?.length || 0}</div>
-                                    <div className="text-gray-600">Domains</div>
-                                  </div>
-                                  <div className="text-center">
-                                    <div className="font-bold text-purple-600">94%</div>
-                                    <div className="text-gray-600">Success</div>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         )}
 
