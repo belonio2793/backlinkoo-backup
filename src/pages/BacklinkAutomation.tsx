@@ -2036,7 +2036,7 @@ export default function BacklinkAutomation() {
                           </p>
                           <div className="flex justify-center gap-4 text-xs text-gray-500">
                             <span>✓ High-authority domains</span>
-                            <span>✓ Instant results</span>
+                            <span>✓ Fast 1-2s publishing</span>
                             <span>✓ No signup required</span>
                           </div>
                           {guestCampaignResults.length > 0 && (
