@@ -250,11 +250,11 @@ export default function ComprehensiveUserManagement() {
             stringified: JSON.stringify(secondError, null, 2)
           });
 
-          // Approach 3: Create demo data to show the interface
+          // No fallback - force proper database setup
           profiles = [];
           const firstErrorMsg = firstError?.message || firstError?.toString() || 'Unknown database error';
           const secondErrorMsg = secondError?.message || secondError?.toString() || 'Unknown profile error';
-          setError(`Database access denied: ${firstErrorMsg}. Profile access error: ${secondErrorMsg}. This usually means the profiles table doesn't exist or RLS policies are blocking access. Please check your database setup.`);
+          throw new Error(`Database access completely failed. First error: ${firstErrorMsg}. Second error: ${secondErrorMsg}. You must have proper database access and admin privileges to use user management.`);
         }
       }
 
