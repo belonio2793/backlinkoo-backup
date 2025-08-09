@@ -420,47 +420,14 @@ export default function BacklinkAutomation() {
       const savedLinks = existingCampaign?.progressiveLinkCount || 0;
       const progressiveLinkCount = Math.max(currentLinks, savedLinks);
 
-      // Live monitoring data with indefinite storage
       const enhancedCampaign = {
         ...campaign,
         lastUpdated: new Date().toISOString(),
         isPermanent: true,
         isLiveMonitored: true,
-        progressiveLinkCount, // Progressive counter that only increases
+        progressiveLinkCount,
         linksBuilt: progressiveLinkCount,
-        avgAuthority: campaign.quality?.averageAuthority || Math.floor(Math.random() * 15) + 85,
-        successRate: campaign.quality?.successRate || Math.floor(Math.random() * 10) + 90,
-
-        // Live monitoring metrics (stored indefinitely)
-        liveMonitoring: {
-          startTime: existingCampaign?.liveMonitoring?.startTime || new Date().toISOString(),
-          totalRuntime: existingCampaign?.liveMonitoring?.totalRuntime || 0,
-          linkVelocity: currentLinks > 0 ? (currentLinks / ((Date.now() - new Date(existingCampaign?.liveMonitoring?.startTime || new Date()).getTime()) / (1000 * 60 * 60))) : 0,
-          peakPerformance: Math.max(existingCampaign?.liveMonitoring?.peakPerformance || 0, currentLinks),
-          sessionsCompleted: (existingCampaign?.liveMonitoring?.sessionsCompleted || 0) + 1,
-          lastActiveAt: new Date().toISOString()
-        },
-
-        // Progressive metrics history (indefinite storage)
-        metricsHistory: [
-          ...(existingCampaign?.metricsHistory || []),
-          {
-            timestamp: new Date().toISOString(),
-            linksBuilt: progressiveLinkCount,
-            linksLive: Math.floor(progressiveLinkCount * 0.85),
-            avgAuthority: campaign.quality?.averageAuthority || 90,
-            successRate: campaign.quality?.successRate || 100,
-            isProgressive: true
-          }
-        ].slice(-100), // Keep last 100 entries for performance
-
-        // Auto-detection settings
-        autoDetection: {
-          isPremium: user ? isPremium : false,
-          linkLimitReached: !isPremium && progressiveLinkCount >= 20,
-          autoPreventOverage: !isPremium && progressiveLinkCount >= 20,
-          lastLimitCheck: new Date().toISOString()
-        }
+        isDatabaseSynced: false // Mark as localStorage only
       };
 
       if (existingIndex >= 0) {
@@ -470,16 +437,7 @@ export default function BacklinkAutomation() {
       }
 
       localStorage.setItem(storageKey, JSON.stringify(savedCampaigns));
-      console.log('🔄 Live Campaign Monitor: Saved for user', user?.id || 'guest', 'with progressive count:', progressiveLinkCount);
-
-      // Show success notification for monitoring updates
-      if (Math.random() > 0.9) {
-        toast({
-          title: '🔄 Live Monitor Active',
-          description: `Campaign tracking: ${progressiveLinkCount} total links (stored indefinitely)`,
-          duration: 2000
-        });
-      }
+      console.log('🔄 localStorage Backup: Saved for user', user?.id || 'guest', 'with progressive count:', progressiveLinkCount);
 
       return enhancedCampaign;
     } catch (error) {
