@@ -2235,10 +2235,22 @@ export default function BacklinkAutomation() {
                           <p className="text-sm text-gray-600 mb-2">
                             🚀 Launch your automated backlink building campaign
                           </p>
-                          <div className="flex justify-center gap-4 text-xs text-gray-500">
+                          <div className="flex justify-center gap-4 text-xs text-gray-500 mb-2">
                             <span>✓ High-authority domains</span>
                             <span>✓ Fast 1-2s publishing</span>
                             <span>✓ No signup required</span>
+                          </div>
+                          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-3 border border-blue-200">
+                            <div className="text-center">
+                              <div className="flex items-center justify-center gap-2 mb-1">
+                                <Monitor className="h-4 w-4 text-blue-600" />
+                                <span className="font-semibold text-blue-800 text-sm">PREMIUM PREVIEW FEATURES</span>
+                                <Badge variant="outline" className="bg-blue-100 text-blue-700 text-xs">LIVE</Badge>
+                              </div>
+                              <div className="text-xs text-blue-700">
+                                🎮 Full Campaign Controls • ⚡ Real-Time Console • 📊 Live Analytics • 🔧 Pause/Resume
+                              </div>
+                            </div>
                           </div>
                           {guestCampaignResults.length > 0 && (
                             <Button
