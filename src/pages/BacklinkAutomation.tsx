@@ -391,7 +391,7 @@ export default function BacklinkAutomation() {
     if (selectedTab === 'results') {
       const interval = setInterval(() => {
         // Simulate real-time updates by triggering re-renders
-        setRealTimeMetrics(prev => ({
+        setControlPanelData(prev => ({
           ...prev,
           lastUpdate: new Date(),
           currentThroughput: prev.currentThroughput + Math.floor(Math.random() * 3) - 1,
