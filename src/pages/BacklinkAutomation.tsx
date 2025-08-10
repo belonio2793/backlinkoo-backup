@@ -1247,7 +1247,7 @@ export default function BacklinkAutomation() {
   useEffect(() => {
     if (!user && !guestTrackingInitialized) {
       const guestUserId = guestTrackingService.initializeGuestTracking();
-      console.log('��� Guest tracking initialized:', guestUserId);
+      console.log('���� Guest tracking initialized:', guestUserId);
       setGuestTrackingInitialized(true);
       updateGuestRestrictions();
     }
@@ -6921,6 +6921,14 @@ export default function BacklinkAutomation() {
               if (deleted) {
                 // Remove campaign counters
                 deleteCounterCampaign(campaignId);
+
+                // Clean up predictive metrics
+                try {
+                  const { predictiveCampaignAlgorithm } = await import('@/services/predictiveCampaignAlgorithm');
+                  predictiveCampaignAlgorithm.deletePredictiveMetrics(campaignId);
+                } catch (error) {
+                  console.warn('Failed to clean up predictive metrics:', error instanceof Error ? error.message : String(error));
+                }
 
                 setCampaigns(prev => prev.filter(c => c.id !== campaignId));
                 updateGuestRestrictions();
