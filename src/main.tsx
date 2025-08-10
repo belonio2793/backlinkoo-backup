@@ -10,6 +10,7 @@ import './utils/fullstoryProtection'
 import './utils/errorDisplayFix'
 // Fix authentication error display issues
 import { setupAuthErrorInterceptor } from './utils/authErrorFix'
+import './utils/authErrorFixSummary'
 // Load error fixes summary
 import './utils/errorFixesSummary'
 
