@@ -358,7 +358,6 @@ export default function BacklinkAutomation() {
   const [linkBuildingQueue, setLinkBuildingQueue] = useState<any[]>([]);
   const [recentPostbacks, setRecentPostbacks] = useState<any[]>([]);
   const [showSignInModal, setShowSignInModal] = useState(false);
-  const [showGuestPremiumModal, setShowGuestPremiumModal] = useState(false);
   const [showPostCampaignSignupModal, setShowPostCampaignSignupModal] = useState(false);
   const [guestTrackingInitialized, setGuestTrackingInitialized] = useState(false);
   const [guestCampaignRestrictions, setGuestCampaignRestrictions] = useState<any>({});
@@ -2345,7 +2344,7 @@ export default function BacklinkAutomation() {
             const activity = {
               id: `activity-${Date.now()}-${i}`,
               type: 'link_published' as const,
-              message: `🔗 ${newPostback.linkType.replace('_', ' ')} published on ${newPostback.domain}`,
+              message: `�� ${newPostback.linkType.replace('_', ' ')} published on ${newPostback.domain}`,
               timestamp: new Date().toISOString(),
               metadata: {
                 domain: newPostback.domain,
