@@ -139,7 +139,7 @@ class CampaignMetricsService {
           };
         }
 
-        return { success: false, error: error.message || 'Failed to fetch campaign data' };
+        return { success: false, error: formatErrorForUI(error) || 'Failed to fetch campaign data' };
       }
 
       return { success: true, data: data || [] };
