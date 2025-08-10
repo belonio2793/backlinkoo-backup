@@ -62,7 +62,11 @@ const AdminVerificationQueue = () => {
       const campaigns = await NoHandsSEOVerificationService.getPendingVerifications();
       setPendingCampaigns(campaigns);
     } catch (error) {
-      console.error('Error fetching pending campaigns:', error);
+      console.error('Error fetching pending campaigns:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
       toast({
         title: "Error",
         description: "Failed to fetch pending campaigns.",
