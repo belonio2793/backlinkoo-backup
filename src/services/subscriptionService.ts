@@ -167,7 +167,7 @@ export class SubscriptionService {
       });
 
       if (error) {
-        console.error('Edge function error:', error?.message || error?.toString() || JSON.stringify(error));
+        logError('Edge function error', error);
 
         // Provide more specific error messages
         let errorMessage = 'Failed to create subscription';
@@ -216,7 +216,7 @@ export class SubscriptionService {
       return { success: true, url: data.url };
 
     } catch (error: any) {
-      console.error('Exception creating subscription:', error?.message || error?.toString() || JSON.stringify(error));
+      logError('Exception creating subscription', error);
 
       let errorMessage = 'An unexpected error occurred';
 
@@ -313,7 +313,7 @@ export class SubscriptionService {
 
       return { success: true };
     } catch (error: any) {
-      console.error('Exception cancelling subscription:', error?.message || error?.toString() || JSON.stringify(error));
+      logError('Exception cancelling subscription', error);
       return { success: false, error: error.message || 'Failed to cancel subscription' };
     }
   }
