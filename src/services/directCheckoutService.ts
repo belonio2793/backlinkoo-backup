@@ -54,10 +54,19 @@ class DirectCheckoutService {
       
     } catch (error: any) {
       console.error('Direct checkout failed:', error);
-      return { 
-        success: false, 
-        error: error.message || 'Checkout failed' 
-      };
+
+      // Try fallback payment service
+      try {
+        console.log('🔄 Attempting fallback payment...');
+        await FallbackPaymentService.openPayment(options);
+        return { success: true };
+      } catch (fallbackError) {
+        console.error('Fallback payment also failed:', fallbackError);
+        return {
+          success: false,
+          error: error.message || 'Checkout failed'
+        };
+      }
     }
   }
   
