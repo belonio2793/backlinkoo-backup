@@ -55,7 +55,8 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ModalProvider>
-        <SymbolCleanerProvider>
+        <PremiumUpgradeProvider>
+          <SymbolCleanerProvider>
           <Toaster />
           <Sonner />
           <UnifiedModalManager />
@@ -258,7 +259,8 @@ const App = () => (
             </Routes>
           </ReportSyncProvider>
         </BrowserRouter>
-        </SymbolCleanerProvider>
+          </SymbolCleanerProvider>
+        </PremiumUpgradeProvider>
       </ModalProvider>
     </TooltipProvider>
   </QueryClientProvider>
