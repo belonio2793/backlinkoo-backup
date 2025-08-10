@@ -179,7 +179,8 @@ class CampaignMetricsService {
       console.log('✅ Link recorded in database:', linkRecord.sourceUrl);
       return { success: true, data };
     } catch (error) {
-      console.error('Link recording error:', formatErrorForLogging(error, 'recordLink-catch'));
+      const errorDetails = formatErrorForLogging(error, 'recordLink-catch');
+      console.error('Link recording error:', JSON.stringify(errorDetails, null, 2));
       const errorMessage = formatErrorForUI(error) || 'Unknown error';
       return { success: false, error: String(errorMessage) };
     }
