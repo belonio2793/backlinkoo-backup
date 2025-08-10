@@ -4,6 +4,8 @@
  * to prevent popup blockers and ensure reliable checkout flow
  */
 
+import { PopupBlockerDetection } from './popupBlockerDetection';
+
 export interface CheckoutRedirectOptions {
   preferNewWindow?: boolean;
   windowFeatures?: string;
