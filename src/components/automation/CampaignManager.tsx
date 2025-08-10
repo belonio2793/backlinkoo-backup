@@ -36,7 +36,7 @@ export function CampaignManager() {
       failedTasks: 8,
       engines: ['blog-commenting', 'guest-posting'],
       created: '2024-01-15',
-      target: 'Technology blogs and forums',
+      target: 'Technology blogs and developer forums',
       budget: 500
     },
     {
@@ -62,7 +62,7 @@ export function CampaignManager() {
       failedTasks: 5,
       engines: ['forum-profiles', 'blog-commenting'],
       created: '2024-01-10',
-      target: 'Marketing forums',
+      target: 'Marketing and SEO forums',
       budget: 200
     }
   ]);
