@@ -2905,8 +2905,8 @@ export default function BacklinkAutomation() {
                         </Alert>
                       )}
 
-                      {/* Usage Stats for Guests */}
-                      <div className="grid grid-cols-2 gap-3">
+                      {/* Usage Stats for Guests - Hidden */}
+                      <div className="hidden grid grid-cols-2 gap-3">
                         <div className="bg-blue-50 rounded-lg p-3 text-center">
                           <div className="text-lg font-bold text-blue-600">
                             {guestCampaignRestrictions?.restrictions?.campaignsUsed || 0}/{guestCampaignRestrictions?.restrictions?.campaignsLimit || 3}
