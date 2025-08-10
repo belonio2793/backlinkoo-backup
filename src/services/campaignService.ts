@@ -669,7 +669,12 @@ class CampaignService {
         message: `Campaign ${status === 'active' ? 'resumed' : status} successfully`
       };
     } catch (error) {
-      console.error('Error updating campaign status:', error.message || error.toString() || JSON.stringify(error));
+      console.error('Error updating campaign status:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return {
         success: false,
         message: `Failed to ${status} campaign`,
