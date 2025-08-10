@@ -1995,12 +1995,7 @@ export default function BacklinkAutomation() {
       // Update campaign counters
       updateCounterStatus(campaignId, 'paused');
 
-      // Update predictive algorithm
-      try {
-        updatePredictive(campaignId);
-      } catch (error) {
-        console.warn('Failed to update predictive metrics on pause:', error instanceof Error ? error.message : String(error));
-      }
+      // Predictive algorithm removed - values integrated into live metrics
 
       // Update local state with preserved data
       setCampaigns(prev => prev.map(c => {
