@@ -133,7 +133,8 @@ class CampaignMetricsService {
 
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Campaign metrics fetch error:', formatErrorForLogging(error, 'getCampaignMetrics-catch'));
+      const errorDetails = formatErrorForLogging(error, 'getCampaignMetrics-catch');
+      console.error('Campaign metrics fetch error:', JSON.stringify(errorDetails, null, 2));
       const errorMessage = formatErrorForUI(error) || 'Unknown error';
       return { success: false, error: String(errorMessage) };
     }
