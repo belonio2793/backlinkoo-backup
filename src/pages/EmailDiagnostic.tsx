@@ -25,6 +25,7 @@ import {
   Clock,
   Terminal
 } from 'lucide-react';
+import { formatErrorForUI } from '@/utils/errorUtils';
 
 interface TestResult {
   name: string;
