@@ -1,8 +1,6 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
-import { useToast } from '@/hooks/use-toast';
 import { Crown, CreditCard, Zap } from 'lucide-react';
+import { DirectCheckoutService } from '@/services/directCheckoutService';
 
 interface UniversalPaymentTriggerProps {
   children?: React.ReactNode;
