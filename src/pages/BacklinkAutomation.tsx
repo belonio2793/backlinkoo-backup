@@ -793,7 +793,7 @@ export default function BacklinkAutomation() {
       localStorage.setItem('failed_campaign_syncs', JSON.stringify(remainingSyncs));
 
       if (syncPromises.length > 0) {
-        console.log(`���� Processed ${syncPromises.length} failed syncs, ${remainingSyncs.length} remaining`);
+        console.log(`🔄 Processed ${syncPromises.length} failed syncs, ${remainingSyncs.length} remaining`);
       }
     } catch (error) {
       console.warn('Failed to process retry queue:', error);
@@ -2192,7 +2192,7 @@ export default function BacklinkAutomation() {
       : "You've built 20 high-quality backlinks! Upgrade to Premium for unlimited campaigns and links.";
 
     toast({
-      title: " Campaign Paused - Link Limit Reached",
+      title: "🛑 Campaign Paused - Link Limit Reached",
       description: message,
       action: (
         <Button size="sm" onClick={() => setShowPremiumPlanModal(true)}>
