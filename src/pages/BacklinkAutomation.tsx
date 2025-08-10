@@ -3750,7 +3750,7 @@ export default function BacklinkAutomation() {
                           <div className="flex justify-center gap-4 text-xs text-gray-500">
                             <span>✓ High-authority domains</span>
                             <span>✓ Instant results</span>
-                            <span>��� No signup required</span>
+                            <span>✓ No signup required</span>
                           </div>
                           {guestCampaignResults.length > 0 && (
                             <Button
