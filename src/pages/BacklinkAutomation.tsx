@@ -6953,6 +6953,10 @@ export default function BacklinkAutomation() {
                 setCampaigns(prev => prev.filter(c => c.id !== campaignId));
                 updateGuestRestrictions();
 
+                // Close dialog and reset state
+                setDeleteDialogOpen(false);
+                setCampaignToDelete(null);
+
                 toast({
                   title: "������� Campaign Deleted",
                   description: "Campaign has been permanently removed.",
