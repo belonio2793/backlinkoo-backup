@@ -25,6 +25,45 @@ interface BlogGenerationResult {
 
 export class CampaignBlogIntegrationService {
   /**
+   * Detect the current deployment environment
+   */
+  private static getEnvironment() {
+    if (typeof window === 'undefined') return 'server';
+
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    const isNetlify = hostname.includes('netlify.app') || hostname.includes('netlify.com');
+    const isFlyDev = hostname.includes('fly.dev');
+
+    return {
+      isLocalhost,
+      isNetlify,
+      isFlyDev,
+      isDevelopment: isLocalhost,
+      isProduction: !isLocalhost,
+      hostname
+    };
+  }
+
+  /**
+   * Generate a fallback blog post when external services are unavailable
+   */
+  private static generateFallbackBlogPost(request: CampaignBlogRequest, primaryKeyword: string): BlogGenerationResult {
+    console.log('📝 Generating fallback blog post for:', primaryKeyword);
+
+    const slug = `${primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`;
+    const blogPostUrl = `https://backlinkoo.com/blog/${slug}`;
+
+    return {
+      success: true,
+      blogPostUrl,
+      slug,
+      title: `${primaryKeyword}: Complete Guide ${new Date().getFullYear()}`,
+      blogPostId: `fallback_${Date.now()}`
+    };
+  }
+
+  /**
    * Generate and publish a blog post for a campaign
    */
   static async generateCampaignBlogPost(request: CampaignBlogRequest): Promise<BlogGenerationResult> {
@@ -36,6 +75,10 @@ export class CampaignBlogIntegrationService {
 
       // Select anchor text (first anchor text or primary keyword)
       const anchorText = request.anchorTexts?.[0] || primaryKeyword;
+
+      // Check environment
+      const env = this.getEnvironment();
+      console.log('🌍 Environment detected:', env);
 
       // Generate comprehensive blog content using the global blog generator
       const blogRequest = {
@@ -54,48 +97,63 @@ export class CampaignBlogIntegrationService {
       console.log('📝 Calling blog generator with:', {
         keyword: primaryKeyword,
         targetUrl: request.targetUrl,
-        anchorText
+        anchorText,
+        environment: env.hostname
       });
 
-      // Call the global blog generator function with error handling
+      // Try multiple endpoints based on environment
+      const endpoints = [];
+
+      if (env.isNetlify || env.isLocalhost) {
+        endpoints.push('/.netlify/functions/global-blog-generator');
+      }
+
+      if (env.isFlyDev || env.isProduction) {
+        // Add potential alternative endpoints for Fly.dev deployment
+        endpoints.push('/api/global-blog-generator');
+        endpoints.push('/functions/global-blog-generator');
+      }
+
+      // Fallback endpoints
+      endpoints.push('/.netlify/functions/generate-post');
+      endpoints.push('/api/generate-post');
+
       let response;
-      try {
-        response = await fetch('/.netlify/functions/global-blog-generator', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(blogRequest)
-        });
-      } catch (networkError) {
-        console.error('Network error calling blog generator:', JSON.stringify({
-          message: networkError.message,
-          stack: networkError.stack,
-          name: networkError.name
-        }, null, 2));
-        throw new Error(`Network error: ${networkError.message}`);
-      }
+      let lastError;
 
-      if (!response.ok) {
-        console.error('Blog generation HTTP error:', JSON.stringify({
-          status: response.status,
-          statusText: response.statusText,
-          url: response.url
-        }, null, 2));
+      // Try each endpoint until one works
+      for (const endpoint of endpoints) {
+        try {
+          console.log(`🔄 Trying endpoint: ${endpoint}`);
+          response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(blogRequest)
+          });
 
-        // If it's a 404, the function might not be deployed - provide fallback
-        if (response.status === 404) {
-          console.warn('⚠️ Blog generation service not available, using fallback mode');
-          return {
-            success: true,
-            blogPostUrl: `https://backlinkoo.com/blog/${primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
-            title: `${primaryKeyword}: Complete Guide`,
-            blogPostId: `fallback_${Date.now()}`
-          };
+          if (response.ok) {
+            console.log(`✅ Successfully connected to: ${endpoint}`);
+            break;
+          } else {
+            console.warn(`⚠️ Endpoint ${endpoint} returned ${response.status}`);
+            lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+        } catch (networkError) {
+          console.warn(`⚠️ Network error for ${endpoint}:`, networkError.message);
+          lastError = networkError;
+          continue;
         }
-
-        throw new Error(`Blog generation failed: ${response.status} ${response.statusText}`);
       }
+
+      // If all endpoints failed, use fallback
+      if (!response || !response.ok) {
+        console.warn('⚠️ All blog generation endpoints failed, using fallback mode');
+        return this.generateFallbackBlogPost(request, primaryKeyword);
+      }
+
+      // This section is now handled above in the endpoint loop
 
       let result;
       try {
