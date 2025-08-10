@@ -69,6 +69,7 @@ export const AppWrapper = () => {
         <Route path="/ai-test" element={<AIContentTest />} />
         <Route path="/test-blog-claim" element={<TestBlogClaim />} />
         <Route path="/ai-live" element={<EnhancedAILive />} />
+        <Route path="/checkout-test" element={<CheckoutTest />} />
 
         <Route path="*" element={<NotFound />} />
 
