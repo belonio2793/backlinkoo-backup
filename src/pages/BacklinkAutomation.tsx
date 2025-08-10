@@ -1041,7 +1041,7 @@ export default function BacklinkAutomation() {
   useEffect(() => {
     if (!user && !guestTrackingInitialized) {
       const guestUserId = guestTrackingService.initializeGuestTracking();
-      console.log('🍪 Guest tracking initialized:', guestUserId);
+      console.log('��� Guest tracking initialized:', guestUserId);
       setGuestTrackingInitialized(true);
       updateGuestRestrictions();
     }
@@ -2122,12 +2122,23 @@ export default function BacklinkAutomation() {
       }));
     }, 3000); // Update every 3 seconds for more activity
 
-    // Store interval for cleanup
+    // Store interval for cleanup with atomic update
     setActiveCampaignIntervals(prev => {
       const updated = new Map(prev);
       updated.set(campaignId, interval);
+      console.log('✅ Started monitoring for campaign:', campaignId, '(Total active:', updated.size, ')');
       return updated;
     });
+
+    // Add monitoring health check
+    setTimeout(() => {
+      const currentInterval = activeCampaignIntervals.get(campaignId);
+      if (currentInterval === interval) {
+        console.log('💓 Campaign monitoring health check passed:', campaignId);
+      } else {
+        console.warn('⚠️ Campaign monitoring health check failed - interval mismatch:', campaignId);
+      }
+    }, 10000); // Check after 10 seconds
 
     return interval;
   };
