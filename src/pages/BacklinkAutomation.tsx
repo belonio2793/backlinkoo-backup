@@ -546,6 +546,80 @@ export default function BacklinkAutomation() {
     }
   }, [getUserStorageKey, user]);
 
+  // Background retry service for failed database syncs
+  const retryFailedSyncs = useCallback(async () => {
+    if (!user?.id) return;
+
+    try {
+      const failedSyncs = JSON.parse(localStorage.getItem('failed_campaign_syncs') || '[]');
+      if (failedSyncs.length === 0) return;
+
+      const currentTime = Date.now();
+      const retryDelay = 5 * 60 * 1000; // 5 minutes
+      const maxRetryAge = 24 * 60 * 60 * 1000; // 24 hours
+
+      const syncPromises = [];
+      const remainingSyncs = [];
+
+      for (const failedSync of failedSyncs) {
+        const age = currentTime - failedSync.timestamp;
+
+        // Skip if too old
+        if (age > maxRetryAge) {
+          console.log('⏰ Discarding old failed sync:', failedSync.metrics.campaignId);
+          continue;
+        }
+
+        // Skip if not enough time has passed since last attempt
+        if (age < retryDelay) {
+          remainingSyncs.push(failedSync);
+          continue;
+        }
+
+        // Attempt retry
+        console.log('🔄 Retrying failed database sync for campaign:', failedSync.metrics.campaignId);
+
+        const retryPromise = campaignMetricsService
+          .updateCampaignMetrics(failedSync.userId, failedSync.metrics)
+          .then(result => {
+            if (result.success) {
+              console.log('✅ Retry successful for campaign:', failedSync.metrics.campaignId);
+              // Don't add to remaining syncs (successfully synced)
+            } else {
+              console.warn('❌ Retry failed for campaign:', failedSync.metrics.campaignId);
+              // Add back to remaining syncs with incremented retry count
+              remainingSyncs.push({
+                ...failedSync,
+                retryCount: (failedSync.retryCount || 0) + 1
+              });
+            }
+          })
+          .catch(error => {
+            console.warn('❌ Retry exception for campaign:', failedSync.metrics.campaignId, error);
+            // Add back to remaining syncs with incremented retry count
+            remainingSyncs.push({
+              ...failedSync,
+              retryCount: (failedSync.retryCount || 0) + 1
+            });
+          });
+
+        syncPromises.push(retryPromise);
+      }
+
+      // Wait for all retries to complete
+      await Promise.allSettled(syncPromises);
+
+      // Update localStorage with remaining failed syncs
+      localStorage.setItem('failed_campaign_syncs', JSON.stringify(remainingSyncs));
+
+      if (syncPromises.length > 0) {
+        console.log(`🔄 Processed ${syncPromises.length} failed syncs, ${remainingSyncs.length} remaining`);
+      }
+    } catch (error) {
+      console.warn('Failed to process retry queue:', error);
+    }
+  }, [user]);
+
   // Load campaign metrics from localStorage
   const loadCampaignMetrics = useCallback(() => {
     try {
@@ -4598,7 +4672,7 @@ export default function BacklinkAutomation() {
                                       setPremiumUpsellTrigger('link_limit');
                                       setShowGuestPremiumModal(true);
                                       toast({
-                                        title: "🚀 Premium Required",
+                                        title: "���� Premium Required",
                                         description: updateResult.warning?.message || "This campaign reached the 20-link limit. Upgrade to continue building links!",
                                         variant: "default",
                                         duration: 5000
