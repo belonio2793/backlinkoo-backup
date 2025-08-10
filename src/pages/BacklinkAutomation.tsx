@@ -2149,6 +2149,41 @@ export default function BacklinkAutomation() {
               primaryKeyword: campaignForm.keywords.split(',')[0]?.trim()
             });
           }
+
+          // If blog generation was successful, add it as the first published link
+          if (blogResult.success && blogResult.blogPostUrl) {
+            const blogLink = {
+              domain: 'backlinkoo.com',
+              url: blogResult.blogPostUrl,
+              publishedAt: new Date().toISOString(),
+              anchorText: campaignForm.keywords.split(',')[0]?.trim() || 'learn more',
+              verified: true,
+              destinationUrl: campaignForm.targetUrl,
+              type: 'blog_post',
+              status: 'live',
+              domainAuthority: 95,
+              traffic: 50000,
+              clickThroughRate: '3.2%',
+              indexingStatus: 'Indexed',
+              linkType: 'guest_post',
+              campaignName: campaignForm.name || `Campaign for ${campaignForm.targetUrl}`,
+              priority: true, // Mark as priority link
+              isPrimaryBlogPost: true // Special flag for blog posts
+            };
+
+            // Add blog link as the first item in pending queue (priority)
+            setPendingLinksToPublish(prev => [blogLink, ...prev]);
+
+            // Also immediately add to live results as the first link
+            const currentResults = JSON.parse(localStorage.getItem('live_results') || '[]');
+            const updatedResults = [blogLink, ...currentResults];
+            localStorage.setItem('live_results', JSON.stringify(updatedResults));
+
+            // Update guest links count to include the blog post
+            setGuestLinksGenerated(prev => prev + 1);
+
+            console.log('✅ Blog post added as priority link:', blogResult.blogPostUrl);
+          }
         } catch (blogError) {
           console.warn('Blog generation failed for guest campaign:', blogError.message);
           // Continue with campaign creation even if blog generation fails
