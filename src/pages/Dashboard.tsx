@@ -87,6 +87,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import type { User } from '@supabase/supabase-js';
+import { ensureColonSpacing } from '@/utils/colonSpacingFix';
 
 
 
