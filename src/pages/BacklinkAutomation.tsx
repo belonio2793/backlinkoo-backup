@@ -2898,7 +2898,7 @@ export default function BacklinkAutomation() {
         } else {
           // Progress update
           toast({
-            title: ` +${linksToGenerate} More Backlinks Generated!`,
+            title: `🚀 +${linksToGenerate} More Backlinks Generated!`,
             description: `Total: ${newTotal} premium backlinks built${blogResult.success ? (blogResult.isFallback ? ' + blog post queued' : ' + new blog post published') : ''}! Keep going - you're on fire!`,
           });
         }
@@ -6073,7 +6073,7 @@ export default function BacklinkAutomation() {
                       <div className="space-y-2 max-h-96 overflow-y-auto">
                         {[
                           { name: 'Technology & Software', count: 125420, icon: '💻' },
-                          { name: 'Business & Finance', count: 98750, icon: '💼' },
+                          { name: 'Business & Finance', count: 98750, icon: '����' },
                           { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
