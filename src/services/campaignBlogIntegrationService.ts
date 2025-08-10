@@ -333,12 +333,12 @@ export class CampaignBlogIntegrationService {
       };
 
     } catch (error) {
-      console.error('❌ Guest campaign blog generation failed:', {
+      console.error('❌ Guest campaign blog generation failed:', JSON.stringify({
         message: error.message,
         stack: error.stack,
         name: error.name,
         code: error.code
-      });
+      }, null, 2));
 
       // Check if it's a 404 or network error - try fallback
       if (error.message?.includes('404') || error.message?.includes('Network error')) {
