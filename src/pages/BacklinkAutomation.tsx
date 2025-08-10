@@ -1662,7 +1662,7 @@ export default function BacklinkAutomation() {
 
       const linksCount = (user ? campaigns : guestCampaignResults).find(c => c.id === campaignId)?.linksGenerated || 0;
       toast({
-        title: "⏸️ Campaign Paused Successfully",
+        title: "��️ Campaign Paused Successfully",
         description: `All ${linksCount} links and metrics permanently saved to your account. Will never reset when resuming or refreshing page.`,
       });
     } catch (error) {
@@ -1706,7 +1706,7 @@ export default function BacklinkAutomation() {
       startRealTimeActivity(campaignId);
 
       toast({
-        title: "▶️ Campaign Resumed",
+        title: "▶��� Campaign Resumed",
         description: "Link building is now active and generating high-quality backlinks.",
       });
     } catch (error) {
@@ -3331,7 +3331,7 @@ export default function BacklinkAutomation() {
                             <div className="flex justify-center gap-4 text-xs text-gray-500">
                               <span>✓ High-authority domains</span>
                               <span>✓ Real-time tracking</span>
-                              <span>��� Full reporting</span>
+                              <span>✓ Full reporting</span>
                             </div>
                           </div>
                         )}
@@ -3969,7 +3969,15 @@ export default function BacklinkAutomation() {
                                 {/* Real-time link postbacks */}
                                 {realTimeLinkPostbacks.length > 0 ? (
                                   <div className="space-y-3">
-                                    {realTimeLinkPostbacks.map((postback, index) => (
+                                    {realTimeLinkPostbacks
+                                      .sort((a, b) => {
+                                        // Prioritize blog posts first
+                                        if (a.isPrimaryBlogPost && !b.isPrimaryBlogPost) return -1;
+                                        if (!a.isPrimaryBlogPost && b.isPrimaryBlogPost) return 1;
+                                        // Then sort by published date
+                                        return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+                                      })
+                                      .map((postback, index) => (
                                       <div
                                         key={postback.id}
                                         className={`p-4 rounded-lg border-l-4 ${
@@ -5157,7 +5165,7 @@ export default function BacklinkAutomation() {
                         {[
                           { name: 'Technology & Software', count: 125420, icon: '💻' },
                           { name: 'Business & Finance', count: 98750, icon: '💼' },
-                          { name: 'Health & Medicine', count: 87320, icon: '🏥' },
+                          { name: 'Health & Medicine', count: 87320, icon: '����' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
