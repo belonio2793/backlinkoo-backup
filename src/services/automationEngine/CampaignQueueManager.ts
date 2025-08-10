@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { formatErrorForLogging } from '@/utils/errorUtils';
 
 export interface QueuedCampaign {
   id: string;
