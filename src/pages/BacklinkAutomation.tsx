@@ -1662,7 +1662,7 @@ export default function BacklinkAutomation() {
 
       const linksCount = (user ? campaigns : guestCampaignResults).find(c => c.id === campaignId)?.linksGenerated || 0;
       toast({
-        title: "��️ Campaign Paused Successfully",
+        title: "⏸️ Campaign Paused Successfully",
         description: `All ${linksCount} links and metrics permanently saved to your account. Will never reset when resuming or refreshing page.`,
       });
     } catch (error) {
@@ -1706,7 +1706,7 @@ export default function BacklinkAutomation() {
       startRealTimeActivity(campaignId);
 
       toast({
-        title: "▶��� Campaign Resumed",
+        title: "▶️ Campaign Resumed",
         description: "Link building is now active and generating high-quality backlinks.",
       });
     } catch (error) {
@@ -3981,9 +3981,11 @@ export default function BacklinkAutomation() {
                                       <div
                                         key={postback.id}
                                         className={`p-4 rounded-lg border-l-4 ${
-                                          postback.status === 'live' ? 'border-green-500 bg-green-50' :
-                                          postback.status === 'pending' ? 'border-yellow-500 bg-yellow-50' :
-                                          'border-red-500 bg-red-50'
+                                          postback.isPrimaryBlogPost
+                                            ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 ring-2 ring-blue-200'
+                                            : postback.status === 'live' ? 'border-green-500 bg-green-50' :
+                                            postback.status === 'pending' ? 'border-yellow-500 bg-yellow-50' :
+                                            'border-red-500 bg-red-50'
                                         } animate-fade-in`}
                                         style={{ animationDelay: `${index * 0.1}s` }}
                                       >
@@ -5165,7 +5167,7 @@ export default function BacklinkAutomation() {
                         {[
                           { name: 'Technology & Software', count: 125420, icon: '💻' },
                           { name: 'Business & Finance', count: 98750, icon: '💼' },
-                          { name: 'Health & Medicine', count: 87320, icon: '����' },
+                          { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
