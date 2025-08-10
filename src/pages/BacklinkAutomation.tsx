@@ -39,7 +39,7 @@ import { TrialExhaustedModal } from '@/components/TrialExhaustedModal';
 
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
 import { CampaignBlogIntegrationService } from '@/services/campaignBlogIntegrationService';
-import { campaignMetricsService, type CampaignMetrics } from '@/services/campaignMetricsService';
+// import { campaignMetricsService, type CampaignMetrics } from '@/services/campaignMetricsService';
 import { LoginModal } from '@/components/LoginModal';
 import { guestTrackingService } from '@/services/guestTrackingService';
 import { GuestPremiumUpsellModal } from '@/components/GuestPremiumUpsellModal';
