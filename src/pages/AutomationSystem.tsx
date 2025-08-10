@@ -33,6 +33,7 @@ import { SystemLogs } from '@/components/automation/SystemLogs';
 import { SafetyControls } from '@/components/automation/SafetyControls';
 import { ConfigurationPanel } from '@/components/automation/ConfigurationPanel';
 import { PerformanceMetrics } from '@/components/automation/PerformanceMetrics';
+import { NavigationHeader } from '@/components/shared/NavigationHeader';
 
 export default function AutomationSystem() {
   const [systemStatus, setSystemStatus] = useState('stopped');
