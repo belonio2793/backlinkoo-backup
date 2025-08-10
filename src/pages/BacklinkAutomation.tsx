@@ -33,7 +33,7 @@ import { useAuth } from '@/hooks/useAuth';
 import ToolsHeader from '@/components/shared/ToolsHeader';
 import { Footer } from '@/components/Footer';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
-import { TrialExhaustedModal } from '@/components/TrialExhaustedModal';
+// import { TrialExhaustedModal } from '@/components/TrialExhaustedModal';
 
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
 import { CampaignBlogIntegrationService } from '@/services/campaignBlogIntegrationService';
