@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useEnhancedAdminMetrics } from '@/hooks/useEnhancedAdminMetrics';
 import { ServiceConnectionStatus } from '@/components/admin/ServiceConnectionStatus';
 import { DirectOpenAITest } from '@/components/admin/DirectOpenAITest';
+import { formatTimeDisplay, ensureColonSpacing } from '@/utils/colonSpacingFix';
 import {
   Users,
   Activity,
