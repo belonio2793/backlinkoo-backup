@@ -4063,11 +4063,9 @@ export default function BacklinkAutomation() {
                                   <p className="text-xs text-green-700">
                                     {(() => {
                                       const allCampaigns = user ? campaigns : guestCampaignResults;
-                                      const predictedPerHour = allCampaigns.reduce((sum, campaign) => {
-                                        const predictiveMetrics = predictiveCampaignAlgorithm.getPredictiveMetrics(campaign.id);
-                                        return sum + (predictiveMetrics?.predictedLinksPerHour || 0);
-                                      }, 0);
-                                      return predictedPerHour > 0 ? `${Math.round(predictedPerHour)}/hr predicted` : 'monitoring for new links';
+                                      const activeCampaigns = allCampaigns.filter(c => c.status === 'active').length;
+                                      const estimatedPerHour = Math.max(activeCampaigns * 2, 1); // Simple estimate: 2 links/hour per active campaign
+                                      return `${estimatedPerHour}/hr estimated velocity`;
                                     })()}
                                   </p>
                                 </div>
