@@ -784,7 +784,8 @@ export default function BacklinkAutomation() {
       setMetricsLoaded(true);
       console.log('📊 Loaded metrics for', metricsMap.size, 'campaigns from localStorage');
     } catch (error) {
-      console.warn('Failed to load campaign metrics from localStorage:', formatErrorForUI(error));
+      const errorMessage = formatErrorForUI(error);
+      console.warn('Failed to load campaign metrics from localStorage:', errorMessage);
       setMetricsLoaded(true);
     }
   }, []);
