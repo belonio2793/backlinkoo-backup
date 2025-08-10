@@ -56,7 +56,7 @@ export default function AutomationSystem() {
       status: 'active',
       taskCount: 142,
       successRate: 96.8,
-      description: 'AI-powered contextual blog comments'
+      description: 'AI-powered contextual blog comment generation'
     },
     { 
       id: 'blog-posting', 
@@ -65,7 +65,7 @@ export default function AutomationSystem() {
       status: 'active',
       taskCount: 23,
       successRate: 94.2,
-      description: 'Automated blog post creation'
+      description: 'Automated blog post creation and publishing'
     },
     { 
       id: 'forum-profiles', 
@@ -74,7 +74,7 @@ export default function AutomationSystem() {
       status: 'idle',
       taskCount: 8,
       successRate: 98.1,
-      description: 'Forum profile creation and management'
+      description: 'Automated forum profile creation and management'
     },
     { 
       id: 'social-media', 
@@ -83,7 +83,7 @@ export default function AutomationSystem() {
       status: 'active',
       taskCount: 67,
       successRate: 92.4,
-      description: 'Multi-platform social media posting'
+      description: 'Multi-platform social media content posting'
     },
     { 
       id: 'web2', 
@@ -92,7 +92,7 @@ export default function AutomationSystem() {
       status: 'paused',
       taskCount: 15,
       successRate: 89.7,
-      description: 'Web 2.0 site creation and content'
+      description: 'Web 2.0 site creation and content seeding'
     },
     { 
       id: 'guest-posting', 
@@ -101,7 +101,7 @@ export default function AutomationSystem() {
       status: 'active',
       taskCount: 31,
       successRate: 85.3,
-      description: 'Automated outreach and submissions'
+      description: 'Automated guest post outreach and submissions'
     }
   ];
 
