@@ -36,6 +36,7 @@ import { supabase } from '@/integrations/supabase/client';
 import ToolsHeader from '@/components/shared/ToolsHeader';
 import { Footer } from '@/components/Footer';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
+import { AllCompletedURLsRundown } from '@/components/campaigns/AllCompletedURLsRundown';
 import { TrialExhaustedModal } from '@/components/TrialExhaustedModal';
 import { PremiumPlanModal } from '@/components/PremiumPlanModal';
 
@@ -461,7 +462,7 @@ export default function BacklinkAutomation() {
 
           return enhancedCampaign;
         } else {
-          console.warn('��️ Database save failed, using localStorage fallback:', formatErrorForUI(result.error));
+          console.warn('����️ Database save failed, using localStorage fallback:', formatErrorForUI(result.error));
 
           // Show user-friendly notification for database setup issues
           if (result.error?.includes('Database function missing') || result.error?.includes('table missing')) {
@@ -1682,7 +1683,7 @@ export default function BacklinkAutomation() {
         // Switch to live results sub-tab when campaigns are active\n        setSelectedCampaignTab('live-results');
         toast({
           title: "���� Campaign Results Ready!",
-          description: "Your campaigns are now running. View real-time progress in the live monitor above.",
+          // description: "Your campaigns are now running. View real-time progress in the live monitor above.",
           duration: 4000,
         });
       }, 3000);
@@ -2136,7 +2137,7 @@ export default function BacklinkAutomation() {
       console.log('🧹 Component unmounting - cleaning up all campaign intervals');
       activeCampaignIntervals.forEach((interval, campaignId) => {
         clearInterval(interval);
-        console.log('✅ Cleared interval for campaign on unmount:', campaignId);
+        console.log('�� Cleared interval for campaign on unmount:', campaignId);
       });
     };
   }, [activeCampaignIntervals]);
@@ -3049,7 +3050,7 @@ export default function BacklinkAutomation() {
 
             // If it's a 404 error, create a fallback blog post entry
             if (blogError.message?.includes('404')) {
-              console.log('ℹ️ Blog generation service not available - using fallback blog post');
+              console.log('���️ Blog generation service not available - using fallback blog post');
 
               // Create a fallback blog post entry
               const fallbackSlug = result.campaign.keywords[0]?.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'campaign';
@@ -3474,7 +3475,7 @@ export default function BacklinkAutomation() {
                 <Lightning className="h-5 w-5 text-orange-500 absolute -top-1 -right-1" />
               </div>
               <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-orange-500 bg-clip-text text-transparent">
-                Discovery Engine
+                Backlink Automation
               </h1>
               <div className="flex items-center gap-2">
                 {/* User Status Badges */}
@@ -3567,151 +3568,7 @@ export default function BacklinkAutomation() {
               Discover thousands of verified link opportunities across the entire internet.
             </p>
             
-            {/* Real-time Control Panel */}
-            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-              <div className="bg-gradient-to-r from-slate-50 to-blue-50 px-4 py-2 border-b flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${
-                    controlPanelData.systemStatus === 'active' ? 'bg-green-500 animate-pulse' :
-                    controlPanelData.systemStatus === 'operational' ? 'bg-blue-500' : 'bg-red-500'
-                  }`} />
-                  <span className="text-sm font-medium text-slate-700">
-                    Discovery Engine
-                  </span>
-                  {backendStatus === 'unavailable' && (
-                    <Badge variant="outline" className="text-orange-600 bg-orange-50 text-xs ml-2">
-                      DEMO MODE
-                    </Badge>
-                  )}
-                  {isFetching && <Loader2 className="h-3 w-3 animate-spin text-blue-500" />}
-                </div>
-                <div className="text-xs text-slate-500 time-display">
-                  {formatTimeDisplay('Last update', controlPanelData.lastUpdate)}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 p-4">
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    <Database className="h-3 w-3 text-blue-600" />
-                    <span className="text-lg font-bold text-blue-600">{controlPanelData.totalUrls}</span>
-                  </div>
-                  <div className="text-xs text-gray-500">Total URLs</div>
-                </div>
-
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    <CheckCircle className="h-3 w-3 text-green-600" />
-                    <span className="text-lg font-bold text-green-600">{controlPanelData.verifiedUrls}</span>
-                  </div>
-                  <div className="text-xs text-gray-500">Verified URLs</div>
-                </div>
-
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    <Search className="h-3 w-3 text-purple-600" />
-                    <span className="text-lg font-bold text-purple-600">{controlPanelData.discoveryRate}</span>
-                  </div>
-                  <div className="text-xs text-gray-500">Discovery/Hour</div>
-                </div>
-
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    <Users className="h-3 w-3 text-teal-600" />
-                    <span className="text-lg font-bold text-teal-600">{controlPanelData.activeConnections}</span>
-                  </div>
-                  <div className="text-xs text-gray-500">Contributors</div>
-                </div>
-
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    <Shield className="h-3 w-3 text-indigo-600" />
-                    <span className="text-lg font-bold text-indigo-600">{controlPanelData.networkHealth.toFixed(0)}%</span>
-                  </div>
-                  <div className="text-xs text-gray-500">Quality Score</div>
-                </div>
-
-                {/* User Status & Limits */}
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    {user ? (
-                      isPremium ? (
-                        <>
-                          <Crown className="h-3 w-3 text-purple-600" />
-                          <span className="text-lg font-bold text-purple-600">∞</span>
-                        </>
-                      ) : (
-                        <>
-                          <User className="h-3 w-3 text-blue-600" />
-                          <span className="text-lg font-bold text-blue-600">
-                            {(() => {
-                              // Progressive link counting with auto-detection
-                              const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
-                              const userCampaigns = savedCampaigns.filter((c: any) => c.user_id === user?.id || !c.user_id);
-                              const progressiveTotal = userCampaigns.reduce((sum: number, c: any) => {
-                                return sum + (c.progressiveLinkCount || c.linksGenerated || 0);
-                              }, 0);
-
-                              // Auto-detection: Premium can exceed 20, free stays at 20/20
-                              if (isPremium) {
-                                return <><Infinity className="h-4 w-4 mr-1" /><span>∞</span></>;
-                              } else {
-                                const displayCount = Math.min(progressiveTotal, 20);
-                                return `${displayCount}/20`;
-                              }
-                            })()}
-                          </span>
-                        </>
-                      )
-                    ) : (
-                      guestLinksGenerated > 0 ? (
-                        <>
-                          <Zap className="h-3 w-3 text-green-600" />
-                          <span className="text-lg font-bold text-green-600">
-                            {(() => {
-                              // Progressive guest campaign counting
-                              const savedGuestCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
-                              const guestCampaigns = savedGuestCampaigns.filter((c: any) => !c.user_id);
-                              const progressiveGuestTotal = guestCampaigns.reduce((sum: number, c: any) => {
-                                return sum + (c.progressiveLinkCount || c.linksGenerated || 0);
-                              }, 0);
-
-                              // Guest accounts always limited to 20/20
-                              const displayCount = Math.min(progressiveGuestTotal, 20);
-                              return `${displayCount}/20`;
-                            })()}
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <Target className="h-3 w-3 text-blue-600" />
-                          <span className="text-lg font-bold text-blue-600">--</span>
-                        </>
-                      )
-                    )}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {(() => {
-                      const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
-                      const activeCampaigns = savedCampaigns.filter((c: any) => c.status === 'active').length;
-                      const liveMonitored = savedCampaigns.filter((c: any) => c.isLiveMonitored).length;
-
-                      if (user) {
-                        if (isPremium) {
-                          return `Unlimited • ${formatCampaignStatusText(liveMonitored, 'live', 'ready for campaigns')}`;
-                        } else {
-                          return `Monthly Links • ${formatCampaignStatusText(activeCampaigns, 'active', 'ready to start')}`;
-                        }
-                      } else {
-                        return guestLinksGenerated > 0 ?
-                          `Trial Progress • ${formatCampaignStatusText(liveMonitored, 'monitored', 'in progress')}` :
-                          "Get Started";
-                      }
-                    })()}
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Stats section moved to bottom of page */}
           </div>
 
           {/* Database Status Alert */}
@@ -3755,15 +3612,7 @@ export default function BacklinkAutomation() {
             </Alert>
           )}
 
-          {databaseStatus && databaseStatus.isConnected && !databaseStatus.needsSetup && (
-            <Alert className="border-green-200 bg-green-50">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-flow-fix">
-                <strong>{ensureColonSpacing('System Ready:')}</strong> Your automated link building platform is fully operational!
-                Start creating campaigns to discover and build high-quality backlinks.
-              </AlertDescription>
-            </Alert>
-          )}
+          {/* System Ready alert removed */}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
             <TabsList className="grid w-full grid-cols-5">
@@ -3774,12 +3623,7 @@ export default function BacklinkAutomation() {
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="relative">
-                Analytics & Reporting
-                {globalCounters && globalCounters.totalCampaigns > 0 && (
-                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-blue-500 rounded-full animate-pulse"></div>
-                )}
-              </TabsTrigger>
+              <TabsTrigger value="completed-urls">All Completed URLs</TabsTrigger>
               <TabsTrigger value="database">Website Database</TabsTrigger>
               <TabsTrigger value="recursive">Recursive Discovery</TabsTrigger>
               <TabsTrigger value="discovery">Legacy Discovery</TabsTrigger>
@@ -3957,7 +3801,7 @@ export default function BacklinkAutomation() {
                             🚀 Launch your automated backlink building campaign
                           </p>
                           <div className="flex justify-center gap-4 text-xs text-gray-500">
-                            <span>✓ High-authority domains</span>
+                            <span>��� High-authority domains</span>
                             <span>✓ Instant results</span>
                             <span>✓ No signup required</span>
                           </div>
@@ -4251,25 +4095,34 @@ export default function BacklinkAutomation() {
                         </TabsList>
 
                         <TabsContent value="overview" className="space-y-4">
-                          {/* Enhanced Real-time Stats Dashboard */}
+                          {/* Enhanced Real-time Stats Dashboard with Predictive Values */}
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div className="bg-white rounded-lg p-3 border border-green-200">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">Links Published</p>
                                   <p className="text-xl font-bold text-green-600">
-                                    {formatDisplayNumber(cumulativeStats.totalLinksPublished, {
-                                      hideZero: false,
-                                      zeroText: '0'
-                                    })}
+                                    {(() => {
+                                      // Use predictive algorithm to enhance actual counts
+                                      const allCampaigns = user ? campaigns : guestCampaignResults;
+                                      const totalActual = allCampaigns.reduce((sum, campaign) => {
+                                        const predictiveMetrics = predictiveCampaignAlgorithm.getPredictiveMetrics(campaign.id);
+                                        return sum + (predictiveMetrics?.actualLinksPublished || campaign.linksGenerated || 0);
+                                      }, 0);
+                                      return formatDisplayNumber(Math.max(totalActual, cumulativeStats.totalLinksPublished), {
+                                        hideZero: false,
+                                        zeroText: '0'
+                                      });
+                                    })()}
                                   </p>
                                   <p className="text-xs text-green-700">
                                     {(() => {
-                                      const recentCount = globalActivityFeed.filter(a =>
-                                        a.type === 'link_published' &&
-                                        Date.now() - new Date(a.timestamp).getTime() < 60000
-                                      ).length;
-                                      return recentCount > 0 ? `+${recentCount} last minute` : 'monitoring for new links';
+                                      const allCampaigns = user ? campaigns : guestCampaignResults;
+                                      const predictedPerHour = allCampaigns.reduce((sum, campaign) => {
+                                        const predictiveMetrics = predictiveCampaignAlgorithm.getPredictiveMetrics(campaign.id);
+                                        return sum + (predictiveMetrics?.predictedLinksPerHour || 0);
+                                      }, 0);
+                                      return predictedPerHour > 0 ? `${Math.round(predictedPerHour)}/hr predicted` : 'monitoring for new links';
                                     })()}
                                   </p>
                                 </div>
@@ -4282,17 +4135,27 @@ export default function BacklinkAutomation() {
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">Domains Reached</p>
                                   <p className="text-xl font-bold text-blue-600">
-                                    {formatDisplayNumber(cumulativeStats.totalDomainsReached, {
-                                      hideZero: false,
-                                      zeroText: '0'
-                                    })}
+                                    {(() => {
+                                      // Use predictive algorithm to enhance domain reach calculations
+                                      const allCampaigns = user ? campaigns : guestCampaignResults;
+                                      const totalPredictedDomains = allCampaigns.reduce((sum, campaign) => {
+                                        const predictiveMetrics = predictiveCampaignAlgorithm.getPredictiveMetrics(campaign.id);
+                                        return sum + (predictiveMetrics?.domainsReached || 0);
+                                      }, 0);
+                                      return formatDisplayNumber(Math.max(totalPredictedDomains, cumulativeStats.totalDomainsReached), {
+                                        hideZero: false,
+                                        zeroText: '0'
+                                      });
+                                    })()}
                                   </p>
                                   <p className="text-xs text-blue-700">
                                     {(() => {
-                                      const highDACount = globalActivityFeed.filter(a =>
-                                        a.metadata?.authority >= 90
-                                      ).length;
-                                      return highDACount > 0 ? `${highDACount} high DA` : 'targeting high DA sites';
+                                      const allCampaigns = user ? campaigns : guestCampaignResults;
+                                      const predictedDomainsPerDay = allCampaigns.reduce((sum, campaign) => {
+                                        const predictiveMetrics = predictiveCampaignAlgorithm.getPredictiveMetrics(campaign.id);
+                                        return sum + (predictiveMetrics?.predictedDomainsPerDay || 0);
+                                      }, 0);
+                                      return predictedDomainsPerDay > 0 ? `${Math.round(predictedDomainsPerDay)}/day predicted` : 'targeting high DA sites';
                                     })()}
                                   </p>
                                 </div>
@@ -4303,16 +4166,27 @@ export default function BacklinkAutomation() {
                             <div className="bg-white rounded-lg p-3 border border-purple-200">
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <p className="text-xs font-medium text-muted-foreground">Success Rate</p>
+                                  <p className="text-xs font-medium text-muted-foreground">Efficiency Rate</p>
                                   <p className="text-xl font-bold text-purple-600">
-                                    {globalActivityFeed.length > 0 ?
-                                      Math.round((globalActivityFeed.filter(a =>
-                                        a.metadata?.status === 'live'
-                                      ).length / Math.max(globalActivityFeed.filter(a => a.type === 'link_published').length, 1)) * 100) : 95
-                                    }%
+                                    {(() => {
+                                      const allCampaigns = user ? campaigns : guestCampaignResults;
+                                      if (allCampaigns.length === 0) return '95%';
+                                      const avgEfficiency = allCampaigns.reduce((sum, campaign) => {
+                                        const predictiveMetrics = predictiveCampaignAlgorithm.getPredictiveMetrics(campaign.id);
+                                        return sum + (predictiveMetrics?.efficiencyRating || 95);
+                                      }, 0) / allCampaigns.length;
+                                      return Math.round(avgEfficiency) + '%';
+                                    })()}
                                   </p>
                                   <p className="text-xs text-purple-700">
-                                    {globalActivityFeed.filter(a => a.metadata?.verified).length} verified
+                                    {(() => {
+                                      const allCampaigns = user ? campaigns : guestCampaignResults;
+                                      const avgActivity = allCampaigns.reduce((sum, campaign) => {
+                                        const predictiveMetrics = predictiveCampaignAlgorithm.getPredictiveMetrics(campaign.id);
+                                        return sum + (predictiveMetrics?.activityScore || 0);
+                                      }, 0) / Math.max(allCampaigns.length, 1);
+                                      return Math.round(avgActivity) + '% activity score';
+                                    })()}
                                   </p>
                                 </div>
                                 <TrendingUp className="h-6 w-6 text-purple-600" />
@@ -4323,23 +4197,24 @@ export default function BacklinkAutomation() {
                               <div className="flex items-center justify-between">
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">
-                                    Active Campaigns
+                                    ROI Projection
                                   </p>
                                   <p className="text-xl font-bold text-orange-600">
-                                    {formatDisplayNumber(cumulativeStats.activeCampaigns, {
-                                      hideZero: false,
-                                      zeroText: '0'
-                                    })}
+                                    {(() => {
+                                      const allCampaigns = user ? campaigns : guestCampaignResults;
+                                      if (allCampaigns.length === 0) return '0%';
+                                      const avgROI = allCampaigns.reduce((sum, campaign) => {
+                                        const predictiveMetrics = predictiveCampaignAlgorithm.getPredictiveMetrics(campaign.id);
+                                        return sum + (predictiveMetrics?.projectedROI || 0);
+                                      }, 0) / allCampaigns.length;
+                                      return Math.round(Math.abs(avgROI)) + '%';
+                                    })()}
                                   </p>
                                   <p className="text-xs text-orange-700">
                                     {(() => {
-                                      const avgDA = globalActivityFeed.filter(a => a.metadata?.authority).length > 0 ?
-                                        Math.round(globalActivityFeed
-                                          .filter(a => a.metadata?.authority)
-                                          .reduce((sum, a) => sum + (a.metadata?.authority || 0), 0) /
-                                          globalActivityFeed.filter(a => a.metadata?.authority).length
-                                        ) : 85;
-                                      return cumulativeStats.activeCampaigns > 0 ? `Avg DA: ${avgDA}` : 'ready to deploy';
+                                      const allCampaigns = user ? campaigns : guestCampaignResults;
+                                      const activeCampaigns = allCampaigns.filter(c => c.status === 'active').length;
+                                      return activeCampaigns > 0 ? `${activeCampaigns} active campaigns` : 'ready to deploy';
                                     })()}
                                   </p>
                                 </div>
@@ -6143,19 +6018,6 @@ export default function BacklinkAutomation() {
               )}
             </TabsContent>
 
-            <TabsContent value="analytics" className="space-y-6">
-              {/* Predictive Algorithm Dashboard */}
-              <PredictiveCampaignDashboard
-                isPremium={isPremium}
-                showGlobalMetrics={true}
-              />
-
-              {/* Global Counter Dashboard */}
-              <CampaignCounterDashboard showGlobal={true} />
-
-              {/* Comprehensive Reporting Dashboard */}
-              <CampaignReportingDashboard />
-            </TabsContent>
 
             <TabsContent value="database" className="space-y-6">
               {/* New Discoveries - Priority Publishing */}
@@ -6262,7 +6124,7 @@ export default function BacklinkAutomation() {
                           { name: 'Real Estate', count: 27450, icon: '🏠' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
-                          { name: 'Home & Garden', count: 21890, icon: '🏡' },
+                          { name: 'Home & Garden', count: 21890, icon: '��' },
                           { name: 'Legal Services', count: 19650, icon: '��️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
@@ -6715,7 +6577,159 @@ export default function BacklinkAutomation() {
                 </CardContent>
               </Card>
             </TabsContent>
+
+            <TabsContent value="completed-urls" className="space-y-6">
+              <AllCompletedURLsRundown />
+            </TabsContent>
           </Tabs>
+        </div>
+      </div>
+
+      {/* Discovery Engine Stats - Moved to bottom */}
+      <div className="max-w-7xl mx-auto p-6">
+        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+          <div className="bg-gradient-to-r from-slate-50 to-blue-50 px-4 py-2 border-b flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${
+                controlPanelData.systemStatus === 'active' ? 'bg-green-500 animate-pulse' :
+                controlPanelData.systemStatus === 'operational' ? 'bg-blue-500' : 'bg-red-500'
+              }`} />
+              <span className="text-sm font-medium text-slate-700">
+                Discovery Engine
+              </span>
+              {backendStatus === 'unavailable' && (
+                <Badge variant="outline" className="text-orange-600 bg-orange-50 text-xs ml-2">
+                  DEMO MODE
+                </Badge>
+              )}
+              {isFetching && <Loader2 className="h-3 w-3 animate-spin text-blue-500" />}
+            </div>
+            <div className="text-xs text-slate-500 time-display">
+              {formatTimeDisplay('Last update', controlPanelData.lastUpdate)}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 p-4">
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Database className="h-3 w-3 text-blue-600" />
+                <span className="text-lg font-bold text-blue-600">{controlPanelData.totalUrls}</span>
+              </div>
+              <div className="text-xs text-gray-500">Total URLs</div>
+            </div>
+
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <CheckCircle className="h-3 w-3 text-green-600" />
+                <span className="text-lg font-bold text-green-600">{controlPanelData.verifiedUrls}</span>
+              </div>
+              <div className="text-xs text-gray-500">Verified URLs</div>
+            </div>
+
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Search className="h-3 w-3 text-purple-600" />
+                <span className="text-lg font-bold text-purple-600">{controlPanelData.discoveryRate}</span>
+              </div>
+              <div className="text-xs text-gray-500">Discovery/Hour</div>
+            </div>
+
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Users className="h-3 w-3 text-teal-600" />
+                <span className="text-lg font-bold text-teal-600">{controlPanelData.activeConnections}</span>
+              </div>
+              <div className="text-xs text-gray-500">Contributors</div>
+            </div>
+
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Shield className="h-3 w-3 text-indigo-600" />
+                <span className="text-lg font-bold text-indigo-600">{controlPanelData.networkHealth.toFixed(0)}%</span>
+              </div>
+              <div className="text-xs text-gray-500">Quality Score</div>
+            </div>
+
+            {/* User Status & Limits */}
+            <div className="text-center">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                {user ? (
+                  isPremium ? (
+                    <>
+                      <Crown className="h-3 w-3 text-purple-600" />
+                      <span className="text-lg font-bold text-purple-600">∞</span>
+                    </>
+                  ) : (
+                    <>
+                      <User className="h-3 w-3 text-blue-600" />
+                      <span className="text-lg font-bold text-blue-600">
+                        {(() => {
+                          // Progressive link counting with auto-detection
+                          const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
+                          const userCampaigns = savedCampaigns.filter((c: any) => c.user_id === user?.id || !c.user_id);
+                          const progressiveTotal = userCampaigns.reduce((sum: number, c: any) => {
+                            return sum + (c.progressiveLinkCount || c.linksGenerated || 0);
+                          }, 0);
+
+                          // Auto-detection: Premium can exceed 20, free stays at 20/20
+                          if (isPremium) {
+                            return <><Infinity className="h-4 w-4 mr-1" /><span>∞</span></>;
+                          } else {
+                            const displayCount = Math.min(progressiveTotal, 20);
+                            return `${displayCount}/20`;
+                          }
+                        })()}
+                      </span>
+                    </>
+                  )
+                ) : (
+                  guestLinksGenerated > 0 ? (
+                    <>
+                      <Zap className="h-3 w-3 text-green-600" />
+                      <span className="text-lg font-bold text-green-600">
+                        {(() => {
+                          // Progressive guest campaign counting
+                          const savedGuestCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
+                          const guestCampaigns = savedGuestCampaigns.filter((c: any) => !c.user_id);
+                          const progressiveGuestTotal = guestCampaigns.reduce((sum: number, c: any) => {
+                            return sum + (c.progressiveLinkCount || c.linksGenerated || 0);
+                          }, 0);
+
+                          // Guest accounts always limited to 20/20
+                          const displayCount = Math.min(progressiveGuestTotal, 20);
+                          return `${displayCount}/20`;
+                        })()}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <Target className="h-3 w-3 text-blue-600" />
+                      <span className="text-lg font-bold text-blue-600">--</span>
+                    </>
+                  )
+                )}
+              </div>
+              <div className="text-xs text-gray-500">
+                {(() => {
+                  const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
+                  const activeCampaigns = savedCampaigns.filter((c: any) => c.status === 'active').length;
+                  const liveMonitored = savedCampaigns.filter((c: any) => c.isLiveMonitored).length;
+
+                  if (user) {
+                    if (isPremium) {
+                      return `Unlimited • ${formatCampaignStatusText(liveMonitored, 'live', 'ready for campaigns')}`;
+                    } else {
+                      return `Monthly Links • ${formatCampaignStatusText(activeCampaigns, 'active', 'ready to start')}`;
+                    }
+                  } else {
+                    return guestLinksGenerated > 0 ?
+                      `Trial Progress • ${formatCampaignStatusText(liveMonitored, 'monitored', 'in progress')}` :
+                      "Get Started";
+                  }
+                })()}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 

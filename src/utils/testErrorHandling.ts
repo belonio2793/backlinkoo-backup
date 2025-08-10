@@ -4,8 +4,8 @@
 
 import { reliableContentGenerator } from '@/services/reliableContentGenerator';
 
-export async function testErrorHandling() {
-  console.log('🧪 Testing error handling...');
+export async function testContentGenerationErrorHandling() {
+  console.log('🧪 Testing content generation error handling...');
   
   try {
     const result = await reliableContentGenerator.generateContent(
@@ -36,6 +36,6 @@ export async function testErrorHandling() {
 // Auto-run disabled to prevent console pollution
 // To run manually: testErrorHandling()
 if (import.meta.env.DEV) {
-  (window as any).testErrorHandling = testErrorHandling;
-  console.log('🔧 Error handling test available: testErrorHandling()');
+  (window as any).testContentGenerationErrorHandling = testContentGenerationErrorHandling;
+  console.log('🔧 Content generation error handling test available: testContentGenerationErrorHandling()');
 }
