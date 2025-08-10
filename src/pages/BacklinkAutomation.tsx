@@ -2344,7 +2344,7 @@ export default function BacklinkAutomation() {
           if (newLinks.length === 0 && forceUpdate) {
             // Add small incremental activity to show monitoring is active
             current.totalClicks += Math.floor(Math.random() * 5) + 1; // 1-5 simulated clicks
-            console.log('📊 Synthetic activity added for campaign visibility:', campaignId);
+            console.log('��� Synthetic activity added for campaign visibility:', campaignId);
           }
 
           const updated = new Map(prev);
@@ -5079,6 +5079,15 @@ export default function BacklinkAutomation() {
                                 Approaching 20-link limit. Upgrade for unlimited links!
                               </div>
                             )}
+                          </div>
+
+                          {/* Campaign Counter Dashboard */}
+                          <div className="mb-4">
+                            <CampaignCounterDashboard
+                              campaignId={campaign.id}
+                              showGlobal={false}
+                              compact={true}
+                            />
                           </div>
 
                           {/* Enhanced Real-Time Activity Feed */}
