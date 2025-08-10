@@ -6079,6 +6079,12 @@ export default function BacklinkAutomation() {
             <div className="space-y-3">
               <Button
                 onClick={() => {
+                  // Track signup button click
+                  const analytics = JSON.parse(localStorage.getItem('post_campaign_analytics') || '{}');
+                  analytics.signupClicked = (analytics.signupClicked || 0) + 1;
+                  analytics.lastSignupClicked = new Date().toISOString();
+                  localStorage.setItem('post_campaign_analytics', JSON.stringify(analytics));
+
                   setShowPostCampaignSignupModal(false);
                   setShowSignInModal(true);
                 }}
