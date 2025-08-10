@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AuthService } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
 import { AlertTriangle, CheckCircle, User, Database, Shield } from 'lucide-react';
+import { formatErrorForUI } from '@/utils/errorUtils';
 
 export function AuthDebugHelper() {
   const [testEmail, setTestEmail] = useState('');
