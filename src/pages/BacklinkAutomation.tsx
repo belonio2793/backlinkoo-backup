@@ -1141,7 +1141,7 @@ export default function BacklinkAutomation() {
     };
   }, [selectedTab, startLiveUpdates, stopLiveUpdates]);
 
-  // Live monitoring auto-save with progressive counting
+  // Live monitoring auto-save with progressive counting and stats updates
   useEffect(() => {
     if (guestCampaignResults.length > 0) {
       guestCampaignResults.forEach(campaign => {
@@ -1150,6 +1150,8 @@ export default function BacklinkAutomation() {
           saveCampaignPermanently(campaign);
         }
       });
+      // Update cumulative stats when guest campaigns change
+      updateCumulativeStats();
     }
     if (campaigns.length > 0) {
       campaigns.forEach(campaign => {
@@ -1158,6 +1160,8 @@ export default function BacklinkAutomation() {
           saveCampaignPermanently(campaign);
         }
       });
+      // Update cumulative stats when user campaigns change
+      updateCumulativeStats();
     }
   }, [guestCampaignResults, campaigns, saveCampaignPermanently]);
 
@@ -4500,7 +4504,7 @@ export default function BacklinkAutomation() {
                                           onClick={() => {
                                             copyToClipboard(result.blogPostUrl);
                                             toast({
-                                              title: "✅ Blog URL Copied!",
+                                              title: "�� Blog URL Copied!",
                                               description: "Share this link to showcase your campaign's reach and authority.",
                                             });
                                           }}
