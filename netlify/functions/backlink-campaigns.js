@@ -312,7 +312,12 @@ exports.handler = async (event, context) => {
               .eq('user_id', user.id);
 
             if (deleteError) {
-              console.error('Delete campaign error:', deleteError);
+              console.error('Delete campaign error:', {
+                message: deleteError.message || 'Unknown database error',
+                code: deleteError.code,
+                details: deleteError.details,
+                hint: deleteError.hint
+              });
 
               // Log the failure
               await supabase
