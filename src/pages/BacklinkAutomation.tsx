@@ -584,7 +584,7 @@ export default function BacklinkAutomation() {
 
           console.log('✅ Loaded', campaigns.length, 'campaigns from database for user', user.id);
         } else if (!result.success) {
-          console.warn('⚠️ Database loading failed, will use localStorage:', result.error);
+          console.warn('��️ Database loading failed, will use localStorage:', result.error);
 
           // Show user-friendly notification for database issues
           if (result.error?.includes('table missing') || result.error?.includes('function')) {
@@ -2288,6 +2288,13 @@ export default function BacklinkAutomation() {
         }
       }
 
+      // Show post-campaign signup modal for guest users after successful deployment
+      if (!user) {
+        setTimeout(() => {
+          setShowPostCampaignSignupModal(true);
+        }, 2000); // Show after 2 seconds to let success toast display
+      }
+
       setCampaignForm({
         name: '',
         targetUrl: '',
@@ -3159,7 +3166,7 @@ export default function BacklinkAutomation() {
                             <div className="flex justify-center gap-4 text-xs text-gray-500">
                               <span>✓ High-authority domains</span>
                               <span>✓ Real-time tracking</span>
-                              <span>�� Full reporting</span>
+                              <span>✓ Full reporting</span>
                             </div>
                           </div>
                         )}
