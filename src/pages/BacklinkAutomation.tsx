@@ -392,7 +392,8 @@ export default function BacklinkAutomation() {
 
         if (!existingResult.success) {
           const errorMessage = formatErrorForUI(existingResult.error);
-          console.warn('���️ Failed to fetch existing campaign metrics:', errorMessage);
+          console.warn('⚠️ Failed to fetch existing campaign metrics:', errorMessage);
+          // Error is properly formatted and logged - continuing with local storage fallback
         }
 
         const existingMetrics = existingResult.data?.[0];
@@ -6002,7 +6003,7 @@ export default function BacklinkAutomation() {
                         <div className="flex items-center justify-between mb-3">
                           <div className="font-medium text-gray-900 truncate">{site.domain}</div>
                           <Badge variant={site.status === 'Link Published' ? 'default' : site.status === 'Publishing Live' ? 'outline' : 'secondary'}>
-                            {site.status === 'Link Published' ? '✅ Live' : site.status === 'Publishing Live' ? '���� Publishing' : '⏳ Processing'}
+                            {site.status === 'Link Published' ? '✅ Live' : site.status === 'Publishing Live' ? '����� Publishing' : '⏳ Processing'}
                           </Badge>
                         </div>
                         <div className="space-y-2">
