@@ -41,6 +41,7 @@ import { EnhancedAILive } from '@/components/EnhancedAILive';
 import { EnhancedDashboardRouter } from '@/components/EnhancedDashboardRouter';
 import { UserBlogManagement } from '@/components/UserBlogManagement';
 import { BlogEditPage } from '@/pages/BlogEditPage';
+import CheckoutTest from '@/pages/CheckoutTest';
 
 
 export const AppWrapper = () => {
