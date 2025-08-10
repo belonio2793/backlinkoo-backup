@@ -260,30 +260,30 @@ export function TrialExhaustedModal({
             </div>
 
             {/* Additional Premium Features */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mt-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mt-6 text-white">
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>More than 20 links per campaign</span>
+                <CheckCircle className="h-4 w-4 text-white" />
+                <span className="text-white">More than 20 links per campaign</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Complete SEO Academy courses</span>
+                <CheckCircle className="h-4 w-4 text-white" />
+                <span className="text-white">Complete SEO Academy courses</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Priority customer support</span>
+                <CheckCircle className="h-4 w-4 text-white" />
+                <span className="text-white">Priority customer support</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Advanced analytics & reporting</span>
+                <CheckCircle className="h-4 w-4 text-white" />
+                <span className="text-white">Advanced analytics & reporting</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>White-label options</span>
+                <CheckCircle className="h-4 w-4 text-white" />
+                <span className="text-white">White-label options</span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>API access & bulk exports</span>
+                <CheckCircle className="h-4 w-4 text-white" />
+                <span className="text-white">API access & bulk exports</span>
               </div>
             </div>
           </div>
