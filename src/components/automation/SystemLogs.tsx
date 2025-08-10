@@ -24,7 +24,7 @@ export function SystemLogs() {
       timestamp: '2024-01-25 14:35:22',
       level: 'info',
       module: 'BlogCommenting',
-      message: 'Comment posted successfully to techblog.example.com',
+      message: 'Comment posted successfully on techblog.example.com',
       data: { taskId: 'task_001', url: 'techblog.example.com/post/123' }
     },
     {
@@ -72,7 +72,7 @@ export function SystemLogs() {
       timestamp: '2024-01-25 14:34:28',
       level: 'success',
       module: 'ForumProfile',
-      message: 'Profile created on forums.example.com',
+      message: 'Profile created successfully on forums.example.com',
       data: { profileId: 'prof_789', username: 'user_12345' }
     },
     {
