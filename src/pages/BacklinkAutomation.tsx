@@ -5251,7 +5251,7 @@ export default function BacklinkAutomation() {
                                     return <>∞ unlimited links • {progressiveCount} total</>;
                                   } else {
                                     const displayCount = Math.min(progressiveCount, 20);
-                                    return `${displayCount}/20 free links`;
+                                    return `${displayCount}/20 live links`;
                                   }
                                 })()}
                               </span>
