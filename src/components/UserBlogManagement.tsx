@@ -53,7 +53,12 @@ export function UserBlogManagement() {
       const posts = await blogService.getUserBlogPosts(user.id);
       setBlogPosts(posts);
     } catch (error) {
-      console.error('Failed to load user blog posts:', error);
+      console.error('Failed to load user blog posts:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       toast({
         title: "Error",
         description: "Failed to load your blog posts. Please try again.",
