@@ -294,6 +294,11 @@ class TextFormatter {
    * Format technical terms consistently
    */
   static formatTechnicalTerms(text: string): string {
+    // Type check and early return for non-string input
+    if (!text || typeof text !== 'string') {
+      return text || '';
+    }
+
     const technicalTerms: Record<string, string> = {
       'back-link': 'backlink',
       'back link': 'backlink',
