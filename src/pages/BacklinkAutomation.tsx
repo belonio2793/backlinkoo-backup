@@ -4947,7 +4947,7 @@ export default function BacklinkAutomation() {
                                 {(() => {
                                   // Auto-populating live links with concurrent increase
                                   const baseLinks = campaign.linksGenerated || 0;
-                                  const timeBonus = Math.floor((Date.now() - (campaign.createdAt?.getTime() || Date.now())) / (1000 * 60 * 5)); // +1 every 5 minutes
+                                  const timeBonus = Math.floor((Date.now() - (campaign.createdAt ? new Date(campaign.createdAt).getTime() : Date.now())) / (1000 * 60 * 5)); // +1 every 5 minutes
                                   const activityBonus = Math.floor((globalActivityFeed.filter(a => a.campaignId === campaign.id).length || 0) * 0.3);
                                   const total = Math.min(baseLinks + timeBonus + activityBonus, isPremium ? 999 : 20);
                                   return total;
@@ -4962,7 +4962,7 @@ export default function BacklinkAutomation() {
                                   // Auto-populating domains reached with predictive growth
                                   const campaignReport = detailedReporting.find(r => r.campaignId === campaign.id);
                                   const baseReached = campaignReport?.domainsReached || campaign.linksLive || 0;
-                                  const growthRate = Math.floor((Date.now() - (campaign.createdAt?.getTime() || Date.now())) / (1000 * 60 * 8)); // +1 every 8 minutes
+                                  const growthRate = Math.floor((Date.now() - (campaign.createdAt ? new Date(campaign.createdAt).getTime() : Date.now())) / (1000 * 60 * 8)); // +1 every 8 minutes
                                   const velocityBonus = Math.floor((campaign.linksGenerated || 0) * 0.6); // 60% of links become unique domains
                                   return Math.max(baseReached, Math.min(baseReached + growthRate + velocityBonus, 150));
                                 })()}
@@ -4977,7 +4977,7 @@ export default function BacklinkAutomation() {
                                   const baseAuthority = campaignActivities.length > 0 ?
                                     Math.round(campaignActivities.reduce((sum, a) => sum + (a.metadata?.authority || 0), 0) / campaignActivities.length) :
                                     campaign.quality?.averageAuthority || 85;
-                                  const timeBonus = Math.floor((Date.now() - (campaign.createdAt?.getTime() || Date.now())) / (1000 * 60 * 15)); // +1 every 15 minutes
+                                  const timeBonus = Math.floor((Date.now() - (campaign.createdAt ? new Date(campaign.createdAt).getTime() : Date.now())) / (1000 * 60 * 15)); // +1 every 15 minutes
                                   const performanceBonus = Math.floor((campaign.linksGenerated || 0) / 5); // +1 for every 5 links
                                   return Math.min(baseAuthority + timeBonus + performanceBonus, 99);
                                 })()}%
@@ -4993,7 +4993,7 @@ export default function BacklinkAutomation() {
                                   if (baseClicks > 0) return baseClicks;
 
                                   // Predictive links per hour calculation
-                                  const runtime = (Date.now() - (campaign.createdAt?.getTime() || Date.now())) / (1000 * 60 * 60); // hours
+                                  const runtime = (Date.now() - (campaign.createdAt ? new Date(campaign.createdAt).getTime() : Date.now())) / (1000 * 60 * 60); // hours
                                   const linksGenerated = campaign.linksGenerated || 0;
                                   const velocity = runtime > 0 ? Math.round(linksGenerated / runtime) : Math.floor(2 + Math.random() * 6);
                                   return Math.max(velocity, 1);
@@ -6902,7 +6902,7 @@ export default function BacklinkAutomation() {
                 setCampaignToDelete(null);
 
                 toast({
-                  title: "🗑️ Campaign Deleted",
+                  title: "🗑�� Campaign Deleted",
                   description: "Campaign and all associated data have been permanently removed.",
                 });
               } else {
