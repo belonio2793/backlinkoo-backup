@@ -170,11 +170,11 @@ export class CampaignBlogIntegrationService {
         .eq('id', campaignId);
 
       if (updateError) {
-        console.error('Failed to link campaign to blog post:', {
+        console.error('Failed to link campaign to blog post:', JSON.stringify({
           message: updateError.message,
           code: updateError.code,
           details: updateError.details
-        });
+        }, null, 2));
       }
 
       // Also create an entry in campaign blog links table if it exists
@@ -445,7 +445,7 @@ export class CampaignBlogIntegrationService {
    */
   private static async generateFallbackGuestBlogPost(request: Omit<CampaignBlogRequest, 'campaignId'> & { campaignId?: string }): Promise<BlogGenerationResult> {
     try {
-      console.log('🔄 Generating fallback guest blog post');
+      console.log('��� Generating fallback guest blog post');
 
       const primaryKeyword = request.primaryKeyword || request.keywords[0] || 'business growth';
       const anchorText = request.anchorTexts?.[0] || primaryKeyword;
