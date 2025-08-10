@@ -77,11 +77,11 @@ export class CampaignBlogIntegrationService {
       }
 
       if (!response.ok) {
-        console.error('Blog generation HTTP error:', {
+        console.error('Blog generation HTTP error:', JSON.stringify({
           status: response.status,
           statusText: response.statusText,
           url: response.url
-        });
+        }, null, 2));
 
         // If it's a 404, the function might not be deployed
         if (response.status === 404) {
@@ -273,11 +273,11 @@ export class CampaignBlogIntegrationService {
       }
 
       if (!response.ok) {
-        console.error('Blog generation HTTP error:', {
+        console.error('Blog generation HTTP error:', JSON.stringify({
           status: response.status,
           statusText: response.statusText,
           url: response.url
-        });
+        }, null, 2));
 
         // If it's a 404, the function might not be deployed
         if (response.status === 404) {
