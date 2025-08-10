@@ -2271,7 +2271,10 @@ export default function BacklinkAutomation() {
       });
 
     } catch (error) {
-      console.error('Failed to create campaign:', error);
+      console.error('Failed to create campaign:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
       toast({
         title: "Campaign Creation Failed",
         description: "There was an error creating your campaign. Please try again.",
