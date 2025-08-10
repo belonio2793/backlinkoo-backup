@@ -439,8 +439,10 @@ class CampaignMetricsService {
       return { success: true, migrated: migratedCount };
     } catch (error) {
       console.error('localStorage sync error:', {
-        error: error,
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
       });
       return { success: false, migrated: 0, error: error instanceof Error ? error.message : 'Unknown error' };
     }
