@@ -2343,7 +2343,10 @@ export default function BacklinkAutomation() {
       }
 
     } catch (error) {
-      console.error('URL discovery failed:', error);
+      console.error('URL discovery failed:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
       toast({
         title: "Discovery Failed",
         description: "There was an error starting URL discovery. Please try again.",
