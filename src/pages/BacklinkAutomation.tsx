@@ -1196,7 +1196,7 @@ export default function BacklinkAutomation() {
           if (permanentCampaigns.length > 0) {
             setTimeout(() => {
               toast({
-                title: "�� Data Restored Successfully",
+                title: "📊 Data Restored Successfully",
                 description: `${permanentCampaigns.length} campaigns restored with all metrics preserved. Your data is safe across sessions.`,
                 duration: 4000,
               });
@@ -3731,7 +3731,7 @@ export default function BacklinkAutomation() {
                             🚀 Launch your automated backlink building campaign
                           </p>
                           <div className="flex justify-center gap-4 text-xs text-gray-500">
-                            <span> High-authority domains</span>
+                            <span>✓ High-authority domains</span>
                             <span>✓ Instant results</span>
                             <span>✓ No signup required</span>
                           </div>
