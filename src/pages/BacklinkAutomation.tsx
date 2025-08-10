@@ -242,6 +242,20 @@ export default function BacklinkAutomation() {
   // Auth Hook
   const { user, isPremium } = useAuth();
 
+  // Helper function to safely get timestamp from createdAt field
+  const safeGetTimestamp = (dateValue: any): number => {
+    if (!dateValue) return Date.now();
+    if (dateValue instanceof Date) return dateValue.getTime();
+    if (typeof dateValue === 'string' || typeof dateValue === 'number') {
+      try {
+        return new Date(dateValue).getTime();
+      } catch {
+        return Date.now();
+      }
+    }
+    return Date.now();
+  };
+
   // State Management
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [databaseCampaigns, setDatabaseCampaigns] = useState<DatabaseCampaign[]>([]);
