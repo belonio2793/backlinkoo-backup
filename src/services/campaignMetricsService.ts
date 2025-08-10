@@ -8,6 +8,7 @@ import type { Database } from '@/integrations/supabase/types';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { CampaignMetricsErrorHandler } from './campaignMetricsErrorHandler';
 import { CampaignMetricsHealthCheck } from '@/utils/campaignMetricsHealthCheck';
+import { DeadlockPreventionService } from './deadlockPreventionService';
 
 type CampaignRuntimeMetrics = Database['public']['Tables']['campaign_runtime_metrics']['Row'];
 type CampaignRuntimeMetricsInsert = Database['public']['Tables']['campaign_runtime_metrics']['Insert'];
@@ -125,7 +126,7 @@ class CampaignMetricsService {
 
         // Check for RLS permission errors
         if (CampaignMetricsErrorHandler.isUsersPermissionError(error)) {
-          console.warn('🚨 RLS permission error detected in campaign metrics');
+          console.warn('���� RLS permission error detected in campaign metrics');
           CampaignMetricsErrorHandler.logErrorDetails(error, 'getCampaignMetrics');
 
           // Try to get fallback data
