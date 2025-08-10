@@ -45,10 +45,10 @@ import { guestTrackingService } from '@/services/guestTrackingService';
 import { GuestPremiumUpsellModal } from '@/components/GuestPremiumUpsellModal';
 import { GuestCampaignRestrictionsOverlay } from '@/components/GuestCampaignRestrictionsOverlay';
 
-// Import our enterprise engines - temporarily commented out to test
-// import { CampaignQueueManager, type CampaignConfig } from '@/services/automationEngine/CampaignQueueManager';
-// import { LinkDiscoveryEngine } from '@/services/automationEngine/LinkDiscoveryEngine';
-// import { AnalyticsEngine } from '@/services/automationEngine/AnalyticsEngine';
+// Import our enterprise engines
+import { CampaignQueueManager, type CampaignConfig } from '@/services/automationEngine/CampaignQueueManager';
+import { LinkDiscoveryEngine } from '@/services/automationEngine/LinkDiscoveryEngine';
+import { AnalyticsEngine } from '@/services/automationEngine/AnalyticsEngine';
 import { ContentGenerationEngine } from '@/services/automationEngine/ContentGenerationEngine';
 import { ErrorHandlingEngine } from '@/services/automationEngine/ErrorHandlingEngine';
 
@@ -5944,9 +5944,9 @@ export default function BacklinkAutomation() {
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '����' },
-                          { name: 'Travel & Tourism', count: 38920, icon: '✈���' },
+                          { name: 'Travel & Tourism', count: 38920, icon: '✈����' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
-                          { name: 'Entertainment & Gaming', count: 32180, icon: '���' },
+                          { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
                           { name: 'Real Estate', count: 27450, icon: '🏠' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
