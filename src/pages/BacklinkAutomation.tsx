@@ -1344,7 +1344,7 @@ export default function BacklinkAutomation() {
       );
       updateGuestRestrictions();
       toast({
-        title: "🗑 Campaign Deleted",
+        title: "🗑️ Campaign Deleted",
         description: `"${guestCampaignToDelete.name}" has been permanently removed.`,
       });
     } else {
@@ -1991,7 +1991,7 @@ export default function BacklinkAutomation() {
         const updated = new Map(prev);
         const removed = updated.delete(campaignId);
         if (removed) {
-          console.log('✅ Removed campaign from active monitoring:', campaignId, '(Remaining active:', updated.size, ')');
+          console.log('��� Removed campaign from active monitoring:', campaignId, '(Remaining active:', updated.size, ')');
         }
         return updated;
       });
@@ -6891,7 +6891,7 @@ export default function BacklinkAutomation() {
                 setCampaignToDelete(null);
 
                 toast({
-                  title: "🗑 Campaign Deleted",
+                  title: "🗑️ Campaign Deleted",
                   description: "Campaign and all associated data have been permanently removed.",
                 });
               } else {
