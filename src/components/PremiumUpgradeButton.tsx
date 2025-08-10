@@ -118,24 +118,15 @@ export function PremiumUpgradeButton({
   }
 
   return (
-    <>
-      <Button
-        variant={variant}
-        size={size}
-        onClick={handleUpgradeClick}
-        disabled={disabled || loading}
-        className={getButtonClassName()}
-      >
-        {getButtonContent()}
-      </Button>
-
-      <PremiumPlanModal
-        isOpen={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-        onSuccess={handleModalSuccess}
-        triggerSource={triggerSource}
-      />
-    </>
+    <Button
+      variant={variant}
+      size={size}
+      onClick={handleUpgradeClick}
+      disabled={disabled || loading}
+      className={getButtonClassName()}
+    >
+      {getButtonContent()}
+    </Button>
   );
 }
 
