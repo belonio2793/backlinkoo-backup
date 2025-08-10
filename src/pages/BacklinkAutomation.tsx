@@ -68,6 +68,7 @@ import { CampaignReportingDashboard } from '@/components/CampaignReportingDashbo
 import { PredictiveCampaignDashboard } from '@/components/PredictiveCampaignDashboard';
 import { useCampaignCounters } from '@/hooks/useCampaignCounters';
 import { usePredictiveCampaignAlgorithm } from '@/hooks/usePredictiveCampaignAlgorithm';
+import { predictiveCampaignAlgorithm } from '@/services/predictiveCampaignAlgorithm';
 
 interface DatabaseCampaign {
   id: string;
@@ -811,7 +812,7 @@ export default function BacklinkAutomation() {
 
       setCampaignMetrics(metricsMap);
       setMetricsLoaded(true);
-      console.log('📊 Loaded metrics for', metricsMap.size, 'campaigns from localStorage');
+      console.log('���� Loaded metrics for', metricsMap.size, 'campaigns from localStorage');
     } catch (error) {
       const errorMessage = formatErrorForUI(error);
       console.warn('Failed to load campaign metrics from localStorage:', errorMessage);
@@ -1177,7 +1178,7 @@ export default function BacklinkAutomation() {
         } else {
           // For guest users, directly restore campaigns
           setGuestCampaignResults(permanentCampaigns);
-          console.log('��� Guest Data Restored:', permanentCampaigns.length, 'campaigns with preserved metrics');
+          console.log('����� Guest Data Restored:', permanentCampaigns.length, 'campaigns with preserved metrics');
 
           // Show notification about data preservation for guest users
           if (permanentCampaigns.length > 0) {
@@ -6445,7 +6446,7 @@ export default function BacklinkAutomation() {
                                   </div>
                                   <div className="flex items-center gap-3 text-xs text-gray-500">
                                     <span>Found via: Campaign #{(idx % 3) + 1}</span>
-                                    <span>��</span>
+                                    <span>•</span>
                                     <span>Quality: {85 + (idx % 15)}%</span>
                                     <span>•</span>
                                     <span className="text-green-600">
