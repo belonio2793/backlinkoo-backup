@@ -29,7 +29,7 @@ export class CampaignBlogIntegrationService {
    */
   static async generateCampaignBlogPost(request: CampaignBlogRequest): Promise<BlogGenerationResult> {
     try {
-      console.log('🚀 Generating campaign blog post:', request.campaignId);
+      console.log('��� Generating campaign blog post:', request.campaignId);
 
       // Select the primary keyword (first keyword if not specified)
       const primaryKeyword = request.primaryKeyword || request.keywords[0] || 'business growth';
@@ -240,7 +240,11 @@ export class CampaignBlogIntegrationService {
           body: JSON.stringify(blogRequest)
         });
       } catch (networkError) {
-        console.error('Network error calling blog generator:', networkError);
+        console.error('Network error calling blog generator:', {
+          message: networkError.message,
+          stack: networkError.stack,
+          name: networkError.name
+        });
         throw new Error(`Network error: ${networkError.message}`);
       }
 
