@@ -292,6 +292,7 @@ export default function BacklinkAutomation() {
   const [recentPostbacks, setRecentPostbacks] = useState<any[]>([]);
   const [showSignInModal, setShowSignInModal] = useState(false);
   const [showGuestPremiumModal, setShowGuestPremiumModal] = useState(false);
+  const [showPostCampaignSignupModal, setShowPostCampaignSignupModal] = useState(false);
   const [guestTrackingInitialized, setGuestTrackingInitialized] = useState(false);
   const [guestCampaignRestrictions, setGuestCampaignRestrictions] = useState<any>({});
   const [premiumUpsellTrigger, setPremiumUpsellTrigger] = useState<'campaign_limit' | 'link_limit' | 'feature_limit' | 'manual'>('manual');
@@ -3158,7 +3159,7 @@ export default function BacklinkAutomation() {
                             <div className="flex justify-center gap-4 text-xs text-gray-500">
                               <span>✓ High-authority domains</span>
                               <span>✓ Real-time tracking</span>
-                              <span>✓ Full reporting</span>
+                              <span>�� Full reporting</span>
                             </div>
                           </div>
                         )}
