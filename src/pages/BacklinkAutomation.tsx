@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
+import { formatTimeDisplay, ensureColonSpacing } from '@/utils/colonSpacingFix';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import ToolsHeader from '@/components/shared/ToolsHeader';
@@ -4982,7 +4983,7 @@ export default function BacklinkAutomation() {
                                       <div className="text-xs text-purple-600 flex items-center gap-2 p-2 bg-purple-50 rounded border-l-2 border-purple-400">
                                         <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
                                         <span className="flex-1">
-                                          📊 {campaignMetrics.completedUrls.length} URLs completed • {campaignMetrics.domainsReached} domains reached
+                                          ��� {campaignMetrics.completedUrls.length} URLs completed • {campaignMetrics.domainsReached} domains reached
                                         </span>
                                         <span className="text-purple-500 text-xs font-medium">
                                           Active
