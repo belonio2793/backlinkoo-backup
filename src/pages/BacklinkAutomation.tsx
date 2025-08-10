@@ -2691,7 +2691,7 @@ export default function BacklinkAutomation() {
 
       if (!trackingResult.success) {
         if (trackingResult.shouldShowPremiumModal) {
-          setShowPremiumPlanModal(true);
+          DirectCheckoutService.upgradeToPremium('monthly');
         }
 
         toast({
