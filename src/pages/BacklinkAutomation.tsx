@@ -3606,9 +3606,9 @@ export default function BacklinkAutomation() {
                         </div>
                         <div className="bg-green-50 rounded-lg p-3 text-center">
                           <div className="text-lg font-bold text-green-600">
-                            {guestLinksGenerated}/60
+                            {Math.max(cumulativeStats.totalLinksPublished, guestLinksGenerated)}
                           </div>
-                          <div className="text-xs text-green-700">Total Links Built</div>
+                          <div className="text-xs text-green-700">Live Links Active</div>
                         </div>
                       </div>
                     </div>
