@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, Sparkles, ArrowRight, Zap } from 'lucide-react';
-import { PremiumPlanModal } from '@/components/PremiumPlanModal';
-import { useAuth } from '@/hooks/useAuth';
+import { DirectCheckoutService } from '@/services/directCheckoutService';
 import { usePremium } from '@/hooks/usePremium';
 
 interface PremiumUpgradeButtonProps {
