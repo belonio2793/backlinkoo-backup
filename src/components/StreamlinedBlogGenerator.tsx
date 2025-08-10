@@ -238,7 +238,7 @@ export function StreamlinedBlogGenerator() {
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{formatErrorForUI(error)}</AlertDescription>
         </Alert>
       )}
 
