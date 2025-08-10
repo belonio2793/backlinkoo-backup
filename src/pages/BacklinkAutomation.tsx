@@ -5521,10 +5521,12 @@ export default function BacklinkAutomation() {
                 <CardHeader className="text-center">
                   <CardTitle className="flex items-center justify-center gap-2">
                     <Activity className="h-5 w-5 text-green-600" />
-                    Live Campaign Results
+                    <FormattedText type="title">Live Campaign Results</FormattedText>
                   </CardTitle>
                   <CardDescription>
-                    Real-time tracking of active campaigns and published backlinks
+                    <FormattedDescription>
+                      Real-time tracking of active campaigns and published backlinks
+                    </FormattedDescription>
                   </CardDescription>
                 </CardHeader>
               </Card>
