@@ -1470,10 +1470,10 @@ export default function BacklinkAutomation() {
     });
   }, [campaigns.length]); // Only when campaign count changes
 
-  // Engine Instances - temporarily commented out to test
-  // const queueManager = CampaignQueueManager.getInstance();
-  // const discoveryEngine = LinkDiscoveryEngine.getInstance();
-  // const analyticsEngine = AnalyticsEngine.getInstance();
+  // Engine Instances
+  const queueManager = CampaignQueueManager.getInstance();
+  const discoveryEngine = LinkDiscoveryEngine.getInstance();
+  const analyticsEngine = AnalyticsEngine.getInstance();
   const contentEngine = ContentGenerationEngine.getInstance();
   const errorEngine = ErrorHandlingEngine.getInstance();
 
@@ -5944,7 +5944,7 @@ export default function BacklinkAutomation() {
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '����' },
-                          { name: 'Travel & Tourism', count: 38920, icon: '✈����' },
+                          { name: 'Travel & Tourism', count: 38920, icon: '✈���' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
                           { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
