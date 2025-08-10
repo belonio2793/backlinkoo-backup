@@ -29,7 +29,7 @@ export class CampaignBlogIntegrationService {
    */
   static async generateCampaignBlogPost(request: CampaignBlogRequest): Promise<BlogGenerationResult> {
     try {
-      console.log('��� Generating campaign blog post:', request.campaignId);
+      console.log('🚀 Generating campaign blog post:', request.campaignId);
 
       // Select the primary keyword (first keyword if not specified)
       const primaryKeyword = request.primaryKeyword || request.keywords[0] || 'business growth';
@@ -95,7 +95,11 @@ export class CampaignBlogIntegrationService {
       try {
         result = await response.json();
       } catch (jsonError) {
-        console.error('Error parsing blog generator response:', jsonError);
+        console.error('Error parsing blog generator response:', {
+          message: jsonError.message,
+          stack: jsonError.stack,
+          name: jsonError.name
+        });
         throw new Error('Invalid response from blog generation service');
       }
 
@@ -267,7 +271,11 @@ export class CampaignBlogIntegrationService {
       try {
         result = await response.json();
       } catch (jsonError) {
-        console.error('Error parsing blog generator response:', jsonError);
+        console.error('Error parsing blog generator response:', {
+          message: jsonError.message,
+          stack: jsonError.stack,
+          name: jsonError.name
+        });
         throw new Error('Invalid response from blog generation service');
       }
 
