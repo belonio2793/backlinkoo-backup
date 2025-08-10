@@ -558,7 +558,7 @@ export default function BacklinkAutomation() {
       setCampaigns(prev => prev.filter(c => c.id !== campaignId));
       setGuestCampaignResults(prev => prev.filter(c => c.id !== campaignId));
 
-      console.log('🗑️ Campaign permanently deleted from all storage:', campaignId);
+      console.log('🗑�� Campaign permanently deleted from all storage:', campaignId);
 
       toast({
         title: '🗑️ Campaign Deleted',
@@ -3435,7 +3435,7 @@ export default function BacklinkAutomation() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
       <ToolsHeader user={user} currentTool="automation-link-building" />
 
-      <div className="p-6">
+      <div ref={containerRef} className="p-6">
         <div className="max-w-8xl mx-auto space-y-6">
           {/* Header */}
           <div className="text-center space-y-4">
