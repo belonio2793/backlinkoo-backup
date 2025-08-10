@@ -1539,7 +1539,11 @@ export default function BacklinkAutomation() {
       }
 
     } catch (error) {
-      console.error('Failed to load usage stats:', error);
+      console.error('Failed to load usage stats:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
     }
   };
 
@@ -1723,7 +1727,7 @@ export default function BacklinkAutomation() {
       : "You've built 20 high-quality backlinks! Upgrade to Premium for unlimited campaigns and links.";
 
     toast({
-      title: "🛑 Campaign Paused - Link Limit Reached",
+      title: "�� Campaign Paused - Link Limit Reached",
       description: message,
       action: (
         <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
