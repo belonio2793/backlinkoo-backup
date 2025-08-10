@@ -62,6 +62,7 @@ import { recursiveUrlDiscoveryService } from '@/services/recursiveUrlDiscoverySe
 import { checkDatabaseStatus, initializeDatabase, type DatabaseStatus } from '@/utils/databaseSetup';
 import { updateActiveCampaigns, formatCampaignStatusText } from '@/utils/realTimeCampaignUpdater';
 import { formatDisplayNumber, formatMetricDisplay, formatActivityCount } from '@/utils/displayFormatter';
+import { safeGetRuntimeMinutes, safeGetRuntimeHours, safeFormatDate } from '@/utils/dateUtils';
 import '@/utils/testRealTimeUpdates';
 import '@/utils/testDisplayFormatting';
 
