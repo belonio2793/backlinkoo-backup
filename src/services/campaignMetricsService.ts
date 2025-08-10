@@ -79,7 +79,7 @@ class CampaignMetricsService {
         });
 
         // Check if it's a function not found error
-        if (error.code === '42883' || error.message?.includes('function') && error.message?.includes('does not exist')) {
+        if (error.code === '42883' || error.code === 'PGRST202' || error.message?.includes('function') && error.message?.includes('does not exist')) {
           return {
             success: false,
             error: 'Database function missing. Please run the campaign metrics migration first. Visit /verify-database to check setup.'
