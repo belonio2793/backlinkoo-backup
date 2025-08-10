@@ -71,7 +71,7 @@ class TextFormatter {
    * Main formatting function
    */
   static format(text: string, options: FormattingOptions = {}): string {
-    if (!text || typeof text !== 'string') return text;
+    if (!text || typeof text !== 'string') return text || '';
 
     const defaultOptions: FormattingOptions = {
       capitalizeFirst: true,
