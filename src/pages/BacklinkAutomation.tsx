@@ -1971,6 +1971,9 @@ export default function BacklinkAutomation() {
         }
       }
 
+      // Update campaign counters
+      updateCounterStatus(campaignId, 'paused');
+
       // Update local state with preserved data
       setCampaigns(prev => prev.map(c => {
         if (c.id === campaignId) {
