@@ -5867,7 +5867,7 @@ export default function BacklinkAutomation() {
                       </Badge>
                       <Badge variant="outline" className="text-xs text-blue-600">
                         <Users className="h-3 w-3 mr-1" />
-                        {Math.floor(Math.random() * 50) + 120} active
+                        <span className="number-text">{Math.floor(Math.random() * 50) + 120} active</span>
                       </Badge>
                     </div>
                   </div>
@@ -6613,7 +6613,7 @@ export default function BacklinkAutomation() {
                 updateGuestRestrictions();
 
                 toast({
-                  title: "������️ Campaign Deleted",
+                  title: "����️ Campaign Deleted",
                   description: "Campaign has been permanently removed.",
                 });
               } else {
