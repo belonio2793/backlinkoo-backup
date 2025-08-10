@@ -3195,7 +3195,7 @@ export default function BacklinkAutomation() {
   const startUrlDiscovery = async () => {
     // Check guest trial limit
     if (!user && guestLinksGenerated >= 20) {
-      setShowPremiumPlanModal(true);
+      DirectCheckoutService.upgradeToPremium('monthly');
       return;
     }
 
