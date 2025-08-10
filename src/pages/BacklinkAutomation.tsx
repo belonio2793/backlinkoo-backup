@@ -1268,6 +1268,11 @@ export default function BacklinkAutomation() {
 
       setCampaigns(guestCampaigns);
 
+      // Initialize counters for guest campaigns
+      guestCampaigns.forEach(guestCampaign => {
+        initializeCampaign(guestCampaign.id, guestCampaign.status || 'saved');
+      });
+
       // Also save guest campaigns to permanent storage to prevent data loss
       guestCampaigns.forEach(guestCampaign => {
         saveCampaignPermanently(guestCampaign);
@@ -2158,7 +2163,7 @@ export default function BacklinkAutomation() {
       : "You've built 20 high-quality backlinks! Upgrade to Premium for unlimited campaigns and links.";
 
     toast({
-      title: "🛑 Campaign Paused - Link Limit Reached",
+      title: "�� Campaign Paused - Link Limit Reached",
       description: message,
       action: (
         <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
