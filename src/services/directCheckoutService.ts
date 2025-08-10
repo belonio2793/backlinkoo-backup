@@ -122,13 +122,20 @@ class DirectCheckoutService {
     });
     
     if (!response.ok) {
-      throw new Error('Failed to create premium checkout session');
+      const errorText = await response.text();
+      console.error('Premium checkout failed:', {
+        status: response.status,
+        statusText: response.statusText,
+        error: errorText
+      });
+      throw new Error(`Failed to create premium checkout session: ${response.status} ${response.statusText} - ${errorText}`);
     }
-    
+
     const data = await response.json();
-    
+
     if (!data.url) {
-      throw new Error('No checkout URL received');
+      console.error('No checkout URL in response:', data);
+      throw new Error('No checkout URL received from server');
     }
     
     return data.url;
