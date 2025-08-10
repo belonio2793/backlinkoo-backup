@@ -1220,7 +1220,7 @@ export default function BacklinkAutomation() {
           if (permanentCampaigns.length > 0) {
             setTimeout(() => {
               toast({
-                title: "���� Data Restored Successfully",
+                title: "��� Data Restored Successfully",
                 description: `${permanentCampaigns.length} campaigns restored with all metrics preserved. Your data is safe across sessions.`,
                 duration: 4000,
               });
@@ -6867,21 +6867,7 @@ export default function BacklinkAutomation() {
       </div>
 
 
-      {/* Premium Plan Modal with Live Pricing */}
-      <PremiumPlanModal
-        isOpen={showPremiumPlanModal}
-        onClose={() => setShowPremiumPlanModal(false)}
-        onSuccess={() => {
-          setShowPremiumPlanModal(false);
-          toast({
-            title: "🎉 Welcome to Premium!",
-            description: "Your account has been upgraded. Enjoy unlimited access!",
-          });
-          // Refresh page to update premium status
-          setTimeout(() => window.location.reload(), 2000);
-        }}
-        triggerSource="automation"
-      />
+      {/* Premium Plan Modal removed - using direct checkout */}
 
 
       {/* Predictive Algorithm Premium Modal - Removed */}
