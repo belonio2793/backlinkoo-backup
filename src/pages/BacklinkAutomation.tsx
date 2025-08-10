@@ -3699,7 +3699,9 @@ export default function BacklinkAutomation() {
                     </div>
 
                     <div>
-                      <Label htmlFor="dailyLimit">Daily Link Target</Label>
+                      <Label htmlFor="dailyLimit">
+                        <FormattedText type="label">Daily Link Target</FormattedText>
+                      </Label>
                       <Input
                         id="dailyLimit"
                         type="number"
