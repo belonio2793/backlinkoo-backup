@@ -1091,6 +1091,21 @@ export default function BacklinkAutomation() {
 
       if (activeCampaigns.length > 0) {
         console.log('���� Live Monitor: Tracking', activeCampaigns.length, 'active campaigns for', user?.id || 'guest');
+        // Use enhanced real-time campaign updater
+        const updateResult = updateActiveCampaigns(savedCampaigns, isPremium, user);
+
+        if (updateResult.hasUpdates) {
+          localStorage.setItem(storageKey, JSON.stringify(updateResult.updatedCampaigns));
+
+          // Update state to trigger re-render
+          if (user) {
+            setCampaigns(updateResult.updatedCampaigns);
+          } else {
+            setGuestCampaignResults(updateResult.updatedCampaigns);
+          }
+
+          console.log(`📈 Live Monitor: Updated ${updateResult.updatedCount} active campaigns with new metrics`);
+        }
       }
     }, 30000);
 
