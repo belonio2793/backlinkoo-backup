@@ -5,6 +5,7 @@
 
 import { mockPaymentService } from './mockPaymentService';
 import { supabase } from '@/integrations/supabase/client';
+import { CheckoutRedirectManager, type CheckoutRedirectOptions } from '@/utils/checkoutRedirectManager';
 
 interface PaymentConfig {
   stripe: {
