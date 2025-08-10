@@ -215,7 +215,7 @@ export function ApiHealthMonitor() {
                 <li>Fallback Mode: {systemStatus.configuration.enableOfflineMode ? 'Enabled' : 'Disabled'}</li>
                 <li>Max Retries: {systemStatus.configuration.maxRetryAttempts}</li>
                 <li>Auto-Refresh: Every 5 minutes</li>
-                <li>Last Update: {lastUpdate.toLocaleTimeString()}</li>
+                <li>{formatTimeDisplay('Last Update', lastUpdate)}</li>
               </ul>
             </div>
           </div>
