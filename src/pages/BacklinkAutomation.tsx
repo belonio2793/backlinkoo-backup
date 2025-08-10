@@ -1434,8 +1434,8 @@ export default function BacklinkAutomation() {
           );
           updateGuestRestrictions();
 
-          // Show premium modal for auto-paused campaign
-          setShowPremiumPlanModal(true);
+          // Open premium checkout for auto-paused campaign
+          DirectCheckoutService.upgradeToPremium('monthly');
 
           toast({
             title: "🛑 Campaign Paused - Limit Reached",
