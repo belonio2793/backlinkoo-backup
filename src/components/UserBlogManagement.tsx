@@ -76,7 +76,12 @@ export function UserBlogManagement() {
       const userStats = await blogService.getBlogPostStats(user.id);
       setStats(userStats);
     } catch (error) {
-      console.error('Failed to load stats:', error);
+      console.error('Failed to load stats:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
     }
   };
 
