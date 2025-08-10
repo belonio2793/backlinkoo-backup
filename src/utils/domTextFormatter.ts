@@ -126,48 +126,53 @@ class DOMTextFormatter {
       return text;
     }
 
-    // Determine by element type and classes
-    const tagName = parent.tagName.toLowerCase();
-    const className = parent.className.toLowerCase();
+    try {
+      // Determine by element type and classes
+      const tagName = parent.tagName.toLowerCase();
+      const className = parent.className.toLowerCase();
 
-    // Titles
-    if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName) ||
-        className.includes('title') ||
-        className.includes('heading')) {
-      return TextFormatter.formatTitle(text);
+      // Titles
+      if (['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tagName) ||
+          className.includes('title') ||
+          className.includes('heading')) {
+        return TextFormatter.formatTitle(text);
+      }
+
+      // Labels
+      if (tagName === 'label' ||
+          className.includes('label') ||
+          className.includes('form-label')) {
+        return TextFormatter.formatListItem(text);
+      }
+
+      // Buttons
+      if (tagName === 'button' ||
+          parent.closest('button') ||
+          className.includes('btn') ||
+          className.includes('button')) {
+        return TextFormatter.formatListItem(text);
+      }
+
+      // Links
+      if (tagName === 'a' ||
+          parent.closest('a') ||
+          className.includes('link')) {
+        return TextFormatter.formatListItem(text);
+      }
+
+      // Descriptions
+      if (className.includes('description') ||
+          className.includes('subtitle') ||
+          tagName === 'p') {
+        return TextFormatter.formatDescription(text);
+      }
+
+      // Default to sentence formatting
+      return TextFormatter.formatSentence(text);
+    } catch (error) {
+      console.warn('Error determining formatting type:', error);
+      return text;
     }
-
-    // Labels
-    if (tagName === 'label' ||
-        className.includes('label') ||
-        className.includes('form-label')) {
-      return TextFormatter.formatListItem(text);
-    }
-
-    // Buttons
-    if (tagName === 'button' ||
-        parent.closest('button') ||
-        className.includes('btn') ||
-        className.includes('button')) {
-      return TextFormatter.formatListItem(text);
-    }
-
-    // Links
-    if (tagName === 'a' ||
-        parent.closest('a') ||
-        className.includes('link')) {
-      return TextFormatter.formatListItem(text);
-    }
-
-    // Descriptions
-    if (className.includes('description') ||
-        className.includes('subtitle') ||
-        tagName === 'p') {
-      return TextFormatter.formatDescription(text);
-    }
-
-    // Default to sentence formatting
-    return TextFormatter.formatSentence(text);
   }
 
   /**
