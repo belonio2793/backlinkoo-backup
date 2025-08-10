@@ -159,25 +159,25 @@ export default function DeleteCampaignDialog({
                 </h4>
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-500">Status:</span>
-                    <Badge 
+                    <span className="text-gray-500">Status: </span>
+                    <Badge
                       variant={campaign.status === 'active' ? 'default' : 'secondary'}
-                      className="ml-2"
+                      className="ml-1"
                     >
                       {campaign.status.toUpperCase()}
                     </Badge>
                   </div>
                   <div>
-                    <span className="text-gray-500">Progress:</span>
-                    <span className="ml-2 font-medium">{campaign.progress}%</span>
+                    <span className="text-gray-500">Progress: </span>
+                    <span className="ml-1 font-medium">{campaign.progress}%</span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Links Generated:</span>
-                    <span className="ml-2 font-medium">{campaign.linksGenerated}</span>
+                    <span className="text-gray-500">Links Generated: </span>
+                    <span className="ml-1 font-medium">{campaign.linksGenerated}</span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Links Live:</span>
-                    <span className="ml-2 font-medium">{campaign.linksLive}</span>
+                    <span className="text-gray-500">Links Live: </span>
+                    <span className="ml-1 font-medium">{campaign.linksLive}</span>
                   </div>
                 </div>
               </div>
