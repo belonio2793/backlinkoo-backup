@@ -53,7 +53,8 @@ export function formatErrorForUI(error: any): string {
     // Fall through to default
   }
 
-  return 'An unknown error occurred';
+  // If all else fails, convert to string to prevent [object Object]
+  return String(error);
 }
 
 /**
