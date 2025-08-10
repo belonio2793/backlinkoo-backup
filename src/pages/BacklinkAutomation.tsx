@@ -1602,10 +1602,24 @@ export default function BacklinkAutomation() {
     const interval = setInterval(() => {
       loadRealTimeMetrics();
       loadDiscoveryStats();
+
+      // Check for active campaigns and force state refresh
+      const storageKey = getUserStorageKey();
+      const savedCampaigns = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      const activeCampaigns = savedCampaigns.filter((c: any) => c.status === 'active');
+
+      if (activeCampaigns.length > 0) {
+        // Update state to ensure real-time display
+        if (user) {
+          setCampaigns(savedCampaigns);
+        } else {
+          setGuestCampaignResults(savedCampaigns);
+        }
+      }
     }, 10000); // Update every 10 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [user, getUserStorageKey]);
 
   // Show notification when campaigns become active
   useEffect(() => {
