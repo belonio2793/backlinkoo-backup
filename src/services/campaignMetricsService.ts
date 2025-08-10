@@ -529,7 +529,22 @@ if (typeof window !== 'undefined') {
     return debug;
   };
 
-  console.log('🔧 Campaign Metrics Debug: Run debugCampaignMetrics() in console to test database setup');
+  // Test error logging format
+  (window as any).testCampaignMetricsError = async () => {
+    console.log('🧪 Testing campaign metrics error logging...');
+
+    try {
+      // This will definitely fail and show us the error format
+      const result = await campaignMetricsService.getCampaignMetrics('fake-user-id');
+      console.log('Result:', result);
+    } catch (error) {
+      console.log('Caught error in test - this is expected');
+    }
+  };
+
+  console.log('🔧 Campaign Metrics Debug Commands:');
+  console.log('  - debugCampaignMetrics() - Check database setup');
+  console.log('  - testCampaignMetricsError() - Test error logging format');
 }
 
 export default campaignMetricsService;
