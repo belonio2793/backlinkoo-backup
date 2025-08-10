@@ -2400,13 +2400,7 @@ export default function BacklinkAutomation() {
         });
 
         // Update predictive algorithm with reporting outputs
-        if (newLinks.length > 0) {
-          try {
-            updatePredictive(campaignId, newLinks.length);
-          } catch (error) {
-            console.warn('Failed to update predictive metrics during real-time activity:', error instanceof Error ? error.message : String(error));
-          }
-        }
+        // Predictive algorithm removed - values integrated into live metrics
 
         // Ensure campaigns always show activity with heartbeat system
         const heartbeatActivity = [];
