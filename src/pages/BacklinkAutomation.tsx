@@ -6818,6 +6818,22 @@ export default function BacklinkAutomation() {
         }}
       />
 
+      {/* Premium Plan Modal with Live Pricing */}
+      <PremiumPlanModal
+        isOpen={showPremiumPlanModal}
+        onClose={() => setShowPremiumPlanModal(false)}
+        onSuccess={() => {
+          setShowPremiumPlanModal(false);
+          toast({
+            title: "🎉 Welcome to Premium!",
+            description: "Your account has been upgraded. Enjoy unlimited access!",
+          });
+          // Refresh page to update premium status
+          setTimeout(() => window.location.reload(), 2000);
+        }}
+        triggerSource="automation"
+      />
+
       {/* Guest Premium Upsell Modal */}
       <GuestPremiumUpsellModal
         open={showGuestPremiumModal}
