@@ -205,7 +205,7 @@ export default function EmailDiagnostic() {
       } else {
         toast({
           title: "Test Email Failed",
-          description: result.error,
+          description: formatErrorForUI(result.error),
           variant: "destructive"
         });
       }
