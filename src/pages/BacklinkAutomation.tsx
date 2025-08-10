@@ -1635,7 +1635,7 @@ export default function BacklinkAutomation() {
 
       const linksCount = (user ? campaigns : guestCampaignResults).find(c => c.id === campaignId)?.linksGenerated || 0;
       toast({
-        title: "⏸️ Campaign Paused Successfully",
+        title: "⏸��� Campaign Paused Successfully",
         description: `All ${linksCount} links and metrics permanently saved to your account. Will never reset when resuming or refreshing page.`,
       });
     } catch (error) {
@@ -2084,7 +2084,7 @@ export default function BacklinkAutomation() {
         if (guestLinksGenerated === 0) {
           // First campaign - surprise reveal
           toast({
-            title: "�� Surprise! Your Backlinks Are Ready!",
+            title: "🎉 Surprise! Your Backlinks Are Ready!",
             description: `We've generated ${linksToGenerate} premium backlinks for you instantly! View them in the live monitor above!`,
             duration: 5000,
           });
@@ -5640,7 +5640,10 @@ export default function BacklinkAutomation() {
               }
             }
           } catch (error) {
-            console.error('Campaign deletion failed:', error);
+            console.error('Campaign deletion failed:', {
+              error: error,
+              message: error instanceof Error ? error.message : 'Unknown error'
+            });
             toast({
               title: "Error",
               description: error instanceof Error ? error.message : "Could not delete campaign. Please try again.",
