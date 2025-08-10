@@ -105,7 +105,7 @@ export function useCampaignCounters(options: UseCampaignCountersOptions = {}): U
       
       console.log(`🔄 Updated campaign ${id} status to: ${status}`);
     } catch (error) {
-      console.error('Failed to update campaign status:', error);
+      console.error('Failed to update campaign status:', error instanceof Error ? error.message : String(error));
     }
   }, [campaignId]);
 
