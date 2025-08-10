@@ -3382,7 +3382,7 @@ export default function BacklinkAutomation() {
                   {isFetching && <Loader2 className="h-3 w-3 animate-spin text-blue-500" />}
                 </div>
                 <div className="text-xs text-slate-500 time-display">
-                  Last update: {controlPanelData.lastUpdate.toLocaleTimeString()}
+                  {formatTimeDisplay('Last update', controlPanelData.lastUpdate)}
                 </div>
               </div>
 
@@ -4983,7 +4983,7 @@ export default function BacklinkAutomation() {
                                       <div className="text-xs text-purple-600 flex items-center gap-2 p-2 bg-purple-50 rounded border-l-2 border-purple-400">
                                         <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
                                         <span className="flex-1">
-                                          ��� {campaignMetrics.completedUrls.length} URLs completed • {campaignMetrics.domainsReached} domains reached
+                                          📊 {campaignMetrics.completedUrls.length} URLs completed • {campaignMetrics.domainsReached} domains reached
                                         </span>
                                         <span className="text-purple-500 text-xs font-medium">
                                           Active
