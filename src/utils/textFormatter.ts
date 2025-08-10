@@ -239,6 +239,7 @@ class TextFormatter {
    * Format specific content types
    */
   static formatTitle(text: string): string {
+    if (!text || typeof text !== 'string') return text || '';
     return this.format(text, {
       capitalizeFirst: true,
       ensureEndPunctuation: false,
@@ -248,6 +249,7 @@ class TextFormatter {
   }
 
   static formatDescription(text: string): string {
+    if (!text || typeof text !== 'string') return text || '';
     return this.format(text, {
       capitalizeFirst: true,
       ensureEndPunctuation: true,
@@ -258,6 +260,7 @@ class TextFormatter {
   }
 
   static formatListItem(text: string): string {
+    if (!text || typeof text !== 'string') return text || '';
     return this.format(text, {
       capitalizeFirst: true,
       ensureEndPunctuation: false,
@@ -267,6 +270,7 @@ class TextFormatter {
   }
 
   static formatSentence(text: string): string {
+    if (!text || typeof text !== 'string') return text || '';
     return this.format(text, {
       capitalizeFirst: true,
       ensureEndPunctuation: true,
