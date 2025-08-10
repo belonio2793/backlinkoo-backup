@@ -95,11 +95,11 @@ export class CampaignBlogIntegrationService {
       try {
         result = await response.json();
       } catch (jsonError) {
-        console.error('Error parsing blog generator response:', {
+        console.error('Error parsing blog generator response:', JSON.stringify({
           message: jsonError.message,
           stack: jsonError.stack,
           name: jsonError.name
-        });
+        }, null, 2));
         throw new Error('Invalid response from blog generation service');
       }
 
@@ -291,11 +291,11 @@ export class CampaignBlogIntegrationService {
       try {
         result = await response.json();
       } catch (jsonError) {
-        console.error('Error parsing blog generator response:', {
+        console.error('Error parsing blog generator response:', JSON.stringify({
           message: jsonError.message,
           stack: jsonError.stack,
           name: jsonError.name
-        });
+        }, null, 2));
         throw new Error('Invalid response from blog generation service');
       }
 
