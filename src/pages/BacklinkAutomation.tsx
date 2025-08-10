@@ -2075,7 +2075,7 @@ export default function BacklinkAutomation() {
 
       const linksCount = (user ? campaigns : guestCampaignResults).find(c => c.id === campaignId)?.linksGenerated || 0;
       toast({
-        title: "⏸️ Campaign Paused Successfully",
+        title: "⏸�� Campaign Paused Successfully",
         description: `All ${linksCount} links and metrics permanently saved to your account. Will never reset when resuming or refreshing page.`,
       });
     } catch (error) {
@@ -3524,6 +3524,16 @@ export default function BacklinkAutomation() {
                         className="h-8 px-2"
                       >
                         <RefreshCw className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        onClick={() => window.location.href = '/automation/system'}
+                        className="h-8 px-2 relative"
+                        title="Advanced System Control"
+                      >
+                        <Settings className="h-3 w-3" />
+                        <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                       </Button>
                       {!isPremium && (
                         <Button
