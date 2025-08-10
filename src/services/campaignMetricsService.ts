@@ -584,12 +584,12 @@ if (typeof window !== 'undefined') {
     // Test 1: Standard Error object
     const standardError = new Error('This is a test error message');
     standardError.code = 'TEST_ERROR_CODE';
-    console.error('Test standard error:', {
+    console.error('Test standard error:', JSON.stringify({
       message: standardError.message,
       code: standardError.code,
       stack: standardError.stack,
       name: standardError.name
-    });
+    }, null, 2));
 
     // Test 2: Supabase-like error object
     const supabaseError = {
@@ -598,12 +598,12 @@ if (typeof window !== 'undefined') {
       details: null,
       hint: 'Perhaps you meant to reference the table "public"."campaigns"?'
     };
-    console.error('Test Supabase-like error:', {
+    console.error('Test Supabase-like error:', JSON.stringify({
       message: supabaseError.message,
       code: supabaseError.code,
       details: supabaseError.details,
       hint: supabaseError.hint
-    });
+    }, null, 2));
 
     // Test 3: Network error
     const networkError = new TypeError('fetch failed');
