@@ -6432,7 +6432,9 @@ export default function BacklinkAutomation() {
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="linkTypeSelect">Select Link Type</Label>
+                      <Label htmlFor="linkTypeSelect">
+                        <FormattedText type="label">Select Link Type</FormattedText>
+                      </Label>
                       <Select value={selectedLinkType} onValueChange={setSelectedLinkType}>
                         <SelectTrigger className="h-12">
                           <SelectValue placeholder="Choose link building strategy" />
