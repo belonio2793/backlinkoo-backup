@@ -58,7 +58,7 @@ export function TrialExhaustedModal({
     acc + ((campaign.domains || []).length || 0), 0
   );
 
-  const topDomains = guestResults.flatMap(c => c.domains || [])
+  const topDomains = guestResults.flatMap(c => (c.domains || []))
     .slice(0, 6);
 
   const handleUpgradeClick = async () => {
