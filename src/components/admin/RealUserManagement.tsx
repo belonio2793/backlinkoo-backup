@@ -140,7 +140,7 @@ export function RealUserManagement() {
         {error && (
           <Alert className="mb-4 border-red-200 bg-red-50">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-red-700">{error}</AlertDescription>
+            <AlertDescription className="text-red-700">{formatErrorForUI(error)}</AlertDescription>
           </Alert>
         )}
 
