@@ -3886,11 +3886,11 @@ export default function BacklinkAutomation() {
                             <Button
                               variant="outline"
                               onClick={() => {
-                                
+
                                 if (user) {
-                                  setShowPremiumPlanModal(true);
+                                  DirectCheckoutService.upgradeToPremium('monthly');
                                 } else {
-                                  setShowPremiumPlanModal(true);
+                                  DirectCheckoutService.upgradeToPremium('monthly');
                                 }
                               }}
                               className="w-full h-12 px-6 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100"
