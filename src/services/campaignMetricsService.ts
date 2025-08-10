@@ -503,6 +503,54 @@ class CampaignMetricsService {
   }
 
   /**
+   * Run health check and attempt auto-fix if issues detected
+   */
+  async runHealthCheckAndFix(): Promise<{ success: boolean; message: string; healthCheck: any }> {
+    try {
+      console.log('🏥 Running campaign metrics health check...');
+
+      const healthCheck = await CampaignMetricsHealthCheck.runHealthCheck();
+
+      if (healthCheck.healthy) {
+        return {
+          success: true,
+          message: 'Campaign metrics system is healthy',
+          healthCheck
+        };
+      }
+
+      // Try auto-fix if issues detected
+      console.log('🔧 Issues detected, attempting auto-fix...');
+      const fixResult = await CampaignMetricsHealthCheck.autoFix();
+
+      if (fixResult.success) {
+        return {
+          success: true,
+          message: fixResult.message,
+          healthCheck
+        };
+      } else {
+        const instructions = CampaignMetricsHealthCheck.getManualFixInstructions();
+        console.error('❌ Auto-fix failed. Manual fix required:', instructions);
+
+        return {
+          success: false,
+          message: `${fixResult.message}\n\n${instructions}`,
+          healthCheck
+        };
+      }
+
+    } catch (error) {
+      console.error('Health check failed:', error);
+      return {
+        success: false,
+        message: `Health check failed: ${error.message}`,
+        healthCheck: { healthy: false, issues: [error.message], fixes: [] }
+      };
+    }
+  }
+
+  /**
    * Debug utility to test database connectivity and table existence
    */
   async debugDatabaseSetup(): Promise<{
