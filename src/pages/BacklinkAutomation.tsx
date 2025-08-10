@@ -257,8 +257,12 @@ export default function BacklinkAutomation() {
   // Auth Hook
   const { user, isPremium } = useAuth();
 
-  // Text formatting hook
+  // Text formatting hooks
   const { formatUIText, formatTitle, formatDescription } = useTextFormatter();
+  const { containerRef, formatNow } = useDOMTextFormatter(true, true, true);
+
+  // Auto-format text on page load
+  useAutoFormat(2000);
 
   // Helper function to safely get timestamp from createdAt field
   const safeGetTimestamp = (dateValue: any): number => {
