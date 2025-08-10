@@ -5856,7 +5856,7 @@ export default function BacklinkAutomation() {
                         <Sparkles className="h-5 w-5" />
                         🎯 New Discoveries - Priority Publishing
                       </CardTitle>
-                      <CardDescription>
+                      <CardDescription className="text-flow-fix">
                         Real-time verified link placements from {Math.floor(Math.random() * 500) + 1200}+ active campaigns across our user network
                       </CardDescription>
                     </div>
