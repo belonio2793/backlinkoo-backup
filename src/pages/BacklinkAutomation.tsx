@@ -3955,7 +3955,7 @@ export default function BacklinkAutomation() {
                                 }}
                                 className="p-0 h-auto text-amber-700 hover:text-amber-800"
                               >
-                                Upgrade →
+                                Upgrade ���
                               </Button>
                             </div>
                           </div>
@@ -6945,13 +6945,7 @@ export default function BacklinkAutomation() {
                 // Remove campaign counters
                 deleteCounterCampaign(campaignId);
 
-                // Clean up predictive metrics
-                try {
-                  const { predictiveCampaignAlgorithm } = await import('@/services/predictiveCampaignAlgorithm');
-                  predictiveCampaignAlgorithm.deletePredictiveMetrics(campaignId);
-                } catch (error) {
-                  console.warn('Failed to clean up predictive metrics:', error instanceof Error ? error.message : String(error));
-                }
+                // Predictive metrics cleanup removed - values integrated into live metrics
 
                 setCampaigns(prev => prev.filter(c => c.id !== campaignId));
                 updateGuestRestrictions();
