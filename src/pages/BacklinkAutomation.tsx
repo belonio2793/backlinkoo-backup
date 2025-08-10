@@ -6886,6 +6886,14 @@ export default function BacklinkAutomation() {
                 // Remove campaign counters
                 deleteCounterCampaign(campaignId);
 
+                // Clean up predictive metrics
+                try {
+                  const { predictiveCampaignAlgorithm } = await import('@/services/predictiveCampaignAlgorithm');
+                  predictiveCampaignAlgorithm.deletePredictiveMetrics(campaignId);
+                } catch (error) {
+                  console.warn('Failed to clean up predictive metrics:', error instanceof Error ? error.message : String(error));
+                }
+
                 // Remove from local state
                 setCampaigns(prev => prev.filter(c => c.id !== campaignId));
 
