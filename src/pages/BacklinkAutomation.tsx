@@ -2331,47 +2331,53 @@ export default function BacklinkAutomation() {
 
             // If blog generation was successful, add it as the first published link
             if (blogResult.success && blogResult.blogPostUrl) {
-              const blogPostback = {
-                id: `blog-${result.campaign.id}-${Date.now()}`,
-                domain: 'backlinkoo.com',
-                url: blogResult.blogPostUrl,
-                publishedAt: new Date().toISOString(),
-                anchorText: result.campaign.keywords[0] || 'learn more',
-                verified: true,
-                destinationUrl: result.campaign.target_url,
-                type: 'blog_post',
-                status: 'live',
-                domainAuthority: 95,
-                traffic: 50000,
-                clickThroughRate: '3.2%',
-                indexingStatus: 'Indexed',
-                linkType: 'guest_post',
-                campaignName: result.campaign.name,
-                campaignId: result.campaign.id,
-                priority: true,
-                isPrimaryBlogPost: true
-              };
-
-              // Add blog post as the first item in real-time postbacks
-              setRealTimeLinkPostbacks(prev => [blogPostback, ...prev]);
-              setRecentPostbacks(prev => [blogPostback, ...prev.slice(0, 19)]);
-
-              // Update campaign in database with blog post URL
               try {
-                await supabase
-                  .from('campaigns')
-                  .update({
-                    blog_post_url: blogResult.blogPostUrl,
-                    blog_post_title: blogResult.title,
-                    links_generated: 1 // Start with 1 for the blog post
-                  })
-                  .eq('id', result.campaign.id);
-                console.log('✅ Campaign updated with blog post URL in database');
-              } catch (updateError) {
-                console.warn('Failed to update campaign with blog URL:', updateError);
-              }
+                const blogPostback = {
+                  id: `blog-${result.campaign.id}-${Date.now()}`,
+                  domain: 'backlinkoo.com',
+                  url: blogResult.blogPostUrl,
+                  publishedAt: new Date().toISOString(),
+                  anchorText: result.campaign.keywords[0] || 'learn more',
+                  verified: true,
+                  destinationUrl: result.campaign.target_url,
+                  type: 'blog_post',
+                  status: 'live',
+                  domainAuthority: 95,
+                  traffic: 50000,
+                  clickThroughRate: '3.2%',
+                  indexingStatus: blogResult.isFallback ? 'Pending' : 'Indexed',
+                  linkType: 'guest_post',
+                  campaignName: result.campaign.name,
+                  campaignId: result.campaign.id,
+                  priority: true,
+                  isPrimaryBlogPost: true,
+                  isFallback: blogResult.isFallback || false
+                };
 
-              console.log('✅ Blog post added as priority link for authenticated user:', blogResult.blogPostUrl);
+                // Add blog post as the first item in real-time postbacks
+                setRealTimeLinkPostbacks(prev => [blogPostback, ...prev]);
+                setRecentPostbacks(prev => [blogPostback, ...prev.slice(0, 19)]);
+
+                // Update campaign in database with blog post URL
+                try {
+                  await supabase
+                    .from('campaigns')
+                    .update({
+                      blog_post_url: blogResult.blogPostUrl,
+                      blog_post_title: blogResult.title,
+                      links_generated: 1 // Start with 1 for the blog post
+                    })
+                    .eq('id', result.campaign.id);
+                  console.log('✅ Campaign updated with blog post URL in database');
+                } catch (updateError) {
+                  console.warn('Failed to update campaign with blog URL:', updateError);
+                }
+
+                console.log('✅ Blog post added as priority link for authenticated user:', blogResult.blogPostUrl);
+              } catch (linkError) {
+                console.warn('Failed to add blog post as priority link for authenticated user:', linkError);
+                // Continue without blog link if this fails
+              }
             }
           } catch (blogError) {
             console.warn('Blog generation failed for campaign:', blogError.message);
@@ -5463,7 +5469,7 @@ export default function BacklinkAutomation() {
                                     <span>Found via: Campaign #{(idx % 3) + 1}</span>
                                     <span>•</span>
                                     <span>Quality: {85 + (idx % 15)}%</span>
-                                    <span>���</span>
+                                    <span>•</span>
                                     <span className="text-green-600">
                                       <Clock4 className="h-3 w-3 inline mr-1" />
                                       {idx + 1}m ago
