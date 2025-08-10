@@ -291,7 +291,13 @@ class CampaignService {
 
       return response;
     } catch (error) {
-      console.error('Campaign deletion API error:', error);
+      console.error('Campaign deletion API error:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code,
+        statusCode: error.statusCode
+      });
 
       // Check if this is a backend unavailability issue
       const isBackendUnavailable =
