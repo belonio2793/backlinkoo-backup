@@ -80,7 +80,7 @@ export class BlogService {
       );
 
       if (!persistenceResult.success) {
-        throw new Error(`Failed to create blog post with maximum persistence: ${persistenceResult.error}`);
+        throw new Error(`Failed to create blog post with maximum persistence: ${formatErrorForUI(persistenceResult.error)}`);
       }
 
       return persistenceResult.data!;
