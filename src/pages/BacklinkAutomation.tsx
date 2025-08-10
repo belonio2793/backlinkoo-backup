@@ -2903,7 +2903,7 @@ export default function BacklinkAutomation() {
             description: "See your incredible results and unlock unlimited campaigns!",
             duration: 6000,
           });
-          setTimeout(() => setShowTrialExhaustedModal(true), 3000);
+          setTimeout(() => setShowPremiumPlanModal(true), 3000);
         } else {
           // Progress update
           toast({
@@ -2915,7 +2915,7 @@ export default function BacklinkAutomation() {
         // Logged-in user flow - check if they have any campaigns and if they're premium
         if (!isPremium && campaigns.length > 0) {
           // Non-premium users can only have one campaign with 20 links max
-          setShowTrialExhaustedModal(true);
+          setShowPremiumPlanModal(true);
           return;
         }
 
@@ -3128,7 +3128,7 @@ export default function BacklinkAutomation() {
             title: "��� Campaign Deployed!",
             description: `Your campaign is live${blogResult.success ? (blogResult.isFallback ? ' + priority blog post queued on backlinkoo.com' : ' + priority blog post published on backlinkoo.com') : ''} with 20-link limit. View progress in the monitor above!`,
             action: (
-              <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
+              <Button size="sm" onClick={() => setShowPremiumPlanModal(true)}>
                 Upgrade
               </Button>
             ),
@@ -3184,7 +3184,7 @@ export default function BacklinkAutomation() {
   const startUrlDiscovery = async () => {
     // Check guest trial limit
     if (!user && guestLinksGenerated >= 20) {
-      setShowTrialExhaustedModal(true);
+      setShowPremiumPlanModal(true);
       return;
     }
 
@@ -3219,7 +3219,7 @@ export default function BacklinkAutomation() {
                 description: `Found ${additionalLinks} premium opportunities! You've now built ${newTotal} total backlinks!`,
                 duration: 5000,
               });
-              setTimeout(() => setShowTrialExhaustedModal(true), 3000);
+              setTimeout(() => setShowPremiumPlanModal(true), 3000);
             } else {
               toast({
                 title: "🎯 Discovery Complete!",
@@ -3523,7 +3523,7 @@ export default function BacklinkAutomation() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setShowTrialExhaustedModal(true)}
+                        onClick={() => setShowPremiumPlanModal(true)}
                         className="h-8 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-none"
                       >
                         <Crown className="h-3 w-3 mr-1" />
@@ -6763,7 +6763,7 @@ export default function BacklinkAutomation() {
                     onClick={() => {
                       setPremiumUpsellTrigger('manual');
                       if (user) {
-                        setShowTrialExhaustedModal(true);
+                        setShowPremiumPlanModal(true);
                       } else {
                         setShowGuestPremiumModal(true);
                       }
