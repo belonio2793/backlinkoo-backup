@@ -4821,7 +4821,7 @@ export default function BacklinkAutomation() {
                                     Limit Reached
                                   </Badge>
                                 )}
-                                <span className="text-xs text-gray-500">
+                                <span className="text-xs text-gray-500 time-display">
                                   Last activity: {campaign.lastActivity ? new Date(campaign.lastActivity).toLocaleTimeString() : 'Never'}
                                 </span>
                               </div>
