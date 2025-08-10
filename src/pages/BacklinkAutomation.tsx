@@ -61,6 +61,7 @@ import { recursiveUrlDiscoveryService } from '@/services/recursiveUrlDiscoverySe
 // Import database utilities
 import { checkDatabaseStatus, initializeDatabase, type DatabaseStatus } from '@/utils/databaseSetup';
 import { updateActiveCampaigns, formatCampaignStatusText } from '@/utils/realTimeCampaignUpdater';
+import '@/utils/testRealTimeUpdates';
 
 interface DatabaseCampaign {
   id: string;
@@ -430,7 +431,7 @@ export default function BacklinkAutomation() {
 
           return enhancedCampaign;
         } else {
-          console.warn('⚠️ Database save failed, using localStorage fallback:', formatErrorForUI(result.error));
+          console.warn('��️ Database save failed, using localStorage fallback:', formatErrorForUI(result.error));
 
           // Show user-friendly notification for database setup issues
           if (result.error?.includes('Database function missing') || result.error?.includes('table missing')) {
