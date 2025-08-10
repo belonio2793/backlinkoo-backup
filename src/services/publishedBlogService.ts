@@ -246,9 +246,18 @@ export class PublishedBlogService {
 
   private async incrementViewCount(slug: string): Promise<void> {
     try {
-      await supabase.rpc('increment_blog_post_views', { post_slug: slug });
+      const { error } = await supabase.rpc('increment_blog_post_views', { post_slug: slug });
+
+      if (error) {
+        // Handle missing function gracefully
+        if (error.code === '42883' || error.code === 'PGRST202' || error.message?.includes('Could not find the function')) {
+          console.log('View increment function not available, skipping count');
+        } else {
+          console.warn('Failed to increment view count:', error.message);
+        }
+      }
     } catch (error) {
-      console.warn('Failed to increment view count:', error);
+      console.warn('Failed to increment view count:', error instanceof Error ? error.message : 'Unknown error');
     }
   }
 

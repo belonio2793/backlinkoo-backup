@@ -8,6 +8,7 @@ import { ModalProvider } from "@/contexts/ModalContext";
 import { ReportSyncProvider } from "@/contexts/ReportSyncContext";
 import { UnifiedModalManager } from "@/components/UnifiedModalManager";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { PremiumUpgradeProvider } from "@/components/PremiumUpgradeProvider";
 import { useSymbolCleaner } from "@/utils/symbolCleaner";
 import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import Index from "./pages/Index";
@@ -34,6 +35,7 @@ const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
 const LazySymbolCleanerDebug = lazy(() => import("./components/SymbolCleanerDebug"));
 const LazyCampaignMetricsDBVerifier = lazy(() => import("./components/CampaignMetricsDBVerifier"));
+const LazyPremiumUpgradeTest = lazy(() => import("./components/PremiumUpgradeTest"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,7 +61,8 @@ const App = () => (
           <Sonner />
           <UnifiedModalManager />
           <BrowserRouter>
-          <ReportSyncProvider>
+            <PremiumUpgradeProvider>
+              <ReportSyncProvider>
             <Routes>
             <Route path="/" element={<Index />} />
             <Route
@@ -244,6 +247,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/premium-upgrade-test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyPremiumUpgradeTest />
+                </Suspense>
+              }
+            />
 
             {/* 404 Catch-all route */}
             <Route
@@ -255,8 +266,9 @@ const App = () => (
               }
             />
             </Routes>
-          </ReportSyncProvider>
-        </BrowserRouter>
+              </ReportSyncProvider>
+            </PremiumUpgradeProvider>
+          </BrowserRouter>
         </SymbolCleanerProvider>
       </ModalProvider>
     </TooltipProvider>

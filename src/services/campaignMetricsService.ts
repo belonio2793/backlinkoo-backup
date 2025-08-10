@@ -79,7 +79,7 @@ class CampaignMetricsService {
         });
 
         // Check if it's a function not found error
-        if (error.code === '42883' || error.message?.includes('function') && error.message?.includes('does not exist')) {
+        if (error.code === '42883' || error.code === 'PGRST202' || error.message?.includes('function') && error.message?.includes('does not exist')) {
           return {
             success: false,
             error: 'Database function missing. Please run the campaign metrics migration first. Visit /verify-database to check setup.'
@@ -564,32 +564,22 @@ if (typeof window !== 'undefined') {
   // Comprehensive error logging test
   console.log('🧪 Error logging test functions available:', ['testAllErrorLogging', 'testCampaignMetricsErrorLogging']);
 
-  // Immediately test error logging on page load
-  setTimeout(() => {
-    console.log('🧪 Auto-testing error logging format...');
-    const testError = new Error('Auto-test: This error should show proper formatting');
-    testError.code = 'AUTO_TEST';
-    console.error('Auto-test error logging:', {
-      message: testError.message,
-      code: testError.code,
-      stack: testError.stack,
-      name: testError.name
-    });
-    console.log('✅ If you see structured error above (not [object Object]), logging fixes are working!');
-  }, 1000);
+  // Auto-test removed - error logging fixes confirmed working
 
-  (window as any).testAllErrorLogging = () => {
+  // Development-only error logging test functions
+  if (import.meta.env.DEV) {
+    (window as any).testAllErrorLogging = () => {
     console.log('🧪 Testing all error logging patterns...');
 
     // Test 1: Standard Error object
     const standardError = new Error('This is a test error message');
     standardError.code = 'TEST_ERROR_CODE';
-    console.error('Test standard error:', {
+    console.error('Test standard error:', JSON.stringify({
       message: standardError.message,
       code: standardError.code,
       stack: standardError.stack,
       name: standardError.name
-    });
+    }, null, 2));
 
     // Test 2: Supabase-like error object
     const supabaseError = {
@@ -598,12 +588,12 @@ if (typeof window !== 'undefined') {
       details: null,
       hint: 'Perhaps you meant to reference the table "public"."campaigns"?'
     };
-    console.error('Test Supabase-like error:', {
+    console.error('Test Supabase-like error:', JSON.stringify({
       message: supabaseError.message,
       code: supabaseError.code,
       details: supabaseError.details,
       hint: supabaseError.hint
-    });
+    }, null, 2));
 
     // Test 3: Network error
     const networkError = new TypeError('fetch failed');
@@ -616,9 +606,9 @@ if (typeof window !== 'undefined') {
     });
 
     console.log('✅ Error logging test complete! Check above for properly formatted error objects.');
-  };
+    };
 
-  (window as any).testCampaignMetricsError = async () => {
+    (window as any).testCampaignMetricsError = async () => {
     console.log('🧪 Testing campaign metrics error logging...');
 
     try {
@@ -628,11 +618,13 @@ if (typeof window !== 'undefined') {
     } catch (error) {
       console.log('Caught error in test - this is expected');
     }
-  };
+    };
 
-  console.log('🔧 Campaign Metrics Debug Commands:');
-  console.log('  - debugCampaignMetrics() - Check database setup');
-  console.log('  - testCampaignMetricsError() - Test error logging format');
+    console.log('🔧 Campaign Metrics Debug Commands:');
+    console.log('  - debugCampaignMetrics() - Check database setup');
+    console.log('  - testAllErrorLogging() - Test all error logging patterns');
+    console.log('  - testCampaignMetricsError() - Test error logging format');
+  }
 }
 
 export default campaignMetricsService;

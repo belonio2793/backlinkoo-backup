@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
-import { logError, getErrorMessage } from '@/utils/errorFormatter';
+import { logError as logFormattedError, getErrorMessage } from '@/utils/errorFormatter';
+import { logError } from '@/utils/errorLogger';
 
 export interface SubscriptionStatus {
   isSubscribed: boolean;
@@ -166,7 +167,7 @@ export class SubscriptionService {
       });
 
       if (error) {
-        console.error('Edge function error:', error);
+        logError('Edge function error', error);
 
         // Provide more specific error messages
         let errorMessage = 'Failed to create subscription';
@@ -215,7 +216,7 @@ export class SubscriptionService {
       return { success: true, url: data.url };
 
     } catch (error: any) {
-      console.error('Exception creating subscription:', error);
+      logError('Exception creating subscription', error);
 
       let errorMessage = 'An unexpected error occurred';
 
@@ -312,7 +313,7 @@ export class SubscriptionService {
 
       return { success: true };
     } catch (error: any) {
-      console.error('Exception cancelling subscription:', error);
+      logError('Exception cancelling subscription', error);
       return { success: false, error: error.message || 'Failed to cancel subscription' };
     }
   }

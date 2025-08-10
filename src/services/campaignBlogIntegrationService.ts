@@ -68,20 +68,20 @@ export class CampaignBlogIntegrationService {
           body: JSON.stringify(blogRequest)
         });
       } catch (networkError) {
-        console.error('Network error calling blog generator:', {
+        console.error('Network error calling blog generator:', JSON.stringify({
           message: networkError.message,
           stack: networkError.stack,
           name: networkError.name
-        });
+        }, null, 2));
         throw new Error(`Network error: ${networkError.message}`);
       }
 
       if (!response.ok) {
-        console.error('Blog generation HTTP error:', {
+        console.error('Blog generation HTTP error:', JSON.stringify({
           status: response.status,
           statusText: response.statusText,
           url: response.url
-        });
+        }, null, 2));
 
         // If it's a 404, the function might not be deployed
         if (response.status === 404) {
@@ -95,16 +95,16 @@ export class CampaignBlogIntegrationService {
       try {
         result = await response.json();
       } catch (jsonError) {
-        console.error('Error parsing blog generator response:', {
+        console.error('Error parsing blog generator response:', JSON.stringify({
           message: jsonError.message,
           stack: jsonError.stack,
           name: jsonError.name
-        });
+        }, null, 2));
         throw new Error('Invalid response from blog generation service');
       }
 
       if (!result.success || !result.data?.blogPost) {
-        console.error('Blog generation service returned error:', result);
+        console.error('Blog generation service returned error:', JSON.stringify(result, null, 2));
         throw new Error(result.error || 'Failed to generate blog post');
       }
 
@@ -129,12 +129,12 @@ export class CampaignBlogIntegrationService {
       };
 
     } catch (error) {
-      console.error('❌ Campaign blog generation failed:', {
+      console.error('❌ Campaign blog generation failed:', JSON.stringify({
         message: error.message,
         stack: error.stack,
         name: error.name,
         code: error.code
-      });
+      }, null, 2));
 
       // Check if it's a 404 or network error - try fallback
       if (error.message?.includes('404') || error.message?.includes('Network error')) {
@@ -170,11 +170,11 @@ export class CampaignBlogIntegrationService {
         .eq('id', campaignId);
 
       if (updateError) {
-        console.error('Failed to link campaign to blog post:', {
+        console.error('Failed to link campaign to blog post:', JSON.stringify({
           message: updateError.message,
           code: updateError.code,
           details: updateError.details
-        });
+        }, null, 2));
       }
 
       // Also create an entry in campaign blog links table if it exists
@@ -196,11 +196,11 @@ export class CampaignBlogIntegrationService {
       }
 
     } catch (error) {
-      console.error('Error linking campaign to blog post:', {
+      console.error('Error linking campaign to blog post:', JSON.stringify({
         message: error.message,
         stack: error.stack,
         name: error.name
-      });
+      }, null, 2));
       // Don't throw - this is not critical for the main flow
     }
   }
@@ -222,11 +222,11 @@ export class CampaignBlogIntegrationService {
 
       return data.blog_post_url;
     } catch (error) {
-      console.error('Error fetching campaign blog URL:', {
+      console.error('Error fetching campaign blog URL:', JSON.stringify({
         message: error.message,
         stack: error.stack,
         name: error.name
-      });
+      }, null, 2));
       return null;
     }
   }
@@ -264,20 +264,20 @@ export class CampaignBlogIntegrationService {
           body: JSON.stringify(blogRequest)
         });
       } catch (networkError) {
-        console.error('Network error calling blog generator:', {
+        console.error('Network error calling blog generator:', JSON.stringify({
           message: networkError.message,
           stack: networkError.stack,
           name: networkError.name
-        });
+        }, null, 2));
         throw new Error(`Network error: ${networkError.message}`);
       }
 
       if (!response.ok) {
-        console.error('Blog generation HTTP error:', {
+        console.error('Blog generation HTTP error:', JSON.stringify({
           status: response.status,
           statusText: response.statusText,
           url: response.url
-        });
+        }, null, 2));
 
         // If it's a 404, the function might not be deployed
         if (response.status === 404) {
@@ -291,16 +291,16 @@ export class CampaignBlogIntegrationService {
       try {
         result = await response.json();
       } catch (jsonError) {
-        console.error('Error parsing blog generator response:', {
+        console.error('Error parsing blog generator response:', JSON.stringify({
           message: jsonError.message,
           stack: jsonError.stack,
           name: jsonError.name
-        });
+        }, null, 2));
         throw new Error('Invalid response from blog generation service');
       }
 
       if (!result.success || !result.data?.blogPost) {
-        console.error('Blog generation service returned error:', result);
+        console.error('Blog generation service returned error:', JSON.stringify(result, null, 2));
         throw new Error(result.error || 'Failed to generate blog post');
       }
 
@@ -333,12 +333,12 @@ export class CampaignBlogIntegrationService {
       };
 
     } catch (error) {
-      console.error('❌ Guest campaign blog generation failed:', {
+      console.error('❌ Guest campaign blog generation failed:', JSON.stringify({
         message: error.message,
         stack: error.stack,
         name: error.name,
         code: error.code
-      });
+      }, null, 2));
 
       // Check if it's a 404 or network error - try fallback
       if (error.message?.includes('404') || error.message?.includes('Network error')) {
@@ -428,11 +428,11 @@ export class CampaignBlogIntegrationService {
       };
 
     } catch (error) {
-      console.error('❌ Fallback blog generation failed:', {
+      console.error('❌ Fallback blog generation failed:', JSON.stringify({
         message: error.message,
         stack: error.stack,
         name: error.name
-      });
+      }, null, 2));
       return {
         success: false,
         error: 'Failed to generate fallback blog post'
