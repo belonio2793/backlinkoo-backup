@@ -3056,12 +3056,7 @@ export default function BacklinkAutomation() {
           // Initialize campaign counters
           initializeCampaign(result.campaign.id, 'active');
 
-          // Initialize predictive algorithm
-          try {
-            initializePredictive(result.campaign.id, isPremium);
-          } catch (error) {
-            console.warn('Failed to initialize predictive metrics for authenticated campaign:', error instanceof Error ? error.message : String(error));
-          }
+          // Predictive algorithm removed - values integrated into live metrics
 
           // Immediately save to permanent storage to prevent any data loss
           await saveCampaignPermanently(enhancedCampaign);
