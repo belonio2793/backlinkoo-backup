@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
 import { Download, Search, Mail, Globe, Trash2, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { formatErrorForUI } from '@/utils/errorUtils';
 
 interface ScrapedEmail {
   email: string;
