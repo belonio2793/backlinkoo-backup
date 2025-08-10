@@ -416,7 +416,7 @@ export default function BacklinkAutomation() {
   const getUserStorageKey = useCallback(() => {
     if (user?.id) {
       const key = `permanent_campaigns_${user.id}`;
-      console.log('🔑 Using user storage key:', key);
+      console.log('���� Using user storage key:', key);
       return key;
     } else {
       // For guest users, use a persistent guest ID
@@ -1340,7 +1340,7 @@ export default function BacklinkAutomation() {
   const updateGuestLinkCount = (newCount: number) => {
     setGuestLinksGenerated(newCount);
     if (newCount >= 20 && !user) {
-      setShowPremiumPlanModal(true);
+      DirectCheckoutService.upgradeToPremium('monthly');
     }
   };
 
