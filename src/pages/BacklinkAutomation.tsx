@@ -2114,14 +2114,31 @@ export default function BacklinkAutomation() {
           return updated;
         });
 
-        // Always return updated campaign with fresh metrics
+        // Ensure campaigns always show activity with heartbeat system
+        const heartbeatActivity = [];
+        if (newActivities.length === 0 && forceUpdate) {
+          // Add heartbeat activity to show the system is monitoring
+          heartbeatActivity.push({
+            id: `heartbeat-${Date.now()}`,
+            type: 'system_monitoring' as const,
+            message: `📊 Campaign actively monitored • ${campaignMetrics.get(campaignId)?.domainsReached?.size || 0} domains tracked`,
+            timestamp: new Date().toISOString(),
+            metadata: {
+              type: 'heartbeat',
+              domainsCount: campaignMetrics.get(campaignId)?.domainsReached?.size || 0,
+              isActive: campaign.status === 'active'
+            }
+          });
+        }
+
+        // Always return updated campaign with guaranteed fresh metrics
         const updatedCampaign = {
           ...campaign,
           linksGenerated: updatedLinksGenerated,
           linksLive: campaign.linksLive + liveLinks,
           progress: updatedProgress,
           lastActivity: new Date(),
-          realTimeActivity: [...newActivities, ...(campaign.realTimeActivity || [])].slice(0, 20),
+          realTimeActivity: [...newActivities, ...heartbeatActivity, ...(campaign.realTimeActivity || [])].slice(0, 20),
           recentLinks: [...newLinks, ...(campaign.recentLinks || [])].slice(0, 50),
           quality: newLinks.length > 0 ? {
             averageAuthority: Math.round(newLinks.reduce((sum, link) => sum + link.domainAuthority, 0) / newLinks.length),
