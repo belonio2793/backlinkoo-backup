@@ -5546,7 +5546,7 @@ export default function BacklinkAutomation() {
       </div>
 
       {/* Trial Exhausted Modal */}
-      {/* <TrialExhaustedModal
+      <TrialExhaustedModal
         open={showTrialExhaustedModal}
         onOpenChange={setShowTrialExhaustedModal}
         guestResults={guestCampaignResults}
@@ -5557,7 +5557,7 @@ export default function BacklinkAutomation() {
           // The TrialExhaustedModal now handles its own checkout integration
           console.log('User upgrading to premium from trial exhausted modal');
         }}
-      /> */}
+      />
 
       {/* Guest Premium Upsell Modal */}
       <GuestPremiumUpsellModal
