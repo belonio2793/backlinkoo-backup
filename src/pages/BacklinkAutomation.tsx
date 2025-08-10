@@ -6816,7 +6816,7 @@ export default function BacklinkAutomation() {
         onSuccess={() => {
           setShowPremiumPlanModal(false);
           toast({
-            title: " Welcome to Premium!",
+            title: "🎉 Welcome to Premium!",
             description: "Your account has been upgraded. Enjoy unlimited access!",
           });
           // Refresh page to update premium status
