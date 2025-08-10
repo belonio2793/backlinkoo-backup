@@ -95,10 +95,10 @@ class CampaignMetricsService {
     } catch (error) {
       console.error('Campaign metrics service error:', {
         error: error,
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: formatErrorForUI(error) || 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined
       });
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
     }
   }
 
@@ -146,10 +146,10 @@ class CampaignMetricsService {
     } catch (error) {
       console.error('Campaign metrics fetch error:', {
         error: error,
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: formatErrorForUI(error) || 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined
       });
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
     }
   }
 
@@ -195,9 +195,9 @@ class CampaignMetricsService {
     } catch (error) {
       console.error('Link recording error:', {
         error: error,
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: formatErrorForUI(error) || 'Unknown error'
       });
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
     }
   }
 
@@ -236,9 +236,9 @@ class CampaignMetricsService {
     } catch (error) {
       console.error('Monthly aggregates fetch error:', {
         error: error,
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: formatErrorForUI(error) || 'Unknown error'
       });
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
     }
   }
 
@@ -268,9 +268,9 @@ class CampaignMetricsService {
     } catch (error) {
       console.error('Live campaign monitor fetch error:', {
         error: error,
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: formatErrorForUI(error) || 'Unknown error'
       });
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
     }
   }
 
@@ -300,9 +300,9 @@ class CampaignMetricsService {
     } catch (error) {
       console.error('User dashboard summary fetch error:', {
         error: error,
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: formatErrorForUI(error) || 'Unknown error'
       });
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
     }
   }
 
@@ -338,9 +338,9 @@ class CampaignMetricsService {
     } catch (error) {
       console.error('Campaign deletion error:', {
         error: error,
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: formatErrorForUI(error) || 'Unknown error'
       });
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
     }
   }
 
@@ -379,9 +379,9 @@ class CampaignMetricsService {
     } catch (error) {
       console.error('Link history fetch error:', {
         error: error,
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: formatErrorForUI(error) || 'Unknown error'
       });
-      return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+      return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
     }
   }
 
@@ -440,12 +440,12 @@ class CampaignMetricsService {
       return { success: true, migrated: migratedCount };
     } catch (error) {
       console.error('localStorage sync error:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: formatErrorForUI(error) || 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
         name: error instanceof Error ? error.name : undefined,
         code: error.code
       });
-      return { success: false, migrated: 0, error: error instanceof Error ? error.message : 'Unknown error' };
+      return { success: false, migrated: 0, error: formatErrorForUI(error) || 'Unknown error' };
     }
   }
 
