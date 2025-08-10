@@ -3547,13 +3547,13 @@ export default function BacklinkAutomation() {
 
                       if (user) {
                         if (isPremium) {
-                          return `Unlimited • ${liveMonitored > 0 ? `${liveMonitored} live monitored` : 'ready for campaigns'}`;
+                          return `Unlimited • ${formatCampaignStatusText(liveMonitored, 'live', 'ready for campaigns')}`;
                         } else {
-                          return `Monthly Links • ${activeCampaigns > 0 ? `${activeCampaigns} active` : 'ready to start'}`;
+                          return `Monthly Links • ${formatCampaignStatusText(activeCampaigns, 'active', 'ready to start')}`;
                         }
                       } else {
                         return guestLinksGenerated > 0 ?
-                          `Trial Progress • ${liveMonitored > 0 ? `${liveMonitored} monitored` : 'in progress'}` :
+                          `Trial Progress • ${formatCampaignStatusText(liveMonitored, 'monitored', 'in progress')}` :
                           "Get Started";
                       }
                     })()}
