@@ -275,7 +275,8 @@ class PaymentIntegrationService {
   async createSubscription(
     plan: 'monthly' | 'yearly',
     isGuest: boolean = false,
-    guestEmail?: string
+    guestEmail?: string,
+    redirectOptions?: CheckoutRedirectOptions
   ): Promise<PaymentResult> {
     try {
       // Validate Stripe is available (subscriptions currently only support Stripe)
