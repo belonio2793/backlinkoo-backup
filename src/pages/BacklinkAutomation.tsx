@@ -715,7 +715,7 @@ export default function BacklinkAutomation() {
         }
 
         // Attempt retry
-        console.log('🔄 Retrying failed database sync for campaign:', failedSync.metrics.campaignId);
+        console.log('���� Retrying failed database sync for campaign:', failedSync.metrics.campaignId);
 
         const retryPromise = campaignMetricsService
           .updateCampaignMetrics(failedSync.userId, failedSync.metrics)
@@ -1503,6 +1503,7 @@ export default function BacklinkAutomation() {
       }, 5000); // 5 second timeout
       try {
         const status = await checkDatabaseStatus();
+        clearTimeout(timeoutId);
         setDatabaseStatus(status);
 
         if (status.isConnected && !status.needsSetup) {
