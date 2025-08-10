@@ -3842,7 +3842,7 @@ export default function BacklinkAutomation() {
                             <Button
                               variant="outline"
                               onClick={() => {
-                                setPremiumUpsellTrigger('manual');
+                                
                                 if (user) {
                                   setShowPremiumPlanModal(true);
                                 } else {
@@ -3931,7 +3931,7 @@ export default function BacklinkAutomation() {
                                 variant="link"
                                 size="sm"
                                 onClick={() => {
-                                  setPremiumUpsellTrigger('manual');
+                                  
                                   if (user) {
                                     setShowPremiumPlanModal(true);
                                   } else {
@@ -6747,7 +6747,7 @@ export default function BacklinkAutomation() {
                   <Button
                     size="sm"
                     onClick={() => {
-                      setPremiumUpsellTrigger('manual');
+                      
                       if (user) {
                         setShowPremiumPlanModal(true);
                       } else {
