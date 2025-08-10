@@ -54,7 +54,7 @@ export function useCampaignCounters(options: UseCampaignCountersOptions = {}): U
       setGlobalCounters(global);
       setLastUpdate(new Date());
     } catch (error) {
-      console.error('Failed to update counters:', error);
+      console.error('Failed to update counters:', error instanceof Error ? error.message : String(error));
     } finally {
       setIsLoading(false);
     }
