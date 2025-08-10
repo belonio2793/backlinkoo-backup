@@ -80,7 +80,7 @@ export function useCampaignCounters(options: UseCampaignCountersOptions = {}): U
       
       console.log(`✅ Initialized campaign counters for ${id} with status: ${status}`);
     } catch (error) {
-      console.error('Failed to initialize campaign:', error);
+      console.error('Failed to initialize campaign:', error instanceof Error ? error.message : String(error));
     } finally {
       setIsLoading(false);
     }
