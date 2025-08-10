@@ -1411,7 +1411,6 @@ export default function BacklinkAutomation() {
           updateGuestRestrictions();
 
           // Show premium modal for auto-paused campaign
-          setPremiumUpsellTrigger('link_limit');
           setShowPremiumPlanModal(true);
 
           toast({
@@ -1421,7 +1420,6 @@ export default function BacklinkAutomation() {
             duration: 5000
           });
         } else if (trackingResult.shouldShowPremiumModal) {
-          setPremiumUpsellTrigger('link_limit');
           setShowPremiumPlanModal(true);
         }
       }
@@ -2063,7 +2061,7 @@ export default function BacklinkAutomation() {
 
       const linksCount = (user ? campaigns : guestCampaignResults).find(c => c.id === campaignId)?.linksGenerated || 0;
       toast({
-        title: "⏸�� Campaign Paused Successfully",
+        title: "⏸���� Campaign Paused Successfully",
         description: `All ${linksCount} links and metrics permanently saved to your account. Will never reset when resuming or refreshing page.`,
       });
     } catch (error) {
@@ -2489,7 +2487,7 @@ export default function BacklinkAutomation() {
                 const isLastRetry = retryCount >= maxRetries;
 
                 if (isLastRetry) {
-                  console.warn('�� Database sync failed after', maxRetries, 'attempts for campaign:', campaign.id, formatErrorForUI(error));
+                  console.warn('❌ Database sync failed after', maxRetries, 'attempts for campaign:', campaign.id, formatErrorForUI(error));
 
                   // Store failed sync for later retry
                   try {
@@ -5256,7 +5254,6 @@ export default function BacklinkAutomation() {
                                   onClick={() => {
                                     // Check if campaign has reached link limit
                                     if (campaign.linksGenerated >= 20) {
-                                      setPremiumUpsellTrigger('link_limit');
                                       setShowPremiumPlanModal(true);
                                       toast({
                                         title: "🚀 Upgrade to Continue",
@@ -5289,7 +5286,6 @@ export default function BacklinkAutomation() {
 
                                     if (!updateResult.success) {
                                       // Campaign cannot be reactivated - show premium modal
-                                      setPremiumUpsellTrigger('link_limit');
                                       setShowPremiumPlanModal(true);
                                       toast({
                                         title: "���� Premium Required",
@@ -5387,7 +5383,6 @@ export default function BacklinkAutomation() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => {
-                                    setPremiumUpsellTrigger('link_limit');
                                     setShowPremiumPlanModal(true);
                                   }}
                                   className="text-xs h-5 px-2 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100 mt-1"
@@ -5429,7 +5424,6 @@ export default function BacklinkAutomation() {
                                 <Button
                                   size="sm"
                                   onClick={() => {
-                                    setPremiumUpsellTrigger('link_limit');
                                     setShowPremiumPlanModal(true);
                                   }}
                                   className="h-6 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
@@ -6923,7 +6917,7 @@ export default function BacklinkAutomation() {
                 setCampaignToDelete(null);
 
                 toast({
-                  title: "������� Campaign Deleted",
+                  title: "�������� Campaign Deleted",
                   description: "Campaign has been permanently removed.",
                 });
               } else {
