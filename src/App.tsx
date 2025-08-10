@@ -33,6 +33,7 @@ const LazyNotFound = lazy(() => import("./pages/NotFound"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
 const LazySymbolCleanerDebug = lazy(() => import("./components/SymbolCleanerDebug"));
+const LazyCampaignMetricsDBVerifier = lazy(() => import("./components/CampaignMetricsDBVerifier"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
