@@ -29,6 +29,7 @@ import {
   ChevronDown, ChevronUp, X, Monitor, LinkIcon, Send, Clock4, AlertCircle, Lock
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { formatErrorForUI } from '@/utils/errorUtils';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import ToolsHeader from '@/components/shared/ToolsHeader';
@@ -471,7 +472,7 @@ export default function BacklinkAutomation() {
 
       return enhancedCampaign;
     } catch (error) {
-      console.warn('⚠️ Failed to save campaign permanently:', {
+      console.warn('⚠��� Failed to save campaign permanently:', {
         message: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
         name: error instanceof Error ? error.name : undefined
