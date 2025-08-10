@@ -69,8 +69,9 @@ import { CampaignCounterDashboard } from '@/components/CampaignCounterDashboard'
 import { CampaignReportingDashboard } from '@/components/CampaignReportingDashboard';
 // Predictive Engine removed - values integrated into live metrics
 import { useCampaignCounters } from '@/hooks/useCampaignCounters';
-import { usePredictiveCampaignAlgorithm } from '@/hooks/usePredictiveCampaignAlgorithm';
-import { predictiveCampaignAlgorithm } from '@/services/predictiveCampaignAlgorithm';
+// Predictive algorithm removed - values integrated into live metrics
+// import { usePredictiveCampaignAlgorithm } from '@/hooks/usePredictiveCampaignAlgorithm';
+// import { predictiveCampaignAlgorithm } from '@/services/predictiveCampaignAlgorithm';
 
 interface DatabaseCampaign {
   id: string;
@@ -1187,7 +1188,7 @@ export default function BacklinkAutomation() {
           if (permanentCampaigns.length > 0) {
             setTimeout(() => {
               toast({
-                title: "��� Data Restored Successfully",
+                title: "📊 Data Restored Successfully",
                 description: `${permanentCampaigns.length} campaigns restored with all metrics preserved. Your data is safe across sessions.`,
                 duration: 4000,
               });
