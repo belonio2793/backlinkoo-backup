@@ -285,7 +285,7 @@ export default function ScrapePage() {
             {/* Error Display */}
             {error && (
               <Alert variant="destructive">
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{formatErrorForUI(error)}</AlertDescription>
               </Alert>
             )}
           </CardContent>
