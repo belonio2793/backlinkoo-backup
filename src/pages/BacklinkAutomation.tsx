@@ -2914,7 +2914,7 @@ export default function BacklinkAutomation() {
             description: "See your incredible results and unlock unlimited campaigns!",
             duration: 6000,
           });
-          setTimeout(() => setShowPremiumPlanModal(true), 3000);
+          setTimeout(() => DirectCheckoutService.upgradeToPremium('monthly'), 3000);
         } else {
           // Progress update
           toast({
