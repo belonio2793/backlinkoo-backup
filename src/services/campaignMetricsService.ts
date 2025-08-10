@@ -106,6 +106,24 @@ class CampaignMetricsService {
     userId: string,
     campaignId?: string
   ): Promise<{ success: boolean; data?: CampaignRuntimeMetrics[]; error?: string }> {
+
+    // Use deadlock prevention for this operation
+    return await DeadlockPreventionService.safeCampaignMetricsOperation(
+      userId,
+      campaignId || 'all',
+      async () => {
+        return this._getCampaignMetricsInternal(userId, campaignId);
+      }
+    );
+  }
+
+  /**
+   * Internal getCampaignMetrics implementation (wrapped by deadlock prevention)
+   */
+  private async _getCampaignMetricsInternal(
+    userId: string,
+    campaignId?: string
+  ): Promise<{ success: boolean; data?: CampaignRuntimeMetrics[]; error?: string }> {
     try {
       let query = supabase
         .from('campaign_runtime_metrics')
@@ -126,7 +144,7 @@ class CampaignMetricsService {
 
         // Check for RLS permission errors
         if (CampaignMetricsErrorHandler.isUsersPermissionError(error)) {
-          console.warn('���� RLS permission error detected in campaign metrics');
+          console.warn('🚨 RLS permission error detected in campaign metrics');
           CampaignMetricsErrorHandler.logErrorDetails(error, 'getCampaignMetrics');
 
           // Try to get fallback data
@@ -508,7 +526,7 @@ class CampaignMetricsService {
    */
   async runHealthCheckAndFix(): Promise<{ success: boolean; message: string; healthCheck: any }> {
     try {
-      console.log('🏥 Running campaign metrics health check...');
+      console.log('��� Running campaign metrics health check...');
 
       const healthCheck = await CampaignMetricsHealthCheck.runHealthCheck();
 
