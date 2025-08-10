@@ -2191,11 +2191,8 @@ export default function BacklinkAutomation() {
 
   const showPremiumUpgrade = (campaignId: string) => {
     // Use PremiumPlanModal for authenticated users, TrialExhaustedModal for guests
-    if (user) {
-      setShowPremiumPlanModal(true);
-    } else {
-      setShowTrialExhaustedModal(true);
-    }
+    // Always use PremiumPlanModal for consistent experience
+    setShowPremiumPlanModal(true);
 
     const message = user && !isPremium
       ? "Campaign paused at 20-link limit. Upgrade to Premium to continue building unlimited links!"
