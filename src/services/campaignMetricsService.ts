@@ -445,6 +445,67 @@ class CampaignMetricsService {
       return { success: false, migrated: 0, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
+
+  /**
+   * Debug utility to test database connectivity and table existence
+   */
+  async debugDatabaseSetup(): Promise<{
+    tablesExist: { [key: string]: boolean };
+    viewsExist: { [key: string]: boolean };
+    functionsExist: { [key: string]: boolean };
+    errors: string[];
+  }> {
+    const debug = {
+      tablesExist: {} as { [key: string]: boolean },
+      viewsExist: {} as { [key: string]: boolean },
+      functionsExist: {} as { [key: string]: boolean },
+      errors: [] as string[]
+    };
+
+    // Test tables
+    const tables = ['campaign_runtime_metrics', 'user_monthly_link_aggregates', 'campaign_link_history'];
+    for (const table of tables) {
+      try {
+        const { error } = await supabase.from(table).select('*', { count: 'exact', head: true });
+        debug.tablesExist[table] = !error;
+        if (error) debug.errors.push(`Table ${table}: ${error.message}`);
+      } catch (err) {
+        debug.tablesExist[table] = false;
+        debug.errors.push(`Table ${table}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      }
+    }
+
+    // Test views
+    const views = ['live_campaign_monitor', 'user_dashboard_summary'];
+    for (const view of views) {
+      try {
+        const { error } = await supabase.from(view).select('*').limit(1);
+        debug.viewsExist[view] = !error;
+        if (error) debug.errors.push(`View ${view}: ${error.message}`);
+      } catch (err) {
+        debug.viewsExist[view] = false;
+        debug.errors.push(`View ${view}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      }
+    }
+
+    // Test functions
+    const functions = ['update_campaign_runtime_metrics', 'update_user_monthly_aggregates'];
+    for (const func of functions) {
+      try {
+        const { error } = await supabase.rpc(func as any);
+        // If we get a parameter error, the function exists
+        debug.functionsExist[func] = !error || error.message.includes('null value');
+        if (error && !error.message.includes('null value')) {
+          debug.errors.push(`Function ${func}: ${error.message}`);
+        }
+      } catch (err) {
+        debug.functionsExist[func] = false;
+        debug.errors.push(`Function ${func}: ${err instanceof Error ? err.message : 'Unknown error'}`);
+      }
+    }
+
+    return debug;
+  }
 }
 
 export const campaignMetricsService = new CampaignMetricsService();
