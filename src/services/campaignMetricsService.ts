@@ -428,7 +428,7 @@ class CampaignMetricsService {
             const result = await this.updateCampaignMetrics(userId, metrics);
             if (result.success) {
               migratedCount++;
-              console.log('✅ Migrated campaign to database:', campaign.id);
+              console.log('��� Migrated campaign to database:', campaign.id);
             }
           }
         } catch (parseError) {
@@ -557,6 +557,10 @@ if (typeof window !== 'undefined') {
   };
 
   // Test error logging format
+  (window as any).testCampaignMetricsErrorLogging = () => {
+    campaignMetricsService.debugErrorLogging();
+  };
+
   (window as any).testCampaignMetricsError = async () => {
     console.log('🧪 Testing campaign metrics error logging...');
 
