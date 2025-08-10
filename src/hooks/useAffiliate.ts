@@ -43,7 +43,11 @@ export const useAffiliate = () => {
       // Check for milestone rewards
       await affiliateService.checkMilestoneRewards(user.id);
     } catch (error) {
-      console.error('Error loading affiliate data:', error);
+      console.error('Error loading affiliate data:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
       toast({
         title: "Error Loading Data",
         description: "Failed to load affiliate information. Please try again.",
