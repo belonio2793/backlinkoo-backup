@@ -1979,9 +1979,9 @@ export default function BacklinkAutomation() {
       localStorage.setItem('guest_campaigns_transferred', 'true');
 
       toast({
-        title: "🎉 Campaigns Transferred!",
-        description: `Your ${guestCampaigns.length} guest campaign(s) have been saved to your account.`,
-        duration: 5000
+        title: "🎉 Welcome to Your Free Account!",
+        description: `Your ${guestCampaigns.length} campaign(s) are now saved! You can create ${3 - guestCampaigns.length} more free campaigns.`,
+        duration: 6000
       });
 
       // Refresh campaigns list
@@ -3533,7 +3533,7 @@ export default function BacklinkAutomation() {
                                             </div>
                                             <div className="flex items-center gap-2">
                                               <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
-                                                ✓ {campaign.status}
+                                                �� {campaign.status}
                                               </Badge>
                                               <Button
                                                 variant="ghost"
