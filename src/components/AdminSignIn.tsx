@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Label } from '@/components/ui/label';
 import { Loader2, Shield, AlertTriangle } from 'lucide-react';
+import { formatErrorForUI } from '@/utils/errorUtils';
 
 export function AdminSignIn() {
   const [email, setEmail] = useState('');
