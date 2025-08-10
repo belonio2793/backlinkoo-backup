@@ -7,8 +7,12 @@
 
 async function testCampaignMetricsErrorHandling() {
   console.log('🧪 Testing Campaign Metrics Error Handling...');
-  
+
   try {
+    // Dynamic import to avoid module loading issues
+    const { campaignMetricsService } = await import('@/services/campaignMetricsService');
+    const { formatErrorForUI } = await import('@/utils/errorUtils');
+
     // This should trigger a database error
     const result = await campaignMetricsService.getCampaignMetrics('fake-user-id-12345');
     
