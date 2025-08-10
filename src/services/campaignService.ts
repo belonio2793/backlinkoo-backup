@@ -598,7 +598,12 @@ class CampaignService {
         requirements
       };
     } catch (error) {
-      console.error('Failed to validate campaign for deletion:', error);
+      console.error('Failed to validate campaign for deletion:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return {
         canDelete: false,
         warnings: ['Validation failed'],
