@@ -2837,7 +2837,7 @@ export default function BacklinkAutomation() {
             <Alert className="border-green-200 bg-green-50">
               <CheckCircle className="h-4 w-4 text-green-600" />
               <AlertDescription>
-                <strong>System Ready: </strong>Your automated link building platform is fully operational!
+                <strong>System Ready:</strong> Your automated link building platform is fully operational!
                 Start creating campaigns to discover and build high-quality backlinks.
               </AlertDescription>
             </Alert>
