@@ -8,6 +8,8 @@ import './utils/cryptoWalletHandler'
 import './utils/fullstoryProtection'
 // Fix error object display issues
 import './utils/errorDisplayFix'
+// Fix authentication error display issues
+import { setupAuthErrorInterceptor } from './utils/authErrorFix'
 // Load error fixes summary
 import './utils/errorFixesSummary'
 
