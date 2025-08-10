@@ -6034,7 +6034,7 @@ export default function BacklinkAutomation() {
                   </div>
                   <div className="mt-6 text-center">
                     <p className="text-sm text-gray-600 mb-3">
-                       Live feed showing verified link placements from campaigns running across our {Math.floor(Math.random() * 5000) + 15000}+ user network
+                       📡 Live feed showing verified link placements from campaigns running across our {Math.floor(Math.random() * 5000) + 15000}+ user network
                     </p>
                   </div>
                 </CardContent>
