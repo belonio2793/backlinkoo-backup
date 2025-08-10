@@ -498,8 +498,9 @@ export default function BacklinkAutomation() {
       return true;
     } catch (error) {
       console.error('Failed to delete campaign permanently:', {
-        error: error,
         message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
         campaignId
       });
       return false;
