@@ -1163,7 +1163,7 @@ export default function BacklinkAutomation() {
       // Update cumulative stats when user campaigns change
       updateCumulativeStats();
     }
-  }, [guestCampaignResults, campaigns, saveCampaignPermanently]);
+  }, [guestCampaignResults, campaigns, saveCampaignPermanently, updateCumulativeStats]);
 
   // Cleanup on unmount
   useEffect(() => {
