@@ -117,6 +117,24 @@ const App = () => (
               }
             />
             <Route
+              path="/automation/system"
+              element={
+                <Suspense fallback={
+                  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+                    <div className="text-center">
+                      <LoadingSpinner />
+                      <div className="mt-4">
+                        <h2 className="text-xl font-semibold text-gray-900">Loading Automation System</h2>
+                        <p className="text-gray-600 mt-2">Initializing advanced automation engines...</p>
+                      </div>
+                    </div>
+                  </div>
+                }>
+                  <LazyAutomationSystem />
+                </Suspense>
+              }
+            />
+            <Route
               path="/view"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
