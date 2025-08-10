@@ -6655,6 +6655,7 @@ export default function BacklinkAutomation() {
                     </div>
                     <div>
                       <Label className="text-sm font-medium text-gray-900">Created</Label>
+                      <br />
                       <p className="text-sm text-gray-800">{selectedCampaignDetails.createdAt ? new Date(selectedCampaignDetails.createdAt).toLocaleString() : 'Recently'}</p>
                     </div>
                   </CardContent>
