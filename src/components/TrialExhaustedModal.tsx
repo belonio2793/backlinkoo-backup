@@ -50,75 +50,64 @@ export function TrialExhaustedModal({
       // Show processing message
       toast({
         title: "🚀 Creating Secure Checkout!",
-        description: "Opening payment window...",
+        description: "Opening Stripe payment window...",
       });
 
-      // Create subscription checkout session
-      const result = await paymentIntegrationService.createSubscription(
-        selectedPlan,
+      // Create real subscription using SubscriptionService
+      const result = await SubscriptionService.createSubscription(
+        isLoggedIn ? { id: userName, email: userName } : null, // Pass user if logged in
         !isLoggedIn, // isGuest (opposite of isLoggedIn)
-        !isLoggedIn ? 'guest@example.com' : undefined // Guest email placeholder
+        !isLoggedIn ? 'guest@example.com' : undefined, // Guest email placeholder
+        selectedPlan // Use the selected plan (monthly/yearly)
       );
 
       if (result.success && result.url) {
-        // Check if this is a demo/mock checkout
-        const isDemoCheckout = result.url.includes('mock=true') || result.sessionId?.startsWith('mock_');
+        // Close modal first
+        onOpenChange(false);
 
-        if (isDemoCheckout) {
-          // Handle demo checkout differently
+        // Check if this is development fallback mode
+        if (result.usedFallback) {
           toast({
-            title: "🚧 Demo Checkout Mode",
-            description: "Payment system is in demo mode. No actual payment will be processed.",
+            title: "✅ Premium Activated!",
+            description: "Your account has been upgraded to Premium (development mode).",
             duration: 5000,
           });
 
-          // For demo, just navigate to success page
-          onOpenChange(false);
-          window.location.href = result.url;
-
+          // Trigger upgrade callback
           if (onUpgrade) {
             onUpgrade();
           }
-        } else {
-          // Open real checkout in new window/tab
-          const checkoutWindow = window.open(
-            result.url,
-            'stripe-checkout',
-            'width=800,height=600,scrollbars=yes,resizable=yes'
-          );
 
-          if (checkoutWindow) {
-            // Close modal since checkout opened
-            onOpenChange(false);
-
-            // Monitor the checkout window
-            const checkClosed = setInterval(() => {
-              if (checkoutWindow.closed) {
-                clearInterval(checkClosed);
-                toast({
-                  title: "Checkout Complete",
-                  description: "If you completed your purchase, please refresh the page to see your premium features!",
-                });
-              }
-            }, 1000);
-
-            if (onUpgrade) {
-              onUpgrade();
-            }
-          } else {
-            // Popup was blocked, fallback to same window
-            toast({
-              title: "Popup Blocked",
-              description: "Opening checkout in current window...",
-            });
+          // Redirect after short delay
+          setTimeout(() => {
             window.location.href = result.url;
+          }, 1000);
+        } else {
+          // Real Stripe checkout - open in same window for better mobile experience
+          toast({
+            title: "🔄 Redirecting to Stripe",
+            description: "Opening secure payment portal...",
+            duration: 3000,
+          });
+
+          // Trigger upgrade callback
+          if (onUpgrade) {
+            onUpgrade();
           }
+
+          // Redirect to Stripe checkout
+          window.location.href = result.url;
         }
       } else {
         throw new Error(result.error || 'Failed to create checkout session');
       }
     } catch (error) {
-      console.error('Upgrade error:', error);
+      console.error('Upgrade error:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
+
       toast({
         title: "Checkout Error",
         description: error instanceof Error ? error.message : "Something went wrong. Please try again.",
