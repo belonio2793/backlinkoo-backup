@@ -287,13 +287,20 @@ class CampaignMetricsService {
         .single();
 
       if (error && error.code !== 'PGRST116') {
-        console.error('Failed to fetch user dashboard summary:', error);
-        return { success: false, error: error.message };
+        console.error('Failed to fetch user dashboard summary:', {
+          code: error.code,
+          message: error.message,
+          details: error.details
+        });
+        return { success: false, error: error.message || 'Failed to fetch dashboard summary' };
       }
 
       return { success: true, data: data || null };
     } catch (error) {
-      console.error('User dashboard summary fetch error:', error);
+      console.error('User dashboard summary fetch error:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
@@ -314,8 +321,12 @@ class CampaignMetricsService {
         .eq('campaign_id', campaignId);
 
       if (metricsError) {
-        console.error('Failed to delete campaign metrics:', metricsError);
-        return { success: false, error: metricsError.message };
+        console.error('Failed to delete campaign metrics:', {
+          code: metricsError.code,
+          message: metricsError.message,
+          details: metricsError.details
+        });
+        return { success: false, error: metricsError.message || 'Failed to delete campaign' };
       }
 
       // Update monthly aggregates
@@ -324,7 +335,10 @@ class CampaignMetricsService {
       console.log('✅ Campaign deleted from database:', campaignId);
       return { success: true };
     } catch (error) {
-      console.error('Campaign deletion error:', error);
+      console.error('Campaign deletion error:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
@@ -352,13 +366,20 @@ class CampaignMetricsService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Failed to fetch link history:', error);
-        return { success: false, error: error.message };
+        console.error('Failed to fetch link history:', {
+          code: error.code,
+          message: error.message,
+          details: error.details
+        });
+        return { success: false, error: error.message || 'Failed to fetch link history' };
       }
 
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Link history fetch error:', error);
+      console.error('Link history fetch error:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
@@ -417,7 +438,10 @@ class CampaignMetricsService {
 
       return { success: true, migrated: migratedCount };
     } catch (error) {
-      console.error('localStorage sync error:', error);
+      console.error('localStorage sync error:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
       return { success: false, migrated: 0, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
