@@ -167,7 +167,7 @@ Ensure the anchor text placement follows SEO best practices and genuinely helps 
       if (!error) {
         setSystemStatus(prev => ({
           ...prev,
-          database: { status: 'ready', message: 'Database sync ready' }
+          database: { status: 'ready', message: 'Connected' }
         }));
       } else {
         setSystemStatus(prev => ({
