@@ -2384,7 +2384,10 @@ export default function BacklinkAutomation() {
       });
 
     } catch (error) {
-      console.error('Failed to vote on URL:', error);
+      console.error('Failed to vote on URL:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
       toast({
         title: "Vote Failed",
         description: "Could not record your vote. Please try again.",
