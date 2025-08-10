@@ -6885,38 +6885,7 @@ export default function BacklinkAutomation() {
         }}
       />
 
-      {/* Predictive Algorithm Premium Modal */}
-      {showPredictivePremiumModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <div className="text-center space-y-4">
-              <div className="text-4xl">⚠️</div>
-              <h3 className="text-xl font-semibold">Monthly Limit Reached</h3>
-              <p className="text-gray-600">
-                Your campaign has reached the 20/20 monthly link limit. Upgrade to continue with unlimited link building.
-              </p>
-              <div className="flex gap-3">
-                <Button
-                  onClick={closePredictivePremiumModal}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  Continue Paused
-                </Button>
-                <Button
-                  onClick={() => {
-                    closePredictivePremiumModal();
-                    setShowPremiumPlanModal(true);
-                  }}
-                  className="flex-1 bg-purple-600 hover:bg-purple-700"
-                >
-                  Upgrade Now
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Predictive Algorithm Premium Modal - Removed */}
 
       {/* Guest Campaign Delete Confirmation */}
       <AlertDialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
