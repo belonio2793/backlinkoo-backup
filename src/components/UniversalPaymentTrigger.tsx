@@ -17,24 +17,21 @@ interface UniversalPaymentTriggerProps {
 
 /**
  * Universal Payment Trigger Component
- * 
- * This component provides a consistent way to trigger payments throughout the app.
- * It can be used for both credit purchases and premium subscriptions.
+ *
+ * Simplified version that opens Stripe checkout directly in a new window
+ * No modals, loading states, or notifications - just direct checkout
  */
 export function UniversalPaymentTrigger({
   children,
   defaultTab = 'credits',
-  initialCredits,
+  initialCredits = 50,
   triggerText,
   triggerVariant = 'default',
   triggerSize = 'default',
   triggerClassName = '',
   showIcon = true,
-  onSuccess,
-  redirectAfterSuccess = '/dashboard'
+  onSuccess
 }: UniversalPaymentTriggerProps) {
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const { toast } = useToast();
 
   const getDefaultText = () => {
     if (defaultTab === 'premium') {
@@ -50,22 +47,30 @@ export function UniversalPaymentTrigger({
     return <CreditCard className="h-4 w-4 mr-2" />;
   };
 
-  const handleSuccess = () => {
-    setIsPaymentModalOpen(false);
-    toast({
-      title: "Payment Successful!",
-      description: defaultTab === 'premium' 
-        ? "Welcome to Premium! All features are now available."
-        : "Credits have been added to your account.",
-    });
-    onSuccess?.();
+  const handleClick = async () => {
+    try {
+      if (defaultTab === 'premium') {
+        await DirectCheckoutService.upgradeToPremium('monthly');
+      } else {
+        const credits = initialCredits && [50, 100, 250, 500].includes(initialCredits)
+          ? initialCredits as 50 | 100 | 250 | 500
+          : 50;
+        await DirectCheckoutService.buyCredits(credits);
+      }
+
+      // Call success callback if provided (but no toast/notification)
+      onSuccess?.();
+
+    } catch (error) {
+      console.error('Direct checkout failed:', error);
+    }
   };
 
   return (
     <>
       {children ? (
-        <div 
-          onClick={() => setIsPaymentModalOpen(true)}
+        <div
+          onClick={handleClick}
           className="cursor-pointer"
         >
           {children}
@@ -75,21 +80,12 @@ export function UniversalPaymentTrigger({
           variant={triggerVariant}
           size={triggerSize}
           className={triggerClassName}
-          onClick={() => setIsPaymentModalOpen(true)}
+          onClick={handleClick}
         >
           {showIcon && getDefaultIcon()}
           {triggerText || getDefaultText()}
         </Button>
       )}
-
-      <EnhancedUnifiedPaymentModal
-        isOpen={isPaymentModalOpen}
-        onClose={() => setIsPaymentModalOpen(false)}
-        defaultTab={defaultTab}
-        initialCredits={initialCredits}
-        redirectAfterSuccess={redirectAfterSuccess}
-        onSuccess={handleSuccess}
-      />
     </>
   );
 }
