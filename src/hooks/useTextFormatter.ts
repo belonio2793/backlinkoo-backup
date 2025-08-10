@@ -60,8 +60,13 @@ export function useTextFormatter() {
  */
 export function useFormattedText(text: string, type: 'title' | 'description' | 'label' | 'button' | 'link' = 'description') {
   return useMemo(() => {
-    if (!text) return text;
-    return TextFormatter.formatUIText(text, type);
+    if (!text || typeof text !== 'string') return text || '';
+    try {
+      return TextFormatter.formatUIText(text, type);
+    } catch (error) {
+      console.warn('Text formatting error:', error);
+      return text;
+    }
   }, [text, type]);
 }
 
