@@ -6820,19 +6820,6 @@ export default function BacklinkAutomation() {
         </div>
       </div>
 
-      {/* Trial Exhausted Modal */}
-      <TrialExhaustedModal
-        open={showTrialExhaustedModal}
-        onOpenChange={setShowTrialExhaustedModal}
-        guestResults={guestCampaignResults}
-        totalLinks={user ? (campaigns.reduce((sum, c) => sum + c.linksGenerated, 0)) : guestLinksGenerated}
-        isLoggedIn={!!user}
-        userName={user?.user_metadata?.full_name || user?.email}
-        onUpgrade={() => {
-          // The TrialExhaustedModal now handles its own checkout integration
-          console.log('User upgrading to premium from trial exhausted modal');
-        }}
-      />
 
       {/* Premium Plan Modal with Live Pricing */}
       <PremiumPlanModal
