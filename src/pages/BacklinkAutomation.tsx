@@ -2128,7 +2128,7 @@ export default function BacklinkAutomation() {
       console.log('🧹 Component unmounting - cleaning up all campaign intervals');
       activeCampaignIntervals.forEach((interval, campaignId) => {
         clearInterval(interval);
-        console.log('�� Cleared interval for campaign on unmount:', campaignId);
+        console.log('���� Cleared interval for campaign on unmount:', campaignId);
       });
     };
   }, [activeCampaignIntervals]);
@@ -6837,16 +6837,6 @@ export default function BacklinkAutomation() {
         triggerSource="automation"
       />
 
-      {/* Guest Premium Upsell Modal */}
-      <GuestPremiumUpsellModal
-        open={showGuestPremiumModal}
-        onOpenChange={setShowGuestPremiumModal}
-        trigger={premiumUpsellTrigger}
-        onUpgrade={() => {
-          // Handle upgrade completion
-          console.log('Guest user upgrading to premium');
-        }}
-      />
 
       {/* Predictive Algorithm Premium Modal - Removed */}
 
