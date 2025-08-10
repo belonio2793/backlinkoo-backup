@@ -5,7 +5,7 @@ import './index.css'
 import './utils/globalErrorHandler'
 import './utils/cryptoWalletHandler'
 // Protect fetch from FullStory interference early
-import './utils/fullstoryProtection'
+import './utils/fullstoryProtection\'\n// Fix error object display issues\nimport \'./utils/errorDisplayFix'
 
 // Clear previous console errors in development
 if (import.meta.env.DEV) {
