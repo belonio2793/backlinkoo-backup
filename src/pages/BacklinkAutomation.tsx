@@ -5039,15 +5039,7 @@ export default function BacklinkAutomation() {
                             </div>
                           </div>
 
-                          {/* Predictive Algorithm Dashboard */}
-                          <div className="mb-4">
-                            <PredictiveCampaignDashboard
-                              campaignId={campaign.id}
-                              isPremium={isPremium}
-                              compact={true}
-                              showGlobalMetrics={false}
-                            />
-                          </div>
+                          {/* Predictive Algorithm Dashboard - Removed, values integrated into live metrics */}
 
                           {/* Progress Bar with Premium Warning */}
                           <div className="mb-4">
