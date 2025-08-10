@@ -192,6 +192,7 @@ export function OrganizedAdminDashboard() {
 
             <TabsContent value="database">
               <div className="space-y-6">
+                <CampaignMetricsDBVerifier />
                 <DatabaseTestComponent />
                 <Card>
                   <CardHeader>
