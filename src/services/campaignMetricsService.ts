@@ -125,7 +125,8 @@ class CampaignMetricsService {
           };
         }
 
-        return { success: false, error: formatErrorForUI(error) || 'Failed to fetch campaign data' };
+        const errorMessage = formatErrorForUI(error) || 'Failed to fetch campaign data';
+        return { success: false, error: String(errorMessage) };
       }
 
       return { success: true, data: data || [] };
