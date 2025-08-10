@@ -68,11 +68,11 @@ export class CampaignBlogIntegrationService {
           body: JSON.stringify(blogRequest)
         });
       } catch (networkError) {
-        console.error('Network error calling blog generator:', {
+        console.error('Network error calling blog generator:', JSON.stringify({
           message: networkError.message,
           stack: networkError.stack,
           name: networkError.name
-        });
+        }, null, 2));
         throw new Error(`Network error: ${networkError.message}`);
       }
 
@@ -264,11 +264,11 @@ export class CampaignBlogIntegrationService {
           body: JSON.stringify(blogRequest)
         });
       } catch (networkError) {
-        console.error('Network error calling blog generator:', {
+        console.error('Network error calling blog generator:', JSON.stringify({
           message: networkError.message,
           stack: networkError.stack,
           name: networkError.name
-        });
+        }, null, 2));
         throw new Error(`Network error: ${networkError.message}`);
       }
 
