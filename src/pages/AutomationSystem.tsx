@@ -288,7 +288,7 @@ export default function AutomationSystem() {
                         {getStatusIcon(activity.status)}
                         <div>
                           <p className="font-medium text-sm">{activity.engine}</p>
-                          <p className="text-xs text-gray-600">{activity.action} on {activity.target}</p>
+                          <p className="text-xs text-gray-600 tracking-wide">{activity.action} on {activity.target}</p>
                         </div>
                       </div>
                       <div className="text-right">
