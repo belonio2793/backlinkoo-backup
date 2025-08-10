@@ -738,7 +738,7 @@ export default function BacklinkAutomation() {
             }
           })
           .catch(error => {
-            console.warn('��� Retry exception for campaign:', failedSync.metrics.campaignId, error);
+            console.warn('��� Retry exception for campaign:', failedSync.metrics.campaignId, formatErrorForUI(error));
             // Add back to remaining syncs with incremented retry count
             remainingSyncs.push({
               ...failedSync,
@@ -2427,7 +2427,7 @@ export default function BacklinkAutomation() {
                 const isLastRetry = retryCount >= maxRetries;
 
                 if (isLastRetry) {
-                  console.warn('❌ Database sync failed after', maxRetries, 'attempts for campaign:', campaign.id, error);
+                  console.warn('❌ Database sync failed after', maxRetries, 'attempts for campaign:', campaign.id, formatErrorForUI(error));
 
                   // Store failed sync for later retry
                   try {
