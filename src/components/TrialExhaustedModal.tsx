@@ -12,7 +12,7 @@ import {
   UserPlus, BarChart3, Globe, Link, Sparkles, ArrowRight
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { paymentIntegrationService } from '@/services/paymentIntegrationService';
+import SubscriptionService from '@/services/subscriptionService';
 
 interface TrialExhaustedModalProps {
   open: boolean;
