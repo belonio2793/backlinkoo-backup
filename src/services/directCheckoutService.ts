@@ -5,6 +5,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { FallbackPaymentService } from './fallbackPaymentService';
 
 interface DirectCheckoutOptions {
   type: 'credits' | 'premium';
