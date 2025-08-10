@@ -185,6 +185,9 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
 
           {/* Action Buttons */}
           <div className="flex items-center gap-3">
+            {/* Premium Upgrade Button */}
+            {user && <ToolsHeaderUpgradeButton />}
+
             {/* Clear Cache Button - Always visible */}
             <Button
               onClick={handleClearCacheAndCookies}
