@@ -6089,6 +6089,12 @@ export default function BacklinkAutomation() {
             </TabsContent>
 
             <TabsContent value="analytics" className="space-y-6">
+              {/* Predictive Algorithm Dashboard */}
+              <PredictiveCampaignDashboard
+                isPremium={isPremium}
+                showGlobalMetrics={true}
+              />
+
               {/* Global Counter Dashboard */}
               <CampaignCounterDashboard showGlobal={true} />
 
