@@ -4129,7 +4129,7 @@ export default function BacklinkAutomation() {
                                 </Badge>
                               </div>
                               <div className="text-xs text-gray-500 time-display">
-                                Last updated: {new Date(cumulativeStats.lastUpdated).toLocaleTimeString()}
+                                {formatTimeDisplay('Last updated', new Date(cumulativeStats.lastUpdated))}
                               </div>
                             </div>
 
