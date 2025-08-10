@@ -2379,7 +2379,13 @@ export default function BacklinkAutomation() {
       // Show post-campaign signup modal for guest users after successful deployment
       if (!user) {
         setTimeout(() => {
-          setShowPostCampaignSignupModal(true);
+          // Double-check user is still not signed in before showing modal
+          const currentAuth = supabase.auth.getUser();
+          currentAuth.then(({ data: { user: currentUser } }) => {
+            if (!currentUser) {
+              setShowPostCampaignSignupModal(true);
+            }
+          });
         }, 2000); // Show after 2 seconds to let success toast display
       }
 
