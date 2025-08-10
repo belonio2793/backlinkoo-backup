@@ -2650,6 +2650,11 @@ export default function BacklinkAutomation() {
         setPremiumUpsellTrigger('campaign_limit');
         setShowGuestPremiumModal(true);
       }
+
+      // Initialize counters for guest campaign
+      if (trackingResult.success && trackingResult.campaign) {
+        initializeCampaign(trackingResult.campaign.id, 'active');
+      }
     }
 
     try {
