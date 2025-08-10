@@ -40,7 +40,12 @@ export function useDirectSupabaseMetrics(): UseDirectMetricsResult {
       
       console.log('✅ Direct metrics loaded successfully:', metricsData);
     } catch (err: any) {
-      console.error('❌ Error in useDirectSupabaseMetrics:', err);
+      console.error('❌ Error in useDirectSupabaseMetrics:', {
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined,
+        name: err instanceof Error ? err.name : undefined,
+        code: err.code
+      });
       setError(err.message || 'Failed to fetch metrics');
       setConnected(false);
     } finally {
