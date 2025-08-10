@@ -121,7 +121,7 @@ const EmailConfigurationTester: React.FC = () => {
           
           {result?.error && (
             <Alert variant="destructive">
-              <AlertDescription className="text-xs">{result.error}</AlertDescription>
+              <AlertDescription className="text-xs">{formatErrorForUI(result.error)}</AlertDescription>
             </Alert>
           )}
           
