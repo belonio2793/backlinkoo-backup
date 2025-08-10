@@ -324,7 +324,7 @@ exports.handler = async (event, context) => {
                 .from('campaign_deletion_logs')
                 .update({
                   status: 'failed',
-                  error_message: deleteError.message,
+                  error_message: deleteError.message || 'Database deletion failed',
                   completed_at: new Date().toISOString()
                 })
                 .eq('campaign_id', campaignId)
