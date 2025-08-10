@@ -3,8 +3,7 @@
  * Run this in browser console: testCampaignMetricsErrorHandling()
  */
 
-import { campaignMetricsService } from '@/services/campaignMetricsService';
-import { formatErrorForUI } from '@/utils/errorUtils';
+// Simple test utility - imports will be done dynamically to avoid issues
 
 async function testCampaignMetricsErrorHandling() {
   console.log('🧪 Testing Campaign Metrics Error Handling...');
