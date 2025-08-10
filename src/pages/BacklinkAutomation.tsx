@@ -29,7 +29,7 @@ import {
   ChevronDown, ChevronUp, X, Monitor, LinkIcon, Send, Clock4, AlertCircle, Lock
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { formatErrorForUI } from '@/utils/errorUtils';
+import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import ToolsHeader from '@/components/shared/ToolsHeader';
@@ -1496,7 +1496,7 @@ export default function BacklinkAutomation() {
           }
           loadRealTimeMetrics();
         } else {
-          console.warn('⚠������� Database not ready:', status);
+          console.warn('⚠����� Database not ready:', status);
         }
       } catch (error) {
         console.error('❌ Database check failed:', {
