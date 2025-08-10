@@ -214,9 +214,9 @@ export function TrialExhaustedModal({
             >
               <div className="text-center text-black">
                 <div className="text-base font-bold">Monthly</div>
-                <div className="text-xl font-bold">$29</div>
-                <div className="text-xs text-gray-600">per month</div>
-                <div className="text-xs text-gray-500 mt-0.5">Cancel anytime</div>
+                <div className="text-xl font-bold">{pricing.monthly.display}</div>
+                <div className="text-xs text-gray-600">{pricing.monthly.period}</div>
+                <div className="text-xs text-gray-500 mt-0.5">{pricing.monthly.billing}</div>
               </div>
             </div>
             <div
