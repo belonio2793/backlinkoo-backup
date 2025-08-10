@@ -332,11 +332,16 @@ class TextFormatter {
    * Comprehensive formatting for UI text
    */
   static formatUIText(text: string, type: 'title' | 'description' | 'label' | 'button' | 'link' = 'description'): string {
+    // Type check and early return for non-string input
+    if (!text || typeof text !== 'string') {
+      return text || '';
+    }
+
     let formatted = text;
 
     // Apply technical terms formatting
     formatted = this.formatTechnicalTerms(formatted);
-    
+
     // Apply number formatting
     formatted = this.formatNumbers(formatted);
 
