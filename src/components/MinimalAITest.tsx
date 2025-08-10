@@ -274,7 +274,7 @@ export function MinimalAITest() {
       }
 
     } catch (error) {
-      addLog('error', provider.toUpperCase(), `Generation failed: ${error}`);
+      addLog('error', provider.toUpperCase(), `Generation failed: ${error instanceof Error ? error.message : String(error)}`);
       return {
         provider,
         content: '',
