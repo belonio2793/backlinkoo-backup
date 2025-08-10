@@ -67,7 +67,7 @@ import { formatDisplayNumber, formatMetricDisplay, formatActivityCount } from '@
 import { safeGetRuntimeMinutes, safeGetRuntimeHours, safeFormatDate } from '@/utils/dateUtils';
 import { CampaignCounterDashboard } from '@/components/CampaignCounterDashboard';
 import { CampaignReportingDashboard } from '@/components/CampaignReportingDashboard';
-import { PredictiveCampaignDashboard } from '@/components/PredictiveCampaignDashboard';
+// Predictive Engine removed - values integrated into live metrics
 import { useCampaignCounters } from '@/hooks/useCampaignCounters';
 import { usePredictiveCampaignAlgorithm } from '@/hooks/usePredictiveCampaignAlgorithm';
 import { predictiveCampaignAlgorithm } from '@/services/predictiveCampaignAlgorithm';
@@ -6858,7 +6858,7 @@ export default function BacklinkAutomation() {
         onSuccess={() => {
           setShowPremiumPlanModal(false);
           toast({
-            title: "🎉 Welcome to Premium!",
+            title: "���� Welcome to Premium!",
             description: "Your account has been upgraded. Enjoy unlimited access!",
           });
           // Refresh page to update premium status
