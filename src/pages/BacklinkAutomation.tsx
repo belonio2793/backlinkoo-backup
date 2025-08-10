@@ -3766,18 +3766,12 @@ export default function BacklinkAutomation() {
           )}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="campaigns" className="relative">
                 Campaign Manager
                 {((user && campaigns.filter(c => c.status === 'active').length > 0) ||
                   (!user && guestCampaignResults.length > 0)) && (
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
-                )}
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="relative">
-                Analytics & Reporting
-                {globalCounters && globalCounters.totalCampaigns > 0 && (
-                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-blue-500 rounded-full animate-pulse"></div>
                 )}
               </TabsTrigger>
               <TabsTrigger value="database">Website Database</TabsTrigger>
@@ -6174,19 +6168,6 @@ export default function BacklinkAutomation() {
               )}
             </TabsContent>
 
-            <TabsContent value="analytics" className="space-y-6">
-              {/* Predictive Algorithm Dashboard */}
-              <PredictiveCampaignDashboard
-                isPremium={isPremium}
-                showGlobalMetrics={true}
-              />
-
-              {/* Global Counter Dashboard */}
-              <CampaignCounterDashboard showGlobal={true} />
-
-              {/* Comprehensive Reporting Dashboard */}
-              <CampaignReportingDashboard />
-            </TabsContent>
 
             <TabsContent value="database" className="space-y-6">
               {/* New Discoveries - Priority Publishing */}
