@@ -31,6 +31,7 @@ import { NetlifyEnvironmentManager } from "@/components/admin/NetlifyEnvironment
 import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionStatus";
 import { DirectOpenAITest } from "@/components/admin/DirectOpenAITest";
 import { UserManagement } from "@/components/admin/UserManagement";
+import { CampaignMetricsDBVerifier } from "@/components/CampaignMetricsDBVerifier";
 
 // Testing Tools
 import { AuthEmailTest } from "@/components/AuthEmailTest";
