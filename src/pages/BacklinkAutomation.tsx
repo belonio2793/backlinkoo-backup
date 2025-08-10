@@ -66,6 +66,7 @@ import { safeGetRuntimeMinutes, safeGetRuntimeHours, safeFormatDate } from '@/ut
 import { CampaignCounterDashboard } from '@/components/CampaignCounterDashboard';
 import { CampaignReportingDashboard } from '@/components/CampaignReportingDashboard';
 import { useCampaignCounters } from '@/hooks/useCampaignCounters';
+import '@/utils/debugCurrentError';
 
 interface DatabaseCampaign {
   id: string;
