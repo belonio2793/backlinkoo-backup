@@ -29,14 +29,20 @@ class DOMTextFormatter {
     const textNodes = this.getTextNodes(container);
     
     textNodes.forEach(node => {
-      if (this.shouldFormatNode(node)) {
-        const originalText = node.textContent || '';
-        const formattedText = this.determineFormattingType(node, originalText);
-        
-        if (formattedText !== originalText) {
-          node.textContent = formattedText;
-          formattedCount++;
+      try {
+        if (this.shouldFormatNode(node)) {
+          const originalText = node.textContent || '';
+          if (originalText && typeof originalText === 'string') {
+            const formattedText = this.determineFormattingType(node, originalText);
+
+            if (formattedText && formattedText !== originalText) {
+              node.textContent = formattedText;
+              formattedCount++;
+            }
+          }
         }
+      } catch (error) {
+        console.warn('DOM text formatting error:', error);
       }
     });
 
