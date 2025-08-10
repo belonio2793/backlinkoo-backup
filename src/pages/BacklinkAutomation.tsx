@@ -5196,7 +5196,7 @@ export default function BacklinkAutomation() {
                                 })()}
                               </div>
                               <div className="text-xs text-gray-500">
-                                {isPremium ? 'Unlimited' : 'Free Links'}
+                                {isPremium ? 'Unlimited' : 'Live Links'}
                               </div>
                               {campaign.linksGenerated >= 20 && (
                                 <div className="text-xs text-red-600 font-medium flex items-center justify-center gap-1">
