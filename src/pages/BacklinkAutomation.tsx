@@ -4047,7 +4047,14 @@ export default function BacklinkAutomation() {
                     Your Campaigns
                   </CardTitle>
                   <CardDescription>
-                    {user ? `${campaigns.length} campaigns • ${campaigns.filter(c => c.status === 'active').length} active` : `${guestCampaignResults.length} campaigns created`}
+                    {user ?
+                      (() => {
+                        const total = campaigns.length;
+                        const active = campaigns.filter(c => c.status === 'active').length;
+                        return `${formatActivityCount(total, 'campaign')} • ${formatActivityCount(active, 'active', undefined, { showZero: true, zeroText: 'none active' })}`;
+                      })() :
+                      formatActivityCount(guestCampaignResults.length, 'campaign', undefined, { showZero: true, zeroText: 'ready to start' }) + ' created'
+                    }
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
