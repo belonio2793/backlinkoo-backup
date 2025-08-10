@@ -3544,8 +3544,10 @@ export default function BacklinkAutomation() {
               </div>
             </div>
             <p className="text-gray-600 max-w-4xl mx-auto text-lg">
-              AI-powered recursive URL discovery system that learns and grows with community collaboration. 
-              Discover thousands of verified link opportunities across the entire internet.
+              <FormattedDescription>
+                AI-powered recursive URL discovery system that learns and grows with community collaboration.
+                Discover thousands of verified link opportunities across the entire internet.
+              </FormattedDescription>
             </p>
             
             {/* Stats section moved to bottom of page */}
