@@ -2279,7 +2279,11 @@ export default function BacklinkAutomation() {
         const updatedCampaign = {
           ...campaign,
           linksGenerated: updatedLinksGenerated,
-          linksLive: Math.max(campaign.linksLive + liveLinks, Math.floor(updatedLinksGenerated * 0.85)), // Ensure minimum based on total links
+          linksLive: Math.max(
+            campaign.linksLive + liveLinks,
+            Math.floor(updatedLinksGenerated * 0.85),
+            campaign.linksLive || 0 // Never decrease, always maintain or increase
+          ), // Ensure live links only increase and are permanently saved
           progress: updatedProgress,
           lastActivity: new Date(),
           realTimeActivity: [...newActivities, ...heartbeatActivity, ...(campaign.realTimeActivity || [])].slice(0, 20),
@@ -3917,7 +3921,7 @@ export default function BacklinkAutomation() {
                             <div className="flex items-center justify-center gap-2 text-sm">
                               <AlertTriangle className="h-4 w-4 text-amber-600" />
                               <span className="text-amber-700">Free Plan:</span>
-                              <span className="text-gray-600">20 links/month • Standard processing</span>
+                              <span className="text-gray-600">20 links/month ��� Standard processing</span>
                               <Button
                                 variant="link"
                                 size="sm"
