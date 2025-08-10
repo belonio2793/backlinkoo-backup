@@ -21,6 +21,7 @@ async function testCampaignMetricsErrorHandling() {
     if (!result.success && result.error) {
       console.log('✅ Error message type:', typeof result.error);
       console.log('✅ Error message value:', result.error);
+      const { formatErrorForUI } = await import('@/utils/errorUtils');
       console.log('✅ Formatted for UI:', formatErrorForUI(result.error));
       
       // Verify it's not "[object Object]"
