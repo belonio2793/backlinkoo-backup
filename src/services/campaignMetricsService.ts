@@ -566,7 +566,9 @@ if (typeof window !== 'undefined') {
 
   // Auto-test removed - error logging fixes confirmed working
 
-  (window as any).testAllErrorLogging = () => {
+  // Development-only error logging test functions
+  if (import.meta.env.DEV) {
+    (window as any).testAllErrorLogging = () => {
     console.log('🧪 Testing all error logging patterns...');
 
     // Test 1: Standard Error object
@@ -604,9 +606,9 @@ if (typeof window !== 'undefined') {
     });
 
     console.log('✅ Error logging test complete! Check above for properly formatted error objects.');
-  };
+    };
 
-  (window as any).testCampaignMetricsError = async () => {
+    (window as any).testCampaignMetricsError = async () => {
     console.log('🧪 Testing campaign metrics error logging...');
 
     try {
@@ -616,11 +618,13 @@ if (typeof window !== 'undefined') {
     } catch (error) {
       console.log('Caught error in test - this is expected');
     }
-  };
+    };
 
-  console.log('🔧 Campaign Metrics Debug Commands:');
-  console.log('  - debugCampaignMetrics() - Check database setup');
-  console.log('  - testCampaignMetricsError() - Test error logging format');
+    console.log('🔧 Campaign Metrics Debug Commands:');
+    console.log('  - debugCampaignMetrics() - Check database setup');
+    console.log('  - testAllErrorLogging() - Test all error logging patterns');
+    console.log('  - testCampaignMetricsError() - Test error logging format');
+  }
 }
 
 export default campaignMetricsService;
