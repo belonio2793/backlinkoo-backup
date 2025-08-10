@@ -715,7 +715,7 @@ export default function BacklinkAutomation() {
         }
 
         // Attempt retry
-        console.log('���� Retrying failed database sync for campaign:', failedSync.metrics.campaignId);
+        console.log('🔄 Retrying failed database sync for campaign:', failedSync.metrics.campaignId);
 
         const retryPromise = campaignMetricsService
           .updateCampaignMetrics(failedSync.userId, failedSync.metrics)
@@ -1520,9 +1520,22 @@ export default function BacklinkAutomation() {
           console.warn('⚠������ Database not ready:', status);
         }
       } catch (error) {
-        console.error('❌ Database check failed:', {
+        clearTimeout(timeoutId);
+        console.error('Database check failed, using fallback mode:', {
           error: error,
           message: error instanceof Error ? error.message : 'Unknown error'
+        });
+        // Set fallback status
+        setDatabaseStatus({
+          isConnected: false,
+          tablesExist: {
+            backlink_campaigns: false,
+            discovered_urls: false,
+            link_opportunities: false,
+            link_posting_results: false
+          },
+          errors: [error instanceof Error ? error.message : 'Unknown error'],
+          needsSetup: true
         });
       } finally {
         setIsCheckingDatabase(false);
