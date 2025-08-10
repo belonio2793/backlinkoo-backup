@@ -4006,6 +4006,11 @@ export default function BacklinkAutomation() {
                                               <Badge variant="outline" className="text-xs capitalize">
                                                 {postback.linkType.replace('_', ' ')}
                                               </Badge>
+                                              {postback.isPrimaryBlogPost && (
+                                                <Badge className="text-xs bg-blue-600 text-white">
+                                                  ⭐ Priority Blog Post
+                                                </Badge>
+                                              )}
                                             </div>
 
                                             <div className="text-sm text-gray-600 mb-2">
