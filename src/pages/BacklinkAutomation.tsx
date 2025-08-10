@@ -3555,7 +3555,7 @@ export default function BacklinkAutomation() {
             <Alert className="border-green-200 bg-green-50">
               <CheckCircle className="h-4 w-4 text-green-600" />
               <AlertDescription className="text-flow-fix">
-                <strong>System Ready:</strong> Your automated link building platform is fully operational!
+                <strong>{ensureColonSpacing('System Ready:')}</strong> Your automated link building platform is fully operational!
                 Start creating campaigns to discover and build high-quality backlinks.
               </AlertDescription>
             </Alert>
@@ -5956,7 +5956,7 @@ export default function BacklinkAutomation() {
                           { name: 'Legal Services', count: 19650, icon: '⚖️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
-                          { name: 'Science & Research', count: 14560, icon: '🔬' },
+                          { name: 'Science & Research', count: 14560, icon: '���' },
                           { name: 'Arts & Culture', count: 13290, icon: '���' }
                         ].map((category, idx) => (
                           <div key={idx} className="p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors">
