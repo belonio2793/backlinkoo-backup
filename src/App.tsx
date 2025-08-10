@@ -13,7 +13,7 @@ import { useSymbolCleaner } from "@/utils/symbolCleaner";
 import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import Index from "./pages/Index";
 
-const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
+const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomationTest"));
 const LazyBacklinkReport = lazy(() => import("./pages/BacklinkReport"));
 const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDiscoveryDashboard"));
 const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
