@@ -451,7 +451,7 @@ export default function BacklinkAutomation() {
           if (result.error?.includes('Database function missing') || result.error?.includes('table missing')) {
             toast({
               title: "⚠️ Database Setup Required",
-              description: "Campaign metrics will use local storage until database is configured. Visit Admin → Database to set up.",
+              description: "Campaign metrics will use local storage until database is configured. Visit Admin ��� Database to set up.",
               duration: 5000
             });
           }
@@ -6746,6 +6746,9 @@ export default function BacklinkAutomation() {
               });
 
               if (result.success) {
+                // Remove campaign counters
+                deleteCounterCampaign(campaignId);
+
                 // Remove from local state
                 setCampaigns(prev => prev.filter(c => c.id !== campaignId));
 
