@@ -43,7 +43,6 @@ class TextFormatter {
     "couldnt": "couldn't",
     "mustnt": "mustn't",
     "neednt": "needn't",
-    "dares": "dare's",
     "heres": "here's",
     "theres": "there's",
     "wheres": "where's",
@@ -52,7 +51,6 @@ class TextFormatter {
     "whos": "who's",
     "whens": "when's",
     "whys": "why's",
-    "its": "it's",
     "youre": "you're",
     "were": "we're",
     "theyre": "they're",
@@ -64,7 +62,6 @@ class TextFormatter {
     "youll": "you'll",
     "well": "we'll",
     "theyll": "they'll",
-    "id": "I'd",
     "youd": "you'd",
     "wed": "we'd",
     "theyd": "they'd"
@@ -107,11 +104,6 @@ class TextFormatter {
       formatted = this.fixProperNouns(formatted);
     }
 
-    // Fix quotes
-    if (opts.fixQuotes) {
-      formatted = this.fixQuotes(formatted);
-    }
-
     // Capitalize first letter of sentences
     if (opts.capitalizeFirst) {
       formatted = this.capitalizeSentences(formatted);
@@ -149,9 +141,6 @@ class TextFormatter {
       // Fix spacing around parentheses
       .replace(/\(\s+/g, '(')
       .replace(/\s+\)/g, ')')
-      // Fix spacing around quotation marks
-      .replace(/"\s+/g, '"')
-      .replace(/\s+"/g, '"')
       // Fix spacing around hyphens and em dashes
       .replace(/\s+-\s+/g, ' - ')
       .replace(/\s+—\s+/g, ' — ');
@@ -183,18 +172,6 @@ class TextFormatter {
     });
 
     return result;
-  }
-
-  /**
-   * Fix quotation marks
-   */
-  private static fixQuotes(text: string): string {
-    return text
-      // Replace straight quotes with curly quotes
-      .replace(/"([^"]+)"/g, '"$1"')
-      .replace(/'([^']+)'/g, ''$1'')
-      // Fix apostrophes
-      .replace(/(\w)'(\w)/g, '$1'$2');
   }
 
   /**
