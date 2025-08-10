@@ -363,7 +363,13 @@ export class SupabaseConfigSync {
       return { success: true, config: savedConfig };
 
     } catch (error) {
-      console.error(`❌ Failed to save configuration ${key}:`, error);
+      console.error(`❌ Failed to save configuration ${key}:`, {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code,
+        configKey: key
+      });
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Unknown error' 
