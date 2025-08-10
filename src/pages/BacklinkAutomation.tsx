@@ -264,6 +264,20 @@ export default function BacklinkAutomation() {
   // Auto-format text on page load
   useAutoFormat(2000);
 
+  // Add periodic formatting for dynamic content
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (containerRef.current) {
+        const result = formatNow();
+        if (result.total > 0) {
+          console.log('🎨 Periodic text formatting applied:', result);
+        }
+      }
+    }, 5000); // Every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [formatNow]);
+
   // Helper function to safely get timestamp from createdAt field
   const safeGetTimestamp = (dateValue: any): number => {
     if (!dateValue) return Date.now();
