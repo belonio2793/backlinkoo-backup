@@ -1417,7 +1417,7 @@ export default function BacklinkAutomation() {
 
           // Show premium modal for auto-paused campaign
           setPremiumUpsellTrigger('link_limit');
-          setShowGuestPremiumModal(true);
+          setShowPremiumPlanModal(true);
 
           toast({
             title: "🛑 Campaign Paused - Limit Reached",
@@ -1427,7 +1427,7 @@ export default function BacklinkAutomation() {
           });
         } else if (trackingResult.shouldShowPremiumModal) {
           setPremiumUpsellTrigger('link_limit');
-          setShowGuestPremiumModal(true);
+          setShowPremiumPlanModal(true);
         }
       }
     }
@@ -1998,7 +1998,7 @@ export default function BacklinkAutomation() {
         const updated = new Map(prev);
         const removed = updated.delete(campaignId);
         if (removed) {
-          console.log('✅ Removed campaign from active monitoring:', campaignId, '(Remaining active:', updated.size, ')');
+          console.log('�� Removed campaign from active monitoring:', campaignId, '(Remaining active:', updated.size, ')');
         }
         return updated;
       });
@@ -2679,7 +2679,7 @@ export default function BacklinkAutomation() {
       if (!trackingResult.success) {
         if (trackingResult.shouldShowPremiumModal) {
           setPremiumUpsellTrigger('campaign_limit');
-          setShowGuestPremiumModal(true);
+          setShowPremiumPlanModal(true);
         }
 
         toast({
@@ -2692,7 +2692,7 @@ export default function BacklinkAutomation() {
 
       if (trackingResult.warning && trackingResult.shouldShowPremiumModal) {
         setPremiumUpsellTrigger('campaign_limit');
-        setShowGuestPremiumModal(true);
+        setShowPremiumPlanModal(true);
       }
 
       // Initialize counters for guest campaign
@@ -3605,7 +3605,7 @@ export default function BacklinkAutomation() {
                                 size="sm"
                                 onClick={() => {
                                   setPremiumUpsellTrigger('campaign_limit');
-                                  setShowGuestPremiumModal(true);
+                                  setShowPremiumPlanModal(true);
                                 }}
                                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-xs"
                               >
@@ -3856,7 +3856,7 @@ export default function BacklinkAutomation() {
                                 if (user) {
                                   setShowPremiumPlanModal(true);
                                 } else {
-                                  setShowGuestPremiumModal(true);
+                                  setShowPremiumPlanModal(true);
                                 }
                               }}
                               className="w-full h-12 px-6 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100"
@@ -3945,7 +3945,7 @@ export default function BacklinkAutomation() {
                                   if (user) {
                                     setShowPremiumPlanModal(true);
                                   } else {
-                                    setShowGuestPremiumModal(true);
+                                    setShowPremiumPlanModal(true);
                                   }
                                 }}
                                 className="p-0 h-auto text-amber-700 hover:text-amber-800"
@@ -5262,7 +5262,7 @@ export default function BacklinkAutomation() {
                                     // Check if campaign has reached link limit
                                     if (campaign.linksGenerated >= 20) {
                                       setPremiumUpsellTrigger('link_limit');
-                                      setShowGuestPremiumModal(true);
+                                      setShowPremiumPlanModal(true);
                                       toast({
                                         title: "🚀 Upgrade to Continue",
                                         description: "This campaign has reached the 20-link free limit. Upgrade for unlimited links!",
@@ -5295,7 +5295,7 @@ export default function BacklinkAutomation() {
                                     if (!updateResult.success) {
                                       // Campaign cannot be reactivated - show premium modal
                                       setPremiumUpsellTrigger('link_limit');
-                                      setShowGuestPremiumModal(true);
+                                      setShowPremiumPlanModal(true);
                                       toast({
                                         title: "���� Premium Required",
                                         description: updateResult.warning?.message || "This campaign reached the 20-link limit. Upgrade to continue building links!",
@@ -5393,7 +5393,7 @@ export default function BacklinkAutomation() {
                                   variant="outline"
                                   onClick={() => {
                                     setPremiumUpsellTrigger('link_limit');
-                                    setShowGuestPremiumModal(true);
+                                    setShowPremiumPlanModal(true);
                                   }}
                                   className="text-xs h-5 px-2 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100 mt-1"
                                 >
@@ -5435,7 +5435,7 @@ export default function BacklinkAutomation() {
                                   size="sm"
                                   onClick={() => {
                                     setPremiumUpsellTrigger('link_limit');
-                                    setShowGuestPremiumModal(true);
+                                    setShowPremiumPlanModal(true);
                                   }}
                                   className="h-6 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                                 >
@@ -6765,7 +6765,7 @@ export default function BacklinkAutomation() {
                       if (user) {
                         setShowPremiumPlanModal(true);
                       } else {
-                        setShowGuestPremiumModal(true);
+                        setShowPremiumPlanModal(true);
                       }
                       setShowFabMenu(false);
                     }}
