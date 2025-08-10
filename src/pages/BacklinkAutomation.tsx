@@ -6213,10 +6213,12 @@ export default function BacklinkAutomation() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Network className="h-5 w-5" />
-                    Recursive Link Discovery
+                    <FormattedText type="title">Recursive Link Discovery</FormattedText>
                   </CardTitle>
                   <CardDescription>
-                    AI-powered recursive discovery synced across all your campaigns to continuously find new high-quality link opportunities
+                    <FormattedDescription>
+                      AI-powered recursive URL discovery system that learns and grows with community collaboration. Discover thousands of verified link opportunities across the entire internet.
+                    </FormattedDescription>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
