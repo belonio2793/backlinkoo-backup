@@ -524,7 +524,7 @@ export default function BacklinkAutomation() {
         if (result.success) {
           console.log('✅ Campaign deleted from database:', campaignId);
         } else {
-          console.warn('⚠️ Database deletion failed:', formatErrorForUI(result.error));
+          console.warn('⚠��� Database deletion failed:', formatErrorForUI(result.error));
         }
       }
 
@@ -3567,151 +3567,7 @@ export default function BacklinkAutomation() {
               Discover thousands of verified link opportunities across the entire internet.
             </p>
             
-            {/* Real-time Control Panel */}
-            <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
-              <div className="bg-gradient-to-r from-slate-50 to-blue-50 px-4 py-2 border-b flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${
-                    controlPanelData.systemStatus === 'active' ? 'bg-green-500 animate-pulse' :
-                    controlPanelData.systemStatus === 'operational' ? 'bg-blue-500' : 'bg-red-500'
-                  }`} />
-                  <span className="text-sm font-medium text-slate-700">
-                    Discovery Engine
-                  </span>
-                  {backendStatus === 'unavailable' && (
-                    <Badge variant="outline" className="text-orange-600 bg-orange-50 text-xs ml-2">
-                      DEMO MODE
-                    </Badge>
-                  )}
-                  {isFetching && <Loader2 className="h-3 w-3 animate-spin text-blue-500" />}
-                </div>
-                <div className="text-xs text-slate-500 time-display">
-                  {formatTimeDisplay('Last update', controlPanelData.lastUpdate)}
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 p-4">
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    <Database className="h-3 w-3 text-blue-600" />
-                    <span className="text-lg font-bold text-blue-600">{controlPanelData.totalUrls}</span>
-                  </div>
-                  <div className="text-xs text-gray-500">Total URLs</div>
-                </div>
-
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    <CheckCircle className="h-3 w-3 text-green-600" />
-                    <span className="text-lg font-bold text-green-600">{controlPanelData.verifiedUrls}</span>
-                  </div>
-                  <div className="text-xs text-gray-500">Verified URLs</div>
-                </div>
-
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    <Search className="h-3 w-3 text-purple-600" />
-                    <span className="text-lg font-bold text-purple-600">{controlPanelData.discoveryRate}</span>
-                  </div>
-                  <div className="text-xs text-gray-500">Discovery/Hour</div>
-                </div>
-
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    <Users className="h-3 w-3 text-teal-600" />
-                    <span className="text-lg font-bold text-teal-600">{controlPanelData.activeConnections}</span>
-                  </div>
-                  <div className="text-xs text-gray-500">Contributors</div>
-                </div>
-
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    <Shield className="h-3 w-3 text-indigo-600" />
-                    <span className="text-lg font-bold text-indigo-600">{controlPanelData.networkHealth.toFixed(0)}%</span>
-                  </div>
-                  <div className="text-xs text-gray-500">Quality Score</div>
-                </div>
-
-                {/* User Status & Limits */}
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-1 mb-1">
-                    {user ? (
-                      isPremium ? (
-                        <>
-                          <Crown className="h-3 w-3 text-purple-600" />
-                          <span className="text-lg font-bold text-purple-600">∞</span>
-                        </>
-                      ) : (
-                        <>
-                          <User className="h-3 w-3 text-blue-600" />
-                          <span className="text-lg font-bold text-blue-600">
-                            {(() => {
-                              // Progressive link counting with auto-detection
-                              const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
-                              const userCampaigns = savedCampaigns.filter((c: any) => c.user_id === user?.id || !c.user_id);
-                              const progressiveTotal = userCampaigns.reduce((sum: number, c: any) => {
-                                return sum + (c.progressiveLinkCount || c.linksGenerated || 0);
-                              }, 0);
-
-                              // Auto-detection: Premium can exceed 20, free stays at 20/20
-                              if (isPremium) {
-                                return <><Infinity className="h-4 w-4 mr-1" /><span>∞</span></>;
-                              } else {
-                                const displayCount = Math.min(progressiveTotal, 20);
-                                return `${displayCount}/20`;
-                              }
-                            })()}
-                          </span>
-                        </>
-                      )
-                    ) : (
-                      guestLinksGenerated > 0 ? (
-                        <>
-                          <Zap className="h-3 w-3 text-green-600" />
-                          <span className="text-lg font-bold text-green-600">
-                            {(() => {
-                              // Progressive guest campaign counting
-                              const savedGuestCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
-                              const guestCampaigns = savedGuestCampaigns.filter((c: any) => !c.user_id);
-                              const progressiveGuestTotal = guestCampaigns.reduce((sum: number, c: any) => {
-                                return sum + (c.progressiveLinkCount || c.linksGenerated || 0);
-                              }, 0);
-
-                              // Guest accounts always limited to 20/20
-                              const displayCount = Math.min(progressiveGuestTotal, 20);
-                              return `${displayCount}/20`;
-                            })()}
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <Target className="h-3 w-3 text-blue-600" />
-                          <span className="text-lg font-bold text-blue-600">--</span>
-                        </>
-                      )
-                    )}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {(() => {
-                      const savedCampaigns = JSON.parse(localStorage.getItem('permanent_campaigns') || '[]');
-                      const activeCampaigns = savedCampaigns.filter((c: any) => c.status === 'active').length;
-                      const liveMonitored = savedCampaigns.filter((c: any) => c.isLiveMonitored).length;
-
-                      if (user) {
-                        if (isPremium) {
-                          return `Unlimited • ${formatCampaignStatusText(liveMonitored, 'live', 'ready for campaigns')}`;
-                        } else {
-                          return `Monthly Links • ${formatCampaignStatusText(activeCampaigns, 'active', 'ready to start')}`;
-                        }
-                      } else {
-                        return guestLinksGenerated > 0 ?
-                          `Trial Progress • ${formatCampaignStatusText(liveMonitored, 'monitored', 'in progress')}` :
-                          "Get Started";
-                      }
-                    })()}
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* Stats section moved to bottom of page */}
           </div>
 
           {/* Database Status Alert */}
@@ -6261,7 +6117,7 @@ export default function BacklinkAutomation() {
                           { name: 'E-commerce & Retail', count: 45670, icon: '����' },
                           { name: 'Travel & Tourism', count: 38920, icon: '✈���' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
-                          { name: 'Entertainment & Gaming', count: 32180, icon: '����' },
+                          { name: 'Entertainment & Gaming', count: 32180, icon: '�����' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
                           { name: 'Real Estate', count: 27450, icon: '🏠' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
