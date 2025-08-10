@@ -3139,7 +3139,7 @@ export default function BacklinkAutomation() {
             title: "🚀 Campaign Deployed!",
             description: `Your campaign is live${blogResult.success ? (blogResult.isFallback ? ' + priority blog post queued on backlinkoo.com' : ' + priority blog post published on backlinkoo.com') : ''} with 20-link limit. View progress in the monitor above!`,
             action: (
-              <Button size="sm" onClick={() => setShowPremiumPlanModal(true)}>
+              <Button size="sm" onClick={() => DirectCheckoutService.upgradeToPremium('monthly')}>
                 Upgrade
               </Button>
             ),
