@@ -430,14 +430,7 @@ export default function BacklinkAutomation() {
         if (result.success) {
           console.log('✅ Campaign saved to database:', campaign.id, 'with progressive count:', progressiveLinkCount);
 
-          // Show success notification occasionally
-          if (Math.random() > 0.9) {
-            toast({
-              title: '📊 Database Sync Complete',
-              description: `Campaign metrics saved: ${progressiveLinkCount} total links`,
-              duration: 2000
-            });
-          }
+          // Database sync notification removed per user request
 
           // Also keep localStorage backup for offline access
           const storageKey = getUserStorageKey();
@@ -1681,11 +1674,7 @@ export default function BacklinkAutomation() {
       // Show notification after 3 seconds of campaign deployment
       const timer = setTimeout(() => {
         // Switch to live results sub-tab when campaigns are active\n        setSelectedCampaignTab('live-results');
-        toast({
-          title: "���� Campaign Results Ready!",
-          // description: "Your campaigns are now running. View real-time progress in the live monitor above.",
-          duration: 4000,
-        });
+        // Notification removed per user request
       }, 3000);
 
       return () => clearTimeout(timer);
@@ -3581,15 +3570,7 @@ export default function BacklinkAutomation() {
             {/* Stats section moved to bottom of page */}
           </div>
 
-          {/* Database Status Alert */}
-          {isCheckingDatabase && (
-            <Alert className="border-blue-200 bg-blue-50">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <AlertDescription>
-                <strong>Checking Database:</strong> Verifying database connection and table structure...
-              </AlertDescription>
-            </Alert>
-          )}
+          {/* Database Status Alert - Removed per user request */}
 
           {databaseStatus && !databaseStatus.isConnected && (
             <Alert className="border-red-200 bg-red-50">
