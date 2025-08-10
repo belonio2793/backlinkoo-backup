@@ -6887,6 +6887,7 @@ export default function BacklinkAutomation() {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         campaign={campaignToDelete}
+        isDeleting={isDeleting}
         onDelete={async (campaignId, options) => {
           try {
             setIsDeleting(true);
