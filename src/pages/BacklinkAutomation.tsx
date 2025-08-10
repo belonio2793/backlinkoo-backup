@@ -3926,7 +3926,7 @@ export default function BacklinkAutomation() {
                             <div className="flex items-center justify-center gap-2 text-sm">
                               <AlertTriangle className="h-4 w-4 text-amber-600" />
                               <span className="text-amber-700">Free Plan:</span>
-                              <span className="text-gray-600">20 links/month  Standard processing</span>
+                              <span className="text-gray-600">20 links/month • Standard processing</span>
                               <Button
                                 variant="link"
                                 size="sm"
@@ -6089,7 +6089,7 @@ export default function BacklinkAutomation() {
                           { name: 'Home & Garden', count: 21890, icon: '' },
                           { name: 'Legal Services', count: 19650, icon: '️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
-                          { name: 'Government & Politics', count: 15820, icon: '🏛️' },
+                          { name: 'Government & Politics', count: 15820, icon: '🏛��' },
                           { name: 'Science & Research', count: 14560, icon: '🔬' },
                           { name: 'Arts & Culture', count: 13290, icon: '' }
                         ].map((category, idx) => (
