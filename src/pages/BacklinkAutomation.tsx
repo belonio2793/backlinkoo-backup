@@ -1324,6 +1324,13 @@ export default function BacklinkAutomation() {
 
     const deleted = guestTrackingService.deleteCampaign(guestCampaignToDelete.id);
     if (deleted) {
+      // Clean up predictive metrics
+      try {
+        predictiveCampaignAlgorithm.deletePredictiveMetrics(guestCampaignToDelete.id);
+      } catch (error) {
+        console.warn('Failed to clean up predictive metrics:', error instanceof Error ? error.message : String(error));
+      }
+
       setGuestCampaignResults(prev =>
         prev.filter(c => c.id !== guestCampaignToDelete.id)
       );
@@ -6438,7 +6445,7 @@ export default function BacklinkAutomation() {
                                   </div>
                                   <div className="flex items-center gap-3 text-xs text-gray-500">
                                     <span>Found via: Campaign #{(idx % 3) + 1}</span>
-                                    <span>•</span>
+                                    <span>��</span>
                                     <span>Quality: {85 + (idx % 15)}%</span>
                                     <span>•</span>
                                     <span className="text-green-600">
