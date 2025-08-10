@@ -651,7 +651,12 @@ class CampaignService {
         .single();
 
       if (error) {
-        console.error('Error updating campaign status:', error.message || error.toString() || JSON.stringify(error));
+        console.error('Error updating campaign status:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         return {
           success: false,
           message: `Failed to ${status} campaign`,
