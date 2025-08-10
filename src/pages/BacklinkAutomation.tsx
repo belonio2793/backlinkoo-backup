@@ -781,7 +781,7 @@ export default function BacklinkAutomation() {
         }
 
         // Attempt retry
-        console.log('🔄 Retrying failed database sync for campaign:', failedSync.metrics.campaignId);
+        console.log('�� Retrying failed database sync for campaign:', failedSync.metrics.campaignId);
 
         const retryPromise = campaignMetricsService
           .updateCampaignMetrics(failedSync.userId, failedSync.metrics)
@@ -2926,7 +2926,7 @@ export default function BacklinkAutomation() {
         // Logged-in user flow - check if they have any campaigns and if they're premium
         if (!isPremium && campaigns.length > 0) {
           // Non-premium users can only have one campaign with 20 links max
-          setShowPremiumPlanModal(true);
+        DirectCheckoutService.upgradeToPremium('monthly');
           return;
         }
 
