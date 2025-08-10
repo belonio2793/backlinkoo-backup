@@ -44,7 +44,6 @@ import { CampaignBlogIntegrationService } from '@/services/campaignBlogIntegrati
 import { campaignMetricsService, type CampaignMetrics } from '@/services/campaignMetricsService';
 import { LoginModal } from '@/components/LoginModal';
 import { guestTrackingService } from '@/services/guestTrackingService';
-import { GuestPremiumUpsellModal } from '@/components/GuestPremiumUpsellModal';
 import { GuestCampaignRestrictionsOverlay } from '@/components/GuestCampaignRestrictionsOverlay';
 
 // Import our enterprise engines
@@ -1987,7 +1986,7 @@ export default function BacklinkAutomation() {
       const interval = activeCampaignIntervals.get(campaignId);
       if (interval) {
         clearInterval(interval);
-        console.log('���️ Cleared interval for paused campaign:', campaignId);
+        console.log('⏸️ Cleared interval for paused campaign:', campaignId);
       }
 
       // Update intervals map atomically
@@ -2491,7 +2490,7 @@ export default function BacklinkAutomation() {
                 const isLastRetry = retryCount >= maxRetries;
 
                 if (isLastRetry) {
-                  console.warn('❌ Database sync failed after', maxRetries, 'attempts for campaign:', campaign.id, formatErrorForUI(error));
+                  console.warn('�� Database sync failed after', maxRetries, 'attempts for campaign:', campaign.id, formatErrorForUI(error));
 
                   // Store failed sync for later retry
                   try {
