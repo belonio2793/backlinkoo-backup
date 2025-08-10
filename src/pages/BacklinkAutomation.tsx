@@ -3524,6 +3524,17 @@ export default function BacklinkAutomation() {
                       >
                         <RefreshCw className="h-3 w-3" />
                       </Button>
+                      {!isPremium && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setShowPremiumPlanModal(true)}
+                          className="h-8 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-none"
+                        >
+                          <Crown className="h-3 w-3 mr-1" />
+                          View Plans
+                        </Button>
+                      )}
                     </>
                   )}
 
