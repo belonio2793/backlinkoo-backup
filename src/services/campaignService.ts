@@ -723,7 +723,12 @@ class CampaignService {
 
       return { campaign: data };
     } catch (error) {
-      console.error('Error creating campaign:', error.message || error.toString() || JSON.stringify(error));
+      console.error('Error creating campaign:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return { error: error.message || 'Unknown error occurred' };
     }
   }
