@@ -209,7 +209,8 @@ class CampaignMetricsService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Failed to fetch monthly aggregates:', formatErrorForLogging(error, 'getUserMonthlyAggregates'));
+        const errorDetails = formatErrorForLogging(error, 'getUserMonthlyAggregates');
+        console.error('Failed to fetch monthly aggregates:', JSON.stringify(errorDetails, null, 2));
         return { success: false, error: formatErrorForUI(error) || 'Failed to fetch monthly data' };
       }
 
