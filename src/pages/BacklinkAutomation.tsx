@@ -3975,11 +3975,11 @@ export default function BacklinkAutomation() {
                                 variant="link"
                                 size="sm"
                                 onClick={() => {
-                                  
+
                                   if (user) {
-                                    setShowPremiumPlanModal(true);
+                                    DirectCheckoutService.upgradeToPremium('monthly');
                                   } else {
-                                    setShowPremiumPlanModal(true);
+                                    DirectCheckoutService.upgradeToPremium('monthly');
                                   }
                                 }}
                                 className="p-0 h-auto text-amber-700 hover:text-amber-800"
