@@ -36,6 +36,7 @@ const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
 const LazySymbolCleanerDebug = lazy(() => import("./components/SymbolCleanerDebug"));
 const LazyCampaignMetricsDBVerifier = lazy(() => import("./components/CampaignMetricsDBVerifier"));
 const LazyPremiumUpgradeTest = lazy(() => import("./components/PremiumUpgradeTest"));
+const LazyAutomationSystem = lazy(() => import("./pages/AutomationSystem"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
