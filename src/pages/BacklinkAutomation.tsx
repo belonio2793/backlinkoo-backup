@@ -780,7 +780,7 @@ export default function BacklinkAutomation() {
 
       setCampaignMetrics(metricsMap);
       setMetricsLoaded(true);
-      console.log('��� Loaded metrics for', metricsMap.size, 'campaigns from localStorage');
+      console.log('📊 Loaded metrics for', metricsMap.size, 'campaigns from localStorage');
     } catch (error) {
       console.warn('Failed to load campaign metrics from localStorage:', formatErrorForUI(error));
       setMetricsLoaded(true);
@@ -1866,7 +1866,7 @@ export default function BacklinkAutomation() {
       const interval = activeCampaignIntervals.get(campaignId);
       if (interval) {
         clearInterval(interval);
-        console.log('⏸️ Cleared interval for paused campaign:', campaignId);
+        console.log('���️ Cleared interval for paused campaign:', campaignId);
       }
 
       // Update intervals map atomically
@@ -4127,7 +4127,7 @@ export default function BacklinkAutomation() {
                                   {globalActivityFeed.length} activities
                                 </Badge>
                               </div>
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-gray-500 time-display">
                                 Last updated: {new Date(cumulativeStats.lastUpdated).toLocaleTimeString()}
                               </div>
                             </div>
