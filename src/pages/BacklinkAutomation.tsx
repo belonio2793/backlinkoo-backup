@@ -1633,7 +1633,7 @@ export default function BacklinkAutomation() {
           status: dbCampaign.status,
           progress: dbCampaign.progress || 0,
           linksGenerated: dbCampaign.links_generated || 0,
-          linksLive: dbCampaign.links_generated ? Math.round(dbCampaign.links_generated * 0.95) : 0,
+          linksLive: dbCampaign.links_generated ? Math.max(Math.round(dbCampaign.links_generated * 0.95), 1) : 0,
           createdAt: new Date(dbCampaign.created_at),
           lastActivity: dbCampaign.updated_at ? new Date(dbCampaign.updated_at) : new Date(),
           blogPostUrl: dbCampaign.blog_post_url,
