@@ -4,8 +4,8 @@
 
 import { reliableContentGenerator } from '@/services/reliableContentGenerator';
 
-export async function testErrorHandling() {
-  console.log('🧪 Testing error handling...');
+export async function testContentGenerationErrorHandling() {
+  console.log('🧪 Testing content generation error handling...');
   
   try {
     const result = await reliableContentGenerator.generateContent(
