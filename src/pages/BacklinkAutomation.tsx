@@ -2682,12 +2682,7 @@ export default function BacklinkAutomation() {
       // Initialize counters for guest campaign
       if (trackingResult.success && trackingResult.campaign) {
         initializeCampaign(trackingResult.campaign.id, 'active');
-        // Initialize predictive algorithm for guest campaign
-        try {
-          initializePredictive(trackingResult.campaign.id, false); // Guest campaigns are not premium
-        } catch (error) {
-          console.warn('Failed to initialize predictive metrics for guest campaign:', error instanceof Error ? error.message : String(error));
-        }
+        // Predictive algorithm removed - values integrated into live metrics
       }
     }
 
