@@ -3230,7 +3230,7 @@ export default function BacklinkAutomation() {
                 description: `Found ${additionalLinks} premium opportunities! You've now built ${newTotal} total backlinks!`,
                 duration: 5000,
               });
-              setTimeout(() => setShowPremiumPlanModal(true), 3000);
+              setTimeout(() => DirectCheckoutService.upgradeToPremium('monthly'), 3000);
             } else {
               toast({
                 title: "🎯 Discovery Complete!",
