@@ -30,7 +30,6 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { formatErrorForUI } from '@/utils/errorUtils';
-import '@/utils/testErrorFix'; // Enable error handling test in development
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import ToolsHeader from '@/components/shared/ToolsHeader';
