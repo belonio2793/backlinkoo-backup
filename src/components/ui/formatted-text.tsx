@@ -44,11 +44,11 @@ export function FormattedTitle({ children, className, ...props }: Omit<Formatted
 
 export function FormattedDescription({ children, className, ...props }: Omit<FormattedTextProps, 'type' | 'as'>) {
   const formattedText = useFormattedText(children, 'description');
-  
+
   return (
-    <p className={cn("text-gray-600", className)} {...props}>
+    <span className={cn("text-gray-600", className)} {...props}>
       {formattedText}
-    </p>
+    </span>
   );
 }
 
