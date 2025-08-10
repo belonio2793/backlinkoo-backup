@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 import SubscriptionService from '@/services/subscriptionService';
 import { useAuth } from '@/hooks/useAuth';
+import { CheckoutRedirectManager } from '@/utils/checkoutRedirectManager';
 import {
   Crown,
   CreditCard,
