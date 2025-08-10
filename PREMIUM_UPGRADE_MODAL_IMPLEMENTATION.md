@@ -115,7 +115,10 @@ function FeatureComponent() {
   return (
     <div>
       {!isPremium && <CompactUpgradeButton />}
-      {/* Premium content */}
+      <div className="premium-content">
+        <h3>Advanced Analytics Dashboard</h3>
+        <p>Premium feature content here</p>
+      </div>
     </div>
   );
 }
