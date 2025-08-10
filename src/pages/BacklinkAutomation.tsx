@@ -1298,7 +1298,7 @@ export default function BacklinkAutomation() {
       );
       updateGuestRestrictions();
       toast({
-        title: "🗑�� Campaign Deleted",
+        title: "����� Campaign Deleted",
         description: `"${guestCampaignToDelete.name}" has been permanently removed.`,
       });
     } else {
@@ -4335,11 +4335,21 @@ export default function BacklinkAutomation() {
 
                                           <div className="grid grid-cols-3 gap-2 text-xs">
                                             <div className="text-center">
-                                              <div className="font-bold text-green-600">{campaign.linksGenerated}</div>
+                                              <div className="font-bold text-green-600">
+                                                {formatDisplayNumber(campaign.linksGenerated, {
+                                                  hideZero: false,
+                                                  zeroText: '0'
+                                                })}
+                                              </div>
                                               <div className="text-gray-600">Links</div>
                                             </div>
                                             <div className="text-center">
-                                              <div className="font-bold text-blue-600">{campaign.domains?.length || 0}</div>
+                                              <div className="font-bold text-blue-600">
+                                                {formatDisplayNumber(campaign.domains?.length || 0, {
+                                                  hideZero: false,
+                                                  zeroText: '0'
+                                                })}
+                                              </div>
                                               <div className="text-gray-600">Domains</div>
                                             </div>
                                             <div className="text-center">
