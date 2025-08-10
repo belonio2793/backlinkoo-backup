@@ -1484,6 +1484,23 @@ export default function BacklinkAutomation() {
   useEffect(() => {
     const checkDatabase = async () => {
       setIsCheckingDatabase(true);
+
+      // Set a timeout to prevent indefinite loading
+      const timeoutId = setTimeout(() => {
+        console.warn('Database check timeout, proceeding with fallback mode');
+        setIsCheckingDatabase(false);
+        setDatabaseStatus({
+          isConnected: true,
+          tablesExist: {
+            backlink_campaigns: false,
+            discovered_urls: false,
+            link_opportunities: false,
+            link_posting_results: false
+          },
+          errors: ['Timeout - using fallback mode'],
+          needsSetup: false
+        });
+      }, 5000); // 5 second timeout
       try {
         const status = await checkDatabaseStatus();
         setDatabaseStatus(status);
