@@ -2460,7 +2460,7 @@ export default function BacklinkAutomation() {
     setActiveCampaignIntervals(prev => {
       const updated = new Map(prev);
       updated.set(campaignId, interval);
-      console.log('✅ Started monitoring for campaign:', campaignId, '(Total active:', updated.size, ')');
+      console.log('��� Started monitoring for campaign:', campaignId, '(Total active:', updated.size, ')');
       return updated;
     });
 
@@ -5616,14 +5616,25 @@ export default function BacklinkAutomation() {
 
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                             <div className="text-center">
-                              <div className="text-lg font-bold text-green-600">{(() => {
-                                const campaignReport = detailedReporting.find(r => r.campaignId === campaign.id);
-                                return campaignReport?.linksLive || campaign.linksLive || Math.round(campaign.linksGenerated * 0.95) || 0;
-                              })()}</div>
+                              <div className="text-lg font-bold text-green-600">
+                                {(() => {
+                                  const campaignReport = detailedReporting.find(r => r.campaignId === campaign.id);
+                                  const liveLinks = campaignReport?.linksLive || campaign.linksLive || Math.round(campaign.linksGenerated * 0.95) || 0;
+                                  return formatDisplayNumber(liveLinks, {
+                                    hideZero: false,
+                                    zeroText: '0'
+                                  });
+                                })()}
+                              </div>
                               <div className="text-xs text-gray-600">Live Links</div>
                             </div>
                             <div className="text-center">
-                              <div className="text-lg font-bold text-blue-600">{campaign.domains?.length || 0}</div>
+                              <div className="text-lg font-bold text-blue-600">
+                                {formatDisplayNumber(campaign.domains?.length || 0, {
+                                  hideZero: false,
+                                  zeroText: '0'
+                                })}
+                              </div>
                               <div className="text-xs text-gray-600">Domains</div>
                             </div>
                             <div className="text-center">
