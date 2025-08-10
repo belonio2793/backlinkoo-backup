@@ -793,7 +793,7 @@ export default function BacklinkAutomation() {
       localStorage.setItem('failed_campaign_syncs', JSON.stringify(remainingSyncs));
 
       if (syncPromises.length > 0) {
-        console.log(`🔄 Processed ${syncPromises.length} failed syncs, ${remainingSyncs.length} remaining`);
+        console.log(`���� Processed ${syncPromises.length} failed syncs, ${remainingSyncs.length} remaining`);
       }
     } catch (error) {
       console.warn('Failed to process retry queue:', error);
@@ -1991,7 +1991,7 @@ export default function BacklinkAutomation() {
         const updated = new Map(prev);
         const removed = updated.delete(campaignId);
         if (removed) {
-          console.log('��� Removed campaign from active monitoring:', campaignId, '(Remaining active:', updated.size, ')');
+          console.log('✅ Removed campaign from active monitoring:', campaignId, '(Remaining active:', updated.size, ')');
         }
         return updated;
       });
@@ -2061,7 +2061,7 @@ export default function BacklinkAutomation() {
 
       const linksCount = (user ? campaigns : guestCampaignResults).find(c => c.id === campaignId)?.linksGenerated || 0;
       toast({
-        title: "⏸ Campaign Paused Successfully",
+        title: "⏸️ Campaign Paused Successfully",
         description: `All ${linksCount} links and metrics permanently saved to your account. Will never reset when resuming or refreshing page.`,
       });
     } catch (error) {
