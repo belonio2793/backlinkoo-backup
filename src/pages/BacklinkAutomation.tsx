@@ -780,7 +780,7 @@ export default function BacklinkAutomation() {
 
       setCampaignMetrics(metricsMap);
       setMetricsLoaded(true);
-      console.log('📊 Loaded metrics for', metricsMap.size, 'campaigns from localStorage');
+      console.log('��� Loaded metrics for', metricsMap.size, 'campaigns from localStorage');
     } catch (error) {
       console.warn('Failed to load campaign metrics from localStorage:', formatErrorForUI(error));
       setMetricsLoaded(true);
@@ -3380,7 +3380,7 @@ export default function BacklinkAutomation() {
                   )}
                   {isFetching && <Loader2 className="h-3 w-3 animate-spin text-blue-500" />}
                 </div>
-                <div className="text-xs text-slate-500">
+                <div className="text-xs text-slate-500 time-display">
                   Last update: {controlPanelData.lastUpdate.toLocaleTimeString()}
                 </div>
               </div>
