@@ -621,8 +621,256 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_runtime_metrics: {
+        Row: {
+          id: string
+          campaign_id: string
+          user_id: string
+          campaign_name: string
+          start_time: string
+          last_active_time: string | null
+          total_runtime_seconds: number
+          status: string
+          progressive_link_count: number
+          links_live: number
+          links_pending: number
+          links_failed: number
+          target_url: string
+          keywords: string[]
+          anchor_texts: string[]
+          daily_limit: number
+          average_authority: number
+          success_rate: number
+          velocity: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          campaign_id: string
+          user_id: string
+          campaign_name: string
+          start_time?: string
+          last_active_time?: string | null
+          total_runtime_seconds?: number
+          status?: string
+          progressive_link_count?: number
+          links_live?: number
+          links_pending?: number
+          links_failed?: number
+          target_url: string
+          keywords?: string[]
+          anchor_texts?: string[]
+          daily_limit?: number
+          average_authority?: number
+          success_rate?: number
+          velocity?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          campaign_id?: string
+          user_id?: string
+          campaign_name?: string
+          start_time?: string
+          last_active_time?: string | null
+          total_runtime_seconds?: number
+          status?: string
+          progressive_link_count?: number
+          links_live?: number
+          links_pending?: number
+          links_failed?: number
+          target_url?: string
+          keywords?: string[]
+          anchor_texts?: string[]
+          daily_limit?: number
+          average_authority?: number
+          success_rate?: number
+          velocity?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_runtime_metrics_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      user_monthly_link_aggregates: {
+        Row: {
+          id: string
+          user_id: string
+          year: number
+          month: number
+          total_links_generated: number
+          total_links_live: number
+          total_campaigns_active: number
+          total_campaigns_completed: number
+          average_authority: number
+          average_success_rate: number
+          is_premium: boolean
+          monthly_link_limit: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          year: number
+          month: number
+          total_links_generated?: number
+          total_links_live?: number
+          total_campaigns_active?: number
+          total_campaigns_completed?: number
+          average_authority?: number
+          average_success_rate?: number
+          is_premium?: boolean
+          monthly_link_limit?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          year?: number
+          month?: number
+          total_links_generated?: number
+          total_links_live?: number
+          total_campaigns_active?: number
+          total_campaigns_completed?: number
+          average_authority?: number
+          average_success_rate?: number
+          is_premium?: boolean
+          monthly_link_limit?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_monthly_link_aggregates_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      campaign_link_history: {
+        Row: {
+          id: string
+          campaign_id: string
+          user_id: string
+          source_url: string
+          target_url: string
+          anchor_text: string
+          domain: string
+          status: string
+          domain_authority: number
+          verified: boolean
+          link_type: string
+          link_strategy: string
+          clicks: number
+          link_juice: number
+          published_at: string
+          verified_at: string | null
+          last_checked_at: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          campaign_id: string
+          user_id: string
+          source_url: string
+          target_url: string
+          anchor_text: string
+          domain: string
+          status?: string
+          domain_authority?: number
+          verified?: boolean
+          link_type?: string
+          link_strategy?: string
+          clicks?: number
+          link_juice?: number
+          published_at?: string
+          verified_at?: string | null
+          last_checked_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          campaign_id?: string
+          user_id?: string
+          source_url?: string
+          target_url?: string
+          anchor_text?: string
+          domain?: string
+          status?: string
+          domain_authority?: number
+          verified?: boolean
+          link_type?: string
+          link_strategy?: string
+          clicks?: number
+          link_juice?: number
+          published_at?: string
+          verified_at?: string | null
+          last_checked_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_link_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
+      live_campaign_monitor: {
+        Row: {
+          user_id: string | null
+          email: string | null
+          total_campaigns: number | null
+          active_campaigns: number | null
+          paused_campaigns: number | null
+          total_links_generated: number | null
+          total_links_live: number | null
+          total_links_pending: number | null
+          avg_authority: number | null
+          avg_success_rate: number | null
+          total_runtime_seconds: number | null
+          last_activity: string | null
+        }
+        Relationships: []
+      }
+      user_dashboard_summary: {
+        Row: {
+          user_id: string | null
+          email: string | null
+          subscription_tier: string | null
+          subscription_status: string | null
+          current_month_links: number | null
+          monthly_limit: number | null
+          is_premium: boolean | null
+          lifetime_links: number | null
+          total_campaigns: number | null
+          active_campaigns: number | null
+          average_authority: number | null
+          average_success_rate: number | null
+          last_activity: string | null
+        }
+        Relationships: []
+      }
       ranking_dashboard: {
         Row: {
           average_position: number | null

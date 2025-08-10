@@ -22,7 +22,12 @@ export function useUnifiedAdminMetrics(): UseUnifiedAdminMetricsResult {
       const data = await unifiedAdminMetrics.getAllMetrics(forceRefresh);
       setMetrics(data);
     } catch (err: any) {
-      console.error('Failed to fetch unified admin metrics:', err);
+      console.error('Failed to fetch unified admin metrics:', {
+        message: err instanceof Error ? err.message : 'Unknown error',
+        stack: err instanceof Error ? err.stack : undefined,
+        name: err instanceof Error ? err.name : undefined,
+        code: err.code
+      });
       setError(err.message || 'Failed to fetch metrics');
       
       // Set default values on error

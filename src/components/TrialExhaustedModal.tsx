@@ -12,7 +12,7 @@ import {
   UserPlus, BarChart3, Globe, Link, Sparkles, ArrowRight
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { paymentIntegrationService } from '@/services/paymentIntegrationService';
+import SubscriptionService from '@/services/subscriptionService';
 
 interface TrialExhaustedModalProps {
   open: boolean;
@@ -50,75 +50,64 @@ export function TrialExhaustedModal({
       // Show processing message
       toast({
         title: "🚀 Creating Secure Checkout!",
-        description: "Opening payment window...",
+        description: "Opening Stripe payment window...",
       });
 
-      // Create subscription checkout session
-      const result = await paymentIntegrationService.createSubscription(
-        selectedPlan,
+      // Create real subscription using SubscriptionService
+      const result = await SubscriptionService.createSubscription(
+        isLoggedIn ? { id: userName, email: userName } : null, // Pass user if logged in
         !isLoggedIn, // isGuest (opposite of isLoggedIn)
-        !isLoggedIn ? 'guest@example.com' : undefined // Guest email placeholder
+        !isLoggedIn ? 'guest@example.com' : undefined, // Guest email placeholder
+        selectedPlan // Use the selected plan (monthly/yearly)
       );
 
       if (result.success && result.url) {
-        // Check if this is a demo/mock checkout
-        const isDemoCheckout = result.url.includes('mock=true') || result.sessionId?.startsWith('mock_');
+        // Close modal first
+        onOpenChange(false);
 
-        if (isDemoCheckout) {
-          // Handle demo checkout differently
+        // Check if this is development fallback mode
+        if (result.usedFallback) {
           toast({
-            title: "🚧 Demo Checkout Mode",
-            description: "Payment system is in demo mode. No actual payment will be processed.",
+            title: "✅ Premium Activated!",
+            description: "Your account has been upgraded to Premium (development mode).",
             duration: 5000,
           });
 
-          // For demo, just navigate to success page
-          onOpenChange(false);
-          window.location.href = result.url;
-
+          // Trigger upgrade callback
           if (onUpgrade) {
             onUpgrade();
           }
-        } else {
-          // Open real checkout in new window/tab
-          const checkoutWindow = window.open(
-            result.url,
-            'stripe-checkout',
-            'width=800,height=600,scrollbars=yes,resizable=yes'
-          );
 
-          if (checkoutWindow) {
-            // Close modal since checkout opened
-            onOpenChange(false);
-
-            // Monitor the checkout window
-            const checkClosed = setInterval(() => {
-              if (checkoutWindow.closed) {
-                clearInterval(checkClosed);
-                toast({
-                  title: "Checkout Complete",
-                  description: "If you completed your purchase, please refresh the page to see your premium features!",
-                });
-              }
-            }, 1000);
-
-            if (onUpgrade) {
-              onUpgrade();
-            }
-          } else {
-            // Popup was blocked, fallback to same window
-            toast({
-              title: "Popup Blocked",
-              description: "Opening checkout in current window...",
-            });
+          // Redirect after short delay
+          setTimeout(() => {
             window.location.href = result.url;
+          }, 1000);
+        } else {
+          // Real Stripe checkout - open in same window for better mobile experience
+          toast({
+            title: "🔄 Redirecting to Stripe",
+            description: "Opening secure payment portal...",
+            duration: 3000,
+          });
+
+          // Trigger upgrade callback
+          if (onUpgrade) {
+            onUpgrade();
           }
+
+          // Redirect to Stripe checkout
+          window.location.href = result.url;
         }
       } else {
         throw new Error(result.error || 'Failed to create checkout session');
       }
     } catch (error) {
-      console.error('Upgrade error:', error);
+      console.error('Upgrade error:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
+
       toast({
         title: "Checkout Error",
         description: error instanceof Error ? error.message : "Something went wrong. Please try again.",
@@ -194,160 +183,65 @@ export function TrialExhaustedModal({
           </Card>
         </div>
 
-        {/* Campaign Results */}
-        <div className="mb-8">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Target className="h-5 w-5" />
-            Your Campaigns
-          </h3>
-          <div className="space-y-3 max-h-40 overflow-y-auto">
-            {guestResults.map((campaign, idx) => (
-              <Card key={idx} className="bg-gray-50">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-semibold text-gray-900">{campaign.name}</div>
-                      <div className="text-sm text-gray-600">
-                        Keywords: {campaign.keywords.join(', ')}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant="outline" className="text-green-600 bg-green-50">
-                        {campaign.linksGenerated} links
-                      </Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Success Domains */}
-        <div className="mb-8">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            High-Authority Domains You Conquered
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {topDomains.map((domain, idx) => (
-              <Badge key={idx} variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
-                {domain}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
-        {/* Value Proposition */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 text-white mb-8">
-          <div className="text-center">
-            <h3 className="text-2xl font-bold mb-3">
-              {isLoggedIn ? 'Unlock Premium Power!' : 'This Was Just a Free Preview!'}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold">∞</div>
-                <div className="text-sm opacity-90">Unlimited Links per Campaign</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold">🎓</div>
-                <div className="text-sm opacity-90">SEO Academy Access</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold">⚡</div>
-                <div className="text-sm opacity-90">Priority Support</div>
-              </div>
-            </div>
-
-            {/* Additional Premium Features */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mt-6">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>More than 20 links per campaign</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Complete SEO Academy courses</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Priority customer support</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Advanced analytics & reporting</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>White-label options</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>API access & bulk exports</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Plan Selection */}
-        <div className="mb-8">
-          <h3 className="text-lg font-bold mb-4 text-center text-white">Choose Your Plan</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="mb-3 flex flex-col items-center">
+          <h3 className="text-lg font-bold mb-3 text-center text-black">Choose Your Plan</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-w-md">
             <div
-              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+              className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
                 selectedPlan === 'monthly'
-                  ? 'border-white bg-white/10 backdrop-blur-sm'
-                  : 'border-white/30 bg-white/5 hover:border-white/50'
+                  ? 'border-blue-600 bg-blue-50 shadow-md'
+                  : 'border-gray-300 bg-white hover:border-blue-400'
               }`}
               onClick={() => setSelectedPlan('monthly')}
             >
-              <div className="text-center text-white">
-                <div className="text-xl font-bold">Monthly</div>
-                <div className="text-2xl font-bold">$29</div>
-                <div className="text-sm opacity-90">per month</div>
-                <div className="text-xs opacity-75 mt-2">Cancel anytime</div>
+              <div className="text-center text-black">
+                <div className="text-base font-bold">Monthly</div>
+                <div className="text-xl font-bold">$29</div>
+                <div className="text-xs text-gray-600">per month</div>
+                <div className="text-xs text-gray-500 mt-0.5">Cancel anytime</div>
               </div>
             </div>
             <div
-              className={`p-4 rounded-lg border-2 cursor-pointer transition-all relative ${
+              className={`p-3 rounded-lg border-2 cursor-pointer transition-all relative ${
                 selectedPlan === 'yearly'
-                  ? 'border-white bg-white/10 backdrop-blur-sm'
-                  : 'border-white/30 bg-white/5 hover:border-white/50'
+                  ? 'border-blue-600 bg-blue-50 shadow-md'
+                  : 'border-gray-300 bg-white hover:border-blue-400'
               }`}
               onClick={() => setSelectedPlan('yearly')}
             >
               <div className="absolute -top-2 -right-2">
                 <Badge className="bg-green-600 text-white text-xs">Save 40%</Badge>
               </div>
-              <div className="text-center text-white">
-                <div className="text-xl font-bold">Yearly</div>
-                <div className="text-2xl font-bold">$17</div>
-                <div className="text-sm opacity-90">per month</div>
-                <div className="text-xs opacity-75 mt-2">Billed $199/year</div>
+              <div className="text-center text-black">
+                <div className="text-base font-bold">Yearly</div>
+                <div className="text-xl font-bold">$17</div>
+                <div className="text-xs text-gray-600">per month</div>
+                <div className="text-xs text-gray-500 mt-0.5">Billed $199/year</div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="space-y-4">
-          <div className="flex flex-col sm:flex-row gap-3">
+        <div className="space-y-2 flex flex-col items-center mb-3">
+          <div className="flex flex-col sm:flex-row gap-2 w-full max-w-lg">
             <Button
               size="lg"
-              className="flex-1 h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              className="flex-1 h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold text-sm"
               onClick={handleUpgradeClick}
               disabled={isProcessingUpgrade}
             >
               {isProcessingUpgrade ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   Creating Checkout...
                 </>
               ) : (
                 <>
-                  <Crown className="h-5 w-5 mr-2" />
+                  <Crown className="h-4 w-4 mr-2" />
                   Upgrade to Premium - {selectedPlan === 'monthly' ? '$29/month' : '$17/month (billed yearly)'}
-                  <ArrowRight className="h-5 w-5 ml-2" />
+                  <ArrowRight className="h-4 w-4 ml-2" />
                 </>
               )}
             </Button>
@@ -355,37 +249,72 @@ export function TrialExhaustedModal({
               <Button
                 size="lg"
                 variant="outline"
-                className="h-14 border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
+                className="h-12 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold text-sm"
                 onClick={() => onOpenChange(false)}
               >
-                <UserPlus className="h-5 w-5 mr-2" />
+                <UserPlus className="h-4 w-4 mr-2" />
                 Create Free Account
               </Button>
             )}
           </div>
-          
-          <div className="text-center">
-            <p className="text-sm text-gray-600 mb-2">
-              {isLoggedIn ?
-                '🔥 Special offer: Get 50% off your first premium month!' :
-                '🔥 Limited Time: Get your first month 50% off when you upgrade now!'
-              }
-            </p>
-            <div className="flex justify-center gap-4 text-xs text-gray-500">
-              <span>✓ 30-day money back guarantee</span>
-              <span>✓ Cancel anytime</span>
-              <span>✓ Priority support</span>
-            </div>
+        </div>
+
+        <div className="text-center mb-3">
+          <div className="flex justify-center gap-2 text-xs text-gray-500 mb-2">
+            <span>✓ 30-day money back guarantee</span>
+            <span>✓ Cancel anytime</span>
+            <span>✓ Priority support</span>
           </div>
 
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onOpenChange(false)}
-            className="w-full text-gray-500"
+            className="w-full max-w-lg text-gray-500 text-xs py-1"
           >
             {isLoggedIn ? 'Continue with free account (1 campaign limit)' : 'Continue browsing (limited features)'}
           </Button>
+        </div>
+
+        {/* Value Proposition - Moved Below Continue Button */}
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-4 text-white">
+          <div className="text-center">
+            <h3 className="text-lg font-bold mb-3">Unlock Premium Power!</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold">∞</div>
+                <div className="text-sm opacity-90">Unlimited Links per Campaign</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">🎓</div>
+                <div className="text-sm opacity-90">SEO Academy Access</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">⚡</div>
+                <div className="text-sm opacity-90">Priority Support</div>
+              </div>
+            </div>
+
+            {/* Additional Premium Features */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-white">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-white" />
+                <span className="text-white">Advanced analytics & reporting</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-white" />
+                <span className="text-white">White-label options</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-white" />
+                <span className="text-white">API access & bulk exports</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-white" />
+                <span className="text-white">Priority customer support</span>
+              </div>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

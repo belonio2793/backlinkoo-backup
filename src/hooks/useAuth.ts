@@ -63,7 +63,11 @@ export function useAuth(): AuthState {
       }
 
     } catch (error: any) {
-      console.error('❌ Async premium check failed (non-critical):', error);
+      console.error('❌ Async premium check failed (non-critical):', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
     }
   };
 

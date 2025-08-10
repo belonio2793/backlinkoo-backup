@@ -389,7 +389,7 @@ export default function CampaignDeleteTest() {
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
               )}
               <AlertDescription>
-                <strong>Test Suite Complete:</strong> {passedTests}/{totalTests} tests passed. 
+                <strong>Test Suite Complete: </strong>{passedTests}/{totalTests} tests passed. 
                 {failedTests > 0 && ` ${failedTests} tests failed and require attention.`}
                 {failedTests === 0 && " All deletion functionality is working correctly."}
               </AlertDescription>

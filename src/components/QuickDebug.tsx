@@ -107,7 +107,7 @@ export function QuickDebug() {
               <Alert className="border-red-200 bg-red-50">
                 <XCircle className="h-4 w-4 text-red-600" />
                 <AlertDescription className="text-red-800">
-                  <strong>Diagnostic Error:</strong> {testResults.message}
+                  <strong>Diagnostic Error: </strong>{testResults.message}
                 </AlertDescription>
               </Alert>
             ) : (

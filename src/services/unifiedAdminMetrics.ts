@@ -121,7 +121,13 @@ class UnifiedAdminMetricsService {
     
     results.forEach((result, index) => {
       if (result.status === 'rejected') {
-        console.warn(`❌ Failed to fetch ${metricTypes[index]} metrics:`, result.reason);
+        console.warn(`❌ Failed to fetch ${metricTypes[index]} metrics:`, {
+          message: result.reason instanceof Error ? result.reason.message : 'Unknown error',
+          stack: result.reason instanceof Error ? result.reason.stack : undefined,
+          name: result.reason instanceof Error ? result.reason.name : undefined,
+          code: result.reason?.code,
+          metricType: metricTypes[index]
+        });
       }
     });
 

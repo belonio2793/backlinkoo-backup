@@ -291,7 +291,13 @@ class CampaignService {
 
       return response;
     } catch (error) {
-      console.error('Campaign deletion API error:', error);
+      console.error('Campaign deletion API error:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code,
+        statusCode: error.statusCode
+      });
 
       // Check if this is a backend unavailability issue
       const isBackendUnavailable =
@@ -365,7 +371,12 @@ class CampaignService {
         throw error;
       }
 
-      console.error('Failed to fetch campaigns:', error);
+      console.error('Failed to fetch campaigns:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       // Return empty array for any other unexpected errors to prevent UI crashes
       return [];
     }
@@ -420,7 +431,12 @@ class CampaignService {
         };
       }
 
-      console.error('Failed to create campaign:', error);
+      console.error('Failed to create campaign:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       throw error;
     }
   }
@@ -456,7 +472,12 @@ class CampaignService {
         return; // Silently succeed in demo mode
       }
 
-      console.error('Failed to pause campaign:', error);
+      console.error('Failed to pause campaign:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       throw error;
     }
   }
@@ -492,7 +513,12 @@ class CampaignService {
         return; // Silently succeed in demo mode
       }
 
-      console.error('Failed to resume campaign:', error);
+      console.error('Failed to resume campaign:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       throw error;
     }
   }
@@ -511,7 +537,12 @@ class CampaignService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Failed to fetch deletion logs:', error);
+      console.error('Failed to fetch deletion logs:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       throw error;
     }
   }
@@ -567,7 +598,12 @@ class CampaignService {
         requirements
       };
     } catch (error) {
-      console.error('Failed to validate campaign for deletion:', error);
+      console.error('Failed to validate campaign for deletion:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return {
         canDelete: false,
         warnings: ['Validation failed'],
@@ -615,7 +651,12 @@ class CampaignService {
         .single();
 
       if (error) {
-        console.error('Error updating campaign status:', error.message || error.toString() || JSON.stringify(error));
+        console.error('Error updating campaign status:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         return {
           success: false,
           message: `Failed to ${status} campaign`,
@@ -628,7 +669,12 @@ class CampaignService {
         message: `Campaign ${status === 'active' ? 'resumed' : status} successfully`
       };
     } catch (error) {
-      console.error('Error updating campaign status:', error.message || error.toString() || JSON.stringify(error));
+      console.error('Error updating campaign status:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return {
         success: false,
         message: `Failed to ${status} campaign`,
@@ -666,13 +712,23 @@ class CampaignService {
         .single();
 
       if (error) {
-        console.error('Error creating campaign:', error.message || error.toString() || JSON.stringify(error));
+        console.error('Error creating campaign:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         return { error: error.message };
       }
 
       return { campaign: data };
     } catch (error) {
-      console.error('Error creating campaign:', error.message || error.toString() || JSON.stringify(error));
+      console.error('Error creating campaign:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return { error: error.message || 'Unknown error occurred' };
     }
   }
@@ -697,13 +753,23 @@ class CampaignService {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Error loading campaigns:', error.message || error.toString() || JSON.stringify(error));
+        console.error('Error loading campaigns:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         return { error: error.message };
       }
 
       return { campaigns: data || [] };
     } catch (error) {
-      console.error('Error loading campaigns:', error.message || error.toString() || JSON.stringify(error));
+      console.error('Error loading campaigns:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return { error: error.message || 'Unknown error occurred' };
     }
   }

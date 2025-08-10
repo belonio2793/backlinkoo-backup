@@ -68,7 +68,11 @@ export class CampaignBlogIntegrationService {
           body: JSON.stringify(blogRequest)
         });
       } catch (networkError) {
-        console.error('Network error calling blog generator:', networkError);
+        console.error('Network error calling blog generator:', {
+          message: networkError.message,
+          stack: networkError.stack,
+          name: networkError.name
+        });
         throw new Error(`Network error: ${networkError.message}`);
       }
 
@@ -91,7 +95,11 @@ export class CampaignBlogIntegrationService {
       try {
         result = await response.json();
       } catch (jsonError) {
-        console.error('Error parsing blog generator response:', jsonError);
+        console.error('Error parsing blog generator response:', {
+          message: jsonError.message,
+          stack: jsonError.stack,
+          name: jsonError.name
+        });
         throw new Error('Invalid response from blog generation service');
       }
 
@@ -121,7 +129,12 @@ export class CampaignBlogIntegrationService {
       };
 
     } catch (error) {
-      console.error('❌ Campaign blog generation failed:', error);
+      console.error('❌ Campaign blog generation failed:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
 
       // Check if it's a 404 or network error - try fallback
       if (error.message?.includes('404') || error.message?.includes('Network error')) {
@@ -157,7 +170,11 @@ export class CampaignBlogIntegrationService {
         .eq('id', campaignId);
 
       if (updateError) {
-        console.error('Failed to link campaign to blog post:', updateError);
+        console.error('Failed to link campaign to blog post:', {
+          message: updateError.message,
+          code: updateError.code,
+          details: updateError.details
+        });
       }
 
       // Also create an entry in campaign blog links table if it exists
@@ -172,11 +189,18 @@ export class CampaignBlogIntegrationService {
           });
       } catch (linkError) {
         // This table might not exist, so we'll ignore the error
-        console.log('Campaign blog links table not available:', linkError);
+        console.log('Campaign blog links table not available:', {
+          message: linkError.message,
+          code: linkError.code
+        });
       }
 
     } catch (error) {
-      console.error('Error linking campaign to blog post:', error);
+      console.error('Error linking campaign to blog post:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       // Don't throw - this is not critical for the main flow
     }
   }
@@ -198,7 +222,11 @@ export class CampaignBlogIntegrationService {
 
       return data.blog_post_url;
     } catch (error) {
-      console.error('Error fetching campaign blog URL:', error);
+      console.error('Error fetching campaign blog URL:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       return null;
     }
   }
@@ -236,7 +264,11 @@ export class CampaignBlogIntegrationService {
           body: JSON.stringify(blogRequest)
         });
       } catch (networkError) {
-        console.error('Network error calling blog generator:', networkError);
+        console.error('Network error calling blog generator:', {
+          message: networkError.message,
+          stack: networkError.stack,
+          name: networkError.name
+        });
         throw new Error(`Network error: ${networkError.message}`);
       }
 
@@ -259,7 +291,11 @@ export class CampaignBlogIntegrationService {
       try {
         result = await response.json();
       } catch (jsonError) {
-        console.error('Error parsing blog generator response:', jsonError);
+        console.error('Error parsing blog generator response:', {
+          message: jsonError.message,
+          stack: jsonError.stack,
+          name: jsonError.name
+        });
         throw new Error('Invalid response from blog generation service');
       }
 
@@ -297,7 +333,12 @@ export class CampaignBlogIntegrationService {
       };
 
     } catch (error) {
-      console.error('❌ Guest campaign blog generation failed:', error);
+      console.error('❌ Guest campaign blog generation failed:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
 
       // Check if it's a 404 or network error - try fallback
       if (error.message?.includes('404') || error.message?.includes('Network error')) {
@@ -321,7 +362,11 @@ export class CampaignBlogIntegrationService {
       const blogPost = guestBlogPosts.find((post: any) => post.campaignId === campaignId);
       return blogPost?.blogUrl || null;
     } catch (error) {
-      console.error('Error fetching guest campaign blog URL:', error);
+      console.error('Error fetching guest campaign blog URL:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       return null;
     }
   }
@@ -383,7 +428,11 @@ export class CampaignBlogIntegrationService {
       };
 
     } catch (error) {
-      console.error('❌ Fallback blog generation failed:', error);
+      console.error('❌ Fallback blog generation failed:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       return {
         success: false,
         error: 'Failed to generate fallback blog post'
@@ -433,7 +482,11 @@ export class CampaignBlogIntegrationService {
       };
 
     } catch (error) {
-      console.error('❌ Fallback guest blog generation failed:', error);
+      console.error('❌ Fallback guest blog generation failed:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
       return {
         success: false,
         error: 'Failed to generate fallback guest blog post'

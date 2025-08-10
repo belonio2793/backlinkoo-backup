@@ -1,4 +1,4 @@
-import React, { Suspense, lazy } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,6 +8,8 @@ import { ModalProvider } from "@/contexts/ModalContext";
 import { ReportSyncProvider } from "@/contexts/ReportSyncContext";
 import { UnifiedModalManager } from "@/components/UnifiedModalManager";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { useSymbolCleaner } from "@/utils/symbolCleaner";
+import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import Index from "./pages/Index";
 
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
@@ -30,6 +32,8 @@ const LazyPrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const LazyNotFound = lazy(() => import("./pages/NotFound"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
+const LazySymbolCleanerDebug = lazy(() => import("./components/SymbolCleanerDebug"));
+const LazyCampaignMetricsDBVerifier = lazy(() => import("./components/CampaignMetricsDBVerifier"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -40,14 +44,21 @@ const queryClient = new QueryClient({
   },
 });
 
+// Global Symbol Cleaner Component
+const SymbolCleanerProvider = ({ children }: { children: React.ReactNode }) => {
+  useSymbolCleaner(true); // Enable automatic symbol cleaning
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ModalProvider>
-        <Toaster />
-        <Sonner />
-        <UnifiedModalManager />
-        <BrowserRouter>
+        <SymbolCleanerProvider>
+          <Toaster />
+          <Sonner />
+          <UnifiedModalManager />
+          <BrowserRouter>
           <ReportSyncProvider>
             <Routes>
             <Route path="/" element={<Index />} />
@@ -136,6 +147,22 @@ const App = () => (
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazyAffiliate />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/symbol-cleaner-debug"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazySymbolCleanerDebug />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/verify-database"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyCampaignMetricsDBVerifier />
                 </Suspense>
               }
             />
@@ -230,6 +257,7 @@ const App = () => (
             </Routes>
           </ReportSyncProvider>
         </BrowserRouter>
+        </SymbolCleanerProvider>
       </ModalProvider>
     </TooltipProvider>
   </QueryClientProvider>

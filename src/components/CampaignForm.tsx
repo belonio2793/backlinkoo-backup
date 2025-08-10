@@ -167,7 +167,12 @@ export const CampaignForm = ({ onSuccess, onCancel }: CampaignFormProps) => {
 
       onSuccess?.();
     } catch (error) {
-      console.error('Campaign creation error:', error);
+      console.error('Campaign creation error:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to create campaign",

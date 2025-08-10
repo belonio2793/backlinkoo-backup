@@ -189,7 +189,7 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
               onClick={handleClearCacheAndCookies}
               variant="outline"
               size="sm"
-              className="bg-transparent hover:bg-orange-50/50 border border-orange-200/60 text-orange-600 hover:text-orange-700 hover:border-orange-300/80 transition-all duration-200 font-medium px-3 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
+              className="bg-transparent hover:bg-orange-50/50 border border-orange-200/60 text-orange-600 hover:text-orange-700 hover:border-orange-300/80 transition-all duration-200 font-medium px-4 py-2 min-w-[120px] backdrop-blur-sm shadow-sm hover:shadow-md"
               title="Clear browser cache and cookies"
             >
               <Trash2 className="h-4 w-4 sm:mr-2" />
@@ -201,7 +201,7 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
                 <Button
                   variant="outline"
                   onClick={() => navigate("/dashboard")}
-                  className="hidden sm:flex items-center gap-2"
+                  className="hidden sm:flex items-center gap-2 px-4 py-2 min-w-[110px]"
                 >
                   <Target className="h-4 w-4" />
                   Dashboard

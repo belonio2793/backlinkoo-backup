@@ -39,6 +39,7 @@ import {
   TrendingDown
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { format, formatDistanceToNow } from 'date-fns';
 
@@ -75,12 +76,12 @@ const statusConfig = {
     icon: Activity
   },
   completed: {
-    label: 'Completed',
-    color: 'bg-green-500',
-    bgColor: 'bg-green-50 dark:bg-green-950/20',
-    textColor: 'text-green-700 dark:text-green-300',
-    borderColor: 'border-green-200 dark:border-green-800',
-    icon: CheckCircle
+    label: 'Paused',
+    color: 'bg-orange-500',
+    bgColor: 'bg-orange-50 dark:bg-orange-950/20',
+    textColor: 'text-orange-700 dark:text-orange-300',
+    borderColor: 'border-orange-200 dark:border-orange-800',
+    icon: Pause
   },
   paused: {
     label: 'Paused',
@@ -99,6 +100,27 @@ export function CampaignManager() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const { toast } = useToast();
+  const { isPremium, subscriptionTier } = useAuth();
+
+  const getPausedCampaignInstructions = (isPremiumUser: boolean) => {
+    if (isPremiumUser) {
+      return {
+        title: "Campaign Paused - Premium User",
+        message: "Your campaign is paused. As a premium subscriber, you can resume unlimited campaigns at any time.",
+        action: "Resume Campaign",
+        actionIcon: Play,
+        variant: "default" as const
+      };
+    } else {
+      return {
+        title: "Campaign Paused - Upgrade to Continue",
+        message: "Your campaign has reached the free tier limit. Upgrade to Premium to resume and access unlimited campaigns with 500+ links each.",
+        action: "Upgrade to Premium",
+        actionIcon: Star,
+        variant: "secondary" as const
+      };
+    }
+  };
 
   // New campaign form state
   const [newCampaign, setNewCampaign] = useState({
@@ -386,6 +408,33 @@ export function CampaignManager() {
                     </div>
                   </div>
                   
+                  {/* Paused Campaign Instructions */}
+                  {campaign.status === 'completed' && (() => {
+                    const instructions = getPausedCampaignInstructions(isPremium);
+                    const ActionIcon = instructions.actionIcon;
+                    return (
+                      <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-lg p-4 space-y-3">
+                        <div className="flex items-start gap-3">
+                          <div className="p-1.5 bg-orange-100 rounded-full">
+                            <Pause className="h-4 w-4 text-orange-600" />
+                          </div>
+                          <div className="flex-1">
+                            <h4 className="font-medium text-orange-800">{instructions.title}</h4>
+                            <p className="text-sm text-orange-700 mt-1">{instructions.message}</p>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant={instructions.variant}
+                          className="w-full"
+                        >
+                          <ActionIcon className="h-4 w-4 mr-2" />
+                          {instructions.action}
+                        </Button>
+                      </div>
+                    );
+                  })()}
+
                   {/* Actions */}
                   <div className="flex items-center gap-2 pt-4">
                     <Button variant="outline" size="sm" className="flex-1">

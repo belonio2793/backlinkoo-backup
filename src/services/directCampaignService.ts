@@ -69,14 +69,24 @@ class DirectCampaignService {
         .single();
 
       if (error) {
-        console.error('Direct campaign creation error:', error);
+        console.error('Direct campaign creation error:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
       }
 
       console.log('✅ Campaign created directly in database:', data);
       return data;
     } catch (error) {
-      console.error('Failed to create campaign directly:', error);
+      console.error('Failed to create campaign directly:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       throw error;
     }
   }
@@ -93,14 +103,24 @@ class DirectCampaignService {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('Direct campaign fetch error:', error);
+        console.error('Direct campaign fetch error:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
       }
 
       console.log('✅ Campaigns fetched directly from database:', data?.length || 0);
       return data || [];
     } catch (error) {
-      console.error('Failed to fetch campaigns directly:', error);
+      console.error('Failed to fetch campaigns directly:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       throw error;
     }
   }
@@ -119,13 +139,23 @@ class DirectCampaignService {
         .eq('id', campaignId);
 
       if (error) {
-        console.error('Direct campaign status update error:', error);
+        console.error('Direct campaign status update error:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
       }
 
       console.log('✅ Campaign status updated directly:', campaignId, status);
     } catch (error) {
-      console.error('Failed to update campaign status directly:', error);
+      console.error('Failed to update campaign status directly:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       throw error;
     }
   }
@@ -151,13 +181,23 @@ class DirectCampaignService {
         .eq('id', campaignId);
 
       if (error) {
-        console.error('Direct campaign metrics update error:', error);
+        console.error('Direct campaign metrics update error:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
       }
 
       console.log('✅ Campaign metrics updated directly:', campaignId, metrics);
     } catch (error) {
-      console.error('Failed to update campaign metrics directly:', error);
+      console.error('Failed to update campaign metrics directly:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       throw error;
     }
   }
@@ -173,13 +213,23 @@ class DirectCampaignService {
         .eq('id', campaignId);
 
       if (error) {
-        console.error('Direct campaign deletion error:', error);
+        console.error('Direct campaign deletion error:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
       }
 
       console.log('✅ Campaign deleted directly:', campaignId);
     } catch (error) {
-      console.error('Failed to delete campaign directly:', error);
+      console.error('Failed to delete campaign directly:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       throw error;
     }
   }

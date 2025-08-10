@@ -130,7 +130,7 @@ export const PremiumStatusSync = ({
               <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                  <strong>Sync Failed:</strong> {syncResult.error}
+                  <strong>Sync Failed: </strong>{syncResult.error}
                 </AlertDescription>
               </Alert>
             )}

@@ -82,7 +82,12 @@ export async function testSupabaseConnection(): Promise<SupabaseTestResult> {
     return result;
 
   } catch (error: any) {
-    console.error('🚨 Supabase test exception:', error);
+    console.error('🚨 Supabase test exception:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined,
+      code: error.code
+    });
     result.error = error.message;
     return result;
   }

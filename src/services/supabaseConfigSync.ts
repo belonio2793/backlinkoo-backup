@@ -75,7 +75,12 @@ export class SupabaseConfigSync {
       this.isInitialized = true;
 
     } catch (error) {
-      console.error('❌ Failed to initialize real-time sync:', error.message || error.toString() || JSON.stringify(error));
+      console.error('❌ Failed to initialize real-time sync:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       // Fall back to localStorage-only mode
       await this.loadFromLocalStorageOnly();
       this.isInitialized = true;
@@ -191,7 +196,13 @@ export class SupabaseConfigSync {
 
       console.log(`✅ Config synced: ${config.key}`);
     } catch (error) {
-      console.error(`❌ Failed to sync config ${config.key}:`, error.message || error.toString() || JSON.stringify(error));
+      console.error(`❌ Failed to sync config ${config.key}:`, {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code,
+        configKey: config.key
+      });
     }
   }
 
@@ -258,7 +269,12 @@ export class SupabaseConfigSync {
       return configs;
 
     } catch (error) {
-      console.error('Failed to load configurations:', error);
+      console.error('Failed to load configurations:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       return this.loadFromLocalStorage();
     }
   }
@@ -347,7 +363,13 @@ export class SupabaseConfigSync {
       return { success: true, config: savedConfig };
 
     } catch (error) {
-      console.error(`❌ Failed to save configuration ${key}:`, error);
+      console.error(`❌ Failed to save configuration ${key}:`, {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code,
+        configKey: key
+      });
       return { 
         success: false, 
         error: error instanceof Error ? error.message : 'Unknown error' 

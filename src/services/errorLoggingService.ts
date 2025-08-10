@@ -201,7 +201,12 @@ class ErrorLoggingService {
 
       console.log('error_logs table created successfully');
     } catch (error) {
-      console.error('Failed to create error_logs table automatically:', error);
+      console.error('Failed to create error_logs table automatically:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       console.warn('Please create the error_logs table manually in Supabase dashboard');
 
       // Log instructions to console
@@ -263,7 +268,11 @@ GRANT ALL ON error_logs TO service_role;
       
       localStorage.setItem('error_logs_fallback', JSON.stringify(trimmedErrors));
     } catch (error) {
-      console.error('Failed to save error to localStorage:', error);
+      console.error('Failed to save error to localStorage:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
     }
   }
 
@@ -318,7 +327,12 @@ GRANT ALL ON error_logs TO service_role;
         .slice(0, limit);
 
     } catch (error) {
-      console.error('Failed to fetch errors from database:', error);
+      console.error('Failed to fetch errors from database:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       return this.getErrorsFromLocalStorage();
     }
   }
@@ -334,7 +348,12 @@ GRANT ALL ON error_logs TO service_role;
         throw error;
       }
     } catch (error) {
-      console.error('Failed to mark error as resolved:', error);
+      console.error('Failed to mark error as resolved:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
     }
   }
 
