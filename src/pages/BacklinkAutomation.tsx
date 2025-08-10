@@ -1706,16 +1706,22 @@ export default function BacklinkAutomation() {
     try {
       setIsLoading(true);
 
-      // Stop real-time activity immediately
+      // Stop real-time activity immediately with robust cleanup
       const interval = activeCampaignIntervals.get(campaignId);
       if (interval) {
         clearInterval(interval);
-        setActiveCampaignIntervals(prev => {
-          const updated = new Map(prev);
-          updated.delete(campaignId);
-          return updated;
-        });
+        console.log('⏸️ Cleared interval for paused campaign:', campaignId);
       }
+
+      // Update intervals map atomically
+      setActiveCampaignIntervals(prev => {
+        const updated = new Map(prev);
+        const removed = updated.delete(campaignId);
+        if (removed) {
+          console.log('✅ Removed campaign from active monitoring:', campaignId, '(Remaining active:', updated.size, ')');
+        }
+        return updated;
+      });
 
       // Update via API if user is authenticated
       if (user) {
@@ -5470,7 +5476,7 @@ export default function BacklinkAutomation() {
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '🛒' },
-                          { name: 'Travel & Tourism', count: 38920, icon: '✈️' },
+                          { name: 'Travel & Tourism', count: 38920, icon: '✈���' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
                           { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
