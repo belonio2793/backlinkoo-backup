@@ -6924,6 +6924,10 @@ export default function BacklinkAutomation() {
                   });
                 }
 
+                // Close dialog and reset state
+                setDeleteDialogOpen(false);
+                setCampaignToDelete(null);
+
                 toast({
                   title: "🗑️ Campaign Deleted",
                   description: "Campaign and all associated data have been permanently removed.",
