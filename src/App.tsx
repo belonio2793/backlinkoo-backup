@@ -158,6 +158,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/verify-database"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyCampaignMetricsDBVerifier />
+                </Suspense>
+              }
+            />
 
             {/* Authentication routes */}
             <Route
