@@ -55,7 +55,7 @@ export function TrialExhaustedModal({
   };
 
   const totalDomains = guestResults.reduce((acc, campaign) =>
-    acc + (campaign.domains?.length || 0), 0
+    acc + ((campaign.domains || []).length || 0), 0
   );
 
   const topDomains = guestResults.flatMap(c => c.domains || [])
