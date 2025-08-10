@@ -1074,7 +1074,7 @@ export default function BacklinkAutomation() {
     return () => {
       clearInterval(monitoringInterval);
     };
-  }, [randomizeWebsites, loadPermanentCampaigns, autoDetectionSystem, getUserStorageKey, loadCampaignMetrics, metricsLoaded, retryFailedSyncs]);
+  }, [randomizeWebsites, loadPermanentCampaigns, autoDetectionSystem, getUserStorageKey, loadCampaignMetrics, metricsLoaded, retryFailedSyncs, updateCumulativeStats]);
 
   // User-specific data restoration - triggers when user authentication changes
   useEffect(() => {
@@ -5697,7 +5697,7 @@ export default function BacklinkAutomation() {
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
-                          { name: 'E-commerce & Retail', count: 45670, icon: '🛒' },
+                          { name: 'E-commerce & Retail', count: 45670, icon: '����' },
                           { name: 'Travel & Tourism', count: 38920, icon: '✈���' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
                           { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
