@@ -2703,7 +2703,7 @@ export default function BacklinkAutomation() {
       }
 
       if (trackingResult.warning && trackingResult.shouldShowPremiumModal) {
-        setShowPremiumPlanModal(true);
+        DirectCheckoutService.upgradeToPremium('monthly');
       }
 
       // Initialize counters for guest campaign
