@@ -88,11 +88,7 @@ class CampaignMetricsService {
       console.log('✅ Campaign metrics updated in database:', metrics.campaignId);
       return { success: true, data: data as CampaignRuntimeMetrics };
     } catch (error) {
-      console.error('Campaign metrics service error:', {
-        error: error,
-        message: formatErrorForUI(error) || 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      });
+      console.error('Campaign metrics service error:', formatErrorForLogging(error, 'updateCampaignMetrics-catch'));
       return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
     }
   }
