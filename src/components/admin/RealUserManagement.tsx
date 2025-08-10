@@ -19,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { formatErrorForUI } from '@/utils/errorUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { Users, Search, Edit, Trash2, Crown, Gift, RefreshCw, AlertCircle } from "lucide-react";
 
@@ -139,7 +140,7 @@ export function RealUserManagement() {
         {error && (
           <Alert className="mb-4 border-red-200 bg-red-50">
             <AlertCircle className="h-4 w-4" />
-            <AlertDescription className="text-red-700">{error}</AlertDescription>
+            <AlertDescription className="text-red-700">{formatErrorForUI(error)}</AlertDescription>
           </Alert>
         )}
 

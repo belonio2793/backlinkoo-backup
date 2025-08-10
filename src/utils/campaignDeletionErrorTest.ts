@@ -121,10 +121,9 @@ export async function testCampaignDeletionErrorHandling(): Promise<{
   };
 }
 
-// Auto-run test when imported in development
+// Auto-run disabled to prevent console pollution
+// To run manually: testCampaignDeletionErrorHandling()
 if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-  // Run test after a short delay to ensure dependencies are loaded
-  setTimeout(() => {
-    testCampaignDeletionErrorHandling().catch(console.error);
-  }, 1000);
+  (window as any).testCampaignDeletionErrorHandling = testCampaignDeletionErrorHandling;
+  console.log('🔧 Campaign deletion error test available: testCampaignDeletionErrorHandling()');
 }

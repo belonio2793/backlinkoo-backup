@@ -357,7 +357,7 @@ export function EnhancedBlogCreationForm({
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{error instanceof Error ? error.message : String(error)}</AlertDescription>
             </Alert>
           )}
 
@@ -617,7 +617,7 @@ export function EnhancedBlogCreationForm({
               {error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{error}</AlertDescription>
+                  <AlertDescription>{error instanceof Error ? error.message : String(error)}</AlertDescription>
                 </Alert>
               )}
 

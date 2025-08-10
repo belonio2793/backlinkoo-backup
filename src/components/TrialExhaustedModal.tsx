@@ -35,7 +35,24 @@ export function TrialExhaustedModal({
 }: TrialExhaustedModalProps) {
   const { toast } = useToast();
   const [isProcessingUpgrade, setIsProcessingUpgrade] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
+
+  // Live pricing configuration
+  const pricing = {
+    monthly: {
+      price: 29,
+      display: '$29',
+      period: 'per month',
+      billing: 'Billed monthly'
+    },
+    yearly: {
+      price: 290,
+      display: '$24',
+      period: 'per month',
+      billing: 'Billed $290/year',
+      savings: 'Save $58'
+    }
+  };
 
   const totalDomains = guestResults.reduce((acc, campaign) =>
     acc + (campaign.domains?.length || 0), 0
@@ -197,9 +214,9 @@ export function TrialExhaustedModal({
             >
               <div className="text-center text-black">
                 <div className="text-base font-bold">Monthly</div>
-                <div className="text-xl font-bold">$29</div>
-                <div className="text-xs text-gray-600">per month</div>
-                <div className="text-xs text-gray-500 mt-0.5">Cancel anytime</div>
+                <div className="text-xl font-bold">{pricing.monthly.display}</div>
+                <div className="text-xs text-gray-600">{pricing.monthly.period}</div>
+                <div className="text-xs text-gray-500 mt-0.5">{pricing.monthly.billing}</div>
               </div>
             </div>
             <div
@@ -211,13 +228,13 @@ export function TrialExhaustedModal({
               onClick={() => setSelectedPlan('yearly')}
             >
               <div className="absolute -top-2 -right-2">
-                <Badge className="bg-green-600 text-white text-xs">Save 40%</Badge>
+                <Badge className="bg-green-600 text-white text-xs">{pricing.yearly.savings}</Badge>
               </div>
               <div className="text-center text-black">
                 <div className="text-base font-bold">Yearly</div>
-                <div className="text-xl font-bold">$17</div>
-                <div className="text-xs text-gray-600">per month</div>
-                <div className="text-xs text-gray-500 mt-0.5">Billed $199/year</div>
+                <div className="text-xl font-bold">{pricing.yearly.display}</div>
+                <div className="text-xs text-gray-600">{pricing.yearly.period}</div>
+                <div className="text-xs text-gray-500 mt-0.5">{pricing.yearly.billing}</div>
               </div>
             </div>
           </div>
@@ -240,7 +257,7 @@ export function TrialExhaustedModal({
               ) : (
                 <>
                   <Crown className="h-4 w-4 mr-2" />
-                  Upgrade to Premium - {selectedPlan === 'monthly' ? '$29/month' : '$17/month (billed yearly)'}
+                  Upgrade to Premium - {selectedPlan === 'monthly' ? '$29/month' : '$24/month (billed yearly)'}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </>
               )}

@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { formatErrorForUI } from '@/utils/errorUtils';
 import { adminUserCreationService, type CreateUserPayload } from '@/services/adminUserCreationService';
 import { UserPlus, Eye, EyeOff, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
 
@@ -141,7 +142,7 @@ export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
           {error && (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{formatErrorForUI(error)}</AlertDescription>
             </Alert>
           )}
           

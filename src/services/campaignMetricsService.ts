@@ -89,7 +89,8 @@ class CampaignMetricsService {
       return { success: true, data: data as CampaignRuntimeMetrics };
     } catch (error) {
       console.error('Campaign metrics service error:', formatErrorForLogging(error, 'updateCampaignMetrics-catch'));
-      return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
+      const errorMessage = formatErrorForUI(error) || 'Unknown error';
+      return { success: false, error: String(errorMessage) };
     }
   }
 
@@ -115,7 +116,9 @@ class CampaignMetricsService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Failed to fetch campaign metrics:', formatErrorForLogging(error, 'getCampaignMetrics'));
+        const errorDetails = formatErrorForLogging(error, 'getCampaignMetrics');
+        console.error('Failed to fetch campaign metrics');
+        console.error(errorDetails);
 
         // Check if it's a table not found error
         if (error.code === '42P01' || error.message?.includes('relation') && error.message?.includes('does not exist')) {
@@ -125,13 +128,15 @@ class CampaignMetricsService {
           };
         }
 
-        return { success: false, error: formatErrorForUI(error) || 'Failed to fetch campaign data' };
+        const errorMessage = formatErrorForUI(error) || 'Failed to fetch campaign data';
+        return { success: false, error: String(errorMessage) };
       }
 
       return { success: true, data: data || [] };
     } catch (error) {
       console.error('Campaign metrics fetch error:', formatErrorForLogging(error, 'getCampaignMetrics-catch'));
-      return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
+      const errorMessage = formatErrorForUI(error) || 'Unknown error';
+      return { success: false, error: String(errorMessage) };
     }
   }
 
@@ -172,7 +177,8 @@ class CampaignMetricsService {
       return { success: true, data };
     } catch (error) {
       console.error('Link recording error:', formatErrorForLogging(error, 'recordLink-catch'));
-      return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
+      const errorMessage = formatErrorForUI(error) || 'Unknown error';
+      return { success: false, error: String(errorMessage) };
     }
   }
 

@@ -19,24 +19,24 @@ export function formatErrorForUI(error: any): string {
 
   // If it's an Error object, use the message
   if (error instanceof Error) {
-    return error.message;
+    return error.message || error.toString();
   }
 
   // If it's a Supabase-style error object
   if (error && typeof error === 'object') {
     if (error.message) {
-      return error.message;
+      return String(error.message);
     }
     if (error.error && error.error.message) {
-      return error.error.message;
+      return String(error.error.message);
     }
     if (error.details) {
-      return error.details;
+      return String(error.details);
     }
     // If it has multiple fields, create a readable string
     if (error.code || error.hint) {
       let message = '';
-      if (error.message) message += error.message;
+      if (error.message) message += String(error.message);
       if (error.code) message += ` (Code: ${error.code})`;
       if (error.hint) message += ` Hint: ${error.hint}`;
       return message || 'Database error occurred';
@@ -46,14 +46,20 @@ export function formatErrorForUI(error: any): string {
   // Last resort: try to stringify it safely
   try {
     const stringified = JSON.stringify(error);
-    if (stringified && stringified !== '{}') {
+    if (stringified && stringified !== '{}' && stringified !== 'null') {
       return stringified;
     }
   } catch {
     // Fall through to default
   }
 
-  return 'An unknown error occurred';
+  // Final fallback: use toString but check if it returns [object Object]
+  const stringResult = String(error);
+  if (stringResult === '[object Object]') {
+    return 'An error occurred (details unavailable)';
+  }
+
+  return stringResult;
 }
 
 /**

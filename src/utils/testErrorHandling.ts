@@ -33,9 +33,9 @@ export async function testErrorHandling() {
   }
 }
 
-// Auto-run test in development
+// Auto-run disabled to prevent console pollution
+// To run manually: testErrorHandling()
 if (import.meta.env.DEV) {
-  setTimeout(() => {
-    testErrorHandling();
-  }, 2000);
+  (window as any).testErrorHandling = testErrorHandling;
+  console.log('🔧 Error handling test available: testErrorHandling()');
 }

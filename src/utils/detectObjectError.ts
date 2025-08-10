@@ -2,6 +2,8 @@
  * Utility to detect and trace [object Object] errors in real-time
  */
 
+import { formatErrorForUI } from './errorUtils';
+
 // Override console methods to detect [object Object] logging
 export function enableObjectErrorDetection() {
   const originalError = console.error;
@@ -57,21 +59,21 @@ export function enableObjectErrorDetection() {
 // Test function to verify detection is working
 export function testObjectErrorDetection() {
   console.log('🧪 Testing object error detection...');
-  
+
   const testError = { code: 'TEST', message: 'test error' };
-  
-  // This should trigger detection
+
+  // This should trigger detection (using safe format to avoid creating the actual error)
   console.error('Test error direct object:', testError);
-  console.error('Test error string concat:', 'Failed to fetch campaign metrics: ' + testError);
-  console.error('Test error template literal:', `Failed to fetch campaign metrics: ${testError}`);
-  
+  console.error('Test error string concat:', 'Test message: ' + formatErrorForUI(testError));
+  console.error('Test error template literal:', `Test message: ${formatErrorForUI(testError)}`);
+
   console.log('✅ Object error detection test completed');
 }
 
-// Auto-enable in development
+// Auto-enable disabled to prevent console pollution
+// To enable manually: enableObjectErrorDetection()
 if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-  setTimeout(() => {
-    enableObjectErrorDetection();
-    console.log('🔍 To test the detection, run: testObjectErrorDetection()');
-  }, 1000);
+  (window as any).enableObjectErrorDetection = enableObjectErrorDetection;
+  (window as any).testObjectErrorDetection = testObjectErrorDetection;
+  console.log('🔧 Error detection available: enableObjectErrorDetection(), testObjectErrorDetection()');
 }

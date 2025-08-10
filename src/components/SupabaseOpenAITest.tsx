@@ -13,6 +13,7 @@ import {
   Shield
 } from 'lucide-react';
 import { enhancedOpenAI } from '@/services/enhancedOpenAIService';
+import { formatErrorForUI } from '@/utils/errorUtils';
 
 export function SupabaseOpenAITest() {
   const [isTestingConnection, setIsTestingConnection] = useState(false);
@@ -112,7 +113,7 @@ export function SupabaseOpenAITest() {
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{formatErrorForUI(error)}</AlertDescription>
             </Alert>
           )}
         </CardContent>
@@ -212,7 +213,7 @@ export function SupabaseOpenAITest() {
               {generationResult.error && (
                 <Alert variant="destructive">
                   <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>{generationResult.error}</AlertDescription>
+                  <AlertDescription>{formatErrorForUI(generationResult.error)}</AlertDescription>
                 </Alert>
               )}
 

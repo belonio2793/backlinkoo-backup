@@ -274,7 +274,7 @@ export function MinimalAITest() {
       }
 
     } catch (error) {
-      addLog('error', provider.toUpperCase(), `Generation failed: ${error}`);
+      addLog('error', provider.toUpperCase(), `Generation failed: ${error instanceof Error ? error.message : String(error)}`);
       return {
         provider,
         content: '',
@@ -329,7 +329,7 @@ export function MinimalAITest() {
       } catch (error) {
         const latency = Date.now() - startTime;
         statuses.push({ provider: provider.name, status: 'error', error: 'Connection timeout' });
-        addLog('error', 'API_TEST', `${provider.name} failed: ${error}`);
+        addLog('error', 'API_TEST', `${provider.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         setErrorCount(prev => prev + 1);
       }
     }
@@ -413,7 +413,7 @@ export function MinimalAITest() {
       }
 
     } catch (error) {
-      addLog('error', 'SYSTEM', `Critical error: ${error}`);
+      addLog('error', 'SYSTEM', `Critical error: ${error instanceof Error ? error.message : String(error)}`);
       setErrorCount(prev => prev + 1);
     } finally {
       setIsRunning(false);

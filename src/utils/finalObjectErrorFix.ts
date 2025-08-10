@@ -79,9 +79,9 @@ export async function runFinalObjectErrorCheck(): Promise<{
   return { success, issues };
 }
 
-// Auto-run in development
+// Auto-run disabled to prevent console pollution
+// To run manually: runFinalObjectErrorCheck()
 if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-  setTimeout(() => {
-    runFinalObjectErrorCheck();
-  }, 4000);
+  (window as any).runFinalObjectErrorCheck = runFinalObjectErrorCheck;
+  console.log('🔧 Final error check available: runFinalObjectErrorCheck()');
 }

@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { SafeAuth } from '@/utils/safeAuth';
 import { AdminSignIn } from './AdminSignIn';
 import { Card, CardContent } from '@/components/ui/card';
+import { formatErrorForUI } from '@/utils/errorUtils';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
@@ -253,7 +254,7 @@ export function AuthCheck({ children, requireAdmin = false }: AuthCheckProps) {
             <div className="space-y-4">
               <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{formatErrorForUI(error)}</AlertDescription>
               </Alert>
 
               <div className="space-y-2">

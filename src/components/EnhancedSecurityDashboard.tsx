@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { formatErrorForUI } from '@/utils/errorUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -182,7 +183,7 @@ export function EnhancedSecurityDashboard() {
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             <div className="font-medium">Dashboard Error</div>
-            <div className="text-sm mt-1">{error}</div>
+            <div className="text-sm mt-1">{formatErrorForUI(error)}</div>
           </AlertDescription>
         </Alert>
       )}

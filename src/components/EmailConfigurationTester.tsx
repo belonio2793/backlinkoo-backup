@@ -5,6 +5,7 @@ import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
 import { CheckCircle, XCircle, AlertCircle, Mail, Settings, Database, Send } from 'lucide-react';
 import { emailTest } from '../services/emailConfigurationTest';
+import { formatErrorForUI } from '@/utils/errorUtils';
 
 interface TestResult {
   success: boolean;
@@ -120,7 +121,7 @@ const EmailConfigurationTester: React.FC = () => {
           
           {result?.error && (
             <Alert variant="destructive">
-              <AlertDescription className="text-xs">{result.error}</AlertDescription>
+              <AlertDescription className="text-xs">{formatErrorForUI(result.error)}</AlertDescription>
             </Alert>
           )}
           

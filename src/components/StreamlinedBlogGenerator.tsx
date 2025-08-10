@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
 import { useAuth } from '@/hooks/useAuth';
+import { formatErrorForUI } from '@/utils/errorUtils';
 import { EnhancedBlogWorkflow, type BlogCreationRequest } from '@/services/enhancedBlogWorkflow';
 import { blogService } from '@/services/blogService';
 import { LoginModal } from './LoginModal';
@@ -237,7 +238,7 @@ export function StreamlinedBlogGenerator() {
       {error && (
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{formatErrorForUI(error)}</AlertDescription>
         </Alert>
       )}
 

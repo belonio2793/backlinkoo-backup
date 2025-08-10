@@ -1,6 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatErrorForUI } from '@/utils/errorUtils';
 import { 
   AlertTriangle, 
   RefreshCw, 
@@ -103,7 +104,7 @@ export function ErrorDisplay({
           </div>
           
           <AlertDescription className="text-red-700">
-            {error}
+            {formatErrorForUI(error)}
           </AlertDescription>
 
           {context && (

@@ -1,5 +1,5 @@
 /**
- * Enterprise-Grade Backlink Automation Platform
+ * Enterprise-Grade Discovery Engine Platform
  * Separate tabs for each strategy with recursive URL discovery and premium pricing
  */
 
@@ -37,6 +37,7 @@ import ToolsHeader from '@/components/shared/ToolsHeader';
 import { Footer } from '@/components/Footer';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
 import { TrialExhaustedModal } from '@/components/TrialExhaustedModal';
+import { PremiumPlanModal } from '@/components/PremiumPlanModal';
 
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
 import { CampaignBlogIntegrationService } from '@/services/campaignBlogIntegrationService';
@@ -60,6 +61,15 @@ import { recursiveUrlDiscoveryService } from '@/services/recursiveUrlDiscoverySe
 
 // Import database utilities
 import { checkDatabaseStatus, initializeDatabase, type DatabaseStatus } from '@/utils/databaseSetup';
+import { updateActiveCampaigns, formatCampaignStatusText } from '@/utils/realTimeCampaignUpdater';
+import { formatDisplayNumber, formatMetricDisplay, formatActivityCount } from '@/utils/displayFormatter';
+import { safeGetRuntimeMinutes, safeGetRuntimeHours, safeFormatDate } from '@/utils/dateUtils';
+import { CampaignCounterDashboard } from '@/components/CampaignCounterDashboard';
+import { CampaignReportingDashboard } from '@/components/CampaignReportingDashboard';
+import { PredictiveCampaignDashboard } from '@/components/PredictiveCampaignDashboard';
+import { useCampaignCounters } from '@/hooks/useCampaignCounters';
+import { usePredictiveCampaignAlgorithm } from '@/hooks/usePredictiveCampaignAlgorithm';
+import { predictiveCampaignAlgorithm } from '@/services/predictiveCampaignAlgorithm';
 
 interface DatabaseCampaign {
   id: string;
@@ -257,11 +267,33 @@ export default function BacklinkAutomation() {
   const [usageStats, setUsageStats] = useState({ linksPosted: 0, isLimitReached: false });
   const [guestLinksGenerated, setGuestLinksGenerated] = useState(0);
   const [showTrialExhaustedModal, setShowTrialExhaustedModal] = useState(false);
+  const [showPremiumPlanModal, setShowPremiumPlanModal] = useState(false);
   const [guestCampaignResults, setGuestCampaignResults] = useState<any[]>([]);
   const [isFetching, setIsFetching] = useState(false);
   const [backendStatus, setBackendStatus] = useState('available');
   const [databaseStatus, setDatabaseStatus] = useState<DatabaseStatus | null>(null);
   const [isCheckingDatabase, setIsCheckingDatabase] = useState(true);
+
+  // Campaign counter integration
+  const {
+    initializeCampaign,
+    updateStatus: updateCounterStatus,
+    deleteCampaign: deleteCounterCampaign,
+    globalCounters
+  } = useCampaignCounters();
+
+  // Predictive algorithm integration
+  const {
+    initializePredictive,
+    updatePredictive,
+    triggerPremiumCheck,
+    openPremiumModal: openPredictivePremiumModal,
+    closePremiumModal: closePredictivePremiumModal,
+    showPremiumModal: showPredictivePremiumModal
+  } = usePredictiveCampaignAlgorithm({
+    isPremium,
+    enablePremiumModal: true
+  });
 
   // Throttling state for controlled link publishing
   const [isThrottling, setIsThrottling] = useState(false);
@@ -368,7 +400,8 @@ export default function BacklinkAutomation() {
         const existingResult = await campaignMetricsService.getCampaignMetrics(user.id, campaign.id);
 
         if (!existingResult.success) {
-          console.warn('⚠️ Failed to fetch existing campaign metrics:', formatErrorForUI(existingResult.error));
+          const errorMessage = formatErrorForUI(existingResult.error);
+          console.warn('���️ Failed to fetch existing campaign metrics:', errorMessage);
         }
 
         const existingMetrics = existingResult.data?.[0];
@@ -428,7 +461,7 @@ export default function BacklinkAutomation() {
 
           return enhancedCampaign;
         } else {
-          console.warn('⚠️ Database save failed, using localStorage fallback:', formatErrorForUI(result.error));
+          console.warn('��️ Database save failed, using localStorage fallback:', formatErrorForUI(result.error));
 
           // Show user-friendly notification for database setup issues
           if (result.error?.includes('Database function missing') || result.error?.includes('table missing')) {
@@ -500,6 +533,13 @@ export default function BacklinkAutomation() {
       const savedCampaigns = JSON.parse(localStorage.getItem(storageKey) || '[]');
       const updatedCampaigns = savedCampaigns.filter((c: any) => c.id !== campaignId);
       localStorage.setItem(storageKey, JSON.stringify(updatedCampaigns));
+
+      // Clean up predictive metrics
+      try {
+        predictiveCampaignAlgorithm.deletePredictiveMetrics(campaignId);
+      } catch (error) {
+        console.warn('Failed to clean up predictive metrics:', error instanceof Error ? error.message : String(error));
+      }
 
       // Remove from active state
       setCampaigns(prev => prev.filter(c => c.id !== campaignId));
@@ -732,7 +772,7 @@ export default function BacklinkAutomation() {
             }
           })
           .catch(error => {
-            console.warn('��� Retry exception for campaign:', failedSync.metrics.campaignId, error);
+            console.warn('��� Retry exception for campaign:', failedSync.metrics.campaignId, formatErrorForUI(error));
             // Add back to remaining syncs with incremented retry count
             remainingSyncs.push({
               ...failedSync,
@@ -781,9 +821,10 @@ export default function BacklinkAutomation() {
 
       setCampaignMetrics(metricsMap);
       setMetricsLoaded(true);
-      console.log('📊 Loaded metrics for', metricsMap.size, 'campaigns from localStorage');
+      console.log('���� Loaded metrics for', metricsMap.size, 'campaigns from localStorage');
     } catch (error) {
-      console.warn('Failed to load campaign metrics from localStorage:', formatErrorForUI(error));
+      const errorMessage = formatErrorForUI(error);
+      console.warn('Failed to load campaign metrics from localStorage:', errorMessage);
       setMetricsLoaded(true);
     }
   }, []);
@@ -1088,6 +1129,24 @@ export default function BacklinkAutomation() {
 
       if (activeCampaigns.length > 0) {
         console.log('���� Live Monitor: Tracking', activeCampaigns.length, 'active campaigns for', user?.id || 'guest');
+        // Use enhanced real-time campaign updater
+        const updateResult = updateActiveCampaigns(savedCampaigns, isPremium, user);
+
+        if (updateResult.hasUpdates) {
+          localStorage.setItem(storageKey, JSON.stringify(updateResult.updatedCampaigns));
+
+          // Update state to trigger re-render
+          if (user) {
+            setCampaigns(updateResult.updatedCampaigns);
+          } else {
+            setGuestCampaignResults(updateResult.updatedCampaigns);
+          }
+
+          console.log(`📈 Live Monitor: Updated ${updateResult.updatedCount} active campaigns with new metrics`);
+
+          // Force cumulative stats update to reflect changes
+          updateCumulativeStats();
+        }
       }
     }, 30000);
 
@@ -1128,7 +1187,7 @@ export default function BacklinkAutomation() {
         } else {
           // For guest users, directly restore campaigns
           setGuestCampaignResults(permanentCampaigns);
-          console.log('��� Guest Data Restored:', permanentCampaigns.length, 'campaigns with preserved metrics');
+          console.log('����� Guest Data Restored:', permanentCampaigns.length, 'campaigns with preserved metrics');
 
           // Show notification about data preservation for guest users
           if (permanentCampaigns.length > 0) {
@@ -1198,7 +1257,7 @@ export default function BacklinkAutomation() {
   useEffect(() => {
     if (!user && !guestTrackingInitialized) {
       const guestUserId = guestTrackingService.initializeGuestTracking();
-      console.log('��� Guest tracking initialized:', guestUserId);
+      console.log('���� Guest tracking initialized:', guestUserId);
       setGuestTrackingInitialized(true);
       updateGuestRestrictions();
     }
@@ -1231,6 +1290,11 @@ export default function BacklinkAutomation() {
       }));
 
       setCampaigns(guestCampaigns);
+
+      // Initialize counters for guest campaigns
+      guestCampaigns.forEach(guestCampaign => {
+        initializeCampaign(guestCampaign.id, guestCampaign.status || 'saved');
+      });
 
       // Also save guest campaigns to permanent storage to prevent data loss
       guestCampaigns.forEach(guestCampaign => {
@@ -1270,6 +1334,13 @@ export default function BacklinkAutomation() {
 
     const deleted = guestTrackingService.deleteCampaign(guestCampaignToDelete.id);
     if (deleted) {
+      // Clean up predictive metrics
+      try {
+        predictiveCampaignAlgorithm.deletePredictiveMetrics(guestCampaignToDelete.id);
+      } catch (error) {
+        console.warn('Failed to clean up predictive metrics:', error instanceof Error ? error.message : String(error));
+      }
+
       setGuestCampaignResults(prev =>
         prev.filter(c => c.id !== guestCampaignToDelete.id)
       );
@@ -1482,8 +1553,26 @@ export default function BacklinkAutomation() {
   useEffect(() => {
     const checkDatabase = async () => {
       setIsCheckingDatabase(true);
+
+      // Set a timeout to prevent indefinite loading
+      const timeoutId = setTimeout(() => {
+        console.warn('Database check timeout, proceeding with fallback mode');
+        setIsCheckingDatabase(false);
+        setDatabaseStatus({
+          isConnected: true,
+          tablesExist: {
+            backlink_campaigns: false,
+            discovered_urls: false,
+            link_opportunities: false,
+            link_posting_results: false
+          },
+          errors: ['Timeout - using fallback mode'],
+          needsSetup: false
+        });
+      }, 5000); // 5 second timeout
       try {
         const status = await checkDatabaseStatus();
+        clearTimeout(timeoutId);
         setDatabaseStatus(status);
 
         if (status.isConnected && !status.needsSetup) {
@@ -1497,12 +1586,27 @@ export default function BacklinkAutomation() {
           }
           loadRealTimeMetrics();
         } else {
-          console.warn('⚠����� Database not ready:', status);
+          console.warn('Database not ready, using local storage mode:', status);
+          // Load from localStorage as fallback
+          loadPermanentCampaigns();
         }
       } catch (error) {
-        console.error('❌ Database check failed:', {
+        clearTimeout(timeoutId);
+        console.error('Database check failed, using fallback mode:', {
           error: error,
           message: error instanceof Error ? error.message : 'Unknown error'
+        });
+        // Set fallback status
+        setDatabaseStatus({
+          isConnected: false,
+          tablesExist: {
+            backlink_campaigns: false,
+            discovered_urls: false,
+            link_opportunities: false,
+            link_posting_results: false
+          },
+          errors: [error instanceof Error ? error.message : 'Unknown error'],
+          needsSetup: true
         });
       } finally {
         setIsCheckingDatabase(false);
@@ -1548,10 +1652,24 @@ export default function BacklinkAutomation() {
     const interval = setInterval(() => {
       loadRealTimeMetrics();
       loadDiscoveryStats();
+
+      // Check for active campaigns and force state refresh
+      const storageKey = getUserStorageKey();
+      const savedCampaigns = JSON.parse(localStorage.getItem(storageKey) || '[]');
+      const activeCampaigns = savedCampaigns.filter((c: any) => c.status === 'active');
+
+      if (activeCampaigns.length > 0) {
+        // Update state to ensure real-time display
+        if (user) {
+          setCampaigns(savedCampaigns);
+        } else {
+          setGuestCampaignResults(savedCampaigns);
+        }
+      }
     }, 10000); // Update every 10 seconds
 
     return () => clearInterval(interval);
-  }, []);
+  }, [user, getUserStorageKey]);
 
   // Show notification when campaigns become active
   useEffect(() => {
@@ -1563,7 +1681,7 @@ export default function BacklinkAutomation() {
       const timer = setTimeout(() => {
         // Switch to live results sub-tab when campaigns are active\n        setSelectedCampaignTab('live-results');
         toast({
-          title: "�� Campaign Results Ready!",
+          title: "���� Campaign Results Ready!",
           description: "Your campaigns are now running. View real-time progress in the live monitor above.",
           duration: 4000,
         });
@@ -1669,6 +1787,12 @@ export default function BacklinkAutomation() {
         }));
 
         setCampaigns(convertedCampaigns);
+
+        // Initialize counters for loaded campaigns
+        convertedCampaigns.forEach(campaign => {
+          initializeCampaign(campaign.id, campaign.status || 'saved');
+        });
+
         console.log('Loaded campaigns:', convertedCampaigns.length);
       } else if (result.error) {
         console.error('Failed to load campaigns:', formatErrorForLogging(result.error, 'loadCampaigns'));
@@ -1888,6 +2012,16 @@ export default function BacklinkAutomation() {
         }
       }
 
+      // Update campaign counters
+      updateCounterStatus(campaignId, 'paused');
+
+      // Update predictive algorithm
+      try {
+        updatePredictive(campaignId);
+      } catch (error) {
+        console.warn('Failed to update predictive metrics on pause:', error instanceof Error ? error.message : String(error));
+      }
+
       // Update local state with preserved data
       setCampaigns(prev => prev.map(c => {
         if (c.id === campaignId) {
@@ -2019,6 +2153,16 @@ export default function BacklinkAutomation() {
         }
       }
 
+      // Update campaign counters
+      updateCounterStatus(campaignId, 'active');
+
+      // Initialize/update predictive algorithm
+      try {
+        initializePredictive(campaignId, isPremium);
+      } catch (error) {
+        console.warn('Failed to initialize predictive metrics on resume:', error instanceof Error ? error.message : String(error));
+      }
+
       // Update local state
       setCampaigns(prev => prev.map(c =>
         c.id === campaignId ? { ...c, status: 'active' } : c
@@ -2057,16 +2201,22 @@ export default function BacklinkAutomation() {
   };
 
   const showPremiumUpgrade = (campaignId: string) => {
-    setShowTrialExhaustedModal(true);
+    // Use PremiumPlanModal for authenticated users, TrialExhaustedModal for guests
+    if (user) {
+      setShowPremiumPlanModal(true);
+    } else {
+      setShowTrialExhaustedModal(true);
+    }
+
     const message = user && !isPremium
       ? "Campaign paused at 20-link limit. Upgrade to Premium to continue building unlimited links!"
       : "You've built 20 high-quality backlinks! Upgrade to Premium for unlimited campaigns and links.";
 
     toast({
-      title: "🛑 Campaign Paused - Link Limit Reached",
+      title: "�� Campaign Paused - Link Limit Reached",
       description: message,
       action: (
-        <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
+        <Button size="sm" onClick={() => user ? setShowPremiumPlanModal(true) : setShowTrialExhaustedModal(true)}>
           {user && !isPremium ? "Upgrade to Continue" : "Upgrade Now"}
         </Button>
       ),
@@ -2255,7 +2405,7 @@ export default function BacklinkAutomation() {
           if (newLinks.length === 0 && forceUpdate) {
             // Add small incremental activity to show monitoring is active
             current.totalClicks += Math.floor(Math.random() * 5) + 1; // 1-5 simulated clicks
-            console.log('📊 Synthetic activity added for campaign visibility:', campaignId);
+            console.log('��� Synthetic activity added for campaign visibility:', campaignId);
           }
 
           const updated = new Map(prev);
@@ -2278,6 +2428,15 @@ export default function BacklinkAutomation() {
 
           return updated;
         });
+
+        // Update predictive algorithm with reporting outputs
+        if (newLinks.length > 0) {
+          try {
+            updatePredictive(campaignId, newLinks.length);
+          } catch (error) {
+            console.warn('Failed to update predictive metrics during real-time activity:', error instanceof Error ? error.message : String(error));
+          }
+        }
 
         // Ensure campaigns always show activity with heartbeat system
         const heartbeatActivity = [];
@@ -2355,7 +2514,7 @@ export default function BacklinkAutomation() {
                 const isLastRetry = retryCount >= maxRetries;
 
                 if (isLastRetry) {
-                  console.warn('❌ Database sync failed after', maxRetries, 'attempts for campaign:', campaign.id, error);
+                  console.warn('❌ Database sync failed after', maxRetries, 'attempts for campaign:', campaign.id, formatErrorForUI(error));
 
                   // Store failed sync for later retry
                   try {
@@ -2390,7 +2549,7 @@ export default function BacklinkAutomation() {
     setActiveCampaignIntervals(prev => {
       const updated = new Map(prev);
       updated.set(campaignId, interval);
-      console.log('✅ Started monitoring for campaign:', campaignId, '(Total active:', updated.size, ')');
+      console.log('�� Started monitoring for campaign:', campaignId, '(Total active:', updated.size, ')');
       return updated;
     });
 
@@ -2415,7 +2574,7 @@ export default function BacklinkAutomation() {
 
       if (guestCampaigns.length === 0) return;
 
-      console.log('🔄 Transferring guest campaigns to user account:', user.email);
+      console.log('��� Transferring guest campaigns to user account:', user.email);
 
       // Create campaigns in the database for the new user
       for (const guestCampaign of guestCampaigns) {
@@ -2554,6 +2713,17 @@ export default function BacklinkAutomation() {
       if (trackingResult.warning && trackingResult.shouldShowPremiumModal) {
         setPremiumUpsellTrigger('campaign_limit');
         setShowGuestPremiumModal(true);
+      }
+
+      // Initialize counters for guest campaign
+      if (trackingResult.success && trackingResult.campaign) {
+        initializeCampaign(trackingResult.campaign.id, 'active');
+        // Initialize predictive algorithm for guest campaign
+        try {
+          initializePredictive(trackingResult.campaign.id, false); // Guest campaigns are not premium
+        } catch (error) {
+          console.warn('Failed to initialize predictive metrics for guest campaign:', error instanceof Error ? error.message : String(error));
+        }
       }
     }
 
@@ -2868,7 +3038,7 @@ export default function BacklinkAutomation() {
                   console.warn('Failed to update campaign with blog URL:', updateError);
                 }
 
-                console.log('✅ Blog post added as priority link for authenticated user:', blogResult.blogPostUrl);
+                console.log('�� Blog post added as priority link for authenticated user:', blogResult.blogPostUrl);
               } catch (linkError) {
                 console.warn('Failed to add blog post as priority link for authenticated user:', linkError);
                 // Continue without blog link if this fails
@@ -2891,7 +3061,7 @@ export default function BacklinkAutomation() {
                 isFallback: true
               };
 
-              console.log('✅ Fallback blog post created for authenticated user:', blogResult.blogPostUrl);
+              console.log('���� Fallback blog post created for authenticated user:', blogResult.blogPostUrl);
             }
           }
 
@@ -2923,6 +3093,16 @@ export default function BacklinkAutomation() {
 
           // Add to campaigns state immediately
           setCampaigns(prev => [...prev, enhancedCampaign]);
+
+          // Initialize campaign counters
+          initializeCampaign(result.campaign.id, 'active');
+
+          // Initialize predictive algorithm
+          try {
+            initializePredictive(result.campaign.id, isPremium);
+          } catch (error) {
+            console.warn('Failed to initialize predictive metrics for authenticated campaign:', error instanceof Error ? error.message : String(error));
+          }
 
           // Immediately save to permanent storage to prevent any data loss
           await saveCampaignPermanently(enhancedCampaign);
@@ -2975,7 +3155,7 @@ export default function BacklinkAutomation() {
           });
         } else {
           toast({
-            title: "🚀 Campaign Deployed!",
+            title: "��� Campaign Deployed!",
             description: `Your campaign is live${blogResult.success ? (blogResult.isFallback ? ' + priority blog post queued on backlinkoo.com' : ' + priority blog post published on backlinkoo.com') : ''} with 20-link limit. View progress in the monitor above!`,
             action: (
               <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
@@ -3015,9 +3195,11 @@ export default function BacklinkAutomation() {
       });
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Failed to create campaign:', {
-        error: error,
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : 'Unknown'
       });
       toast({
         title: "Campaign Creation Failed",
@@ -3292,7 +3474,7 @@ export default function BacklinkAutomation() {
                 <Lightning className="h-5 w-5 text-orange-500 absolute -top-1 -right-1" />
               </div>
               <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-orange-500 bg-clip-text text-transparent">
-                Backlink Automation
+                Discovery Engine
               </h1>
               <div className="flex items-center gap-2">
                 {/* User Status Badges */}
@@ -3342,18 +3524,40 @@ export default function BacklinkAutomation() {
                       >
                         <RefreshCw className="h-3 w-3" />
                       </Button>
+                      {!isPremium && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setShowPremiumPlanModal(true)}
+                          className="h-8 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-none"
+                        >
+                          <Crown className="h-3 w-3 mr-1" />
+                          View Plans
+                        </Button>
+                      )}
                     </>
                   )}
 
                   {!user && (
-                    <Button
-                      size="sm"
-                      onClick={() => setShowSignInModal(true)}
-                      className="h-8 bg-blue-600 hover:bg-blue-700"
-                    >
-                      <UserPlus className="h-3 w-3 mr-1" />
-                      Sign In
-                    </Button>
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => setShowTrialExhaustedModal(true)}
+                        className="h-8 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-none"
+                      >
+                        <Crown className="h-3 w-3 mr-1" />
+                        View Plans
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => setShowSignInModal(true)}
+                        className="h-8 bg-blue-600 hover:bg-blue-700"
+                      >
+                        <UserPlus className="h-3 w-3 mr-1" />
+                        Sign In
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
@@ -3372,7 +3576,7 @@ export default function BacklinkAutomation() {
                     controlPanelData.systemStatus === 'operational' ? 'bg-blue-500' : 'bg-red-500'
                   }`} />
                   <span className="text-sm font-medium text-slate-700">
-                    Backlink Automation
+                    Discovery Engine
                   </span>
                   {backendStatus === 'unavailable' && (
                     <Badge variant="outline" className="text-orange-600 bg-orange-50 text-xs ml-2">
@@ -3494,13 +3698,13 @@ export default function BacklinkAutomation() {
 
                       if (user) {
                         if (isPremium) {
-                          return `Unlimited • ${liveMonitored} live monitored`;
+                          return `Unlimited • ${formatCampaignStatusText(liveMonitored, 'live', 'ready for campaigns')}`;
                         } else {
-                          return `Monthly Links • ${activeCampaigns} active`;
+                          return `Monthly Links • ${formatCampaignStatusText(activeCampaigns, 'active', 'ready to start')}`;
                         }
                       } else {
                         return guestLinksGenerated > 0 ?
-                          `Trial Progress • ${liveMonitored} monitored` :
+                          `Trial Progress • ${formatCampaignStatusText(liveMonitored, 'monitored', 'in progress')}` :
                           "Get Started";
                       }
                     })()}
@@ -3562,12 +3766,18 @@ export default function BacklinkAutomation() {
           )}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="campaigns" className="relative">
                 Campaign Manager
                 {((user && campaigns.filter(c => c.status === 'active').length > 0) ||
                   (!user && guestCampaignResults.length > 0)) && (
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="relative">
+                Analytics & Reporting
+                {globalCounters && globalCounters.totalCampaigns > 0 && (
+                  <div className="absolute -top-1 -right-1 h-3 w-3 bg-blue-500 rounded-full animate-pulse"></div>
                 )}
               </TabsTrigger>
               <TabsTrigger value="database">Website Database</TabsTrigger>
@@ -3795,7 +4005,7 @@ export default function BacklinkAutomation() {
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                           <Button
-                            onClick={() => setShowTrialExhaustedModal(true)}
+                            onClick={() => setShowPremiumPlanModal(true)}
                             className="h-12 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                           >
                             <Crown className="h-4 w-4 mr-2" />
@@ -3860,7 +4070,7 @@ export default function BacklinkAutomation() {
                               onClick={() => {
                                 setPremiumUpsellTrigger('manual');
                                 if (user) {
-                                  setShowTrialExhaustedModal(true);
+                                  setShowPremiumPlanModal(true);
                                 } else {
                                   setShowGuestPremiumModal(true);
                                 }
@@ -3949,7 +4159,7 @@ export default function BacklinkAutomation() {
                                 onClick={() => {
                                   setPremiumUpsellTrigger('manual');
                                   if (user) {
-                                    setShowTrialExhaustedModal(true);
+                                    setShowPremiumPlanModal(true);
                                   } else {
                                     setShowGuestPremiumModal(true);
                                   }
@@ -3975,7 +4185,14 @@ export default function BacklinkAutomation() {
                     Your Campaigns
                   </CardTitle>
                   <CardDescription>
-                    {user ? `${campaigns.length} campaigns • ${campaigns.filter(c => c.status === 'active').length} active` : `${guestCampaignResults.length} campaigns created`}
+                    {user ?
+                      (() => {
+                        const total = campaigns.length;
+                        const active = campaigns.filter(c => c.status === 'active').length;
+                        return `${formatActivityCount(total, 'campaign')} • ${formatActivityCount(active, 'active', undefined, { showZero: true, zeroText: 'none active' })}`;
+                      })() :
+                      formatActivityCount(guestCampaignResults.length, 'campaign', undefined, { showZero: true, zeroText: 'ready to start' }) + ' created'
+                    }
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -4041,13 +4258,19 @@ export default function BacklinkAutomation() {
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">Links Published</p>
                                   <p className="text-xl font-bold text-green-600">
-                                    {cumulativeStats.totalLinksPublished}
+                                    {formatDisplayNumber(cumulativeStats.totalLinksPublished, {
+                                      hideZero: false,
+                                      zeroText: '0'
+                                    })}
                                   </p>
                                   <p className="text-xs text-green-700">
-                                    +{globalActivityFeed.filter(a =>
-                                      a.type === 'link_published' &&
-                                      Date.now() - new Date(a.timestamp).getTime() < 60000
-                                    ).length} last minute
+                                    {(() => {
+                                      const recentCount = globalActivityFeed.filter(a =>
+                                        a.type === 'link_published' &&
+                                        Date.now() - new Date(a.timestamp).getTime() < 60000
+                                      ).length;
+                                      return recentCount > 0 ? `+${recentCount} last minute` : 'monitoring for new links';
+                                    })()}
                                   </p>
                                 </div>
                                 <Link className="h-6 w-6 text-green-600" />
@@ -4059,12 +4282,18 @@ export default function BacklinkAutomation() {
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">Domains Reached</p>
                                   <p className="text-xl font-bold text-blue-600">
-                                    {cumulativeStats.totalDomainsReached}
+                                    {formatDisplayNumber(cumulativeStats.totalDomainsReached, {
+                                      hideZero: false,
+                                      zeroText: '0'
+                                    })}
                                   </p>
                                   <p className="text-xs text-blue-700">
-                                    {globalActivityFeed.filter(a =>
-                                      a.metadata?.authority >= 90
-                                    ).length} high DA
+                                    {(() => {
+                                      const highDACount = globalActivityFeed.filter(a =>
+                                        a.metadata?.authority >= 90
+                                      ).length;
+                                      return highDACount > 0 ? `${highDACount} high DA` : 'targeting high DA sites';
+                                    })()}
                                   </p>
                                 </div>
                                 <Globe className="h-6 w-6 text-blue-600" />
@@ -4097,15 +4326,21 @@ export default function BacklinkAutomation() {
                                     Active Campaigns
                                   </p>
                                   <p className="text-xl font-bold text-orange-600">
-                                    {cumulativeStats.activeCampaigns}
+                                    {formatDisplayNumber(cumulativeStats.activeCampaigns, {
+                                      hideZero: false,
+                                      zeroText: '0'
+                                    })}
                                   </p>
                                   <p className="text-xs text-orange-700">
-                                    Avg DA: {globalActivityFeed.filter(a => a.metadata?.authority).length > 0 ?
-                                      Math.round(globalActivityFeed
-                                        .filter(a => a.metadata?.authority)
-                                        .reduce((sum, a) => sum + (a.metadata?.authority || 0), 0) /
-                                        globalActivityFeed.filter(a => a.metadata?.authority).length
-                                      ) : 85}
+                                    {(() => {
+                                      const avgDA = globalActivityFeed.filter(a => a.metadata?.authority).length > 0 ?
+                                        Math.round(globalActivityFeed
+                                          .filter(a => a.metadata?.authority)
+                                          .reduce((sum, a) => sum + (a.metadata?.authority || 0), 0) /
+                                          globalActivityFeed.filter(a => a.metadata?.authority).length
+                                        ) : 85;
+                                      return cumulativeStats.activeCampaigns > 0 ? `Avg DA: ${avgDA}` : 'ready to deploy';
+                                    })()}
                                   </p>
                                 </div>
                                 <div className="relative">
@@ -4125,7 +4360,10 @@ export default function BacklinkAutomation() {
                                 <Activity className="h-4 w-4 text-purple-600 animate-pulse" />
                                 <span className="font-medium text-gray-900">Global Activity Feed</span>
                                 <Badge variant="secondary" className="text-xs">
-                                  {globalActivityFeed.length} activities
+                                  {formatActivityCount(globalActivityFeed.length, 'activity', 'activities', {
+                                    showZero: true,
+                                    zeroText: 'monitoring for activity'
+                                  })}
                                 </Badge>
                               </div>
                               <div className="text-xs text-gray-500 time-display">
@@ -4235,11 +4473,21 @@ export default function BacklinkAutomation() {
 
                                           <div className="grid grid-cols-3 gap-2 text-xs">
                                             <div className="text-center">
-                                              <div className="font-bold text-green-600">{campaign.linksGenerated}</div>
+                                              <div className="font-bold text-green-600">
+                                                {formatDisplayNumber(campaign.linksGenerated, {
+                                                  hideZero: false,
+                                                  zeroText: '0'
+                                                })}
+                                              </div>
                                               <div className="text-gray-600">Links</div>
                                             </div>
                                             <div className="text-center">
-                                              <div className="font-bold text-blue-600">{campaign.domains?.length || 0}</div>
+                                              <div className="font-bold text-blue-600">
+                                                {formatDisplayNumber(campaign.domains?.length || 0, {
+                                                  hideZero: false,
+                                                  zeroText: '0'
+                                                })}
+                                              </div>
                                               <div className="text-gray-600">Domains</div>
                                             </div>
                                             <div className="text-center">
@@ -4253,7 +4501,12 @@ export default function BacklinkAutomation() {
                                             <div className="mt-3">
                                               <div className="flex items-center justify-between text-xs mb-1">
                                                 <span className="text-gray-600">Publishing Progress</span>
-                                                <span className="text-green-600">{pendingLinksToPublish.length} queued</span>
+                                                <span className="text-green-600">
+                                                  {formatActivityCount(pendingLinksToPublish.length, 'queued', undefined, {
+                                                    showZero: true,
+                                                    zeroText: 'ready to publish'
+                                                  })}
+                                                </span>
                                               </div>
                                               <Progress
                                                 value={((campaign.totalLinksToGenerate - pendingLinksToPublish.length) / campaign.totalLinksToGenerate) * 100}
@@ -4579,9 +4832,17 @@ export default function BacklinkAutomation() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-sm font-medium text-green-700">Live Links</p>
-                                    <p className="text-2xl font-bold text-green-900">{cumulativeStats.totalLinksPublished}</p>
+                                    <p className="text-2xl font-bold text-green-900">
+                                      {formatDisplayNumber(cumulativeStats.totalLinksPublished, {
+                                        hideZero: false,
+                                        zeroText: '0'
+                                      })}
+                                    </p>
                                     <p className="text-xs text-green-600 mt-1">
-                                      {globalActivityFeed.filter(a => a.metadata?.status === 'live').length} verified live
+                                      {(() => {
+                                        const verifiedLive = globalActivityFeed.filter(a => a.metadata?.status === 'live').length;
+                                        return verifiedLive > 0 ? `${verifiedLive} verified live` : 'ready for verification';
+                                      })()}
                                     </p>
                                   </div>
                                   <Activity className="h-8 w-8 text-green-600" />
@@ -4912,6 +5173,16 @@ export default function BacklinkAutomation() {
                             </div>
                           </div>
 
+                          {/* Predictive Algorithm Dashboard */}
+                          <div className="mb-4">
+                            <PredictiveCampaignDashboard
+                              campaignId={campaign.id}
+                              isPremium={isPremium}
+                              compact={true}
+                              showGlobalMetrics={false}
+                            />
+                          </div>
+
                           {/* Progress Bar with Premium Warning */}
                           <div className="mb-4">
                             <div className="flex justify-between text-sm mb-2">
@@ -4928,6 +5199,15 @@ export default function BacklinkAutomation() {
                                 Approaching 20-link limit. Upgrade for unlimited links!
                               </div>
                             )}
+                          </div>
+
+                          {/* Campaign Counter Dashboard */}
+                          <div className="mb-4">
+                            <CampaignCounterDashboard
+                              campaignId={campaign.id}
+                              showGlobal={false}
+                              compact={true}
+                            />
                           </div>
 
                           {/* Enhanced Real-Time Activity Feed */}
@@ -5498,14 +5778,25 @@ export default function BacklinkAutomation() {
 
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                             <div className="text-center">
-                              <div className="text-lg font-bold text-green-600">{(() => {
-                                const campaignReport = detailedReporting.find(r => r.campaignId === campaign.id);
-                                return campaignReport?.linksLive || campaign.linksLive || Math.round(campaign.linksGenerated * 0.95) || 0;
-                              })()}</div>
+                              <div className="text-lg font-bold text-green-600">
+                                {(() => {
+                                  const campaignReport = detailedReporting.find(r => r.campaignId === campaign.id);
+                                  const liveLinks = campaignReport?.linksLive || campaign.linksLive || Math.round(campaign.linksGenerated * 0.95) || 0;
+                                  return formatDisplayNumber(liveLinks, {
+                                    hideZero: false,
+                                    zeroText: '0'
+                                  });
+                                })()}
+                              </div>
                               <div className="text-xs text-gray-600">Live Links</div>
                             </div>
                             <div className="text-center">
-                              <div className="text-lg font-bold text-blue-600">{campaign.domains?.length || 0}</div>
+                              <div className="text-lg font-bold text-blue-600">
+                                {formatDisplayNumber(campaign.domains?.length || 0, {
+                                  hideZero: false,
+                                  zeroText: '0'
+                                })}
+                              </div>
                               <div className="text-xs text-gray-600">Domains</div>
                             </div>
                             <div className="text-center">
@@ -5514,7 +5805,7 @@ export default function BacklinkAutomation() {
                             </div>
                             <div className="text-center">
                               <div className="text-lg font-bold text-orange-600">
-                                {Math.round((Date.now() - new Date(campaign.createdAt).getTime()) / (1000 * 60))}m
+                                {safeGetRuntimeMinutes(campaign.createdAt)}m
                               </div>
                               <div className="text-xs text-gray-600">Runtime</div>
                             </div>
@@ -5643,7 +5934,12 @@ export default function BacklinkAutomation() {
                               <div className="text-xs text-gray-600">Live Links</div>
                             </div>
                             <div className="text-center">
-                              <div className="text-lg font-bold text-blue-600">{campaign.linksLive || Math.round(campaign.linksGenerated * 0.95)}</div>
+                              <div className="text-lg font-bold text-blue-600">
+                                {formatDisplayNumber(campaign.linksLive || Math.round(campaign.linksGenerated * 0.95), {
+                                  hideZero: false,
+                                  zeroText: '0'
+                                })}
+                              </div>
                               <div className="text-xs text-gray-600">Live Links</div>
                             </div>
                             <div className="text-center">
@@ -5656,7 +5952,7 @@ export default function BacklinkAutomation() {
                             </div>
                             <div className="text-center">
                               <div className="text-lg font-bold text-teal-600">
-                                {Math.round((Date.now() - campaign.createdAt.getTime()) / (1000 * 60 * 60))}h
+                                {safeGetRuntimeHours(campaign.createdAt)}h
                               </div>
                               <div className="text-xs text-gray-600">Runtime</div>
                             </div>
@@ -5847,6 +6143,20 @@ export default function BacklinkAutomation() {
               )}
             </TabsContent>
 
+            <TabsContent value="analytics" className="space-y-6">
+              {/* Predictive Algorithm Dashboard */}
+              <PredictiveCampaignDashboard
+                isPremium={isPremium}
+                showGlobalMetrics={true}
+              />
+
+              {/* Global Counter Dashboard */}
+              <CampaignCounterDashboard showGlobal={true} />
+
+              {/* Comprehensive Reporting Dashboard */}
+              <CampaignReportingDashboard />
+            </TabsContent>
+
             <TabsContent value="database" className="space-y-6">
               {/* New Discoveries - Priority Publishing */}
               <Card className="border-green-200 bg-gradient-to-r from-green-50 to-blue-50">
@@ -5947,13 +6257,13 @@ export default function BacklinkAutomation() {
                           { name: 'E-commerce & Retail', count: 45670, icon: '����' },
                           { name: 'Travel & Tourism', count: 38920, icon: '✈���' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
-                          { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
+                          { name: 'Entertainment & Gaming', count: 32180, icon: '����' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
                           { name: 'Real Estate', count: 27450, icon: '🏠' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
                           { name: 'Home & Garden', count: 21890, icon: '🏡' },
-                          { name: 'Legal Services', count: 19650, icon: '⚖️' },
+                          { name: 'Legal Services', count: 19650, icon: '��️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
                           { name: 'Science & Research', count: 14560, icon: '🔬' },
@@ -6536,6 +6846,22 @@ export default function BacklinkAutomation() {
         }}
       />
 
+      {/* Premium Plan Modal with Live Pricing */}
+      <PremiumPlanModal
+        isOpen={showPremiumPlanModal}
+        onClose={() => setShowPremiumPlanModal(false)}
+        onSuccess={() => {
+          setShowPremiumPlanModal(false);
+          toast({
+            title: "🎉 Welcome to Premium!",
+            description: "Your account has been upgraded. Enjoy unlimited access!",
+          });
+          // Refresh page to update premium status
+          setTimeout(() => window.location.reload(), 2000);
+        }}
+        triggerSource="automation"
+      />
+
       {/* Guest Premium Upsell Modal */}
       <GuestPremiumUpsellModal
         open={showGuestPremiumModal}
@@ -6546,6 +6872,39 @@ export default function BacklinkAutomation() {
           console.log('Guest user upgrading to premium');
         }}
       />
+
+      {/* Predictive Algorithm Premium Modal */}
+      {showPredictivePremiumModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <div className="text-center space-y-4">
+              <div className="text-4xl">⚠️</div>
+              <h3 className="text-xl font-semibold">Monthly Limit Reached</h3>
+              <p className="text-gray-600">
+                Your campaign has reached the 20/20 monthly link limit. Upgrade to continue with unlimited link building.
+              </p>
+              <div className="flex gap-3">
+                <Button
+                  onClick={closePredictivePremiumModal}
+                  variant="outline"
+                  className="flex-1"
+                >
+                  Continue Paused
+                </Button>
+                <Button
+                  onClick={() => {
+                    closePredictivePremiumModal();
+                    setShowPremiumPlanModal(true);
+                  }}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700"
+                >
+                  Upgrade Now
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Guest Campaign Delete Confirmation */}
       <AlertDialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
@@ -6574,6 +6933,7 @@ export default function BacklinkAutomation() {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         campaign={campaignToDelete}
+        isDeleting={isDeleting}
         onDelete={async (campaignId, options) => {
           try {
             setIsDeleting(true);
@@ -6585,6 +6945,17 @@ export default function BacklinkAutomation() {
               });
 
               if (result.success) {
+                // Remove campaign counters
+                deleteCounterCampaign(campaignId);
+
+                // Clean up predictive metrics
+                try {
+                  const { predictiveCampaignAlgorithm } = await import('@/services/predictiveCampaignAlgorithm');
+                  predictiveCampaignAlgorithm.deletePredictiveMetrics(campaignId);
+                } catch (error) {
+                  console.warn('Failed to clean up predictive metrics:', error instanceof Error ? error.message : String(error));
+                }
+
                 // Remove from local state
                 setCampaigns(prev => prev.filter(c => c.id !== campaignId));
 
@@ -6599,6 +6970,10 @@ export default function BacklinkAutomation() {
                   });
                 }
 
+                // Close dialog and reset state
+                setDeleteDialogOpen(false);
+                setCampaignToDelete(null);
+
                 toast({
                   title: "🗑️ Campaign Deleted",
                   description: "Campaign and all associated data have been permanently removed.",
@@ -6610,11 +6985,26 @@ export default function BacklinkAutomation() {
               // For guest users, use guest tracking service
               const deleted = guestTrackingService.deleteCampaign(campaignId);
               if (deleted) {
+                // Remove campaign counters
+                deleteCounterCampaign(campaignId);
+
+                // Clean up predictive metrics
+                try {
+                  const { predictiveCampaignAlgorithm } = await import('@/services/predictiveCampaignAlgorithm');
+                  predictiveCampaignAlgorithm.deletePredictiveMetrics(campaignId);
+                } catch (error) {
+                  console.warn('Failed to clean up predictive metrics:', error instanceof Error ? error.message : String(error));
+                }
+
                 setCampaigns(prev => prev.filter(c => c.id !== campaignId));
                 updateGuestRestrictions();
 
+                // Close dialog and reset state
+                setDeleteDialogOpen(false);
+                setCampaignToDelete(null);
+
                 toast({
-                  title: "����️ Campaign Deleted",
+                  title: "������� Campaign Deleted",
                   description: "Campaign has been permanently removed.",
                 });
               } else {
