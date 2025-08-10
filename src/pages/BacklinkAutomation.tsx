@@ -1313,12 +1313,7 @@ export default function BacklinkAutomation() {
 
     const deleted = guestTrackingService.deleteCampaign(guestCampaignToDelete.id);
     if (deleted) {
-      // Clean up predictive metrics
-      try {
-        predictiveCampaignAlgorithm.deletePredictiveMetrics(guestCampaignToDelete.id);
-      } catch (error) {
-        console.warn('Failed to clean up predictive metrics:', error instanceof Error ? error.message : String(error));
-      }
+      // Predictive metrics cleanup removed - values integrated into live metrics
 
       setGuestCampaignResults(prev =>
         prev.filter(c => c.id !== guestCampaignToDelete.id)
