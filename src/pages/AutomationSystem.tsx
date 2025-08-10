@@ -106,11 +106,11 @@ export default function AutomationSystem() {
   ];
 
   const recentActivities = [
-    { id: 1, engine: 'Blog Commenting', action: 'Comment posted', target: 'techblog.example.com', status: 'success', time: '2 minutes ago' },
-    { id: 2, engine: 'Social Media', action: 'Tweet published', target: 'Twitter', status: 'success', time: '5 minutes ago' },
-    { id: 3, engine: 'Guest Posting', action: 'Outreach sent', target: 'marketingblog.net', status: 'pending', time: '8 minutes ago' },
-    { id: 4, engine: 'Blog Posting', action: 'Article published', target: 'myblog.wordpress.com', status: 'success', time: '12 minutes ago' },
-    { id: 5, engine: 'Forum Profiles', action: 'Profile created', target: 'marketingforum.com', status: 'success', time: '15 minutes ago' },
+    { id: 1, engine: 'Blog Commenting', action: 'Comment posted successfully', target: 'techblog.example.com', status: 'success', time: '2 minutes ago' },
+    { id: 2, engine: 'Social Media', action: 'Tweet published successfully', target: 'Twitter', status: 'success', time: '5 minutes ago' },
+    { id: 3, engine: 'Guest Posting', action: 'Outreach email sent', target: 'marketingblog.net', status: 'pending', time: '8 minutes ago' },
+    { id: 4, engine: 'Blog Posting', action: 'Article published successfully', target: 'myblog.wordpress.com', status: 'success', time: '12 minutes ago' },
+    { id: 5, engine: 'Forum Profiles', action: 'Profile created successfully', target: 'marketingforum.com', status: 'success', time: '15 minutes ago' },
   ];
 
   useEffect(() => {
