@@ -6014,6 +6014,14 @@ export default function BacklinkAutomation() {
               )}
             </TabsContent>
 
+            <TabsContent value="analytics" className="space-y-6">
+              {/* Global Counter Dashboard */}
+              <CampaignCounterDashboard showGlobal={true} />
+
+              {/* Comprehensive Reporting Dashboard */}
+              <CampaignReportingDashboard />
+            </TabsContent>
+
             <TabsContent value="database" className="space-y-6">
               {/* New Discoveries - Priority Publishing */}
               <Card className="border-green-200 bg-gradient-to-r from-green-50 to-blue-50">
