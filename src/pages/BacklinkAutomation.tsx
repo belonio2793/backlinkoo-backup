@@ -532,6 +532,13 @@ export default function BacklinkAutomation() {
       const updatedCampaigns = savedCampaigns.filter((c: any) => c.id !== campaignId);
       localStorage.setItem(storageKey, JSON.stringify(updatedCampaigns));
 
+      // Clean up predictive metrics
+      try {
+        predictiveCampaignAlgorithm.deletePredictiveMetrics(campaignId);
+      } catch (error) {
+        console.warn('Failed to clean up predictive metrics:', error instanceof Error ? error.message : String(error));
+      }
+
       // Remove from active state
       setCampaigns(prev => prev.filter(c => c.id !== campaignId));
       setGuestCampaignResults(prev => prev.filter(c => c.id !== campaignId));
