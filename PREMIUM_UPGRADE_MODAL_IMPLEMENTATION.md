@@ -61,7 +61,15 @@ import { PremiumUpgradeProvider } from '@/components/PremiumUpgradeProvider';
 // Wrapped around the entire app
 <PremiumUpgradeProvider>
   <SymbolCleanerProvider>
-    {/* app content */}
+    <Toaster />
+    <Sonner />
+    <UnifiedModalManager />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </BrowserRouter>
   </SymbolCleanerProvider>
 </PremiumUpgradeProvider>
 ```
