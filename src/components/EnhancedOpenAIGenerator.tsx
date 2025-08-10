@@ -52,7 +52,7 @@ export const EnhancedOpenAIGenerator = ({ variant = 'standalone', onSuccess }: O
   const [systemStatus, setSystemStatus] = useState({
     apiKey: { status: 'checking', message: 'Checking API key...' } as SystemStatus,
     chatGPT: { status: 'checking', message: 'Checking ChatGPT connection...' } as SystemStatus,
-    database: { status: 'checking', message: 'Checking database connection...' } as SystemStatus
+    database: { status: 'checking', message: 'Connecting...' } as SystemStatus
   });
   
   const { toast } = useToast();
