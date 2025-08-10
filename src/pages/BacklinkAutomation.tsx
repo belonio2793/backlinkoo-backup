@@ -2061,7 +2061,7 @@ export default function BacklinkAutomation() {
 
       const linksCount = (user ? campaigns : guestCampaignResults).find(c => c.id === campaignId)?.linksGenerated || 0;
       toast({
-        title: "⏸���� Campaign Paused Successfully",
+        title: "⏸�� Campaign Paused Successfully",
         description: `All ${linksCount} links and metrics permanently saved to your account. Will never reset when resuming or refreshing page.`,
       });
     } catch (error) {
@@ -2671,7 +2671,6 @@ export default function BacklinkAutomation() {
 
       if (!trackingResult.success) {
         if (trackingResult.shouldShowPremiumModal) {
-          setPremiumUpsellTrigger('campaign_limit');
           setShowPremiumPlanModal(true);
         }
 
@@ -2684,7 +2683,6 @@ export default function BacklinkAutomation() {
       }
 
       if (trackingResult.warning && trackingResult.shouldShowPremiumModal) {
-        setPremiumUpsellTrigger('campaign_limit');
         setShowPremiumPlanModal(true);
       }
 
@@ -3597,7 +3595,6 @@ export default function BacklinkAutomation() {
                               <Button
                                 size="sm"
                                 onClick={() => {
-                                  setPremiumUpsellTrigger('campaign_limit');
                                   setShowPremiumPlanModal(true);
                                 }}
                                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-xs"
@@ -6917,7 +6914,7 @@ export default function BacklinkAutomation() {
                 setCampaignToDelete(null);
 
                 toast({
-                  title: "�������� Campaign Deleted",
+                  title: "������� Campaign Deleted",
                   description: "Campaign has been permanently removed.",
                 });
               } else {
