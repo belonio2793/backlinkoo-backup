@@ -368,7 +368,8 @@ export default function BacklinkAutomation() {
         const existingResult = await campaignMetricsService.getCampaignMetrics(user.id, campaign.id);
 
         if (!existingResult.success) {
-          console.warn('⚠️ Failed to fetch existing campaign metrics:', formatErrorForUI(existingResult.error));
+          const errorMessage = formatErrorForUI(existingResult.error);
+          console.warn('⚠️ Failed to fetch existing campaign metrics:', errorMessage);
         }
 
         const existingMetrics = existingResult.data?.[0];
