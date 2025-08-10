@@ -31,6 +31,8 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { formatTimeDisplay, ensureColonSpacing } from '@/utils/colonSpacingFix';
+import { useTextFormatter } from '@/hooks/useTextFormatter';
+import { FormattedText, FormattedTitle, FormattedDescription } from '@/components/ui/formatted-text';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import ToolsHeader from '@/components/shared/ToolsHeader';
