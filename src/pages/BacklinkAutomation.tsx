@@ -455,7 +455,11 @@ export default function BacklinkAutomation() {
 
       return enhancedCampaign;
     } catch (error) {
-      console.warn('⚠️ Failed to save campaign permanently:', error);
+      console.warn('⚠️ Failed to save campaign permanently:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
       return campaign;
     }
   }, [user, isPremium, getUserStorageKey]);
