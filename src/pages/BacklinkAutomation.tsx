@@ -3010,7 +3010,7 @@ export default function BacklinkAutomation() {
           });
         } else {
           toast({
-            title: "🚀 Campaign Deployed!",
+            title: "��� Campaign Deployed!",
             description: `Your campaign is live${blogResult.success ? (blogResult.isFallback ? ' + priority blog post queued on backlinkoo.com' : ' + priority blog post published on backlinkoo.com') : ''} with 20-link limit. View progress in the monitor above!`,
             action: (
               <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
@@ -3531,13 +3531,13 @@ export default function BacklinkAutomation() {
 
                       if (user) {
                         if (isPremium) {
-                          return `Unlimited • ${liveMonitored} live monitored`;
+                          return `Unlimited • ${liveMonitored > 0 ? `${liveMonitored} live monitored` : 'ready for campaigns'}`;
                         } else {
-                          return `Monthly Links • ${activeCampaigns} active`;
+                          return `Monthly Links • ${activeCampaigns > 0 ? `${activeCampaigns} active` : 'ready to start'}`;
                         }
                       } else {
                         return guestLinksGenerated > 0 ?
-                          `Trial Progress • ${liveMonitored} monitored` :
+                          `Trial Progress • ${liveMonitored > 0 ? `${liveMonitored} monitored` : 'in progress'}` :
                           "Get Started";
                       }
                     })()}
