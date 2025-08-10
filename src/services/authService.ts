@@ -88,14 +88,7 @@ export class AuthService {
       });
 
       if (error) {
-        console.error('🚨 Authentication Error:', this.formatErrorMessage(error.message), {
-          type: 'sign_in_error',
-          status: error.status,
-          statusText: error.statusText,
-          name: error.name,
-          email: signInData.email.substring(0, 3) + '***',
-          timestamp: new Date().toISOString()
-        });
+        logAuthError('SignIn', error);
 
         return {
           success: false,
