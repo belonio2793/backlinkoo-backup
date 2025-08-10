@@ -166,7 +166,7 @@ export class SubscriptionService {
       });
 
       if (error) {
-        console.error('Edge function error:', error);
+        console.error('Edge function error:', error?.message || error?.toString() || JSON.stringify(error));
 
         // Provide more specific error messages
         let errorMessage = 'Failed to create subscription';
