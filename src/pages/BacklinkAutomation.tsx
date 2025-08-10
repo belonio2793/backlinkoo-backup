@@ -4057,8 +4057,8 @@ export default function BacklinkAutomation() {
                                                 {postback.linkType.replace('_', ' ')}
                                               </Badge>
                                               {postback.isPrimaryBlogPost && (
-                                                <Badge className="text-xs bg-blue-600 text-white">
-                                                  ⭐ Priority Blog Post
+                                                <Badge className={`text-xs ${postback.isFallback ? 'bg-orange-600' : 'bg-blue-600'} text-white`}>
+                                                  {postback.isFallback ? '⏳ Blog Post Queued' : '⭐ Priority Blog Post'}
                                                 </Badge>
                                               )}
                                             </div>
