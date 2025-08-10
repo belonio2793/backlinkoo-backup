@@ -104,7 +104,7 @@ export class CampaignBlogIntegrationService {
       }
 
       if (!result.success || !result.data?.blogPost) {
-        console.error('Blog generation service returned error:', result);
+        console.error('Blog generation service returned error:', JSON.stringify(result, null, 2));
         throw new Error(result.error || 'Failed to generate blog post');
       }
 
@@ -300,7 +300,7 @@ export class CampaignBlogIntegrationService {
       }
 
       if (!result.success || !result.data?.blogPost) {
-        console.error('Blog generation service returned error:', result);
+        console.error('Blog generation service returned error:', JSON.stringify(result, null, 2));
         throw new Error(result.error || 'Failed to generate blog post');
       }
 
