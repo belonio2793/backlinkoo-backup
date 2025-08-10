@@ -135,7 +135,7 @@ export function AuthDebugHelper() {
     } catch (error: any) {
       toast({
         title: "Account creation error",
-        description: error.message,
+        description: formatErrorForUI(error),
         variant: "destructive",
       });
     } finally {
