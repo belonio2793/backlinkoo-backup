@@ -238,63 +238,12 @@ export function TrialExhaustedModal({
           </div>
         </div>
 
-        {/* Value Proposition */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 text-white mb-8">
-          <div className="text-center">
-            <h3 className="text-2xl font-bold mb-3">
-              {isLoggedIn ? 'Unlock Premium Power!' : 'This Was Just a Free Preview!'}
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-              <div className="text-center">
-                <div className="text-3xl font-bold">∞</div>
-                <div className="text-sm opacity-90">Unlimited Links per Campaign</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold">🎓</div>
-                <div className="text-sm opacity-90">SEO Academy Access</div>
-              </div>
-              <div className="text-center">
-                <div className="text-3xl font-bold">⚡</div>
-                <div className="text-sm opacity-90">Priority Support</div>
-              </div>
-            </div>
-
-            {/* Additional Premium Features */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm mt-6 text-white">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-white" />
-                <span className="text-white">More than 20 links per campaign</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-white" />
-                <span className="text-white">Complete SEO Academy courses</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-white" />
-                <span className="text-white">Priority customer support</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-white" />
-                <span className="text-white">Advanced analytics & reporting</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-white" />
-                <span className="text-white">White-label options</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-white" />
-                <span className="text-white">API access & bulk exports</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Plan Selection */}
-        <div className="mb-8 flex flex-col items-center">
-          <h3 className="text-lg font-bold mb-4 text-center text-black">Choose Your Plan</h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md">
+        <div className="mb-6 flex flex-col items-center">
+          <h3 className="text-xl font-bold mb-4 text-center text-black">Choose Your Plan</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md">
             <div
-              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
+              className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
                 selectedPlan === 'monthly'
                   ? 'border-blue-600 bg-blue-50 shadow-md'
                   : 'border-gray-300 bg-white hover:border-blue-400'
@@ -302,14 +251,14 @@ export function TrialExhaustedModal({
               onClick={() => setSelectedPlan('monthly')}
             >
               <div className="text-center text-black">
-                <div className="text-xl font-bold">Monthly</div>
+                <div className="text-lg font-bold">Monthly</div>
                 <div className="text-2xl font-bold">$29</div>
                 <div className="text-sm text-gray-600">per month</div>
-                <div className="text-xs text-gray-500 mt-2">Cancel anytime</div>
+                <div className="text-xs text-gray-500 mt-1">Cancel anytime</div>
               </div>
             </div>
             <div
-              className={`p-4 rounded-lg border-2 cursor-pointer transition-all relative ${
+              className={`p-3 rounded-lg border-2 cursor-pointer transition-all relative ${
                 selectedPlan === 'yearly'
                   ? 'border-blue-600 bg-blue-50 shadow-md'
                   : 'border-gray-300 bg-white hover:border-blue-400'
@@ -320,34 +269,34 @@ export function TrialExhaustedModal({
                 <Badge className="bg-green-600 text-white text-xs">Save 40%</Badge>
               </div>
               <div className="text-center text-black">
-                <div className="text-xl font-bold">Yearly</div>
+                <div className="text-lg font-bold">Yearly</div>
                 <div className="text-2xl font-bold">$17</div>
                 <div className="text-sm text-gray-600">per month</div>
-                <div className="text-xs text-gray-500 mt-2">Billed $199/year</div>
+                <div className="text-xs text-gray-500 mt-1">Billed $199/year</div>
               </div>
             </div>
           </div>
         </div>
 
         {/* Action Buttons */}
-        <div className="space-y-4 flex flex-col items-center">
+        <div className="space-y-3 flex flex-col items-center mb-6">
           <div className="flex flex-col sm:flex-row gap-3 w-full max-w-lg">
             <Button
               size="lg"
-              className="flex-1 h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+              className="flex-1 h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
               onClick={handleUpgradeClick}
               disabled={isProcessingUpgrade}
             >
               {isProcessingUpgrade ? (
                 <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                   Creating Checkout...
                 </>
               ) : (
                 <>
-                  <Crown className="h-5 w-5 mr-2" />
+                  <Crown className="h-4 w-4 mr-2" />
                   Upgrade to Premium - {selectedPlan === 'monthly' ? '$29/month' : '$17/month (billed yearly)'}
-                  <ArrowRight className="h-5 w-5 ml-2" />
+                  <ArrowRight className="h-4 w-4 ml-2" />
                 </>
               )}
             </Button>
@@ -355,34 +304,69 @@ export function TrialExhaustedModal({
               <Button
                 size="lg"
                 variant="outline"
-                className="h-14 border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
+                className="h-12 border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
                 onClick={() => onOpenChange(false)}
               >
-                <UserPlus className="h-5 w-5 mr-2" />
+                <UserPlus className="h-4 w-4 mr-2" />
                 Create Free Account
               </Button>
             )}
           </div>
+        </div>
 
+        {/* Value Proposition - Moved Below Payment */}
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-4 text-white mb-4">
           <div className="text-center">
-            <p className="text-sm text-gray-600 mb-2">
-              {isLoggedIn ?
-                '🔥 Special offer: Get 50% off your first premium month!' :
-                '🔥 Limited Time: Get your first month 50% off when you upgrade now!'
-              }
-            </p>
-            <div className="flex justify-center gap-4 text-xs text-gray-500">
-              <span>✓ 30-day money back guarantee</span>
-              <span>✓ Cancel anytime</span>
-              <span>✓ Priority support</span>
+            <h3 className="text-lg font-bold mb-3">Unlock Premium Power!</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold">∞</div>
+                <div className="text-xs opacity-90">Unlimited Links per Campaign</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">🎓</div>
+                <div className="text-xs opacity-90">SEO Academy Access</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">⚡</div>
+                <div className="text-xs opacity-90">Priority Support</div>
+              </div>
             </div>
+
+            {/* Additional Premium Features */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-white">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-3 w-3 text-white" />
+                <span className="text-white">Advanced analytics & reporting</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-3 w-3 text-white" />
+                <span className="text-white">White-label options</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-3 w-3 text-white" />
+                <span className="text-white">API access & bulk exports</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-3 w-3 text-white" />
+                <span className="text-white">Priority customer support</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <div className="flex justify-center gap-4 text-xs text-gray-500 mb-3">
+            <span>✓ 30-day money back guarantee</span>
+            <span>✓ Cancel anytime</span>
+            <span>✓ Priority support</span>
           </div>
 
           <Button
             variant="ghost"
             size="sm"
             onClick={() => onOpenChange(false)}
-            className="w-full max-w-lg text-gray-500"
+            className="w-full max-w-lg text-gray-500 text-xs"
           >
             {isLoggedIn ? 'Continue with free account (1 campaign limit)' : 'Continue browsing (limited features)'}
           </Button>
