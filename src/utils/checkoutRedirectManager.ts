@@ -184,12 +184,12 @@ export class CheckoutRedirectManager {
   }
 
   /**
-   * Legacy support: Direct redirect with popup blocker detection
+   * Legacy support: Direct redirect with intelligent popup blocker detection
    */
-  static directRedirect(
-    url: string, 
+  static async directRedirect(
+    url: string,
     options: CheckoutRedirectOptions = {}
-  ): boolean {
+  ): Promise<boolean> {
     const {
       preferNewWindow = true,
       windowFeatures = 'width=800,height=600,scrollbars=yes,resizable=yes',
@@ -200,32 +200,30 @@ export class CheckoutRedirectManager {
     } = options;
 
     if (preferNewWindow) {
-      try {
-        const checkoutWindow = window.open(url, 'stripe-checkout', windowFeatures);
-        
-        if (checkoutWindow) {
-          onRedirectSuccess?.();
-          return true;
-        } else {
-          onPopupBlocked?.();
-          
-          if (fallbackToCurrentWindow) {
-            window.location.href = url;
-            return true;
+      // Use intelligent popup detection
+      const result = await PopupBlockerDetection.openWithFallback(
+        url,
+        'stripe-checkout',
+        windowFeatures,
+        {
+          useCurrentWindow: fallbackToCurrentWindow,
+          onFallback: (reason) => {
+            console.log('Popup fallback triggered:', reason);
+            onPopupBlocked?.();
           }
-          return false;
         }
-      } catch (error) {
-        onRedirectError?.(error as Error);
-        
-        if (fallbackToCurrentWindow) {
-          window.location.href = url;
-          return true;
-        }
+      );
+
+      if (result.success) {
+        onRedirectSuccess?.();
+        return true;
+      } else {
+        onRedirectError?.(new Error('Failed to open checkout window'));
         return false;
       }
     } else {
       window.location.href = url;
+      onRedirectSuccess?.();
       return true;
     }
   }
