@@ -562,6 +562,7 @@ if (typeof window !== 'undefined') {
   };
 
   // Comprehensive error logging test
+  console.log('🧪 Error logging test functions available:', ['testAllErrorLogging', 'testCampaignMetricsErrorLogging']);
   (window as any).testAllErrorLogging = () => {
     console.log('🧪 Testing all error logging patterns...');
 
