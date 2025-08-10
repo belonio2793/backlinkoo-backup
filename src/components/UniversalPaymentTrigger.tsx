@@ -179,7 +179,7 @@ export function UpgradeToPremiumButton({
 export function PaymentCard({
   children,
   defaultTab = 'credits',
-  initialCredits,
+  initialCredits = 50,
   onSuccess
 }: {
   children: React.ReactNode;
@@ -187,14 +187,30 @@ export function PaymentCard({
   initialCredits?: number;
   onSuccess?: () => void;
 }) {
+
+  const handleClick = async () => {
+    try {
+      if (defaultTab === 'premium') {
+        await DirectCheckoutService.upgradeToPremium('monthly');
+      } else {
+        const credits = initialCredits && [50, 100, 250, 500].includes(initialCredits)
+          ? initialCredits as 50 | 100 | 250 | 500
+          : 50;
+        await DirectCheckoutService.buyCredits(credits);
+      }
+      onSuccess?.();
+    } catch (error) {
+      console.error('Payment card checkout failed:', error);
+    }
+  };
+
   return (
-    <UniversalPaymentTrigger
-      defaultTab={defaultTab}
-      initialCredits={initialCredits}
-      onSuccess={onSuccess}
+    <div
+      onClick={handleClick}
+      className="cursor-pointer"
     >
       {children}
-    </UniversalPaymentTrigger>
+    </div>
   );
 }
 
