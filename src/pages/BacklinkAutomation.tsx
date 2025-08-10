@@ -4873,26 +4873,71 @@ export default function BacklinkAutomation() {
                             )}
                           </div>
 
-                          {/* Real-Time Activity Feed */}
-                          {campaign.realTimeActivity && campaign.realTimeActivity.length > 0 && (
-                            <div className="mb-4">
-                              <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
-                                <Zap className="h-3 w-3" />
-                                Live Activity
-                              </h4>
-                              <div className="space-y-1 max-h-24 overflow-y-auto">
-                                {campaign.realTimeActivity.slice(0, 3).map((activity) => (
-                                  <div key={activity.id} className="text-xs text-gray-600 flex items-center gap-2 p-2 bg-gray-50 rounded">
-                                    <div className="w-1 h-1 bg-green-500 rounded-full"></div>
-                                    <span>{activity.message}</span>
-                                    <span className="text-gray-400 ml-auto">
-                                      {new Date(activity.timestamp).toLocaleTimeString()}
-                                    </span>
-                                  </div>
-                                ))}
+                          {/* Enhanced Real-Time Activity Feed */}
+                          {(() => {
+                            const campaignActivities = globalActivityFeed.filter(a => a.campaignId === campaign.id);
+                            const hasActivity = campaignActivities.length > 0 || (campaign.realTimeActivity && campaign.realTimeActivity.length > 0);
+
+                            return hasActivity && (
+                              <div className="mb-4">
+                                <h4 className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-1">
+                                  <Zap className="h-3 w-3 animate-pulse" />
+                                  Live Activity
+                                  <Badge variant="outline" className="text-xs ml-1">
+                                    {campaignActivities.length} recent
+                                  </Badge>
+                                </h4>
+                                <div className="space-y-1 max-h-32 overflow-y-auto">
+                                  {/* Show global activity feed first (most recent) */}
+                                  {campaignActivities.slice(0, 2).map((activity) => (
+                                    <div key={activity.id} className="text-xs text-gray-600 flex items-center gap-2 p-2 bg-gradient-to-r from-blue-50 to-green-50 rounded border-l-2 border-blue-400">
+                                      <div className={`w-1.5 h-1.5 rounded-full ${
+                                        activity.type === 'link_published' ? 'bg-green-500 animate-pulse' :
+                                        activity.type === 'system_monitoring' ? 'bg-blue-500' :
+                                        'bg-gray-400'
+                                      }`}></div>
+                                      <span className="flex-1 truncate">{activity.message}</span>
+                                      {activity.metadata?.authority && (
+                                        <Badge variant="outline" className="text-xs px-1 py-0">
+                                          DA {activity.metadata.authority}
+                                        </Badge>
+                                      )}
+                                      <span className="text-gray-400 text-xs">
+                                        {new Date(activity.timestamp).toLocaleTimeString()}
+                                      </span>
+                                    </div>
+                                  ))}
+
+                                  {/* Show campaign-specific activity if available */}
+                                  {campaign.realTimeActivity && campaign.realTimeActivity.slice(0, 2).map((activity) => (
+                                    <div key={activity.id} className="text-xs text-gray-600 flex items-center gap-2 p-2 bg-gray-50 rounded">
+                                      <div className="w-1 h-1 bg-green-500 rounded-full"></div>
+                                      <span className="flex-1 truncate">{activity.message}</span>
+                                      <span className="text-gray-400 text-xs">
+                                        {new Date(activity.timestamp).toLocaleTimeString()}
+                                      </span>
+                                    </div>
+                                  ))}
+
+                                  {/* Show metrics from cumulative stats */}
+                                  {(() => {
+                                    const campaignMetrics = detailedReporting.find(r => r.campaignId === campaign.id);
+                                    return campaignMetrics && campaignMetrics.completedUrls.length > 0 && (
+                                      <div className="text-xs text-purple-600 flex items-center gap-2 p-2 bg-purple-50 rounded border-l-2 border-purple-400">
+                                        <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
+                                        <span className="flex-1">
+                                          📊 {campaignMetrics.completedUrls.length} URLs completed • {campaignMetrics.domainsReached} domains reached
+                                        </span>
+                                        <span className="text-purple-500 text-xs font-medium">
+                                          Active
+                                        </span>
+                                      </div>
+                                    );
+                                  })()}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            );
+                          })()}
 
                           {/* Keywords */}
                           <div className="flex flex-wrap gap-1 mb-4">
