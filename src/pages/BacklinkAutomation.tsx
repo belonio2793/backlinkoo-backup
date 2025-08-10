@@ -63,6 +63,7 @@ import { checkDatabaseStatus, initializeDatabase, type DatabaseStatus } from '@/
 import { updateActiveCampaigns, formatCampaignStatusText } from '@/utils/realTimeCampaignUpdater';
 import { formatDisplayNumber, formatMetricDisplay, formatActivityCount } from '@/utils/displayFormatter';
 import '@/utils/testRealTimeUpdates';
+import '@/utils/testDisplayFormatting';
 
 interface DatabaseCampaign {
   id: string;
@@ -2460,7 +2461,7 @@ export default function BacklinkAutomation() {
     setActiveCampaignIntervals(prev => {
       const updated = new Map(prev);
       updated.set(campaignId, interval);
-      console.log('��� Started monitoring for campaign:', campaignId, '(Total active:', updated.size, ')');
+      console.log('✅ Started monitoring for campaign:', campaignId, '(Total active:', updated.size, ')');
       return updated;
     });
 
