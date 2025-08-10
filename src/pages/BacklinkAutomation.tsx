@@ -3526,38 +3526,7 @@ export default function BacklinkAutomation() {
 
           {/* Database Status Alert - Removed per user request */}
 
-          {databaseStatus && !databaseStatus.isConnected && (
-            <Alert className="border-red-200 bg-red-50">
-              <XCircle className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Database Setup in Progress:</strong> Our automated link building system is initializing.
-                Please wait a moment while we prepare your workspace.
-                <div className="mt-2 text-sm text-red-700">
-                  ⚠️ <strong>Quick Fix:</strong> If this persists, please contact support. We'll have you up and running within minutes!
-                </div>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {databaseStatus && databaseStatus.isConnected && databaseStatus.needsSetup && (
-            <Alert className="border-yellow-200 bg-yellow-50">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                <strong>Final Setup Step:</strong> We're preparing your personalized link building workspace.
-                <div className="mt-2">
-                  <Button
-                    size="sm"
-                    className="bg-yellow-600 hover:bg-yellow-700"
-                    onClick={() => window.open('mailto:support@backlinkoo.com?subject=Complete Database Setup', '_blank')}
-                  >
-                    Complete Setup (1 minute)
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* System Ready alert removed */}
+          {/* Setup notifications removed per user request */}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
             <TabsList className="grid w-full grid-cols-5">
