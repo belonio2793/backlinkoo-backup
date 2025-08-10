@@ -359,7 +359,6 @@ export default function BacklinkAutomation() {
   const [showPostCampaignSignupModal, setShowPostCampaignSignupModal] = useState(false);
   const [guestTrackingInitialized, setGuestTrackingInitialized] = useState(false);
   const [guestCampaignRestrictions, setGuestCampaignRestrictions] = useState<any>({});
-  const [premiumUpsellTrigger, setPremiumUpsellTrigger] = useState<'campaign_limit' | 'link_limit' | 'feature_limit' | 'manual'>('manual');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [guestCampaignToDelete, setGuestCampaignToDelete] = useState<any>(null);
   const [showFabMenu, setShowFabMenu] = useState(false);
