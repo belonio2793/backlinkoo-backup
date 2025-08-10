@@ -413,7 +413,7 @@ export function MinimalAITest() {
       }
 
     } catch (error) {
-      addLog('error', 'SYSTEM', `Critical error: ${error}`);
+      addLog('error', 'SYSTEM', `Critical error: ${error instanceof Error ? error.message : String(error)}`);
       setErrorCount(prev => prev + 1);
     } finally {
       setIsRunning(false);
