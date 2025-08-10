@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import SubscriptionService from '@/services/subscriptionService';
+import { CheckoutRedirectManager } from '@/utils/checkoutRedirectManager';
 
 interface TrialExhaustedModalProps {
   open: boolean;
