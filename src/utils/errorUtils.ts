@@ -46,15 +46,20 @@ export function formatErrorForUI(error: any): string {
   // Last resort: try to stringify it safely
   try {
     const stringified = JSON.stringify(error);
-    if (stringified && stringified !== '{}') {
+    if (stringified && stringified !== '{}' && stringified !== 'null') {
       return stringified;
     }
   } catch {
     // Fall through to default
   }
 
-  // If all else fails, convert to string to prevent [object Object]
-  return String(error);
+  // Final fallback: use toString but check if it returns [object Object]
+  const stringResult = String(error);
+  if (stringResult === '[object Object]') {
+    return 'An error occurred (details unavailable)';
+  }
+
+  return stringResult;
 }
 
 /**
