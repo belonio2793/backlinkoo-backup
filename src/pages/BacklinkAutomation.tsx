@@ -348,6 +348,11 @@ export default function BacklinkAutomation() {
 
         // Get existing metrics to ensure progressive counting
         const existingResult = await campaignMetricsService.getCampaignMetrics(user.id, campaign.id);
+
+        if (!existingResult.success) {
+          console.warn('⚠️ Failed to fetch existing campaign metrics:', existingResult.error);
+        }
+
         const existingMetrics = existingResult.data?.[0];
         const savedLinks = existingMetrics?.progressive_link_count || 0;
         const progressiveLinkCount = Math.max(currentLinks, savedLinks); // Can only increase
@@ -1635,7 +1640,7 @@ export default function BacklinkAutomation() {
 
       const linksCount = (user ? campaigns : guestCampaignResults).find(c => c.id === campaignId)?.linksGenerated || 0;
       toast({
-        title: "⏸��� Campaign Paused Successfully",
+        title: "⏸️ Campaign Paused Successfully",
         description: `All ${linksCount} links and metrics permanently saved to your account. Will never reset when resuming or refreshing page.`,
       });
     } catch (error) {
