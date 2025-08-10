@@ -472,7 +472,7 @@ export default function BacklinkAutomation() {
 
       return enhancedCampaign;
     } catch (error) {
-      console.warn('⚠️ Failed to save campaign permanently:', {
+      console.warn('���️ Failed to save campaign permanently:', {
         message: error instanceof Error ? error.message : 'Unknown error',
         stack: error instanceof Error ? error.stack : undefined,
         name: error instanceof Error ? error.name : undefined
@@ -1545,7 +1545,7 @@ export default function BacklinkAutomation() {
       const timer = setTimeout(() => {
         // Switch to live results sub-tab when campaigns are active\n        setSelectedCampaignTab('live-results');
         toast({
-          title: "���� Campaign Results Ready!",
+          title: "�� Campaign Results Ready!",
           description: "Your campaigns are now running. View real-time progress in the live monitor above.",
           duration: 4000,
         });
@@ -4850,7 +4850,7 @@ export default function BacklinkAutomation() {
                                 {campaign.linksGenerated}
                                 {!isPremium && <span className="text-sm text-gray-500">/20</span>}
                               </div>
-                              <div className="text-xs text-green-700">Links Built</div>
+                              <div className="text-xs text-green-700">Live Links</div>
                             </div>
                             <div className="text-center p-3 bg-blue-50 rounded-lg border border-blue-200">
                               <div className="text-2xl font-bold text-blue-600">
