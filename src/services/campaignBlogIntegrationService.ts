@@ -428,11 +428,11 @@ export class CampaignBlogIntegrationService {
       };
 
     } catch (error) {
-      console.error('❌ Fallback blog generation failed:', {
+      console.error('❌ Fallback blog generation failed:', JSON.stringify({
         message: error.message,
         stack: error.stack,
         name: error.name
-      });
+      }, null, 2));
       return {
         success: false,
         error: 'Failed to generate fallback blog post'
