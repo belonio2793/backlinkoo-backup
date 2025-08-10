@@ -568,6 +568,13 @@ export default function BacklinkAutomation() {
           }));
 
           console.log('✅ Loaded', campaigns.length, 'campaigns from database for user', user.id);
+        } else if (!result.success) {
+          console.warn('⚠️ Database loading failed, will use localStorage:', result.error);
+
+          // Show user-friendly notification for database issues
+          if (result.error?.includes('table missing') || result.error?.includes('function')) {
+            console.log('💡 Database tables not found, using localStorage fallback');
+          }
         }
       }
 
