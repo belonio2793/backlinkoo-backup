@@ -2250,7 +2250,7 @@ export default function BacklinkAutomation() {
           // Progress update
           toast({
             title: `🔥 +${linksToGenerate} More Backlinks Generated!`,
-            description: `Total: ${newTotal} premium backlinks built! Keep going - you're on fire!`,
+            description: `Total: ${newTotal} premium backlinks built${blogResult.success ? ' + new blog post published' : ''}! Keep going - you're on fire!`,
           });
         }
       } else {
