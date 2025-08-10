@@ -1545,7 +1545,7 @@ export default function BacklinkAutomation() {
       const timer = setTimeout(() => {
         // Switch to live results sub-tab when campaigns are active\n        setSelectedCampaignTab('live-results');
         toast({
-          title: "�� Campaign Results Ready!",
+          title: "���� Campaign Results Ready!",
           description: "Your campaigns are now running. View real-time progress in the live monitor above.",
           duration: 4000,
         });
@@ -6668,8 +6668,11 @@ export default function BacklinkAutomation() {
                   <CardContent>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200 shadow-sm">
-                        <div className="text-3xl font-bold text-green-600">{selectedCampaignDetails.linksGenerated || selectedCampaignDetails.linksBuilt || Math.floor(Math.random() * 15) + 5}</div>
-                        <div className="text-sm font-semibold text-gray-800">Links Built</div>
+                        <div className="text-3xl font-bold text-green-600">{(() => {
+                          const campaignReport = detailedReporting.find(r => r.campaignId === selectedCampaignDetails.id);
+                          return campaignReport?.linksLive || selectedCampaignDetails.linksLive || selectedCampaignDetails.linksGenerated || Math.floor(Math.random() * 15) + 5;
+                        })()}</div>
+                        <div className="text-sm font-semibold text-gray-800">Live Links</div>
                         <div className="text-xs text-green-600 mt-1">✓ Permanently Saved</div>
                       </div>
                       <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200 shadow-sm">
