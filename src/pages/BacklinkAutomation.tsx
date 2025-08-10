@@ -367,7 +367,7 @@ export default function BacklinkAutomation() {
         const existingResult = await campaignMetricsService.getCampaignMetrics(user.id, campaign.id);
 
         if (!existingResult.success) {
-          console.warn('⚠️ Failed to fetch existing campaign metrics:', existingResult.error);
+          console.warn('���️ Failed to fetch existing campaign metrics:', existingResult.error);
         }
 
         const existingMetrics = existingResult.data?.[0];
@@ -1470,10 +1470,10 @@ export default function BacklinkAutomation() {
     });
   }, [campaigns.length]); // Only when campaign count changes
 
-  // Engine Instances
-  const queueManager = CampaignQueueManager.getInstance();
-  const discoveryEngine = LinkDiscoveryEngine.getInstance();
-  const analyticsEngine = AnalyticsEngine.getInstance();
+  // Engine Instances - temporarily commented out to test
+  // const queueManager = CampaignQueueManager.getInstance();
+  // const discoveryEngine = LinkDiscoveryEngine.getInstance();
+  // const analyticsEngine = AnalyticsEngine.getInstance();
   const contentEngine = ContentGenerationEngine.getInstance();
   const errorEngine = ErrorHandlingEngine.getInstance();
 
@@ -2285,7 +2285,7 @@ export default function BacklinkAutomation() {
           heartbeatActivity.push({
             id: `heartbeat-${Date.now()}`,
             type: 'system_monitoring' as const,
-            message: `📊 Campaign actively monitored • ${campaignMetrics.get(campaignId)?.domainsReached?.size || 0} domains tracked`,
+            message: `📊 Campaign actively monitored ��� ${campaignMetrics.get(campaignId)?.domainsReached?.size || 0} domains tracked`,
             timestamp: new Date().toISOString(),
             metadata: {
               type: 'heartbeat',
@@ -2761,7 +2761,7 @@ export default function BacklinkAutomation() {
         } else {
           // Progress update
           toast({
-            title: `���� +${linksToGenerate} More Backlinks Generated!`,
+            title: `������ +${linksToGenerate} More Backlinks Generated!`,
             description: `Total: ${newTotal} premium backlinks built${blogResult.success ? (blogResult.isFallback ? ' + blog post queued' : ' + new blog post published') : ''}! Keep going - you're on fire!`,
           });
         }
@@ -6923,7 +6923,7 @@ export default function BacklinkAutomation() {
                 <li>✓ Your current campaign will be saved to your account</li>
                 <li>✓ Get access to 3 free automation campaigns</li>
                 <li>✓ Monitor your backlink progress in real-time</li>
-                <li>��� Receive notifications when links go live</li>
+                <li>✓ Receive notifications when links go live</li>
               </ul>
             </div>
 
