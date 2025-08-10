@@ -1201,7 +1201,7 @@ export default function BacklinkAutomation() {
           if (permanentCampaigns.length > 0) {
             setTimeout(() => {
               toast({
-                title: "📊 Data Restored Successfully",
+                title: "��� Data Restored Successfully",
                 description: `${permanentCampaigns.length} campaigns restored with all metrics preserved. Your data is safe across sessions.`,
                 duration: 4000,
               });
@@ -6060,10 +6060,12 @@ export default function BacklinkAutomation() {
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         <Database className="h-5 w-5" />
-                        Global Website Database
+                        <FormattedText type="title">Global Website Database</FormattedText>
                       </CardTitle>
                       <CardDescription>
-                        Live database of {(Math.floor(Math.random() * 50) + 125).toLocaleString()}K+ verified domains with successful placements from our community
+                        <FormattedDescription>
+                          Live database of {(Math.floor(Math.random() * 50) + 125).toLocaleString()}K+ verified domains with successful placements from our community
+                        </FormattedDescription>
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
