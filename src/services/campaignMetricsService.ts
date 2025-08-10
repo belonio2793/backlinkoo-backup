@@ -194,6 +194,19 @@ class CampaignMetricsService {
       const errorDetails = formatErrorForLogging(error, 'getCampaignMetrics-catch');
       console.error('Campaign metrics fetch error:', JSON.stringify(errorDetails, null, 2));
 
+      // Check for deadlock errors
+      const deadlockInfo = DeadlockPreventionService.handleDeadlockError(error, 'getCampaignMetrics');
+      if (deadlockInfo.isDeadlock) {
+        console.warn('🔒 Deadlock detected in campaign metrics');
+
+        // Return fallback data for deadlocks
+        return {
+          success: true,
+          data: [],
+          error: deadlockInfo.message
+        };
+      }
+
       // Check for RLS errors in catch block too
       if (CampaignMetricsErrorHandler.isUsersPermissionError(error)) {
         console.warn('🚨 RLS permission error in catch block');
@@ -526,7 +539,7 @@ class CampaignMetricsService {
    */
   async runHealthCheckAndFix(): Promise<{ success: boolean; message: string; healthCheck: any }> {
     try {
-      console.log('��� Running campaign metrics health check...');
+      console.log('🏥 Running campaign metrics health check...');
 
       const healthCheck = await CampaignMetricsHealthCheck.runHealthCheck();
 
