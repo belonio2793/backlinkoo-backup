@@ -446,7 +446,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div className="text-yellow-400 mb-2">System Status:</div>
               <div>• Status: {debugInfo.loadingStatus}</div>
               <div>• Online: {debugInfo.connectionOnline ? '✅' : '❌'}</div>
-              <div>• Last Update: {debugInfo.timestamp}</div>
+              <div>• {ensureColonSpacing(`Last Update: ${debugInfo.timestamp}`)}</div>
               <div>• User Auth: {debugInfo.userAuthenticated ? '✅' : '❌'}</div>
               <div>• User ID: {debugInfo.userId || 'None'}</div>
             </div>
