@@ -116,7 +116,9 @@ class CampaignMetricsService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Failed to fetch campaign metrics:', formatErrorForUI(error));
+        const errorDetails = formatErrorForLogging(error, 'getCampaignMetrics');
+        console.error('Failed to fetch campaign metrics');
+        console.error(errorDetails);
 
         // Check if it's a table not found error
         if (error.code === '42P01' || error.message?.includes('relation') && error.message?.includes('does not exist')) {
