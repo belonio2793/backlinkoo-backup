@@ -290,6 +290,19 @@ export default function BacklinkAutomation() {
   const [realTimeLinkPostbacks, setRealTimeLinkPostbacks] = useState<any[]>([]);
   const [campaignMetrics, setCampaignMetrics] = useState<Map<string, any>>(new Map());
   const [metricsLoaded, setMetricsLoaded] = useState(false);
+
+  // Enhanced cumulative activity tracking
+  const [globalActivityFeed, setGlobalActivityFeed] = useState<any[]>([]);
+  const [cumulativeStats, setCumulativeStats] = useState({
+    totalLinksPublished: 0,
+    totalDomainsReached: 0,
+    totalCampaigns: 0,
+    activeCampaigns: 0,
+    totalClicks: 0,
+    completedUrls: new Set<string>(),
+    lastUpdated: Date.now()
+  });
+  const [detailedReporting, setDetailedReporting] = useState<any[]>([]);
   const [linkBuildingQueue, setLinkBuildingQueue] = useState<any[]>([]);
   const [recentPostbacks, setRecentPostbacks] = useState<any[]>([]);
   const [showSignInModal, setShowSignInModal] = useState(false);
