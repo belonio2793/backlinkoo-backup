@@ -19,6 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { formatErrorForUI } from '@/utils/errorUtils';
 import { supabase } from '@/integrations/supabase/client';
 import { Users, Search, Edit, Trash2, Crown, Gift, RefreshCw, AlertCircle } from "lucide-react";
 
