@@ -4364,7 +4364,12 @@ export default function BacklinkAutomation() {
                                             <div className="mt-3">
                                               <div className="flex items-center justify-between text-xs mb-1">
                                                 <span className="text-gray-600">Publishing Progress</span>
-                                                <span className="text-green-600">{pendingLinksToPublish.length} queued</span>
+                                                <span className="text-green-600">
+                                                  {formatActivityCount(pendingLinksToPublish.length, 'queued', undefined, {
+                                                    showZero: true,
+                                                    zeroText: 'ready to publish'
+                                                  })}
+                                                </span>
                                               </div>
                                               <Progress
                                                 value={((campaign.totalLinksToGenerate - pendingLinksToPublish.length) / campaign.totalLinksToGenerate) * 100}
