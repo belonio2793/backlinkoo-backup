@@ -172,38 +172,65 @@ export function PremiumPlanModal({
         timestamp: Date.now()
       }));
 
-      // Create subscription using the subscription service
+      toast({
+        title: "🚀 Opening Secure Checkout",
+        description: "Preparing your Stripe payment session...",
+      });
+
+      // Create subscription using the subscription service with checkout redirect manager
       const result = await SubscriptionService.createSubscription(
         user,
         checkoutMode === 'guest',
         checkoutMode === 'guest' ? guestEmail : undefined,
-        selectedPlan
+        selectedPlan,
+        {
+          preferNewWindow: true,
+          fallbackToCurrentWindow: true,
+          onPopupBlocked: () => {
+            toast({
+              title: "Popup Blocked",
+              description: "Opening checkout in current window...",
+            });
+          },
+          onRedirectSuccess: () => {
+            toast({
+              title: "✅ Checkout Opened",
+              description: "Complete your payment in the Stripe window.",
+            });
+
+            // Close modal on successful redirect
+            setTimeout(() => {
+              handleClose();
+            }, 1000);
+          },
+          onRedirectError: (error) => {
+            setCurrentStep('checkout');
+            toast({
+              title: "Checkout Error",
+              description: "Unable to open checkout window. Please try again.",
+              variant: "destructive"
+            });
+          }
+        }
       );
 
-      if (result.success && result.url) {
-        toast({
-          title: "🚀 Redirecting to Secure Checkout",
-          description: "You'll be redirected to complete your payment safely.",
-        });
+      if (result.success) {
+        if (result.usedFallback) {
+          // Handle fallback activation
+          setCurrentStep('success');
+          toast({
+            title: "🎉 Premium Activated!",
+            description: "Your account has been upgraded to Premium successfully.",
+          });
 
-        // Small delay before redirect to show toast
-        setTimeout(() => {
-          window.location.href = result.url;
-        }, 1500);
-      } else if (result.success && result.usedFallback) {
-        // Handle fallback activation
-        setCurrentStep('success');
-        toast({
-          title: "🎉 Premium Activated!",
-          description: "Your account has been upgraded to Premium successfully.",
-        });
-
-        // Auto-redirect after success
-        setTimeout(() => {
-          handleClose();
-          navigate('/dashboard');
-          onSuccess?.();
-        }, 2000);
+          // Auto-redirect after success
+          setTimeout(() => {
+            handleClose();
+            navigate('/dashboard');
+            onSuccess?.();
+          }, 2000);
+        }
+        // If using checkout redirect manager, redirect is already handled
       } else {
         throw new Error(result.error || 'Failed to create subscription checkout');
       }
