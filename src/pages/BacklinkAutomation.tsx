@@ -60,6 +60,7 @@ import { recursiveUrlDiscoveryService } from '@/services/recursiveUrlDiscoverySe
 
 // Import database utilities
 import { checkDatabaseStatus, initializeDatabase, type DatabaseStatus } from '@/utils/databaseSetup';
+import { updateActiveCampaigns, formatCampaignStatusText } from '@/utils/realTimeCampaignUpdater';
 
 interface DatabaseCampaign {
   id: string;
