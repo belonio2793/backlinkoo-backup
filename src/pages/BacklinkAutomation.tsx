@@ -5513,7 +5513,7 @@ export default function BacklinkAutomation() {
                       }
                       setShowFabMenu(false);
                     }}
-                    className="w-40 justify-start bg-purple-600 text-white shadow-lg hover:bg-purple-700"
+                    className="w-48 justify-start bg-purple-600 text-white shadow-lg hover:bg-purple-700"
                   >
                     <Crown className="h-4 w-4 mr-2" />
                     Upgrade Now
