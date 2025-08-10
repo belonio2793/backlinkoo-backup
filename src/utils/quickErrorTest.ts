@@ -49,9 +49,9 @@ export function runQuickErrorTest() {
   console.log('✅ Quick error test completed');
 }
 
-// Auto-run in development
+// Auto-run disabled to prevent error message pollution in console
+// To run manually: runQuickErrorTest()
 if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-  setTimeout(() => {
-    runQuickErrorTest();
-  }, 2000);
+  (window as any).runQuickErrorTest = runQuickErrorTest;
+  console.log('🔧 Error test available: runQuickErrorTest()');
 }
