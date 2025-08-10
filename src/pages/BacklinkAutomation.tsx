@@ -1866,7 +1866,7 @@ export default function BacklinkAutomation() {
       const interval = activeCampaignIntervals.get(campaignId);
       if (interval) {
         clearInterval(interval);
-        console.log('���️ Cleared interval for paused campaign:', campaignId);
+        console.log('⏸️ Cleared interval for paused campaign:', campaignId);
       }
 
       // Update intervals map atomically
@@ -4621,7 +4621,7 @@ export default function BacklinkAutomation() {
                                       Real-time Data
                                     </Badge>
                                   </div>
-                                  <div className="text-xs text-gray-500">
+                                  <div className="text-xs text-gray-500 time-display">
                                     Last updated: {new Date(cumulativeStats.lastUpdated).toLocaleTimeString()}
                                   </div>
                                 </div>
