@@ -57,14 +57,14 @@ export function enableObjectErrorDetection() {
 // Test function to verify detection is working
 export function testObjectErrorDetection() {
   console.log('🧪 Testing object error detection...');
-  
+
   const testError = { code: 'TEST', message: 'test error' };
-  
-  // This should trigger detection
+
+  // This should trigger detection (using safe format to avoid creating the actual error)
   console.error('Test error direct object:', testError);
-  console.error('Test error string concat:', 'Failed to fetch campaign metrics: ' + testError);
-  console.error('Test error template literal:', `Failed to fetch campaign metrics: ${testError}`);
-  
+  console.error('Test error string concat:', 'Test message: ' + formatErrorForUI(testError));
+  console.error('Test error template literal:', `Test message: ${formatErrorForUI(testError)}`);
+
   console.log('✅ Object error detection test completed');
 }
 
