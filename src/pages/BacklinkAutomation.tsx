@@ -1,5 +1,5 @@
 /**
- * Enterprise-Grade Backlink Automation Platform
+ * Enterprise-Grade Discovery Engine Platform
  * Separate tabs for each strategy with recursive URL discovery and premium pricing
  */
 
@@ -383,7 +383,7 @@ export default function BacklinkAutomation() {
 
         if (!existingResult.success) {
           const errorMessage = formatErrorForUI(existingResult.error);
-          console.warn('⚠️ Failed to fetch existing campaign metrics:', errorMessage);
+          console.warn('���️ Failed to fetch existing campaign metrics:', errorMessage);
         }
 
         const existingMetrics = existingResult.data?.[0];
@@ -3400,7 +3400,7 @@ export default function BacklinkAutomation() {
                 <Lightning className="h-5 w-5 text-orange-500 absolute -top-1 -right-1" />
               </div>
               <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-orange-500 bg-clip-text text-transparent">
-                Backlink Automation
+                Discovery Engine
               </h1>
               <div className="flex items-center gap-2">
                 {/* User Status Badges */}
@@ -3480,7 +3480,7 @@ export default function BacklinkAutomation() {
                     controlPanelData.systemStatus === 'operational' ? 'bg-blue-500' : 'bg-red-500'
                   }`} />
                   <span className="text-sm font-medium text-slate-700">
-                    Backlink Automation
+                    Discovery Engine
                   </span>
                   {backendStatus === 'unavailable' && (
                     <Badge variant="outline" className="text-orange-600 bg-orange-50 text-xs ml-2">
