@@ -99,7 +99,11 @@ export const useAffiliate = () => {
       }
       return success;
     } catch (error) {
-      console.error('Error spending credits:', error);
+      console.error('Error spending credits:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
       toast({
         title: "Error",
         description: "Failed to spend credits. Please try again.",
