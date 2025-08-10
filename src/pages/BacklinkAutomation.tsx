@@ -5297,7 +5297,7 @@ export default function BacklinkAutomation() {
                                   onClick={() => {
                                     // Check if campaign has reached link limit
                                     if (campaign.linksGenerated >= 20) {
-                                      setShowPremiumPlanModal(true);
+                                      DirectCheckoutService.upgradeToPremium('monthly');
                                       toast({
                                         title: "🚀 Upgrade to Continue",
                                         description: "This campaign has reached the 20-link free limit. Upgrade for unlimited links!",
