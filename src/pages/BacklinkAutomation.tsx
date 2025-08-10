@@ -2406,6 +2406,15 @@ export default function BacklinkAutomation() {
           return updated;
         });
 
+        // Update predictive algorithm with reporting outputs
+        if (newLinks.length > 0) {
+          try {
+            updatePredictive(campaignId, newLinks.length);
+          } catch (error) {
+            console.warn('Failed to update predictive metrics during real-time activity:', error instanceof Error ? error.message : String(error));
+          }
+        }
+
         // Ensure campaigns always show activity with heartbeat system
         const heartbeatActivity = [];
         if (newActivities.length === 0 && forceUpdate) {
@@ -2542,7 +2551,7 @@ export default function BacklinkAutomation() {
 
       if (guestCampaigns.length === 0) return;
 
-      console.log('🔄 Transferring guest campaigns to user account:', user.email);
+      console.log('��� Transferring guest campaigns to user account:', user.email);
 
       // Create campaigns in the database for the new user
       for (const guestCampaign of guestCampaigns) {
