@@ -67,24 +67,54 @@ export function TrialExhaustedModal({
     try {
       // Show processing message
       toast({
-        title: "🚀 Creating Secure Checkout!",
-        description: "Opening Stripe payment window...",
+        title: "🚀 Opening Secure Checkout!",
+        description: "Preparing your Stripe payment session...",
       });
 
-      // Create real subscription using SubscriptionService
+      // Create real subscription using SubscriptionService with checkout redirect manager
       const result = await SubscriptionService.createSubscription(
         isLoggedIn ? { id: userName, email: userName } : null, // Pass user if logged in
         !isLoggedIn, // isGuest (opposite of isLoggedIn)
         !isLoggedIn ? 'guest@example.com' : undefined, // Guest email placeholder
-        selectedPlan // Use the selected plan (monthly/yearly)
+        selectedPlan, // Use the selected plan (monthly/yearly)
+        {
+          preferNewWindow: true,
+          fallbackToCurrentWindow: true,
+          onPopupBlocked: () => {
+            toast({
+              title: "Popup Blocked",
+              description: "Opening checkout in current window...",
+            });
+          },
+          onRedirectSuccess: () => {
+            // Close modal on successful redirect
+            onOpenChange(false);
+
+            toast({
+              title: "✅ Checkout Opened",
+              description: "Complete your payment in the Stripe window.",
+            });
+
+            // Trigger upgrade callback
+            if (onUpgrade) {
+              onUpgrade();
+            }
+          },
+          onRedirectError: (error) => {
+            toast({
+              title: "Checkout Error",
+              description: "Unable to open checkout window. Please try again.",
+              variant: "destructive"
+            });
+          }
+        }
       );
 
-      if (result.success && result.url) {
-        // Close modal first
-        onOpenChange(false);
-
-        // Check if this is development fallback mode
+      if (result.success) {
         if (result.usedFallback) {
+          // Development fallback mode
+          onOpenChange(false);
+
           toast({
             title: "✅ Premium Activated!",
             description: "Your account has been upgraded to Premium (development mode).",
@@ -95,27 +125,8 @@ export function TrialExhaustedModal({
           if (onUpgrade) {
             onUpgrade();
           }
-
-          // Redirect after short delay
-          setTimeout(() => {
-            window.location.href = result.url;
-          }, 1000);
-        } else {
-          // Real Stripe checkout - open in same window for better mobile experience
-          toast({
-            title: "🔄 Redirecting to Stripe",
-            description: "Opening secure payment portal...",
-            duration: 3000,
-          });
-
-          // Trigger upgrade callback
-          if (onUpgrade) {
-            onUpgrade();
-          }
-
-          // Redirect to Stripe checkout
-          window.location.href = result.url;
         }
+        // If using checkout redirect manager, the redirect is already handled
       } else {
         throw new Error(result.error || 'Failed to create checkout session');
       }
