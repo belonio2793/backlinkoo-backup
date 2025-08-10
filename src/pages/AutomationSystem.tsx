@@ -157,7 +157,7 @@ export default function AutomationSystem() {
               <Zap className="h-8 w-8 text-blue-600" />
               Automation System
             </h1>
-            <p className="text-gray-600 mt-1">Enterprise-grade backlinking automation platform</p>
+            <p className="text-gray-600 mt-1">Enterprise-grade backlinking automation platform with advanced safety controls</p>
           </div>
           <div className="flex items-center gap-3">
             <Badge variant={systemStatus === 'running' ? 'default' : 'secondary'} className="px-3 py-1">
