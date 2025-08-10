@@ -79,7 +79,11 @@ export function usePremium(): PremiumStatus {
 
       console.log('✅ usePremium: All data loaded successfully');
     } catch (error) {
-      console.error('❌ usePremium: Error loading user status:', error);
+      console.error('❌ usePremium: Error loading user status:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
       // Set safe defaults on error
       setIsPremium(false);
       setIsAdmin(false);
