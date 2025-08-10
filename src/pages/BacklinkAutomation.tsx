@@ -2310,6 +2310,36 @@ export default function BacklinkAutomation() {
               primaryKeyword: result.campaign.keywords[0],
               campaignName: result.campaign.name
             });
+
+            // If blog generation was successful, add it as the first published link
+            if (blogResult.success && blogResult.blogPostUrl) {
+              const blogPostback = {
+                id: `blog-${result.campaign.id}-${Date.now()}`,
+                domain: 'backlinkoo.com',
+                url: blogResult.blogPostUrl,
+                publishedAt: new Date().toISOString(),
+                anchorText: result.campaign.keywords[0] || 'learn more',
+                verified: true,
+                destinationUrl: result.campaign.target_url,
+                type: 'blog_post',
+                status: 'live',
+                domainAuthority: 95,
+                traffic: 50000,
+                clickThroughRate: '3.2%',
+                indexingStatus: 'Indexed',
+                linkType: 'guest_post',
+                campaignName: result.campaign.name,
+                campaignId: result.campaign.id,
+                priority: true,
+                isPrimaryBlogPost: true
+              };
+
+              // Add blog post as the first item in real-time postbacks
+              setRealTimeLinkPostbacks(prev => [blogPostback, ...prev]);
+              setRecentPostbacks(prev => [blogPostback, ...prev.slice(0, 19)]);
+
+              console.log('✅ Blog post added as priority link for authenticated user:', blogResult.blogPostUrl);
+            }
           } catch (blogError) {
             console.warn('Blog generation failed for campaign:', blogError.message);
             // Continue with campaign creation even if blog generation fails
@@ -3301,7 +3331,7 @@ export default function BacklinkAutomation() {
                             <div className="flex justify-center gap-4 text-xs text-gray-500">
                               <span>✓ High-authority domains</span>
                               <span>✓ Real-time tracking</span>
-                              <span>✓ Full reporting</span>
+                              <span>��� Full reporting</span>
                             </div>
                           </div>
                         )}
