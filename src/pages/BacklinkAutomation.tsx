@@ -2900,7 +2900,7 @@ export default function BacklinkAutomation() {
         } else {
           // Progress update
           toast({
-            title: `�������� +${linksToGenerate} More Backlinks Generated!`,
+            title: `������ +${linksToGenerate} More Backlinks Generated!`,
             description: `Total: ${newTotal} premium backlinks built${blogResult.success ? (blogResult.isFallback ? ' + blog post queued' : ' + new blog post published') : ''}! Keep going - you're on fire!`,
           });
         }
@@ -3064,6 +3064,13 @@ export default function BacklinkAutomation() {
 
           // Initialize campaign counters
           initializeCampaign(result.campaign.id, 'active');
+
+          // Initialize predictive algorithm
+          try {
+            initializePredictive(result.campaign.id, isPremium);
+          } catch (error) {
+            console.warn('Failed to initialize predictive metrics for authenticated campaign:', error instanceof Error ? error.message : String(error));
+          }
 
           // Immediately save to permanent storage to prevent any data loss
           await saveCampaignPermanently(enhancedCampaign);
