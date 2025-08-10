@@ -348,7 +348,12 @@ GRANT ALL ON error_logs TO service_role;
         throw error;
       }
     } catch (error) {
-      console.error('Failed to mark error as resolved:', error);
+      console.error('Failed to mark error as resolved:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
     }
   }
 
