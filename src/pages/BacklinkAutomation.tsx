@@ -4061,15 +4061,20 @@ export default function BacklinkAutomation() {
                                     Active Campaigns
                                   </p>
                                   <p className="text-xl font-bold text-orange-600">
-                                    {user ? campaigns.filter(c => c.status === 'active').length : guestCampaignResults.filter(c => c.status === 'active' || !c.status).length}
+                                    {cumulativeStats.activeCampaigns}
                                   </p>
                                   <p className="text-xs text-orange-700">
-                                    Avg DA: {realTimeLinkPostbacks.length > 0 ? Math.round(realTimeLinkPostbacks.reduce((sum, p) => sum + p.domainAuthority, 0) / realTimeLinkPostbacks.length) : 85}
+                                    Avg DA: {globalActivityFeed.filter(a => a.metadata?.authority).length > 0 ?
+                                      Math.round(globalActivityFeed
+                                        .filter(a => a.metadata?.authority)
+                                        .reduce((sum, a) => sum + (a.metadata?.authority || 0), 0) /
+                                        globalActivityFeed.filter(a => a.metadata?.authority).length
+                                      ) : 85}
                                   </p>
                                 </div>
                                 <div className="relative">
                                   <Activity className="h-6 w-6 text-orange-600" />
-                                  {(user ? campaigns.filter(c => c.status === 'active').length : guestCampaignResults.filter(c => c.status === 'active' || !c.status).length) > 0 && (
+                                  {cumulativeStats.activeCampaigns > 0 && (
                                     <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
                                   )}
                                 </div>
