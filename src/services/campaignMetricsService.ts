@@ -563,6 +563,21 @@ if (typeof window !== 'undefined') {
 
   // Comprehensive error logging test
   console.log('🧪 Error logging test functions available:', ['testAllErrorLogging', 'testCampaignMetricsErrorLogging']);
+
+  // Immediately test error logging on page load
+  setTimeout(() => {
+    console.log('🧪 Auto-testing error logging format...');
+    const testError = new Error('Auto-test: This error should show proper formatting');
+    testError.code = 'AUTO_TEST';
+    console.error('Auto-test error logging:', {
+      message: testError.message,
+      code: testError.code,
+      stack: testError.stack,
+      name: testError.name
+    });
+    console.log('✅ If you see structured error above (not [object Object]), logging fixes are working!');
+  }, 1000);
+
   (window as any).testAllErrorLogging = () => {
     console.log('🧪 Testing all error logging patterns...');
 
