@@ -1496,7 +1496,7 @@ export default function BacklinkAutomation() {
           }
           loadRealTimeMetrics();
         } else {
-          console.warn('⚠����� Database not ready:', status);
+          console.warn('⚠������� Database not ready:', status);
         }
       } catch (error) {
         console.error('❌ Database check failed:', {
@@ -6621,13 +6621,10 @@ export default function BacklinkAutomation() {
               }
             }
           } catch (error) {
-            console.error('Campaign deletion failed:', {
-              error: error,
-              message: error instanceof Error ? error.message : 'Unknown error'
-            });
+            console.error('Campaign deletion failed:', formatErrorForLogging(error, 'deleteCampaign'));
             toast({
-              title: "Error",
-              description: error instanceof Error ? error.message : "Could not delete campaign. Please try again.",
+              title: "Campaign deletion failed",
+              description: formatErrorForUI(error),
               variant: "destructive"
             });
           } finally {
