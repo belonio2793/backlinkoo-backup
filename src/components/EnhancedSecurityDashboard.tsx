@@ -183,7 +183,7 @@ export function EnhancedSecurityDashboard() {
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
             <div className="font-medium">Dashboard Error</div>
-            <div className="text-sm mt-1">{error}</div>
+            <div className="text-sm mt-1">{formatErrorForUI(error)}</div>
           </AlertDescription>
         </Alert>
       )}
