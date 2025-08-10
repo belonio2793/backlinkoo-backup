@@ -4040,13 +4040,14 @@ export default function BacklinkAutomation() {
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">Success Rate</p>
                                   <p className="text-xl font-bold text-purple-600">
-                                    {realTimeLinkPostbacks.length > 0 ?
-                                      Math.round((realTimeLinkPostbacks.filter(p => p.status === 'live').length / realTimeLinkPostbacks.length) * 100) :
-                                      user ? Math.round(campaigns.reduce((sum, c) => sum + (c.quality?.successRate || 85), 0) / Math.max(campaigns.length, 1)) : 94
+                                    {globalActivityFeed.length > 0 ?
+                                      Math.round((globalActivityFeed.filter(a =>
+                                        a.metadata?.status === 'live'
+                                      ).length / Math.max(globalActivityFeed.filter(a => a.type === 'link_published').length, 1)) * 100) : 95
                                     }%
                                   </p>
                                   <p className="text-xs text-purple-700">
-                                    {realTimeLinkPostbacks.filter(p => p.verified).length} verified
+                                    {globalActivityFeed.filter(a => a.metadata?.verified).length} verified
                                   </p>
                                 </div>
                                 <TrendingUp className="h-6 w-6 text-purple-600" />
