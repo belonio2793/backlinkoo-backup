@@ -142,7 +142,7 @@ export function CreateUserDialog({ onUserCreated }: CreateUserDialogProps) {
           {error && (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>{error}</AlertDescription>
+              <AlertDescription>{formatErrorForUI(error)}</AlertDescription>
             </Alert>
           )}
           
