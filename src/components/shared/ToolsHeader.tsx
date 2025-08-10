@@ -275,11 +275,11 @@ const ToolsHeader = ({ user, currentTool }: ToolsHeaderProps) => {
                           }`}>
                             {tool.name}
                           </span>
-                          <Badge 
-                            variant={tool.status === 'Active' ? "secondary" : "outline"} 
+                          <Badge
+                            variant={tool.status === 'Active' ? "secondary" : "outline"}
                             className="ml-auto text-xs"
                           >
-                            {tool.status}
+                            {String(tool.status).trim()}
                           </Badge>
                         </button>
                       ))}
