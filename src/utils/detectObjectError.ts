@@ -68,10 +68,10 @@ export function testObjectErrorDetection() {
   console.log('✅ Object error detection test completed');
 }
 
-// Auto-enable in development
+// Auto-enable disabled to prevent console pollution
+// To enable manually: enableObjectErrorDetection()
 if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-  setTimeout(() => {
-    enableObjectErrorDetection();
-    console.log('🔍 To test the detection, run: testObjectErrorDetection()');
-  }, 1000);
+  (window as any).enableObjectErrorDetection = enableObjectErrorDetection;
+  (window as any).testObjectErrorDetection = testObjectErrorDetection;
+  console.log('🔧 Error detection available: enableObjectErrorDetection(), testObjectErrorDetection()');
 }
