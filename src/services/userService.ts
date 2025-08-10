@@ -84,8 +84,8 @@ class UserService {
       console.log('✅ userService: Profile loaded successfully:', profile);
       return profile;
     } catch (error: any) {
-      const errorMessage = error.message || error;
-      console.error('❌ userService: Error getting current user profile:', errorMessage);
+      const errorMessage = formatErrorForUI(error);
+      console.error('❌ userService: Error getting current user profile:', formatErrorForLogging(error, 'getCurrentUserProfile'));
 
       // Handle infinite recursion gracefully
       if (errorMessage && errorMessage.includes('infinite recursion detected in policy')) {
