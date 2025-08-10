@@ -171,7 +171,8 @@ class CampaignMetricsService {
         .single();
 
       if (error) {
-        console.error('Failed to record link:', formatErrorForLogging(error, 'recordLink'));
+        const errorDetails = formatErrorForLogging(error, 'recordLink');
+        console.error('Failed to record link:', JSON.stringify(errorDetails, null, 2));
         return { success: false, error: formatErrorForUI(error) || 'Failed to record link' };
       }
 
