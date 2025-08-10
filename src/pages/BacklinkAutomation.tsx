@@ -1344,7 +1344,7 @@ export default function BacklinkAutomation() {
       );
       updateGuestRestrictions();
       toast({
-        title: "🗑️ Campaign Deleted",
+        title: "��️ Campaign Deleted",
         description: `"${guestCampaignToDelete.name}" has been permanently removed.`,
       });
     } else {
@@ -3940,7 +3940,7 @@ export default function BacklinkAutomation() {
                                 }}
                                 className="p-0 h-auto text-amber-700 hover:text-amber-800"
                               >
-                                Upgrade 
+                                Upgrade ⬆️
                               </Button>
                             </div>
                           </div>
