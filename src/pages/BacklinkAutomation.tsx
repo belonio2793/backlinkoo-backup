@@ -2084,7 +2084,7 @@ export default function BacklinkAutomation() {
         if (guestLinksGenerated === 0) {
           // First campaign - surprise reveal
           toast({
-            title: "🎉 Surprise! Your Backlinks Are Ready!",
+            title: "�� Surprise! Your Backlinks Are Ready!",
             description: `We've generated ${linksToGenerate} premium backlinks for you instantly! View them in the live monitor above!`,
             duration: 5000,
           });
@@ -2421,7 +2421,10 @@ export default function BacklinkAutomation() {
       });
 
     } catch (error) {
-      console.error('Failed to report URL:', error);
+      console.error('Failed to report URL:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
       toast({
         title: "Report Failed",
         description: "Could not submit report. Please try again.",
