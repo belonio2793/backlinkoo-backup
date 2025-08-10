@@ -232,7 +232,7 @@ export function useCampaignReporting(updateInterval: number = 60000) {
       setReportingData(data);
       setLastUpdate(new Date());
     } catch (error) {
-      console.error('Failed to update reporting data:', error);
+      console.error('Failed to update reporting data:', error instanceof Error ? error.message : String(error));
     }
   }, []);
 
