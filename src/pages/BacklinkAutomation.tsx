@@ -2420,8 +2420,8 @@ export default function BacklinkAutomation() {
 
         if (isPremium) {
           toast({
-            title: "✨ Premium Campaign Deployed!",
-            description: `Your campaign is live${blogResult.success ? ' + blog post published' : ''}! View real-time progress in the monitor above.`,
+            title: "��� Premium Campaign Deployed!",
+            description: `Your campaign is live${blogResult.success ? ' + priority blog post published on backlinkoo.com' : ''}! View real-time progress in the monitor above.`,
             action: blogResult.success ? (
               <Button size="sm" onClick={() => window.open(blogResult.blogPostUrl, '_blank')}>
                 View Blog Post
