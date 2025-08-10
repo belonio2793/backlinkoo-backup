@@ -104,7 +104,7 @@ export function ErrorDisplay({
           </div>
           
           <AlertDescription className="text-red-700">
-            {error}
+            {formatErrorForUI(error)}
           </AlertDescription>
 
           {context && (
