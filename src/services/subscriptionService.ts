@@ -215,7 +215,7 @@ export class SubscriptionService {
       return { success: true, url: data.url };
 
     } catch (error: any) {
-      console.error('Exception creating subscription:', error);
+      console.error('Exception creating subscription:', error?.message || error?.toString() || JSON.stringify(error));
 
       let errorMessage = 'An unexpected error occurred';
 
@@ -312,7 +312,7 @@ export class SubscriptionService {
 
       return { success: true };
     } catch (error: any) {
-      console.error('Exception cancelling subscription:', error);
+      console.error('Exception cancelling subscription:', error?.message || error?.toString() || JSON.stringify(error));
       return { success: false, error: error.message || 'Failed to cancel subscription' };
     }
   }
