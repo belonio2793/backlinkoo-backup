@@ -488,7 +488,11 @@ export default function BacklinkAutomation() {
 
       return true;
     } catch (error) {
-      console.error('Failed to delete campaign permanently:', error);
+      console.error('Failed to delete campaign permanently:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        campaignId
+      });
       return false;
     }
   }, [getUserStorageKey]);
@@ -611,7 +615,11 @@ export default function BacklinkAutomation() {
 
       return campaigns;
     } catch (error) {
-      console.error('Failed to load permanent campaigns:', error);
+      console.error('Failed to load permanent campaigns:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        userId: user?.id
+      });
       return [];
     }
   }, [getUserStorageKey, user, isPremium]);
@@ -1209,7 +1217,10 @@ export default function BacklinkAutomation() {
           console.warn('⚠����� Database not ready:', status);
         }
       } catch (error) {
-        console.error('❌ Database check failed:', error);
+        console.error('❌ Database check failed:', {
+          error: error,
+          message: error instanceof Error ? error.message : 'Unknown error'
+        });
       } finally {
         setIsCheckingDatabase(false);
       }
@@ -1235,7 +1246,11 @@ export default function BacklinkAutomation() {
       setPremiumLimitData(premiumCheck);
       setIsUserPremium(!premiumCheck.isLimitReached || premiumCheck.maxLinks === -1);
     } catch (error) {
-      console.error('Error checking premium status:', error);
+      console.error('Error checking premium status:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        userId: user?.id
+      });
     }
   };
 
@@ -1381,10 +1396,13 @@ export default function BacklinkAutomation() {
         });
       }
     } catch (error) {
-      console.error('Failed to load campaigns:', error);
+      console.error('Failed to load campaigns:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
       toast({
         title: "Error Loading Campaigns",
-        description: "Failed to load your campaigns. Please try refreshing the page.",
+        description: error instanceof Error ? error.message : "Failed to load your campaigns. Please try refreshing the page.",
         variant: "destructive",
       });
     } finally {
