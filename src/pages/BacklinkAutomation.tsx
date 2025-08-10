@@ -2420,7 +2420,7 @@ export default function BacklinkAutomation() {
 
         if (isPremium) {
           toast({
-            title: "��� Premium Campaign Deployed!",
+            title: "✨ Premium Campaign Deployed!",
             description: `Your campaign is live${blogResult.success ? ' + priority blog post published on backlinkoo.com' : ''}! View real-time progress in the monitor above.`,
             action: blogResult.success ? (
               <Button size="sm" onClick={() => window.open(blogResult.blogPostUrl, '_blank')}>
@@ -2431,7 +2431,7 @@ export default function BacklinkAutomation() {
         } else {
           toast({
             title: "🚀 Campaign Deployed!",
-            description: `Your campaign is live${blogResult.success ? ' + blog post published' : ''} with 20-link limit. View progress in the monitor above!`,
+            description: `Your campaign is live${blogResult.success ? ' + priority blog post published on backlinkoo.com' : ''} with 20-link limit. View progress in the monitor above!`,
             action: (
               <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
                 Upgrade
@@ -5124,7 +5124,7 @@ export default function BacklinkAutomation() {
                         <div className="flex items-center justify-between mb-3">
                           <div className="font-medium text-gray-900 truncate">{site.domain}</div>
                           <Badge variant={site.status === 'Link Published' ? 'default' : site.status === 'Publishing Live' ? 'outline' : 'secondary'}>
-                            {site.status === 'Link Published' ? '✅ Live' : site.status === 'Publishing Live' ? '🔄 Publishing' : '⏳ Processing'}
+                            {site.status === 'Link Published' ? '✅ Live' : site.status === 'Publishing Live' ? '���� Publishing' : '⏳ Processing'}
                           </Badge>
                         </div>
                         <div className="space-y-2">
