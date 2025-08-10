@@ -546,6 +546,37 @@ export default function BacklinkAutomation() {
     }
   }, [getUserStorageKey, user]);
 
+  // Load campaign metrics from localStorage
+  const loadCampaignMetrics = useCallback(() => {
+    try {
+      const metricsMap = new Map();
+
+      // Load metrics for all campaigns from localStorage
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key?.startsWith('campaign_metrics_')) {
+          const campaignId = key.replace('campaign_metrics_', '');
+          const metricsData = localStorage.getItem(key);
+          if (metricsData) {
+            const parsed = JSON.parse(metricsData);
+            metricsMap.set(campaignId, {
+              domainsReached: new Set(parsed.domainsReached || []),
+              totalClicks: parsed.totalClicks || 0,
+              lastUpdate: parsed.lastUpdate || Date.now()
+            });
+          }
+        }
+      }
+
+      setCampaignMetrics(metricsMap);
+      setMetricsLoaded(true);
+      console.log('📊 Loaded metrics for', metricsMap.size, 'campaigns from localStorage');
+    } catch (error) {
+      console.warn('Failed to load campaign metrics from localStorage:', error);
+      setMetricsLoaded(true);
+    }
+  }, []);
+
   // Load live monitored campaigns with progressive data (database + localStorage)
   const loadPermanentCampaigns = useCallback(async (): Promise<any[]> => {
     try {
