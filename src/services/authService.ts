@@ -87,15 +87,13 @@ export class AuthService {
       });
 
       if (error) {
-        console.error('🚨 Authentication Error:', {
+        console.error('🚨 Authentication Error:', this.formatErrorMessage(error.message), {
           type: 'sign_in_error',
-          message: error.message,
           status: error.status,
           statusText: error.statusText,
           name: error.name,
-          email: signInData.email.substring(0, 3) + '***', // Partial email for privacy
-          timestamp: new Date().toISOString(),
-          originalError: error
+          email: signInData.email.substring(0, 3) + '***',
+          timestamp: new Date().toISOString()
         });
 
         return {
@@ -121,14 +119,11 @@ export class AuthService {
         error: 'No user data received from signin'
       };
     } catch (error: any) {
-      console.error('🚨 Authentication Exception:', {
+      console.error('🚨 Authentication Exception:', this.formatErrorMessage(error.message || String(error)), {
         type: 'sign_in_exception',
-        message: error.message,
         name: error.name,
-        stack: error.stack,
-        email: signInData.email.substring(0, 3) + '***', // Partial email for privacy
-        timestamp: new Date().toISOString(),
-        originalError: error
+        email: signInData.email.substring(0, 3) + '***',
+        timestamp: new Date().toISOString()
       });
 
       return {
