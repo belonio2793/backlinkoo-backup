@@ -196,11 +196,11 @@ export class CampaignBlogIntegrationService {
       }
 
     } catch (error) {
-      console.error('Error linking campaign to blog post:', {
+      console.error('Error linking campaign to blog post:', JSON.stringify({
         message: error.message,
         stack: error.stack,
         name: error.name
-      });
+      }, null, 2));
       // Don't throw - this is not critical for the main flow
     }
   }
@@ -445,7 +445,7 @@ export class CampaignBlogIntegrationService {
    */
   private static async generateFallbackGuestBlogPost(request: Omit<CampaignBlogRequest, 'campaignId'> & { campaignId?: string }): Promise<BlogGenerationResult> {
     try {
-      console.log('��� Generating fallback guest blog post');
+      console.log('🔄 Generating fallback guest blog post');
 
       const primaryKeyword = request.primaryKeyword || request.keywords[0] || 'business growth';
       const anchorText = request.anchorTexts?.[0] || primaryKeyword;
