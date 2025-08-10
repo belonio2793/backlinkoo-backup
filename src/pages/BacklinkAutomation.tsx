@@ -4030,6 +4030,18 @@ export default function BacklinkAutomation() {
                                           </div>
 
                                           <div className="flex items-center gap-2 ml-4">
+                                            {postback.isPrimaryBlogPost && (
+                                              <Button
+                                                size="sm"
+                                                className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white"
+                                                onClick={() => {
+                                                  window.open(postback.url, '_blank');
+                                                }}
+                                              >
+                                                <ExternalLink className="h-3 w-3 mr-1" />
+                                                View Blog Post
+                                              </Button>
+                                            )}
                                             <Button
                                               size="sm"
                                               variant="outline"
