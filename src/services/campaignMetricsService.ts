@@ -175,7 +175,8 @@ class CampaignMetricsService {
       return { success: true, data };
     } catch (error) {
       console.error('Link recording error:', formatErrorForLogging(error, 'recordLink-catch'));
-      return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
+      const errorMessage = formatErrorForUI(error) || 'Unknown error';
+      return { success: false, error: String(errorMessage) };
     }
   }
 
