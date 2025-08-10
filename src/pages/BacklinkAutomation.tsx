@@ -474,7 +474,7 @@ export default function BacklinkAutomation() {
           // Show user-friendly notification for database setup issues
           if (result.error?.includes('Database function missing') || result.error?.includes('table missing')) {
             toast({
-              title: "⚠️ Database Setup Required",
+              title: "⚠��� Database Setup Required",
               description: "Campaign metrics will use local storage until database is configured. Visit Admin → Database to set up.",
               duration: 5000
             });
@@ -2339,7 +2339,7 @@ export default function BacklinkAutomation() {
             const activity = {
               id: `activity-${Date.now()}-${i}`,
               type: 'link_published' as const,
-              message: ` ${newPostback.linkType.replace('_', ' ')} published on ${newPostback.domain}`,
+              message: `🔗 ${newPostback.linkType.replace('_', ' ')} published on ${newPostback.domain}`,
               timestamp: new Date().toISOString(),
               metadata: {
                 domain: newPostback.domain,
