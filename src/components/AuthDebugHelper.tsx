@@ -128,7 +128,7 @@ export function AuthDebugHelper() {
       } else {
         toast({
           title: "Account creation failed",
-          description: result.error,
+          description: formatErrorForUI(result.error),
           variant: "destructive",
         });
       }
