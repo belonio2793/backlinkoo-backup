@@ -257,7 +257,7 @@ export function TrialExhaustedModal({
               ) : (
                 <>
                   <Crown className="h-4 w-4 mr-2" />
-                  Upgrade to Premium - {selectedPlan === 'monthly' ? '$29/month' : '$17/month (billed yearly)'}
+                  Upgrade to Premium - {selectedPlan === 'monthly' ? '$29/month' : '$24/month (billed yearly)'}
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </>
               )}
