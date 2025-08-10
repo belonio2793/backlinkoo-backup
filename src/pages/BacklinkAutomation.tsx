@@ -1105,6 +1105,9 @@ export default function BacklinkAutomation() {
           }
 
           console.log(`📈 Live Monitor: Updated ${updateResult.updatedCount} active campaigns with new metrics`);
+
+          // Force cumulative stats update to reflect changes
+          updateCumulativeStats();
         }
       }
     }, 30000);
