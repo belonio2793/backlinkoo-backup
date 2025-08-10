@@ -113,12 +113,17 @@ class DOMTextFormatter {
    */
   private static determineFormattingType(node: Text, text: string): string {
     const parent = node.parentElement;
-    if (!parent) return text;
+    if (!parent || !text || typeof text !== 'string') return text;
 
-    // Check for explicit formatting type
-    const formatType = parent.getAttribute('data-format-type');
-    if (formatType) {
-      return TextFormatter.formatUIText(text, formatType as any);
+    try {
+      // Check for explicit formatting type
+      const formatType = parent.getAttribute('data-format-type');
+      if (formatType) {
+        return TextFormatter.formatUIText(text, formatType as any);
+      }
+    } catch (error) {
+      console.warn('Error formatting with explicit type:', error);
+      return text;
     }
 
     // Determine by element type and classes
