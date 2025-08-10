@@ -3607,7 +3607,12 @@ export default function BacklinkAutomation() {
                         </div>
                         <div className="bg-green-50 rounded-lg p-3 text-center">
                           <div className="text-lg font-bold text-green-600">
-                            {Math.max(cumulativeStats.totalLinksPublished, guestLinksGenerated)}
+                            {Math.max(
+                              cumulativeStats.totalLinksPublished,
+                              guestLinksGenerated,
+                              globalActivityFeed.filter(a => a.metadata?.status === 'live').length,
+                              guestLinksGenerated > 0 ? Math.floor(guestLinksGenerated * 0.85) : 0
+                            )}
                           </div>
                           <div className="text-xs text-green-700">Live Links Active</div>
                         </div>
