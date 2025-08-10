@@ -6016,11 +6016,15 @@ export default function BacklinkAutomation() {
       <LoginModal
         isOpen={showSignInModal}
         onClose={() => setShowSignInModal(false)}
-        onAuthSuccess={(user) => {
+        onAuthSuccess={async (user) => {
           console.log('User signed in:', user);
           setShowSignInModal(false);
-          // Optionally reload campaigns or update user state
-          if (user) {
+
+          // Check if there are guest campaigns to transfer
+          const guestCampaigns = JSON.parse(localStorage.getItem('guest_campaign_results') || '[]');
+          if (user && guestCampaigns.length > 0) {
+            await transferGuestCampaignsToUser(user);
+          } else if (user) {
             window.location.reload(); // Refresh to load user campaigns
           }
         }}
