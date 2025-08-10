@@ -573,7 +573,8 @@ export default function BacklinkAutomation() {
     let globalActivities: any[] = [];
 
     allCampaigns.forEach(campaign => {
-      totalLinks += campaign.linksGenerated || 0;
+      // Use actual live links for more accurate reporting
+      totalLinks += campaign.linksLive || campaign.linksGenerated || 0;
       activeCampaignsCount += campaign.status === 'active' ? 1 : 0;
 
       // Aggregate domains from campaign metrics
@@ -6667,7 +6668,7 @@ export default function BacklinkAutomation() {
                       <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200 shadow-sm">
                         <div className="text-3xl font-bold text-blue-600">{selectedCampaignDetails.linksLive || Math.floor((selectedCampaignDetails.linksGenerated || Math.floor(Math.random() * 15) + 5) * 0.7) || Math.floor(Math.random() * 10) + 3}</div>
                         <div className="text-sm font-semibold text-gray-800">Live Links</div>
-                        <div className="text-xs text-blue-600 mt-1">✓ Verified Active</div>
+                        <div className="text-xs text-blue-600 mt-1">��� Verified Active</div>
                       </div>
                       <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200 shadow-sm">
                         <div className="text-3xl font-bold text-purple-600">{selectedCampaignDetails.avgAuthority || selectedCampaignDetails.quality?.averageAuthority || Math.floor(Math.random() * 15) + 85}</div>
