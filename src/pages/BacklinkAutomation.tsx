@@ -4181,15 +4181,21 @@ export default function BacklinkAutomation() {
                                     Active Campaigns
                                   </p>
                                   <p className="text-xl font-bold text-orange-600">
-                                    {cumulativeStats.activeCampaigns}
+                                    {formatDisplayNumber(cumulativeStats.activeCampaigns, {
+                                      hideZero: false,
+                                      zeroText: '0'
+                                    })}
                                   </p>
                                   <p className="text-xs text-orange-700">
-                                    Avg DA: {globalActivityFeed.filter(a => a.metadata?.authority).length > 0 ?
-                                      Math.round(globalActivityFeed
-                                        .filter(a => a.metadata?.authority)
-                                        .reduce((sum, a) => sum + (a.metadata?.authority || 0), 0) /
-                                        globalActivityFeed.filter(a => a.metadata?.authority).length
-                                      ) : 85}
+                                    {(() => {
+                                      const avgDA = globalActivityFeed.filter(a => a.metadata?.authority).length > 0 ?
+                                        Math.round(globalActivityFeed
+                                          .filter(a => a.metadata?.authority)
+                                          .reduce((sum, a) => sum + (a.metadata?.authority || 0), 0) /
+                                          globalActivityFeed.filter(a => a.metadata?.authority).length
+                                        ) : 85;
+                                      return cumulativeStats.activeCampaigns > 0 ? `Avg DA: ${avgDA}` : 'ready to deploy';
+                                    })()}
                                   </p>
                                 </div>
                                 <div className="relative">
