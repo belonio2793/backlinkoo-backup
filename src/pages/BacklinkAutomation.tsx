@@ -429,7 +429,7 @@ export default function BacklinkAutomation() {
           // Show success notification occasionally
           if (Math.random() > 0.9) {
             toast({
-              title: '📊 Database Sync Complete',
+              title: '�� Database Sync Complete',
               description: `Campaign metrics saved: ${progressiveLinkCount} total links`,
               duration: 2000
             });
@@ -2138,6 +2138,13 @@ export default function BacklinkAutomation() {
 
       // Update campaign counters
       updateCounterStatus(campaignId, 'active');
+
+      // Initialize/update predictive algorithm
+      try {
+        initializePredictive(campaignId, isPremium);
+      } catch (error) {
+        console.warn('Failed to initialize predictive metrics on resume:', error instanceof Error ? error.message : String(error));
+      }
 
       // Update local state
       setCampaigns(prev => prev.map(c =>
