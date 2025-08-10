@@ -33,6 +33,7 @@ import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { formatTimeDisplay, ensureColonSpacing } from '@/utils/colonSpacingFix';
 import { useTextFormatter } from '@/hooks/useTextFormatter';
 import { FormattedText, FormattedTitle, FormattedDescription } from '@/components/ui/formatted-text';
+import { useDOMTextFormatter, useAutoFormat } from '@/hooks/useDOMTextFormatter';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import ToolsHeader from '@/components/shared/ToolsHeader';
