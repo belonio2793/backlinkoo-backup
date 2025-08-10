@@ -206,12 +206,12 @@ export function PremiumPlanModal({
         throw new Error(result.error || 'Failed to create subscription checkout');
       }
     } catch (error: any) {
-      console.error('Premium checkout error:', error);
-      
+      console.error('Premium checkout error:', error?.message || error?.toString() || JSON.stringify(error));
+
       setCurrentStep('checkout');
       toast({
         title: "Checkout Error",
-        description: error.message || "Failed to create checkout session. Please try again.",
+        description: error?.message || error?.toString() || "Failed to create checkout session. Please try again.",
         variant: "destructive"
       });
     } finally {
