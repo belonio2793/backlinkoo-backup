@@ -93,13 +93,12 @@ export function PremiumUpgradeButton({
     }
   };
 
-  const handleUpgradeClick = () => {
-    setShowPremiumModal(true);
-  };
-
-  const handleModalSuccess = () => {
-    setShowPremiumModal(false);
-    // The modal will handle navigation to dashboard
+  const handleUpgradeClick = async () => {
+    try {
+      await DirectCheckoutService.upgradeToPremium('monthly');
+    } catch (error) {
+      console.error('Premium upgrade failed:', error);
+    }
   };
 
   if (loading) {
