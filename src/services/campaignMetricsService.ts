@@ -72,12 +72,7 @@ class CampaignMetricsService {
       });
 
       if (error) {
-        console.error('Campaign metrics update failed:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint
-        });
+        console.error('Campaign metrics update failed:', formatErrorForLogging(error, 'updateCampaignMetrics'));
 
         // Check if it's a function not found error
         if (error.code === '42883' || error.code === 'PGRST202' || error.message?.includes('function') && error.message?.includes('does not exist')) {
