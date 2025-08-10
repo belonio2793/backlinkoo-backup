@@ -195,7 +195,7 @@ export function useAllCampaignCounters(updateInterval: number = 30000) {
       setGlobalCounters(global);
       setLastUpdate(new Date());
     } catch (error) {
-      console.error('Failed to update all counters:', error);
+      console.error('Failed to update all counters:', error instanceof Error ? error.message : String(error));
     }
   }, []);
 
