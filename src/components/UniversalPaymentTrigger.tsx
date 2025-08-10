@@ -93,10 +93,10 @@ export function UniversalPaymentTrigger({
 // Convenience components for common use cases
 
 /**
- * Buy Credits Button
+ * Buy Credits Button - Direct checkout
  */
 export function BuyCreditsButton({
-  credits,
+  credits = 50,
   variant = 'default',
   size = 'default',
   className = '',
@@ -108,40 +108,68 @@ export function BuyCreditsButton({
   className?: string;
   onSuccess?: () => void;
 }) {
+
+  const handleClick = async () => {
+    try {
+      const validCredits = [50, 100, 250, 500].includes(credits)
+        ? credits as 50 | 100 | 250 | 500
+        : 50;
+      await DirectCheckoutService.buyCredits(validCredits);
+      onSuccess?.();
+    } catch (error) {
+      console.error('Credits checkout failed:', error);
+    }
+  };
+
   return (
-    <UniversalPaymentTrigger
-      defaultTab="credits"
-      initialCredits={credits}
-      triggerVariant={variant}
-      triggerSize={size}
-      triggerClassName={className}
-      onSuccess={onSuccess}
-    />
+    <Button
+      variant={variant}
+      size={size}
+      className={className}
+      onClick={handleClick}
+    >
+      <CreditCard className="h-4 w-4 mr-2" />
+      Buy {credits} Credits
+    </Button>
   );
 }
 
 /**
- * Upgrade to Premium Button
+ * Upgrade to Premium Button - Direct checkout
  */
 export function UpgradeToPremiumButton({
+  plan = 'monthly',
   variant = 'default',
   size = 'default',
   className = '',
   onSuccess
 }: {
+  plan?: 'monthly' | 'annual';
   variant?: 'default' | 'outline' | 'destructive' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
   onSuccess?: () => void;
 }) {
+
+  const handleClick = async () => {
+    try {
+      await DirectCheckoutService.upgradeToPremium(plan);
+      onSuccess?.();
+    } catch (error) {
+      console.error('Premium checkout failed:', error);
+    }
+  };
+
   return (
-    <UniversalPaymentTrigger
-      defaultTab="premium"
-      triggerVariant={variant}
-      triggerSize={size}
-      triggerClassName={className}
-      onSuccess={onSuccess}
-    />
+    <Button
+      variant={variant}
+      size={size}
+      className={className}
+      onClick={handleClick}
+    >
+      <Crown className="h-4 w-4 mr-2" />
+      Upgrade to Premium
+    </Button>
   );
 }
 
