@@ -110,6 +110,7 @@ interface Campaign {
   totalTarget?: number;
   blogPostUrl?: string;
   blogPostTitle?: string;
+  domains?: string[];
   quality?: {
     averageAuthority: number;
     averageRelevance?: number;
