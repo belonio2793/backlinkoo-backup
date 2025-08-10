@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { useToast } from '@/hooks/use-toast';
 import SubscriptionService from '@/services/subscriptionService';
 import { useAuth } from '@/hooks/useAuth';
+import { CheckoutRedirectManager } from '@/utils/checkoutRedirectManager';
 import {
   Crown,
   CreditCard,
@@ -86,19 +87,49 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
     setPaymentMethod(method);
 
     try {
-      // Use subscription service with fallback support
+      toast({
+        title: "🚀 Opening Secure Checkout",
+        description: "Preparing your Stripe payment session...",
+      });
+
+      // Use subscription service with checkout redirect manager
       const result = await SubscriptionService.createSubscription(
         user,
         !user, // isGuest if no user
         !user ? formData.email : undefined, // guestEmail if no user
-        'monthly' // Default to monthly plan
+        selectedPlan, // Use selected plan instead of default
+        {
+          preferNewWindow: true,
+          fallbackToCurrentWindow: true,
+          onPopupBlocked: () => {
+            toast({
+              title: "Popup Blocked",
+              description: "Opening checkout in current window instead...",
+            });
+          },
+          onRedirectSuccess: () => {
+            toast({
+              title: "✅ Checkout Opened",
+              description: "Complete your payment in the Stripe window.",
+            });
+            // Close modal after successful redirect
+            onClose();
+          },
+          onRedirectError: (error) => {
+            toast({
+              title: "Redirect Failed",
+              description: "Unable to open checkout window. Please try again.",
+              variant: "destructive"
+            });
+          }
+        }
       );
 
-      if (result.success && result.url) {
+      if (result.success) {
         if (result.usedFallback) {
-          // Fallback was used - redirect directly and close modal
+          // Fallback was used - handle locally
           toast({
-            title: "Premium Activated!",
+            title: "✅ Premium Activated!",
             description: "Your account has been upgraded to Premium (development mode).",
           });
 
@@ -107,20 +138,8 @@ export function PremiumCheckoutModal({ isOpen, onClose, onSuccess }: PremiumChec
           if (onSuccess) {
             onSuccess();
           }
-
-          // Small delay then redirect
-          setTimeout(() => {
-            window.location.href = result.url!;
-          }, 1000);
-        } else {
-          // Real Stripe checkout - open in new tab
-          window.open(result.url, '_blank');
-
-          toast({
-            title: "Redirecting to Stripe",
-            description: "You'll be redirected to Stripe to complete your payment securely.",
-          });
         }
+        // If checkout redirect manager handled the redirect, we don't need to do anything else
       } else {
         throw new Error(result.error || 'Failed to create subscription');
       }

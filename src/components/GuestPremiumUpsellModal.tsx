@@ -18,6 +18,7 @@ import { guestTrackingService, type PremiumLimitWarning } from '@/services/guest
 import { LoginModal } from '@/components/LoginModal';
 import { useToast } from '@/hooks/use-toast';
 import { paymentIntegrationService } from '@/services/paymentIntegrationService';
+import { CheckoutRedirectManager } from '@/utils/checkoutRedirectManager';
 
 interface GuestPremiumUpsellModalProps {
   open: boolean;
@@ -61,19 +62,46 @@ export function GuestPremiumUpsellModal({
         description: "Opening payment window...",
       });
 
-      // Create subscription checkout session
+      // Create subscription checkout session using payment integration service
       const result = await paymentIntegrationService.createSubscription(
         selectedPlan,
         true, // isGuest
-        guestEmail
+        guestEmail,
+        {
+          preferNewWindow: true,
+          fallbackToCurrentWindow: true,
+          onPopupBlocked: () => {
+            toast({
+              title: "Popup Blocked",
+              description: "Opening checkout in current window...",
+            });
+          },
+          onRedirectSuccess: () => {
+            // Close modal since checkout opened
+            onOpenChange(false);
+
+            toast({
+              title: "✅ Checkout Opened",
+              description: "Complete your payment in the Stripe window.",
+            });
+
+            if (onUpgrade) {
+              onUpgrade();
+            }
+          },
+          onRedirectError: (error) => {
+            toast({
+              title: "Checkout Error",
+              description: "Unable to open checkout window. Please try again.",
+              variant: "destructive"
+            });
+          }
+        }
       );
 
-      if (result.success && result.url) {
-        // Check if this is a demo/mock checkout
-        const isDemoCheckout = result.url.includes('mock=true') || result.sessionId?.startsWith('mock_');
-
-        if (isDemoCheckout) {
-          // Handle demo checkout differently
+      if (result.success) {
+        if (result.usedFallback) {
+          // Handle demo/mock checkout
           toast({
             title: "🚧 Demo Checkout Mode",
             description: "Payment system is in demo mode. No actual payment will be processed.",
@@ -82,46 +110,15 @@ export function GuestPremiumUpsellModal({
 
           // For demo, just navigate to success page
           onOpenChange(false);
-          window.location.href = result.url;
+          if (result.url) {
+            window.location.href = result.url;
+          }
 
           if (onUpgrade) {
             onUpgrade();
           }
-        } else {
-          // Open real checkout in new window/tab
-          const checkoutWindow = window.open(
-            result.url,
-            'stripe-checkout',
-            'width=800,height=600,scrollbars=yes,resizable=yes'
-          );
-
-          if (checkoutWindow) {
-            // Close modal since checkout opened
-            onOpenChange(false);
-
-            // Monitor the checkout window
-            const checkClosed = setInterval(() => {
-              if (checkoutWindow.closed) {
-                clearInterval(checkClosed);
-                toast({
-                  title: "Checkout Complete",
-                  description: "If you completed your purchase, please refresh the page to see your premium features!",
-                });
-              }
-            }, 1000);
-
-            if (onUpgrade) {
-              onUpgrade();
-            }
-          } else {
-            // Popup was blocked, fallback to same window
-            toast({
-              title: "Popup Blocked",
-              description: "Opening checkout in current window...",
-            });
-            window.location.href = result.url;
-          }
         }
+        // If using checkout redirect manager, redirect is already handled
       } else {
         throw new Error(result.error || 'Failed to create checkout session');
       }

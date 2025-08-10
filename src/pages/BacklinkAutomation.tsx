@@ -31,13 +31,15 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { formatTimeDisplay, ensureColonSpacing } from '@/utils/colonSpacingFix';
+import { useTextFormatter } from '@/hooks/useTextFormatter';
+import { FormattedText, FormattedTitle, FormattedDescription } from '@/components/ui/formatted-text';
+import { useDOMTextFormatter, useAutoFormat } from '@/hooks/useDOMTextFormatter';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import ToolsHeader from '@/components/shared/ToolsHeader';
 import { Footer } from '@/components/Footer';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
 import { AllCompletedURLsRundown } from '@/components/campaigns/AllCompletedURLsRundown';
-import { TrialExhaustedModal } from '@/components/TrialExhaustedModal';
 import { PremiumPlanModal } from '@/components/PremiumPlanModal';
 
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
@@ -45,7 +47,6 @@ import { CampaignBlogIntegrationService } from '@/services/campaignBlogIntegrati
 import { campaignMetricsService, type CampaignMetrics } from '@/services/campaignMetricsService';
 import { LoginModal } from '@/components/LoginModal';
 import { guestTrackingService } from '@/services/guestTrackingService';
-import { GuestPremiumUpsellModal } from '@/components/GuestPremiumUpsellModal';
 import { GuestCampaignRestrictionsOverlay } from '@/components/GuestCampaignRestrictionsOverlay';
 
 // Import our enterprise engines
@@ -110,6 +111,7 @@ interface Campaign {
   totalTarget?: number;
   blogPostUrl?: string;
   blogPostTitle?: string;
+  domains?: string[];
   quality?: {
     averageAuthority: number;
     averageRelevance?: number;
@@ -142,6 +144,19 @@ interface Campaign {
     publishedAt: string;
     domainAuthority: number;
     verified: boolean;
+  }>;
+  publishedUrls?: Array<{
+    domain: string;
+    url: string;
+    publishedAt: string;
+    anchorText: string;
+    verified: boolean;
+    destinationUrl: string;
+    type: string;
+    status: string;
+    isPrimaryBlogPost?: boolean;
+    priority?: number;
+    verificationStatus?: string;
   }>;
 }
 
@@ -242,6 +257,27 @@ export default function BacklinkAutomation() {
   // Auth Hook
   const { user, isPremium } = useAuth();
 
+  // Text formatting hooks
+  const { formatUIText, formatTitle, formatDescription } = useTextFormatter();
+  const { containerRef, formatNow } = useDOMTextFormatter(true, true, true);
+
+  // Auto-format text on page load
+  useAutoFormat(2000);
+
+  // Add periodic formatting for dynamic content
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (containerRef.current) {
+        const result = formatNow();
+        if (result.total > 0) {
+          console.log('🎨 Periodic text formatting applied:', result);
+        }
+      }
+    }, 5000); // Every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [formatNow]);
+
   // Helper function to safely get timestamp from createdAt field
   const safeGetTimestamp = (dateValue: any): number => {
     if (!dateValue) return Date.now();
@@ -282,7 +318,6 @@ export default function BacklinkAutomation() {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [usageStats, setUsageStats] = useState({ linksPosted: 0, isLimitReached: false });
   const [guestLinksGenerated, setGuestLinksGenerated] = useState(0);
-  const [showTrialExhaustedModal, setShowTrialExhaustedModal] = useState(false);
   const [showPremiumPlanModal, setShowPremiumPlanModal] = useState(false);
   const [guestCampaignResults, setGuestCampaignResults] = useState<any[]>([]);
   const [isFetching, setIsFetching] = useState(false);
@@ -345,11 +380,9 @@ export default function BacklinkAutomation() {
   const [linkBuildingQueue, setLinkBuildingQueue] = useState<any[]>([]);
   const [recentPostbacks, setRecentPostbacks] = useState<any[]>([]);
   const [showSignInModal, setShowSignInModal] = useState(false);
-  const [showGuestPremiumModal, setShowGuestPremiumModal] = useState(false);
   const [showPostCampaignSignupModal, setShowPostCampaignSignupModal] = useState(false);
   const [guestTrackingInitialized, setGuestTrackingInitialized] = useState(false);
   const [guestCampaignRestrictions, setGuestCampaignRestrictions] = useState<any>({});
-  const [premiumUpsellTrigger, setPremiumUpsellTrigger] = useState<'campaign_limit' | 'link_limit' | 'feature_limit' | 'manual'>('manual');
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [guestCampaignToDelete, setGuestCampaignToDelete] = useState<any>(null);
   const [showFabMenu, setShowFabMenu] = useState(false);
@@ -460,12 +493,12 @@ export default function BacklinkAutomation() {
 
           return enhancedCampaign;
         } else {
-          console.warn('����️ Database save failed, using localStorage fallback:', formatErrorForUI(result.error));
+          console.warn('️ Database save failed, using localStorage fallback:', formatErrorForUI(result.error));
 
           // Show user-friendly notification for database setup issues
           if (result.error?.includes('Database function missing') || result.error?.includes('table missing')) {
             toast({
-              title: "⚠️ Database Setup Required",
+              title: "⚠�� Database Setup Required",
               description: "Campaign metrics will use local storage until database is configured. Visit Admin → Database to set up.",
               duration: 5000
             });
@@ -539,7 +572,7 @@ export default function BacklinkAutomation() {
       setCampaigns(prev => prev.filter(c => c.id !== campaignId));
       setGuestCampaignResults(prev => prev.filter(c => c.id !== campaignId));
 
-      console.log('🗑️ Campaign permanently deleted from all storage:', campaignId);
+      console.log('🗑�� Campaign permanently deleted from all storage:', campaignId);
 
       toast({
         title: '🗑️ Campaign Deleted',
@@ -766,7 +799,7 @@ export default function BacklinkAutomation() {
             }
           })
           .catch(error => {
-            console.warn('��� Retry exception for campaign:', failedSync.metrics.campaignId, formatErrorForUI(error));
+            console.warn(' Retry exception for campaign:', failedSync.metrics.campaignId, formatErrorForUI(error));
             // Add back to remaining syncs with incremented retry count
             remainingSyncs.push({
               ...failedSync,
@@ -815,7 +848,7 @@ export default function BacklinkAutomation() {
 
       setCampaignMetrics(metricsMap);
       setMetricsLoaded(true);
-      console.log('���� Loaded metrics for', metricsMap.size, 'campaigns from localStorage');
+      console.log(' Loaded metrics for', metricsMap.size, 'campaigns from localStorage');
     } catch (error) {
       const errorMessage = formatErrorForUI(error);
       console.warn('Failed to load campaign metrics from localStorage:', errorMessage);
@@ -880,7 +913,7 @@ export default function BacklinkAutomation() {
 
           // Show user-friendly notification for database issues
           if (result.error?.includes('table missing') || result.error?.includes('function')) {
-            console.log('��� Database tables not found, using localStorage fallback');
+            console.log(' Database tables not found, using localStorage fallback');
           }
         }
       }
@@ -1100,7 +1133,7 @@ export default function BacklinkAutomation() {
     const permanentCampaigns = loadPermanentCampaigns();
     if (permanentCampaigns.length > 0) {
       setGuestCampaignResults(permanentCampaigns);
-      console.log('��� Live Monitor: Loaded', permanentCampaigns.length, 'campaigns with progressive counts');
+      console.log(' Live Monitor: Loaded', permanentCampaigns.length, 'campaigns with progressive counts');
     }
 
     // Run initial auto-detection
@@ -1122,7 +1155,7 @@ export default function BacklinkAutomation() {
       const activeCampaigns = savedCampaigns.filter((c: any) => c.status === 'active');
 
       if (activeCampaigns.length > 0) {
-        console.log('���� Live Monitor: Tracking', activeCampaigns.length, 'active campaigns for', user?.id || 'guest');
+        console.log(' Live Monitor: Tracking', activeCampaigns.length, 'active campaigns for', user?.id || 'guest');
         // Use enhanced real-time campaign updater
         const updateResult = updateActiveCampaigns(savedCampaigns, isPremium, user);
 
@@ -1181,13 +1214,13 @@ export default function BacklinkAutomation() {
         } else {
           // For guest users, directly restore campaigns
           setGuestCampaignResults(permanentCampaigns);
-          console.log('����� Guest Data Restored:', permanentCampaigns.length, 'campaigns with preserved metrics');
+          console.log(' Guest Data Restored:', permanentCampaigns.length, 'campaigns with preserved metrics');
 
           // Show notification about data preservation for guest users
           if (permanentCampaigns.length > 0) {
             setTimeout(() => {
               toast({
-                title: "📊 Data Restored Successfully",
+                title: "��� Data Restored Successfully",
                 description: `${permanentCampaigns.length} campaigns restored with all metrics preserved. Your data is safe across sessions.`,
                 duration: 4000,
               });
@@ -1251,7 +1284,7 @@ export default function BacklinkAutomation() {
   useEffect(() => {
     if (!user && !guestTrackingInitialized) {
       const guestUserId = guestTrackingService.initializeGuestTracking();
-      console.log('���� Guest tracking initialized:', guestUserId);
+      console.log(' Guest tracking initialized:', guestUserId);
       setGuestTrackingInitialized(true);
       updateGuestRestrictions();
     }
@@ -1307,7 +1340,7 @@ export default function BacklinkAutomation() {
   const updateGuestLinkCount = (newCount: number) => {
     setGuestLinksGenerated(newCount);
     if (newCount >= 20 && !user) {
-      setShowTrialExhaustedModal(true);
+      setShowPremiumPlanModal(true);
     }
   };
 
@@ -1335,7 +1368,7 @@ export default function BacklinkAutomation() {
       );
       updateGuestRestrictions();
       toast({
-        title: "🗑�� Campaign Deleted",
+        title: "🗑️ Campaign Deleted",
         description: `"${guestCampaignToDelete.name}" has been permanently removed.`,
       });
     } else {
@@ -1402,8 +1435,7 @@ export default function BacklinkAutomation() {
           updateGuestRestrictions();
 
           // Show premium modal for auto-paused campaign
-          setPremiumUpsellTrigger('link_limit');
-          setShowGuestPremiumModal(true);
+          setShowPremiumPlanModal(true);
 
           toast({
             title: "🛑 Campaign Paused - Limit Reached",
@@ -1412,8 +1444,7 @@ export default function BacklinkAutomation() {
             duration: 5000
           });
         } else if (trackingResult.shouldShowPremiumModal) {
-          setPremiumUpsellTrigger('link_limit');
-          setShowGuestPremiumModal(true);
+          setShowPremiumPlanModal(true);
         }
       }
     }
@@ -1459,7 +1490,7 @@ export default function BacklinkAutomation() {
             ...campaign,
             linksGenerated: finalPublishedUrls.length,
             publishedUrls: finalPublishedUrls,
-            domains: [...new Set([...campaign.domains, linkToPublish.domain])]
+            domains: [...new Set([...(campaign.domains || []), linkToPublish.domain])]
           };
         }
         return campaign;
@@ -2054,7 +2085,7 @@ export default function BacklinkAutomation() {
 
       const linksCount = (user ? campaigns : guestCampaignResults).find(c => c.id === campaignId)?.linksGenerated || 0;
       toast({
-        title: "⏸�� Campaign Paused Successfully",
+        title: "⏸️ Campaign Paused Successfully",
         description: `All ${linksCount} links and metrics permanently saved to your account. Will never reset when resuming or refreshing page.`,
       });
     } catch (error) {
@@ -2116,7 +2147,7 @@ export default function BacklinkAutomation() {
       console.log('🧹 Component unmounting - cleaning up all campaign intervals');
       activeCampaignIntervals.forEach((interval, campaignId) => {
         clearInterval(interval);
-        console.log('�� Cleared interval for campaign on unmount:', campaignId);
+        console.log(' Cleared interval for campaign on unmount:', campaignId);
       });
     };
   }, [activeCampaignIntervals]);
@@ -2177,21 +2208,18 @@ export default function BacklinkAutomation() {
 
   const showPremiumUpgrade = (campaignId: string) => {
     // Use PremiumPlanModal for authenticated users, TrialExhaustedModal for guests
-    if (user) {
-      setShowPremiumPlanModal(true);
-    } else {
-      setShowTrialExhaustedModal(true);
-    }
+    // Always use PremiumPlanModal for consistent experience
+    setShowPremiumPlanModal(true);
 
     const message = user && !isPremium
       ? "Campaign paused at 20-link limit. Upgrade to Premium to continue building unlimited links!"
       : "You've built 20 high-quality backlinks! Upgrade to Premium for unlimited campaigns and links.";
 
     toast({
-      title: "�� Campaign Paused - Link Limit Reached",
+      title: "🛑 Campaign Paused - Link Limit Reached",
       description: message,
       action: (
-        <Button size="sm" onClick={() => user ? setShowPremiumPlanModal(true) : setShowTrialExhaustedModal(true)}>
+        <Button size="sm" onClick={() => setShowPremiumPlanModal(true)}>
           {user && !isPremium ? "Upgrade to Continue" : "Upgrade Now"}
         </Button>
       ),
@@ -2380,7 +2408,7 @@ export default function BacklinkAutomation() {
           if (newLinks.length === 0 && forceUpdate) {
             // Add small incremental activity to show monitoring is active
             current.totalClicks += Math.floor(Math.random() * 5) + 1; // 1-5 simulated clicks
-            console.log('��� Synthetic activity added for campaign visibility:', campaignId);
+            console.log(' Synthetic activity added for campaign visibility:', campaignId);
           }
 
           const updated = new Map(prev);
@@ -2414,7 +2442,7 @@ export default function BacklinkAutomation() {
           heartbeatActivity.push({
             id: `heartbeat-${Date.now()}`,
             type: 'system_monitoring' as const,
-            message: `📊 Campaign actively monitored ��� ${campaignMetrics.get(campaignId)?.domainsReached?.size || 0} domains tracked`,
+            message: `📊 Campaign actively monitored • ${campaignMetrics.get(campaignId)?.domainsReached?.size || 0} domains tracked`,
             timestamp: new Date().toISOString(),
             metadata: {
               type: 'heartbeat',
@@ -2518,7 +2546,7 @@ export default function BacklinkAutomation() {
     setActiveCampaignIntervals(prev => {
       const updated = new Map(prev);
       updated.set(campaignId, interval);
-      console.log('�� Started monitoring for campaign:', campaignId, '(Total active:', updated.size, ')');
+      console.log(' Started monitoring for campaign:', campaignId, '(Total active:', updated.size, ')');
       return updated;
     });
 
@@ -2543,7 +2571,7 @@ export default function BacklinkAutomation() {
 
       if (guestCampaigns.length === 0) return;
 
-      console.log('��� Transferring guest campaigns to user account:', user.email);
+      console.log(' Transferring guest campaigns to user account:', user.email);
 
       // Create campaigns in the database for the new user
       for (const guestCampaign of guestCampaigns) {
@@ -2667,8 +2695,7 @@ export default function BacklinkAutomation() {
 
       if (!trackingResult.success) {
         if (trackingResult.shouldShowPremiumModal) {
-          setPremiumUpsellTrigger('campaign_limit');
-          setShowGuestPremiumModal(true);
+          setShowPremiumPlanModal(true);
         }
 
         toast({
@@ -2680,8 +2707,7 @@ export default function BacklinkAutomation() {
       }
 
       if (trackingResult.warning && trackingResult.shouldShowPremiumModal) {
-        setPremiumUpsellTrigger('campaign_limit');
-        setShowGuestPremiumModal(true);
+        setShowPremiumPlanModal(true);
       }
 
       // Initialize counters for guest campaign
@@ -2881,22 +2907,22 @@ export default function BacklinkAutomation() {
         if (guestLinksGenerated === 0) {
           // First campaign - surprise reveal
           toast({
-            title: "���� Surprise! Your Backlinks Are Ready!",
+            title: "🎉 Surprise! Your Backlinks Are Ready!",
             description: `We've generated ${linksToGenerate} premium backlinks for you instantly${blogResult.success ? (blogResult.isFallback ? ' + queued a priority blog post on backlinkoo.com' : ' + published a priority blog post on backlinkoo.com') : ''}! View them in the live monitor above!`,
             duration: 6000,
           });
         } else if (newTotal >= 20) {
           // Trial complete
           toast({
-            title: "🚀 Amazing! You've Built 20+ Backlinks!",
+            title: "🎉 Amazing! You've Built 20+ Backlinks!",
             description: "See your incredible results and unlock unlimited campaigns!",
             duration: 6000,
           });
-          setTimeout(() => setShowTrialExhaustedModal(true), 3000);
+          setTimeout(() => setShowPremiumPlanModal(true), 3000);
         } else {
           // Progress update
           toast({
-            title: `������ +${linksToGenerate} More Backlinks Generated!`,
+            title: `🚀 +${linksToGenerate} More Backlinks Generated!`,
             description: `Total: ${newTotal} premium backlinks built${blogResult.success ? (blogResult.isFallback ? ' + blog post queued' : ' + new blog post published') : ''}! Keep going - you're on fire!`,
           });
         }
@@ -2904,7 +2930,7 @@ export default function BacklinkAutomation() {
         // Logged-in user flow - check if they have any campaigns and if they're premium
         if (!isPremium && campaigns.length > 0) {
           // Non-premium users can only have one campaign with 20 links max
-          setShowTrialExhaustedModal(true);
+          setShowPremiumPlanModal(true);
           return;
         }
 
@@ -3002,7 +3028,7 @@ export default function BacklinkAutomation() {
                   console.warn('Failed to update campaign with blog URL:', updateError);
                 }
 
-                console.log('�� Blog post added as priority link for authenticated user:', blogResult.blogPostUrl);
+                console.log(' Blog post added as priority link for authenticated user:', blogResult.blogPostUrl);
               } catch (linkError) {
                 console.warn('Failed to add blog post as priority link for authenticated user:', linkError);
                 // Continue without blog link if this fails
@@ -3013,7 +3039,7 @@ export default function BacklinkAutomation() {
 
             // If it's a 404 error, create a fallback blog post entry
             if (blogError.message?.includes('404')) {
-              console.log('���️ Blog generation service not available - using fallback blog post');
+              console.log('️ Blog generation service not available - using fallback blog post');
 
               // Create a fallback blog post entry
               const fallbackSlug = result.campaign.keywords[0]?.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'campaign';
@@ -3025,7 +3051,7 @@ export default function BacklinkAutomation() {
                 isFallback: true
               };
 
-              console.log('���� Fallback blog post created for authenticated user:', blogResult.blogPostUrl);
+              console.log(' Fallback blog post created for authenticated user:', blogResult.blogPostUrl);
             }
           }
 
@@ -3114,10 +3140,10 @@ export default function BacklinkAutomation() {
           });
         } else {
           toast({
-            title: "��� Campaign Deployed!",
+            title: "🚀 Campaign Deployed!",
             description: `Your campaign is live${blogResult.success ? (blogResult.isFallback ? ' + priority blog post queued on backlinkoo.com' : ' + priority blog post published on backlinkoo.com') : ''} with 20-link limit. View progress in the monitor above!`,
             action: (
-              <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
+              <Button size="sm" onClick={() => setShowPremiumPlanModal(true)}>
                 Upgrade
               </Button>
             ),
@@ -3173,7 +3199,7 @@ export default function BacklinkAutomation() {
   const startUrlDiscovery = async () => {
     // Check guest trial limit
     if (!user && guestLinksGenerated >= 20) {
-      setShowTrialExhaustedModal(true);
+      setShowPremiumPlanModal(true);
       return;
     }
 
@@ -3208,7 +3234,7 @@ export default function BacklinkAutomation() {
                 description: `Found ${additionalLinks} premium opportunities! You've now built ${newTotal} total backlinks!`,
                 duration: 5000,
               });
-              setTimeout(() => setShowTrialExhaustedModal(true), 3000);
+              setTimeout(() => setShowPremiumPlanModal(true), 3000);
             } else {
               toast({
                 title: "🎯 Discovery Complete!",
@@ -3357,7 +3383,7 @@ export default function BacklinkAutomation() {
 
   const generateRealTimeActivity = (campaign: any) => {
     const activities = [
-      { type: 'discovery', message: `Scanning ${campaign.domains?.length || 3} high-authority domains`, timestamp: new Date(Date.now() - Math.random() * 300000), status: 'completed' },
+      { type: 'discovery', message: `Scanning ${(campaign.domains || []).length || 3} high-authority domains`, timestamp: new Date(Date.now() - Math.random() * 300000), status: 'completed' },
       { type: 'content', message: `Generated contextual content for "${campaign.keywords?.[0] || 'keyword'}"`, timestamp: new Date(Date.now() - Math.random() * 240000), status: 'completed' },
       { type: 'posting', message: `Publishing link on ${['reddit.com', 'medium.com', 'dev.to'][Math.floor(Math.random() * 3)]}`, timestamp: new Date(Date.now() - Math.random() * 180000), status: 'active' },
       { type: 'verification', message: 'Verifying link placement and indexing', timestamp: new Date(Date.now() - Math.random() * 120000), status: 'active' },
@@ -3423,7 +3449,7 @@ export default function BacklinkAutomation() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
       <ToolsHeader user={user} currentTool="automation-link-building" />
 
-      <div className="p-6">
+      <div ref={containerRef} className="p-6">
         <div className="max-w-8xl mx-auto space-y-6">
           {/* Header */}
           <div className="text-center space-y-4">
@@ -3433,7 +3459,7 @@ export default function BacklinkAutomation() {
                 <Lightning className="h-5 w-5 text-orange-500 absolute -top-1 -right-1" />
               </div>
               <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-orange-500 bg-clip-text text-transparent">
-                Backlink Automation
+                <FormattedText type="title">Backlink Automation</FormattedText>
               </h1>
               <div className="flex items-center gap-2">
                 {/* User Status Badges */}
@@ -3512,7 +3538,7 @@ export default function BacklinkAutomation() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => setShowTrialExhaustedModal(true)}
+                        onClick={() => setShowPremiumPlanModal(true)}
                         className="h-8 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-none"
                       >
                         <Crown className="h-3 w-3 mr-1" />
@@ -3532,8 +3558,10 @@ export default function BacklinkAutomation() {
               </div>
             </div>
             <p className="text-gray-600 max-w-4xl mx-auto text-lg">
-              AI-powered recursive URL discovery system that learns and grows with community collaboration. 
-              Discover thousands of verified link opportunities across the entire internet.
+              <FormattedDescription>
+                AI-powered recursive URL discovery system that learns and grows with community collaboration.
+                Discover thousands of verified link opportunities across the entire internet.
+              </FormattedDescription>
             </p>
             
             {/* Stats section moved to bottom of page */}
@@ -3546,16 +3574,24 @@ export default function BacklinkAutomation() {
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
             <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="campaigns" className="relative">
-                Campaign Manager
+                <FormattedText type="label">Campaign Manager</FormattedText>
                 {((user && campaigns.filter(c => c.status === 'active').length > 0) ||
                   (!user && guestCampaignResults.length > 0)) && (
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="completed-urls">All Completed URLs</TabsTrigger>
-              <TabsTrigger value="database">Website Database</TabsTrigger>
-              <TabsTrigger value="recursive">Recursive Discovery</TabsTrigger>
-              <TabsTrigger value="discovery">Legacy Discovery</TabsTrigger>
+              <TabsTrigger value="completed-urls">
+                <FormattedText type="label">All Completed URLs</FormattedText>
+              </TabsTrigger>
+              <TabsTrigger value="database">
+                <FormattedText type="label">Website Database</FormattedText>
+              </TabsTrigger>
+              <TabsTrigger value="recursive">
+                <FormattedText type="label">Recursive Discovery</FormattedText>
+              </TabsTrigger>
+              <TabsTrigger value="discovery">
+                <FormattedText type="label">Legacy Discovery</FormattedText>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="campaigns" className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
@@ -3565,10 +3601,12 @@ export default function BacklinkAutomation() {
                 <CardHeader className="text-center">
                   <CardTitle className="flex items-center justify-center gap-2">
                     <Target className="h-5 w-5" />
-                    Create Targeted Campaign
+                    <FormattedText type="title">Create Targeted Campaign</FormattedText>
                   </CardTitle>
                   <CardDescription>
-                    Deploy a focused campaign for a specific link building strategy{!user ? ' - something special awaits!' : ''}
+                    <FormattedDescription>
+                      Deploy a focused campaign for a specific link building strategy{!user ? ' - something special awaits!' : ''}
+                    </FormattedDescription>
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -3593,8 +3631,7 @@ export default function BacklinkAutomation() {
                               <Button
                                 size="sm"
                                 onClick={() => {
-                                  setPremiumUpsellTrigger('campaign_limit');
-                                  setShowGuestPremiumModal(true);
+                                  setShowPremiumPlanModal(true);
                                 }}
                                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-xs"
                               >
@@ -3631,7 +3668,9 @@ export default function BacklinkAutomation() {
 
                   <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
                     <div>
-                      <Label htmlFor="linkType">Link Building Strategy</Label>
+                      <Label htmlFor="linkType">
+                        <FormattedText type="label">Link Building Strategy</FormattedText>
+                      </Label>
                       <Select value={campaignForm.linkType} onValueChange={(value) => setCampaignForm(prev => ({ ...prev, linkType: value }))}>
                         <SelectTrigger className="h-12">
                           <SelectValue placeholder="Select strategy" />
@@ -3650,7 +3689,9 @@ export default function BacklinkAutomation() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="targetUrl">Target URL *</Label>
+                      <Label htmlFor="targetUrl">
+                        <FormattedText type="label">Target URL *</FormattedText>
+                      </Label>
                       <Input
                         id="targetUrl"
                         value={campaignForm.targetUrl}
@@ -3661,7 +3702,9 @@ export default function BacklinkAutomation() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="keywords">Target Keywords (comma-separated) *</Label>
+                      <Label htmlFor="keywords">
+                        <FormattedText type="label">Target Keywords (comma-separated) *</FormattedText>
+                      </Label>
                       <Input
                         id="keywords"
                         value={campaignForm.keywords}
@@ -3672,7 +3715,9 @@ export default function BacklinkAutomation() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="anchorTexts">Anchor Text Variations</Label>
+                      <Label htmlFor="anchorTexts">
+                        <FormattedText type="label">Anchor Text Variations</FormattedText>
+                      </Label>
                       <Textarea
                         id="anchorTexts"
                         value={campaignForm.anchorTexts}
@@ -3683,7 +3728,9 @@ export default function BacklinkAutomation() {
                     </div>
 
                     <div>
-                      <Label htmlFor="dailyLimit">Daily Link Target</Label>
+                      <Label htmlFor="dailyLimit">
+                        <FormattedText type="label">Daily Link Target</FormattedText>
+                      </Label>
                       <Input
                         id="dailyLimit"
                         type="number"
@@ -3722,7 +3769,7 @@ export default function BacklinkAutomation() {
                             ) : (
                               <Zap className="h-4 w-4 mr-2" />
                             )}
-                            Deploy Campaign
+                            <FormattedText type="button">Deploy Campaign</FormattedText>
                           </Button>
                         </div>
                         <div className="text-center">
@@ -3730,7 +3777,7 @@ export default function BacklinkAutomation() {
                             🚀 Launch your automated backlink building campaign
                           </p>
                           <div className="flex justify-center gap-4 text-xs text-gray-500">
-                            <span>��� High-authority domains</span>
+                            <span>✓ High-authority domains</span>
                             <span>✓ Instant results</span>
                             <span>✓ No signup required</span>
                           </div>
@@ -3834,18 +3881,20 @@ export default function BacklinkAutomation() {
                             ) : (
                               <Rocket className="h-4 w-4 mr-2" />
                             )}
-                            {isPremium ? "Deploy Premium Campaign" : "Deploy Campaign"}
+                            <FormattedText type="button">
+                              {isPremium ? "Deploy Premium Campaign" : "Deploy Campaign"}
+                            </FormattedText>
                           </Button>
 
                           {!isPremium && (
                             <Button
                               variant="outline"
                               onClick={() => {
-                                setPremiumUpsellTrigger('manual');
+                                
                                 if (user) {
                                   setShowPremiumPlanModal(true);
                                 } else {
-                                  setShowGuestPremiumModal(true);
+                                  setShowPremiumPlanModal(true);
                                 }
                               }}
                               className="w-full h-12 px-6 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100"
@@ -3925,21 +3974,21 @@ export default function BacklinkAutomation() {
                             <div className="flex items-center justify-center gap-2 text-sm">
                               <AlertTriangle className="h-4 w-4 text-amber-600" />
                               <span className="text-amber-700">Free Plan:</span>
-                              <span className="text-gray-600">20 links/month ��� Standard processing</span>
+                              <span className="text-gray-600">20 links/month • Standard processing</span>
                               <Button
                                 variant="link"
                                 size="sm"
                                 onClick={() => {
-                                  setPremiumUpsellTrigger('manual');
+                                  
                                   if (user) {
                                     setShowPremiumPlanModal(true);
                                   } else {
-                                    setShowGuestPremiumModal(true);
+                                    setShowPremiumPlanModal(true);
                                   }
                                 }}
                                 className="p-0 h-auto text-amber-700 hover:text-amber-800"
                               >
-                                Upgrade ���
+                                Upgrade ⬆️
                               </Button>
                             </div>
                           </div>
@@ -3955,17 +4004,19 @@ export default function BacklinkAutomation() {
                 <CardHeader className="text-center">
                   <CardTitle className="flex items-center justify-center gap-2">
                     <Monitor className="h-5 w-5" />
-                    Your Campaigns
+                    <FormattedText type="title">Your Campaigns</FormattedText>
                   </CardTitle>
                   <CardDescription>
-                    {user ?
-                      (() => {
-                        const total = campaigns.length;
-                        const active = campaigns.filter(c => c.status === 'active').length;
-                        return `${formatActivityCount(total, 'campaign')} • ${formatActivityCount(active, 'active', undefined, { showZero: true, zeroText: 'none active' })}`;
-                      })() :
-                      formatActivityCount(guestCampaignResults.length, 'campaign', undefined, { showZero: true, zeroText: 'ready to start' }) + ' created'
-                    }
+                    <FormattedDescription>
+                      {user ?
+                        (() => {
+                          const total = campaigns.length;
+                          const active = campaigns.filter(c => c.status === 'active').length;
+                          return formatUIText(`${formatActivityCount(total, 'campaign')} • ${formatActivityCount(active, 'active', undefined, { showZero: true, zeroText: 'none active' })}`, 'description');
+                        })() :
+                        formatUIText(formatActivityCount(guestCampaignResults.length, 'campaign', undefined, { showZero: true, zeroText: 'ready to start' }) + ' created', 'description')
+                      }
+                    </FormattedDescription>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -4255,7 +4306,7 @@ export default function BacklinkAutomation() {
                                             </div>
                                             <div className="flex items-center gap-2">
                                               <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
-                                                �� {campaign.status}
+                                                🔄 {campaign.status}
                                               </Badge>
                                               <Button
                                                 variant="ghost"
@@ -4280,7 +4331,7 @@ export default function BacklinkAutomation() {
                                             </div>
                                             <div className="text-center">
                                               <div className="font-bold text-blue-600">
-                                                {formatDisplayNumber(campaign.domains?.length || 0, {
+                                                {formatDisplayNumber((campaign.domains || []).length || 0, {
                                                   hideZero: false,
                                                   zeroText: '0'
                                                 })}
@@ -4586,7 +4637,7 @@ export default function BacklinkAutomation() {
                                           onClick={() => {
                                             copyToClipboard(result.blogPostUrl);
                                             toast({
-                                              title: "�� Blog URL Copied!",
+                                              title: " Blog URL Copied!",
                                               description: "Share this link to showcase your campaign's reach and authority.",
                                             });
                                           }}
@@ -5250,8 +5301,7 @@ export default function BacklinkAutomation() {
                                   onClick={() => {
                                     // Check if campaign has reached link limit
                                     if (campaign.linksGenerated >= 20) {
-                                      setPremiumUpsellTrigger('link_limit');
-                                      setShowGuestPremiumModal(true);
+                                      setShowPremiumPlanModal(true);
                                       toast({
                                         title: "🚀 Upgrade to Continue",
                                         description: "This campaign has reached the 20-link free limit. Upgrade for unlimited links!",
@@ -5283,10 +5333,9 @@ export default function BacklinkAutomation() {
 
                                     if (!updateResult.success) {
                                       // Campaign cannot be reactivated - show premium modal
-                                      setPremiumUpsellTrigger('link_limit');
-                                      setShowGuestPremiumModal(true);
+                                      setShowPremiumPlanModal(true);
                                       toast({
-                                        title: "���� Premium Required",
+                                        title: " Premium Required",
                                         description: updateResult.warning?.message || "This campaign reached the 20-link limit. Upgrade to continue building links!",
                                         variant: "default",
                                         duration: 5000
@@ -5300,7 +5349,7 @@ export default function BacklinkAutomation() {
                                     );
                                     updateGuestRestrictions();
                                     toast({
-                                      title: "���️ Trial Campaign Resumed",
+                                      title: "️ Trial Campaign Resumed",
                                       description: "Link building activity has resumed.",
                                     });
                                   }}
@@ -5374,15 +5423,14 @@ export default function BacklinkAutomation() {
                               )}
                             </div>
                             <div className="text-center">
-                              <div className="text-lg font-bold text-blue-600">{campaign.domains?.length || 0}</div>
+                              <div className="text-lg font-bold text-blue-600">{(campaign.domains || []).length || 0}</div>
                               <div className="text-xs text-gray-500">Domains</div>
                               {campaign.linksGenerated >= 18 && (
                                 <Button
                                   size="sm"
                                   variant="outline"
                                   onClick={() => {
-                                    setPremiumUpsellTrigger('link_limit');
-                                    setShowGuestPremiumModal(true);
+                                    setShowPremiumPlanModal(true);
                                   }}
                                   className="text-xs h-5 px-2 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100 mt-1"
                                 >
@@ -5423,8 +5471,7 @@ export default function BacklinkAutomation() {
                                 <Button
                                   size="sm"
                                   onClick={() => {
-                                    setPremiumUpsellTrigger('link_limit');
-                                    setShowGuestPremiumModal(true);
+                                    setShowPremiumPlanModal(true);
                                   }}
                                   className="h-6 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                                 >
@@ -5449,7 +5496,7 @@ export default function BacklinkAutomation() {
                               )}
                             </div>
 
-                            <Progress value={(campaign.domains?.length || 0) / 10 * 100} className="h-2" />
+                            <Progress value={((campaign.domains || []).length || 0) / 10 * 100} className="h-2" />
 
                             <div className="flex items-center justify-between text-xs text-gray-500">
                               <span>Trial Campaign</span>
@@ -5460,7 +5507,7 @@ export default function BacklinkAutomation() {
                                 onClick={() => {
                                   toast({
                                     title: "Campaign Results",
-                                    description: `${campaign.domains?.length || 0} domains discovered for your trial campaign`,
+                                    description: `${(campaign.domains || []).length || 0} domains discovered for your trial campaign`,
                                   });
                                 }}
                               >
@@ -5515,10 +5562,12 @@ export default function BacklinkAutomation() {
                 <CardHeader className="text-center">
                   <CardTitle className="flex items-center justify-center gap-2">
                     <Activity className="h-5 w-5 text-green-600" />
-                    Live Campaign Results
+                    <FormattedText type="title">Live Campaign Results</FormattedText>
                   </CardTitle>
                   <CardDescription>
-                    Real-time tracking of active campaigns and published backlinks
+                    <FormattedDescription>
+                      Real-time tracking of active campaigns and published backlinks
+                    </FormattedDescription>
                   </CardDescription>
                 </CardHeader>
               </Card>
@@ -5560,7 +5609,7 @@ export default function BacklinkAutomation() {
                         <p className="text-sm font-medium text-muted-foreground">Domains Reached</p>
                         <p className="text-2xl font-bold text-purple-600">
                           {user ? Math.min(campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) * 0.8, 50) :
-                           guestCampaignResults.reduce((acc, campaign) => acc + (campaign.domains?.length || 0), 0)}
+                           guestCampaignResults.reduce((acc, campaign) => acc + ((campaign.domains || []).length || 0), 0)}
                         </p>
                       </div>
                       <Globe className="h-8 w-8 text-purple-600" />
@@ -5632,7 +5681,7 @@ export default function BacklinkAutomation() {
                             </div>
                             <div className="text-center">
                               <div className="text-lg font-bold text-blue-600">
-                                {formatDisplayNumber(campaign.domains?.length || 0, {
+                                {formatDisplayNumber((campaign.domains || []).length || 0, {
                                   hideZero: false,
                                   zeroText: '0'
                                 })}
@@ -5655,7 +5704,7 @@ export default function BacklinkAutomation() {
                           <div className="bg-white rounded-lg p-3 border">
                             <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
                               <ExternalLink className="h-4 w-4" />
-                              Published Backlinks ({campaign.publishedUrls?.length || campaign.domains?.length || 0})
+                              Published Backlinks ({campaign.publishedUrls?.length || (campaign.domains || []).length || 0})
                             </h4>
                             <div className="space-y-3 max-h-40 overflow-y-auto">
                               {campaign.publishedUrls ? (
@@ -5712,7 +5761,7 @@ export default function BacklinkAutomation() {
                                   </div>
                                 ))
                               ) : (
-                                campaign.domains?.map((domain, domainIdx) => (
+                                (campaign.domains || []).map((domain, domainIdx) => (
                                   <div key={domainIdx} className="flex items-center justify-between text-sm">
                                     <div className="flex items-center gap-2">
                                       <div className="h-2 w-2 bg-green-500 rounded-full"></div>
@@ -5862,7 +5911,7 @@ export default function BacklinkAutomation() {
                                       <div className="flex items-center gap-2 text-xs">
                                         <span className="text-gray-600">Anchor:</span>
                                         <span className="font-medium text-blue-700">"{anchorText}"</span>
-                                        <span className="text-gray-600">���</span>
+                                        <span className="text-gray-600">→</span>
                                         <span className="text-green-600 truncate max-w-24">{campaign.targetUrl}</span>
                                         <Button
                                           size="sm"
@@ -5992,10 +6041,12 @@ export default function BacklinkAutomation() {
                     <div>
                       <CardTitle className="flex items-center gap-2 text-green-800">
                         <Sparkles className="h-5 w-5" />
-                        🎯 New Discoveries - Priority Publishing
+                        <FormattedText type="title">🎯 New Discoveries - Priority Publishing</FormattedText>
                       </CardTitle>
                       <CardDescription className="text-flow-fix">
-                        Real-time verified link placements from {Math.floor(Math.random() * 500) + 1200}+ active campaigns across our user network
+                        <FormattedDescription>
+                          📡 Live feed showing verified link placements from campaigns running across our {Math.floor(Math.random() * 5000) + 15000}+ user network
+                        </FormattedDescription>
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
@@ -6017,7 +6068,7 @@ export default function BacklinkAutomation() {
                         <div className="flex items-center justify-between mb-3">
                           <div className="font-medium text-gray-900 truncate">{site.domain}</div>
                           <Badge variant={site.status === 'Link Published' ? 'default' : site.status === 'Publishing Live' ? 'outline' : 'secondary'}>
-                            {site.status === 'Link Published' ? '✅ Live' : site.status === 'Publishing Live' ? '����� Publishing' : '⏳ Processing'}
+                            {site.status === 'Link Published' ? '✅ Live' : site.status === 'Publishing Live' ? '🔄 Publishing' : '⏳ Processing'}
                           </Badge>
                         </div>
                         <div className="space-y-2">
@@ -6037,7 +6088,7 @@ export default function BacklinkAutomation() {
                   </div>
                   <div className="mt-6 text-center">
                     <p className="text-sm text-gray-600 mb-3">
-                      �� Live feed showing verified link placements from campaigns running across our {Math.floor(Math.random() * 5000) + 15000}+ user network
+                       📡 Live feed showing verified link placements from campaigns running across our {Math.floor(Math.random() * 5000) + 15000}+ user network
                     </p>
                   </div>
                 </CardContent>
@@ -6050,10 +6101,12 @@ export default function BacklinkAutomation() {
                     <div>
                       <CardTitle className="flex items-center gap-2">
                         <Database className="h-5 w-5" />
-                        Global Website Database
+                        <FormattedText type="title">Global Website Database</FormattedText>
                       </CardTitle>
                       <CardDescription>
-                        Live database of {(Math.floor(Math.random() * 50) + 125).toLocaleString()}K+ verified domains with successful placements from our community
+                        <FormattedDescription>
+                          Live database of {(Math.floor(Math.random() * 50) + 125).toLocaleString()}K+ verified domains with successful placements from our community
+                        </FormattedDescription>
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
@@ -6081,20 +6134,20 @@ export default function BacklinkAutomation() {
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
-                          { name: 'E-commerce & Retail', count: 45670, icon: '����' },
-                          { name: 'Travel & Tourism', count: 38920, icon: '✈���' },
+                          { name: 'E-commerce & Retail', count: 45670, icon: '🛒' },
+                          { name: 'Travel & Tourism', count: 38920, icon: '✈️' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
-                          { name: 'Entertainment & Gaming', count: 32180, icon: '����' },
+                          { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
                           { name: 'Real Estate', count: 27450, icon: '🏠' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
-                          { name: 'Home & Garden', count: 21890, icon: '��' },
-                          { name: 'Legal Services', count: 19650, icon: '��️' },
+                          { name: 'Home & Garden', count: 21890, icon: '🏠' },
+                          { name: 'Legal Services', count: 19650, icon: '⚖️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
-                          { name: 'Government & Politics', count: 15820, icon: '🏛️' },
+                          { name: 'Government & Politics', count: 15820, icon: '🏛��' },
                           { name: 'Science & Research', count: 14560, icon: '🔬' },
-                          { name: 'Arts & Culture', count: 13290, icon: '���' }
+                          { name: 'Arts & Culture', count: 13290, icon: '🎨' }
                         ].map((category, idx) => (
                           <div key={idx} className="p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors">
                             <div className="flex items-center justify-between">
@@ -6201,10 +6254,12 @@ export default function BacklinkAutomation() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Network className="h-5 w-5" />
-                    Recursive Link Discovery
+                    <FormattedText type="title">Recursive Link Discovery</FormattedText>
                   </CardTitle>
                   <CardDescription>
-                    AI-powered recursive discovery synced across all your campaigns to continuously find new high-quality link opportunities
+                    <FormattedDescription>
+                      AI-powered recursive URL discovery system that learns and grows with community collaboration. Discover thousands of verified link opportunities across the entire internet.
+                    </FormattedDescription>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -6397,16 +6452,20 @@ export default function BacklinkAutomation() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Search className="h-5 w-5" />
-                    URL Discovery
+                    <FormattedText type="title">URL Discovery</FormattedText>
                   </CardTitle>
                   <CardDescription>
-                    Browse categorized URLs by link building strategy
+                    <FormattedDescription>
+                      Browse categorized URLs by link building strategy and discover high-quality opportunities
+                    </FormattedDescription>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <Label htmlFor="linkTypeSelect">Select Link Type</Label>
+                      <Label htmlFor="linkTypeSelect">
+                        <FormattedText type="label">Select Link Type</FormattedText>
+                      </Label>
                       <Select value={selectedLinkType} onValueChange={setSelectedLinkType}>
                         <SelectTrigger className="h-12">
                           <SelectValue placeholder="Choose link building strategy" />
@@ -6750,11 +6809,11 @@ export default function BacklinkAutomation() {
                   <Button
                     size="sm"
                     onClick={() => {
-                      setPremiumUpsellTrigger('manual');
+                      
                       if (user) {
-                        setShowTrialExhaustedModal(true);
+                        setShowPremiumPlanModal(true);
                       } else {
-                        setShowGuestPremiumModal(true);
+                        setShowPremiumPlanModal(true);
                       }
                       setShowFabMenu(false);
                     }}
@@ -6811,19 +6870,6 @@ export default function BacklinkAutomation() {
         </div>
       </div>
 
-      {/* Trial Exhausted Modal */}
-      <TrialExhaustedModal
-        open={showTrialExhaustedModal}
-        onOpenChange={setShowTrialExhaustedModal}
-        guestResults={guestCampaignResults}
-        totalLinks={user ? (campaigns.reduce((sum, c) => sum + c.linksGenerated, 0)) : guestLinksGenerated}
-        isLoggedIn={!!user}
-        userName={user?.user_metadata?.full_name || user?.email}
-        onUpgrade={() => {
-          // The TrialExhaustedModal now handles its own checkout integration
-          console.log('User upgrading to premium from trial exhausted modal');
-        }}
-      />
 
       {/* Premium Plan Modal with Live Pricing */}
       <PremiumPlanModal
@@ -6832,7 +6878,7 @@ export default function BacklinkAutomation() {
         onSuccess={() => {
           setShowPremiumPlanModal(false);
           toast({
-            title: "���� Welcome to Premium!",
+            title: "🎉 Welcome to Premium!",
             description: "Your account has been upgraded. Enjoy unlimited access!",
           });
           // Refresh page to update premium status
@@ -6841,16 +6887,6 @@ export default function BacklinkAutomation() {
         triggerSource="automation"
       />
 
-      {/* Guest Premium Upsell Modal */}
-      <GuestPremiumUpsellModal
-        open={showGuestPremiumModal}
-        onOpenChange={setShowGuestPremiumModal}
-        trigger={premiumUpsellTrigger}
-        onUpgrade={() => {
-          // Handle upgrade completion
-          console.log('Guest user upgrading to premium');
-        }}
-      />
 
       {/* Predictive Algorithm Premium Modal - Removed */}
 
@@ -6917,7 +6953,7 @@ export default function BacklinkAutomation() {
                 setCampaignToDelete(null);
 
                 toast({
-                  title: "🗑�� Campaign Deleted",
+                  title: "🗑️ Campaign Deleted",
                   description: "Campaign and all associated data have been permanently removed.",
                 });
               } else {
@@ -6940,7 +6976,7 @@ export default function BacklinkAutomation() {
                 setCampaignToDelete(null);
 
                 toast({
-                  title: "������� Campaign Deleted",
+                  title: " Campaign Deleted",
                   description: "Campaign has been permanently removed.",
                 });
               } else {
@@ -7033,12 +7069,12 @@ export default function BacklinkAutomation() {
                       <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200 shadow-sm">
                         <div className="text-3xl font-bold text-blue-600">{selectedCampaignDetails.linksLive || Math.floor((selectedCampaignDetails.linksGenerated || Math.floor(Math.random() * 15) + 5) * 0.7) || Math.floor(Math.random() * 10) + 3}</div>
                         <div className="text-sm font-semibold text-gray-800">Live Links</div>
-                        <div className="text-xs text-blue-600 mt-1">��� Verified Active</div>
+                        <div className="text-xs text-blue-600 mt-1">✓ Verified Active</div>
                       </div>
                       <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200 shadow-sm">
                         <div className="text-3xl font-bold text-purple-600">{selectedCampaignDetails.avgAuthority || selectedCampaignDetails.quality?.averageAuthority || Math.floor(Math.random() * 15) + 85}</div>
                         <div className="text-sm font-semibold text-gray-800">Avg Authority</div>
-                        <div className="text-xs text-purple-600 mt-1">��� High Quality</div>
+                        <div className="text-xs text-purple-600 mt-1">⭐ High Quality</div>
                       </div>
                       <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200 shadow-sm">
                         <div className="text-3xl font-bold text-orange-600">

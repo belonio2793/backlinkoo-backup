@@ -5,6 +5,7 @@
 
 import { mockPaymentService } from './mockPaymentService';
 import { supabase } from '@/integrations/supabase/client';
+import { CheckoutRedirectManager, type CheckoutRedirectOptions } from '@/utils/checkoutRedirectManager';
 
 interface PaymentConfig {
   stripe: {
@@ -21,6 +22,8 @@ interface PaymentResult {
   sessionId?: string;
   orderId?: string;
   error?: string;
+  checkoutSessionId?: string;
+  usedFallback?: boolean;
 }
 
 class PaymentIntegrationService {
@@ -88,7 +91,8 @@ class PaymentIntegrationService {
     credits: number,
     paymentMethod: 'stripe',
     isGuest: boolean = false,
-    guestEmail?: string
+    guestEmail?: string,
+    redirectOptions?: CheckoutRedirectOptions
   ): Promise<PaymentResult> {
     try {
       // Development mode fallback
@@ -271,7 +275,8 @@ class PaymentIntegrationService {
   async createSubscription(
     plan: 'monthly' | 'yearly',
     isGuest: boolean = false,
-    guestEmail?: string
+    guestEmail?: string,
+    redirectOptions?: CheckoutRedirectOptions
   ): Promise<PaymentResult> {
     try {
       // Validate Stripe is available (subscriptions currently only support Stripe)

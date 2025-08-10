@@ -41,6 +41,7 @@ import { EnhancedAILive } from '@/components/EnhancedAILive';
 import { EnhancedDashboardRouter } from '@/components/EnhancedDashboardRouter';
 import { UserBlogManagement } from '@/components/UserBlogManagement';
 import { BlogEditPage } from '@/pages/BlogEditPage';
+import CheckoutTest from '@/pages/CheckoutTest';
 
 
 export const AppWrapper = () => {
@@ -68,6 +69,7 @@ export const AppWrapper = () => {
         <Route path="/ai-test" element={<AIContentTest />} />
         <Route path="/test-blog-claim" element={<TestBlogClaim />} />
         <Route path="/ai-live" element={<EnhancedAILive />} />
+        <Route path="/checkout-test" element={<CheckoutTest />} />
 
         <Route path="*" element={<NotFound />} />
 

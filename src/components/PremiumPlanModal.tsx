@@ -12,6 +12,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthFormTabs } from '@/components/shared/AuthFormTabs';
 import SubscriptionService from '@/services/subscriptionService';
 import { logError, getErrorMessage } from '@/utils/errorLogger';
+import { CheckoutRedirectManager } from '@/utils/checkoutRedirectManager';
 import {
   Crown, Shield, CheckCircle, X, Lock, Star, Infinity, BookOpen,
   TrendingUp, Users, Target, Sparkles, Zap, ArrowRight, CreditCard,
@@ -171,38 +172,65 @@ export function PremiumPlanModal({
         timestamp: Date.now()
       }));
 
-      // Create subscription using the subscription service
+      toast({
+        title: "🚀 Opening Secure Checkout",
+        description: "Preparing your Stripe payment session...",
+      });
+
+      // Create subscription using the subscription service with checkout redirect manager
       const result = await SubscriptionService.createSubscription(
         user,
         checkoutMode === 'guest',
         checkoutMode === 'guest' ? guestEmail : undefined,
-        selectedPlan
+        selectedPlan,
+        {
+          preferNewWindow: true,
+          fallbackToCurrentWindow: true,
+          onPopupBlocked: () => {
+            toast({
+              title: "Popup Blocked",
+              description: "Opening checkout in current window...",
+            });
+          },
+          onRedirectSuccess: () => {
+            toast({
+              title: "✅ Checkout Opened",
+              description: "Complete your payment in the Stripe window.",
+            });
+
+            // Close modal on successful redirect
+            setTimeout(() => {
+              handleClose();
+            }, 1000);
+          },
+          onRedirectError: (error) => {
+            setCurrentStep('checkout');
+            toast({
+              title: "Checkout Error",
+              description: "Unable to open checkout window. Please try again.",
+              variant: "destructive"
+            });
+          }
+        }
       );
 
-      if (result.success && result.url) {
-        toast({
-          title: "🚀 Redirecting to Secure Checkout",
-          description: "You'll be redirected to complete your payment safely.",
-        });
+      if (result.success) {
+        if (result.usedFallback) {
+          // Handle fallback activation
+          setCurrentStep('success');
+          toast({
+            title: "🎉 Premium Activated!",
+            description: "Your account has been upgraded to Premium successfully.",
+          });
 
-        // Small delay before redirect to show toast
-        setTimeout(() => {
-          window.location.href = result.url;
-        }, 1500);
-      } else if (result.success && result.usedFallback) {
-        // Handle fallback activation
-        setCurrentStep('success');
-        toast({
-          title: "🎉 Premium Activated!",
-          description: "Your account has been upgraded to Premium successfully.",
-        });
-
-        // Auto-redirect after success
-        setTimeout(() => {
-          handleClose();
-          navigate('/dashboard');
-          onSuccess?.();
-        }, 2000);
+          // Auto-redirect after success
+          setTimeout(() => {
+            handleClose();
+            navigate('/dashboard');
+            onSuccess?.();
+          }, 2000);
+        }
+        // If using checkout redirect manager, redirect is already handled
       } else {
         throw new Error(result.error || 'Failed to create subscription checkout');
       }
@@ -248,32 +276,6 @@ export function PremiumPlanModal({
         </div>
       </div>
 
-      {/* Special Offer Banner */}
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6">
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <Gift className="h-6 w-6 text-green-600" />
-            <span className="text-2xl font-bold text-green-800">Limited Time Offer!</span>
-          </div>
-          <p className="text-green-700 text-lg mb-3">
-            Get <span className="font-bold text-2xl">51% OFF</span> when you choose our yearly plan
-          </p>
-          <div className="flex items-center justify-center gap-6 text-sm text-green-600">
-            <span className="flex items-center gap-1">
-              <CheckCircle className="h-4 w-4" />
-              30-day money back guarantee
-            </span>
-            <span className="flex items-center gap-1">
-              <CheckCircle className="h-4 w-4" />
-              Cancel anytime
-            </span>
-            <span className="flex items-center gap-1">
-              <CheckCircle className="h-4 w-4" />
-              Instant access
-            </span>
-          </div>
-        </div>
-      </div>
 
       {/* Core Features Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

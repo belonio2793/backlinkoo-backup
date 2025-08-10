@@ -3,6 +3,7 @@ import type { User } from '@supabase/supabase-js';
 import { logError as logFormattedError, getErrorMessage } from '@/utils/errorFormatter';
 import { logError } from '@/utils/errorLogger';
 import { mockPaymentService } from '@/services/mockPaymentService';
+import { CheckoutRedirectManager, type CheckoutRedirectOptions } from '@/utils/checkoutRedirectManager';
 
 export interface SubscriptionStatus {
   isSubscribed: boolean;
@@ -151,8 +152,9 @@ export class SubscriptionService {
     user: User | null,
     isGuest: boolean = false,
     guestEmail?: string,
-    planType: 'monthly' | 'yearly' = 'monthly'
-  ): Promise<{ success: boolean; url?: string; error?: string }> {
+    planType: 'monthly' | 'yearly' = 'monthly',
+    redirectOptions?: CheckoutRedirectOptions
+  ): Promise<{ success: boolean; url?: string; error?: string; sessionId?: string; checkoutManager?: any }> {
 
     try {
       // Validate Stripe configuration for the selected plan
