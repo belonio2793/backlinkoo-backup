@@ -5467,7 +5467,7 @@ export default function BacklinkAutomation() {
                                 <Button
                                   size="sm"
                                   onClick={() => {
-                                    setShowPremiumPlanModal(true);
+                                    DirectCheckoutService.upgradeToPremium('monthly');
                                   }}
                                   className="h-6 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                                 >
