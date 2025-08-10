@@ -268,7 +268,11 @@ GRANT ALL ON error_logs TO service_role;
       
       localStorage.setItem('error_logs_fallback', JSON.stringify(trimmedErrors));
     } catch (error) {
-      console.error('Failed to save error to localStorage:', error);
+      console.error('Failed to save error to localStorage:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
     }
   }
 
