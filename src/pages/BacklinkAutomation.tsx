@@ -284,18 +284,7 @@ export default function BacklinkAutomation() {
     globalCounters
   } = useCampaignCounters();
 
-  // Predictive algorithm integration
-  const {
-    initializePredictive,
-    updatePredictive,
-    triggerPremiumCheck,
-    openPremiumModal: openPredictivePremiumModal,
-    closePremiumModal: closePredictivePremiumModal,
-    showPremiumModal: showPredictivePremiumModal
-  } = usePredictiveCampaignAlgorithm({
-    isPremium,
-    enablePremiumModal: true
-  });
+  // Predictive algorithm removed - values integrated into live metrics
 
   // Throttling state for controlled link publishing
   const [isThrottling, setIsThrottling] = useState(false);
