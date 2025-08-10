@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { CampaignMetricsErrorHandler } from './campaignMetricsErrorHandler';
+import { CampaignMetricsHealthCheck } from '@/utils/campaignMetricsHealthCheck';
 
 type CampaignRuntimeMetrics = Database['public']['Tables']['campaign_runtime_metrics']['Row'];
 type CampaignRuntimeMetricsInsert = Database['public']['Tables']['campaign_runtime_metrics']['Insert'];
