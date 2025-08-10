@@ -327,7 +327,12 @@ GRANT ALL ON error_logs TO service_role;
         .slice(0, limit);
 
     } catch (error) {
-      console.error('Failed to fetch errors from database:', error);
+      console.error('Failed to fetch errors from database:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       return this.getErrorsFromLocalStorage();
     }
   }
