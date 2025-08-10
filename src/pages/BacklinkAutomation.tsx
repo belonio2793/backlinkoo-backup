@@ -887,7 +887,7 @@ export default function BacklinkAutomation() {
 
           // Show user-friendly notification for database issues
           if (result.error?.includes('table missing') || result.error?.includes('function')) {
-            console.log('����� Database tables not found, using localStorage fallback');
+            console.log('��� Database tables not found, using localStorage fallback');
           }
         }
       }
@@ -3615,7 +3615,7 @@ export default function BacklinkAutomation() {
           {/* System Ready alert removed */}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-5">
               <TabsTrigger value="campaigns" className="relative">
                 Campaign Manager
                 {((user && campaigns.filter(c => c.status === 'active').length > 0) ||
@@ -3623,6 +3623,7 @@ export default function BacklinkAutomation() {
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
                 )}
               </TabsTrigger>
+              <TabsTrigger value="completed-urls">All Completed URLs</TabsTrigger>
               <TabsTrigger value="database">Website Database</TabsTrigger>
               <TabsTrigger value="recursive">Recursive Discovery</TabsTrigger>
               <TabsTrigger value="discovery">Legacy Discovery</TabsTrigger>
@@ -6114,7 +6115,7 @@ export default function BacklinkAutomation() {
                           { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
-                          { name: 'Marketing & Advertising', count: 54210, icon: '��' },
+                          { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '����' },
                           { name: 'Travel & Tourism', count: 38920, icon: '✈���' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
