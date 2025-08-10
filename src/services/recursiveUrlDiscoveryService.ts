@@ -734,10 +734,17 @@ class RecursiveUrlDiscoveryService {
       const { data, error } = await supabase.rpc('auto_clean_urls');
 
       if (error) {
-        if (error.code === '42883') {
+        // Handle various error codes for missing function
+        if (error.code === '42883' || error.code === 'PGRST202' || error.message?.includes('Could not find the function')) {
           console.log('Auto cleanup function does not exist, skipping cleanup');
+          return;
         } else {
-          console.error('Auto cleanup failed:', error instanceof Error ? error.message : JSON.stringify(error, null, 2));
+          console.error('Auto cleanup failed:', {
+            code: error.code,
+            message: error.message,
+            details: error.details,
+            hint: error.hint
+          });
         }
       } else {
         console.log(`Auto cleanup completed: ${data} URLs cleaned`);
