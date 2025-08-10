@@ -164,21 +164,14 @@ class CampaignMetricsService {
         .single();
 
       if (error) {
-        console.error('Failed to record link:', {
-          code: error.code,
-          message: error.message,
-          details: error.details
-        });
+        console.error('Failed to record link:', formatErrorForLogging(error, 'recordLink'));
         return { success: false, error: formatErrorForUI(error) || 'Failed to record link' };
       }
 
       console.log('✅ Link recorded in database:', linkRecord.sourceUrl);
       return { success: true, data };
     } catch (error) {
-      console.error('Link recording error:', {
-        error: error,
-        message: formatErrorForUI(error) || 'Unknown error'
-      });
+      console.error('Link recording error:', formatErrorForLogging(error, 'recordLink-catch'));
       return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
     }
   }
