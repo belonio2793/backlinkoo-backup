@@ -77,7 +77,7 @@ export const RLSRecursionFixer = () => {
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            <strong>Error:</strong> infinite recursion detected in policy for relation "profiles"
+            <strong>Error: </strong>infinite recursion detected in policy for relation "profiles"
             <br />
             This prevents user authentication and database queries from working properly.
           </AlertDescription>
