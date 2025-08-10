@@ -1752,6 +1752,12 @@ export default function BacklinkAutomation() {
         }));
 
         setCampaigns(convertedCampaigns);
+
+        // Initialize counters for loaded campaigns
+        convertedCampaigns.forEach(campaign => {
+          initializeCampaign(campaign.id, campaign.status || 'saved');
+        });
+
         console.log('Loaded campaigns:', convertedCampaigns.length);
       } else if (result.error) {
         console.error('Failed to load campaigns:', formatErrorForLogging(result.error, 'loadCampaigns'));
