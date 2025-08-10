@@ -318,7 +318,7 @@ export default function BacklinkAutomation() {
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [usageStats, setUsageStats] = useState({ linksPosted: 0, isLimitReached: false });
   const [guestLinksGenerated, setGuestLinksGenerated] = useState(0);
-  const [showPremiumPlanModal, setShowPremiumPlanModal] = useState(false);
+  // Premium modal removed - using direct checkout
   const [guestCampaignResults, setGuestCampaignResults] = useState<any[]>([]);
   const [isFetching, setIsFetching] = useState(false);
   const [backendStatus, setBackendStatus] = useState('available');
@@ -422,7 +422,7 @@ export default function BacklinkAutomation() {
       // For guest users, use a persistent guest ID
       const guestId = guestTrackingService.getGuestData()?.guestId || 'guest_default';
       const key = `permanent_campaigns_guest_${guestId}`;
-      console.log('🔑 Using guest storage key:', key);
+      console.log('��� Using guest storage key:', key);
       return key;
     }
   }, [user]);
@@ -2187,7 +2187,7 @@ export default function BacklinkAutomation() {
       startRealTimeActivity(campaignId);
 
       toast({
-        title: "▶️ Campaign Resumed",
+        title: "��️ Campaign Resumed",
         description: "Link building is now active and generating high-quality backlinks.",
       });
     } catch (error) {
