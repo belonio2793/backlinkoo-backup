@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { EnhancedBlogClaimService } from './enhancedBlogClaimService';
+import { formatErrorForLogging } from '@/utils/errorUtils';
 
 export class BlogCleanupService {
   private static readonly CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour
@@ -49,7 +50,7 @@ export class BlogCleanupService {
       const result = await EnhancedBlogClaimService.cleanupExpiredPosts();
       
       if (result.error) {
-        console.error('🧹 Cleanup failed:', result.error);
+        console.error('🧹 Cleanup failed:', formatErrorForLogging(result.error, 'cleanupExpiredPosts'));
         return { success: false, deletedCount: 0, error: result.error };
       }
 
@@ -61,7 +62,7 @@ export class BlogCleanupService {
 
       return { success: true, deletedCount: result.deletedCount };
     } catch (error: any) {
-      console.error('🧹 Cleanup service error:', error.message || error.toString() || JSON.stringify(error));
+      console.error('🧹 Cleanup service error:', formatErrorForLogging(error, 'cleanupExpiredPosts-catch'));
       return { success: false, deletedCount: 0, error: error.message };
     }
   }
