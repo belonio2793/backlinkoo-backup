@@ -3580,9 +3580,15 @@ export default function BacklinkAutomation() {
                   <div className="absolute -top-1 -right-1 h-3 w-3 bg-green-500 rounded-full animate-pulse"></div>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="completed-urls">All Completed URLs</TabsTrigger>
-              <TabsTrigger value="database">Website Database</TabsTrigger>
-              <TabsTrigger value="recursive">Recursive Discovery</TabsTrigger>
+              <TabsTrigger value="completed-urls">
+                <FormattedText type="label">All Completed URLs</FormattedText>
+              </TabsTrigger>
+              <TabsTrigger value="database">
+                <FormattedText type="label">Website Database</FormattedText>
+              </TabsTrigger>
+              <TabsTrigger value="recursive">
+                <FormattedText type="label">Recursive Discovery</FormattedText>
+              </TabsTrigger>
               <TabsTrigger value="discovery">Legacy Discovery</TabsTrigger>
             </TabsList>
 
