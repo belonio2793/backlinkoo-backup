@@ -111,7 +111,7 @@ export function QueueMonitor() {
       startTime: '14:30:45',
       duration: '2m 15s',
       priority: 1,
-      error: 'Connection timeout'
+      error: 'Connection timeout occurred'
     },
     {
       id: 'task_004',
