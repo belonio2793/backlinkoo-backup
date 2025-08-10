@@ -509,4 +509,27 @@ class CampaignMetricsService {
 }
 
 export const campaignMetricsService = new CampaignMetricsService();
+
+// Debug utility for console
+if (typeof window !== 'undefined') {
+  (window as any).debugCampaignMetrics = async () => {
+    console.log('🔍 Debugging Campaign Metrics Database Setup...');
+    const debug = await campaignMetricsService.debugDatabaseSetup();
+
+    console.log('📊 Tables Status:', debug.tablesExist);
+    console.log('👁️ Views Status:', debug.viewsExist);
+    console.log('⚙️ Functions Status:', debug.functionsExist);
+
+    if (debug.errors.length > 0) {
+      console.error('❌ Errors Found:', debug.errors);
+    } else {
+      console.log('✅ All database components are working!');
+    }
+
+    return debug;
+  };
+
+  console.log('🔧 Campaign Metrics Debug: Run debugCampaignMetrics() in console to test database setup');
+}
+
 export default campaignMetricsService;
