@@ -1682,7 +1682,7 @@ export default function BacklinkAutomation() {
         // Switch to live results sub-tab when campaigns are active\n        setSelectedCampaignTab('live-results');
         toast({
           title: "���� Campaign Results Ready!",
-          description: "Your campaigns are now running. View real-time progress in the live monitor above.",
+          // description: "Your campaigns are now running. View real-time progress in the live monitor above.",
           duration: 4000,
         });
       }, 3000);
