@@ -209,10 +209,9 @@ export class ProfileErrorDebugger {
   }
 }
 
-// Auto-run debug check when imported in development
+// Auto-run disabled to prevent console pollution
+// To run manually: ProfileErrorDebugger.checkDatabaseSchema()
 if (process.env.NODE_ENV === 'development') {
-  // Run a delayed check to avoid immediate execution during imports
-  setTimeout(() => {
-    ProfileErrorDebugger.checkDatabaseSchema();
-  }, 2000);
+  (window as any).ProfileErrorDebugger = ProfileErrorDebugger;
+  console.log('🔧 Profile error debugger available: ProfileErrorDebugger.checkDatabaseSchema()');
 }
