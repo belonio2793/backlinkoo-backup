@@ -45,10 +45,10 @@ import { guestTrackingService } from '@/services/guestTrackingService';
 import { GuestPremiumUpsellModal } from '@/components/GuestPremiumUpsellModal';
 import { GuestCampaignRestrictionsOverlay } from '@/components/GuestCampaignRestrictionsOverlay';
 
-// Import our enterprise engines
-import { CampaignQueueManager, type CampaignConfig } from '@/services/automationEngine/CampaignQueueManager';
-import { LinkDiscoveryEngine } from '@/services/automationEngine/LinkDiscoveryEngine';
-import { AnalyticsEngine } from '@/services/automationEngine/AnalyticsEngine';
+// Import our enterprise engines - temporarily commented out to test
+// import { CampaignQueueManager, type CampaignConfig } from '@/services/automationEngine/CampaignQueueManager';
+// import { LinkDiscoveryEngine } from '@/services/automationEngine/LinkDiscoveryEngine';
+// import { AnalyticsEngine } from '@/services/automationEngine/AnalyticsEngine';
 import { ContentGenerationEngine } from '@/services/automationEngine/ContentGenerationEngine';
 import { ErrorHandlingEngine } from '@/services/automationEngine/ErrorHandlingEngine';
 
@@ -6923,7 +6923,7 @@ export default function BacklinkAutomation() {
                 <li>✓ Your current campaign will be saved to your account</li>
                 <li>✓ Get access to 3 free automation campaigns</li>
                 <li>✓ Monitor your backlink progress in real-time</li>
-                <li>✓ Receive notifications when links go live</li>
+                <li>��� Receive notifications when links go live</li>
               </ul>
             </div>
 
