@@ -1671,7 +1671,7 @@ export default function BacklinkAutomation() {
         setCampaigns(convertedCampaigns);
         console.log('Loaded campaigns:', convertedCampaigns.length);
       } else if (result.error) {
-        console.error('Failed to load campaigns:', result.error);
+        console.error('Failed to load campaigns:', formatErrorForLogging(result.error, 'loadCampaigns'));
         toast({
           title: "Error Loading Campaigns",
           description: formatErrorForUI(result.error),
@@ -5956,7 +5956,7 @@ export default function BacklinkAutomation() {
                           { name: 'Legal Services', count: 19650, icon: '⚖️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
-                          { name: 'Science & Research', count: 14560, icon: '���' },
+                          { name: 'Science & Research', count: 14560, icon: '🔬' },
                           { name: 'Arts & Culture', count: 13290, icon: '���' }
                         ].map((category, idx) => (
                           <div key={idx} className="p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors">
