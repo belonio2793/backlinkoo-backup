@@ -271,6 +271,14 @@ export default function BacklinkAutomation() {
   const [databaseStatus, setDatabaseStatus] = useState<DatabaseStatus | null>(null);
   const [isCheckingDatabase, setIsCheckingDatabase] = useState(true);
 
+  // Campaign counter integration
+  const {
+    initializeCampaign,
+    updateStatus: updateCounterStatus,
+    deleteCampaign: deleteCounterCampaign,
+    globalCounters
+  } = useCampaignCounters();
+
   // Throttling state for controlled link publishing
   const [isThrottling, setIsThrottling] = useState(false);
   const [throttleIntervalId, setThrottleIntervalId] = useState<NodeJS.Timeout | null>(null);
