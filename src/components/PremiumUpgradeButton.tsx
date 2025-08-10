@@ -27,8 +27,6 @@ export function PremiumUpgradeButton({
   style = 'primary',
   disabled = false
 }: PremiumUpgradeButtonProps) {
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const { user } = useAuth();
   const { isPremium, loading } = usePremium();
 
   // Don't show upgrade button if user is already premium
