@@ -429,7 +429,7 @@ export default function BacklinkAutomation() {
           // Show success notification occasionally
           if (Math.random() > 0.9) {
             toast({
-              title: '�� Database Sync Complete',
+              title: '📊 Database Sync Complete',
               description: `Campaign metrics saved: ${progressiveLinkCount} total links`,
               duration: 2000
             });
@@ -2686,6 +2686,12 @@ export default function BacklinkAutomation() {
       // Initialize counters for guest campaign
       if (trackingResult.success && trackingResult.campaign) {
         initializeCampaign(trackingResult.campaign.id, 'active');
+        // Initialize predictive algorithm for guest campaign
+        try {
+          initializePredictive(trackingResult.campaign.id, false); // Guest campaigns are not premium
+        } catch (error) {
+          console.warn('Failed to initialize predictive metrics for guest campaign:', error instanceof Error ? error.message : String(error));
+        }
       }
     }
 
@@ -2894,7 +2900,7 @@ export default function BacklinkAutomation() {
         } else {
           // Progress update
           toast({
-            title: `������ +${linksToGenerate} More Backlinks Generated!`,
+            title: `�������� +${linksToGenerate} More Backlinks Generated!`,
             description: `Total: ${newTotal} premium backlinks built${blogResult.success ? (blogResult.isFallback ? ' + blog post queued' : ' + new blog post published') : ''}! Keep going - you're on fire!`,
           });
         }
