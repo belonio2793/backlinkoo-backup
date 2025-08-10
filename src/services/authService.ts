@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { EmailService } from './emailService';
 import { ProfileMigrationService } from './profileMigrationService';
+import { logAuthError } from '@/utils/authErrorFix';
 import type { User, Session } from '@supabase/supabase-js';
 
 export interface AuthResponse {
