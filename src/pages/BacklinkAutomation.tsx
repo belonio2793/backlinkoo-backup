@@ -1998,6 +1998,13 @@ export default function BacklinkAutomation() {
       // Update campaign counters
       updateCounterStatus(campaignId, 'paused');
 
+      // Update predictive algorithm
+      try {
+        updatePredictive(campaignId);
+      } catch (error) {
+        console.warn('Failed to update predictive metrics on pause:', error instanceof Error ? error.message : String(error));
+      }
+
       // Update local state with preserved data
       setCampaigns(prev => prev.map(c => {
         if (c.id === campaignId) {
@@ -2268,7 +2275,7 @@ export default function BacklinkAutomation() {
       // Check if this interval is still the active one (prevents race conditions)
       const currentInterval = activeCampaignIntervals.get(campaignId);
       if (currentInterval !== interval) {
-        console.log('⏹�� Stopping stale interval for campaign:', campaignId);
+        console.log('⏹️ Stopping stale interval for campaign:', campaignId);
         clearInterval(interval);
         return;
       }
@@ -6156,7 +6163,7 @@ export default function BacklinkAutomation() {
                           { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
-                          { name: 'Marketing & Advertising', count: 54210, icon: '��' },
+                          { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '����' },
                           { name: 'Travel & Tourism', count: 38920, icon: '✈���' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
