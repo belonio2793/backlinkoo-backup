@@ -2105,6 +2105,9 @@ export default function BacklinkAutomation() {
         }
       }
 
+      // Update campaign counters
+      updateCounterStatus(campaignId, 'active');
+
       // Update local state
       setCampaigns(prev => prev.map(c =>
         c.id === campaignId ? { ...c, status: 'active' } : c
