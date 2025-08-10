@@ -37,7 +37,6 @@ import ToolsHeader from '@/components/shared/ToolsHeader';
 import { Footer } from '@/components/Footer';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
 import { AllCompletedURLsRundown } from '@/components/campaigns/AllCompletedURLsRundown';
-import { TrialExhaustedModal } from '@/components/TrialExhaustedModal';
 import { PremiumPlanModal } from '@/components/PremiumPlanModal';
 
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
@@ -1988,7 +1987,7 @@ export default function BacklinkAutomation() {
       const interval = activeCampaignIntervals.get(campaignId);
       if (interval) {
         clearInterval(interval);
-        console.log('⏸️ Cleared interval for paused campaign:', campaignId);
+        console.log('���️ Cleared interval for paused campaign:', campaignId);
       }
 
       // Update intervals map atomically
@@ -2128,7 +2127,7 @@ export default function BacklinkAutomation() {
       console.log('🧹 Component unmounting - cleaning up all campaign intervals');
       activeCampaignIntervals.forEach((interval, campaignId) => {
         clearInterval(interval);
-        console.log('���� Cleared interval for campaign on unmount:', campaignId);
+        console.log('�� Cleared interval for campaign on unmount:', campaignId);
       });
     };
   }, [activeCampaignIntervals]);
