@@ -925,6 +925,9 @@ export default function BacklinkAutomation() {
     const monitoringInterval = setInterval(() => {
       autoDetectionSystem();
 
+      // Retry failed database syncs
+      retryFailedSyncs();
+
       // Update live monitoring metrics for current user
       const storageKey = getUserStorageKey();
       const savedCampaigns = JSON.parse(localStorage.getItem(storageKey) || '[]');
