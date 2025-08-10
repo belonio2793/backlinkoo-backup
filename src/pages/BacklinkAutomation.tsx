@@ -941,7 +941,7 @@ export default function BacklinkAutomation() {
     return () => {
       clearInterval(monitoringInterval);
     };
-  }, [randomizeWebsites, loadPermanentCampaigns, autoDetectionSystem, getUserStorageKey, loadCampaignMetrics, metricsLoaded]);
+  }, [randomizeWebsites, loadPermanentCampaigns, autoDetectionSystem, getUserStorageKey, loadCampaignMetrics, metricsLoaded, retryFailedSyncs]);
 
   // User-specific data restoration - triggers when user authentication changes
   useEffect(() => {
