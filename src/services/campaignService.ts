@@ -537,7 +537,12 @@ class CampaignService {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Failed to fetch deletion logs:', error);
+      console.error('Failed to fetch deletion logs:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       throw error;
     }
   }
