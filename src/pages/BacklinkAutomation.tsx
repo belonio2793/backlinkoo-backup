@@ -1969,29 +1969,63 @@ export default function BacklinkAutomation() {
           }
         };
 
-        // Async database sync with retry logic (don't block UI updates)
+        // Async database sync with comprehensive retry logic (don't block UI updates)
         if (user?.id && shouldGenerateNewLinks && newLinks.length > 0) {
           (async () => {
-            try {
-              const metrics: CampaignMetrics = {
-                campaignId: campaign.id,
-                campaignName: campaign.name,
-                targetUrl: campaign.targetUrl,
-                keywords: campaign.keywords || [],
-                anchorTexts: campaign.anchorTexts || [],
-                status: updatedCampaign.status,
-                progressiveLinkCount: updatedLinksGenerated,
-                linksLive: updatedCampaign.linksLive,
-                linksPending: 0,
-                averageAuthority: updatedCampaign.quality?.averageAuthority || 75,
-                successRate: updatedCampaign.quality?.successRate || 95,
-                velocity: updatedLinksGenerated,
-                dailyLimit: campaign.dailyLimit || 25
-              };
+            const metrics: CampaignMetrics = {
+              campaignId: campaign.id,
+              campaignName: campaign.name,
+              targetUrl: campaign.targetUrl,
+              keywords: campaign.keywords || [],
+              anchorTexts: campaign.anchorTexts || [],
+              status: updatedCampaign.status,
+              progressiveLinkCount: updatedLinksGenerated,
+              linksLive: updatedCampaign.linksLive,
+              linksPending: 0,
+              averageAuthority: updatedCampaign.quality?.averageAuthority || 75,
+              successRate: updatedCampaign.quality?.successRate || 95,
+              velocity: updatedLinksGenerated,
+              dailyLimit: campaign.dailyLimit || 25
+            };
 
-              await campaignMetricsService.updateCampaignMetrics(user.id, metrics);
-            } catch (error) {
-              console.warn('Database sync failed, metrics persisted locally:', error);
+            // Retry logic with exponential backoff
+            let retryCount = 0;
+            const maxRetries = 3;
+            const baseDelay = 1000; // 1 second
+
+            while (retryCount < maxRetries) {
+              try {
+                await campaignMetricsService.updateCampaignMetrics(user.id, metrics);
+                console.log('✅ Database sync successful for campaign:', campaign.id);
+                break; // Success, exit retry loop
+              } catch (error) {
+                retryCount++;
+                const isLastRetry = retryCount >= maxRetries;
+
+                if (isLastRetry) {
+                  console.warn('❌ Database sync failed after', maxRetries, 'attempts for campaign:', campaign.id, error);
+
+                  // Store failed sync for later retry
+                  try {
+                    const failedSyncs = JSON.parse(localStorage.getItem('failed_campaign_syncs') || '[]');
+                    failedSyncs.push({
+                      metrics,
+                      userId: user.id,
+                      timestamp: Date.now(),
+                      retryCount: 0
+                    });
+                    // Keep only last 50 failed syncs
+                    localStorage.setItem('failed_campaign_syncs', JSON.stringify(failedSyncs.slice(-50)));
+                  } catch (storageError) {
+                    console.warn('Failed to store sync failure for retry:', storageError);
+                  }
+                } else {
+                  // Wait before retry with exponential backoff
+                  const delay = baseDelay * Math.pow(2, retryCount - 1);
+                  console.log(`⏳ Database sync failed, retrying in ${delay}ms (attempt ${retryCount}/${maxRetries})`);
+                  await new Promise(resolve => setTimeout(resolve, delay));
+                }
+              }
             }
           })();
         }
