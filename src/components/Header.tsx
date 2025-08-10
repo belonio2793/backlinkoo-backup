@@ -152,6 +152,7 @@ export function Header({ showHomeLink = true }: HeaderProps) {
             ) : user ? (
               // Authenticated user buttons
               <>
+                <HeaderUpgradeButton />
                 <Button
                   onClick={() => navigate("/dashboard")}
                   className="bg-transparent hover:bg-blue-50/50 border border-blue-200/60 text-blue-700 hover:text-blue-800 hover:border-blue-300/80 transition-all duration-200 font-medium px-6 py-2 backdrop-blur-sm shadow-sm hover:shadow-md"
