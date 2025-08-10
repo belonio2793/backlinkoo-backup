@@ -261,7 +261,7 @@ class CampaignMetricsService {
           message: error.message,
           details: error.details
         });
-        return { success: false, error: error.message || 'Failed to fetch live monitor data' };
+        return { success: false, error: formatErrorForUI(error) || 'Failed to fetch live monitor data' };
       }
 
       return { success: true, data: data || null };
@@ -293,7 +293,7 @@ class CampaignMetricsService {
           message: error.message,
           details: error.details
         });
-        return { success: false, error: error.message || 'Failed to fetch dashboard summary' };
+        return { success: false, error: formatErrorForUI(error) || 'Failed to fetch dashboard summary' };
       }
 
       return { success: true, data: data || null };
@@ -327,7 +327,7 @@ class CampaignMetricsService {
           message: metricsError.message,
           details: metricsError.details
         });
-        return { success: false, error: metricsError.message || 'Failed to delete campaign' };
+        return { success: false, error: formatErrorForUI(metricsError) || 'Failed to delete campaign' };
       }
 
       // Update monthly aggregates
@@ -372,7 +372,7 @@ class CampaignMetricsService {
           message: error.message,
           details: error.details
         });
-        return { success: false, error: error.message || 'Failed to fetch link history' };
+        return { success: false, error: formatErrorForUI(error) || 'Failed to fetch link history' };
       }
 
       return { success: true, data: data || [] };
