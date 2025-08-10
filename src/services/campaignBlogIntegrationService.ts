@@ -318,43 +318,51 @@ export class CampaignBlogIntegrationService {
         }
       };
 
-      let response;
-      try {
-        response = await fetch('/.netlify/functions/global-blog-generator', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(blogRequest)
-        });
-      } catch (networkError) {
-        console.error('Network error calling blog generator:', JSON.stringify({
-          message: networkError.message,
-          stack: networkError.stack,
-          name: networkError.name
-        }, null, 2));
-        throw new Error(`Network error: ${networkError.message}`);
+      // Check environment and try multiple endpoints
+      const env = this.getEnvironment();
+      const endpoints = [];
+
+      if (env.isNetlify || env.isLocalhost) {
+        endpoints.push('/.netlify/functions/global-blog-generator');
       }
 
-      if (!response.ok) {
-        console.error('Blog generation HTTP error:', JSON.stringify({
-          status: response.status,
-          statusText: response.statusText,
-          url: response.url
-        }, null, 2));
+      if (env.isFlyDev || env.isProduction) {
+        endpoints.push('/api/global-blog-generator');
+        endpoints.push('/functions/global-blog-generator');
+      }
 
-        // If it's a 404, the function might not be deployed - provide fallback
-        if (response.status === 404) {
-          console.warn('⚠️ Blog generation service not available, using fallback mode');
-          return {
-            success: true,
-            blogPostUrl: `https://backlinkoo.com/blog/${primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
-            title: `${primaryKeyword}: Complete Guide`,
-            blogPostId: `guest_fallback_${Date.now()}`
-          };
+      endpoints.push('/.netlify/functions/generate-post', '/api/generate-post');
+
+      let response;
+      let lastError;
+
+      for (const endpoint of endpoints) {
+        try {
+          console.log(`🔄 Trying guest blog endpoint: ${endpoint}`);
+          response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(blogRequest)
+          });
+
+          if (response.ok) {
+            console.log(`✅ Guest blog endpoint success: ${endpoint}`);
+            break;
+          } else {
+            lastError = new Error(`HTTP ${response.status}: ${response.statusText}`);
+          }
+        } catch (networkError) {
+          console.warn(`⚠️ Guest blog endpoint error ${endpoint}:`, networkError.message);
+          lastError = networkError;
+          continue;
         }
+      }
 
-        throw new Error(`Blog generation failed: ${response.status} ${response.statusText}`);
+      if (!response || !response.ok) {
+        console.warn('⚠️ All guest blog endpoints failed, using fallback mode');
+        return this.generateFallbackBlogPost({ ...request, campaignId: request.campaignId || `guest_${Date.now()}` }, primaryKeyword);
       }
 
       let result;
