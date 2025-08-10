@@ -1067,7 +1067,7 @@ export default function BacklinkAutomation() {
       const activeCampaigns = savedCampaigns.filter((c: any) => c.status === 'active');
 
       if (activeCampaigns.length > 0) {
-        console.log('🔄 Live Monitor: Tracking', activeCampaigns.length, 'active campaigns for', user?.id || 'guest');
+        console.log('��� Live Monitor: Tracking', activeCampaigns.length, 'active campaigns for', user?.id || 'guest');
       }
     }, 30000);
 
@@ -4079,6 +4079,70 @@ export default function BacklinkAutomation() {
                                   )}
                                 </div>
                               </div>
+                            </div>
+                          </div>
+
+                          {/* Global Real-time Activity Feed */}
+                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                            <div className="bg-gradient-to-r from-purple-50 to-blue-50 px-4 py-2 border-b flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <Activity className="h-4 w-4 text-purple-600 animate-pulse" />
+                                <span className="font-medium text-gray-900">Global Activity Feed</span>
+                                <Badge variant="secondary" className="text-xs">
+                                  {globalActivityFeed.length} activities
+                                </Badge>
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Last updated: {new Date(cumulativeStats.lastUpdated).toLocaleTimeString()}
+                              </div>
+                            </div>
+
+                            <div className="max-h-60 overflow-y-auto">
+                              {globalActivityFeed.length > 0 ? (
+                                <div className="divide-y divide-gray-100">
+                                  {globalActivityFeed.slice(0, 20).map((activity, idx) => (
+                                    <div key={activity.id || idx} className="p-3 hover:bg-gray-50 transition-colors">
+                                      <div className="flex items-start gap-3">
+                                        <div className={`mt-1 h-2 w-2 rounded-full flex-shrink-0 ${
+                                          activity.type === 'link_published' ? 'bg-green-500' :
+                                          activity.type === 'system_monitoring' ? 'bg-blue-500 animate-pulse' :
+                                          'bg-gray-400'
+                                        }`}></div>
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-center justify-between">
+                                            <p className="text-sm text-gray-900 truncate">
+                                              {activity.message}
+                                            </p>
+                                            <span className="text-xs text-gray-500 ml-2">
+                                              {new Date(activity.timestamp).toLocaleTimeString()}
+                                            </span>
+                                          </div>
+                                          <div className="flex items-center gap-2 mt-1">
+                                            <span className="text-xs text-blue-600 font-medium">
+                                              {activity.campaignName}
+                                            </span>
+                                            {activity.metadata?.domain && (
+                                              <span className="text-xs text-gray-500">
+                                                {activity.metadata.domain}
+                                              </span>
+                                            )}
+                                            {activity.metadata?.authority && (
+                                              <Badge variant="outline" className="text-xs px-1 py-0">
+                                                DA {activity.metadata.authority}
+                                              </Badge>
+                                            )}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <div className="p-8 text-center text-gray-500">
+                                  <Activity className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                  <p className="text-sm">No activity yet. Deploy a campaign to see real-time updates.</p>
+                                </div>
+                              )}
                             </div>
                           </div>
 
