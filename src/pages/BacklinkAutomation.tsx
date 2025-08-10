@@ -2153,37 +2153,43 @@ export default function BacklinkAutomation() {
 
           // If blog generation was successful, add it as the first published link
           if (blogResult.success && blogResult.blogPostUrl) {
-            const blogLink = {
-              domain: 'backlinkoo.com',
-              url: blogResult.blogPostUrl,
-              publishedAt: new Date().toISOString(),
-              anchorText: campaignForm.keywords.split(',')[0]?.trim() || 'learn more',
-              verified: true,
-              destinationUrl: campaignForm.targetUrl,
-              type: 'blog_post',
-              status: 'live',
-              domainAuthority: 95,
-              traffic: 50000,
-              clickThroughRate: '3.2%',
-              indexingStatus: 'Indexed',
-              linkType: 'guest_post',
-              campaignName: campaignForm.name || `Campaign for ${campaignForm.targetUrl}`,
-              priority: true, // Mark as priority link
-              isPrimaryBlogPost: true // Special flag for blog posts
-            };
+            try {
+              const blogLink = {
+                domain: 'backlinkoo.com',
+                url: blogResult.blogPostUrl,
+                publishedAt: new Date().toISOString(),
+                anchorText: campaignForm.keywords.split(',')[0]?.trim() || 'learn more',
+                verified: true,
+                destinationUrl: campaignForm.targetUrl,
+                type: 'blog_post',
+                status: 'live',
+                domainAuthority: 95,
+                traffic: 50000,
+                clickThroughRate: '3.2%',
+                indexingStatus: blogResult.isFallback ? 'Pending' : 'Indexed',
+                linkType: 'guest_post',
+                campaignName: campaignForm.name || `Campaign for ${campaignForm.targetUrl}`,
+                priority: true, // Mark as priority link
+                isPrimaryBlogPost: true, // Special flag for blog posts
+                isFallback: blogResult.isFallback || false
+              };
 
-            // Add blog link as the first item in pending queue (priority)
-            setPendingLinksToPublish(prev => [blogLink, ...prev]);
+              // Add blog link as the first item in pending queue (priority)
+              setPendingLinksToPublish(prev => [blogLink, ...prev]);
 
-            // Also immediately add to live results as the first link
-            const currentResults = JSON.parse(localStorage.getItem('live_results') || '[]');
-            const updatedResults = [blogLink, ...currentResults];
-            localStorage.setItem('live_results', JSON.stringify(updatedResults));
+              // Also immediately add to live results as the first link
+              const currentResults = JSON.parse(localStorage.getItem('live_results') || '[]');
+              const updatedResults = [blogLink, ...currentResults];
+              localStorage.setItem('live_results', JSON.stringify(updatedResults));
 
-            // Update guest links count to include the blog post
-            setGuestLinksGenerated(prev => prev + 1);
+              // Update guest links count to include the blog post
+              setGuestLinksGenerated(prev => prev + 1);
 
-            console.log('✅ Blog post added as priority link:', blogResult.blogPostUrl);
+              console.log('✅ Blog post added as priority link:', blogResult.blogPostUrl);
+            } catch (linkError) {
+              console.warn('Failed to add blog post as priority link:', linkError);
+              // Continue without blog link if this fails
+            }
           }
         } catch (blogError) {
           console.warn('Blog generation failed for guest campaign:', blogError.message);
@@ -5457,7 +5463,7 @@ export default function BacklinkAutomation() {
                                     <span>Found via: Campaign #{(idx % 3) + 1}</span>
                                     <span>•</span>
                                     <span>Quality: {85 + (idx % 15)}%</span>
-                                    <span>•</span>
+                                    <span>���</span>
                                     <span className="text-green-600">
                                       <Clock4 className="h-3 w-3 inline mr-1" />
                                       {idx + 1}m ago
