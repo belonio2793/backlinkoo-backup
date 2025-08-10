@@ -334,12 +334,22 @@ export class EnhancedBlogClaimService {
       // Try the RPC function first
       const { data, error } = await supabase.rpc('cleanup_expired_posts');
 
-      if (!error && data !== null) {
+      if (error) {
+        // Handle various error codes for missing function
+        if (error.code === '42883' || error.code === 'PGRST202' || error.message?.includes('Could not find the function')) {
+          console.warn('Cleanup function not available, using manual cleanup');
+        } else {
+          console.error('Cleanup function failed:', {
+            code: error.code,
+            message: error.message,
+            details: error.details
+          });
+        }
+      } else if (data !== null) {
         return { deletedCount: data || 0 };
       }
 
-      // If RPC function doesn't exist, use manual cleanup
-      console.warn('RPC function not available, using manual cleanup');
+      // If RPC function doesn't exist or failed, use manual cleanup
       const { data: expiredPosts, error: selectError } = await supabase
         .from('blog_posts')
         .select('id')
