@@ -6866,7 +6866,7 @@ export default function BacklinkAutomation() {
                 <Button
                   onClick={() => {
                     closePredictivePremiumModal();
-                    setShowTrialExhaustedModal(true);
+                    setShowPremiumPlanModal(true);
                   }}
                   className="flex-1 bg-purple-600 hover:bg-purple-700"
                 >
