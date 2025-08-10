@@ -35,7 +35,24 @@ export function TrialExhaustedModal({
 }: TrialExhaustedModalProps) {
   const { toast } = useToast();
   const [isProcessingUpgrade, setIsProcessingUpgrade] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('monthly');
+  const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
+
+  // Live pricing configuration
+  const pricing = {
+    monthly: {
+      price: 29,
+      display: '$29',
+      period: 'per month',
+      billing: 'Billed monthly'
+    },
+    yearly: {
+      price: 290,
+      display: '$24',
+      period: 'per month',
+      billing: 'Billed $290/year',
+      savings: 'Save $58'
+    }
+  };
 
   const totalDomains = guestResults.reduce((acc, campaign) =>
     acc + (campaign.domains?.length || 0), 0
