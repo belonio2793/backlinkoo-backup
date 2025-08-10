@@ -6411,10 +6411,12 @@ export default function BacklinkAutomation() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Search className="h-5 w-5" />
-                    URL Discovery
+                    <FormattedText type="title">URL Discovery</FormattedText>
                   </CardTitle>
                   <CardDescription>
-                    Browse categorized URLs by link building strategy
+                    <FormattedDescription>
+                      Browse categorized URLs by link building strategy and discover high-quality opportunities
+                    </FormattedDescription>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
