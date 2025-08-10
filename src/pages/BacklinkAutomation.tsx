@@ -474,7 +474,7 @@ export default function BacklinkAutomation() {
           // Show user-friendly notification for database setup issues
           if (result.error?.includes('Database function missing') || result.error?.includes('table missing')) {
             toast({
-              title: "⚠️ Database Setup Required",
+              title: "⚠�� Database Setup Required",
               description: "Campaign metrics will use local storage until database is configured. Visit Admin → Database to set up.",
               duration: 5000
             });
@@ -7012,7 +7012,7 @@ export default function BacklinkAutomation() {
                       <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200 shadow-sm">
                         <div className="text-3xl font-bold text-purple-600">{selectedCampaignDetails.avgAuthority || selectedCampaignDetails.quality?.averageAuthority || Math.floor(Math.random() * 15) + 85}</div>
                         <div className="text-sm font-semibold text-gray-800">Avg Authority</div>
-                        <div className="text-xs text-purple-600 mt-1"> High Quality</div>
+                        <div className="text-xs text-purple-600 mt-1">⭐ High Quality</div>
                       </div>
                       <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200 shadow-sm">
                         <div className="text-3xl font-bold text-orange-600">
