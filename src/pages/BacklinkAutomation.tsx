@@ -427,7 +427,7 @@ export default function BacklinkAutomation() {
 
           return enhancedCampaign;
         } else {
-          console.warn('⚠️ Database save failed, using localStorage fallback:', result.error);
+          console.warn('⚠️ Database save failed, using localStorage fallback:', formatErrorForUI(result.error));
 
           // Show user-friendly notification for database setup issues
           if (result.error?.includes('Database function missing') || result.error?.includes('table missing')) {
@@ -490,7 +490,7 @@ export default function BacklinkAutomation() {
         if (result.success) {
           console.log('✅ Campaign deleted from database:', campaignId);
         } else {
-          console.warn('⚠️ Database deletion failed:', result.error);
+          console.warn('⚠️ Database deletion failed:', formatErrorForUI(result.error));
         }
       }
 
@@ -840,7 +840,7 @@ export default function BacklinkAutomation() {
 
           console.log('✅ Loaded', campaigns.length, 'campaigns from database for user', user.id);
         } else if (!result.success) {
-          console.warn('��️ Database loading failed, will use localStorage:', result.error);
+          console.warn('⚠️ Database loading failed, will use localStorage:', formatErrorForUI(result.error));
 
           // Show user-friendly notification for database issues
           if (result.error?.includes('table missing') || result.error?.includes('function')) {
