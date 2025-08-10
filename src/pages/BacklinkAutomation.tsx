@@ -2201,7 +2201,13 @@ export default function BacklinkAutomation() {
   };
 
   const showPremiumUpgrade = (campaignId: string) => {
-    setShowTrialExhaustedModal(true);
+    // Use PremiumPlanModal for authenticated users, TrialExhaustedModal for guests
+    if (user) {
+      setShowPremiumPlanModal(true);
+    } else {
+      setShowTrialExhaustedModal(true);
+    }
+
     const message = user && !isPremium
       ? "Campaign paused at 20-link limit. Upgrade to Premium to continue building unlimited links!"
       : "You've built 20 high-quality backlinks! Upgrade to Premium for unlimited campaigns and links.";
@@ -6976,7 +6982,7 @@ export default function BacklinkAutomation() {
                 setCampaignToDelete(null);
 
                 toast({
-                  title: "������� Campaign Deleted",
+                  title: "�������� Campaign Deleted",
                   description: "Campaign has been permanently removed.",
                 });
               } else {
