@@ -13,15 +13,20 @@ interface FormattedTextProps {
 /**
  * Component that automatically formats text content
  */
-export function FormattedText({ 
-  children, 
-  type = 'description', 
-  as: Component = 'span', 
+export function FormattedText({
+  children,
+  type = 'description',
+  as: Component = 'span',
   className,
-  ...props 
+  ...props
 }: FormattedTextProps) {
+  // Validate children prop
+  if (!children || typeof children !== 'string') {
+    return <Component className={className} {...props}>{children || ''}</Component>;
+  }
+
   const formattedText = useFormattedText(children, type);
-  
+
   return (
     <Component className={className} {...props}>
       {formattedText}
