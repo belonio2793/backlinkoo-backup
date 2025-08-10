@@ -124,12 +124,7 @@ class CampaignMetricsService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Failed to fetch campaign metrics:', {
-          code: error.code,
-          message: error.message,
-          details: error.details,
-          hint: error.hint
-        });
+        console.error('Failed to fetch campaign metrics:', formatErrorForLogging(error, 'getCampaignMetrics'));
 
         // Check if it's a table not found error
         if (error.code === '42P01' || error.message?.includes('relation') && error.message?.includes('does not exist')) {
@@ -429,7 +424,7 @@ class CampaignMetricsService {
             const result = await this.updateCampaignMetrics(userId, metrics);
             if (result.success) {
               migratedCount++;
-              console.log('��� Migrated campaign to database:', campaign.id);
+              console.log('����� Migrated campaign to database:', campaign.id);
             }
           }
         } catch (parseError) {
