@@ -228,13 +228,13 @@ export function TrialExhaustedModal({
               onClick={() => setSelectedPlan('yearly')}
             >
               <div className="absolute -top-2 -right-2">
-                <Badge className="bg-green-600 text-white text-xs">Save 40%</Badge>
+                <Badge className="bg-green-600 text-white text-xs">{pricing.yearly.savings}</Badge>
               </div>
               <div className="text-center text-black">
                 <div className="text-base font-bold">Yearly</div>
-                <div className="text-xl font-bold">$17</div>
-                <div className="text-xs text-gray-600">per month</div>
-                <div className="text-xs text-gray-500 mt-0.5">Billed $199/year</div>
+                <div className="text-xl font-bold">{pricing.yearly.display}</div>
+                <div className="text-xs text-gray-600">{pricing.yearly.period}</div>
+                <div className="text-xs text-gray-500 mt-0.5">{pricing.yearly.billing}</div>
               </div>
             </div>
           </div>
