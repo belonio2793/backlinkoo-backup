@@ -5650,7 +5650,7 @@ export default function BacklinkAutomation() {
                             </div>
                             <div className="text-center">
                               <div className="text-lg font-bold text-orange-600">
-                                {Math.round((Date.now() - new Date(campaign.createdAt).getTime()) / (1000 * 60))}m
+                                {safeGetRuntimeMinutes(campaign.createdAt)}m
                               </div>
                               <div className="text-xs text-gray-600">Runtime</div>
                             </div>
@@ -5797,7 +5797,7 @@ export default function BacklinkAutomation() {
                             </div>
                             <div className="text-center">
                               <div className="text-lg font-bold text-teal-600">
-                                {Math.round((Date.now() - new Date(campaign.createdAt).getTime()) / (1000 * 60 * 60))}h
+                                {safeGetRuntimeHours(campaign.createdAt)}h
                               </div>
                               <div className="text-xs text-gray-600">Runtime</div>
                             </div>
