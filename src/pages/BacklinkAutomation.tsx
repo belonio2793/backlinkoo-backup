@@ -1220,7 +1220,7 @@ export default function BacklinkAutomation() {
           if (permanentCampaigns.length > 0) {
             setTimeout(() => {
               toast({
-                title: "��� Data Restored Successfully",
+                title: "���� Data Restored Successfully",
                 description: `${permanentCampaigns.length} campaigns restored with all metrics preserved. Your data is safe across sessions.`,
                 duration: 4000,
               });
@@ -6807,9 +6807,9 @@ export default function BacklinkAutomation() {
                     onClick={() => {
                       
                       if (user) {
-                        setShowPremiumPlanModal(true);
+                        DirectCheckoutService.upgradeToPremium('monthly');
                       } else {
-                        setShowPremiumPlanModal(true);
+                        DirectCheckoutService.upgradeToPremium('monthly');
                       }
                       setShowFabMenu(false);
                     }}
