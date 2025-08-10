@@ -187,7 +187,7 @@ class CampaignMetricsService {
           message: error.message,
           details: error.details
         });
-        return { success: false, error: error.message || 'Failed to record link' };
+        return { success: false, error: formatErrorForUI(error) || 'Failed to record link' };
       }
 
       console.log('✅ Link recorded in database:', linkRecord.sourceUrl);
@@ -545,7 +545,7 @@ if (typeof window !== 'undefined') {
     const debug = await campaignMetricsService.debugDatabaseSetup();
 
     console.log('📊 Tables Status:', debug.tablesExist);
-    console.log('👁️ Views Status:', debug.viewsExist);
+    console.log('���️ Views Status:', debug.viewsExist);
     console.log('⚙️ Functions Status:', debug.functionsExist);
 
     if (debug.errors.length > 0) {
