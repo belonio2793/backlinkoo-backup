@@ -2202,7 +2202,7 @@ export default function BacklinkAutomation() {
       title: "�� Campaign Paused - Link Limit Reached",
       description: message,
       action: (
-        <Button size="sm" onClick={() => user ? setShowPremiumPlanModal(true) : setShowTrialExhaustedModal(true)}>
+        <Button size="sm" onClick={() => setShowPremiumPlanModal(true)}>
           {user && !isPremium ? "Upgrade to Continue" : "Upgrade Now"}
         </Button>
       ),
