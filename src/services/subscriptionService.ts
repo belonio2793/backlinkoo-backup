@@ -152,8 +152,9 @@ export class SubscriptionService {
     user: User | null,
     isGuest: boolean = false,
     guestEmail?: string,
-    planType: 'monthly' | 'yearly' = 'monthly'
-  ): Promise<{ success: boolean; url?: string; error?: string }> {
+    planType: 'monthly' | 'yearly' = 'monthly',
+    redirectOptions?: CheckoutRedirectOptions
+  ): Promise<{ success: boolean; url?: string; error?: string; sessionId?: string; checkoutManager?: any }> {
 
     try {
       // Validate Stripe configuration for the selected plan
