@@ -3660,7 +3660,9 @@ export default function BacklinkAutomation() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="targetUrl">Target URL *</Label>
+                      <Label htmlFor="targetUrl">
+                        <FormattedText type="label">Target URL *</FormattedText>
+                      </Label>
                       <Input
                         id="targetUrl"
                         value={campaignForm.targetUrl}
