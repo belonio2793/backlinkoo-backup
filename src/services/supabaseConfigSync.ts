@@ -75,7 +75,12 @@ export class SupabaseConfigSync {
       this.isInitialized = true;
 
     } catch (error) {
-      console.error('❌ Failed to initialize real-time sync:', error.message || error.toString() || JSON.stringify(error));
+      console.error('❌ Failed to initialize real-time sync:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       // Fall back to localStorage-only mode
       await this.loadFromLocalStorageOnly();
       this.isInitialized = true;
