@@ -2015,17 +2015,28 @@ export default function BacklinkAutomation() {
           // Continue to metrics update below instead of early return
         }
 
-        // Ensure metrics always update with guaranteed minimum activity
-        const baseLinksToGenerate = shouldGenerateNewLinks ? Math.floor(Math.random() * 3) + 1 : 0;
-        const guaranteedUpdate = Math.random() < 0.3; // 30% chance of guaranteed metric update
-        const linksToGenerate = shouldGenerateNewLinks ? Math.max(baseLinksToGenerate, guaranteedUpdate ? 1 : 0) : (guaranteedUpdate ? 1 : 0);
+        // Guarantee metrics always update with enhanced reliability
+        const cycleNumber = Math.floor(Date.now() / 3000) % 10; // 0-9 cycle counter
+        const forceUpdate = cycleNumber === 0; // Force update every 10th cycle (30 seconds)
+
+        // Enhanced link generation logic with guaranteed minimums
+        let linksToGenerate = 0;
+        if (shouldGenerateNewLinks) {
+          const baseLinks = Math.floor(Math.random() * 3) + 1; // 1-3 base links
+          const guaranteedMin = forceUpdate ? 1 : 0; // At least 1 link every 30 seconds
+          linksToGenerate = Math.max(baseLinks, guaranteedMin);
+        } else if (forceUpdate) {
+          // Even paused campaigns get minimal activity for visibility
+          linksToGenerate = Math.random() < 0.5 ? 1 : 0; // 50% chance for paused campaigns
+        }
 
         const newLinks = [];
         const newActivities = [];
 
+        // Generate links with extremely high success rate for reliability
         for (let i = 0; i < linksToGenerate; i++) {
-          // Increase link generation probability for more consistent updates
-          if (Math.random() < 0.85) { // Increased from 60% to 85%
+          // Virtually guaranteed generation (95% success rate)
+          if (Math.random() < 0.95) {
             const newPostback = generateRealTimeLinkPostback(campaign);
             newLinks.push(newPostback);
 
