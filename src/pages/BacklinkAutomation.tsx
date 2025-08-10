@@ -1499,7 +1499,7 @@ export default function BacklinkAutomation() {
           }
           loadRealTimeMetrics();
         } else {
-          console.warn('⚠����� Database not ready:', status);
+          console.warn('⚠������ Database not ready:', status);
         }
       } catch (error) {
         console.error('❌ Database check failed:', {
@@ -3017,9 +3017,11 @@ export default function BacklinkAutomation() {
       });
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Failed to create campaign:', {
-        error: error,
-        message: error instanceof Error ? error.message : 'Unknown error'
+        message: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : 'Unknown'
       });
       toast({
         title: "Campaign Creation Failed",
