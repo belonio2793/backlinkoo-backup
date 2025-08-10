@@ -222,11 +222,11 @@ export class CampaignBlogIntegrationService {
 
       return data.blog_post_url;
     } catch (error) {
-      console.error('Error fetching campaign blog URL:', {
+      console.error('Error fetching campaign blog URL:', JSON.stringify({
         message: error.message,
         stack: error.stack,
         name: error.name
-      });
+      }, null, 2));
       return null;
     }
   }
