@@ -5529,7 +5529,7 @@ export default function BacklinkAutomation() {
                     setShowSignInModal(true);
                     setShowFabMenu(false);
                   }}
-                  className="w-40 justify-start bg-blue-600 text-white shadow-lg hover:bg-blue-700"
+                  className="w-48 justify-start bg-blue-600 text-white shadow-lg hover:bg-blue-700"
                 >
                   <UserPlus className="h-4 w-4 mr-2" />
                   Sign In
@@ -5540,7 +5540,7 @@ export default function BacklinkAutomation() {
                     setSelectedTab('database');
                     setShowFabMenu(false);
                   }}
-                  className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
+                  className="w-48 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
                   <Eye className="h-4 w-4 mr-2" />
                   Website Database
