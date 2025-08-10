@@ -5,6 +5,7 @@ import { Badge } from './ui/badge';
 import { Alert, AlertDescription } from './ui/alert';
 import { CheckCircle, XCircle, AlertCircle, Mail, Settings, Database, Send } from 'lucide-react';
 import { emailTest } from '../services/emailConfigurationTest';
+import { formatErrorForUI } from '@/utils/errorUtils';
 
 interface TestResult {
   success: boolean;
