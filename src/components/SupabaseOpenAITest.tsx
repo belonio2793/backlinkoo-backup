@@ -13,6 +13,7 @@ import {
   Shield
 } from 'lucide-react';
 import { enhancedOpenAI } from '@/services/enhancedOpenAIService';
+import { formatErrorForUI } from '@/utils/errorUtils';
 
 export function SupabaseOpenAITest() {
   const [isTestingConnection, setIsTestingConnection] = useState(false);
