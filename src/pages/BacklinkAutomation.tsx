@@ -1298,7 +1298,7 @@ export default function BacklinkAutomation() {
       );
       updateGuestRestrictions();
       toast({
-        title: "����� Campaign Deleted",
+        title: "🗑�� Campaign Deleted",
         description: `"${guestCampaignToDelete.name}" has been permanently removed.`,
       });
     } else {
@@ -5761,7 +5761,12 @@ export default function BacklinkAutomation() {
                               <div className="text-xs text-gray-600">Live Links</div>
                             </div>
                             <div className="text-center">
-                              <div className="text-lg font-bold text-blue-600">{campaign.linksLive || Math.round(campaign.linksGenerated * 0.95)}</div>
+                              <div className="text-lg font-bold text-blue-600">
+                                {formatDisplayNumber(campaign.linksLive || Math.round(campaign.linksGenerated * 0.95), {
+                                  hideZero: false,
+                                  zeroText: '0'
+                                })}
+                              </div>
                               <div className="text-xs text-gray-600">Live Links</div>
                             </div>
                             <div className="text-center">
