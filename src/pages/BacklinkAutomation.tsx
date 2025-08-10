@@ -803,7 +803,7 @@ export default function BacklinkAutomation() {
     const permanentCampaigns = loadPermanentCampaigns();
     if (permanentCampaigns.length > 0) {
       setGuestCampaignResults(permanentCampaigns);
-      console.log('��� Live Monitor: Loaded', permanentCampaigns.length, 'campaigns with progressive counts');
+      console.log('���� Live Monitor: Loaded', permanentCampaigns.length, 'campaigns with progressive counts');
     }
 
     // Run initial auto-detection
@@ -1909,6 +1909,94 @@ export default function BacklinkAutomation() {
     });
 
     return interval;
+  };
+
+  // Function to transfer guest campaigns to user account
+  const transferGuestCampaignsToUser = async (user: any) => {
+    try {
+      const guestCampaigns = JSON.parse(localStorage.getItem('guest_campaign_results') || '[]');
+      const guestResults = JSON.parse(localStorage.getItem('live_results') || '[]');
+
+      if (guestCampaigns.length === 0) return;
+
+      console.log('🔄 Transferring guest campaigns to user account:', user.email);
+
+      // Create campaigns in the database for the new user
+      for (const guestCampaign of guestCampaigns) {
+        try {
+          const campaignData = {
+            name: guestCampaign.name,
+            target_url: guestCampaign.targetUrl,
+            keywords: guestCampaign.keywords,
+            anchor_texts: guestCampaign.anchorTexts || ['learn more', 'click here', 'visit site'],
+            daily_limit: isPremium ? 100 : 20,
+            strategy_blog_comments: true,
+            strategy_forum_profiles: true,
+            strategy_web2_platforms: true,
+            strategy_social_profiles: true,
+            strategy_contact_forms: true,
+            user_id: user.id,
+            status: 'active'
+          };
+
+          const { data: campaign, error } = await supabase
+            .from('campaigns')
+            .insert(campaignData)
+            .select()
+            .single();
+
+          if (error) {
+            console.error('Error transferring campaign:', error);
+            continue;
+          }
+
+          console.log('✅ Transferred campaign:', campaign.name);
+
+          // Transfer the guest results to user campaign
+          const guestLinksForThisCampaign = guestResults.filter((result: any) =>
+            result.targetUrl === guestCampaign.targetUrl ||
+            result.destinationUrl === guestCampaign.targetUrl
+          );
+
+          if (guestLinksForThisCampaign.length > 0) {
+            // Update campaign with links generated
+            await supabase
+              .from('campaigns')
+              .update({
+                links_generated: guestLinksForThisCampaign.length,
+                last_active_time: new Date().toISOString()
+              })
+              .eq('id', campaign.id);
+          }
+
+        } catch (error) {
+          console.error('Error transferring guest campaign:', error);
+        }
+      }
+
+      // Clear guest data after successful transfer
+      localStorage.removeItem('guest_campaign_results');
+      localStorage.setItem('guest_campaigns_transferred', 'true');
+
+      toast({
+        title: "🎉 Campaigns Transferred!",
+        description: `Your ${guestCampaigns.length} guest campaign(s) have been saved to your account.`,
+        duration: 5000
+      });
+
+      // Refresh campaigns list
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000);
+
+    } catch (error) {
+      console.error('Error transferring guest campaigns:', error);
+      toast({
+        title: "Transfer Error",
+        description: "There was an issue transferring your campaigns. Please contact support.",
+        variant: "destructive"
+      });
+    }
   };
 
   const deployCampaign = async () => {
@@ -4997,7 +5085,7 @@ export default function BacklinkAutomation() {
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '🛒' },
-                          { name: 'Travel & Tourism', count: 38920, icon: '✈️' },
+                          { name: 'Travel & Tourism', count: 38920, icon: '✈��' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
                           { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
