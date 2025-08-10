@@ -196,7 +196,13 @@ export class SupabaseConfigSync {
 
       console.log(`✅ Config synced: ${config.key}`);
     } catch (error) {
-      console.error(`❌ Failed to sync config ${config.key}:`, error.message || error.toString() || JSON.stringify(error));
+      console.error(`❌ Failed to sync config ${config.key}:`, {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code,
+        configKey: config.key
+      });
     }
   }
 
