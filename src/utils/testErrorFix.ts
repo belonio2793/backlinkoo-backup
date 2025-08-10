@@ -6,7 +6,7 @@
 import { campaignMetricsService } from '@/services/campaignMetricsService';
 import { formatErrorForUI } from '@/utils/errorUtils';
 
-export async function testCampaignMetricsErrorHandling() {
+async function testCampaignMetricsErrorHandling() {
   console.log('🧪 Testing Campaign Metrics Error Handling...');
   
   try {
