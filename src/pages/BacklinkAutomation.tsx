@@ -49,7 +49,7 @@ import { GuestCampaignRestrictionsOverlay } from '@/components/GuestCampaignRest
 // import { CampaignQueueManager, type CampaignConfig } from '@/services/automationEngine/CampaignQueueManager';
 // import { LinkDiscoveryEngine } from '@/services/automationEngine/LinkDiscoveryEngine';
 // import { AnalyticsEngine } from '@/services/automationEngine/AnalyticsEngine';
-// import { ContentGenerationEngine } from '@/services/automationEngine/ContentGenerationEngine';
+import { ContentGenerationEngine } from '@/services/automationEngine/ContentGenerationEngine';
 // import { ErrorHandlingEngine } from '@/services/automationEngine/ErrorHandlingEngine';
 
 // Import real services instead of mocking them
