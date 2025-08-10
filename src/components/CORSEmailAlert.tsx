@@ -7,11 +7,11 @@ const CORSEmailAlert: React.FC = () => {
     <Alert variant="destructive" className="mb-4">
       <AlertTriangle className="h-4 w-4" />
       <AlertDescription>
-        <strong>Email Service Notice:</strong> Direct API calls to Resend are blocked by CORS policy in browser environments. 
+        <strong>Email Service Notice: </strong>Direct API calls to Resend are blocked by CORS policy in browser environments. 
         <br />
-        <strong>Solution:</strong> Deploy Netlify functions or use server-side email sending.
+        <strong>Solution: </strong>Deploy Netlify functions or use server-side email sending.
         <br />
-        <strong>Current Status:</strong> Using mock email service for testing.
+        <strong>Current Status: </strong>Using mock email service for testing.
       </AlertDescription>
     </Alert>
   );
