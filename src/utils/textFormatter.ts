@@ -279,6 +279,11 @@ class TextFormatter {
    * Format numbers and units properly
    */
   static formatNumbers(text: string): string {
+    // Type check and early return for non-string input
+    if (!text || typeof text !== 'string') {
+      return text || '';
+    }
+
     return text
       // Add commas to large numbers
       .replace(/\b(\d{4,})\b/g, (match) => {
