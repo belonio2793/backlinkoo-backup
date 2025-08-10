@@ -408,6 +408,13 @@ export class BlogService {
       const { error } = await supabase.rpc('increment_blog_post_views', { post_slug: slug });
 
       if (error) {
+        // Check if it's a missing function error and use fallback
+        if (error.code === '42883' || error.code === 'PGRST202' || error.message?.includes('Could not find the function')) {
+          console.log('View increment function not available, using direct update');
+        } else {
+          console.warn('View increment function failed:', error.message);
+        }
+
         // Fallback: direct update
         await supabase
           .from('blog_posts')
