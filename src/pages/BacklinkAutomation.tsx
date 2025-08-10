@@ -2383,6 +2383,12 @@ export default function BacklinkAutomation() {
           const currentAuth = supabase.auth.getUser();
           currentAuth.then(({ data: { user: currentUser } }) => {
             if (!currentUser) {
+              // Track that the post-campaign modal was shown
+              const analytics = JSON.parse(localStorage.getItem('post_campaign_analytics') || '{}');
+              analytics.modalShown = (analytics.modalShown || 0) + 1;
+              analytics.lastModalShown = new Date().toISOString();
+              localStorage.setItem('post_campaign_analytics', JSON.stringify(analytics));
+
               setShowPostCampaignSignupModal(true);
             }
           });
