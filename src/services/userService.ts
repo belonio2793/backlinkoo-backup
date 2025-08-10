@@ -32,7 +32,7 @@ class UserService {
         .single();
 
       if (error) {
-        const errorMessage = error.message || error;
+        const errorMessage = formatErrorForUI(error);
 
         // Handle permission denied errors or table not found (silently for these common issues)
         if (errorMessage && (
@@ -54,8 +54,8 @@ class UserService {
           };
         }
 
-        // Only log unexpected errors
-        console.error('❌ userService: Unexpected error fetching user profile:', errorMessage);
+        // Only log unexpected errors with proper formatting
+        console.error('❌ userService: Unexpected error fetching user profile:', formatErrorForLogging(error, 'getCurrentUserProfile'));
 
         // Handle infinite recursion in RLS policies
         if (errorMessage && errorMessage.includes('infinite recursion detected in policy')) {
