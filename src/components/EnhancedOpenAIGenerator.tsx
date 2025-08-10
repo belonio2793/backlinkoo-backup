@@ -172,7 +172,7 @@ Ensure the anchor text placement follows SEO best practices and genuinely helps 
       } else {
         setSystemStatus(prev => ({
           ...prev,
-          database: { status: 'warning', message: 'Database sync available (localStorage fallback)' }
+          database: { status: 'warning', message: 'Local storage mode' }
         }));
       }
     } catch (error) {
