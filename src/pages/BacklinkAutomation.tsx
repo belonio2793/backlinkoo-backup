@@ -1196,7 +1196,7 @@ export default function BacklinkAutomation() {
           if (permanentCampaigns.length > 0) {
             setTimeout(() => {
               toast({
-                title: "📊 Data Restored Successfully",
+                title: "�� Data Restored Successfully",
                 description: `${permanentCampaigns.length} campaigns restored with all metrics preserved. Your data is safe across sessions.`,
                 duration: 4000,
               });
@@ -3116,7 +3116,7 @@ export default function BacklinkAutomation() {
           });
         } else {
           toast({
-            title: " Campaign Deployed!",
+            title: "🚀 Campaign Deployed!",
             description: `Your campaign is live${blogResult.success ? (blogResult.isFallback ? ' + priority blog post queued on backlinkoo.com' : ' + priority blog post published on backlinkoo.com') : ''} with 20-link limit. View progress in the monitor above!`,
             action: (
               <Button size="sm" onClick={() => setShowPremiumPlanModal(true)}>
@@ -6073,7 +6073,7 @@ export default function BacklinkAutomation() {
                       <div className="space-y-2 max-h-96 overflow-y-auto">
                         {[
                           { name: 'Technology & Software', count: 125420, icon: '💻' },
-                          { name: 'Business & Finance', count: 98750, icon: '����' },
+                          { name: 'Business & Finance', count: 98750, icon: '💼' },
                           { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
