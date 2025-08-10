@@ -36,6 +36,7 @@ import { supabase } from '@/integrations/supabase/client';
 import ToolsHeader from '@/components/shared/ToolsHeader';
 import { Footer } from '@/components/Footer';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
+import { AllCompletedURLsRundown } from '@/components/campaigns/AllCompletedURLsRundown';
 import { TrialExhaustedModal } from '@/components/TrialExhaustedModal';
 import { PremiumPlanModal } from '@/components/PremiumPlanModal';
 
@@ -886,7 +887,7 @@ export default function BacklinkAutomation() {
 
           // Show user-friendly notification for database issues
           if (result.error?.includes('table missing') || result.error?.includes('function')) {
-            console.log('��� Database tables not found, using localStorage fallback');
+            console.log('����� Database tables not found, using localStorage fallback');
           }
         }
       }
@@ -6113,7 +6114,7 @@ export default function BacklinkAutomation() {
                           { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
-                          { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
+                          { name: 'Marketing & Advertising', count: 54210, icon: '��' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '����' },
                           { name: 'Travel & Tourism', count: 38920, icon: '✈���' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
