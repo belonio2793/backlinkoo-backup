@@ -295,7 +295,12 @@ export function EnhancedUnifiedPaymentModal({
       setCurrentStep('success');
 
     } catch (error: any) {
-      console.error('Payment error:', error);
+      console.error('Payment error:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       toast({
         title: "Payment Error",
         description: error.message || "Payment processing failed. Please try again.",
