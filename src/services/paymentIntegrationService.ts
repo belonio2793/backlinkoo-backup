@@ -22,6 +22,8 @@ interface PaymentResult {
   sessionId?: string;
   orderId?: string;
   error?: string;
+  checkoutSessionId?: string;
+  usedFallback?: boolean;
 }
 
 class PaymentIntegrationService {
