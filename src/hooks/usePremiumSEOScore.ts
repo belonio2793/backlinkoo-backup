@@ -25,7 +25,11 @@ export function usePremiumSEOScore(blogPost: BlogPost | null) {
         setEffectiveScore(score);
         setIsPremiumScore(score === 100 && (blogPost.seo_score || 0) < 100);
       } catch (error) {
-        console.error('Error calculating effective SEO score:', error);
+        console.error('Error calculating effective SEO score:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined,
+          name: error instanceof Error ? error.name : undefined
+        });
         setEffectiveScore(blogPost.seo_score || 0);
         setIsPremiumScore(false);
       } finally {
