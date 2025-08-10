@@ -201,7 +201,12 @@ class ErrorLoggingService {
 
       console.log('error_logs table created successfully');
     } catch (error) {
-      console.error('Failed to create error_logs table automatically:', error);
+      console.error('Failed to create error_logs table automatically:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       console.warn('Please create the error_logs table manually in Supabase dashboard');
 
       // Log instructions to console
