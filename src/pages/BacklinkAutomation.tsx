@@ -1925,13 +1925,24 @@ export default function BacklinkAutomation() {
   };
 
   const startRealTimeActivity = (campaignId: string) => {
-    // Clear existing interval if any
+    // Robust interval management to prevent race conditions
     const existingInterval = activeCampaignIntervals.get(campaignId);
     if (existingInterval) {
       clearInterval(existingInterval);
+      console.log('🔄 Cleared existing interval for campaign:', campaignId);
     }
 
+    // Add debouncing to prevent rapid restarts
+    const intervalKey = `${campaignId}_${Date.now()}`;
+
     const interval = setInterval(() => {
+      // Check if this interval is still the active one (prevents race conditions)
+      const currentInterval = activeCampaignIntervals.get(campaignId);
+      if (currentInterval !== interval) {
+        console.log('⏹️ Stopping stale interval for campaign:', campaignId);
+        clearInterval(interval);
+        return;
+      }
       setCampaigns(prev => prev.map(campaign => {
         if (campaign.id !== campaignId) return campaign;
 
