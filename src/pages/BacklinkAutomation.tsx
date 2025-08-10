@@ -289,6 +289,7 @@ export default function BacklinkAutomation() {
   const [activeCampaignIntervals, setActiveCampaignIntervals] = useState<Map<string, NodeJS.Timeout>>(new Map());
   const [realTimeLinkPostbacks, setRealTimeLinkPostbacks] = useState<any[]>([]);
   const [campaignMetrics, setCampaignMetrics] = useState<Map<string, any>>(new Map());
+  const [metricsLoaded, setMetricsLoaded] = useState(false);
   const [linkBuildingQueue, setLinkBuildingQueue] = useState<any[]>([]);
   const [recentPostbacks, setRecentPostbacks] = useState<any[]>([]);
   const [showSignInModal, setShowSignInModal] = useState(false);
