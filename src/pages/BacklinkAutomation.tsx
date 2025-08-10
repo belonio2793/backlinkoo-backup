@@ -2438,7 +2438,7 @@ export default function BacklinkAutomation() {
           heartbeatActivity.push({
             id: `heartbeat-${Date.now()}`,
             type: 'system_monitoring' as const,
-            message: `📊 Campaign actively monitored • ${campaignMetrics.get(campaignId)?.domainsReached?.size || 0} domains tracked`,
+            message: `📊 Campaign actively monitored �� ${campaignMetrics.get(campaignId)?.domainsReached?.size || 0} domains tracked`,
             timestamp: new Date().toISOString(),
             metadata: {
               type: 'heartbeat',
@@ -3821,7 +3821,7 @@ export default function BacklinkAutomation() {
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                           <Button
-                            onClick={() => setShowPremiumPlanModal(true)}
+                            onClick={() => DirectCheckoutService.upgradeToPremium('monthly')}
                             className="h-12 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                           >
                             <Crown className="h-4 w-4 mr-2" />
