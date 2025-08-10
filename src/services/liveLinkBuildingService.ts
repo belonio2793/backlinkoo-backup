@@ -325,7 +325,7 @@ class LiveLinkBuildingService {
           }
         });
 
-      console.log('✅ Postback created for link:', link.id);
+      console.log('��� Postback created for link:', link.id);
     } catch (error) {
       console.error('Error creating postback:', error);
     }
@@ -383,7 +383,7 @@ class LiveLinkBuildingService {
         }
       }
     } catch (error) {
-      console.error('Error updating campaign metrics:', error);
+      console.error('Error updating campaign metrics:', formatErrorForLogging(error, 'updateCampaignMetrics'));
     }
   }
 
