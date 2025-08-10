@@ -329,7 +329,7 @@ export function MinimalAITest() {
       } catch (error) {
         const latency = Date.now() - startTime;
         statuses.push({ provider: provider.name, status: 'error', error: 'Connection timeout' });
-        addLog('error', 'API_TEST', `${provider.name} failed: ${error}`);
+        addLog('error', 'API_TEST', `${provider.name} failed: ${error instanceof Error ? error.message : String(error)}`);
         setErrorCount(prev => prev + 1);
       }
     }
