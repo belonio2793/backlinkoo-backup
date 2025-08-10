@@ -1,6 +1,7 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { formatErrorForUI } from '@/utils/errorUtils';
 import { 
   AlertTriangle, 
   RefreshCw, 
