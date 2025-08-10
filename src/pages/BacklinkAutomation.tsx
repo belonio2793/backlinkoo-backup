@@ -2235,8 +2235,8 @@ export default function BacklinkAutomation() {
           // First campaign - surprise reveal
           toast({
             title: "🎉 Surprise! Your Backlinks Are Ready!",
-            description: `We've generated ${linksToGenerate} premium backlinks for you instantly! View them in the live monitor above!`,
-            duration: 5000,
+            description: `We've generated ${linksToGenerate} premium backlinks for you instantly${blogResult.success ? ' + published a priority blog post on backlinkoo.com' : ''}! View them in the live monitor above!`,
+            duration: 6000,
           });
         } else if (newTotal >= 20) {
           // Trial complete
