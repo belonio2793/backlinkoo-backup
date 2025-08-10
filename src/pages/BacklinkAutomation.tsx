@@ -3421,7 +3421,7 @@ export default function BacklinkAutomation() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
-      <ToolsHeader user={user} currentTool="automation" />
+      <ToolsHeader user={user} currentTool="automation-link-building" />
 
       <div className="p-6">
         <div className="max-w-8xl mx-auto space-y-6">
