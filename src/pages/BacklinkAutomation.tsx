@@ -1344,7 +1344,7 @@ export default function BacklinkAutomation() {
       );
       updateGuestRestrictions();
       toast({
-        title: "��️ Campaign Deleted",
+        title: "🗑️ Campaign Deleted",
         description: `"${guestCampaignToDelete.name}" has been permanently removed.`,
       });
     } else {
@@ -4256,7 +4256,7 @@ export default function BacklinkAutomation() {
                                             </div>
                                             <div className="flex items-center gap-2">
                                               <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
-                                                 {campaign.status}
+                                                🔄 {campaign.status}
                                               </Badge>
                                               <Button
                                                 variant="ghost"
