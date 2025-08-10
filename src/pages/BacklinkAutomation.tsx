@@ -1634,7 +1634,7 @@ export default function BacklinkAutomation() {
       const timer = setTimeout(() => {
         // Switch to live results sub-tab when campaigns are active\n        setSelectedCampaignTab('live-results');
         toast({
-          title: "�� Campaign Results Ready!",
+          title: "���� Campaign Results Ready!",
           description: "Your campaigns are now running. View real-time progress in the live monitor above.",
           duration: 4000,
         });
@@ -5796,7 +5796,7 @@ export default function BacklinkAutomation() {
                             </div>
                             <div className="text-center">
                               <div className="text-lg font-bold text-teal-600">
-                                {Math.round((Date.now() - campaign.createdAt.getTime()) / (1000 * 60 * 60))}h
+                                {Math.round((Date.now() - new Date(campaign.createdAt).getTime()) / (1000 * 60 * 60))}h
                               </div>
                               <div className="text-xs text-gray-600">Runtime</div>
                             </div>
