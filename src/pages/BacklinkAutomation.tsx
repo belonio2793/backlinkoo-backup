@@ -731,7 +731,7 @@ export default function BacklinkAutomation() {
             }
           })
           .catch(error => {
-            console.warn('❌ Retry exception for campaign:', failedSync.metrics.campaignId, error);
+            console.warn('��� Retry exception for campaign:', failedSync.metrics.campaignId, error);
             // Add back to remaining syncs with incremented retry count
             remainingSyncs.push({
               ...failedSync,
@@ -2252,7 +2252,10 @@ export default function BacklinkAutomation() {
             const metricsData = {
               domainsReached: Array.from(current.domainsReached),
               totalClicks: current.totalClicks,
-              lastUpdate: current.lastUpdate
+              lastUpdate: current.lastUpdate,
+              // Persist live links count to ensure it only increases
+              linksLive: updatedCampaign.linksLive,
+              linksGenerated: updatedCampaign.linksGenerated
             };
             localStorage.setItem(`campaign_metrics_${campaignId}`, JSON.stringify(metricsData));
           } catch (error) {
