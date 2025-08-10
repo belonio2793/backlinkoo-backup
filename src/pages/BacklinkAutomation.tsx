@@ -3553,7 +3553,7 @@ export default function BacklinkAutomation() {
           {databaseStatus && databaseStatus.isConnected && !databaseStatus.needsSetup && (
             <Alert className="border-green-200 bg-green-50">
               <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription>
+              <AlertDescription className="text-flow-fix">
                 <strong>System Ready:</strong> Your automated link building platform is fully operational!
                 Start creating campaigns to discover and build high-quality backlinks.
               </AlertDescription>
@@ -6613,7 +6613,7 @@ export default function BacklinkAutomation() {
                 updateGuestRestrictions();
 
                 toast({
-                  title: "����️ Campaign Deleted",
+                  title: "������️ Campaign Deleted",
                   description: "Campaign has been permanently removed.",
                 });
               } else {
