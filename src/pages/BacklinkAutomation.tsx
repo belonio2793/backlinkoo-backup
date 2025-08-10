@@ -406,6 +406,15 @@ export default function BacklinkAutomation() {
           return enhancedCampaign;
         } else {
           console.warn('⚠️ Database save failed, using localStorage fallback:', result.error);
+
+          // Show user-friendly notification for database setup issues
+          if (result.error?.includes('Database function missing') || result.error?.includes('table missing')) {
+            toast({
+              title: "⚠️ Database Setup Required",
+              description: "Campaign metrics will use local storage until database is configured. Visit Admin → Database to set up.",
+              duration: 5000
+            });
+          }
         }
       }
 
