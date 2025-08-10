@@ -469,7 +469,7 @@ export default function BacklinkAutomation() {
 
           return enhancedCampaign;
         } else {
-          console.warn('����️ Database save failed, using localStorage fallback:', formatErrorForUI(result.error));
+          console.warn('️ Database save failed, using localStorage fallback:', formatErrorForUI(result.error));
 
           // Show user-friendly notification for database setup issues
           if (result.error?.includes('Database function missing') || result.error?.includes('table missing')) {
@@ -775,7 +775,7 @@ export default function BacklinkAutomation() {
             }
           })
           .catch(error => {
-            console.warn('��� Retry exception for campaign:', failedSync.metrics.campaignId, formatErrorForUI(error));
+            console.warn(' Retry exception for campaign:', failedSync.metrics.campaignId, formatErrorForUI(error));
             // Add back to remaining syncs with incremented retry count
             remainingSyncs.push({
               ...failedSync,
@@ -824,7 +824,7 @@ export default function BacklinkAutomation() {
 
       setCampaignMetrics(metricsMap);
       setMetricsLoaded(true);
-      console.log('���� Loaded metrics for', metricsMap.size, 'campaigns from localStorage');
+      console.log(' Loaded metrics for', metricsMap.size, 'campaigns from localStorage');
     } catch (error) {
       const errorMessage = formatErrorForUI(error);
       console.warn('Failed to load campaign metrics from localStorage:', errorMessage);
@@ -889,7 +889,7 @@ export default function BacklinkAutomation() {
 
           // Show user-friendly notification for database issues
           if (result.error?.includes('table missing') || result.error?.includes('function')) {
-            console.log('��� Database tables not found, using localStorage fallback');
+            console.log(' Database tables not found, using localStorage fallback');
           }
         }
       }
@@ -1109,7 +1109,7 @@ export default function BacklinkAutomation() {
     const permanentCampaigns = loadPermanentCampaigns();
     if (permanentCampaigns.length > 0) {
       setGuestCampaignResults(permanentCampaigns);
-      console.log('��� Live Monitor: Loaded', permanentCampaigns.length, 'campaigns with progressive counts');
+      console.log(' Live Monitor: Loaded', permanentCampaigns.length, 'campaigns with progressive counts');
     }
 
     // Run initial auto-detection
@@ -1131,7 +1131,7 @@ export default function BacklinkAutomation() {
       const activeCampaigns = savedCampaigns.filter((c: any) => c.status === 'active');
 
       if (activeCampaigns.length > 0) {
-        console.log('���� Live Monitor: Tracking', activeCampaigns.length, 'active campaigns for', user?.id || 'guest');
+        console.log(' Live Monitor: Tracking', activeCampaigns.length, 'active campaigns for', user?.id || 'guest');
         // Use enhanced real-time campaign updater
         const updateResult = updateActiveCampaigns(savedCampaigns, isPremium, user);
 
@@ -1190,7 +1190,7 @@ export default function BacklinkAutomation() {
         } else {
           // For guest users, directly restore campaigns
           setGuestCampaignResults(permanentCampaigns);
-          console.log('����� Guest Data Restored:', permanentCampaigns.length, 'campaigns with preserved metrics');
+          console.log(' Guest Data Restored:', permanentCampaigns.length, 'campaigns with preserved metrics');
 
           // Show notification about data preservation for guest users
           if (permanentCampaigns.length > 0) {
@@ -1260,7 +1260,7 @@ export default function BacklinkAutomation() {
   useEffect(() => {
     if (!user && !guestTrackingInitialized) {
       const guestUserId = guestTrackingService.initializeGuestTracking();
-      console.log('���� Guest tracking initialized:', guestUserId);
+      console.log(' Guest tracking initialized:', guestUserId);
       setGuestTrackingInitialized(true);
       updateGuestRestrictions();
     }
@@ -1344,7 +1344,7 @@ export default function BacklinkAutomation() {
       );
       updateGuestRestrictions();
       toast({
-        title: "🗑�� Campaign Deleted",
+        title: "🗑 Campaign Deleted",
         description: `"${guestCampaignToDelete.name}" has been permanently removed.`,
       });
     } else {
@@ -2061,7 +2061,7 @@ export default function BacklinkAutomation() {
 
       const linksCount = (user ? campaigns : guestCampaignResults).find(c => c.id === campaignId)?.linksGenerated || 0;
       toast({
-        title: "⏸�� Campaign Paused Successfully",
+        title: "⏸ Campaign Paused Successfully",
         description: `All ${linksCount} links and metrics permanently saved to your account. Will never reset when resuming or refreshing page.`,
       });
     } catch (error) {
@@ -2123,7 +2123,7 @@ export default function BacklinkAutomation() {
       console.log('🧹 Component unmounting - cleaning up all campaign intervals');
       activeCampaignIntervals.forEach((interval, campaignId) => {
         clearInterval(interval);
-        console.log('�� Cleared interval for campaign on unmount:', campaignId);
+        console.log(' Cleared interval for campaign on unmount:', campaignId);
       });
     };
   }, [activeCampaignIntervals]);
@@ -2192,7 +2192,7 @@ export default function BacklinkAutomation() {
       : "You've built 20 high-quality backlinks! Upgrade to Premium for unlimited campaigns and links.";
 
     toast({
-      title: "�� Campaign Paused - Link Limit Reached",
+      title: " Campaign Paused - Link Limit Reached",
       description: message,
       action: (
         <Button size="sm" onClick={() => setShowPremiumPlanModal(true)}>
@@ -2339,7 +2339,7 @@ export default function BacklinkAutomation() {
             const activity = {
               id: `activity-${Date.now()}-${i}`,
               type: 'link_published' as const,
-              message: `�� ${newPostback.linkType.replace('_', ' ')} published on ${newPostback.domain}`,
+              message: ` ${newPostback.linkType.replace('_', ' ')} published on ${newPostback.domain}`,
               timestamp: new Date().toISOString(),
               metadata: {
                 domain: newPostback.domain,
@@ -2384,7 +2384,7 @@ export default function BacklinkAutomation() {
           if (newLinks.length === 0 && forceUpdate) {
             // Add small incremental activity to show monitoring is active
             current.totalClicks += Math.floor(Math.random() * 5) + 1; // 1-5 simulated clicks
-            console.log('��� Synthetic activity added for campaign visibility:', campaignId);
+            console.log(' Synthetic activity added for campaign visibility:', campaignId);
           }
 
           const updated = new Map(prev);
@@ -2418,7 +2418,7 @@ export default function BacklinkAutomation() {
           heartbeatActivity.push({
             id: `heartbeat-${Date.now()}`,
             type: 'system_monitoring' as const,
-            message: `📊 Campaign actively monitored ��� ${campaignMetrics.get(campaignId)?.domainsReached?.size || 0} domains tracked`,
+            message: `📊 Campaign actively monitored  ${campaignMetrics.get(campaignId)?.domainsReached?.size || 0} domains tracked`,
             timestamp: new Date().toISOString(),
             metadata: {
               type: 'heartbeat',
@@ -2522,7 +2522,7 @@ export default function BacklinkAutomation() {
     setActiveCampaignIntervals(prev => {
       const updated = new Map(prev);
       updated.set(campaignId, interval);
-      console.log('�� Started monitoring for campaign:', campaignId, '(Total active:', updated.size, ')');
+      console.log(' Started monitoring for campaign:', campaignId, '(Total active:', updated.size, ')');
       return updated;
     });
 
@@ -2547,7 +2547,7 @@ export default function BacklinkAutomation() {
 
       if (guestCampaigns.length === 0) return;
 
-      console.log('��� Transferring guest campaigns to user account:', user.email);
+      console.log(' Transferring guest campaigns to user account:', user.email);
 
       // Create campaigns in the database for the new user
       for (const guestCampaign of guestCampaigns) {
@@ -2883,14 +2883,14 @@ export default function BacklinkAutomation() {
         if (guestLinksGenerated === 0) {
           // First campaign - surprise reveal
           toast({
-            title: "���� Surprise! Your Backlinks Are Ready!",
+            title: " Surprise! Your Backlinks Are Ready!",
             description: `We've generated ${linksToGenerate} premium backlinks for you instantly${blogResult.success ? (blogResult.isFallback ? ' + queued a priority blog post on backlinkoo.com' : ' + published a priority blog post on backlinkoo.com') : ''}! View them in the live monitor above!`,
             duration: 6000,
           });
         } else if (newTotal >= 20) {
           // Trial complete
           toast({
-            title: "��� Amazing! You've Built 20+ Backlinks!",
+            title: " Amazing! You've Built 20+ Backlinks!",
             description: "See your incredible results and unlock unlimited campaigns!",
             duration: 6000,
           });
@@ -2898,7 +2898,7 @@ export default function BacklinkAutomation() {
         } else {
           // Progress update
           toast({
-            title: `������ +${linksToGenerate} More Backlinks Generated!`,
+            title: ` +${linksToGenerate} More Backlinks Generated!`,
             description: `Total: ${newTotal} premium backlinks built${blogResult.success ? (blogResult.isFallback ? ' + blog post queued' : ' + new blog post published') : ''}! Keep going - you're on fire!`,
           });
         }
@@ -3004,7 +3004,7 @@ export default function BacklinkAutomation() {
                   console.warn('Failed to update campaign with blog URL:', updateError);
                 }
 
-                console.log('�� Blog post added as priority link for authenticated user:', blogResult.blogPostUrl);
+                console.log(' Blog post added as priority link for authenticated user:', blogResult.blogPostUrl);
               } catch (linkError) {
                 console.warn('Failed to add blog post as priority link for authenticated user:', linkError);
                 // Continue without blog link if this fails
@@ -3015,7 +3015,7 @@ export default function BacklinkAutomation() {
 
             // If it's a 404 error, create a fallback blog post entry
             if (blogError.message?.includes('404')) {
-              console.log('���️ Blog generation service not available - using fallback blog post');
+              console.log('️ Blog generation service not available - using fallback blog post');
 
               // Create a fallback blog post entry
               const fallbackSlug = result.campaign.keywords[0]?.toLowerCase().replace(/[^a-z0-9]/g, '-') || 'campaign';
@@ -3027,7 +3027,7 @@ export default function BacklinkAutomation() {
                 isFallback: true
               };
 
-              console.log('���� Fallback blog post created for authenticated user:', blogResult.blogPostUrl);
+              console.log(' Fallback blog post created for authenticated user:', blogResult.blogPostUrl);
             }
           }
 
@@ -3116,7 +3116,7 @@ export default function BacklinkAutomation() {
           });
         } else {
           toast({
-            title: "��� Campaign Deployed!",
+            title: " Campaign Deployed!",
             description: `Your campaign is live${blogResult.success ? (blogResult.isFallback ? ' + priority blog post queued on backlinkoo.com' : ' + priority blog post published on backlinkoo.com') : ''} with 20-link limit. View progress in the monitor above!`,
             action: (
               <Button size="sm" onClick={() => setShowPremiumPlanModal(true)}>
@@ -3731,7 +3731,7 @@ export default function BacklinkAutomation() {
                             🚀 Launch your automated backlink building campaign
                           </p>
                           <div className="flex justify-center gap-4 text-xs text-gray-500">
-                            <span>��� High-authority domains</span>
+                            <span> High-authority domains</span>
                             <span>✓ Instant results</span>
                             <span>✓ No signup required</span>
                           </div>
@@ -3926,7 +3926,7 @@ export default function BacklinkAutomation() {
                             <div className="flex items-center justify-center gap-2 text-sm">
                               <AlertTriangle className="h-4 w-4 text-amber-600" />
                               <span className="text-amber-700">Free Plan:</span>
-                              <span className="text-gray-600">20 links/month ��� Standard processing</span>
+                              <span className="text-gray-600">20 links/month  Standard processing</span>
                               <Button
                                 variant="link"
                                 size="sm"
@@ -3940,7 +3940,7 @@ export default function BacklinkAutomation() {
                                 }}
                                 className="p-0 h-auto text-amber-700 hover:text-amber-800"
                               >
-                                Upgrade ���
+                                Upgrade 
                               </Button>
                             </div>
                           </div>
@@ -4256,7 +4256,7 @@ export default function BacklinkAutomation() {
                                             </div>
                                             <div className="flex items-center gap-2">
                                               <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
-                                                �� {campaign.status}
+                                                 {campaign.status}
                                               </Badge>
                                               <Button
                                                 variant="ghost"
@@ -4587,7 +4587,7 @@ export default function BacklinkAutomation() {
                                           onClick={() => {
                                             copyToClipboard(result.blogPostUrl);
                                             toast({
-                                              title: "�� Blog URL Copied!",
+                                              title: " Blog URL Copied!",
                                               description: "Share this link to showcase your campaign's reach and authority.",
                                             });
                                           }}
@@ -5285,7 +5285,7 @@ export default function BacklinkAutomation() {
                                       // Campaign cannot be reactivated - show premium modal
                                       setShowPremiumPlanModal(true);
                                       toast({
-                                        title: "���� Premium Required",
+                                        title: " Premium Required",
                                         description: updateResult.warning?.message || "This campaign reached the 20-link limit. Upgrade to continue building links!",
                                         variant: "default",
                                         duration: 5000
@@ -5299,7 +5299,7 @@ export default function BacklinkAutomation() {
                                     );
                                     updateGuestRestrictions();
                                     toast({
-                                      title: "���️ Trial Campaign Resumed",
+                                      title: "️ Trial Campaign Resumed",
                                       description: "Link building activity has resumed.",
                                     });
                                   }}
@@ -5859,7 +5859,7 @@ export default function BacklinkAutomation() {
                                       <div className="flex items-center gap-2 text-xs">
                                         <span className="text-gray-600">Anchor:</span>
                                         <span className="font-medium text-blue-700">"{anchorText}"</span>
-                                        <span className="text-gray-600">���</span>
+                                        <span className="text-gray-600"></span>
                                         <span className="text-green-600 truncate max-w-24">{campaign.targetUrl}</span>
                                         <Button
                                           size="sm"
@@ -6014,7 +6014,7 @@ export default function BacklinkAutomation() {
                         <div className="flex items-center justify-between mb-3">
                           <div className="font-medium text-gray-900 truncate">{site.domain}</div>
                           <Badge variant={site.status === 'Link Published' ? 'default' : site.status === 'Publishing Live' ? 'outline' : 'secondary'}>
-                            {site.status === 'Link Published' ? '✅ Live' : site.status === 'Publishing Live' ? '����� Publishing' : '⏳ Processing'}
+                            {site.status === 'Link Published' ? '✅ Live' : site.status === 'Publishing Live' ? ' Publishing' : '⏳ Processing'}
                           </Badge>
                         </div>
                         <div className="space-y-2">
@@ -6034,7 +6034,7 @@ export default function BacklinkAutomation() {
                   </div>
                   <div className="mt-6 text-center">
                     <p className="text-sm text-gray-600 mb-3">
-                      �� Live feed showing verified link placements from campaigns running across our {Math.floor(Math.random() * 5000) + 15000}+ user network
+                       Live feed showing verified link placements from campaigns running across our {Math.floor(Math.random() * 5000) + 15000}+ user network
                     </p>
                   </div>
                 </CardContent>
@@ -6078,20 +6078,20 @@ export default function BacklinkAutomation() {
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
-                          { name: 'E-commerce & Retail', count: 45670, icon: '����' },
-                          { name: 'Travel & Tourism', count: 38920, icon: '✈���' },
+                          { name: 'E-commerce & Retail', count: 45670, icon: '' },
+                          { name: 'Travel & Tourism', count: 38920, icon: '✈' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
-                          { name: 'Entertainment & Gaming', count: 32180, icon: '����' },
+                          { name: 'Entertainment & Gaming', count: 32180, icon: '' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
                           { name: 'Real Estate', count: 27450, icon: '🏠' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
-                          { name: 'Home & Garden', count: 21890, icon: '��' },
-                          { name: 'Legal Services', count: 19650, icon: '��️' },
+                          { name: 'Home & Garden', count: 21890, icon: '' },
+                          { name: 'Legal Services', count: 19650, icon: '️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
                           { name: 'Science & Research', count: 14560, icon: '🔬' },
-                          { name: 'Arts & Culture', count: 13290, icon: '���' }
+                          { name: 'Arts & Culture', count: 13290, icon: '' }
                         ].map((category, idx) => (
                           <div key={idx} className="p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors">
                             <div className="flex items-center justify-between">
@@ -6816,7 +6816,7 @@ export default function BacklinkAutomation() {
         onSuccess={() => {
           setShowPremiumPlanModal(false);
           toast({
-            title: "���� Welcome to Premium!",
+            title: " Welcome to Premium!",
             description: "Your account has been upgraded. Enjoy unlimited access!",
           });
           // Refresh page to update premium status
@@ -6891,7 +6891,7 @@ export default function BacklinkAutomation() {
                 setCampaignToDelete(null);
 
                 toast({
-                  title: "🗑�� Campaign Deleted",
+                  title: "🗑 Campaign Deleted",
                   description: "Campaign and all associated data have been permanently removed.",
                 });
               } else {
@@ -6914,7 +6914,7 @@ export default function BacklinkAutomation() {
                 setCampaignToDelete(null);
 
                 toast({
-                  title: "������� Campaign Deleted",
+                  title: " Campaign Deleted",
                   description: "Campaign has been permanently removed.",
                 });
               } else {
@@ -7007,12 +7007,12 @@ export default function BacklinkAutomation() {
                       <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200 shadow-sm">
                         <div className="text-3xl font-bold text-blue-600">{selectedCampaignDetails.linksLive || Math.floor((selectedCampaignDetails.linksGenerated || Math.floor(Math.random() * 15) + 5) * 0.7) || Math.floor(Math.random() * 10) + 3}</div>
                         <div className="text-sm font-semibold text-gray-800">Live Links</div>
-                        <div className="text-xs text-blue-600 mt-1">��� Verified Active</div>
+                        <div className="text-xs text-blue-600 mt-1"> Verified Active</div>
                       </div>
                       <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200 shadow-sm">
                         <div className="text-3xl font-bold text-purple-600">{selectedCampaignDetails.avgAuthority || selectedCampaignDetails.quality?.averageAuthority || Math.floor(Math.random() * 15) + 85}</div>
                         <div className="text-sm font-semibold text-gray-800">Avg Authority</div>
-                        <div className="text-xs text-purple-600 mt-1">��� High Quality</div>
+                        <div className="text-xs text-purple-600 mt-1"> High Quality</div>
                       </div>
                       <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200 shadow-sm">
                         <div className="text-3xl font-bold text-orange-600">
