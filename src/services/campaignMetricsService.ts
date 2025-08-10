@@ -181,14 +181,21 @@ class CampaignMetricsService {
         .single();
 
       if (error) {
-        console.error('Failed to record link:', error);
-        return { success: false, error: error.message };
+        console.error('Failed to record link:', {
+          code: error.code,
+          message: error.message,
+          details: error.details
+        });
+        return { success: false, error: error.message || 'Failed to record link' };
       }
 
       console.log('✅ Link recorded in database:', linkRecord.sourceUrl);
       return { success: true, data };
     } catch (error) {
-      console.error('Link recording error:', error);
+      console.error('Link recording error:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
@@ -216,13 +223,20 @@ class CampaignMetricsService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Failed to fetch monthly aggregates:', error);
-        return { success: false, error: error.message };
+        console.error('Failed to fetch monthly aggregates:', {
+          code: error.code,
+          message: error.message,
+          details: error.details
+        });
+        return { success: false, error: error.message || 'Failed to fetch monthly data' };
       }
 
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Monthly aggregates fetch error:', error);
+      console.error('Monthly aggregates fetch error:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
@@ -241,13 +255,20 @@ class CampaignMetricsService {
         .single();
 
       if (error && error.code !== 'PGRST116') { // PGRST116 is "not found"
-        console.error('Failed to fetch live campaign monitor:', error);
-        return { success: false, error: error.message };
+        console.error('Failed to fetch live campaign monitor:', {
+          code: error.code,
+          message: error.message,
+          details: error.details
+        });
+        return { success: false, error: error.message || 'Failed to fetch live monitor data' };
       }
 
       return { success: true, data: data || null };
     } catch (error) {
-      console.error('Live campaign monitor fetch error:', error);
+      console.error('Live campaign monitor fetch error:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error'
+      });
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
