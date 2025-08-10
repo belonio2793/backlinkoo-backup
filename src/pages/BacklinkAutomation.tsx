@@ -3639,7 +3639,9 @@ export default function BacklinkAutomation() {
 
                   <div className="grid grid-cols-1 gap-4 max-w-2xl mx-auto">
                     <div>
-                      <Label htmlFor="linkType">Link Building Strategy</Label>
+                      <Label htmlFor="linkType">
+                        <FormattedText type="label">Link Building Strategy</FormattedText>
+                      </Label>
                       <Select value={campaignForm.linkType} onValueChange={(value) => setCampaignForm(prev => ({ ...prev, linkType: value }))}>
                         <SelectTrigger className="h-12">
                           <SelectValue placeholder="Select strategy" />
