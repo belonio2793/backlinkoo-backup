@@ -2253,7 +2253,7 @@ export default function BacklinkAutomation() {
           // First campaign - surprise reveal
           toast({
             title: "🎉 Surprise! Your Backlinks Are Ready!",
-            description: `We've generated ${linksToGenerate} premium backlinks for you instantly${blogResult.success ? ' + published a priority blog post on backlinkoo.com' : ''}! View them in the live monitor above!`,
+            description: `We've generated ${linksToGenerate} premium backlinks for you instantly${blogResult.success ? (blogResult.isFallback ? ' + queued a priority blog post on backlinkoo.com' : ' + published a priority blog post on backlinkoo.com') : ''}! View them in the live monitor above!`,
             duration: 6000,
           });
         } else if (newTotal >= 20) {
@@ -5174,7 +5174,7 @@ export default function BacklinkAutomation() {
                         <div className="flex items-center justify-between mb-3">
                           <div className="font-medium text-gray-900 truncate">{site.domain}</div>
                           <Badge variant={site.status === 'Link Published' ? 'default' : site.status === 'Publishing Live' ? 'outline' : 'secondary'}>
-                            {site.status === 'Link Published' ? '✅ Live' : site.status === 'Publishing Live' ? '���� Publishing' : '⏳ Processing'}
+                            {site.status === 'Link Published' ? '�� Live' : site.status === 'Publishing Live' ? '���� Publishing' : '⏳ Processing'}
                           </Badge>
                         </div>
                         <div className="space-y-2">
