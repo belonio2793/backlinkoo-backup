@@ -764,7 +764,12 @@ class CampaignService {
 
       return { campaigns: data || [] };
     } catch (error) {
-      console.error('Error loading campaigns:', error.message || error.toString() || JSON.stringify(error));
+      console.error('Error loading campaigns:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return { error: error.message || 'Unknown error occurred' };
     }
   }
