@@ -5119,7 +5119,7 @@ export default function BacklinkAutomation() {
                           <div className="flex items-center justify-between">
                             <div className="text-xs text-gray-500">
                               Created<br />
-                              {new Date(campaign.createdAt).toLocaleDateString()}
+                              {campaign.createdAt ? new Date(campaign.createdAt).toLocaleDateString() : 'Recently'}
                             </div>
                             <div className="flex items-center gap-2">
                               <Button
