@@ -91,7 +91,8 @@ class PaymentIntegrationService {
     credits: number,
     paymentMethod: 'stripe',
     isGuest: boolean = false,
-    guestEmail?: string
+    guestEmail?: string,
+    redirectOptions?: CheckoutRedirectOptions
   ): Promise<PaymentResult> {
     try {
       // Development mode fallback
