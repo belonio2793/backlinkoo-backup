@@ -1797,6 +1797,59 @@ export default function BacklinkAutomation() {
     }
   };
 
+  // Comprehensive cleanup for campaign monitoring
+  const cleanupCampaignMonitoring = useCallback((campaignId: string) => {
+    console.log('🧹 Cleaning up monitoring for campaign:', campaignId);
+
+    // Clear interval
+    const interval = activeCampaignIntervals.get(campaignId);
+    if (interval) {
+      clearInterval(interval);
+      console.log('✅ Cleared interval for campaign:', campaignId);
+    }
+
+    // Remove from active intervals map
+    setActiveCampaignIntervals(prev => {
+      const updated = new Map(prev);
+      const removed = updated.delete(campaignId);
+      if (removed) {
+        console.log('✅ Removed from active intervals:', campaignId);
+      }
+      return updated;
+    });
+
+    // Clean up campaign metrics if campaign is being deleted
+    setCampaignMetrics(prev => {
+      if (prev.has(campaignId)) {
+        const updated = new Map(prev);
+        updated.delete(campaignId);
+        console.log('✅ Cleaned up metrics for campaign:', campaignId);
+
+        // Also remove from localStorage
+        try {
+          localStorage.removeItem(`campaign_metrics_${campaignId}`);
+          console.log('✅ Removed persisted metrics for campaign:', campaignId);
+        } catch (error) {
+          console.warn('Failed to remove persisted metrics:', error);
+        }
+
+        return updated;
+      }
+      return prev;
+    });
+  }, []);
+
+  // Global cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      console.log('🧹 Component unmounting - cleaning up all campaign intervals');
+      activeCampaignIntervals.forEach((interval, campaignId) => {
+        clearInterval(interval);
+        console.log('✅ Cleared interval for campaign on unmount:', campaignId);
+      });
+    };
+  }, [activeCampaignIntervals]);
+
   const resumeCampaign = async (campaignId: string) => {
     try {
       setIsLoading(true);
