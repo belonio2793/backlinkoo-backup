@@ -5,7 +5,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import type { Database } from '@/integrations/supabase/types';
-import { formatErrorForUI } from '@/utils/errorUtils';
+import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 
 type CampaignRuntimeMetrics = Database['public']['Tables']['campaign_runtime_metrics']['Row'];
 type CampaignRuntimeMetricsInsert = Database['public']['Tables']['campaign_runtime_metrics']['Insert'];
@@ -424,7 +424,7 @@ class CampaignMetricsService {
             const result = await this.updateCampaignMetrics(userId, metrics);
             if (result.success) {
               migratedCount++;
-              console.log('����� Migrated campaign to database:', campaign.id);
+              console.log('��� Migrated campaign to database:', campaign.id);
             }
           }
         } catch (parseError) {
