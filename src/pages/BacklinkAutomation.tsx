@@ -1430,7 +1430,11 @@ export default function BacklinkAutomation() {
       );
       setDiscoveredUrls(urls);
     } catch (error) {
-      console.error('Failed to load discovered URLs:', error);
+      console.error('Failed to load discovered URLs:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
       // Provide fallback demo data when database is unavailable
       setDiscoveredUrls([
         {
