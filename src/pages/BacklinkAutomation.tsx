@@ -4669,9 +4669,17 @@ export default function BacklinkAutomation() {
                                 <div className="flex items-center justify-between">
                                   <div>
                                     <p className="text-sm font-medium text-green-700">Live Links</p>
-                                    <p className="text-2xl font-bold text-green-900">{cumulativeStats.totalLinksPublished}</p>
+                                    <p className="text-2xl font-bold text-green-900">
+                                      {formatDisplayNumber(cumulativeStats.totalLinksPublished, {
+                                        hideZero: false,
+                                        zeroText: '0'
+                                      })}
+                                    </p>
                                     <p className="text-xs text-green-600 mt-1">
-                                      {globalActivityFeed.filter(a => a.metadata?.status === 'live').length} verified live
+                                      {(() => {
+                                        const verifiedLive = globalActivityFeed.filter(a => a.metadata?.status === 'live').length;
+                                        return verifiedLive > 0 ? `${verifiedLive} verified live` : 'ready for verification';
+                                      })()}
                                     </p>
                                   </div>
                                   <Activity className="h-8 w-8 text-green-600" />
