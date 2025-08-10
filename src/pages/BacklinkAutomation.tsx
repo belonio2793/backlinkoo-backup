@@ -1489,7 +1489,11 @@ export default function BacklinkAutomation() {
         discoveryRate: Math.floor(Math.random() * 50) + 20
       }));
     } catch (error) {
-      console.error('Failed to load discovery stats:', error);
+      console.error('Failed to load discovery stats:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
       // Provide impressive fallback stats for demo
       const fallbackStats = {
         total_urls: 15847,
