@@ -194,56 +194,12 @@ export function TrialExhaustedModal({
           </Card>
         </div>
 
-        {/* Campaign Results */}
-        <div className="mb-8">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <Target className="h-5 w-5" />
-            Your Campaigns
-          </h3>
-          <div className="space-y-3 max-h-40 overflow-y-auto">
-            {guestResults.map((campaign, idx) => (
-              <Card key={idx} className="bg-gray-50">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="font-semibold text-gray-900">{campaign.name}</div>
-                      <div className="text-sm text-gray-600">
-                        Keywords: {campaign.keywords.join(', ')}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <Badge variant="outline" className="text-green-600 bg-green-50">
-                        {campaign.linksGenerated} links
-                      </Badge>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-
-        {/* Success Domains */}
-        <div className="mb-8">
-          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-            <BarChart3 className="h-5 w-5" />
-            High-Authority Domains You Conquered
-          </h3>
-          <div className="flex flex-wrap gap-2">
-            {topDomains.map((domain, idx) => (
-              <Badge key={idx} variant="outline" className="bg-blue-50 text-blue-700 border-blue-300">
-                {domain}
-              </Badge>
-            ))}
-          </div>
-        </div>
-
         {/* Plan Selection */}
-        <div className="mb-6 flex flex-col items-center">
+        <div className="mb-5 flex flex-col items-center">
           <h3 className="text-xl font-bold mb-4 text-center text-black">Choose Your Plan</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-w-md">
             <div
-              className={`p-3 rounded-lg border-2 cursor-pointer transition-all ${
+              className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${
                 selectedPlan === 'monthly'
                   ? 'border-blue-600 bg-blue-50 shadow-md'
                   : 'border-gray-300 bg-white hover:border-blue-400'
@@ -258,7 +214,7 @@ export function TrialExhaustedModal({
               </div>
             </div>
             <div
-              className={`p-3 rounded-lg border-2 cursor-pointer transition-all relative ${
+              className={`p-4 rounded-lg border-2 cursor-pointer transition-all relative ${
                 selectedPlan === 'yearly'
                   ? 'border-blue-600 bg-blue-50 shadow-md'
                   : 'border-gray-300 bg-white hover:border-blue-400'
@@ -279,24 +235,24 @@ export function TrialExhaustedModal({
         </div>
 
         {/* Action Buttons */}
-        <div className="space-y-3 flex flex-col items-center mb-6">
+        <div className="space-y-4 flex flex-col items-center mb-5">
           <div className="flex flex-col sm:flex-row gap-3 w-full max-w-lg">
             <Button
               size="lg"
-              className="flex-1 h-12 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+              className="flex-1 h-14 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold"
               onClick={handleUpgradeClick}
               disabled={isProcessingUpgrade}
             >
               {isProcessingUpgrade ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                   Creating Checkout...
                 </>
               ) : (
                 <>
-                  <Crown className="h-4 w-4 mr-2" />
+                  <Crown className="h-5 w-5 mr-2" />
                   Upgrade to Premium - {selectedPlan === 'monthly' ? '$29/month' : '$17/month (billed yearly)'}
-                  <ArrowRight className="h-4 w-4 ml-2" />
+                  <ArrowRight className="h-5 w-5 ml-2" />
                 </>
               )}
             </Button>
@@ -304,59 +260,18 @@ export function TrialExhaustedModal({
               <Button
                 size="lg"
                 variant="outline"
-                className="h-12 border-2 border-blue-600 text-blue-600 hover:bg-blue-50"
+                className="h-14 border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold"
                 onClick={() => onOpenChange(false)}
               >
-                <UserPlus className="h-4 w-4 mr-2" />
+                <UserPlus className="h-5 w-5 mr-2" />
                 Create Free Account
               </Button>
             )}
           </div>
         </div>
 
-        {/* Value Proposition - Moved Below Payment */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-4 text-white mb-4">
-          <div className="text-center">
-            <h3 className="text-lg font-bold mb-3">Unlock Premium Power!</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-              <div className="text-center">
-                <div className="text-2xl font-bold">∞</div>
-                <div className="text-xs opacity-90">Unlimited Links per Campaign</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold">🎓</div>
-                <div className="text-xs opacity-90">SEO Academy Access</div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-bold">⚡</div>
-                <div className="text-xs opacity-90">Priority Support</div>
-              </div>
-            </div>
-
-            {/* Additional Premium Features */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-white">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-3 w-3 text-white" />
-                <span className="text-white">Advanced analytics & reporting</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-3 w-3 text-white" />
-                <span className="text-white">White-label options</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-3 w-3 text-white" />
-                <span className="text-white">API access & bulk exports</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-3 w-3 text-white" />
-                <span className="text-white">Priority customer support</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="text-center">
-          <div className="flex justify-center gap-4 text-xs text-gray-500 mb-3">
+        <div className="text-center mb-5">
+          <div className="flex justify-center gap-4 text-xs text-gray-500 mb-4">
             <span>✓ 30-day money back guarantee</span>
             <span>✓ Cancel anytime</span>
             <span>✓ Priority support</span>
@@ -366,10 +281,51 @@ export function TrialExhaustedModal({
             variant="ghost"
             size="sm"
             onClick={() => onOpenChange(false)}
-            className="w-full max-w-lg text-gray-500 text-xs"
+            className="w-full max-w-lg text-gray-500 text-sm py-2"
           >
             {isLoggedIn ? 'Continue with free account (1 campaign limit)' : 'Continue browsing (limited features)'}
           </Button>
+        </div>
+
+        {/* Value Proposition - Moved Below Continue Button */}
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-5 text-white">
+          <div className="text-center">
+            <h3 className="text-lg font-bold mb-4">Unlock Premium Power!</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold">∞</div>
+                <div className="text-sm opacity-90">Unlimited Links per Campaign</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">🎓</div>
+                <div className="text-sm opacity-90">SEO Academy Access</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold">⚡</div>
+                <div className="text-sm opacity-90">Priority Support</div>
+              </div>
+            </div>
+
+            {/* Additional Premium Features */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm text-white">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-white" />
+                <span className="text-white">Advanced analytics & reporting</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-white" />
+                <span className="text-white">White-label options</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-white" />
+                <span className="text-white">API access & bulk exports</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-white" />
+                <span className="text-white">Priority customer support</span>
+              </div>
+            </div>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
