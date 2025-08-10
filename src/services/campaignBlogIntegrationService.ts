@@ -68,7 +68,11 @@ export class CampaignBlogIntegrationService {
           body: JSON.stringify(blogRequest)
         });
       } catch (networkError) {
-        console.error('Network error calling blog generator:', networkError);
+        console.error('Network error calling blog generator:', {
+          message: networkError.message,
+          stack: networkError.stack,
+          name: networkError.name
+        });
         throw new Error(`Network error: ${networkError.message}`);
       }
 
