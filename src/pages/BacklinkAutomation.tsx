@@ -5128,6 +5128,16 @@ export default function BacklinkAutomation() {
                             </div>
                           </div>
 
+                          {/* Predictive Algorithm Dashboard */}
+                          <div className="mb-4">
+                            <PredictiveCampaignDashboard
+                              campaignId={campaign.id}
+                              isPremium={isPremium}
+                              compact={true}
+                              showGlobalMetrics={false}
+                            />
+                          </div>
+
                           {/* Progress Bar with Premium Warning */}
                           <div className="mb-4">
                             <div className="flex justify-between text-sm mb-2">
