@@ -1474,8 +1474,8 @@ export default function BacklinkAutomation() {
   // const queueManager = CampaignQueueManager.getInstance();
   // const discoveryEngine = LinkDiscoveryEngine.getInstance();
   // const analyticsEngine = AnalyticsEngine.getInstance();
-  const contentEngine = ContentGenerationEngine.getInstance();
-  const errorEngine = ErrorHandlingEngine.getInstance();
+  // const contentEngine = ContentGenerationEngine.getInstance();
+  // const errorEngine = ErrorHandlingEngine.getInstance();
 
   // Check database status on mount
   useEffect(() => {
