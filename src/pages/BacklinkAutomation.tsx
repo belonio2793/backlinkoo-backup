@@ -1058,6 +1058,9 @@ export default function BacklinkAutomation() {
       // Retry failed database syncs
       retryFailedSyncs();
 
+      // Update cumulative stats across all campaigns
+      updateCumulativeStats();
+
       // Update live monitoring metrics for current user
       const storageKey = getUserStorageKey();
       const savedCampaigns = JSON.parse(localStorage.getItem(storageKey) || '[]');
