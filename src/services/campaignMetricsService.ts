@@ -199,20 +199,13 @@ class CampaignMetricsService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Failed to fetch monthly aggregates:', {
-          code: error.code,
-          message: error.message,
-          details: error.details
-        });
+        console.error('Failed to fetch monthly aggregates:', formatErrorForLogging(error, 'getUserMonthlyAggregates'));
         return { success: false, error: formatErrorForUI(error) || 'Failed to fetch monthly data' };
       }
 
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Monthly aggregates fetch error:', {
-        error: error,
-        message: formatErrorForUI(error) || 'Unknown error'
-      });
+      console.error('Monthly aggregates fetch error:', formatErrorForLogging(error, 'getUserMonthlyAggregates-catch'));
       return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
     }
   }
