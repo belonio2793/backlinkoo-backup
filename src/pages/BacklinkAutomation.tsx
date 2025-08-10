@@ -61,6 +61,7 @@ import { recursiveUrlDiscoveryService } from '@/services/recursiveUrlDiscoverySe
 // Import database utilities
 import { checkDatabaseStatus, initializeDatabase, type DatabaseStatus } from '@/utils/databaseSetup';
 import { updateActiveCampaigns, formatCampaignStatusText } from '@/utils/realTimeCampaignUpdater';
+import { formatDisplayNumber, formatMetricDisplay, formatActivityCount } from '@/utils/displayFormatter';
 import '@/utils/testRealTimeUpdates';
 
 interface DatabaseCampaign {
@@ -4112,13 +4113,19 @@ export default function BacklinkAutomation() {
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">Links Published</p>
                                   <p className="text-xl font-bold text-green-600">
-                                    {cumulativeStats.totalLinksPublished}
+                                    {formatDisplayNumber(cumulativeStats.totalLinksPublished, {
+                                      hideZero: false,
+                                      zeroText: '0'
+                                    })}
                                   </p>
                                   <p className="text-xs text-green-700">
-                                    +{globalActivityFeed.filter(a =>
-                                      a.type === 'link_published' &&
-                                      Date.now() - new Date(a.timestamp).getTime() < 60000
-                                    ).length} last minute
+                                    {(() => {
+                                      const recentCount = globalActivityFeed.filter(a =>
+                                        a.type === 'link_published' &&
+                                        Date.now() - new Date(a.timestamp).getTime() < 60000
+                                      ).length;
+                                      return recentCount > 0 ? `+${recentCount} last minute` : 'monitoring for new links';
+                                    })()}
                                   </p>
                                 </div>
                                 <Link className="h-6 w-6 text-green-600" />
@@ -4130,12 +4137,18 @@ export default function BacklinkAutomation() {
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">Domains Reached</p>
                                   <p className="text-xl font-bold text-blue-600">
-                                    {cumulativeStats.totalDomainsReached}
+                                    {formatDisplayNumber(cumulativeStats.totalDomainsReached, {
+                                      hideZero: false,
+                                      zeroText: '0'
+                                    })}
                                   </p>
                                   <p className="text-xs text-blue-700">
-                                    {globalActivityFeed.filter(a =>
-                                      a.metadata?.authority >= 90
-                                    ).length} high DA
+                                    {(() => {
+                                      const highDACount = globalActivityFeed.filter(a =>
+                                        a.metadata?.authority >= 90
+                                      ).length;
+                                      return highDACount > 0 ? `${highDACount} high DA` : 'targeting high DA sites';
+                                    })()}
                                   </p>
                                 </div>
                                 <Globe className="h-6 w-6 text-blue-600" />
