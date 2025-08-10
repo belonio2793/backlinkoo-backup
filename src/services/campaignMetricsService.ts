@@ -216,7 +216,8 @@ class CampaignMetricsService {
 
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Monthly aggregates fetch error:', formatErrorForLogging(error, 'getUserMonthlyAggregates-catch'));
+      const errorDetails = formatErrorForLogging(error, 'getUserMonthlyAggregates-catch');
+      console.error('Monthly aggregates fetch error:', JSON.stringify(errorDetails, null, 2));
       return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
     }
   }
