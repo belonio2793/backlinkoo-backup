@@ -2938,7 +2938,7 @@ export default function BacklinkAutomation() {
                   console.warn('Failed to update campaign with blog URL:', updateError);
                 }
 
-                console.log('✅ Blog post added as priority link for authenticated user:', blogResult.blogPostUrl);
+                console.log('�� Blog post added as priority link for authenticated user:', blogResult.blogPostUrl);
               } catch (linkError) {
                 console.warn('Failed to add blog post as priority link for authenticated user:', linkError);
                 // Continue without blog link if this fails
@@ -4222,7 +4222,10 @@ export default function BacklinkAutomation() {
                                 <Activity className="h-4 w-4 text-purple-600 animate-pulse" />
                                 <span className="font-medium text-gray-900">Global Activity Feed</span>
                                 <Badge variant="secondary" className="text-xs">
-                                  {globalActivityFeed.length} activities
+                                  {formatActivityCount(globalActivityFeed.length, 'activity', 'activities', {
+                                    showZero: true,
+                                    zeroText: 'monitoring for activity'
+                                  })}
                                 </Badge>
                               </div>
                               <div className="text-xs text-gray-500 time-display">
