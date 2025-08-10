@@ -3445,7 +3445,7 @@ export default function BacklinkAutomation() {
                 <Lightning className="h-5 w-5 text-orange-500 absolute -top-1 -right-1" />
               </div>
               <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-orange-500 bg-clip-text text-transparent">
-                Backlink Automation
+                <FormattedText type="title">Backlink Automation</FormattedText>
               </h1>
               <div className="flex items-center gap-2">
                 {/* User Status Badges */}
