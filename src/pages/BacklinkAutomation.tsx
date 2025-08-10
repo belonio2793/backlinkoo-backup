@@ -65,7 +65,9 @@ import { formatDisplayNumber, formatMetricDisplay, formatActivityCount } from '@
 import { safeGetRuntimeMinutes, safeGetRuntimeHours, safeFormatDate } from '@/utils/dateUtils';
 import { CampaignCounterDashboard } from '@/components/CampaignCounterDashboard';
 import { CampaignReportingDashboard } from '@/components/CampaignReportingDashboard';
+import { PredictiveCampaignDashboard } from '@/components/PredictiveCampaignDashboard';
 import { useCampaignCounters } from '@/hooks/useCampaignCounters';
+import { usePredictiveCampaignAlgorithm } from '@/hooks/usePredictiveCampaignAlgorithm';
 
 interface DatabaseCampaign {
   id: string;
