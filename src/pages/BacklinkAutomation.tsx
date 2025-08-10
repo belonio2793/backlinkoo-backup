@@ -832,6 +832,11 @@ export default function BacklinkAutomation() {
   useEffect(() => {
     randomizeWebsites();
 
+    // Load campaign metrics first
+    if (!metricsLoaded) {
+      loadCampaignMetrics();
+    }
+
     // Load permanently saved campaigns with live monitoring
     const permanentCampaigns = loadPermanentCampaigns();
     if (permanentCampaigns.length > 0) {
@@ -2345,7 +2350,7 @@ export default function BacklinkAutomation() {
         if (guestLinksGenerated === 0) {
           // First campaign - surprise reveal
           toast({
-            title: "🎉 Surprise! Your Backlinks Are Ready!",
+            title: "���� Surprise! Your Backlinks Are Ready!",
             description: `We've generated ${linksToGenerate} premium backlinks for you instantly${blogResult.success ? (blogResult.isFallback ? ' + queued a priority blog post on backlinkoo.com' : ' + published a priority blog post on backlinkoo.com') : ''}! View them in the live monitor above!`,
             duration: 6000,
           });
