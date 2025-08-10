@@ -88,7 +88,12 @@ class DirectSupabaseMetricsService {
       console.warn('⚠️ Could not get total users count');
       return 0;
     } catch (error: any) {
-      console.error('❌ Error getting total users:', error);
+      console.error('❌ Error getting total users:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return 0;
     }
   }
@@ -117,7 +122,12 @@ class DirectSupabaseMetricsService {
 
       return count || 0;
     } catch (error: any) {
-      console.error('❌ Error getting active users:', error);
+      console.error('❌ Error getting active users:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return 0;
     }
   }
@@ -146,7 +156,12 @@ class DirectSupabaseMetricsService {
       const revenue = data?.reduce((sum, order) => sum + (order.amount || 0), 0) || 0;
       return revenue;
     } catch (error: any) {
-      console.error('❌ Error getting monthly revenue:', error);
+      console.error('❌ Error getting monthly revenue:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return 0;
     }
   }
@@ -169,7 +184,12 @@ class DirectSupabaseMetricsService {
       const revenue = data?.reduce((sum, order) => sum + (order.amount || 0), 0) || 0;
       return revenue;
     } catch (error: any) {
-      console.error('❌ Error getting total revenue:', error);
+      console.error('❌ Error getting total revenue:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return 0;
     }
   }
@@ -191,7 +211,12 @@ class DirectSupabaseMetricsService {
 
       return count || 0;
     } catch (error: any) {
-      console.error('❌ Error getting running campaigns:', error);
+      console.error('❌ Error getting running campaigns:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return 0;
     }
   }
@@ -212,7 +237,12 @@ class DirectSupabaseMetricsService {
 
       return count || 0;
     } catch (error: any) {
-      console.error('❌ Error getting blog posts:', error);
+      console.error('❌ Error getting blog posts:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return 0;
     }
   }
@@ -234,7 +264,12 @@ class DirectSupabaseMetricsService {
 
       return count || 0;
     } catch (error: any) {
-      console.error('❌ Error getting trial users:', error);
+      console.error('❌ Error getting trial users:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return 0;
     }
   }
@@ -259,7 +294,12 @@ class DirectSupabaseMetricsService {
 
       return count || 0;
     } catch (error: any) {
-      console.error('❌ Error getting recent signups:', error);
+      console.error('❌ Error getting recent signups:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return 0;
     }
   }
@@ -307,7 +347,12 @@ class DirectSupabaseMetricsService {
       return metrics;
 
     } catch (error: any) {
-      console.error('❌ Error fetching direct metrics:', error);
+      console.error('❌ Error fetching direct metrics:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       
       // Return zero metrics on error
       return {
@@ -338,7 +383,12 @@ class DirectSupabaseMetricsService {
         tables
       };
     } catch (error: any) {
-      console.error('❌ Connection test failed:', error);
+      console.error('❌ Connection test failed:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       return {
         connected: false,
         error: error.message
