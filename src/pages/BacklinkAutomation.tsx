@@ -2338,6 +2338,21 @@ export default function BacklinkAutomation() {
               setRealTimeLinkPostbacks(prev => [blogPostback, ...prev]);
               setRecentPostbacks(prev => [blogPostback, ...prev.slice(0, 19)]);
 
+              // Update campaign in database with blog post URL
+              try {
+                await supabase
+                  .from('campaigns')
+                  .update({
+                    blog_post_url: blogResult.blogPostUrl,
+                    blog_post_title: blogResult.title,
+                    links_generated: 1 // Start with 1 for the blog post
+                  })
+                  .eq('id', result.campaign.id);
+                console.log('✅ Campaign updated with blog post URL in database');
+              } catch (updateError) {
+                console.warn('Failed to update campaign with blog URL:', updateError);
+              }
+
               console.log('✅ Blog post added as priority link for authenticated user:', blogResult.blogPostUrl);
             }
           } catch (blogError) {
