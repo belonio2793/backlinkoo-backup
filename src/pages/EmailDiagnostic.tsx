@@ -212,7 +212,7 @@ export default function EmailDiagnostic() {
     } catch (error) {
       toast({
         title: "Test Email Error",
-        description: error instanceof Error ? error.message : 'Unknown error',
+        description: formatErrorForUI(error),
         variant: "destructive"
       });
     } finally {
