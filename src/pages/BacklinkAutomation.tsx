@@ -805,7 +805,20 @@ export default function BacklinkAutomation() {
             status: dbCampaign.status,
             linksGenerated: dbCampaign.progressive_link_count,
             linksBuilt: dbCampaign.progressive_link_count,
-            linksLive: dbCampaign.links_live,
+            linksLive: (() => {
+              try {
+                // Restore persisted live links from localStorage if available
+                const persistedMetrics = localStorage.getItem(`campaign_metrics_${dbCampaign.campaign_id}`);
+                if (persistedMetrics) {
+                  const metrics = JSON.parse(persistedMetrics);
+                  // Use the maximum to ensure live links only increase
+                  return Math.max(dbCampaign.links_live || 0, metrics.linksLive || 0);
+                }
+              } catch (error) {
+                console.warn('Failed to restore persisted live links:', error);
+              }
+              return dbCampaign.links_live || 0;
+            })(),
             linksPending: dbCampaign.links_pending,
             progressiveLinkCount: dbCampaign.progressive_link_count,
             dailyLimit: dbCampaign.daily_limit,
@@ -5943,7 +5956,7 @@ export default function BacklinkAutomation() {
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛️' },
                           { name: 'Science & Research', count: 14560, icon: '🔬' },
-                          { name: 'Arts & Culture', count: 13290, icon: '🎨' }
+                          { name: 'Arts & Culture', count: 13290, icon: '���' }
                         ].map((category, idx) => (
                           <div key={idx} className="p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors">
                             <div className="flex items-center justify-between">
