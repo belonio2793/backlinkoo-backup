@@ -3673,7 +3673,9 @@ export default function BacklinkAutomation() {
                     </div>
                     
                     <div>
-                      <Label htmlFor="keywords">Target Keywords (comma-separated) *</Label>
+                      <Label htmlFor="keywords">
+                        <FormattedText type="label">Target Keywords (comma-separated) *</FormattedText>
+                      </Label>
                       <Input
                         id="keywords"
                         value={campaignForm.keywords}
