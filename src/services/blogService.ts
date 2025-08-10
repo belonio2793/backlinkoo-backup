@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/types';
 import { blogPersistenceService } from './blogPersistenceService';
 import { SEOAnalyzer } from './seoAnalyzer';
+import { formatErrorForUI } from '@/utils/errorUtils';
 
 export type BlogPost = Tables<'blog_posts'>;
 export type CreateBlogPost = TablesInsert<'blog_posts'>;
@@ -80,7 +81,7 @@ export class BlogService {
       );
 
       if (!persistenceResult.success) {
-        throw new Error(`Failed to create blog post with maximum persistence: ${persistenceResult.error}`);
+        throw new Error(`Failed to create blog post with maximum persistence: ${formatErrorForUI(persistenceResult.error)}`);
       }
 
       return persistenceResult.data!;

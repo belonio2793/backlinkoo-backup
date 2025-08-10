@@ -25,6 +25,7 @@ import {
   Clock,
   Terminal
 } from 'lucide-react';
+import { formatErrorForUI } from '@/utils/errorUtils';
 
 interface TestResult {
   name: string;
@@ -204,14 +205,14 @@ export default function EmailDiagnostic() {
       } else {
         toast({
           title: "Test Email Failed",
-          description: result.error,
+          description: formatErrorForUI(result.error),
           variant: "destructive"
         });
       }
     } catch (error) {
       toast({
         title: "Test Email Error",
-        description: error instanceof Error ? error.message : 'Unknown error',
+        description: formatErrorForUI(error),
         variant: "destructive"
       });
     } finally {

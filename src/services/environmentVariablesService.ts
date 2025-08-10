@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { formatErrorForLogging } from '@/utils/errorUtils';
 
 interface EnvironmentVariable {
   id: string;
@@ -131,7 +132,7 @@ class EnvironmentVariablesService {
 
       return variables;
     } catch (error) {
-      console.error('Error in getAllVariables:', error);
+      console.error('Error in getAllVariables:', formatErrorForLogging(error, 'getAllVariables'));
       return [];
     }
   }
@@ -170,7 +171,7 @@ class EnvironmentVariablesService {
       console.log(`✅ Environment variable ${key} saved to localStorage`);
       return true;
     } catch (error) {
-      console.error('Error in saveVariable:', error);
+      console.error('Error in saveVariable:', formatErrorForLogging(error, 'saveVariable'));
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       throw new Error(`Failed to save environment variable: ${errorMessage}`);
     }
@@ -193,7 +194,7 @@ class EnvironmentVariablesService {
       console.log(`✅ Environment variable ${key} deleted from localStorage`);
       return true;
     } catch (error) {
-      console.error('Error in deleteVariable:', error);
+      console.error('Error in deleteVariable:', formatErrorForLogging(error, 'deleteVariable'));
       return false;
     }
   }

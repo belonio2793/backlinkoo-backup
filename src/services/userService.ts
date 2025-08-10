@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { formatErrorForLogging, formatErrorForUI } from '@/utils/errorUtils';
 
 export interface UserProfile {
   user_id: string;
@@ -31,7 +32,7 @@ class UserService {
         .single();
 
       if (error) {
-        const errorMessage = error.message || error;
+        const errorMessage = formatErrorForUI(error);
 
         // Handle permission denied errors or table not found (silently for these common issues)
         if (errorMessage && (
@@ -53,8 +54,8 @@ class UserService {
           };
         }
 
-        // Only log unexpected errors
-        console.error('❌ userService: Unexpected error fetching user profile:', errorMessage);
+        // Only log unexpected errors with proper formatting
+        console.error('❌ userService: Unexpected error fetching user profile:', formatErrorForLogging(error, 'getCurrentUserProfile'));
 
         // Handle infinite recursion in RLS policies
         if (errorMessage && errorMessage.includes('infinite recursion detected in policy')) {
@@ -83,8 +84,8 @@ class UserService {
       console.log('✅ userService: Profile loaded successfully:', profile);
       return profile;
     } catch (error: any) {
-      const errorMessage = error.message || error;
-      console.error('❌ userService: Error getting current user profile:', errorMessage);
+      const errorMessage = formatErrorForUI(error);
+      console.error('❌ userService: Error getting current user profile:', formatErrorForLogging(error, 'getCurrentUserProfile'));
 
       // Handle infinite recursion gracefully
       if (errorMessage && errorMessage.includes('infinite recursion detected in policy')) {
@@ -121,7 +122,7 @@ class UserService {
 
       return isPremium;
     } catch (error: any) {
-      console.error('❌ userService: Error checking premium status:', error.message || error);
+      console.error('❌ userService: Error checking premium status:', formatErrorForLogging(error, 'isPremiumUser'));
       return false;
     }
   }
@@ -134,7 +135,7 @@ class UserService {
       const profile = await this.getCurrentUserProfile();
       return profile?.role === 'admin';
     } catch (error: any) {
-      console.error('Error checking admin status:', error.message || error);
+      console.error('Error checking admin status:', formatErrorForLogging(error, 'isAdminUser'));
       return false;
     }
   }
@@ -203,8 +204,8 @@ class UserService {
 
       return { success: true, message: 'Successfully upgraded to premium' };
     } catch (error: any) {
-      console.error('Exception in upgradeToPremium:', error.message || error);
-      return { success: false, message: `Unexpected error during upgrade: ${error.message}` };
+      console.error('Exception in upgradeToPremium:', formatErrorForLogging(error, 'upgradeToPremium'));
+      return { success: false, message: `Unexpected error during upgrade: ${formatErrorForUI(error)}` };
     }
   }
 
@@ -239,7 +240,7 @@ class UserService {
 
       return { success: true, message: 'Successfully downgraded from premium' };
     } catch (error: any) {
-      console.error('Error in downgradeFromPremium:', error.message || error);
+      console.error('Error in downgradeFromPremium:', formatErrorForLogging(error, 'downgradeFromPremium'));
       return { success: false, message: 'Unexpected error during downgrade' };
     }
   }
@@ -271,7 +272,7 @@ class UserService {
         canAccessPremiumContent: isPremium
       };
     } catch (error: any) {
-      console.error('Error getting user limits:', error.message || error);
+      console.error('Error getting user limits:', formatErrorForLogging(error, 'getUserLimits'));
       // Return default (free) limits on error
       return {
         maxClaimedPosts: 3,
@@ -299,7 +300,7 @@ class UserService {
         });
     } catch (error: any) {
       // Don't throw error for logging failures, just log it
-      console.warn('Failed to log user action:', error.message || error);
+      console.warn('Failed to log user action:', formatErrorForLogging(error, 'logUserAction'));
     }
   }
 
@@ -314,7 +315,7 @@ class UserService {
       console.log('Premium features initialized for user:', userId);
       await this.logUserAction(userId, 'premium_features_initialized', 'Premium features have been initialized');
     } catch (error: any) {
-      console.error('Error initializing premium features:', error.message || error);
+      console.error('Error initializing premium features:', formatErrorForLogging(error, 'initializePremiumFeatures'));
     }
   }
 
@@ -333,7 +334,7 @@ class UserService {
       // For regular users, check against limit
       return currentClaimedCount < limits.maxClaimedPosts;
     } catch (error: any) {
-      console.error('Error checking claim eligibility:', error.message || error);
+      console.error('Error checking claim eligibility:', formatErrorForLogging(error, 'canClaimMorePosts'));
       return false;
     }
   }

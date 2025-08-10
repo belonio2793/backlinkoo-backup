@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useEnhancedAdminMetrics } from '@/hooks/useEnhancedAdminMetrics';
 import { ServiceConnectionStatus } from '@/components/admin/ServiceConnectionStatus';
 import { DirectOpenAITest } from '@/components/admin/DirectOpenAITest';
+import { formatTimeDisplay, ensureColonSpacing } from '@/utils/colonSpacingFix';
 import {
   Users,
   Activity,
@@ -117,7 +118,7 @@ export function EnhancedAdminOverview() {
               </Badge>
             </div>
             <div className="text-sm mt-1">
-              Data is automatically syncing. Last update: {metrics.lastUpdate?.toLocaleTimeString() || 'Unknown'}
+              Data is automatically syncing. {metrics.lastUpdate ? formatTimeDisplay('Last update', metrics.lastUpdate) : ensureColonSpacing('Last update: Unknown')}
             </div>
           </AlertDescription>
         </Alert>

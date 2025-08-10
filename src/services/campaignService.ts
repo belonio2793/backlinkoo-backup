@@ -5,6 +5,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { protectedRequest } from '@/utils/fullstoryProtection';
+import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 
 export interface CampaignDeletionOptions {
   confirmationText: string;
@@ -237,7 +238,8 @@ class CampaignService {
     }
 
     if (!response.ok) {
-      const error = new Error(data.error || 'API request failed') as CampaignApiError;
+      const errorMessage = formatErrorForUI(data.error) || 'API request failed';
+      const error = new Error(errorMessage) as CampaignApiError;
       error.statusCode = response.status;
       error.details = data.details;
       error.supportInfo = data.supportInfo;
@@ -291,13 +293,7 @@ class CampaignService {
 
       return response;
     } catch (error) {
-      console.error('Campaign deletion API error:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-        code: error.code,
-        statusCode: error.statusCode
-      });
+      console.error('Campaign deletion API error:', formatErrorForLogging(error, 'deleteCampaign'));
 
       // Check if this is a backend unavailability issue
       const isBackendUnavailable =
@@ -332,11 +328,11 @@ class CampaignService {
       // Re-throw with enhanced error information
       if (error instanceof Error) {
         const enhancedError = error as CampaignApiError;
-        enhancedError.message = `Campaign deletion failed: ${error.message}`;
+        enhancedError.message = `Campaign deletion failed: ${formatErrorForUI(error)}`;
         throw enhancedError;
       }
 
-      throw new Error('Unknown error occurred during campaign deletion');
+      throw new Error('Campaign deletion failed: Invalid response from server. Please try again.');
     }
   }
 

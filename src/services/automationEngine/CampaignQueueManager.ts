@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { formatErrorForLogging } from '@/utils/errorUtils';
 
 export interface QueuedCampaign {
   id: string;
@@ -250,7 +251,7 @@ export class CampaignQueueManager {
       await availableNode.processCampaign(nextCampaign);
       
     } catch (error) {
-      console.error(`Failed to start campaign processing: ${error}`);
+      console.error('Failed to start campaign processing:', formatErrorForLogging(error, 'startCampaignProcessing'));
       await this.handleCampaignError(nextCampaign, error as Error);
     }
   }

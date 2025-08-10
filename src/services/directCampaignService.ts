@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { formatErrorForLogging } from '@/utils/errorUtils';
 
 export interface DirectCampaignData {
   id: string;
@@ -192,12 +193,7 @@ class DirectCampaignService {
 
       console.log('✅ Campaign metrics updated directly:', campaignId, metrics);
     } catch (error) {
-      console.error('Failed to update campaign metrics directly:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined,
-        name: error instanceof Error ? error.name : undefined,
-        code: error.code
-      });
+      console.error('Failed to update campaign metrics directly:', formatErrorForLogging(error, 'updateCampaignMetricsDirectly'));
       throw error;
     }
   }

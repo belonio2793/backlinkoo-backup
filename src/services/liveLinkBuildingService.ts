@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { formatErrorForLogging } from '@/utils/errorUtils';
 
 export interface LinkBuildingConfig {
   campaignId: string;
@@ -325,7 +326,7 @@ class LiveLinkBuildingService {
           }
         });
 
-      console.log('✅ Postback created for link:', link.id);
+      console.log('��� Postback created for link:', link.id);
     } catch (error) {
       console.error('Error creating postback:', error);
     }
@@ -379,11 +380,11 @@ class LiveLinkBuildingService {
             .eq('id', campaignId);
           console.log('✅ Updated backlink_campaigns metrics for:', campaignId);
         } catch (backlinkError) {
-          console.error('��� Failed to update backlink_campaigns:', backlinkError);
+          console.error('��� Failed to update backlink_campaigns:', formatErrorForLogging(backlinkError, 'updateBacklinkCampaigns'));
         }
       }
     } catch (error) {
-      console.error('Error updating campaign metrics:', error);
+      console.error('Error updating campaign metrics:', formatErrorForLogging(error, 'updateCampaignMetrics'));
     }
   }
 

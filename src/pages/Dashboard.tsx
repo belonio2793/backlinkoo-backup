@@ -87,6 +87,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import type { User } from '@supabase/supabase-js';
+import { ensureColonSpacing } from '@/utils/colonSpacingFix';
 
 
 
@@ -445,7 +446,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
               <div className="text-yellow-400 mb-2">System Status:</div>
               <div>• Status: {debugInfo.loadingStatus}</div>
               <div>• Online: {debugInfo.connectionOnline ? '✅' : '❌'}</div>
-              <div>• Last Update: {debugInfo.timestamp}</div>
+              <div>• {ensureColonSpacing(`Last Update: ${debugInfo.timestamp}`)}</div>
               <div>• User Auth: {debugInfo.userAuthenticated ? '✅' : '❌'}</div>
               <div>• User ID: {debugInfo.userId || 'None'}</div>
             </div>

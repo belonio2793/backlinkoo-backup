@@ -312,14 +312,19 @@ exports.handler = async (event, context) => {
               .eq('user_id', user.id);
 
             if (deleteError) {
-              console.error('Delete campaign error:', deleteError);
+              console.error('Delete campaign error:', {
+                message: deleteError.message || 'Unknown database error',
+                code: deleteError.code,
+                details: deleteError.details,
+                hint: deleteError.hint
+              });
 
               // Log the failure
               await supabase
                 .from('campaign_deletion_logs')
                 .update({
                   status: 'failed',
-                  error_message: deleteError.message,
+                  error_message: deleteError.message || 'Database deletion failed',
                   completed_at: new Date().toISOString()
                 })
                 .eq('campaign_id', campaignId)
@@ -375,14 +380,18 @@ exports.handler = async (event, context) => {
             };
 
           } catch (cascadeError) {
-            console.error('Cascade deletion error:', cascadeError);
+            console.error('Cascade deletion error:', {
+              message: cascadeError.message || 'Unknown cascade error',
+              stack: cascadeError.stack,
+              name: cascadeError.name
+            });
 
             // Log the cascade failure
             await supabase
               .from('campaign_deletion_logs')
               .update({
                 status: 'failed',
-                error_message: cascadeError.message,
+                error_message: cascadeError.message || 'Cascade deletion failed',
                 completed_at: new Date().toISOString()
               })
               .eq('campaign_id', campaignId)

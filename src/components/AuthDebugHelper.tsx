@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AuthService } from '@/services/authService';
 import { supabase } from '@/integrations/supabase/client';
 import { AlertTriangle, CheckCircle, User, Database, Shield } from 'lucide-react';
+import { formatErrorForUI } from '@/utils/errorUtils';
 
 export function AuthDebugHelper() {
   const [testEmail, setTestEmail] = useState('');
@@ -127,14 +128,14 @@ export function AuthDebugHelper() {
       } else {
         toast({
           title: "Account creation failed",
-          description: result.error,
+          description: formatErrorForUI(result.error),
           variant: "destructive",
         });
       }
     } catch (error: any) {
       toast({
         title: "Account creation error",
-        description: error.message,
+        description: formatErrorForUI(error),
         variant: "destructive",
       });
     } finally {

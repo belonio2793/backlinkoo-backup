@@ -1,0 +1,71 @@
+/**
+ * Text spacing fixes to ensure proper display
+ */
+
+/* Ensure proper spacing after colons */
+.text-spacing-fix {
+  word-spacing: normal;
+  letter-spacing: normal;
+}
+
+/* Fix for time displays */
+.time-display {
+  white-space: nowrap;
+  word-spacing: 0.1em;
+}
+
+/* Fix for status text */
+.status-text {
+  white-space: nowrap;
+  word-spacing: normal;
+}
+
+/* Fix for number + text combinations */
+.number-text {
+  word-spacing: 0.15em;
+}
+
+/* Ensure colons have proper spacing */
+.colon-spacing::after {
+  content: " ";
+  margin-left: 0.1em;
+}
+
+/* Fix for update timestamps */
+.update-timestamp {
+  white-space: nowrap;
+  word-spacing: 0.1em;
+  letter-spacing: 0.02em;
+}
+
+/* Fix for campaign metrics */
+.campaign-metrics {
+  word-spacing: 0.1em;
+}
+
+/* General text flow fixes */
+.text-flow-fix {
+  word-break: normal;
+  overflow-wrap: normal;
+  white-space: normal;
+  word-spacing: normal;
+}
+
+/* Ensure proper spacing after colons */
+.colon-fix {
+  /* Use CSS to add space after colons when needed */
+  letter-spacing: normal;
+  word-spacing: 0.05em;
+}
+
+/* Force proper colon spacing for specific patterns */
+.time-display::after {
+  content: "";
+  white-space: pre;
+}
+
+/* Prevent text from running together */
+.prevent-text-merge {
+  display: inline-block;
+  min-width: 1px;
+}
