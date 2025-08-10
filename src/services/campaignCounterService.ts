@@ -142,7 +142,7 @@ class CampaignCounterService {
       // Save global counters
       localStorage.setItem('global_campaign_counters', JSON.stringify(this.globalCounters));
     } catch (error) {
-      console.warn('Failed to persist counter data:', error);
+      console.warn('Failed to persist counter data:', error instanceof Error ? error.message : String(error));
     }
   }
 
