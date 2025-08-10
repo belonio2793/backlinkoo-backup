@@ -55,7 +55,9 @@ export function verifyObjectErrorFix(): boolean {
   return allPassed;
 }
 
-// Auto-run in development
+// Auto-run disabled to prevent console pollution
+// To run manually: verifyObjectErrorFix()
 if (typeof window !== 'undefined' && import.meta.env.DEV) {
-  setTimeout(() => verifyObjectErrorFix(), 1000);
+  (window as any).verifyObjectErrorFix = verifyObjectErrorFix;
+  console.log('🔧 Object error verification available: verifyObjectErrorFix()');
 }
