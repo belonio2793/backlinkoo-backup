@@ -2173,11 +2173,16 @@ export default function BacklinkAutomation() {
             const newPostback = generateRealTimeLinkPostback(campaign);
             newLinks.push(newPostback);
 
-            // Add to global postbacks
-            setRealTimeLinkPostbacks(prev => [newPostback, ...prev.slice(0, 99)]);
+            // Add to global postbacks and trigger stats update
+            setRealTimeLinkPostbacks(prev => {
+              const updated = [newPostback, ...prev.slice(0, 99)];
+              // Trigger cumulative stats update after state update
+              setTimeout(() => updateCumulativeStats(), 100);
+              return updated;
+            });
             setRecentPostbacks(prev => [newPostback, ...prev.slice(0, 19)]);
 
-            // Create activity log
+            // Create activity log with enhanced metadata for reporting
             const activity = {
               id: `activity-${Date.now()}-${i}`,
               type: 'link_published' as const,
