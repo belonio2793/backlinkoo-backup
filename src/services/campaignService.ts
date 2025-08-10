@@ -431,7 +431,12 @@ class CampaignService {
         };
       }
 
-      console.error('Failed to create campaign:', error);
+      console.error('Failed to create campaign:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       throw error;
     }
   }
