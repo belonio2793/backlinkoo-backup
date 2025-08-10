@@ -248,32 +248,6 @@ export function PremiumPlanModal({
         </div>
       </div>
 
-      {/* Special Offer Banner */}
-      <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl p-6">
-        <div className="text-center">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <Gift className="h-6 w-6 text-green-600" />
-            <span className="text-2xl font-bold text-green-800">Limited Time Offer!</span>
-          </div>
-          <p className="text-green-700 text-lg mb-3">
-            Get <span className="font-bold text-2xl">51% OFF</span> when you choose our yearly plan
-          </p>
-          <div className="flex items-center justify-center gap-6 text-sm text-green-600">
-            <span className="flex items-center gap-1">
-              <CheckCircle className="h-4 w-4" />
-              30-day money back guarantee
-            </span>
-            <span className="flex items-center gap-1">
-              <CheckCircle className="h-4 w-4" />
-              Cancel anytime
-            </span>
-            <span className="flex items-center gap-1">
-              <CheckCircle className="h-4 w-4" />
-              Instant access
-            </span>
-          </div>
-        </div>
-      </div>
 
       {/* Core Features Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
