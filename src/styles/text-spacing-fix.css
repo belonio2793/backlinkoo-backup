@@ -50,3 +50,22 @@
   white-space: normal;
   word-spacing: normal;
 }
+
+/* Ensure proper spacing after colons */
+.colon-fix {
+  /* Use CSS to add space after colons when needed */
+  letter-spacing: normal;
+  word-spacing: 0.05em;
+}
+
+/* Force proper colon spacing for specific patterns */
+.time-display::after {
+  content: "";
+  white-space: pre;
+}
+
+/* Prevent text from running together */
+.prevent-text-merge {
+  display: inline-block;
+  min-width: 1px;
+}
