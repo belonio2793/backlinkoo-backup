@@ -2268,7 +2268,7 @@ export default function BacklinkAutomation() {
           // Progress update
           toast({
             title: `🔥 +${linksToGenerate} More Backlinks Generated!`,
-            description: `Total: ${newTotal} premium backlinks built${blogResult.success ? ' + new blog post published' : ''}! Keep going - you're on fire!`,
+            description: `Total: ${newTotal} premium backlinks built${blogResult.success ? (blogResult.isFallback ? ' + blog post queued' : ' + new blog post published') : ''}! Keep going - you're on fire!`,
           });
         }
       } else {
@@ -5174,7 +5174,7 @@ export default function BacklinkAutomation() {
                         <div className="flex items-center justify-between mb-3">
                           <div className="font-medium text-gray-900 truncate">{site.domain}</div>
                           <Badge variant={site.status === 'Link Published' ? 'default' : site.status === 'Publishing Live' ? 'outline' : 'secondary'}>
-                            {site.status === 'Link Published' ? '�� Live' : site.status === 'Publishing Live' ? '���� Publishing' : '⏳ Processing'}
+                            {site.status === 'Link Published' ? '✅ Live' : site.status === 'Publishing Live' ? '���� Publishing' : '⏳ Processing'}
                           </Badge>
                         </div>
                         <div className="space-y-2">
