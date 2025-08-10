@@ -290,11 +290,7 @@ class CampaignMetricsService {
         .eq('campaign_id', campaignId);
 
       if (metricsError) {
-        console.error('Failed to delete campaign metrics:', {
-          code: metricsError.code,
-          message: metricsError.message,
-          details: metricsError.details
-        });
+        console.error('Failed to delete campaign metrics:', formatErrorForLogging(metricsError, 'deleteCampaign'));
         return { success: false, error: formatErrorForUI(metricsError) || 'Failed to delete campaign' };
       }
 
