@@ -124,7 +124,7 @@ class CampaignCounterService {
       this.isInitialized = true;
       console.log('✅ Loaded campaign counters for', this.counters.size, 'campaigns');
     } catch (error) {
-      console.warn('Failed to load persisted counter data:', error);
+      console.warn('Failed to load persisted counter data:', error instanceof Error ? error.message : String(error));
       this.isInitialized = true;
     }
   }
