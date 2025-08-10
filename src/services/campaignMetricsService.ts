@@ -569,12 +569,12 @@ if (typeof window !== 'undefined') {
     console.log('🧪 Auto-testing error logging format...');
     const testError = new Error('Auto-test: This error should show proper formatting');
     testError.code = 'AUTO_TEST';
-    console.error('Auto-test error logging:', {
+    console.error('Auto-test error logging:', JSON.stringify({
       message: testError.message,
       code: testError.code,
       stack: testError.stack,
       name: testError.name
-    });
+    }, null, 2));
     console.log('✅ If you see structured error above (not [object Object]), logging fixes are working!');
   }, 1000);
 
