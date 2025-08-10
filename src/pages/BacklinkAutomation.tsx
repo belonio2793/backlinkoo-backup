@@ -4524,116 +4524,199 @@ export default function BacklinkAutomation() {
                             </div>
                           )}
 
-                          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                            <div className="bg-gradient-to-r from-purple-50 to-blue-50 px-4 py-3 border-b">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-2">
-                                  <FileText className="h-5 w-5 text-purple-600" />
-                                  <span className="font-medium text-gray-900">Live Link Reporting</span>
-                                  <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-300 text-xs">
-                                    Real-time
-                                  </Badge>
+                          {/* Comprehensive Reporting Dashboard */}
+                          <div className="space-y-6">
+                            {/* Summary Stats Grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                              <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm font-medium text-blue-700">Total URLs Completed</p>
+                                    <p className="text-2xl font-bold text-blue-900">{cumulativeStats.completedUrls.size}</p>
+                                    <p className="text-xs text-blue-600 mt-1">Across {cumulativeStats.totalCampaigns} campaigns</p>
+                                  </div>
+                                  <LinkIcon className="h-8 w-8 text-blue-600" />
                                 </div>
-                                <div className="text-xs text-gray-500">
-                                  {user ? campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) : guestLinksGenerated} total links published
+                              </div>
+
+                              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm font-medium text-green-700">Live Links</p>
+                                    <p className="text-2xl font-bold text-green-900">{cumulativeStats.totalLinksPublished}</p>
+                                    <p className="text-xs text-green-600 mt-1">
+                                      {globalActivityFeed.filter(a => a.metadata?.status === 'live').length} verified live
+                                    </p>
+                                  </div>
+                                  <Activity className="h-8 w-8 text-green-600" />
+                                </div>
+                              </div>
+
+                              <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm font-medium text-purple-700">Total Clicks</p>
+                                    <p className="text-2xl font-bold text-purple-900">{cumulativeStats.totalClicks.toLocaleString()}</p>
+                                    <p className="text-xs text-purple-600 mt-1">From all campaigns</p>
+                                  </div>
+                                  <TrendingUp className="h-8 w-8 text-purple-600" />
+                                </div>
+                              </div>
+
+                              <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
+                                <div className="flex items-center justify-between">
+                                  <div>
+                                    <p className="text-sm font-medium text-orange-700">Unique Domains</p>
+                                    <p className="text-2xl font-bold text-orange-900">{cumulativeStats.totalDomainsReached}</p>
+                                    <p className="text-xs text-orange-600 mt-1">Domain reach achieved</p>
+                                  </div>
+                                  <Globe className="h-8 w-8 text-orange-600" />
                                 </div>
                               </div>
                             </div>
 
-                            <div className="p-4">
-                              <div className="mb-4">
-                                <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
-                                  <Activity className="h-4 w-4 text-green-600" />
-                                  All Published Backlinks - Live Postbacks
-                                </h4>
-                                <p className="text-sm text-gray-600">
-                                  Real-time feed of all published links across all active campaigns
-                                </p>
+                            {/* Detailed Campaign Reporting Table */}
+                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                              <div className="bg-gradient-to-r from-purple-50 to-blue-50 px-4 py-3 border-b">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <FileText className="h-5 w-5 text-purple-600" />
+                                    <span className="font-medium text-gray-900">Detailed Campaign Analytics</span>
+                                    <Badge variant="outline" className="bg-purple-100 text-purple-700 border-purple-300 text-xs">
+                                      Real-time Data
+                                    </Badge>
+                                  </div>
+                                  <div className="text-xs text-gray-500">
+                                    Last updated: {new Date(cumulativeStats.lastUpdated).toLocaleTimeString()}
+                                  </div>
+                                </div>
                               </div>
 
-                              <div className="space-y-3 max-h-96 overflow-y-auto">
-                                {/* Real-time link postbacks */}
-                                {realTimeLinkPostbacks.length > 0 ? (
-                                  <div className="space-y-3">
-                                    {realTimeLinkPostbacks
-                                      .sort((a, b) => {
-                                        // Prioritize blog posts first
-                                        if (a.isPrimaryBlogPost && !b.isPrimaryBlogPost) return -1;
-                                        if (!a.isPrimaryBlogPost && b.isPrimaryBlogPost) return 1;
-                                        // Then sort by published date
-                                        return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
-                                      })
-                                      .map((postback, index) => (
-                                      <div
-                                        key={postback.id}
-                                        className={`p-4 rounded-lg border-l-4 ${
-                                          postback.isPrimaryBlogPost
-                                            ? 'border-blue-500 bg-gradient-to-r from-blue-50 to-purple-50 ring-2 ring-blue-200'
-                                            : postback.status === 'live' ? 'border-green-500 bg-green-50' :
-                                            postback.status === 'pending' ? 'border-yellow-500 bg-yellow-50' :
-                                            'border-red-500 bg-red-50'
-                                        } animate-fade-in`}
-                                        style={{ animationDelay: `${index * 0.1}s` }}
-                                      >
-                                        <div className="flex items-start justify-between">
-                                          <div className="flex-1">
-                                            <div className="flex items-center gap-2 mb-2">
-                                              <div className={`w-2 h-2 rounded-full ${
-                                                postback.status === 'live' ? 'bg-green-500 animate-pulse' :
-                                                postback.status === 'pending' ? 'bg-yellow-500' :
-                                                'bg-red-500'
-                                              }`}></div>
-                                              <span className="font-medium text-gray-900">
-                                                {postback.domain}
-                                              </span>
-                                              <Badge variant="outline" className="text-xs">
-                                                DA {postback.domainAuthority}
-                                              </Badge>
-                                              <Badge variant="outline" className="text-xs capitalize">
-                                                {postback.linkType.replace('_', ' ')}
-                                              </Badge>
-                                              {postback.isPrimaryBlogPost && (
-                                                <Badge className={`text-xs ${postback.isFallback ? 'bg-orange-600' : 'bg-blue-600'} text-white`}>
-                                                  {postback.isFallback ? '⏳ Blog Post Queued' : '⭐ Priority Blog Post'}
-                                                </Badge>
-                                              )}
-                                            </div>
-
-                                            <div className="text-sm text-gray-600 mb-2">
-                                              <strong>Campaign:</strong> {postback.campaignName}
-                                            </div>
-
-                                            <div className="text-sm text-gray-600 mb-2">
-                                              <strong>Anchor:</strong> "{postback.anchorText}"
-                                            </div>
-
-                                            <div className="flex items-center gap-4 text-xs text-gray-500">
-                                              <span>{postback.traffic.toLocaleString()} monthly visits</span>
-                                              <span>CTR: {postback.clickThroughRate}</span>
-                                              <span>{postback.indexingStatus}</span>
-                                              <span>{new Date(postback.publishedAt).toLocaleTimeString()}</span>
-                                            </div>
+                              <div className="max-h-80 overflow-y-auto">
+                                <table className="w-full">
+                                  <thead className="bg-gray-50 sticky top-0">
+                                    <tr>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Campaign</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Links</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Domains</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quality</th>
+                                      <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URLs</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="bg-white divide-y divide-gray-200">
+                                    {detailedReporting.map((report, idx) => (
+                                      <tr key={report.campaignId} className="hover:bg-gray-50">
+                                        <td className="px-4 py-3">
+                                          <div>
+                                            <p className="text-sm font-medium text-gray-900">{report.campaignName}</p>
+                                            <p className="text-xs text-gray-500">
+                                              {new Date(report.lastActivity).toLocaleDateString()}
+                                            </p>
                                           </div>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                          <Badge
+                                            variant={report.status === 'active' ? 'default' : 'outline'}
+                                            className="text-xs"
+                                          >
+                                            {report.status === 'active' && <Activity className="h-3 w-3 mr-1" />}
+                                            {report.status}
+                                          </Badge>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                          <div className="text-sm">
+                                            <p className="font-medium text-gray-900">{report.linksGenerated}</p>
+                                            <p className="text-xs text-green-600">{report.linksLive} live</p>
+                                          </div>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                          <div className="text-sm">
+                                            <p className="font-medium text-gray-900">{report.domainsReached}</p>
+                                            <p className="text-xs text-gray-500">{report.totalClicks} clicks</p>
+                                          </div>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                          <div className="text-sm">
+                                            <p className="font-medium text-gray-900">
+                                              {report.quality?.averageAuthority || 85} DA
+                                            </p>
+                                            <p className="text-xs text-gray-500">
+                                              {report.quality?.successRate || 95}% success
+                                            </p>
+                                          </div>
+                                        </td>
+                                        <td className="px-4 py-3">
+                                          <Button
+                                            size="sm"
+                                            variant="outline"
+                                            className="text-xs"
+                                            onClick={() => setSelectedCampaignDetails({
+                                              ...report,
+                                              id: report.campaignId,
+                                              name: report.campaignName,
+                                              publishedUrls: report.completedUrls
+                                            })}
+                                          >
+                                            <Eye className="h-3 w-3 mr-1" />
+                                            View {report.completedUrls.length}
+                                          </Button>
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
 
+                            {/* Completed URLs Section */}
+                            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                              <div className="bg-gradient-to-r from-green-50 to-blue-50 px-4 py-3 border-b">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-2">
+                                    <LinkIcon className="h-5 w-5 text-green-600" />
+                                    <span className="font-medium text-gray-900">All Completed URLs</span>
+                                    <Badge variant="outline" className="bg-green-100 text-green-700 border-green-300 text-xs">
+                                      {cumulativeStats.completedUrls.size} total
+                                    </Badge>
+                                  </div>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => {
+                                      const urlsList = Array.from(cumulativeStats.completedUrls).join('\n');
+                                      copyToClipboard(urlsList);
+                                      toast({
+                                        title: "📋 URLs Copied!",
+                                        description: `${cumulativeStats.completedUrls.size} URLs copied to clipboard`,
+                                      });
+                                    }}
+                                  >
+                                    <LinkIcon className="h-3 w-3 mr-1" />
+                                    Copy All URLs
+                                  </Button>
+                                </div>
+                              </div>
+
+                              <div className="max-h-60 overflow-y-auto">
+                                {cumulativeStats.completedUrls.size > 0 ? (
+                                  <div className="divide-y divide-gray-100">
+                                    {Array.from(cumulativeStats.completedUrls).map((url, idx) => (
+                                      <div key={idx} className="p-3 hover:bg-gray-50 transition-colors">
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex-1 min-w-0">
+                                            <p className="text-sm text-gray-900 truncate">{url}</p>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                              {globalActivityFeed.find(a => a.metadata?.url === url)?.campaignName || 'Campaign'}
+                                            </p>
+                                          </div>
                                           <div className="flex items-center gap-2 ml-4">
-                                            {postback.isPrimaryBlogPost && (
-                                              <Button
-                                                size="sm"
-                                                className="h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white"
-                                                onClick={() => {
-                                                  window.open(postback.url, '_blank');
-                                                }}
-                                              >
-                                                <ExternalLink className="h-3 w-3 mr-1" />
-                                                View Blog Post
-                                              </Button>
-                                            )}
                                             <Button
                                               size="sm"
-                                              variant="outline"
+                                              variant="ghost"
                                               className="h-8 px-2"
                                               onClick={() => {
-                                                copyToClipboard(postback.url);
+                                                copyToClipboard(url);
                                                 toast({
                                                   title: "URL Copied!",
                                                   description: "Link URL copied to clipboard",
@@ -4644,9 +4727,9 @@ export default function BacklinkAutomation() {
                                             </Button>
                                             <Button
                                               size="sm"
-                                              variant="outline"
+                                              variant="ghost"
                                               className="h-8 px-2"
-                                              onClick={() => window.open(postback.url, '_blank')}
+                                              onClick={() => window.open(url, '_blank')}
                                             >
                                               <ExternalLink className="h-3 w-3" />
                                             </Button>
@@ -4656,32 +4739,10 @@ export default function BacklinkAutomation() {
                                     ))}
                                   </div>
                                 ) : (
-                                  /* No links fallback */
-                                  ((user && campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) === 0) &&
-                                    (!user && guestLinksGenerated === 0)) && (
-                                    <div className="text-center py-12">
-                                      <div className="h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                                        <FileText className="h-8 w-8 text-gray-400" />
-                                      </div>
-                                      <h3 className="text-lg font-semibold text-gray-900 mb-2">No Published Links Yet</h3>
-                                      <p className="text-gray-600 mb-4">
-                                        Start a campaign to see real-time link postbacks here
-                                      </p>
-                                      <Button
-                                        onClick={() => {
-                                          // Focus on the target URL input
-                                          const targetUrlInput = document.getElementById('targetUrl') as HTMLInputElement;
-                                          if (targetUrlInput) {
-                                            targetUrlInput.focus();
-                                          }
-                                        }}
-                                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                                      >
-                                        <Rocket className="h-4 w-4 mr-2" />
-                                        Deploy Campaign
-                                      </Button>
-                                    </div>
-                                  )
+                                  <div className="p-8 text-center text-gray-500">
+                                    <LinkIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                                    <p className="text-sm">No completed URLs yet. Deploy a campaign to see results.</p>
+                                  </div>
                                 )}
                               </div>
                             </div>
