@@ -3755,15 +3755,7 @@ export default function BacklinkAutomation() {
             </Alert>
           )}
 
-          {databaseStatus && databaseStatus.isConnected && !databaseStatus.needsSetup && (
-            <Alert className="border-green-200 bg-green-50">
-              <CheckCircle className="h-4 w-4 text-green-600" />
-              <AlertDescription className="text-flow-fix">
-                <strong>{ensureColonSpacing('System Ready:')}</strong> Your automated link building platform is fully operational!
-                Start creating campaigns to discover and build high-quality backlinks.
-              </AlertDescription>
-            </Alert>
-          )}
+          {/* System Ready alert removed */}
 
           <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
             <TabsList className="grid w-full grid-cols-4">
