@@ -277,40 +277,40 @@ export function TrialExhaustedModal({
         </div>
 
         {/* Value Proposition - Moved Below Continue Button */}
-        <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-3 text-white">
+        <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg p-4 text-white">
           <div className="text-center">
-            <h3 className="text-base font-bold mb-2">Unlock Premium Power!</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mb-3">
+            <h3 className="text-lg font-bold mb-3">Unlock Premium Power!</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
               <div className="text-center">
-                <div className="text-xl font-bold">∞</div>
-                <div className="text-xs opacity-90">Unlimited Links per Campaign</div>
+                <div className="text-2xl font-bold">∞</div>
+                <div className="text-sm opacity-90">Unlimited Links per Campaign</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold">🎓</div>
-                <div className="text-xs opacity-90">SEO Academy Access</div>
+                <div className="text-2xl font-bold">🎓</div>
+                <div className="text-sm opacity-90">SEO Academy Access</div>
               </div>
               <div className="text-center">
-                <div className="text-xl font-bold">⚡</div>
-                <div className="text-xs opacity-90">Priority Support</div>
+                <div className="text-2xl font-bold">⚡</div>
+                <div className="text-sm opacity-90">Priority Support</div>
               </div>
             </div>
 
             {/* Additional Premium Features */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-1 text-xs text-white">
-              <div className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3 text-white" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-white">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-white" />
                 <span className="text-white">Advanced analytics & reporting</span>
               </div>
-              <div className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3 text-white" />
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-white" />
                 <span className="text-white">White-label options</span>
               </div>
-              <div className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3 text-white" />
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-white" />
                 <span className="text-white">API access & bulk exports</span>
               </div>
-              <div className="flex items-center gap-1">
-                <CheckCircle className="h-3 w-3 text-white" />
+              <div className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 text-white" />
                 <span className="text-white">Priority customer support</span>
               </div>
             </div>
