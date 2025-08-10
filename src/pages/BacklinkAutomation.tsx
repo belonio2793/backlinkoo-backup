@@ -422,7 +422,7 @@ export default function BacklinkAutomation() {
       // For guest users, use a persistent guest ID
       const guestId = guestTrackingService.getGuestData()?.guestId || 'guest_default';
       const key = `permanent_campaigns_guest_${guestId}`;
-      console.log('��� Using guest storage key:', key);
+      console.log('🔑 Using guest storage key:', key);
       return key;
     }
   }, [user]);
@@ -2187,7 +2187,7 @@ export default function BacklinkAutomation() {
       startRealTimeActivity(campaignId);
 
       toast({
-        title: "��️ Campaign Resumed",
+        title: "▶️ Campaign Resumed",
         description: "Link building is now active and generating high-quality backlinks.",
       });
     } catch (error) {
@@ -2207,10 +2207,6 @@ export default function BacklinkAutomation() {
   };
 
   const showPremiumUpgrade = (campaignId: string) => {
-    // Use PremiumPlanModal for authenticated users, TrialExhaustedModal for guests
-    // Always use PremiumPlanModal for consistent experience
-    setShowPremiumPlanModal(true);
-
     const message = user && !isPremium
       ? "Campaign paused at 20-link limit. Upgrade to Premium to continue building unlimited links!"
       : "You've built 20 high-quality backlinks! Upgrade to Premium for unlimited campaigns and links.";
@@ -2219,7 +2215,7 @@ export default function BacklinkAutomation() {
       title: "🛑 Campaign Paused - Link Limit Reached",
       description: message,
       action: (
-        <Button size="sm" onClick={() => setShowPremiumPlanModal(true)}>
+        <Button size="sm" onClick={() => DirectCheckoutService.upgradeToPremium('monthly')}>
           {user && !isPremium ? "Upgrade to Continue" : "Upgrade Now"}
         </Button>
       ),
@@ -6133,7 +6129,7 @@ export default function BacklinkAutomation() {
                           { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
-                          { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
+                          { name: 'Marketing & Advertising', count: 54210, icon: '����' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '🛒' },
                           { name: 'Travel & Tourism', count: 38920, icon: '✈️' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
