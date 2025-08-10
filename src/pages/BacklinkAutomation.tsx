@@ -2890,7 +2890,7 @@ export default function BacklinkAutomation() {
         } else if (newTotal >= 20) {
           // Trial complete
           toast({
-            title: " Amazing! You've Built 20+ Backlinks!",
+            title: "🎉 Amazing! You've Built 20+ Backlinks!",
             description: "See your incredible results and unlock unlimited campaigns!",
             duration: 6000,
           });
