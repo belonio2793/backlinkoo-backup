@@ -71,14 +71,32 @@ class CampaignMetricsService {
       });
 
       if (error) {
-        console.error('Campaign metrics update failed:', error);
-        return { success: false, error: error.message };
+        console.error('Campaign metrics update failed:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+
+        // Check if it's a function not found error
+        if (error.code === '42883' || error.message?.includes('function') && error.message?.includes('does not exist')) {
+          return {
+            success: false,
+            error: 'Database function missing. Please run the campaign metrics migration first. Visit /verify-database to check setup.'
+          };
+        }
+
+        return { success: false, error: error.message || 'Database update failed' };
       }
 
       console.log('✅ Campaign metrics updated in database:', metrics.campaignId);
       return { success: true, data: data as CampaignRuntimeMetrics };
     } catch (error) {
-      console.error('Campaign metrics service error:', error);
+      console.error('Campaign metrics service error:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
@@ -105,13 +123,31 @@ class CampaignMetricsService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Failed to fetch campaign metrics:', error);
-        return { success: false, error: error.message };
+        console.error('Failed to fetch campaign metrics:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
+
+        // Check if it's a table not found error
+        if (error.code === '42P01' || error.message?.includes('relation') && error.message?.includes('does not exist')) {
+          return {
+            success: false,
+            error: 'Campaign metrics table missing. Please run the database migration first. Visit /verify-database to check setup.'
+          };
+        }
+
+        return { success: false, error: error.message || 'Failed to fetch campaign data' };
       }
 
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Campaign metrics fetch error:', error);
+      console.error('Campaign metrics fetch error:', {
+        error: error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      });
       return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
     }
   }
