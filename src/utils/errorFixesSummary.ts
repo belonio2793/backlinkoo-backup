@@ -129,4 +129,4 @@ if (typeof window !== 'undefined' && import.meta.env.DEV) {
   (window as any).displayErrorFixesSummary = displayErrorFixesSummary;
 }
 
-export { displayErrorFixesSummary, testErrorHandling };
+// Functions are already exported individually above
