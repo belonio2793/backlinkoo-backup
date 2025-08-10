@@ -827,9 +827,16 @@ class RecursiveUrlDiscoveryService {
       const { data, error } = await supabase.rpc('get_discovery_stats');
 
       if (error) {
-        if (error.code === '42883') {
+        // Handle various error codes for missing function
+        if (error.code === '42883' || error.code === 'PGRST202' || error.message?.includes('Could not find the function')) {
           return await this.calculateStatsManually();
         }
+        console.error('Discovery stats function failed:', {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint
+        });
         throw error;
       }
 
