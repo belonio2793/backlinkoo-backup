@@ -474,7 +474,7 @@ export default function BacklinkAutomation() {
           // Show user-friendly notification for database setup issues
           if (result.error?.includes('Database function missing') || result.error?.includes('table missing')) {
             toast({
-              title: "⚠��� Database Setup Required",
+              title: "⚠️ Database Setup Required",
               description: "Campaign metrics will use local storage until database is configured. Visit Admin → Database to set up.",
               duration: 5000
             });
@@ -2418,7 +2418,7 @@ export default function BacklinkAutomation() {
           heartbeatActivity.push({
             id: `heartbeat-${Date.now()}`,
             type: 'system_monitoring' as const,
-            message: `📊 Campaign actively monitored  ${campaignMetrics.get(campaignId)?.domainsReached?.size || 0} domains tracked`,
+            message: `📊 Campaign actively monitored • ${campaignMetrics.get(campaignId)?.domainsReached?.size || 0} domains tracked`,
             timestamp: new Date().toISOString(),
             metadata: {
               type: 'heartbeat',
