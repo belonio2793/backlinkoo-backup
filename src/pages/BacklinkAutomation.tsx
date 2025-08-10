@@ -5610,8 +5610,11 @@ export default function BacklinkAutomation() {
 
                           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-4">
                             <div className="text-center">
-                              <div className="text-lg font-bold text-green-600">{campaign.linksGenerated}</div>
-                              <div className="text-xs text-gray-600">Links Built</div>
+                              <div className="text-lg font-bold text-green-600">{(() => {
+                                const campaignReport = detailedReporting.find(r => r.campaignId === campaign.id);
+                                return campaignReport?.linksLive || campaign.linksLive || Math.round(campaign.linksGenerated * 0.95) || 0;
+                              })()}</div>
+                              <div className="text-xs text-gray-600">Live Links</div>
                             </div>
                             <div className="text-center">
                               <div className="text-lg font-bold text-blue-600">{campaign.linksLive || Math.round(campaign.linksGenerated * 0.95)}</div>
