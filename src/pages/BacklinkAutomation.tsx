@@ -6081,7 +6081,7 @@ export default function BacklinkAutomation() {
                           { name: 'E-commerce & Retail', count: 45670, icon: '🛒' },
                           { name: 'Travel & Tourism', count: 38920, icon: '✈️' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
-                          { name: 'Entertainment & Gaming', count: 32180, icon: '' },
+                          { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
                           { name: 'Real Estate', count: 27450, icon: '🏠' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
