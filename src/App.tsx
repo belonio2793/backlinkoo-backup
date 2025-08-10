@@ -36,6 +36,8 @@ const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
 const LazySymbolCleanerDebug = lazy(() => import("./components/SymbolCleanerDebug"));
 const LazyCampaignMetricsDBVerifier = lazy(() => import("./components/CampaignMetricsDBVerifier"));
 const LazyPremiumUpgradeTest = lazy(() => import("./components/PremiumUpgradeTest"));
+const LazyAutomationSystem = lazy(() => import("./pages/AutomationSystem"));
+const LazyAuthErrorDebug = lazy(() => import("./pages/AuthErrorDebug"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -112,6 +114,24 @@ const App = () => (
                   </div>
                 }>
                   <LazyBacklinkAutomation />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/automation/system"
+              element={
+                <Suspense fallback={
+                  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
+                    <div className="text-center">
+                      <LoadingSpinner />
+                      <div className="mt-4">
+                        <h2 className="text-xl font-semibold text-gray-900">Loading Automation System</h2>
+                        <p className="text-gray-600 mt-2">Initializing advanced automation engines...</p>
+                      </div>
+                    </div>
+                  </div>
+                }>
+                  <LazyAutomationSystem />
                 </Suspense>
               }
             />
@@ -262,6 +282,14 @@ const App = () => (
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazyPremiumUpgradeTest />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/debug/auth-errors"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyAuthErrorDebug />
                 </Suspense>
               }
             />

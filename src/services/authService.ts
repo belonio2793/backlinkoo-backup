@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { EmailService } from './emailService';
 import { ProfileMigrationService } from './profileMigrationService';
+import { logAuthError } from '@/utils/authErrorFix';
 import type { User, Session } from '@supabase/supabase-js';
 
 export interface AuthResponse {
@@ -87,16 +88,7 @@ export class AuthService {
       });
 
       if (error) {
-        console.error('🚨 Authentication Error:', {
-          type: 'sign_in_error',
-          message: error.message,
-          status: error.status,
-          statusText: error.statusText,
-          name: error.name,
-          email: signInData.email.substring(0, 3) + '***', // Partial email for privacy
-          timestamp: new Date().toISOString(),
-          originalError: error
-        });
+        logAuthError('SignIn', error);
 
         return {
           success: false,
@@ -121,15 +113,7 @@ export class AuthService {
         error: 'No user data received from signin'
       };
     } catch (error: any) {
-      console.error('🚨 Authentication Exception:', {
-        type: 'sign_in_exception',
-        message: error.message,
-        name: error.name,
-        stack: error.stack,
-        email: signInData.email.substring(0, 3) + '***', // Partial email for privacy
-        timestamp: new Date().toISOString(),
-        originalError: error
-      });
+      logAuthError('SignIn Exception', error);
 
       return {
         success: false,

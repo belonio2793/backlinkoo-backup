@@ -52,7 +52,7 @@ export const EnhancedOpenAIGenerator = ({ variant = 'standalone', onSuccess }: O
   const [systemStatus, setSystemStatus] = useState({
     apiKey: { status: 'checking', message: 'Checking API key...' } as SystemStatus,
     chatGPT: { status: 'checking', message: 'Checking ChatGPT connection...' } as SystemStatus,
-    database: { status: 'checking', message: 'Checking database connection...' } as SystemStatus
+    database: { status: 'checking', message: 'Connecting...' } as SystemStatus
   });
   
   const { toast } = useToast();
@@ -167,12 +167,12 @@ Ensure the anchor text placement follows SEO best practices and genuinely helps 
       if (!error) {
         setSystemStatus(prev => ({
           ...prev,
-          database: { status: 'ready', message: 'Database sync ready' }
+          database: { status: 'ready', message: 'Connected' }
         }));
       } else {
         setSystemStatus(prev => ({
           ...prev,
-          database: { status: 'warning', message: 'Database sync available (localStorage fallback)' }
+          database: { status: 'warning', message: 'Local storage mode' }
         }));
       }
     } catch (error) {

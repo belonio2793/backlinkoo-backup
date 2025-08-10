@@ -4,6 +4,21 @@
  */
 
 /**
+ * Safely formats error for console display to prevent [object Object]
+ */
+export function safeErrorDisplay(error: any): string {
+  if (!error) return 'Unknown error';
+
+  if (typeof error === 'string') return error;
+
+  try {
+    return JSON.stringify(error, null, 2);
+  } catch {
+    return error.toString ? error.toString() : 'Error object could not be displayed';
+  }
+}
+
+/**
  * Safely formats an error for display in UI components
  * Prevents "[object Object]" by properly stringifying error objects
  */

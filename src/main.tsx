@@ -8,8 +8,14 @@ import './utils/cryptoWalletHandler'
 import './utils/fullstoryProtection'
 // Fix error object display issues
 import './utils/errorDisplayFix'
+// Fix authentication error display issues
+import { setupAuthErrorInterceptor } from './utils/authErrorFix'
+import './utils/authErrorFixSummary'
 // Load error fixes summary
 import './utils/errorFixesSummary'
+
+// Initialize authentication error interceptor
+setupAuthErrorInterceptor();
 
 // Clear previous console errors in development
 if (import.meta.env.DEV) {

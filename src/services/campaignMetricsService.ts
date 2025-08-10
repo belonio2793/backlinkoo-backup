@@ -72,7 +72,8 @@ class CampaignMetricsService {
       });
 
       if (error) {
-        console.error('Campaign metrics update failed:', formatErrorForLogging(error, 'updateCampaignMetrics'));
+        const errorDetails = formatErrorForLogging(error, 'updateCampaignMetrics');
+        console.error('Campaign metrics update failed:', JSON.stringify(errorDetails, null, 2));
 
         // Check if it's a function not found error
         if (error.code === '42883' || error.code === 'PGRST202' || error.message?.includes('function') && error.message?.includes('does not exist')) {
@@ -88,7 +89,8 @@ class CampaignMetricsService {
       console.log('✅ Campaign metrics updated in database:', metrics.campaignId);
       return { success: true, data: data as CampaignRuntimeMetrics };
     } catch (error) {
-      console.error('Campaign metrics service error:', formatErrorForLogging(error, 'updateCampaignMetrics-catch'));
+      const errorDetails = formatErrorForLogging(error, 'updateCampaignMetrics-catch');
+      console.error('Campaign metrics service error:', JSON.stringify(errorDetails, null, 2));
       const errorMessage = formatErrorForUI(error) || 'Unknown error';
       return { success: false, error: String(errorMessage) };
     }
@@ -117,8 +119,7 @@ class CampaignMetricsService {
 
       if (error) {
         const errorDetails = formatErrorForLogging(error, 'getCampaignMetrics');
-        console.error('Failed to fetch campaign metrics');
-        console.error(errorDetails);
+        console.error('Failed to fetch campaign metrics:', JSON.stringify(errorDetails, null, 2));
 
         // Check if it's a table not found error
         if (error.code === '42P01' || error.message?.includes('relation') && error.message?.includes('does not exist')) {
@@ -134,7 +135,8 @@ class CampaignMetricsService {
 
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Campaign metrics fetch error:', formatErrorForLogging(error, 'getCampaignMetrics-catch'));
+      const errorDetails = formatErrorForLogging(error, 'getCampaignMetrics-catch');
+      console.error('Campaign metrics fetch error:', JSON.stringify(errorDetails, null, 2));
       const errorMessage = formatErrorForUI(error) || 'Unknown error';
       return { success: false, error: String(errorMessage) };
     }
@@ -169,14 +171,16 @@ class CampaignMetricsService {
         .single();
 
       if (error) {
-        console.error('Failed to record link:', formatErrorForLogging(error, 'recordLink'));
+        const errorDetails = formatErrorForLogging(error, 'recordLink');
+        console.error('Failed to record link:', JSON.stringify(errorDetails, null, 2));
         return { success: false, error: formatErrorForUI(error) || 'Failed to record link' };
       }
 
       console.log('✅ Link recorded in database:', linkRecord.sourceUrl);
       return { success: true, data };
     } catch (error) {
-      console.error('Link recording error:', formatErrorForLogging(error, 'recordLink-catch'));
+      const errorDetails = formatErrorForLogging(error, 'recordLink-catch');
+      console.error('Link recording error:', JSON.stringify(errorDetails, null, 2));
       const errorMessage = formatErrorForUI(error) || 'Unknown error';
       return { success: false, error: String(errorMessage) };
     }
@@ -205,13 +209,15 @@ class CampaignMetricsService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Failed to fetch monthly aggregates:', formatErrorForLogging(error, 'getUserMonthlyAggregates'));
+        const errorDetails = formatErrorForLogging(error, 'getUserMonthlyAggregates');
+        console.error('Failed to fetch monthly aggregates:', JSON.stringify(errorDetails, null, 2));
         return { success: false, error: formatErrorForUI(error) || 'Failed to fetch monthly data' };
       }
 
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Monthly aggregates fetch error:', formatErrorForLogging(error, 'getUserMonthlyAggregates-catch'));
+      const errorDetails = formatErrorForLogging(error, 'getUserMonthlyAggregates-catch');
+      console.error('Monthly aggregates fetch error:', JSON.stringify(errorDetails, null, 2));
       return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
     }
   }
@@ -296,7 +302,8 @@ class CampaignMetricsService {
         .eq('campaign_id', campaignId);
 
       if (metricsError) {
-        console.error('Failed to delete campaign metrics:', formatErrorForLogging(metricsError, 'deleteCampaign'));
+        const errorDetails = formatErrorForLogging(metricsError, 'deleteCampaign');
+        console.error('Failed to delete campaign metrics:', JSON.stringify(errorDetails, null, 2));
         return { success: false, error: formatErrorForUI(metricsError) || 'Failed to delete campaign' };
       }
 
