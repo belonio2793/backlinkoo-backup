@@ -144,6 +144,19 @@ interface Campaign {
     domainAuthority: number;
     verified: boolean;
   }>;
+  publishedUrls?: Array<{
+    domain: string;
+    url: string;
+    publishedAt: string;
+    anchorText: string;
+    verified: boolean;
+    destinationUrl: string;
+    type: string;
+    status: string;
+    isPrimaryBlogPost?: boolean;
+    priority?: number;
+    verificationStatus?: string;
+  }>;
 }
 
 interface PostedLink {
