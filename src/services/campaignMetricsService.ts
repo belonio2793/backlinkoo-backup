@@ -449,6 +449,31 @@ class CampaignMetricsService {
   }
 
   /**
+   * Debug utility to test error logging format
+   */
+  debugErrorLogging(): void {
+    console.log('🧪 Testing error logging format...');
+
+    // Create a test error similar to Supabase errors
+    const testError = new Error('relation "campaign_metrics" does not exist');
+    testError.code = '42P01';
+    testError.details = null;
+    testError.hint = 'Perhaps you meant to reference the table "public"."campaigns"?';
+
+    // Test the new format
+    console.error('Test error with new format:', {
+      message: testError.message,
+      code: testError.code,
+      details: testError.details,
+      hint: testError.hint,
+      stack: testError.stack,
+      name: testError.name
+    });
+
+    console.log('✅ If you see detailed error information above (not "[object Object]"), the fix is working!');
+  }
+
+  /**
    * Debug utility to test database connectivity and table existence
    */
   async debugDatabaseSetup(): Promise<{
