@@ -247,6 +247,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/premium-upgrade-test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyPremiumUpgradeTest />
+                </Suspense>
+              }
+            />
 
             {/* 404 Catch-all route */}
             <Route
