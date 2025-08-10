@@ -5859,7 +5859,7 @@ export default function BacklinkAutomation() {
                                       <div className="flex items-center gap-2 text-xs">
                                         <span className="text-gray-600">Anchor:</span>
                                         <span className="font-medium text-blue-700">"{anchorText}"</span>
-                                        <span className="text-gray-600"></span>
+                                        <span className="text-gray-600">→</span>
                                         <span className="text-green-600 truncate max-w-24">{campaign.targetUrl}</span>
                                         <Button
                                           size="sm"
