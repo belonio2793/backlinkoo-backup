@@ -472,7 +472,12 @@ class CampaignService {
         return; // Silently succeed in demo mode
       }
 
-      console.error('Failed to pause campaign:', error);
+      console.error('Failed to pause campaign:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       throw error;
     }
   }
