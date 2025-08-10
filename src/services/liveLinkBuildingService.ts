@@ -380,7 +380,7 @@ class LiveLinkBuildingService {
             .eq('id', campaignId);
           console.log('✅ Updated backlink_campaigns metrics for:', campaignId);
         } catch (backlinkError) {
-          console.error('��� Failed to update backlink_campaigns:', backlinkError);
+          console.error('��� Failed to update backlink_campaigns:', formatErrorForLogging(backlinkError, 'updateBacklinkCampaigns'));
         }
       }
     } catch (error) {
