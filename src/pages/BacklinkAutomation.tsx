@@ -2216,7 +2216,7 @@ export default function BacklinkAutomation() {
       title: "�� Campaign Paused - Link Limit Reached",
       description: message,
       action: (
-        <Button size="sm" onClick={() => setShowTrialExhaustedModal(true)}>
+        <Button size="sm" onClick={() => user ? setShowPremiumPlanModal(true) : setShowTrialExhaustedModal(true)}>
           {user && !isPremium ? "Upgrade to Continue" : "Upgrade Now"}
         </Button>
       ),
@@ -6982,7 +6982,7 @@ export default function BacklinkAutomation() {
                 setCampaignToDelete(null);
 
                 toast({
-                  title: "�������� Campaign Deleted",
+                  title: "������� Campaign Deleted",
                   description: "Campaign has been permanently removed.",
                 });
               } else {
