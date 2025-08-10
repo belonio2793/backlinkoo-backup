@@ -3572,10 +3572,12 @@ export default function BacklinkAutomation() {
                 <CardHeader className="text-center">
                   <CardTitle className="flex items-center justify-center gap-2">
                     <Target className="h-5 w-5" />
-                    Create Targeted Campaign
+                    <FormattedText type="title">Create Targeted Campaign</FormattedText>
                   </CardTitle>
                   <CardDescription>
-                    Deploy a focused campaign for a specific link building strategy{!user ? ' - something special awaits!' : ''}
+                    <FormattedDescription>
+                      Deploy a focused campaign for a specific link building strategy{!user ? ' - something special awaits!' : ''}
+                    </FormattedDescription>
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
