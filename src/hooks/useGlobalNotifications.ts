@@ -11,7 +11,11 @@ const getUserCountry = async (): Promise<{ country: string; countryCode: string 
       countryCode: data.country_code || 'US'
     };
   } catch (error) {
-    console.error('Error getting user country:', error);
+    console.error('Error getting user country:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      name: error instanceof Error ? error.name : undefined
+    });
     return {
       country: 'United States',
       countryCode: 'US'
@@ -36,7 +40,11 @@ export const useGlobalNotifications = () => {
         }
       });
     } catch (error) {
-      console.error('Error broadcasting new user:', error);
+      console.error('Error broadcasting new user:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
     }
   };
 
@@ -56,7 +64,11 @@ export const useGlobalNotifications = () => {
         }
       });
     } catch (error) {
-      console.error('Error broadcasting credit purchase:', error);
+      console.error('Error broadcasting credit purchase:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
     }
   };
 
