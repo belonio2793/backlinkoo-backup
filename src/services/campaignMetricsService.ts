@@ -87,7 +87,7 @@ class CampaignMetricsService {
           };
         }
 
-        return { success: false, error: error.message || 'Database update failed' };
+        return { success: false, error: formatErrorForUI(error) || 'Database update failed' };
       }
 
       console.log('✅ Campaign metrics updated in database:', metrics.campaignId);
