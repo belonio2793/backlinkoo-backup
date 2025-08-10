@@ -3963,17 +3963,19 @@ export default function BacklinkAutomation() {
                 <CardHeader className="text-center">
                   <CardTitle className="flex items-center justify-center gap-2">
                     <Monitor className="h-5 w-5" />
-                    Your Campaigns
+                    <FormattedText type="title">Your Campaigns</FormattedText>
                   </CardTitle>
                   <CardDescription>
-                    {user ?
-                      (() => {
-                        const total = campaigns.length;
-                        const active = campaigns.filter(c => c.status === 'active').length;
-                        return `${formatActivityCount(total, 'campaign')} • ${formatActivityCount(active, 'active', undefined, { showZero: true, zeroText: 'none active' })}`;
-                      })() :
-                      formatActivityCount(guestCampaignResults.length, 'campaign', undefined, { showZero: true, zeroText: 'ready to start' }) + ' created'
-                    }
+                    <FormattedDescription>
+                      {user ?
+                        (() => {
+                          const total = campaigns.length;
+                          const active = campaigns.filter(c => c.status === 'active').length;
+                          return formatUIText(`${formatActivityCount(total, 'campaign')} • ${formatActivityCount(active, 'active', undefined, { showZero: true, zeroText: 'none active' })}`, 'description');
+                        })() :
+                        formatUIText(formatActivityCount(guestCampaignResults.length, 'campaign', undefined, { showZero: true, zeroText: 'ready to start' }) + ' created', 'description')
+                      }
+                    </FormattedDescription>
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
