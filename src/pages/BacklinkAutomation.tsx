@@ -462,7 +462,7 @@ export default function BacklinkAutomation() {
 
           return enhancedCampaign;
         } else {
-          console.warn('��️ Database save failed, using localStorage fallback:', formatErrorForUI(result.error));
+          console.warn('����️ Database save failed, using localStorage fallback:', formatErrorForUI(result.error));
 
           // Show user-friendly notification for database setup issues
           if (result.error?.includes('Database function missing') || result.error?.includes('table missing')) {
@@ -3801,7 +3801,7 @@ export default function BacklinkAutomation() {
                             🚀 Launch your automated backlink building campaign
                           </p>
                           <div className="flex justify-center gap-4 text-xs text-gray-500">
-                            <span>✓ High-authority domains</span>
+                            <span>��� High-authority domains</span>
                             <span>✓ Instant results</span>
                             <span>✓ No signup required</span>
                           </div>
@@ -6576,6 +6576,10 @@ export default function BacklinkAutomation() {
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
+
+            <TabsContent value="completed-urls" className="space-y-6">
+              <AllCompletedURLsRundown />
             </TabsContent>
           </Tabs>
         </div>
