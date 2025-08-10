@@ -107,42 +107,45 @@ export function AllCompletedURLsRundown() {
     try {
       const urlsData: CompletedURL[] = [];
 
-      // 1. Load from posted_links table (live link building service)
-      const { data: postedLinks, error: postedError } = await supabase
-        .from('posted_links')
-        .select(`
-          id,
-          campaign_id,
-          posted_url,
-          link_url,
-          anchor_text,
-          status,
-          created_at,
-          automation_campaigns!inner(name, target_url, user_id)
-        `)
-        .eq('automation_campaigns.user_id', user.id)
-        .order('created_at', { ascending: false });
+      // 1. Try to load from posted_links table (live link building service)
+      try {
+        const { data: postedLinks, error: postedError } = await supabase
+          .from('posted_links')
+          .select('*')
+          .limit(1);
 
-      if (!postedError && postedLinks) {
-        for (const link of postedLinks) {
-          const campaign = link.automation_campaigns as any;
-          urlsData.push({
-            id: link.id,
-            campaignId: link.campaign_id,
-            campaignName: campaign?.name || 'Unknown Campaign',
-            sourceUrl: link.posted_url,
-            targetUrl: link.link_url,
-            anchorText: link.anchor_text || '',
-            platform: extractPlatformFromUrl(link.posted_url),
-            domainAuthority: Math.floor(Math.random() * 30) + 40, // Simulated DA
-            status: link.status as any || 'live',
-            publishedAt: new Date(link.created_at),
-            clicks: Math.floor(Math.random() * 50),
-            linkJuice: Math.random() * 100,
-            verified: true,
-            isBacklinkooUrl: link.posted_url.includes('backlinkoo.com')
-          });
+        // If table exists, load actual data
+        if (!postedError) {
+          const { data: actualPostedLinks } = await supabase
+            .from('posted_links')
+            .select('*')
+            .order('created_at', { ascending: false })
+            .limit(100);
+
+          if (actualPostedLinks) {
+            for (const link of actualPostedLinks) {
+              const campaign = campaigns.find(c => c.id === link.campaign_id);
+              urlsData.push({
+                id: link.id,
+                campaignId: link.campaign_id,
+                campaignName: campaign?.name || 'Link Building Campaign',
+                sourceUrl: link.posted_url || link.link_url || '#',
+                targetUrl: link.link_url || link.posted_url || '#',
+                anchorText: link.anchor_text || 'Link',
+                platform: extractPlatformFromUrl(link.posted_url || link.link_url || ''),
+                domainAuthority: Math.floor(Math.random() * 30) + 40,
+                status: (link.status as any) || 'live',
+                publishedAt: new Date(link.created_at),
+                clicks: Math.floor(Math.random() * 50),
+                linkJuice: Math.random() * 100,
+                verified: true,
+                isBacklinkooUrl: (link.posted_url || '').includes('backlinkoo.com')
+              });
+            }
+          }
         }
+      } catch (error) {
+        console.log('posted_links table not available, skipping...');
       }
 
       // 2. Load from blog_posts table (backlinkoo.com published blogs)
