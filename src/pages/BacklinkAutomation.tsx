@@ -5328,8 +5328,8 @@ export default function BacklinkAutomation() {
                                     const updateResult = guestTrackingService.updateCampaignStatus(campaign.id, 'active');
 
                                     if (!updateResult.success) {
-                                      // Campaign cannot be reactivated - show premium modal
-                                      setShowPremiumPlanModal(true);
+                                      // Campaign cannot be reactivated - open premium checkout
+                                      DirectCheckoutService.upgradeToPremium('monthly');
                                       toast({
                                         title: " Premium Required",
                                         description: updateResult.warning?.message || "This campaign reached the 20-link limit. Upgrade to continue building links!",
