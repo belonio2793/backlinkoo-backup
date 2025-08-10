@@ -168,7 +168,7 @@ export function InstantAuthCheck({ children, requireAdmin = false }: InstantAuth
             <div className="space-y-4">
               <Alert variant="destructive">
                 <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{error instanceof Error ? error.message : String(error)}</AlertDescription>
               </Alert>
 
               <div className="space-y-2">
