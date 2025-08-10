@@ -559,6 +559,123 @@ export default function BacklinkAutomation() {
     }
   }, [getUserStorageKey, user]);
 
+  // Cumulative activity aggregation across all campaigns
+  const updateCumulativeStats = useCallback(() => {
+    const allCampaigns = user ? campaigns : guestCampaignResults;
+    const now = Date.now();
+
+    // Aggregate all metrics
+    let totalLinks = 0;
+    let totalDomains = new Set<string>();
+    let totalClicks = 0;
+    let activeCampaignsCount = 0;
+    let allCompletedUrls = new Set<string>();
+    let globalActivities: any[] = [];
+
+    allCampaigns.forEach(campaign => {
+      totalLinks += campaign.linksGenerated || 0;
+      activeCampaignsCount += campaign.status === 'active' ? 1 : 0;
+
+      // Aggregate domains from campaign metrics
+      const metrics = campaignMetrics.get(campaign.id);
+      if (metrics?.domainsReached) {
+        metrics.domainsReached.forEach((domain: string) => totalDomains.add(domain));
+        totalClicks += metrics.totalClicks || 0;
+      }
+
+      // Collect all published URLs
+      if (campaign.publishedUrls) {
+        campaign.publishedUrls.forEach((url: string) => allCompletedUrls.add(url));
+      }
+      if (campaign.recentLinks) {
+        campaign.recentLinks.forEach((link: any) => {
+          if (link.url) allCompletedUrls.add(link.url);
+        });
+      }
+
+      // Aggregate real-time activities
+      if (campaign.realTimeActivity) {
+        const campaignActivities = campaign.realTimeActivity.map((activity: any) => ({
+          ...activity,
+          campaignId: campaign.id,
+          campaignName: campaign.name,
+          source: 'campaign'
+        }));
+        globalActivities.push(...campaignActivities);
+      }
+    });
+
+    // Add global postback activities
+    const postbackActivities = realTimeLinkPostbacks.map(postback => ({
+      id: `postback-${postback.id}`,
+      type: 'link_published',
+      message: `🔗 ${postback.linkType?.replace('_', ' ')} published on ${postback.domain}`,
+      timestamp: postback.publishedAt || new Date().toISOString(),
+      campaignId: postback.campaignId,
+      campaignName: postback.campaignName,
+      source: 'postback',
+      metadata: {
+        url: postback.url,
+        domain: postback.domain,
+        authority: postback.domainAuthority,
+        linkType: postback.linkType,
+        status: postback.status
+      }
+    }));
+
+    globalActivities.push(...postbackActivities);
+
+    // Sort by timestamp (newest first)
+    globalActivities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+
+    // Update cumulative stats
+    setCumulativeStats({
+      totalLinksPublished: totalLinks,
+      totalDomainsReached: totalDomains.size,
+      totalCampaigns: allCampaigns.length,
+      activeCampaigns: activeCampaignsCount,
+      totalClicks: totalClicks,
+      completedUrls: allCompletedUrls,
+      lastUpdated: now
+    });
+
+    // Update global activity feed (keep last 200 activities)
+    setGlobalActivityFeed(globalActivities.slice(0, 200));
+
+    // Update detailed reporting data
+    const reportingData = allCampaigns.map(campaign => {
+      const metrics = campaignMetrics.get(campaign.id);
+      const campaignUrls = Array.from(allCompletedUrls).filter(url =>
+        url.includes(campaign.name?.toLowerCase().replace(/\s+/g, '-')) ||
+        campaign.recentLinks?.some((link: any) => link.url === url)
+      );
+
+      return {
+        campaignId: campaign.id,
+        campaignName: campaign.name,
+        status: campaign.status,
+        linksGenerated: campaign.linksGenerated || 0,
+        linksLive: campaign.linksLive || 0,
+        domainsReached: metrics?.domainsReached?.size || 0,
+        totalClicks: metrics?.totalClicks || 0,
+        completedUrls: campaignUrls,
+        quality: campaign.quality || {},
+        lastActivity: campaign.lastActivity || new Date(),
+        realTimeActivity: campaign.realTimeActivity || [],
+        recentLinks: campaign.recentLinks || []
+      };
+    });
+
+    setDetailedReporting(reportingData);
+
+    console.log('📊 Updated cumulative stats:', {
+      totalLinks,
+      domains: totalDomains.size,
+      activities: globalActivities.length,
+      completedUrls: allCompletedUrls.size
+    });
+  }, [user, campaigns, guestCampaignResults, campaignMetrics, realTimeLinkPostbacks]);
+
   // Background retry service for failed database syncs
   const retryFailedSyncs = useCallback(async () => {
     if (!user?.id) return;
