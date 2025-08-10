@@ -844,7 +844,7 @@ export default function BacklinkAutomation() {
 
           // Show user-friendly notification for database issues
           if (result.error?.includes('table missing') || result.error?.includes('function')) {
-            console.log('💡 Database tables not found, using localStorage fallback');
+            console.log('��� Database tables not found, using localStorage fallback');
           }
         }
       }
@@ -1127,7 +1127,7 @@ export default function BacklinkAutomation() {
         } else {
           // For guest users, directly restore campaigns
           setGuestCampaignResults(permanentCampaigns);
-          console.log('✅ Guest Data Restored:', permanentCampaigns.length, 'campaigns with preserved metrics');
+          console.log('��� Guest Data Restored:', permanentCampaigns.length, 'campaigns with preserved metrics');
 
           // Show notification about data preservation for guest users
           if (permanentCampaigns.length > 0) {
@@ -2272,7 +2272,7 @@ export default function BacklinkAutomation() {
             };
             localStorage.setItem(`campaign_metrics_${campaignId}`, JSON.stringify(metricsData));
           } catch (error) {
-            console.warn('Failed to persist campaign metrics:', error);
+            console.warn('Failed to persist campaign metrics:', formatErrorForUI(error));
           }
 
           return updated;
