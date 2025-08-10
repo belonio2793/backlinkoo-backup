@@ -1321,7 +1321,7 @@ export default function BacklinkAutomation() {
   const updateGuestLinkCount = (newCount: number) => {
     setGuestLinksGenerated(newCount);
     if (newCount >= 20 && !user) {
-      setShowTrialExhaustedModal(true);
+      setShowPremiumPlanModal(true);
     }
   };
 
