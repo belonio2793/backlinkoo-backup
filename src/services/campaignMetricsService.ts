@@ -89,7 +89,8 @@ class CampaignMetricsService {
       return { success: true, data: data as CampaignRuntimeMetrics };
     } catch (error) {
       console.error('Campaign metrics service error:', formatErrorForLogging(error, 'updateCampaignMetrics-catch'));
-      return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
+      const errorMessage = formatErrorForUI(error) || 'Unknown error';
+      return { success: false, error: String(errorMessage) };
     }
   }
 
