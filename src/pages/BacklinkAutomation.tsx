@@ -2277,7 +2277,7 @@ export default function BacklinkAutomation() {
         const updatedCampaign = {
           ...campaign,
           linksGenerated: updatedLinksGenerated,
-          linksLive: campaign.linksLive + liveLinks,
+          linksLive: Math.max(campaign.linksLive + liveLinks, Math.floor(updatedLinksGenerated * 0.85)), // Ensure minimum based on total links
           progress: updatedProgress,
           lastActivity: new Date(),
           realTimeActivity: [...newActivities, ...heartbeatActivity, ...(campaign.realTimeActivity || [])].slice(0, 20),
