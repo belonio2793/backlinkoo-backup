@@ -38,8 +38,12 @@ export function FormattedText({
  * Specialized components for different text types
  */
 export function FormattedTitle({ children, className, ...props }: Omit<FormattedTextProps, 'type' | 'as'>) {
+  if (!children || typeof children !== 'string') {
+    return <h2 className={cn("text-xl font-semibold", className)} {...props}>{children || ''}</h2>;
+  }
+
   const formattedText = useFormattedText(children, 'title');
-  
+
   return (
     <h2 className={cn("text-xl font-semibold", className)} {...props}>
       {formattedText}
@@ -48,6 +52,10 @@ export function FormattedTitle({ children, className, ...props }: Omit<Formatted
 }
 
 export function FormattedDescription({ children, className, ...props }: Omit<FormattedTextProps, 'type' | 'as'>) {
+  if (!children || typeof children !== 'string') {
+    return <span className={cn("text-gray-600", className)} {...props}>{children || ''}</span>;
+  }
+
   const formattedText = useFormattedText(children, 'description');
 
   return (
@@ -58,8 +66,12 @@ export function FormattedDescription({ children, className, ...props }: Omit<For
 }
 
 export function FormattedLabel({ children, className, ...props }: Omit<FormattedTextProps, 'type' | 'as'>) {
+  if (!children || typeof children !== 'string') {
+    return <label className={cn("text-sm font-medium", className)} {...props}>{children || ''}</label>;
+  }
+
   const formattedText = useFormattedText(children, 'label');
-  
+
   return (
     <label className={cn("text-sm font-medium", className)} {...props}>
       {formattedText}
