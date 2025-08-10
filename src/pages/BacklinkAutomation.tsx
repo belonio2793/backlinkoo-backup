@@ -1459,7 +1459,7 @@ export default function BacklinkAutomation() {
             ...campaign,
             linksGenerated: finalPublishedUrls.length,
             publishedUrls: finalPublishedUrls,
-            domains: [...new Set([...campaign.domains, linkToPublish.domain])]
+            domains: [...new Set([...(campaign.domains || []), linkToPublish.domain])]
           };
         }
         return campaign;
@@ -2888,7 +2888,7 @@ export default function BacklinkAutomation() {
         } else if (newTotal >= 20) {
           // Trial complete
           toast({
-            title: "🚀 Amazing! You've Built 20+ Backlinks!",
+            title: "��� Amazing! You've Built 20+ Backlinks!",
             description: "See your incredible results and unlock unlimited campaigns!",
             duration: 6000,
           });
@@ -3357,7 +3357,7 @@ export default function BacklinkAutomation() {
 
   const generateRealTimeActivity = (campaign: any) => {
     const activities = [
-      { type: 'discovery', message: `Scanning ${campaign.domains?.length || 3} high-authority domains`, timestamp: new Date(Date.now() - Math.random() * 300000), status: 'completed' },
+      { type: 'discovery', message: `Scanning ${(campaign.domains || []).length || 3} high-authority domains`, timestamp: new Date(Date.now() - Math.random() * 300000), status: 'completed' },
       { type: 'content', message: `Generated contextual content for "${campaign.keywords?.[0] || 'keyword'}"`, timestamp: new Date(Date.now() - Math.random() * 240000), status: 'completed' },
       { type: 'posting', message: `Publishing link on ${['reddit.com', 'medium.com', 'dev.to'][Math.floor(Math.random() * 3)]}`, timestamp: new Date(Date.now() - Math.random() * 180000), status: 'active' },
       { type: 'verification', message: 'Verifying link placement and indexing', timestamp: new Date(Date.now() - Math.random() * 120000), status: 'active' },
@@ -4280,7 +4280,7 @@ export default function BacklinkAutomation() {
                                             </div>
                                             <div className="text-center">
                                               <div className="font-bold text-blue-600">
-                                                {formatDisplayNumber(campaign.domains?.length || 0, {
+                                                {formatDisplayNumber((campaign.domains || []).length || 0, {
                                                   hideZero: false,
                                                   zeroText: '0'
                                                 })}
@@ -5374,7 +5374,7 @@ export default function BacklinkAutomation() {
                               )}
                             </div>
                             <div className="text-center">
-                              <div className="text-lg font-bold text-blue-600">{campaign.domains?.length || 0}</div>
+                              <div className="text-lg font-bold text-blue-600">{(campaign.domains || []).length || 0}</div>
                               <div className="text-xs text-gray-500">Domains</div>
                               {campaign.linksGenerated >= 18 && (
                                 <Button
@@ -5449,7 +5449,7 @@ export default function BacklinkAutomation() {
                               )}
                             </div>
 
-                            <Progress value={(campaign.domains?.length || 0) / 10 * 100} className="h-2" />
+                            <Progress value={((campaign.domains || []).length || 0) / 10 * 100} className="h-2" />
 
                             <div className="flex items-center justify-between text-xs text-gray-500">
                               <span>Trial Campaign</span>
@@ -5460,7 +5460,7 @@ export default function BacklinkAutomation() {
                                 onClick={() => {
                                   toast({
                                     title: "Campaign Results",
-                                    description: `${campaign.domains?.length || 0} domains discovered for your trial campaign`,
+                                    description: `${(campaign.domains || []).length || 0} domains discovered for your trial campaign`,
                                   });
                                 }}
                               >
@@ -5560,7 +5560,7 @@ export default function BacklinkAutomation() {
                         <p className="text-sm font-medium text-muted-foreground">Domains Reached</p>
                         <p className="text-2xl font-bold text-purple-600">
                           {user ? Math.min(campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) * 0.8, 50) :
-                           guestCampaignResults.reduce((acc, campaign) => acc + (campaign.domains?.length || 0), 0)}
+                           guestCampaignResults.reduce((acc, campaign) => acc + ((campaign.domains || []).length || 0), 0)}
                         </p>
                       </div>
                       <Globe className="h-8 w-8 text-purple-600" />
@@ -5632,7 +5632,7 @@ export default function BacklinkAutomation() {
                             </div>
                             <div className="text-center">
                               <div className="text-lg font-bold text-blue-600">
-                                {formatDisplayNumber(campaign.domains?.length || 0, {
+                                {formatDisplayNumber((campaign.domains || []).length || 0, {
                                   hideZero: false,
                                   zeroText: '0'
                                 })}
@@ -5655,7 +5655,7 @@ export default function BacklinkAutomation() {
                           <div className="bg-white rounded-lg p-3 border">
                             <h4 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
                               <ExternalLink className="h-4 w-4" />
-                              Published Backlinks ({campaign.publishedUrls?.length || campaign.domains?.length || 0})
+                              Published Backlinks ({campaign.publishedUrls?.length || (campaign.domains || []).length || 0})
                             </h4>
                             <div className="space-y-3 max-h-40 overflow-y-auto">
                               {campaign.publishedUrls ? (
@@ -5712,7 +5712,7 @@ export default function BacklinkAutomation() {
                                   </div>
                                 ))
                               ) : (
-                                campaign.domains?.map((domain, domainIdx) => (
+                                (campaign.domains || []).map((domain, domainIdx) => (
                                   <div key={domainIdx} className="flex items-center justify-between text-sm">
                                     <div className="flex items-center gap-2">
                                       <div className="h-2 w-2 bg-green-500 rounded-full"></div>
