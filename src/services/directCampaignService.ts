@@ -100,7 +100,12 @@ class DirectCampaignService {
       console.log('✅ Campaigns fetched directly from database:', data?.length || 0);
       return data || [];
     } catch (error) {
-      console.error('Failed to fetch campaigns directly:', error);
+      console.error('Failed to fetch campaigns directly:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       throw error;
     }
   }
