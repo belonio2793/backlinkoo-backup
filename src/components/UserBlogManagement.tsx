@@ -120,7 +120,12 @@ export function UserBlogManagement() {
         description: "Your blog post has been deleted successfully.",
       });
     } catch (error) {
-      console.error('Failed to delete blog post:', error);
+      console.error('Failed to delete blog post:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: error.code
+      });
       toast({
         title: "Error",
         description: "Failed to delete blog post. Please try again.",
