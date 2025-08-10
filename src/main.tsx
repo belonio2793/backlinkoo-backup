@@ -13,6 +13,9 @@ import { setupAuthErrorInterceptor } from './utils/authErrorFix'
 // Load error fixes summary
 import './utils/errorFixesSummary'
 
+// Initialize authentication error interceptor
+setupAuthErrorInterceptor();
+
 // Clear previous console errors in development
 if (import.meta.env.DEV) {
   console.clear();
