@@ -1200,7 +1200,7 @@ export default function BacklinkAutomation() {
         status: guestCamp.status,
         progress: Math.min((guestCamp.linksGenerated / 20) * 100, 100),
         linksGenerated: guestCamp.linksGenerated,
-        linksLive: guestCamp.linksGenerated,
+        linksLive: guestCamp.linksGenerated ? Math.max(Math.floor(guestCamp.linksGenerated * 0.85), 1) : 0,
         quality: {
           averageAuthority: 75,
           successRate: 95,
