@@ -130,11 +130,7 @@ class CampaignMetricsService {
 
       return { success: true, data: data || [] };
     } catch (error) {
-      console.error('Campaign metrics fetch error:', {
-        error: error,
-        message: formatErrorForUI(error) || 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      });
+      console.error('Campaign metrics fetch error:', formatErrorForLogging(error, 'getCampaignMetrics-catch'));
       return { success: false, error: formatErrorForUI(error) || 'Unknown error' };
     }
   }
