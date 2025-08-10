@@ -380,7 +380,11 @@ exports.handler = async (event, context) => {
             };
 
           } catch (cascadeError) {
-            console.error('Cascade deletion error:', cascadeError);
+            console.error('Cascade deletion error:', {
+              message: cascadeError.message || 'Unknown cascade error',
+              stack: cascadeError.stack,
+              name: cascadeError.name
+            });
 
             // Log the cascade failure
             await supabase
