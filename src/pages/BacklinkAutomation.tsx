@@ -6091,7 +6091,7 @@ export default function BacklinkAutomation() {
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
                           { name: 'Government & Politics', count: 15820, icon: '🏛��' },
                           { name: 'Science & Research', count: 14560, icon: '🔬' },
-                          { name: 'Arts & Culture', count: 13290, icon: '' }
+                          { name: 'Arts & Culture', count: 13290, icon: '🎨' }
                         ].map((category, idx) => (
                           <div key={idx} className="p-3 rounded-lg border hover:bg-gray-50 cursor-pointer transition-colors">
                             <div className="flex items-center justify-between">
