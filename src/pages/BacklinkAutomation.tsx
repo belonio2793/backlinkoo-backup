@@ -1069,7 +1069,7 @@ export default function BacklinkAutomation() {
       const activeCampaigns = savedCampaigns.filter((c: any) => c.status === 'active');
 
       if (activeCampaigns.length > 0) {
-        console.log('��� Live Monitor: Tracking', activeCampaigns.length, 'active campaigns for', user?.id || 'guest');
+        console.log('���� Live Monitor: Tracking', activeCampaigns.length, 'active campaigns for', user?.id || 'guest');
       }
     }, 30000);
 
@@ -2737,7 +2737,7 @@ export default function BacklinkAutomation() {
         } else {
           // Progress update
           toast({
-            title: `🔥 +${linksToGenerate} More Backlinks Generated!`,
+            title: `���� +${linksToGenerate} More Backlinks Generated!`,
             description: `Total: ${newTotal} premium backlinks built${blogResult.success ? (blogResult.isFallback ? ' + blog post queued' : ' + new blog post published') : ''}! Keep going - you're on fire!`,
           });
         }
@@ -4988,7 +4988,8 @@ export default function BacklinkAutomation() {
                           {/* Action Buttons */}
                           <div className="flex items-center justify-between">
                             <div className="text-xs text-gray-500">
-                              Created {new Date(campaign.createdAt).toLocaleDateString()}
+                              Created<br />
+                              {new Date(campaign.createdAt).toLocaleDateString()}
                             </div>
                             <div className="flex items-center gap-2">
                               <Button
