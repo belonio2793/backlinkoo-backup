@@ -371,7 +371,12 @@ class CampaignService {
         throw error;
       }
 
-      console.error('Failed to fetch campaigns:', error);
+      console.error('Failed to fetch campaigns:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       // Return empty array for any other unexpected errors to prevent UI crashes
       return [];
     }
