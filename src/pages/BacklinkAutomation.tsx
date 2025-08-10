@@ -803,7 +803,7 @@ export default function BacklinkAutomation() {
     const permanentCampaigns = loadPermanentCampaigns();
     if (permanentCampaigns.length > 0) {
       setGuestCampaignResults(permanentCampaigns);
-      console.log('���� Live Monitor: Loaded', permanentCampaigns.length, 'campaigns with progressive counts');
+      console.log('��� Live Monitor: Loaded', permanentCampaigns.length, 'campaigns with progressive counts');
     }
 
     // Run initial auto-detection
@@ -5085,7 +5085,7 @@ export default function BacklinkAutomation() {
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '🛒' },
-                          { name: 'Travel & Tourism', count: 38920, icon: '✈��' },
+                          { name: 'Travel & Tourism', count: 38920, icon: '✈️' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
                           { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
@@ -6027,6 +6027,68 @@ export default function BacklinkAutomation() {
         defaultTab="signup"
         pendingAction="access campaign automation features"
       />
+
+      {/* Post-Campaign Signup Modal */}
+      <Dialog open={showPostCampaignSignupModal} onOpenChange={setShowPostCampaignSignupModal}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center text-xl font-bold">
+              🎉 Campaign Successfully Deployed!
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            <div className="text-center space-y-3">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                <Zap className="h-8 w-8 text-green-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Your backlinks are being built right now!
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Create a free account to save your campaign progress and unlock advanced automation features.
+              </p>
+            </div>
+
+            <div className="bg-blue-50 rounded-lg p-4 space-y-2">
+              <h4 className="font-medium text-blue-900">What happens next:</h4>
+              <ul className="text-sm text-blue-800 space-y-1">
+                <li>✓ Your current campaign will be saved to your account</li>
+                <li>✓ Get access to 3 free automation campaigns</li>
+                <li>✓ Monitor your backlink progress in real-time</li>
+                <li>✓ Receive notifications when links go live</li>
+              </ul>
+            </div>
+
+            <div className="space-y-3">
+              <Button
+                onClick={() => {
+                  setShowPostCampaignSignupModal(false);
+                  setShowSignInModal(true);
+                }}
+                className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                size="lg"
+              >
+                <UserPlus className="h-4 w-4 mr-2" />
+                Create Free Account & Save Campaign
+              </Button>
+
+              <Button
+                onClick={() => setShowPostCampaignSignupModal(false)}
+                variant="outline"
+                className="w-full"
+                size="sm"
+              >
+                Continue as Guest
+              </Button>
+            </div>
+
+            <div className="text-center text-xs text-gray-500">
+              Account creation is free and takes 30 seconds
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
