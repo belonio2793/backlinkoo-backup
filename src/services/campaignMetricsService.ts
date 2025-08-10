@@ -561,6 +561,47 @@ if (typeof window !== 'undefined') {
     campaignMetricsService.debugErrorLogging();
   };
 
+  // Comprehensive error logging test
+  (window as any).testAllErrorLogging = () => {
+    console.log('🧪 Testing all error logging patterns...');
+
+    // Test 1: Standard Error object
+    const standardError = new Error('This is a test error message');
+    standardError.code = 'TEST_ERROR_CODE';
+    console.error('Test standard error:', {
+      message: standardError.message,
+      code: standardError.code,
+      stack: standardError.stack,
+      name: standardError.name
+    });
+
+    // Test 2: Supabase-like error object
+    const supabaseError = {
+      message: 'relation "campaign_metrics" does not exist',
+      code: '42P01',
+      details: null,
+      hint: 'Perhaps you meant to reference the table "public"."campaigns"?'
+    };
+    console.error('Test Supabase-like error:', {
+      message: supabaseError.message,
+      code: supabaseError.code,
+      details: supabaseError.details,
+      hint: supabaseError.hint
+    });
+
+    // Test 3: Network error
+    const networkError = new TypeError('fetch failed');
+    networkError.cause = { errno: -3008, code: 'ENOTFOUND' };
+    console.error('Test network error:', {
+      message: networkError.message,
+      stack: networkError.stack,
+      name: networkError.name,
+      cause: networkError.cause
+    });
+
+    console.log('✅ Error logging test complete! Check above for properly formatted error objects.');
+  };
+
   (window as any).testCampaignMetricsError = async () => {
     console.log('🧪 Testing campaign metrics error logging...');
 
