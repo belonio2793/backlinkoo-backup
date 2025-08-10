@@ -4832,9 +4832,9 @@ export default function BacklinkAutomation() {
                             </div>
                           </div>
 
-                          {/* Real-Time Stats Grid */}
+                          {/* Enhanced Real-Time Stats Grid */}
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                            <div className="text-center p-3 bg-green-50 rounded-lg">
+                            <div className="text-center p-3 bg-green-50 rounded-lg border border-green-200">
                               <div className="text-2xl font-bold text-green-600">
                                 {campaign.linksGenerated}
                                 {!isPremium && <span className="text-sm text-gray-500">/20</span>}
@@ -6647,7 +6647,7 @@ export default function BacklinkAutomation() {
                       <div className="text-center p-4 bg-purple-50 rounded-lg border border-purple-200 shadow-sm">
                         <div className="text-3xl font-bold text-purple-600">{selectedCampaignDetails.avgAuthority || selectedCampaignDetails.quality?.averageAuthority || Math.floor(Math.random() * 15) + 85}</div>
                         <div className="text-sm font-semibold text-gray-800">Avg Authority</div>
-                        <div className="text-xs text-purple-600 mt-1">✓ High Quality</div>
+                        <div className="text-xs text-purple-600 mt-1">��� High Quality</div>
                       </div>
                       <div className="text-center p-4 bg-orange-50 rounded-lg border border-orange-200 shadow-sm">
                         <div className="text-3xl font-bold text-orange-600">
