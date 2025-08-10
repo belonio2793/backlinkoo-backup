@@ -4823,7 +4823,7 @@ export default function BacklinkAutomation() {
                                   </Badge>
                                 )}
                                 <span className="text-xs text-gray-500 time-display">
-                                  Last activity: {campaign.lastActivity ? new Date(campaign.lastActivity).toLocaleTimeString() : 'Never'}
+                                  {campaign.lastActivity ? formatTimeDisplay('Last activity', new Date(campaign.lastActivity)) : ensureColonSpacing('Last activity: Never')}
                                 </span>
                               </div>
                             </div>
