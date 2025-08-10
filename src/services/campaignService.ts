@@ -513,7 +513,12 @@ class CampaignService {
         return; // Silently succeed in demo mode
       }
 
-      console.error('Failed to resume campaign:', error);
+      console.error('Failed to resume campaign:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+        code: error.code
+      });
       throw error;
     }
   }
