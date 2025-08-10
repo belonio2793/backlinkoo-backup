@@ -4042,7 +4042,7 @@ export default function BacklinkAutomation() {
                               onClick={() => {
                                 setPremiumUpsellTrigger('manual');
                                 if (user) {
-                                  setShowTrialExhaustedModal(true);
+                                  setShowPremiumPlanModal(true);
                                 } else {
                                   setShowGuestPremiumModal(true);
                                 }
