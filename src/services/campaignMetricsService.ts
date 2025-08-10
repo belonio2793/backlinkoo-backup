@@ -229,7 +229,7 @@ class CampaignMetricsService {
           message: error.message,
           details: error.details
         });
-        return { success: false, error: error.message || 'Failed to fetch monthly data' };
+        return { success: false, error: formatErrorForUI(error) || 'Failed to fetch monthly data' };
       }
 
       return { success: true, data: data || [] };
@@ -545,7 +545,7 @@ if (typeof window !== 'undefined') {
     const debug = await campaignMetricsService.debugDatabaseSetup();
 
     console.log('📊 Tables Status:', debug.tablesExist);
-    console.log('���️ Views Status:', debug.viewsExist);
+    console.log('👁️ Views Status:', debug.viewsExist);
     console.log('⚙️ Functions Status:', debug.functionsExist);
 
     if (debug.errors.length > 0) {
