@@ -71,7 +71,11 @@ export const useAffiliate = () => {
       // Reload data to reflect changes
       await loadAffiliateData();
     } catch (error) {
-      console.error('Error tracking purchase:', error);
+      console.error('Error tracking purchase:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined
+      });
     }
   };
 
