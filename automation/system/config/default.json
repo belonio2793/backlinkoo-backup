@@ -1,0 +1,191 @@
+{
+  "system": {
+    "name": "Backlink Automation System",
+    "version": "1.0.0",
+    "environment": "development"
+  },
+  "global": {
+    "processingInterval": 5000,
+    "maxConcurrentTasks": 10,
+    "retryAttempts": 3,
+    "retryDelay": 2000,
+    "enableSafetyChecks": true,
+    "enableRateLimiting": true,
+    "enableProxyRotation": true,
+    "enableUserAgentRotation": true,
+    "enableLogging": true,
+    "logLevel": "info"
+  },
+  "engines": {
+    "blogCommenting": {
+      "enabled": true,
+      "batchSize": 5,
+      "commentDelay": {
+        "min": 30000,
+        "max": 120000
+      },
+      "maxCommentsPerSite": 3,
+      "maxCommentsPerDay": 50,
+      "commentLength": {
+        "min": 50,
+        "max": 200
+      },
+      "enableSpinning": true,
+      "enableNLP": true,
+      "requireModeration": true,
+      "commentTemplates": [],
+      "userProfiles": [
+        {
+          "name": "John Smith",
+          "email": "john.smith@example.com",
+          "website": "https://example.com"
+        },
+        {
+          "name": "Sarah Johnson",
+          "email": "sarah.j@example.com",
+          "website": "https://sarahsblog.com"
+        }
+      ]
+    },
+    "blogPosting": {
+      "enabled": true,
+      "batchSize": 3,
+      "postDelay": {
+        "min": 300000,
+        "max": 900000
+      },
+      "maxPostsPerSite": 1,
+      "maxPostsPerDay": 10,
+      "articleLength": {
+        "min": 500,
+        "max": 2000
+      },
+      "enableSEOOptimization": true,
+      "enableImageInsertion": true,
+      "enableVideoEmbedding": true,
+      "targetPlatforms": [],
+      "contentCategories": ["technology", "marketing", "business"],
+      "authorProfiles": []
+    },
+    "forumProfiles": {
+      "enabled": true,
+      "batchSize": 2,
+      "profileCreationDelay": {
+        "min": 600000,
+        "max": 1800000
+      },
+      "maxProfilesPerSite": 1,
+      "maxProfilesPerDay": 5,
+      "enableSignatureLinks": true,
+      "enableProfileLinks": true,
+      "enablePostLinks": true,
+      "targetForums": [],
+      "profileTemplates": [],
+      "signatureTemplates": []
+    },
+    "socialMedia": {
+      "enabled": true,
+      "batchSize": 8,
+      "postDelay": {
+        "min": 180000,
+        "max": 600000
+      },
+      "maxPostsPerPlatform": 5,
+      "maxPostsPerDay": 25,
+      "enableHashtags": true,
+      "enableMentions": true,
+      "enableMediaUploads": true,
+      "platforms": {
+        "twitter": {
+          "enabled": true,
+          "maxPosts": 10,
+          "contentLength": 280
+        },
+        "facebook": {
+          "enabled": true,
+          "maxPosts": 5,
+          "contentLength": 2000
+        },
+        "linkedin": {
+          "enabled": true,
+          "maxPosts": 3,
+          "contentLength": 3000
+        },
+        "instagram": {
+          "enabled": false,
+          "maxPosts": 5,
+          "contentLength": 2200
+        }
+      }
+    },
+    "web2": {
+      "enabled": true,
+      "batchSize": 4,
+      "siteCreationDelay": {
+        "min": 900000,
+        "max": 2700000
+      },
+      "maxSitesPerPlatform": 2,
+      "maxSitesPerDay": 8,
+      "enableContentSeeding": true,
+      "enableInterlinking": true,
+      "enableRSSFeeds": true,
+      "targetPlatforms": [],
+      "siteTemplates": [],
+      "contentSchedules": []
+    },
+    "guestPosting": {
+      "enabled": true,
+      "batchSize": 2,
+      "outreachDelay": {
+        "min": 1800000,
+        "max": 3600000
+      },
+      "maxOutreachPerDay": 20,
+      "maxSubmissionsPerDay": 5,
+      "enableAutomatedOutreach": true,
+      "enableFollowUps": true,
+      "enableContentCustomization": true,
+      "targetSites": [],
+      "outreachTemplates": [],
+      "contentTemplates": []
+    }
+  },
+  "safety": {
+    "enableIPRotation": true,
+    "enableCaptchaSolving": true,
+    "enableHumanSimulation": true,
+    "maxActionsPerIP": 100,
+    "maxActionsPerHour": 50,
+    "blacklistedDomains": [
+      "google.com",
+      "facebook.com",
+      "twitter.com",
+      "linkedin.com",
+      "instagram.com",
+      "youtube.com",
+      "amazon.com",
+      "wikipedia.org"
+    ],
+    "requiredDelays": {
+      "betweenActions": 5000,
+      "betweenSites": 30000,
+      "betweenCampaigns": 300000
+    }
+  },
+  "proxies": {
+    "enabled": false,
+    "rotation": true,
+    "types": ["http", "https", "socks5"],
+    "providers": [],
+    "testTimeout": 10000,
+    "maxFailures": 3,
+    "list": []
+  },
+  "database": {
+    "connectionString": "",
+    "maxConnections": 20,
+    "queryTimeout": 30000,
+    "enableLogging": false
+  }
+}
