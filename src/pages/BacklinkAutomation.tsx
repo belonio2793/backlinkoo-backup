@@ -5474,7 +5474,7 @@ export default function BacklinkAutomation() {
                     setSelectedCampaignTab('create');
                     setShowFabMenu(false);
                   }}
-                  className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
+                  className="w-48 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
                   <Target className="h-4 w-4 mr-2" />
                   New Campaign
@@ -5485,7 +5485,7 @@ export default function BacklinkAutomation() {
                     setSelectedTab('database');
                     setShowFabMenu(false);
                   }}
-                  className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
+                  className="w-48 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
                   <Search className="h-4 w-4 mr-2" />
                   Website Database
@@ -5496,7 +5496,7 @@ export default function BacklinkAutomation() {
                     setSelectedTab('recursive');
                     setShowFabMenu(false);
                   }}
-                  className="w-40 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
+                  className="w-48 justify-start bg-gray-800 text-white shadow-lg border hover:bg-gray-700"
                 >
                   <Network className="h-4 w-4 mr-2" />
                   Recursive Discovery
