@@ -3589,7 +3589,9 @@ export default function BacklinkAutomation() {
               <TabsTrigger value="recursive">
                 <FormattedText type="label">Recursive Discovery</FormattedText>
               </TabsTrigger>
-              <TabsTrigger value="discovery">Legacy Discovery</TabsTrigger>
+              <TabsTrigger value="discovery">
+                <FormattedText type="label">Legacy Discovery</FormattedText>
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="campaigns" className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
