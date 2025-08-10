@@ -3750,7 +3750,7 @@ export default function BacklinkAutomation() {
                           <div className="flex justify-center gap-4 text-xs text-gray-500">
                             <span>✓ High-authority domains</span>
                             <span>✓ Instant results</span>
-                            <span>✓ No signup required</span>
+                            <span>��� No signup required</span>
                           </div>
                           {guestCampaignResults.length > 0 && (
                             <Button
@@ -3852,7 +3852,9 @@ export default function BacklinkAutomation() {
                             ) : (
                               <Rocket className="h-4 w-4 mr-2" />
                             )}
-                            {isPremium ? "Deploy Premium Campaign" : "Deploy Campaign"}
+                            <FormattedText type="button">
+                              {isPremium ? "Deploy Premium Campaign" : "Deploy Campaign"}
+                            </FormattedText>
                           </Button>
 
                           {!isPremium && (
