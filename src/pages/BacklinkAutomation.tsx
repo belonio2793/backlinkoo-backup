@@ -6000,10 +6000,12 @@ export default function BacklinkAutomation() {
                     <div>
                       <CardTitle className="flex items-center gap-2 text-green-800">
                         <Sparkles className="h-5 w-5" />
-                        🎯 New Discoveries - Priority Publishing
+                        <FormattedText type="title">🎯 New Discoveries - Priority Publishing</FormattedText>
                       </CardTitle>
                       <CardDescription className="text-flow-fix">
-                        Real-time verified link placements from {Math.floor(Math.random() * 500) + 1200}+ active campaigns across our user network
+                        <FormattedDescription>
+                          📡 Live feed showing verified link placements from campaigns running across our {Math.floor(Math.random() * 5000) + 15000}+ user network
+                        </FormattedDescription>
                       </CardDescription>
                     </div>
                     <div className="flex items-center gap-2">
