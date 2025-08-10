@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { User } from '@supabase/supabase-js';
+import { formatErrorForLogging, formatErrorForUI } from '@/utils/errorUtils';
 
 export interface UserProfile {
   user_id: string;
