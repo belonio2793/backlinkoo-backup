@@ -6079,7 +6079,7 @@ export default function BacklinkAutomation() {
                           { name: 'News & Media', count: 65430, icon: '📰' },
                           { name: 'Marketing & Advertising', count: 54210, icon: '📢' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '🛒' },
-                          { name: 'Travel & Tourism', count: 38920, icon: '✈' },
+                          { name: 'Travel & Tourism', count: 38920, icon: '✈️' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
                           { name: 'Entertainment & Gaming', count: 32180, icon: '' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
