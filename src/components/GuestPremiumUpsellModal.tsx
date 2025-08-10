@@ -18,6 +18,7 @@ import { guestTrackingService, type PremiumLimitWarning } from '@/services/guest
 import { LoginModal } from '@/components/LoginModal';
 import { useToast } from '@/hooks/use-toast';
 import { paymentIntegrationService } from '@/services/paymentIntegrationService';
+import { CheckoutRedirectManager } from '@/utils/checkoutRedirectManager';
 
 interface GuestPremiumUpsellModalProps {
   open: boolean;
