@@ -48,29 +48,38 @@ export class CheckoutRedirectManager {
     let windowReference: Window | null = null;
 
     if (preferNewWindow) {
-      try {
-        // Immediately open window with loading page to preserve user gesture
-        windowReference = window.open(loadingUrl, 'stripe-checkout', windowFeatures);
-        
-        if (!windowReference) {
-          // Popup was blocked
-          console.warn('Popup blocked for checkout session:', sessionId);
-          onPopupBlocked?.();
-          
-          if (fallbackToCurrentWindow) {
-            // Will redirect current window when checkout URL is ready
-            windowReference = null;
-          } else {
-            throw new Error('Popup blocked and fallback disabled');
-          }
-        } else {
-          console.log('Checkout window opened successfully:', sessionId);
-          onRedirectSuccess?.();
-        }
-      } catch (error) {
-        console.error('Failed to open checkout window:', error);
-        onRedirectError?.(error as Error);
+      // Use intelligent popup detection for better success rate
+      const strategy = PopupBlockerDetection.getRecommendedStrategy();
+
+      if (strategy === 'current-window') {
+        console.log('Popup blockers likely - will use current window for checkout');
         windowReference = null;
+        onRedirectSuccess?.();
+      } else {
+        try {
+          // Immediately open window with loading page to preserve user gesture
+          windowReference = window.open(loadingUrl, 'stripe-checkout', windowFeatures);
+
+          if (!windowReference) {
+            // Popup was blocked
+            console.warn('Popup blocked for checkout session:', sessionId);
+            onPopupBlocked?.();
+
+            if (fallbackToCurrentWindow) {
+              // Will redirect current window when checkout URL is ready
+              windowReference = null;
+            } else {
+              throw new Error('Popup blocked and fallback disabled');
+            }
+          } else {
+            console.log('Checkout window opened successfully:', sessionId);
+            onRedirectSuccess?.();
+          }
+        } catch (error) {
+          console.error('Failed to open checkout window:', error);
+          onRedirectError?.(error as Error);
+          windowReference = null;
+        }
       }
     }
 
