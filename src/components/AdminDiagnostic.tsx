@@ -159,7 +159,7 @@ export function AdminDiagnostic() {
                     <Alert variant="destructive">
                       <AlertTriangle className="h-4 w-4" />
                       <AlertDescription>
-                        <strong>Database Issue Detected:</strong> RLS policies are causing infinite recursion.
+                        <strong>Database Issue Detected: </strong>RLS policies are causing infinite recursion.
                         You need to run the database fix script in your Supabase SQL Editor.
                       </AlertDescription>
                     </Alert>
