@@ -19,6 +19,7 @@ import {
 } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
+import { formatErrorForUI } from '@/utils/errorUtils';
 import { adminUserCreationService, type CreateUserPayload } from '@/services/adminUserCreationService';
 import { UserPlus, Eye, EyeOff, RefreshCw, AlertTriangle, CheckCircle } from 'lucide-react';
 
