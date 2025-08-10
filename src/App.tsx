@@ -285,6 +285,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/debug/auth-errors"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyAuthErrorDebug />
+                </Suspense>
+              }
+            />
 
             {/* 404 Catch-all route */}
             <Route
