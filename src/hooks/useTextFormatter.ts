@@ -79,12 +79,21 @@ export function useFormattedTexts<T extends Record<string, string>>(
 ): T {
   return useMemo(() => {
     const formatted = {} as T;
-    
+
     Object.entries(texts).forEach(([key, text]) => {
-      const type = types[key as keyof T] || 'description';
-      formatted[key as keyof T] = TextFormatter.formatUIText(text as string, type) as T[keyof T];
+      try {
+        const type = types[key as keyof T] || 'description';
+        if (text && typeof text === 'string') {
+          formatted[key as keyof T] = TextFormatter.formatUIText(text, type) as T[keyof T];
+        } else {
+          formatted[key as keyof T] = (text || '') as T[keyof T];
+        }
+      } catch (error) {
+        console.warn(`Text formatting error for key "${key}":`, error);
+        formatted[key as keyof T] = (text || '') as T[keyof T];
+      }
     });
-    
+
     return formatted;
   }, [texts, types]);
 }
