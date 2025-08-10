@@ -3998,17 +3998,20 @@ export default function BacklinkAutomation() {
                         </TabsList>
 
                         <TabsContent value="overview" className="space-y-4">
-                          {/* Real-time Stats Dashboard */}
+                          {/* Enhanced Real-time Stats Dashboard */}
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                             <div className="bg-white rounded-lg p-3 border border-green-200">
                               <div className="flex items-center justify-between">
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">Links Published</p>
                                   <p className="text-xl font-bold text-green-600">
-                                    {user ? campaigns.reduce((sum, c) => sum + c.linksGenerated, 0) : guestLinksGenerated}
+                                    {cumulativeStats.totalLinksPublished}
                                   </p>
                                   <p className="text-xs text-green-700">
-                                    +{recentPostbacks.filter(p => Date.now() - new Date(p.publishedAt).getTime() < 60000).length} last minute
+                                    +{globalActivityFeed.filter(a =>
+                                      a.type === 'link_published' &&
+                                      Date.now() - new Date(a.timestamp).getTime() < 60000
+                                    ).length} last minute
                                   </p>
                                 </div>
                                 <Link className="h-6 w-6 text-green-600" />
@@ -4020,13 +4023,12 @@ export default function BacklinkAutomation() {
                                 <div>
                                   <p className="text-xs font-medium text-muted-foreground">Domains Reached</p>
                                   <p className="text-xl font-bold text-blue-600">
-                                    {user ?
-                                      new Set(realTimeLinkPostbacks.map(p => p.domain)).size :
-                                      guestCampaignResults.reduce((acc, campaign) => acc + (campaign.domains?.length || 0), 0)
-                                    }
+                                    {cumulativeStats.totalDomainsReached}
                                   </p>
                                   <p className="text-xs text-blue-700">
-                                    {realTimeLinkPostbacks.filter(p => p.domainAuthority >= 90).length} high DA
+                                    {globalActivityFeed.filter(a =>
+                                      a.metadata?.authority >= 90
+                                    ).length} high DA
                                   </p>
                                 </div>
                                 <Globe className="h-6 w-6 text-blue-600" />
