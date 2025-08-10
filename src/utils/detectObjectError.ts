@@ -2,6 +2,8 @@
  * Utility to detect and trace [object Object] errors in real-time
  */
 
+import { formatErrorForUI } from './errorUtils';
+
 // Override console methods to detect [object Object] logging
 export function enableObjectErrorDetection() {
   const originalError = console.error;
