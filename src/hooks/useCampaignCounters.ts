@@ -124,7 +124,7 @@ export function useCampaignCounters(options: UseCampaignCountersOptions = {}): U
       
       console.log(`🗑️ Deleted campaign counters for ${id}`);
     } catch (error) {
-      console.error('Failed to delete campaign:', error);
+      console.error('Failed to delete campaign:', error instanceof Error ? error.message : String(error));
     }
   }, [campaignId]);
 
