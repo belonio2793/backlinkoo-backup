@@ -3740,7 +3740,7 @@ export default function BacklinkAutomation() {
                             ) : (
                               <Zap className="h-4 w-4 mr-2" />
                             )}
-                            Deploy Campaign
+                            <FormattedText type="button">Deploy Campaign</FormattedText>
                           </Button>
                         </div>
                         <div className="text-center">
