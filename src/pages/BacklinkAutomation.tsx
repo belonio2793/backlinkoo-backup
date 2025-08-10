@@ -1517,7 +1517,9 @@ export default function BacklinkAutomation() {
           }
           loadRealTimeMetrics();
         } else {
-          console.warn('⚠������ Database not ready:', status);
+          console.warn('Database not ready, using local storage mode:', status);
+          // Load from localStorage as fallback
+          loadPermanentCampaigns();
         }
       } catch (error) {
         clearTimeout(timeoutId);
@@ -6649,7 +6651,7 @@ export default function BacklinkAutomation() {
                 updateGuestRestrictions();
 
                 toast({
-                  title: "����️ Campaign Deleted",
+                  title: "������� Campaign Deleted",
                   description: "Campaign has been permanently removed.",
                 });
               } else {
