@@ -712,7 +712,12 @@ class CampaignService {
         .single();
 
       if (error) {
-        console.error('Error creating campaign:', error.message || error.toString() || JSON.stringify(error));
+        console.error('Error creating campaign:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
         return { error: error.message };
       }
 
