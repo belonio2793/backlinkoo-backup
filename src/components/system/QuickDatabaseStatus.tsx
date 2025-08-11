@@ -36,19 +36,64 @@ export function QuickDatabaseStatus() {
   const attemptQuickFix = async () => {
     setIsFixing(true);
     try {
+      console.log('🔧 Starting quick database fix...');
+
+      // Try the dedicated Netlify function first
+      try {
+        const response = await fetch('/.netlify/functions/fix-database-schema', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ action: 'fix_schema' })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+
+          if (result.success) {
+            toast.success('Database Schema Fixed!', {
+              description: 'exec_sql function and missing columns have been added'
+            });
+            await checkDatabaseQuickly(); // Re-check
+            return;
+          } else {
+            console.warn('Netlify function fix failed:', result);
+          }
+        }
+      } catch (fetchError) {
+        console.warn('Netlify function not available:', fetchError);
+      }
+
+      // Fallback to the emergency fix utility
       const result = await EmergencyDatabaseFix.attemptDatabaseFix();
-      
+
       if (result.success) {
-        toast.success('Database Fixed!');
+        toast.success('Database Fixed!', {
+          description: result.message
+        });
         await checkDatabaseQuickly(); // Re-check
       } else {
         toast.error('Auto-fix failed', {
-          description: result.message
+          description: result.message,
+          action: {
+            label: 'Manual Fix',
+            onClick: () => {
+              window.open('/test-database-fix.html', '_blank');
+            }
+          }
         });
       }
     } catch (error: any) {
+      console.error('Quick fix failed:', error);
       toast.error('Fix failed', {
-        description: error.message
+        description: error.message,
+        action: {
+          label: 'Manual Fix',
+          onClick: () => {
+            window.open('/test-database-fix.html', '_blank');
+          }
+        }
       });
     } finally {
       setIsFixing(false);
