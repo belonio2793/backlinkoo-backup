@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { initializeAutomationTables } from './createAutomationTables';
 
 export class DatabaseHealthCheck {
   static async checkTables(): Promise<{ success: boolean; errors: string[]; details: any }> {
