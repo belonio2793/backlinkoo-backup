@@ -36,6 +36,13 @@ export class AutomationDatabaseService {
   
   static async createCampaign(campaignData: AutomationCampaignInsert): Promise<{ success: boolean; data?: AutomationCampaign; error?: string }> {
     try {
+      // Check if tables exist first
+      const tablesExist = await this.checkTablesExist();
+      if (!tablesExist) {
+        console.warn('⚠️ Automation tables do not exist, using fallback service');
+        return await FallbackAutomationService.createCampaign(campaignData);
+      }
+
       const { data, error } = await supabase
         .from('automation_campaigns')
         .insert(campaignData)
@@ -43,8 +50,18 @@ export class AutomationDatabaseService {
         .single();
 
       if (error) {
-        console.error('Error creating campaign:', error);
-        return { success: false, error: error.message };
+        console.error('Error creating campaign:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        // If it's a table not found error, use fallback
+        if (error.code === '42P01') {
+          console.warn('⚠️ Table not found, using fallback service');
+          return await FallbackAutomationService.createCampaign(campaignData);
+        }
+        return { success: false, error: error.message || 'Failed to create campaign' };
       }
 
       // Initialize user quota tracking
