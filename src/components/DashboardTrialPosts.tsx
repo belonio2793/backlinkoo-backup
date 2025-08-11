@@ -516,8 +516,8 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Trial Blog Posts</h2>
-          <p className="text-gray-600">Each account includes free access to up to <strong>three blog posts</strong>, allowing users to explore and experience our private blog post backlink service at no cost. This introductory offer is designed to educate users on how search engine rankings work and demonstrate the impact of high-quality, contextual backlinks. Our platform is partnered with authoritative websites where we publish tailored blog content to strategically improve keyword performance. When you purchase credits and launch campaigns, you receive powerful blog post backlinks from diverse, reputable domains—proven to enhance visibility and boost your rankings in search engine results (SERPs).</p>
+          <h2 className="text-2xl font-bold text-gray-900">Community Blog Posts</h2>
+          <RotatingTrialText />
         </div>
 
       </div>
