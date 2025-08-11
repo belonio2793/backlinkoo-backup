@@ -29,6 +29,7 @@ import { useDatabaseCampaignManager } from '@/hooks/useDatabaseCampaignManager';
 import { useLinkTracker } from '@/hooks/useLinkTracker';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
+import { DatabaseHealthCheck } from '@/utils/databaseHealthCheck';
 
 const engines = [
   {
