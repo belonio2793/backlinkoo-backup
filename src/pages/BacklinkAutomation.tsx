@@ -6806,18 +6806,13 @@ export default function BacklinkAutomation() {
                   <Button
                     size="sm"
                     onClick={() => {
-                      
-                      if (user) {
-                        DirectCheckoutService.upgradeToPremium('monthly');
-                      } else {
-                        DirectCheckoutService.upgradeToPremium('monthly');
-                      }
+                      setShowPremiumPlans(true);
                       setShowFabMenu(false);
                     }}
                     className="w-48 justify-start bg-purple-600 text-white shadow-lg hover:bg-purple-700"
                   >
                     <Crown className="h-4 w-4 mr-2" />
-                    Upgrade Now
+                    View Premium Plans
                   </Button>
                 )}
               </>
