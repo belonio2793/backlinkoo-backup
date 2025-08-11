@@ -178,7 +178,7 @@ export default function BacklinkAutomation() {
     const newCampaign = await createCampaign({
       name: formData.name,
       engine_type: selectedEngine.replace('-', '_'),
-      target_url: formData.targetUrl.includes('://') ? formData.targetUrl : `https://${formData.targetUrl}`,
+      target_url: normalizedTargetUrl,
       keywords: keywordsArray,
       anchor_texts: anchorTextsArray,
       status: formData.autoStart ? 'active' : 'draft',
