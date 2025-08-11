@@ -66,7 +66,8 @@ const App = () => (
     <TooltipProvider>
       <ModalProvider>
         <SymbolCleanerProvider>
-          <Toaster />
+          <TextCleanerProvider>
+            <Toaster />
           <Sonner />
           <UnifiedModalManager />
           <BrowserRouter>
@@ -314,6 +315,7 @@ const App = () => (
               </ReportSyncProvider>
             </PremiumUpgradeProvider>
           </BrowserRouter>
+          </TextCleanerProvider>
         </SymbolCleanerProvider>
       </ModalProvider>
     </TooltipProvider>
