@@ -53,7 +53,7 @@ export function EnhancedPaymentButton({
       return (
         <>
           {showIcon && <CreditCard className="h-4 w-4 mr-2" />}
-          Buy {credits} Credits (${price})
+          Buy {`${credits} Credits`} (${price})
         </>
       );
     }
