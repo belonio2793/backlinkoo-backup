@@ -110,7 +110,7 @@ export class LiveAutomationEngine {
           url: blog.url
         });
 
-        const placement = await this.attemptBlogComment(campaign, blog);
+        const placement = await LiveAutomationEngine.attemptBlogComment(campaign, blog);
         
         if (placement.success) {
           await this.saveLinkPlacement({
