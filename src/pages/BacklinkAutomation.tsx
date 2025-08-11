@@ -379,7 +379,26 @@ export default function BacklinkAutomation() {
                 </div>
               </CardHeader>
               <CardContent>
-                {currentEngineCampaigns.length > 0 ? (
+                {!isAuthenticated ? (
+                  <div className="text-center py-12">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      {selectedEngineData && <selectedEngineData.icon className="h-8 w-8 text-gray-400" />}
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">
+                      Sign In Required
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      Create an account to view and manage your {selectedEngineData?.name.toLowerCase()} campaigns
+                    </p>
+                    <Button
+                      onClick={() => setShowAuthModal(true)}
+                      className="bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Sign In to Get Started
+                    </Button>
+                  </div>
+                ) : currentEngineCampaigns.length > 0 ? (
                   <div className="space-y-4">
                     {currentEngineCampaigns.map((campaign) => (
                       <Card key={campaign.id} className="border border-gray-200">
