@@ -708,7 +708,7 @@ export function MultiBlogGenerator({
               </h4>
               <p className="text-red-700">
                 Each post above contains live backlinks to your website and is building SEO value right now!
-                But they will automatically delete in 24 hours unless you create an account to keep them forever.
+                But they will be automatically deleted in 24 hours unless you create an account to keep them forever.
               </p>
               <div className="flex items-center justify-center gap-6 text-sm text-red-600 mt-4">
                 <div className="flex items-center gap-1">
