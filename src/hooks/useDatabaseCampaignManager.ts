@@ -133,8 +133,9 @@ export function useDatabaseCampaignManager() {
         return null;
       }
     } catch (err: any) {
+      const errorMessage = err?.message || err?.toString() || 'Unknown error occurred';
       toast.error('Error creating campaign', {
-        description: err.message
+        description: errorMessage
       });
       return null;
     } finally {
