@@ -4,6 +4,8 @@ import App from './App.tsx'
 import './index.css'
 // Unified error handler - fixes all [object Object] displays
 import './utils/unifiedErrorHandler'
+// Campaign-specific error handling
+import './utils/campaignErrorHandler'
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
 
