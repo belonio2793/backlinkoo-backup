@@ -553,6 +553,28 @@ export default function BacklinkAutomation() {
       </div>
 
       <Footer />
+
+      {/* Authentication Modal */}
+      <RoutePreservingAuth showAuthButtons={false} />
+      {showAuthModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full">
+            <h3 className="text-lg font-semibold mb-2">Authentication Required</h3>
+            <p className="text-gray-600 mb-4">
+              You need to sign in to create and manage automation campaigns.
+            </p>
+            <div className="flex gap-3">
+              <RoutePreservingAuth className="flex-1" />
+              <Button
+                variant="outline"
+                onClick={() => setShowAuthModal(false)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
