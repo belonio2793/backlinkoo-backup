@@ -145,7 +145,7 @@ export function UserClaimedPosts() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Eye className="h-3 w-3" />
-                      <span>{post.view_count} views</span>
+                      <span>{post.view_count}&nbsp;views</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <FileText className="h-3 w-3" />

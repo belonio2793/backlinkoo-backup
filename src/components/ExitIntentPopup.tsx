@@ -18,6 +18,10 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
   const navigate = useNavigate();
   const { openSignupModal } = useAuthModal();
 
+  // No text processing - use original values
+  const displayTitle = postTitle;
+  const displayTime = timeRemaining;
+
   // 3-second delay before showing popup
   useEffect(() => {
     if (isVisible) {
@@ -76,14 +80,15 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
         <CardContent className="space-y-6">
           <div className="text-center">
             <p className="text-gray-700 mb-4">
-              {postTitle ? `Your blog post "${postTitle}"` : "Your newly created blog post"} will be 
-              <span className="font-semibold text-red-600"> automatically deleted</span> in {timeRemaining} if left unclaimed.
+              {displayTitle ? `Your blog post "${displayTitle}" will be ` : "Your newly created blog post will be "}
+              <span className="font-semibold text-red-600">automatically deleted</span>
+              {` in ${displayTime} if left unclaimed.`}
             </p>
             
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
               <div className="flex items-center gap-2 text-amber-800 mb-2">
                 <Clock className="h-4 w-4" />
-                <span className="font-medium">Time Remaining: {timeRemaining}</span>
+                <span className="font-medium">Time&nbsp;Remaining:&nbsp;{displayTime}</span>
               </div>
               <p className="text-sm text-amber-700">
                 Create a free account to claim and keep your content permanently.

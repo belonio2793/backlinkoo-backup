@@ -38,14 +38,11 @@ export class ContentFormatter {
       .replace(/([A-Za-z])\s*&lt;[^&]*&gt;\s*([A-Za-z])/g, '$1 $2') // Remove HTML entities between words
       .replace(/\.\s*&lt;[^&]*&gt;\s*([A-Z])/g, '. $1'); // Clean sentence breaks
 
-    // Split content into lines and clean up
+    // Split content into lines and clean up - MINIMAL PROCESSING
     let formattedContent = content
-      // Normalize line breaks
+      // Only normalize line breaks, preserve all other spacing
       .replace(/\r\n/g, '\n')
-      .replace(/\r/g, '\n')
-      // Remove excessive whitespace but preserve paragraph breaks
-      .replace(/[ \t]+/g, ' ')
-      .trim();
+      .replace(/\r/g, '\n');
 
     // Process the content in correct order - add comprehensive cleanup first
     formattedContent = this.removeSpecificMalformedPatterns(formattedContent);
@@ -281,23 +278,14 @@ export class ContentFormatter {
   }
 
   /**
-   * Process and format headings with proper structure
+   * Process and format headings with proper structure - MINIMAL PROCESSING
    */
   private static processHeadings(content: string): string {
     return content
-      // Normalize H3 to H2 for consistent styling (except main title H1)
+      // Only normalize H3 to H2, NO SPACING CHANGES
       .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, '<h2$1>$2</h2>')
-      // Ensure HTML headings have proper spacing before and after
-      .replace(/\n*(<h[1-6][^>]*>.*?<\/h[1-6]>)\n*/gi, '\n\n$1\n\n')
-      // Ensure any remaining markdown headings have proper spacing
-      .replace(/\n*(#{1,6})\s*(.+?)\n*/g, '\n\n$1 $2\n\n')
       // Fix heading hierarchy - normalize H3+ to H2
-      .replace(/\n#{3,6}/g, '\n##')
-      // Ensure remaining markdown heading text is properly capitalized
-      .replace(/(#{1,6})\s*(.+)/g, (match, hashes, text) => {
-        const cleanText = text.trim();
-        return `${hashes} ${this.capitalizeHeading(cleanText)}`;
-      });
+      .replace(/#{3,6}/g, '##');
   }
 
   /**
@@ -379,16 +367,10 @@ export class ContentFormatter {
   }
 
   /**
-   * Fix spacing throughout the content
+   * Fix spacing throughout the content - DISABLED to prevent formatting issues
    */
   private static fixSpacing(content: string): string {
-    return content
-      // Remove excessive line breaks
-      .replace(/\n{3,}/g, '\n\n')
-      // Ensure proper spacing around block elements
-      .replace(/(<\/?(h[1-6]|p|div|ul|ol|blockquote)[^>]*>)\s*\n?\s*/g, '$1\n\n')
-      // Clean up start and end
-      .trim();
+    return content; // Return content unchanged - no space manipulation
   }
 
   /**
@@ -419,20 +401,10 @@ export class ContentFormatter {
   }
 
   /**
-   * Add proper spacing between sections
+   * Add proper spacing between sections - DISABLED to prevent formatting issues
    */
   static addSectionSpacing(content: string): string {
-    return content
-      // Add spacing before headings
-      .replace(/(\n|^)(#{1,6}\s)/g, '\n\n$2')
-      // Add spacing after paragraphs before headings
-      .replace(/(<\/p>)\s*(#{1,6}\s)/g, '$1\n\n$2')
-      // Add spacing around lists
-      .replace(/(<\/(ul|ol)>)\s*(<p>)/g, '$1\n\n$3')
-      .replace(/(<\/p>)\s*(<(ul|ol)>)/g, '$1\n\n$2')
-      // Clean up multiple line breaks
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
+    return content; // Return content unchanged - no section spacing manipulation
   }
 
   /**
@@ -497,10 +469,9 @@ export class ContentFormatter {
       .replace(/[\u2018\u2019]/g, "'")
       .replace(/[\u201C\u201D]/g, '"')
 
-      // Remove excessive whitespace but preserve paragraph structure
-      .replace(/[ \t]+/g, ' ')
-      .replace(/\n\s*\n\s*\n/g, '\n\n')
-      .trim();
+      // NO WHITESPACE MANIPULATION - preserve all original spacing
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n');
   }
 
   /**
@@ -773,11 +744,10 @@ export class ContentFormatter {
       .replace(/&amp;lt;\s*\/?\s*[a-zA-Z]+[^&]*&amp;gt;/g, '')
       .replace(/&lt;\s*\/?\s*[a-zA-Z]+[^&]*&gt;/g, '')
 
-      // Remove empty paragraphs and malformed content
+      // Remove empty paragraphs and malformed content - NO LINE BREAK MANIPULATION
       .replace(/<p[^>]*>\s*<\/p>/gi, '') // Empty paragraphs
       .replace(/<p[^>]*>\s*&lt;[^&>]*&gt;\s*<\/p>/gi, '') // Paragraphs with only HTML entities
       .replace(/<p[^>]*>\s*h[1-6]&gt;\s*<\/p>/gi, '') // Paragraphs with malformed heading fragments
-      .replace(/\n{3,}/g, '\n\n')
 
       // Clean up any remaining malformed headings that contain only symbols
       .replace(/<h[1-6][^>]*>\s*[&<>]+\s*<\/h[1-6]>/gi, '')

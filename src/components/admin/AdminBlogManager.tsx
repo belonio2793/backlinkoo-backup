@@ -643,7 +643,7 @@ export function AdminBlogManager() {
                         </div>
                         <div className="flex items-center gap-1">
                           <Eye className="h-3 w-3" />
-                          <span>{post.view_count || 0} views</span>
+                          <span>{post.view_count || 0}&nbsp;views</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <TrendingUp className="h-3 w-3" />

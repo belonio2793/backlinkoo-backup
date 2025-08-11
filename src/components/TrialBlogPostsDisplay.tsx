@@ -322,7 +322,7 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
           </div>
           <div className="flex items-center gap-1">
             <Eye className="h-4 w-4" />
-            <span>{post.view_count} views</span>
+            <span>{post.view_count}&nbsp;views</span>
           </div>
           <div className="flex items-center gap-1">
             <User className="h-4 w-4" />
@@ -440,7 +440,7 @@ export function TrialBlogPostsDisplay({ user }: TrialBlogPostsDisplayProps) {
                       </div>
                       <div className="flex items-center gap-1">
                         <Eye className="h-4 w-4" />
-                        <span>{post.view_count} views</span>
+                        <span>{post.view_count}&nbsp;views</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <User className="h-4 w-4" />

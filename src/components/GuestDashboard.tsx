@@ -143,7 +143,7 @@ export function GuestDashboard() {
                   ⚠️ Trial Mode - Limited Time Access
                 </h3>
                 <p className="text-amber-800 mb-4">
-                  Your trial backlinks will automatically delete unless you create an account. 
+                  Your trial backlinks will be automatically deleted unless you create an account. 
                   Save them forever and unlock unlimited backlink creation!
                 </p>
                 <div className="flex gap-3">

@@ -361,7 +361,7 @@ export function BeautifulBlogTemplate() {
                 </div>
                 <div className="flex items-center gap-1">
                   <Eye className="h-4 w-4" />
-                  <span>{blogPost.view_count || 0} views</span>
+                  <span>{blogPost.view_count || 0}&nbsp;views</span>
                 </div>
               </div>
 

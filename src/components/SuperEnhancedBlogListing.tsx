@@ -963,7 +963,7 @@ function SuperPostCard({
           </div>
           <div className="flex items-center gap-1">
             <Eye className="h-4 w-4 text-green-500" />
-            {post.view_count} views
+            <span>{post.view_count}&nbsp;views</span>
           </div>
         </div>
       </CardHeader>

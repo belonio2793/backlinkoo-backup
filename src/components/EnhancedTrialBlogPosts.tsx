@@ -444,7 +444,7 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
             </div>
             <div className="flex items-center gap-1">
               <Eye className="h-3 w-3" />
-              {post.view_count || 0} views
+              <span>{post.view_count || 0}&nbsp;views</span>
             </div>
           </div>
         </CardContent>

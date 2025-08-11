@@ -12,6 +12,7 @@ import { Footer } from '@/components/Footer';
 import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
 import {
   ArrowLeft,
+  ArrowRight,
   ExternalLink,
   Calendar,
   Eye,
@@ -142,115 +143,11 @@ export function BeautifulBlogPost() {
     return () => clearTimeout(timer);
   }, [blogPost, user]);
 
-  // Client-side cleanup of malformed content after rendering
+  // Client-side cleanup of malformed content after rendering - DISABLED
   useEffect(() => {
-    const cleanupMalformedContent = () => {
-      // CRITICAL: Fix the exact broken heading pattern we see in DOM
-      // Pattern: <h2>&lt;</h2> followed by <p> strong&gt;Hook Introduction...</p>
-
-      const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
-      headings.forEach(heading => {
-        if (heading.textContent?.trim() === '<' || heading.innerHTML?.includes('&lt;')) {
-          const nextElement = heading.nextElementSibling;
-
-          if (nextElement?.tagName === 'P') {
-            const pContent = nextElement.textContent || '';
-
-            // Check if the paragraph contains the malformed strong pattern
-            if (pContent.includes('strong>') || pContent.includes('strong&gt;')) {
-              // Extract the actual content
-              const content = pContent
-                .replace(/^\s*strong&gt;/, '')
-                .replace(/^\s*strong>/, '')
-                .trim();
-
-              if (content) {
-                // Create a proper heading with the content
-                const newHeading = document.createElement(heading.tagName.toLowerCase());
-                const strongElement = document.createElement('strong');
-                strongElement.className = 'font-bold text-inherit';
-                strongElement.textContent = content;
-                newHeading.appendChild(strongElement);
-
-                // Replace both the malformed heading and paragraph
-                heading.parentNode?.replaceChild(newHeading, heading);
-                nextElement.remove();
-              }
-            }
-          }
-        }
-      });
-
-      // Fix any remaining text nodes with malformed patterns
-      const walker = document.createTreeWalker(
-        document.body,
-        NodeFilter.SHOW_TEXT,
-        null,
-        false
-      );
-
-      const textNodesToFix: Text[] = [];
-      let node: Text | null;
-
-      while (node = walker.nextNode() as Text) {
-        if (node.textContent?.includes('strong&gt;') ||
-            node.textContent?.includes('&lt;') ||
-            node.textContent?.includes('&gt;')) {
-          textNodesToFix.push(node);
-        }
-      }
-
-      textNodesToFix.forEach(textNode => {
-        if (!textNode.parentElement) return;
-
-        let content = textNode.textContent || '';
-
-        // Fix the exact patterns we see
-        content = content
-          .replace(/strong&gt;([^<>&\n]+)/gi, '<strong class="font-bold text-inherit">$1</strong>')
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>');
-
-        if (content !== textNode.textContent) {
-          const tempDiv = document.createElement('div');
-          tempDiv.innerHTML = content;
-
-          // Replace the text node with the corrected HTML
-          while (tempDiv.firstChild) {
-            textNode.parentElement.insertBefore(tempDiv.firstChild, textNode);
-          }
-          textNode.remove();
-        }
-      });
-
-      // Fix elements that contain encoded content
-      const elementsWithEncodedContent = document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, li');
-      elementsWithEncodedContent.forEach(element => {
-        if (element.textContent?.includes('&lt;') || element.textContent?.includes('&gt;')) {
-          const content = element.innerHTML
-            .replace(/&lt;/g, '<')
-            .replace(/&gt;/g, '>');
-          if (content !== element.innerHTML) {
-            element.innerHTML = content;
-          }
-        }
-      });
-
-      // Clean up corrupted style attributes
-      const elementsWithStyle = document.querySelectorAll('[style*="&lt;"]');
-      elementsWithStyle.forEach(element => {
-        if (element instanceof HTMLElement) {
-          element.style.cssText = 'color:#2563eb;font-weight:500;';
-        }
-      });
-    };
-
-    // Run cleanup after content loads
-    if (blogPost) {
-      setTimeout(cleanupMalformedContent, 1);
-      // Run again immediately for any content that needs cleanup
-      setTimeout(cleanupMalformedContent, 5);
-    }
+    // DISABLED: All client-side content manipulation to prevent spacing issues
+    // No automatic formatting or space manipulation will occur
+    return;
   }, [blogPost]);
 
   const processClaimIntent = async () => {
@@ -1018,7 +915,7 @@ export function BeautifulBlogPost() {
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <Eye className="h-4 w-4" />
-                  <span className="font-medium">{blogPost.view_count} views</span>
+                  <span className="font-medium">{blogPost.view_count}&nbsp;views</span>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <SEOScoreDisplay
@@ -1044,20 +941,7 @@ export function BeautifulBlogPost() {
                 <div
                   className="beautiful-blog-content beautiful-prose prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-strong:font-bold prose-strong:text-gray-900"
                   dangerouslySetInnerHTML={{
-                    __html: ContentFormatter.fixDOMDisplayIssues(
-                      ContentFormatter.fixDisplayedHtmlAsText(
-                        ContentFormatter.postProcessCleanup(
-                          ContentFormatter.addSectionSpacing(
-                            ContentFormatter.formatBlogContent(
-                              ContentFormatter.sanitizeContent(
-                                ContentFormatter.preProcessMalformedHtml(blogPost.content || '')
-                              ),
-                              blogPost.title
-                            )
-                          )
-                        )
-                      )
-                    )
+                    __html: blogPost.content || ''
                   }}
                 />
               </div>

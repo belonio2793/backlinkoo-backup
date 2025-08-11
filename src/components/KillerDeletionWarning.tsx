@@ -54,7 +54,7 @@ export function KillerDeletionWarning({
       icon: Skull,
       title: "💀 YOUR CONTENT IS DYING! 💀",
       subtitle: "CONTENT EXECUTION IN PROGRESS",
-      message: "This masterpiece about '{contentTitle}' is being MURDERED by our deletion system! Every second brings it closer to DEATH!",
+      message: "This masterpiece about {contentTitle} is being MURDERED by our deletion system! Every second brings it closer to DEATH!",
       bgColor: "from-red-600 via-black to-red-600",
       urgency: "CRITICAL THREAT LEVEL"
     },
@@ -62,7 +62,7 @@ export function KillerDeletionWarning({
       icon: Bomb,
       title: "💣 CONTENT BOMB ACTIVATED! 💣",
       subtitle: "DETONATION SEQUENCE INITIATED",
-      message: "Your SEO goldmine for '{targetUrl}' is rigged with a DELETION BOMB! When the timer hits zero, BOOM - everything EXPLODES into nothing!",
+      message: "Your SEO goldmine for {targetUrl} is rigged with a DELETION BOMB! When the timer hits zero, BOOM - everything EXPLODES into nothing!",
       bgColor: "from-orange-600 via-red-600 to-yellow-600",
       urgency: "EXPLOSIVE DANGER"
     },
@@ -204,8 +204,8 @@ export function KillerDeletionWarning({
                 <div className="bg-black/40 p-6 rounded-xl backdrop-blur-sm mb-6 border-4 border-yellow-400">
                   <p className="text-xl leading-relaxed font-bold">
                     {currentDeletion.message
-                      .replace('{contentTitle}', contentTitle)
-                      .replace('{targetUrl}', targetUrl)}
+                      .replace(/\{contentTitle\}/g, contentTitle)
+                      .replace(/\{targetUrl\}/g, targetUrl)}
                   </p>
                 </div>
 

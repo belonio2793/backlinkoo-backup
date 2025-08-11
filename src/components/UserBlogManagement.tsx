@@ -361,7 +361,7 @@ export function UserBlogManagement() {
                       </div>
                       <div className="flex items-center gap-1">
                         <Eye className="h-3 w-3" />
-                        {post.view_count} views
+                        <span>{post.view_count}&nbsp;views</span>
                       </div>
                       <div className="flex items-center gap-1">
                         <BarChart3 className="h-3 w-3" />
