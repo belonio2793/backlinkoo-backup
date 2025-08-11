@@ -13,6 +13,8 @@ import { setupAuthErrorInterceptor } from './utils/authErrorFix'
 import './utils/authErrorFixSummary'
 // Load error fixes summary
 import './utils/errorFixesSummary'
+// Initialize automatic symbol cleaner
+import { globalSymbolCleaner } from './utils/symbolCleaner'
 
 // Initialize authentication error interceptor
 setupAuthErrorInterceptor();
