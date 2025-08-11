@@ -77,9 +77,9 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
           <div className="text-center">
             <p className="text-gray-700 mb-4">
               <span>{postTitle ? `Your blog post "${postTitle}" will be ` : "Your newly created blog post will be "}</span>
-              <span className="font-semibold text-red-600">automatically</span>
+              <span>automatically</span>
               <span> </span>
-              <span className="font-semibold text-red-600">deleted</span>
+              <span>deleted</span>
               <span>{` in ${timeRemaining} if left unclaimed.`}</span>
             </p>
             
