@@ -87,13 +87,14 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
 
         <CardContent className="space-y-6">
           <div className="text-center">
-            <p className="text-gray-700 mb-4 emergency-spacing" style={{ wordSpacing: '0.3em', letterSpacing: '0.02em' }}>
-              {spacedPostTitle ? `Your blog post "${spacedPostTitle}" ` : "Your newly created blog post "}
-              will be{' '}
+            <p className="text-gray-700 mb-4" style={{ wordSpacing: '0.3em', letterSpacing: '0.02em', lineHeight: '1.6' }}>
+              <span>Your blog post </span>
+              <span>"{spacedPostTitle || 'this content'}" </span>
+              <span>will be </span>
               <span className="font-semibold text-red-600">automatically deleted</span>
-              {' '}in{' '}
-              <span className="time-remaining-fix" style={{ margin: '0 0.5rem' }}>{spacedTimeRemaining}</span>
-              {' '}if left unclaimed.
+              <span> in </span>
+              <span style={{ margin: '0 0.25rem', fontWeight: '600' }}>{spacedTimeRemaining}</span>
+              <span> if left unclaimed.</span>
             </p>
             
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
