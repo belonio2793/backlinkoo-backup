@@ -58,7 +58,7 @@ const SymbolCleanerProvider = ({ children }: { children: React.ReactNode }) => {
 
 // Global Text Cleaner Component
 const TextCleanerProvider = ({ children }: { children: React.ReactNode }) => {
-  useGlobalAutoCleaner(true, 5000); // Enable automatic text cleaning every 5 seconds
+  useGlobalAutoCleaner(true, 1000); // Enable automatic text cleaning every 1 second for instant removal
   return <>{children}</>;
 };
 
