@@ -21,7 +21,7 @@ import {
 import { CampaignForm } from '@/components/automation/CampaignForm';
 import { AutomationHeader } from '@/components/automation/AutomationHeader';
 import { AutomationFooter } from '@/components/automation/AutomationFooter';
-import { NavigationHeader } from '@/components/shared/NavigationHeader';
+import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useCampaignManager } from '@/hooks/useCampaignManager';
 import { useLinkTracker } from '@/hooks/useLinkTracker';
@@ -431,7 +431,7 @@ export default function BacklinkAutomation() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Site Navigation Header */}
-      <NavigationHeader />
+      <Header />
 
       <div className="container mx-auto px-4 py-8">
       {/* Header */}
