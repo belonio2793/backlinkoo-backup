@@ -239,3 +239,52 @@ span, p, div, a, button, label {
 [role="dialog"] * {
   word-spacing: 0.25em !important;
 }
+
+/* PERFECT MODAL TEXT FORMATTING */
+[role="dialog"] p,
+[role="dialog"] div {
+  white-space: pre-wrap !important;
+  word-spacing: normal !important;
+  letter-spacing: normal !important;
+}
+
+/* Perfect spacing for modal content */
+.modal-perfect-spacing {
+  line-height: 1.8 !important;
+  word-spacing: normal !important;
+  letter-spacing: 0.02em !important;
+}
+
+.modal-perfect-spacing span {
+  margin-right: 0.15em !important;
+}
+
+/* Perfect time display styling */
+.perfect-time-display {
+  display: inline-block !important;
+  padding: 2px 8px !important;
+  background-color: #fef3c7 !important;
+  border: 1px solid #fbbf24 !important;
+  border-radius: 4px !important;
+  font-weight: 700 !important;
+  margin: 0 4px !important;
+  white-space: nowrap !important;
+}
+
+/* Perfect text separation */
+.perfect-text-separation {
+  margin: 0 0.2em !important;
+  display: inline !important;
+}
+
+/* Ensure modal paragraphs have perfect spacing */
+[role="dialog"] .text-gray-700 {
+  font-size: 16px !important;
+  line-height: 1.8 !important;
+  text-align: center !important;
+}
+
+/* Force proper spacing in card content */
+.space-y-6 > div {
+  margin-bottom: 1.5rem !important;
+}
