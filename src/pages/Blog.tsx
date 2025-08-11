@@ -456,9 +456,9 @@ function Blog() {
                 Expert Content Hub
               </Badge>
               <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight">
-                Backlink ∞
+                Backlink ∞&nbsp;
                 <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
-                  {" "}Blog
+                  Blog
                 </span>
               </h1>
               <p className="text-xl md:text-2xl font-medium text-blue-100 max-w-3xl mx-auto leading-relaxed">
@@ -1039,7 +1039,7 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div className="flex items-center gap-2 text-sm text-gray-600">
             <User className="h-4 w-4" />
-            <span>{post.author_name === 'AI Writer' ? 'Backlink ∞' : (post.author_name || 'Backlink ∞')}</span>
+            <span>{post.author_name === 'AI Writer' ? 'Backlink ∞ ' : (post.author_name || 'Backlink ∞ ')}</span>
             {isOwnedByUser && (
               <Badge className="bg-green-50 text-green-700 border-green-200 text-xs ml-2">
                 Yours
@@ -1120,7 +1120,7 @@ function BlogPostListItem({ post, navigate, formatDate, onLoginRequired, cleanTi
                   <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
               <User className="h-4 w-4 text-white" />
             </div>
-            <span className="font-medium">{post.author_name === 'AI Writer' ? 'Backlink ∞' : (post.author_name || 'Backlink ∞')}</span>
+            <span className="font-medium">{post.author_name === 'AI Writer' ? 'Backlink ∞ ' : (post.author_name || 'Backlink ∞ ')}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />

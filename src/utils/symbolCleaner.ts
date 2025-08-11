@@ -160,9 +160,16 @@ export function cleanSymbols(text: string): string {
   });
 
   // Clean up multiple spaces and normalize whitespace
+  // But preserve spaces after infinity symbol for branding
+  const hasInfinitySpace = cleaned.includes('∞ ');
   cleaned = cleaned
     .replace(/\s+/g, ' ')
     .trim();
+
+  // Restore space after infinity if it was present
+  if (hasInfinitySpace && cleaned.includes('∞') && !cleaned.includes('∞ ')) {
+    cleaned = cleaned.replace(/∞/g, '∞ ');
+  }
 
   return cleaned;
 }

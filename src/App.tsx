@@ -13,7 +13,7 @@ import { PremiumUpgradeProvider } from "@/components/PremiumUpgradeProvider";
 import { useSymbolCleaner } from "@/utils/symbolCleaner";
 import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
-import "@/utils/testReplacementCharacter"; // Load replacement character test
+// import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
 import Index from "./pages/Index";
 
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
@@ -54,13 +54,13 @@ const queryClient = new QueryClient({
 
 // Global Symbol Cleaner Component
 const SymbolCleanerProvider = ({ children }: { children: React.ReactNode }) => {
-  useSymbolCleaner(true); // Enable automatic symbol cleaning
+  useSymbolCleaner(false); // Disable automatic symbol cleaning to preserve spaces
   return <>{children}</>;
 };
 
 // Global Text Cleaner Component
 const TextCleanerProvider = ({ children }: { children: React.ReactNode }) => {
-  useGlobalAutoCleaner(true, 1000); // Enable automatic text cleaning every 1 second for instant removal
+  useGlobalAutoCleaner(false, 1000); // Disable automatic text cleaning to preserve spaces
   return <>{children}</>;
 };
 
