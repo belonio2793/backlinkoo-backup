@@ -155,7 +155,7 @@ export class LiveAutomationEngine {
       }
       
       // Respect rate limits
-      await this.sleep(this.getRandomDelay(5000, 15000));
+      await LiveAutomationEngine.sleep(LiveAutomationEngine.getRandomDelay(5000, 15000));
     }
   }
 
