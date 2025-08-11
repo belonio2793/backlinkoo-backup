@@ -95,7 +95,7 @@ export function ClaimSystemStatus() {
       
       <Badge variant="outline" className="flex items-center gap-1">
         <FileText className="h-3 w-3" />
-        {status.claimableCount} available
+        {`${status.claimableCount} available`}
       </Badge>
       
       <Button 
