@@ -29,6 +29,9 @@ import { stableCampaignMetrics, CampaignMetrics } from '@/services/stableCampaig
 import { DataSyncChecker } from '@/utils/dataSyncChecker';
 import { RealTimeUrlMonitor } from './RealTimeUrlMonitor';
 import { SiphonedUrlReporting } from './SiphonedUrlReporting';
+import { LiveUrlPostingMonitor } from './LiveUrlPostingMonitor';
+import { CampaignDataSiphon } from './CampaignDataSiphon';
+import { IntegratedCampaignManager } from './IntegratedCampaignManager';
 
 interface RuntimeReportingProps {
   onToggleCampaign?: (campaignId: string) => void;
