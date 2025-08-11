@@ -2219,7 +2219,7 @@ export default function BacklinkAutomation() {
       title: "🛑 Campaign Paused - Link Limit Reached",
       description: message,
       action: (
-        <Button size="sm" onClick={() => DirectCheckoutService.upgradeToPremium('monthly')}>
+        <Button size="sm" onClick={() => setShowPaymentModal(true)}>
           {user && !isPremium ? "Upgrade to Continue" : "Upgrade Now"}
         </Button>
       ),
@@ -2363,7 +2363,7 @@ export default function BacklinkAutomation() {
             const activity = {
               id: `activity-${Date.now()}-${i}`,
               type: 'link_published' as const,
-              message: `🔗 ${newPostback.linkType.replace('_', ' ')} published on ${newPostback.domain}`,
+              message: `��� ${newPostback.linkType.replace('_', ' ')} published on ${newPostback.domain}`,
               timestamp: new Date().toISOString(),
               metadata: {
                 domain: newPostback.domain,
