@@ -271,15 +271,25 @@ export class ClaimableBlogService {
         .rpc('get_claimable_posts', { limit_count: limit });
 
       if (error) {
-        console.error('❌ Failed to fetch claimable posts:', error);
+        console.error('❌ Failed to fetch claimable posts:', {
+          error: error?.message || error,
+          code: error?.code,
+          limit,
+          timestamp: new Date().toISOString()
+        });
         return [];
       }
 
       console.log(`✅ Fetched ${data?.length || 0} claimable posts`);
       return data || [];
 
-    } catch (error) {
-      console.error('❌ Error fetching claimable posts:', error);
+    } catch (error: any) {
+      console.error('❌ Error fetching claimable posts:', {
+        error: error?.message || error,
+        stack: error?.stack,
+        limit,
+        timestamp: new Date().toISOString()
+      });
       return [];
     }
   }
