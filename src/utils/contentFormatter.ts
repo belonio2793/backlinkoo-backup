@@ -804,6 +804,11 @@ export class ContentFormatter {
       .replace(/([a-z])(ly[A-Z])/g, '$1$2') // Handle adverb combinations
       .replace(/(\w)(in\d+h)/g, '$1 $2') // Add space before time patterns like "in15h"
 
+      // SPECIFIC FIX: Force proper spacing around "automatically deleted"
+      .replace(/automatically\s*deleted/gi, ' automatically deleted ')
+      .replace(/\s+automatically\s+deleted\s+/gi, ' automatically deleted ')
+      .replace(/beautomatically\s*deletedin/gi, ' be automatically deleted in')
+
       // FIX CORRUPTED STYLE ATTRIBUTES: Clean up style attributes with malformed HTML
       .replace(/style="[^"]*&lt;h\s*[1-6]\s*&gt;[^"]*&lt;\/h\s*[1-6]\s*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
       .replace(/style="[^"]*&lt;p&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
