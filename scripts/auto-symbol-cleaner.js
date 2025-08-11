@@ -5,8 +5,12 @@
  * Removes the Unicode replacement character "�" from all source files
  */
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Replacement character to remove
 const REPLACEMENT_CHAR = '�';
@@ -143,7 +147,7 @@ function main() {
   
   console.log('');
   console.log('🎉 Symbol cleaning complete!');
-  console.log(`���� Summary:`);
+  console.log(`📊 Summary:`);
   console.log(`   Files processed: ${totalFilesProcessed}`);
   console.log(`   Files modified: ${totalFilesModified}`);
   console.log(`   Symbols removed: ${totalReplacementsFound}`);
