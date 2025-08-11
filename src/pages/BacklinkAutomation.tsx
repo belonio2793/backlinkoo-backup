@@ -579,7 +579,7 @@ export default function BacklinkAutomation() {
       console.log('🗑 Campaign permanently deleted from all storage:', campaignId);
 
       toast({
-        title: '🗑️ Campaign Deleted',
+        title: '🗑��� Campaign Deleted',
         description: 'Campaign and all metrics permanently removed from database and local storage',
         duration: 3000
       });
@@ -1442,7 +1442,7 @@ export default function BacklinkAutomation() {
           DirectCheckoutService.upgradeToPremium('monthly');
 
           toast({
-            title: "🛑 Campaign Paused - Limit Reached",
+            title: "��� Campaign Paused - Limit Reached",
             description: "This campaign reached the 20 link limit and has been paused. Upgrade to Premium to continue!",
             variant: "default",
             duration: 5000
@@ -3539,7 +3539,7 @@ export default function BacklinkAutomation() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => DirectCheckoutService.upgradeToPremium('monthly')}
+                        onClick={() => setShowPremiumCheckoutModal(true)}
                         className="h-8 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-none"
                       >
                         <Crown className="h-3 w-3 mr-1" />
