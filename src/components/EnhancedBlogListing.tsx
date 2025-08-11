@@ -545,7 +545,7 @@ function PostCard({
           </div>
           <div className="flex items-center gap-1">
             <Clock className="h-3 w-3" />
-            {post.reading_time}m
+            {`${post.reading_time}m`}
           </div>
           <div className="flex items-center gap-1">
             <Eye className="h-3 w-3" />

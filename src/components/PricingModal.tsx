@@ -350,10 +350,10 @@ export const PricingModal = ({
                           ${plan.price}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          ${plan.pricePerLink} per credit
+                          ${`${plan.pricePerLink} per credit`}
                         </div>
                         <div className="text-2xl font-semibold">
-                          {plan.credits} Credits
+                          {`${plan.credits} Credits`}
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground">{plan.description}</p>
@@ -443,7 +443,7 @@ export const PricingModal = ({
                             ${calculateCustomPrice(customCredits)}
                           </div>
                           <div className="text-sm text-muted-foreground">
-                            {customCredits} × $1.40 = ${calculateCustomPrice(customCredits)}
+                            {`${customCredits} × $1.40 = $${calculateCustomPrice(customCredits)}`}
                           </div>
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">

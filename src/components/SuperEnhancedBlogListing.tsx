@@ -959,7 +959,7 @@ function SuperPostCard({
           </div>
           <div className="flex items-center gap-1">
             <Clock className="h-4 w-4 text-purple-500" />
-{post.reading_time || 0}m read
+{`${post.reading_time || 0}m read`}
           </div>
           <div className="flex items-center gap-1">
             <Eye className="h-4 w-4 text-green-500" />

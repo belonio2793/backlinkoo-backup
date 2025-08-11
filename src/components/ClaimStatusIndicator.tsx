@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Crown, Sparkles, Lock } from 'lucide-react';
-import { ClaimableBlogService } from '@/services/claimableBlogService';
+import { UnifiedClaimService } from '@/services/unifiedClaimService';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
@@ -32,11 +32,26 @@ export function ClaimStatusIndicator({ onUpgrade, onSignIn }: ClaimStatusIndicat
       setUser(user);
 
       if (user) {
-        const count = await ClaimableBlogService.getUserClaimedCount(user.id);
-        setClaimedCount(count);
+        try {
+          const stats = await UnifiedClaimService.getUserSavedStats(user.id);
+          setClaimedCount(stats.savedCount);
+        } catch (statsError: any) {
+          console.error('❌ Failed to get user saved stats:', {
+            error: statsError?.message || statsError,
+            stack: statsError?.stack,
+            userId: user.id,
+            timestamp: new Date().toISOString()
+          });
+          // Fallback to 0 if stats fail
+          setClaimedCount(0);
+        }
       }
-    } catch (error) {
-      console.error('Error checking user claims:', error);
+    } catch (error: any) {
+      console.error('Error checking user claims:', {
+        error: error?.message || error,
+        stack: error?.stack,
+        timestamp: new Date().toISOString()
+      });
     } finally {
       setLoading(false);
     }

@@ -209,7 +209,13 @@ export class ClaimableBlogService {
         });
 
       if (error) {
-        console.error('❌ Failed to claim blog post:', error);
+        console.error('❌ Failed to claim blog post:', {
+          error: error?.message || error,
+          code: error?.code,
+          postSlug,
+          userId,
+          timestamp: new Date().toISOString()
+        });
         return {
           success: false,
           message: `Failed to claim blog post: ${error.message}`
@@ -238,8 +244,14 @@ export class ClaimableBlogService {
         claimedCount: result.claimed_count
       };
 
-    } catch (error) {
-      console.error('❌ Error claiming blog post:', error);
+    } catch (error: any) {
+      console.error('❌ Error claiming blog post:', {
+        error: error?.message || error,
+        stack: error?.stack,
+        postSlug,
+        userId,
+        timestamp: new Date().toISOString()
+      });
       return {
         success: false,
         message: error instanceof Error ? error.message : 'Unknown error'
@@ -259,15 +271,25 @@ export class ClaimableBlogService {
         .rpc('get_claimable_posts', { limit_count: limit });
 
       if (error) {
-        console.error('❌ Failed to fetch claimable posts:', error);
+        console.error('❌ Failed to fetch claimable posts:', {
+          error: error?.message || error,
+          code: error?.code,
+          limit,
+          timestamp: new Date().toISOString()
+        });
         return [];
       }
 
       console.log(`✅ Fetched ${data?.length || 0} claimable posts`);
       return data || [];
 
-    } catch (error) {
-      console.error('❌ Error fetching claimable posts:', error);
+    } catch (error: any) {
+      console.error('❌ Error fetching claimable posts:', {
+        error: error?.message || error,
+        stack: error?.stack,
+        limit,
+        timestamp: new Date().toISOString()
+      });
       return [];
     }
   }
@@ -277,17 +299,47 @@ export class ClaimableBlogService {
    */
   static async getUserClaimedCount(userId: string): Promise<number> {
     try {
-      const { data, error } = await supabase
+      // First try the RPC function
+      const { data: rpcData, error: rpcError } = await supabase
         .rpc('get_user_claimed_count', { user_id: userId });
 
-      if (error) {
-        console.error('❌ Failed to get user claimed count:', error);
+      if (!rpcError && rpcData !== null) {
+        return rpcData || 0;
+      }
+
+      // If RPC fails, fall back to direct table query
+      console.warn('RPC get_user_claimed_count failed, using fallback query:', {
+        error: rpcError?.message || rpcError,
+        userId
+      });
+
+      // Fallback: Count posts claimed by user directly
+      const { count, error: countError } = await supabase
+        .from('blog_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('is_trial_post', false); // Only count permanently claimed posts
+
+      if (countError) {
+        console.error('❌ Failed to get user claimed count (fallback):', {
+          error: countError?.message || countError,
+          code: countError?.code,
+          details: countError?.details,
+          hint: countError?.hint,
+          userId,
+          timestamp: new Date().toISOString()
+        });
         return 0;
       }
 
-      return data || 0;
-    } catch (error) {
-      console.error('❌ Error getting user claimed count:', error);
+      return count || 0;
+    } catch (error: any) {
+      console.error('❌ Error getting user claimed count:', {
+        error: error?.message || error,
+        stack: error?.stack,
+        userId,
+        timestamp: new Date().toISOString()
+      });
       return 0;
     }
   }

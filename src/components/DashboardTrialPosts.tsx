@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { blogService } from '@/services/blogService';
+import { RotatingTrialText } from '@/components/RotatingTrialText';
 import {
   Clock,
   Eye,
@@ -60,7 +61,9 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
-    loadPosts();
+    loadPosts().catch(error => {
+      console.error('Error in initial loadPosts:', error);
+    });
   }, []);
 
   // Process any pending claim intent after user login
@@ -80,7 +83,11 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
               title: "Post Claimed Successfully!",
               description: claimResult.message,
             });
-            await loadPosts(); // Refresh the list
+            try {
+              await loadPosts(); // Refresh the list
+            } catch (loadError) {
+              console.error('Error reloading posts after pending claim:', loadError);
+            }
           } else {
             toast({
               title: "Claim Failed",
@@ -99,7 +106,9 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
       }
     };
 
-    processPendingClaim();
+    processPendingClaim().catch(error => {
+      console.error('Error in processPendingClaim:', error);
+    });
   }, [user, toast]);
 
   const loadPosts = async () => {
@@ -375,11 +384,11 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
               <div className="text-blue-600">SEO</div>
             </div>
             <div className="text-center p-2 bg-emerald-50 rounded">
-              <div className="font-semibold text-emerald-700">{post.reading_time || Math.ceil((post.word_count || 0) / 200)}m</div>
+              <div className="font-semibold text-emerald-700">{`${post.reading_time || Math.ceil((post.word_count || 0) / 200)}m`}</div>
               <div className="text-emerald-600">Read</div>
             </div>
             <div className="text-center p-2 bg-purple-50 rounded">
-              <div className="font-semibold text-purple-700">{Math.floor((post.word_count || 0) / 100)}k</div>
+              <div className="font-semibold text-purple-700">{`${Math.floor((post.word_count || 0) / 100)}k`}</div>
               <div className="text-purple-600">Words</div>
             </div>
           </div>
@@ -515,8 +524,8 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Trial Blog Posts</h2>
-          <p className="text-gray-600">Each account includes free access to up to <strong>three blog posts</strong>, allowing users to explore and experience our private blog post backlink service at no cost. This introductory offer is designed to educate users on how search engine rankings work and demonstrate the impact of high-quality, contextual backlinks. Our platform is partnered with authoritative websites where we publish tailored blog content to strategically improve keyword performance. When you purchase credits and launch campaigns, you receive powerful blog post backlinks from diverse, reputable domains—proven to enhance visibility and boost your rankings in search engine results (SERPs).</p>
+          <h2 className="text-2xl font-bold text-gray-900">Community Blog Posts</h2>
+          <RotatingTrialText />
         </div>
 
       </div>

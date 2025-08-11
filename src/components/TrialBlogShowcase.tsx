@@ -315,11 +315,11 @@ export const TrialBlogShowcase = ({ limit = 6 }: TrialBlogShowcaseProps) => {
                     <div className="text-blue-600">SEO</div>
                   </div>
                   <div className="text-center p-2 bg-emerald-50 rounded-lg">
-                    <div className="font-semibold text-emerald-700">{readingTime}m</div>
+                    <div className="font-semibold text-emerald-700">{`${readingTime}m`}</div>
                     <div className="text-emerald-600">Read</div>
                   </div>
                   <div className="text-center p-2 bg-purple-50 rounded-lg">
-                    <div className="font-semibold text-purple-700">{Math.floor((post.word_count || 1500) / 100) / 10}k</div>
+                    <div className="font-semibold text-purple-700">{`${Math.floor((post.word_count || 1500) / 100) / 10}k`}</div>
                     <div className="text-purple-600">Words</div>
                   </div>
                 </div>

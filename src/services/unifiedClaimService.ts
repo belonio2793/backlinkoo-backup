@@ -51,8 +51,12 @@ export class UnifiedClaimService {
         isSubscriber,
         subscriptionTier: data.subscription_tier
       };
-    } catch (error) {
-      console.error('Error checking subscription status:', error.message || error);
+    } catch (error: any) {
+      console.error('Error checking subscription status:', {
+        error: error?.message || error,
+        userId,
+        timestamp: new Date().toISOString()
+      });
       return { isSubscriber: false, subscriptionTier: null };
     }
   }
@@ -72,7 +76,12 @@ export class UnifiedClaimService {
         .eq('user_id', userId);
 
       if (error) {
-        console.error('Failed to get user saved stats:', error.message || error);
+        console.error('Failed to get user saved stats:', {
+          error: error?.message || error,
+          code: error?.code,
+          userId,
+          timestamp: new Date().toISOString()
+        });
         return {
           savedCount: 0,
           maxSaved: isSubscriber ? -1 : this.MAX_SAVED_PER_FREE_USER,
@@ -90,8 +99,13 @@ export class UnifiedClaimService {
         canSave: isSubscriber || savedCount < this.MAX_SAVED_PER_FREE_USER,
         isSubscriber
       };
-    } catch (error) {
-      console.error('Error getting user saved stats:', error.message || error);
+    } catch (error: any) {
+      console.error('Error getting user saved stats:', {
+        error: error?.message || error,
+        stack: error?.stack,
+        userId,
+        timestamp: new Date().toISOString()
+      });
       return {
         savedCount: 0,
         maxSaved: this.MAX_SAVED_PER_FREE_USER,
@@ -346,6 +360,37 @@ export class UnifiedClaimService {
    */
   static async getClaimablePosts(limit: number = 20): Promise<BlogPost[]> {
     return this.getAvailablePosts(limit);
+  }
+
+  /**
+   * Get user claim statistics (compatibility method for ClaimSystemStatus)
+   */
+  static async getUserClaimStats(userId: string): Promise<{
+    claimedCount: number;
+    maxClaims: number;
+    canClaim: boolean;
+  }> {
+    try {
+      const stats = await this.getUserSavedStats(userId);
+
+      return {
+        claimedCount: stats.savedCount,
+        maxClaims: stats.maxSaved === -1 ? Infinity : stats.maxSaved,
+        canClaim: stats.canSave
+      };
+    } catch (error: any) {
+      console.error('Error getting user claim stats:', {
+        error: error?.message || error,
+        userId,
+        timestamp: new Date().toISOString()
+      });
+
+      return {
+        claimedCount: 0,
+        maxClaims: this.MAX_SAVED_PER_FREE_USER,
+        canClaim: true
+      };
+    }
   }
 
   /**

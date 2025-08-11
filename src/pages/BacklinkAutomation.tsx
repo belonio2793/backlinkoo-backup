@@ -49,6 +49,7 @@ import { campaignMetricsService, type CampaignMetrics } from '@/services/campaig
 import { LoginModal } from '@/components/LoginModal';
 import { guestTrackingService } from '@/services/guestTrackingService';
 import { GuestCampaignRestrictionsOverlay } from '@/components/GuestCampaignRestrictionsOverlay';
+import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
 
 // Import our enterprise engines
 import { CampaignQueueManager, type CampaignConfig } from '@/services/automationEngine/CampaignQueueManager';
@@ -317,6 +318,7 @@ export default function BacklinkAutomation() {
   const [isUserPremium, setIsUserPremium] = useState(false);
   const [premiumLimitData, setPremiumLimitData] = useState<any>({});
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [usageStats, setUsageStats] = useState({ linksPosted: 0, isLimitReached: false });
   const [guestLinksGenerated, setGuestLinksGenerated] = useState(0);
   // Premium modal removed - using direct checkout
@@ -381,7 +383,6 @@ export default function BacklinkAutomation() {
   const [linkBuildingQueue, setLinkBuildingQueue] = useState<any[]>([]);
   const [recentPostbacks, setRecentPostbacks] = useState<any[]>([]);
   const [showSignInModal, setShowSignInModal] = useState(false);
-  const [showPremiumPlans, setShowPremiumPlans] = useState(false);
   const [showPostCampaignSignupModal, setShowPostCampaignSignupModal] = useState(false);
   const [guestTrackingInitialized, setGuestTrackingInitialized] = useState(false);
   const [guestCampaignRestrictions, setGuestCampaignRestrictions] = useState<any>({});
@@ -1342,7 +1343,7 @@ export default function BacklinkAutomation() {
   const updateGuestLinkCount = (newCount: number) => {
     setGuestLinksGenerated(newCount);
     if (newCount >= 20 && !user) {
-      DirectCheckoutService.upgradeToPremium('monthly');
+      setShowPaymentModal(true);
     }
   };
 
@@ -1437,7 +1438,7 @@ export default function BacklinkAutomation() {
           updateGuestRestrictions();
 
           // Open premium checkout for auto-paused campaign
-          DirectCheckoutService.upgradeToPremium('monthly');
+          setShowPaymentModal(true);
 
           toast({
             title: "🛑 Campaign Paused - Limit Reached",
@@ -1446,7 +1447,7 @@ export default function BacklinkAutomation() {
             duration: 5000
           });
         } else if (trackingResult.shouldShowPremiumModal) {
-          DirectCheckoutService.upgradeToPremium('monthly');
+          setShowPaymentModal(true);
         }
       }
     }
@@ -2217,7 +2218,7 @@ export default function BacklinkAutomation() {
       title: "🛑 Campaign Paused - Link Limit Reached",
       description: message,
       action: (
-        <Button size="sm" onClick={() => DirectCheckoutService.upgradeToPremium('monthly')}>
+        <Button size="sm" onClick={() => setShowPaymentModal(true)}>
           {user && !isPremium ? "Upgrade to Continue" : "Upgrade Now"}
         </Button>
       ),
@@ -2693,7 +2694,7 @@ export default function BacklinkAutomation() {
 
       if (!trackingResult.success) {
         if (trackingResult.shouldShowPremiumModal) {
-          DirectCheckoutService.upgradeToPremium('monthly');
+          setShowPaymentModal(true);
         }
 
         toast({
@@ -2705,7 +2706,7 @@ export default function BacklinkAutomation() {
       }
 
       if (trackingResult.warning && trackingResult.shouldShowPremiumModal) {
-        DirectCheckoutService.upgradeToPremium('monthly');
+        setShowPaymentModal(true);
       }
 
       // Initialize counters for guest campaign
@@ -2916,7 +2917,7 @@ export default function BacklinkAutomation() {
             description: "See your incredible results and unlock unlimited campaigns!",
             duration: 6000,
           });
-          setTimeout(() => DirectCheckoutService.upgradeToPremium('monthly'), 3000);
+          setTimeout(() => setShowPaymentModal(true), 3000);
         } else {
           // Progress update
           toast({
@@ -2928,7 +2929,7 @@ export default function BacklinkAutomation() {
         // Logged-in user flow - check if they have any campaigns and if they're premium
         if (!isPremium && campaigns.length > 0) {
           // Non-premium users can only have one campaign with 20 links max
-        DirectCheckoutService.upgradeToPremium('monthly');
+        setShowPaymentModal(true);
           return;
         }
 
@@ -3141,7 +3142,7 @@ export default function BacklinkAutomation() {
             title: "🚀 Campaign Deployed!",
             description: `Your campaign is live${blogResult.success ? (blogResult.isFallback ? ' + priority blog post queued on backlinkoo.com' : ' + priority blog post published on backlinkoo.com') : ''} with 20-link limit. View progress in the monitor above!`,
             action: (
-              <Button size="sm" onClick={() => DirectCheckoutService.upgradeToPremium('monthly')}>
+              <Button size="sm" onClick={() => setShowPaymentModal(true)}>
                 Upgrade
               </Button>
             ),
@@ -3197,7 +3198,7 @@ export default function BacklinkAutomation() {
   const startUrlDiscovery = async () => {
     // Check guest trial limit
     if (!user && guestLinksGenerated >= 20) {
-      DirectCheckoutService.upgradeToPremium('monthly');
+      setShowPaymentModal(true);
       return;
     }
 
@@ -3232,7 +3233,7 @@ export default function BacklinkAutomation() {
                 description: `Found ${additionalLinks} premium opportunities! You've now built ${newTotal} total backlinks!`,
                 duration: 5000,
               });
-              setTimeout(() => DirectCheckoutService.upgradeToPremium('monthly'), 3000);
+              setTimeout(() => setShowPaymentModal(true), 3000);
             } else {
               toast({
                 title: "🎯 Discovery Complete!",
@@ -3522,7 +3523,7 @@ export default function BacklinkAutomation() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => DirectCheckoutService.upgradeToPremium('monthly')}
+                          onClick={() => setShowPaymentModal(true)}
                           className="h-8 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-none"
                         >
                           <Crown className="h-3 w-3 mr-1" />
@@ -3537,7 +3538,7 @@ export default function BacklinkAutomation() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => DirectCheckoutService.upgradeToPremium('monthly')}
+                        onClick={() => setShowPaymentModal(true)}
                         className="h-8 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-none"
                       >
                         <Crown className="h-3 w-3 mr-1" />
@@ -3630,7 +3631,7 @@ export default function BacklinkAutomation() {
                               <Button
                                 size="sm"
                                 onClick={() => {
-                                  DirectCheckoutService.upgradeToPremium('monthly');
+                                  setShowPaymentModal(true);
                                 }}
                                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-xs"
                               >
@@ -3824,7 +3825,7 @@ export default function BacklinkAutomation() {
                         </div>
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
                           <Button
-                            onClick={() => DirectCheckoutService.upgradeToPremium('monthly')}
+                            onClick={() => setShowPaymentModal(true)}
                             className="h-12 px-8 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                           >
                             <Crown className="h-4 w-4 mr-2" />
@@ -3888,7 +3889,7 @@ export default function BacklinkAutomation() {
                           {!isPremium && (
                             <Button
                               variant="outline"
-                              onClick={() => setShowPremiumPlans(true)}
+                              onClick={() => setShowPaymentModal(true)}
                               className="w-full h-12 px-6 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100"
                             >
                               <Crown className="h-4 w-4 mr-2" />
@@ -3970,7 +3971,7 @@ export default function BacklinkAutomation() {
                               <Button
                                 variant="link"
                                 size="sm"
-                                onClick={() => setShowPremiumPlans(true)}
+                                onClick={() => setShowPaymentModal(true)}
                                 className="p-0 h-auto text-amber-700 hover:text-amber-800"
                               >
                                 View Plans ⬆️
@@ -5294,7 +5295,7 @@ export default function BacklinkAutomation() {
                                   onClick={() => {
                                     // Check if campaign has reached link limit
                                     if (campaign.linksGenerated >= 20) {
-                                      DirectCheckoutService.upgradeToPremium('monthly');
+                                      setShowPaymentModal(true);
                                       toast({
                                         title: "🚀 Upgrade to Continue",
                                         description: "This campaign has reached the 20-link free limit. Upgrade for unlimited links!",
@@ -5326,7 +5327,7 @@ export default function BacklinkAutomation() {
 
                                     if (!updateResult.success) {
                                       // Campaign cannot be reactivated - open premium checkout
-                                      DirectCheckoutService.upgradeToPremium('monthly');
+                                      setShowPaymentModal(true);
                                       toast({
                                         title: " Premium Required",
                                         description: updateResult.warning?.message || "This campaign reached the 20-link limit. Upgrade to continue building links!",
@@ -5408,7 +5409,7 @@ export default function BacklinkAutomation() {
                               {campaign.isLiveMonitored && (
                                 <div className="text-xs text-blue-600 font-medium flex items-center justify-center gap-1">
                                   <Activity className="h-3 w-3 animate-pulse" />
-                                  Live monitored • Progressive count active
+                                  Live monitored �� Progressive count active
                                 </div>
                               )}
                               {campaign.linksGenerated >= 15 && campaign.linksGenerated < 20 && (
@@ -5423,7 +5424,7 @@ export default function BacklinkAutomation() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => {
-                                    DirectCheckoutService.upgradeToPremium('monthly');
+                                    setShowPaymentModal(true);
                                   }}
                                   className="text-xs h-5 px-2 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100 mt-1"
                                 >
@@ -5464,7 +5465,7 @@ export default function BacklinkAutomation() {
                                 <Button
                                   size="sm"
                                   onClick={() => {
-                                    DirectCheckoutService.upgradeToPremium('monthly');
+                                    setShowPaymentModal(true);
                                   }}
                                   className="h-6 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                                 >
@@ -6132,7 +6133,7 @@ export default function BacklinkAutomation() {
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
                           { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
-                          { name: 'Real Estate', count: 27450, icon: '���' },
+                          { name: 'Real Estate', count: 27450, icon: '�����' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
                           { name: 'Home & Garden', count: 21890, icon: '🏠' },
@@ -6802,7 +6803,7 @@ export default function BacklinkAutomation() {
                   <Button
                     size="sm"
                     onClick={() => {
-                      setShowPremiumPlans(true);
+                      setShowPaymentModal(true);
                       setShowFabMenu(false);
                     }}
                     className="w-48 justify-start bg-purple-600 text-white shadow-lg hover:bg-purple-700"
@@ -6859,208 +6860,6 @@ export default function BacklinkAutomation() {
       </div>
 
 
-      {/* Premium Plan Options - Direct Stripe Checkout */}
-      {showPremiumPlans && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              {/* Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-3 bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl">
-                    <Crown className="h-8 w-8 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                      Premium Plans
-                    </h2>
-                    <p className="text-gray-600">Unlock unlimited automation and advanced features</p>
-                  </div>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowPremiumPlans(false)}
-                  className="rounded-full"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
-              </div>
-
-              {/* Plan Comparison */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                {/* Monthly Plan */}
-                <Card className="relative border-2 border-gray-200 hover:border-purple-300 transition-all duration-200">
-                  <CardHeader className="text-center pb-4">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <Zap className="h-6 w-6 text-purple-600" />
-                      <CardTitle className="text-xl">Monthly Plan</CardTitle>
-                    </div>
-                    <div className="text-4xl font-bold text-purple-600">
-                      $29<span className="text-lg text-gray-500">/month</span>
-                    </div>
-                    <p className="text-gray-600">Perfect for getting started</p>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3 mb-6">
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm">Unlimited campaigns</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm">Unlimited link building</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm">Advanced automation engines</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm">Priority support</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm">Advanced analytics</span>
-                      </li>
-                    </ul>
-                    <Button
-                      onClick={async () => {
-                        console.log('🎯 Monthly plan button clicked');
-                        try {
-                          const result = await DirectCheckoutService.upgradeToPremium('monthly');
-                          console.log('✅ Monthly checkout result:', result);
-                          if (result.success) {
-                            setShowPremiumPlans(false);
-                          }
-                        } catch (error) {
-                          console.error('❌ Monthly checkout error:', error);
-                        }
-                      }}
-                      className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold"
-                    >
-                      <CreditCard className="h-4 w-4 mr-2" />
-                      Get Monthly Plan
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Yearly Plan */}
-                <Card className="relative border-2 border-purple-300 bg-gradient-to-br from-purple-50 to-blue-50">
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                    <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-1">
-                      BEST VALUE - SAVE 31%
-                    </Badge>
-                  </div>
-                  <CardHeader className="text-center pb-4 pt-8">
-                    <div className="flex items-center justify-center gap-2 mb-2">
-                      <Star className="h-6 w-6 text-yellow-500" />
-                      <CardTitle className="text-xl">Yearly Plan</CardTitle>
-                    </div>
-                    <div className="text-4xl font-bold text-purple-600">
-                      $19<span className="text-lg text-gray-500">/month</span>
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      Billed annually at $228/year
-                      <div className="text-green-600 font-semibold">Save $120 per year!</div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-3 mb-6">
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm font-semibold">Everything in Monthly Plan</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm">31% cost savings</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm">Priority email support</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm">Advanced reporting</span>
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        <span className="text-sm">Early access to new features</span>
-                      </li>
-                    </ul>
-                    <Button
-                      onClick={async () => {
-                        console.log('🎯 Yearly plan button clicked');
-                        try {
-                          const result = await DirectCheckoutService.upgradeToPremium('annual');
-                          console.log('✅ Yearly checkout result:', result);
-                          if (result.success) {
-                            setShowPremiumPlans(false);
-                          }
-                        } catch (error) {
-                          console.error('❌ Yearly checkout error:', error);
-                        }
-                      }}
-                      className="w-full h-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold"
-                    >
-                      <Gift className="h-4 w-4 mr-2" />
-                      Get Yearly Plan - Save 31%
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-
-              {/* Feature Comparison Table */}
-              <div className="bg-gray-50 rounded-xl p-6">
-                <h3 className="text-lg font-semibold mb-4 text-center">Feature Comparison</h3>
-                <div className="grid grid-cols-3 gap-4 text-sm">
-                  <div className="font-semibold">Feature</div>
-                  <div className="text-center font-semibold">Free</div>
-                  <div className="text-center font-semibold text-purple-600">Premium</div>
-
-                  <div>Active Campaigns</div>
-                  <div className="text-center">1</div>
-                  <div className="text-center text-purple-600">Unlimited</div>
-
-                  <div>Links per Campaign</div>
-                  <div className="text-center">20</div>
-                  <div className="text-center text-purple-600">Unlimited</div>
-
-                  <div>Automation Engines</div>
-                  <div className="text-center">Basic</div>
-                  <div className="text-center text-purple-600">Advanced</div>
-
-                  <div>Support</div>
-                  <div className="text-center">Community</div>
-                  <div className="text-center text-purple-600">Priority Email</div>
-
-                  <div>Analytics</div>
-                  <div className="text-center">Basic</div>
-                  <div className="text-center text-purple-600">Advanced</div>
-                </div>
-              </div>
-
-              {/* Security & Trust */}
-              <div className="mt-6 text-center text-sm text-gray-600">
-                <div className="flex items-center justify-center gap-4">
-                  <div className="flex items-center gap-1">
-                    <Shield className="h-4 w-4 text-green-500" />
-                    <span>Secure Payments</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Lock className="h-4 w-4 text-green-500" />
-                    <span>SSL Encrypted</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                    <span>30-Day Money Back</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
 
       {/* Predictive Algorithm Premium Modal - Removed */}
@@ -7497,6 +7296,22 @@ export default function BacklinkAutomation() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Premium Payment Modal */}
+      <EnhancedUnifiedPaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        defaultTab="premium"
+        onSuccess={(user) => {
+          setShowPaymentModal(false);
+          toast({
+            title: "Success! 🎉",
+            description: "Welcome to Premium! Your account has been upgraded.",
+          });
+          // Refresh to update premium status
+          window.location.reload();
+        }}
+      />
     </div>
   );
 }

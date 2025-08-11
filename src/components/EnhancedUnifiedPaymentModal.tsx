@@ -285,8 +285,9 @@ export function EnhancedUnifiedPaymentModal({
       }
 
       if (result.success && result.url) {
-        // Redirect to payment provider
-        window.location.href = result.url;
+        // Open payment provider in new window
+        window.open(result.url, '_blank');
+        onClose(); // Close the modal
         return;
       } else if (!result.success) {
         throw new Error(result.error || 'Payment processing failed');
@@ -474,10 +475,10 @@ export function EnhancedUnifiedPaymentModal({
                       ${plan.price}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      ${plan.pricePerCredit} per credit
+                      ${`${plan.pricePerCredit} per credit`}
                     </div>
                     <div className="text-2xl font-semibold">
-                      {plan.credits} Credits
+                      {`${plan.credits} Credits`}
                     </div>
                   </div>
                 </CardHeader>
@@ -543,7 +544,7 @@ export function EnhancedUnifiedPaymentModal({
                         ${calculateCustomPrice(customCredits)}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {customCredits} × $1.40 = ${calculateCustomPrice(customCredits)}
+                        {`${customCredits} × $1.40 = $${calculateCustomPrice(customCredits)}`}
                       </div>
                     </div>
                   </div>

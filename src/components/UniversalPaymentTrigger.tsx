@@ -129,7 +129,7 @@ export function BuyCreditsButton({
       onClick={handleClick}
     >
       <CreditCard className="h-4 w-4 mr-2" />
-      Buy {credits} Credits
+      Buy {`${credits} Credits`}
     </Button>
   );
 }
