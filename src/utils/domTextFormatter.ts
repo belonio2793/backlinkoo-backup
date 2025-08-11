@@ -16,6 +16,7 @@ class DOMTextFormatter {
     'script', 'style', 'code', 'pre',
     '.no-format', '[data-no-format]',
     'input', 'textarea', 'select',
+    'input[placeholder]', 'textarea[placeholder]',
     '.monaco-editor', '.cm-editor'
   ];
 
@@ -102,8 +103,15 @@ class DOMTextFormatter {
     // Check if it's within an editable element
     if (parent.isContentEditable) return false;
 
-    // Check if it's within form inputs
+    // Check if it's within form inputs (including any with placeholders)
     if (parent.closest('input, textarea, select')) return false;
+    if (parent.closest('input[placeholder], textarea[placeholder]')) return false;
+
+    // Skip any text that looks like placeholder content
+    const text = node.textContent?.trim();
+    if (text && (text.includes('.com') || text.includes('website') || text.includes('landing-page'))) {
+      return false;
+    }
 
     return true;
   }
@@ -218,7 +226,7 @@ class DOMTextFormatter {
    */
   static formatForms(container: HTMLElement = document.body): number {
     let formattedCount = 0;
-    
+
     // Format labels
     const labels = container.querySelectorAll('label');
     labels.forEach(label => {
@@ -232,19 +240,8 @@ class DOMTextFormatter {
       }
     });
 
-    // Format placeholder text
-    const inputs = container.querySelectorAll('input[placeholder], textarea[placeholder]');
-    inputs.forEach(input => {
-      const element = input as HTMLInputElement | HTMLTextAreaElement;
-      const placeholder = element.placeholder?.trim();
-      if (placeholder) {
-        const formatted = TextFormatter.formatListItem(placeholder);
-        if (formatted !== placeholder) {
-          element.placeholder = formatted;
-          formattedCount++;
-        }
-      }
-    });
+    // Skip placeholder text formatting to prevent issues with URLs and specific formats
+    // Placeholder text should remain as originally specified by developers
 
     return formattedCount;
   }

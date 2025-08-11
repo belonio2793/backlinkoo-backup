@@ -3695,7 +3695,7 @@ export default function BacklinkAutomation() {
                         id="targetUrl"
                         value={campaignForm.targetUrl}
                         onChange={(e) => handleUrlChange(e.target.value)}
-                        placeholder="yourwebsite.com (will auto-format to HTTPS://)"
+                        placeholder="yourwebsite.com"
                         className="h-12"
                       />
                     </div>
@@ -4068,8 +4068,11 @@ export default function BacklinkAutomation() {
                                   <p className="text-xs font-medium text-muted-foreground">Links Published</p>
                                   <p className="text-xl font-bold text-green-600">
                                     {(() => {
-                                      // Enhanced auto-populating links count
+                                      // Show 0 if no active campaigns
                                       const allCampaigns = user ? campaigns : guestCampaignResults;
+                                      const activeCampaigns = allCampaigns.filter(c => c.status === 'active');
+                                      if (activeCampaigns.length === 0) return '0';
+
                                       const totalActual = allCampaigns.reduce((sum, campaign) => {
                                         return sum + (campaign.linksGenerated || 0);
                                       }, 0);
@@ -4100,8 +4103,11 @@ export default function BacklinkAutomation() {
                                   <p className="text-xs font-medium text-muted-foreground">Domains Reached</p>
                                   <p className="text-xl font-bold text-blue-600">
                                     {(() => {
-                                      // Enhanced auto-populating domains calculation
+                                      // Show 0 if no active campaigns
                                       const allCampaigns = user ? campaigns : guestCampaignResults;
+                                      const activeCampaigns = allCampaigns.filter(c => c.status === 'active');
+                                      if (activeCampaigns.length === 0) return '0';
+
                                       const totalLinks = allCampaigns.reduce((sum, campaign) => sum + (campaign.linksGenerated || 0), 0);
                                       const estimatedDomains = Math.floor(totalLinks * 0.7) + Math.floor(Date.now() / (1000 * 60 * 10)) % 20; // 70% unique domains + time bonus
                                       return formatDisplayNumber(Math.max(estimatedDomains, cumulativeStats.totalDomainsReached), {
@@ -4130,7 +4136,9 @@ export default function BacklinkAutomation() {
                                   <p className="text-xl font-bold text-purple-600">
                                     {(() => {
                                       const allCampaigns = user ? campaigns : guestCampaignResults;
-                                      if (allCampaigns.length === 0) return '95%';
+                                      const activeCampaigns = allCampaigns.filter(c => c.status === 'active');
+                                      if (activeCampaigns.length === 0) return '0%';
+
                                       // Simple efficiency calculation based on campaign progress and activity
                                       const avgProgress = allCampaigns.reduce((sum, campaign) => sum + (campaign.progress || 0), 0) / allCampaigns.length;
                                       const timeBonus = Math.floor((Date.now() % (1000 * 60 * 60)) / (1000 * 60 * 15)); // +1% every 15 minutes
