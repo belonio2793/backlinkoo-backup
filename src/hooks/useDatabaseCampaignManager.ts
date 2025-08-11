@@ -165,7 +165,7 @@ export function useDatabaseCampaignManager() {
         return true;
       } else {
         toast.error('Failed to update campaign', {
-          description: result.error
+          description: formatErrorForUser(result.error)
         });
         return false;
       }
