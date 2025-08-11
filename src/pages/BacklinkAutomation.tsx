@@ -7491,6 +7491,22 @@ export default function BacklinkAutomation() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Enhanced Premium Checkout Modal */}
+      <EnhancedPremiumCheckoutModal
+        isOpen={showPremiumCheckoutModal}
+        onClose={() => setShowPremiumCheckoutModal(false)}
+        onSuccess={() => {
+          setShowPremiumCheckoutModal(false);
+          toast({
+            title: "🎉 Welcome to Premium!",
+            description: "Your premium features are now active. Enjoy unlimited campaigns and advanced automation!",
+          });
+          // Refresh the page to update premium status
+          window.location.reload();
+        }}
+        redirectAfterSuccess="/dashboard"
+      />
     </div>
   );
 }
