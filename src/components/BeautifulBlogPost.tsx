@@ -317,6 +317,7 @@ export function BeautifulBlogPost() {
         }
       }
 
+      if (!isMounted) return; // Prevent state update after unmount
       setBlogPost(post);
 
       // If post is claimed, fetch the author's email
