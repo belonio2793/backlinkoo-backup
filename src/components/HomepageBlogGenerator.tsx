@@ -241,7 +241,7 @@ export function HomepageBlogGenerator() {
 
       // Fallback to ChatGPT generator if needed (though this should be reliable)
       if (!result.success) {
-        console.log('⚠��� Self-contained generator failed, trying ChatGPT fallback...');
+        console.log('⚠️ Self-contained generator failed, trying ChatGPT fallback...');
         result = await chatGPTBlogGenerator.generateAndPublishBlog(
           blogInput,
           currentUser?.id
