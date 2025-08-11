@@ -1223,7 +1223,7 @@ export default function BacklinkAutomation() {
           if (permanentCampaigns.length > 0) {
             setTimeout(() => {
               toast({
-                title: "��� Data Restored Successfully",
+                title: "✅ Data Restored Successfully",
                 description: `${permanentCampaigns.length} campaigns restored with all metrics preserved. Your data is safe across sessions.`,
                 duration: 4000,
               });
@@ -1502,7 +1502,7 @@ export default function BacklinkAutomation() {
 
     // Show toast notification for new link
     toast({
-      title: "��� New Backlink Published!",
+      title: "✨ New Backlink Published!",
       description: `Link published on ${linkToPublish.domain} • Total: ${newCount} links built`,
       duration: 3000,
     });
@@ -2297,7 +2297,7 @@ export default function BacklinkAutomation() {
     const existingInterval = activeCampaignIntervals.get(campaignId);
     if (existingInterval) {
       clearInterval(existingInterval);
-      console.log('���� Cleared existing interval for campaign:', campaignId);
+      console.log('✅ Cleared existing interval for campaign:', campaignId);
     }
 
     // Add debouncing to prevent rapid restarts
