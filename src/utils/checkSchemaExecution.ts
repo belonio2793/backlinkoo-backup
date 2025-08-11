@@ -21,6 +21,17 @@ export async function checkSchemaExecution(): Promise<boolean> {
         `
       });
 
+    // Handle case where exec_sql function doesn't exist
+    if (columnError && columnError.message.includes('function exec_sql')) {
+      console.error('❌ exec_sql function not found. Using fallback method...');
+      return await checkSchemaWithoutExecSql();
+    }
+
+    if (columnError) {
+      console.error('❌ Column query error:', columnError.message);
+      return false;
+    }
+
     // Handle the exec_sql response properly - it might be wrapped in an array or object
     let existingColumns: string[] = [];
 
