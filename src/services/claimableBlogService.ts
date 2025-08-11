@@ -299,22 +299,40 @@ export class ClaimableBlogService {
    */
   static async getUserClaimedCount(userId: string): Promise<number> {
     try {
-      const { data, error } = await supabase
+      // First try the RPC function
+      const { data: rpcData, error: rpcError } = await supabase
         .rpc('get_user_claimed_count', { user_id: userId });
 
-      if (error) {
-        console.error('❌ Failed to get user claimed count:', {
-          error: error?.message || error,
-          code: error?.code,
-          details: error?.details,
-          hint: error?.hint,
+      if (!rpcError && rpcData !== null) {
+        return rpcData || 0;
+      }
+
+      // If RPC fails, fall back to direct table query
+      console.warn('RPC get_user_claimed_count failed, using fallback query:', {
+        error: rpcError?.message || rpcError,
+        userId
+      });
+
+      // Fallback: Count posts claimed by user directly
+      const { count, error: countError } = await supabase
+        .from('blog_posts')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('is_trial_post', false); // Only count permanently claimed posts
+
+      if (countError) {
+        console.error('❌ Failed to get user claimed count (fallback):', {
+          error: countError?.message || countError,
+          code: countError?.code,
+          details: countError?.details,
+          hint: countError?.hint,
           userId,
           timestamp: new Date().toISOString()
         });
         return 0;
       }
 
-      return data || 0;
+      return count || 0;
     } catch (error: any) {
       console.error('❌ Error getting user claimed count:', {
         error: error?.message || error,
