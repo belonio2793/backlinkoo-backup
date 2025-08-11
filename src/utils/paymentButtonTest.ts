@@ -195,7 +195,7 @@ class PaymentButtonTestUtility {
     const buttons = this.findPaymentButtonsOnPage();
     
     for (const button of buttons) {
-      console.log(`���� Found payment button: "${button.textContent}"`);
+      console.log(`🔍 Found payment button: "${button.textContent}"`);
       
       // Add click event listener to test
       button.addEventListener('click', (e) => {
