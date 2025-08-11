@@ -292,7 +292,11 @@ export function BeautifulBlogPost() {
             title: "Post Claimed! 🎉",
             description: result.message,
           });
-          if (slug) await loadBlogPost(slug);
+          if (slug) {
+            await loadBlogPost(slug).catch((loadError) => {
+              console.error('Failed to reload blog post after claim:', loadError);
+            });
+          }
         } else {
           toast({
             title: "Claim Failed",
