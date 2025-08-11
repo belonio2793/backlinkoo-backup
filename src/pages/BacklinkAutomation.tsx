@@ -331,7 +331,7 @@ export default function BacklinkAutomation() {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-blue-600">
-                    {isAuthenticated ? activeCampaignCount : '—'}
+                    {isAuthenticated ? activeCampaignCount : '��'}
                   </div>
                   <div className="text-sm text-gray-600">Active Campaigns</div>
                 </div>
@@ -405,6 +405,11 @@ export default function BacklinkAutomation() {
             onRefresh={checkAutomationTables}
           />
         )}
+
+        {/* Database Health Checker - Always visible for critical issues */}
+        <div className="mb-8">
+          <DatabaseHealthChecker />
+        </div>
 
         {/* Show notice if automation tables are missing */}
         {!automationTablesExist && (
