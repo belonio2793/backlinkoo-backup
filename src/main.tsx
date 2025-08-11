@@ -6,6 +6,8 @@ import './index.css'
 import './utils/unifiedErrorHandler'
 // Campaign-specific error handling
 import './utils/campaignErrorHandler'
+// Test error handling in development
+import './utils/testErrorHandling'
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
 
