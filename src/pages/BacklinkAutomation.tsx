@@ -45,6 +45,7 @@ import { QuickDatabaseStatus } from '@/components/system/QuickDatabaseStatus';
 import { EmergencyFixButton } from '@/components/system/EmergencyFixButton';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { AutomationWithDebugging } from '@/components/automation/AutomationWithDebugging';
+import { MissingColumnsFix } from '@/components/system/MissingColumnsFix';
 import { debugLog } from '@/services/activeErrorLogger';
 
 const engines = [
