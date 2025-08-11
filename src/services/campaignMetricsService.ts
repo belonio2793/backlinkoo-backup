@@ -176,7 +176,7 @@ class CampaignMetricsService {
 
         // Check for RLS permission errors
         if (CampaignMetricsErrorHandler.isUsersPermissionError(error)) {
-          console.warn('�� RLS permission error detected in campaign metrics');
+          console.warn('⚠️ RLS permission error detected in campaign metrics');
           CampaignMetricsErrorHandler.logErrorDetails(error, 'getCampaignMetrics');
 
           // Try to get fallback data
@@ -552,7 +552,7 @@ class CampaignMetricsService {
             const result = await this.updateCampaignMetrics(userId, metrics);
             if (result.success) {
               migratedCount++;
-              console.log('��� Migrated campaign to database:', campaign.id);
+              console.log('✅ Migrated campaign to database:', campaign.id);
             }
           }
         } catch (parseError) {

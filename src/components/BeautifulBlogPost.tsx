@@ -278,7 +278,7 @@ export function BeautifulBlogPost() {
           setBlogPost(result.post!);
         }
         toast({
-          title: "Success! ��",
+          title: "Success! 🎉",
           description: result.message,
         });
       } else {
@@ -445,7 +445,7 @@ export function BeautifulBlogPost() {
         if (result.success) {
           setBlogPost(result.post!);
           toast({
-            title: "Success! ��",
+            title: "Success! 🎉",
             description: "You've successfully claimed this post!",
           });
         } else {
@@ -813,7 +813,7 @@ export function BeautifulBlogPost() {
                                 <p className="text-sm">
                                   Permanently delete this post. As the owner, you have full permission to remove it at any time.
                                 </p>
-                                <p className="text-xs text-red-400">⚠��� This action cannot be undone</p>
+                                <p className="text-xs text-red-400">⚠️ This action cannot be undone</p>
                               </div>
                             </TooltipContent>
                           </Tooltip>
@@ -858,7 +858,7 @@ export function BeautifulBlogPost() {
                             <p className="text-sm">
                               Delete this unclaimed post. Anyone can delete unclaimed posts to help clean up content.
                             </p>
-                            <p className="text-xs text-red-400">⚠�� This action cannot be undone</p>
+                            <p className="text-xs text-red-400">⚠️ This action cannot be undone</p>
                           </div>
                         </TooltipContent>
                       </Tooltip>
@@ -1086,7 +1086,7 @@ export function BeautifulBlogPost() {
                       return (
                         <div className="max-w-2xl mx-auto bg-red-600 text-white p-4 rounded-lg animate-pulse border-4 border-yellow-400">
                           <div className="text-center font-black text-lg">
-                            💀 CRITICAL: LESS THAN 1 HOUR REMAINING! ������
+                            💀 CRITICAL: LESS THAN 1 HOUR REMAINING! ⚠️⚠️⚠️
                           </div>
                           <div className="text-center text-sm mt-2">
                             Your content is entering the DEATH ZONE!
