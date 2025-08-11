@@ -747,93 +747,59 @@ export class ContentFormatter {
    * Final post-processing cleanup to catch patterns that slip through
    */
   static postProcessCleanup(content: string): string {
+    // Content should already be decoded, so focus on fixing malformed HTML structure
     return content
-      // ULTIMATE FIX: Handle double-encoded HTML entities first
-      .replace(/&amp;lt;/g, '<')
-      .replace(/&amp;gt;/g, '>')
-      .replace(/&amp;amp;/g, '&')
+      // CRITICAL: Fix the broken heading pattern after HTML decoding
+      // Pattern: <h2><</h2><p> strong>Hook Introduction...</p>
+      .replace(/<h([1-6])[^>]*><\s*<\/h[1-6]>\s*<p[^>]*>\s*strong>([^<]+?)<\/p>/gi, '<h$1><strong>$2</strong></h$1>')
 
-      // CRITICAL: Fix the broken heading pattern we see in DOM
-      // Pattern: <h2>&lt;</h2><p> strong&gt;Hook Introduction...</p>
-      .replace(/<h([1-6])[^>]*>&lt;<\/h[1-6]>\s*<p[^>]*>\s*strong&gt;([^<]+?)<\/p>/gi, '<h$1><strong>$2</strong></h$1>')
+      // Handle without the strong tag
+      .replace(/<h([1-6])[^>]*><\s*<\/h[1-6]>\s*<p[^>]*>\s*([^<]+?)<\/p>/gi, '<h$1>$2</h$1>')
 
-      // Also handle without the strong tag
-      .replace(/<h([1-6])[^>]*>&lt;<\/h[1-6]>\s*<p[^>]*>\s*([^<]+?)<\/p>/gi, '<h$1>$2</h$1>')
+      // Handle pattern: ## < <p>h2>Pro Tip</p> (after decoding)
+      .replace(/##\s*<\s*<p[^>]*>\s*h[1-6]\s*>\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
 
-      // Handle the exact pattern showing in DOM: ## &lt; <p>h2&gt;Pro Tip</p>
-      .replace(/##\s*&lt;\s*<p[^>]*>\s*h[1-6]\s*&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
+      // Remove malformed heading patterns: <h2><</h2> <p> h2>Pro Tip </p>
+      .replace(/<h[1-6][^>]*><\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]>\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
+      .replace(/<h[1-6][^>]*><\s*<\/h[1-6]>/gi, '') // Remove headings that just contain <
 
-      // Remove specific malformed heading patterns from DOM: <h2>&lt;</h2> <p> h2&gt;Pro Tip </p>
-      .replace(/<h[1-6][^>]*>&lt;<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
-      .replace(/<h[1-6][^>]*>&lt;<\/h[1-6]>/gi, '') // Remove headings that just contain &lt;
+      // Fix pattern where content is split: <h2><</h2> followed by <p> h2>content </p>
+      .replace(/<h[1-6][^>]*><\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]>([^<]*)<\/p>/gi, '<h2>$1</h2>')
 
-      // Fix pattern where content is split: <h2>&lt;</h2> followed by <p> h2&gt;content </p>
-      .replace(/<h[1-6][^>]*>&lt;<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;([^<]*)<\/p>/gi, '<h2>$1</h2>')
+      // Handle markdown patterns after decoding
+      .replace(/##\s*<[\s\S]*?h[1-6]\s*>[\s\S]*?Pro\s*Tip[\s\S]*?/gi, '<h2>Pro Tip</h2>')
 
-      // Handle all variations of the malformed pattern
-      .replace(/##\s*&amp;lt;[\s\S]*?h[1-6]\s*&amp;gt;[\s\S]*?Pro\s*Tip[\s\S]*?/gi, '<h2>Pro Tip</h2>')
-      .replace(/##\s*&lt;[\s\S]*?h[1-6]\s*&gt;[\s\S]*?Pro\s*Tip[\s\S]*?/gi, '<h2>Pro Tip</h2>')
+      // Remove any line starting with ## and containing < or > symbols
+      .replace(/^\s*##\s*<.*$/gm, '')
 
-      // Remove any line starting with ## and containing HTML entities
-      .replace(/^\s*##\s*&amp;lt;.*$/gm, '')
-      .replace(/^\s*##\s*&lt;.*$/gm, '')
-
-      // Ultimate pattern removal - any ## followed by encoded tags
-      .replace(/##\s*(&amp;lt;|&lt;)[^\n]*/g, '')
-
-      // Fix corrupted style attributes with multiple encoding levels
-      .replace(/style="[^"]*(&amp;lt;|&lt;)[^"]*(&amp;gt;|&gt;)[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
-
-      // Fix highly corrupted style attributes with embedded HTML
-      .replace(/style="[^"]*&lt;\/p&gt;[^"]*&lt;h[1-6]&gt;[^"]*&lt;\/h[1-6]&gt;[^"]*&lt;p&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
-      .replace(/style="[^"]*color:[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
-
-      // Clean up any remaining double-encoded entities
-      .replace(/&amp;lt;\s*\/?\s*[a-zA-Z]+[^&]*&amp;gt;/g, '')
-      .replace(/&lt;\s*\/?\s*[a-zA-Z]+[^&]*&gt;/g, '')
+      // Fix corrupted style attributes that contain decoded HTML
+      .replace(/style="[^"]*<\/p>[^"]*<h[1-6]>[^"]*<\/h[1-6]>[^"]*<p>[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      .replace(/style="[^"]*color:[^"]*<[^"]*>[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
 
       // Remove empty paragraphs and malformed content
       .replace(/<p[^>]*>\s*<\/p>/gi, '') // Empty paragraphs
-      .replace(/<p[^>]*>\s*&lt;[^&>]*&gt;\s*<\/p>/gi, '') // Paragraphs with only HTML entities
-      .replace(/<p[^>]*>\s*h[1-6]&gt;\s*<\/p>/gi, '') // Paragraphs with malformed heading fragments
+      .replace(/<p[^>]*>\s*h[1-6]>\s*<\/p>/gi, '') // Paragraphs with malformed heading fragments
+      .replace(/<p[^>]*>\s*h[1-6]>\s*([^<]*)<\/p>/gi, '<h2>$1</h2>') // Convert malformed heading paragraphs
       .replace(/\n{3,}/g, '\n\n')
 
       // Clean up any remaining malformed headings that contain only symbols
-      .replace(/<h[1-6][^>]*>\s*[&<>]+\s*<\/h[1-6]>/gi, '')
+      .replace(/<h[1-6][^>]*>\s*[<>]+\s*<\/h[1-6]>/gi, '')
 
-      // REMOVE DISPLAYED HTML ENTITY TEXT - no code should be visible
-      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>/gi, '') // Remove headings showing just &lt;
-      .replace(/<p[^>]*>\s*h[1-6]&gt;[^<]*<\/p>/gi, '') // Remove paragraphs showing h2&gt; text
-      .replace(/<[^>]*>\s*&lt;\s*<\/[^>]*>/gi, '') // Remove any tag containing just &lt;
-      .replace(/<[^>]*>\s*&gt;\s*<\/[^>]*>/gi, '') // Remove any tag containing just &gt;
+      // REMOVE DISPLAYED HTML TEXT - no code should be visible as text
+      .replace(/<h[1-6][^>]*>\s*<\s*<\/h[1-6]>/gi, '') // Remove headings showing just <
+      .replace(/<p[^>]*>\s*h[1-6]>[^<]*<\/p>/gi, '') // Remove paragraphs showing h2> text
+      .replace(/<[^>]*>\s*<\s*<\/[^>]*>/gi, '') // Remove any tag containing just <
+      .replace(/<[^>]*>\s*>\s*<\/[^>]*>/gi, '') // Remove any tag containing just >
 
-      // ULTIMATE REMOVAL: The exact pattern from the image/DOM
-      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip\s*<\/p>/gi, '<h2>Pro Tip</h2>')
-      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;[^<]*<\/p>/gi, '') // Remove any similar pattern
+      // ULTIMATE REMOVAL: The exact pattern from the DOM (after decoding)
+      .replace(/<h[1-6][^>]*>\s*<\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]>\s*Pro\s*Tip\s*<\/p>/gi, '<h2>Pro Tip</h2>')
+      .replace(/<h[1-6][^>]*>\s*<\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]>[^<]*<\/p>/gi, '') // Remove any similar pattern
 
-      // SPECIFIC FIX: Remove broken <h2>&lt;</h2> and reformat following Pro Tip paragraph
-      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip[^<]*<\/p>/gi, '<h2>Pro Tip</h2>')
-      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;([^<]*)<\/p>/gi, '<h2>$1</h2>')
-
-      // Handle the exact pattern with data-loc attributes from the DOM
-      .replace(/<h[1-6][^>]*data-loc[^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*data-loc[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip[^<]*<\/p>/gi, '<h2>Pro Tip</h2>')
-      .replace(/<h[1-6][^>]*data-loc[^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*data-loc[^>]*>\s*h[1-6]&gt;([^<]*)<\/p>/gi, '<h2>$1</h2>')
-
-      // MOST AGGRESSIVE: Catch any h2 containing just &lt; followed by p containing h2&gt;
-      .replace(/<h2[^>]*>\s*&lt;\s*<\/h2>\s*<p[^>]*>\s*h2&gt;\s*Pro\s*Tip[^<]*<\/p>/gi, '<h2>Pro Tip</h2>')
-      .replace(/<h2[^>]*>\s*&lt;\s*<\/h2>\s*<p[^>]*>\s*h2&gt;([^<]*)<\/p>/gi, '<h2>$1</h2>')
-
-      // Ultra specific for the exact DOM pattern visible
-      .replace(/<h2[^>]*>&lt;<\/h2>\s*<p[^>]*>\s*h2&gt;Pro\s*Tip\s*<\/p>/gi, '<h2>Pro Tip</h2>')
+      // Ultra specific for the exact DOM pattern (after decoding)
+      .replace(/<h2[^>]*><\s*<\/h2>\s*<p[^>]*>\s*h2>\s*Pro\s*Tip\s*<\/p>/gi, '<h2>Pro Tip</h2>')
 
       // Remove standalone malformed heading + paragraph combinations
-      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>[^<]*h[1-6]&gt;[^<]*<\/p>/gi, '')
-
-      // Remove text fragments that are HTML entities being displayed
-      .replace(/&lt;\s*h[1-6]\s*&gt;/gi, '') // Remove &lt; h2&gt; type patterns
-      .replace(/&lt;\s*\/\s*h[1-6]\s*&gt;/gi, '') // Remove &lt;/h2&gt; type patterns
-      .replace(/&lt;\s*p\s*&gt;/gi, '') // Remove &lt;p&gt; patterns
-      .replace(/&lt;\s*\/\s*p\s*&gt;/gi, '') // Remove &lt;/p&gt; patterns
+      .replace(/<h[1-6][^>]*>\s*<\s*<\/h[1-6]>\s*<p[^>]*>[^<]*h[1-6]>[^<]*<\/p>/gi, '')
 
       // Final pass: ensure any remaining ## patterns become proper headings
       .replace(/^\s*##\s+([A-Za-z][^\n]*)/gm, '<h2>$1</h2>')
@@ -858,12 +824,10 @@ export class ContentFormatter {
         return ''; // Remove empty headings
       })
 
-      // Fix any remaining malformed strong tag patterns that might show as text
-      .replace(/strong\s+class="font-bold\s+text-inherit"&gt;([^<]+)/gi, '<strong class="font-bold text-inherit">$1</strong>')
-      .replace(/&lt;strong\s+class="font-bold\s+text-inherit"&gt;([^<]+)&lt;\/strong&gt;/gi, '<strong class="font-bold text-inherit">$1</strong>')
-      .replace(/&lt;strong([^&>]*)&gt;([^<]+)&lt;\/strong&gt;/gi, '<strong$1>$2</strong>')
+      // Fix malformed strong tag patterns that might show as text (after decoding)
+      .replace(/strong\s+class="font-bold\s+text-inherit">([^<]+)/gi, '<strong class="font-bold text-inherit">$1</strong>')
 
-      // Ensure all strong tags have proper classes for bold styling (safer approach)
+      // Ensure all strong tags have proper classes for bold styling
       .replace(/<strong>/gi, '<strong class="font-bold text-inherit">')
       .replace(/<strong(\s+[^>]*?)>/gi, (match, attrs) => {
         // If it already has classes, don't override
