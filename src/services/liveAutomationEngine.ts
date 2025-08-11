@@ -95,7 +95,7 @@ export class LiveAutomationEngine {
     });
 
     // Real blog discovery using actual search APIs
-    const potentialBlogs = await this.discoverBlogs(campaign.keywords);
+    const potentialBlogs = await LiveAutomationEngine.discoverBlogs(campaign.keywords);
     
     for (const blog of potentialBlogs) {
       try {
