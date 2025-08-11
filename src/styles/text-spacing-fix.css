@@ -182,3 +182,60 @@ span, p, div, a, button, label {
 .items-center > span:not(:first-child) {
   margin-left: 0.25rem !important;
 }
+
+/* ULTRA-AGGRESSIVE FIXES FOR MODAL TEXT CONCATENATION */
+
+/* Force spacing in modal paragraphs */
+[role="dialog"] p,
+.modal p,
+.popup p {
+  word-spacing: 0.25em !important;
+  line-height: 1.6 !important;
+}
+
+/* Force spacing between all inline elements */
+[role="dialog"] span + span,
+[role="dialog"] span + text,
+.modal span + span,
+.modal span + text {
+  margin-left: 0.25rem !important;
+}
+
+/* Emergency spacing for emergency-spacing class */
+.emergency-spacing {
+  word-spacing: 0.3em !important;
+  letter-spacing: 0.02em !important;
+}
+
+.emergency-spacing * {
+  word-spacing: 0.3em !important;
+}
+
+/* Force spacing around quotes */
+.emergency-spacing::after {
+  content: " ";
+  white-space: pre;
+}
+
+/* Specific fix for time-remaining elements */
+.time-remaining-fix {
+  margin-left: 0.5rem !important;
+  margin-right: 0.5rem !important;
+  display: inline-block !important;
+}
+
+.time-remaining-fix::before,
+.time-remaining-fix::after {
+  content: " ";
+  white-space: pre !important;
+}
+
+/* Force proper spacing in CardContent */
+.space-y-6 p {
+  word-spacing: 0.3em !important;
+}
+
+/* Nuclear option - force spaces around ALL text in modals */
+[role="dialog"] * {
+  word-spacing: 0.25em !important;
+}
