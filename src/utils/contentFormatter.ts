@@ -345,23 +345,38 @@ export class ContentFormatter {
         }
 
         // Fix content that contains HTML entities or malformed patterns
-        const cleanContent = content
+        let cleanContent = content
           .replace(/&lt;/g, '<')
           .replace(/&gt;/g, '>')
           .replace(/^\s*<\s*$/, '') // Remove standalone <
           .replace(/^\s*>\s*$/, '') // Remove standalone >
           .replace(/[=""]/g, '') // Remove any stray equals signs and quotes
+          .replace(/\s+/g, ' ') // Normalize spaces
           .trim();
 
-        if (!cleanContent) {
+        // CRITICAL: Ensure no attributes or malformed content gets into the tag
+        cleanContent = cleanContent.replace(/[<>="']/g, ''); // Remove any remaining HTML chars
+
+        if (!cleanContent || cleanContent.length < 1) {
           return ''; // Remove empty headings
         }
 
+        // Generate clean H2 tag with no attributes
         return `<h2>${cleanContent}</h2>`;
       })
       // Convert # headings to h1
       .replace(/^# (.+)$/gm, (match, content) => {
-        const cleanContent = content.replace(/[=""]/g, '').trim();
+        let cleanContent = content
+          .replace(/[=""]/g, '')
+          .replace(/[<>="']/g, '') // Remove HTML chars
+          .replace(/\s+/g, ' ') // Normalize spaces
+          .trim();
+
+        if (!cleanContent || cleanContent.length < 1) {
+          return ''; // Remove empty headings
+        }
+
+        // Generate clean H1 tag with no attributes
         return `<h1>${cleanContent}</h1>`;
       })
       // Remove any remaining standalone "Title:" patterns at start of lines
