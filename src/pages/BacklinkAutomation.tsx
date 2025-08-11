@@ -419,7 +419,7 @@ export default function BacklinkAutomation() {
   const getUserStorageKey = useCallback(() => {
     if (user?.id) {
       const key = `permanent_campaigns_${user.id}`;
-      console.log('������ Using user storage key:', key);
+      console.log('���� Using user storage key:', key);
       return key;
     } else {
       // For guest users, use a persistent guest ID
@@ -1343,7 +1343,7 @@ export default function BacklinkAutomation() {
   const updateGuestLinkCount = (newCount: number) => {
     setGuestLinksGenerated(newCount);
     if (newCount >= 20 && !user) {
-      DirectCheckoutService.upgradeToPremium('monthly');
+      setShowPaymentModal(true);
     }
   };
 
@@ -2706,7 +2706,7 @@ export default function BacklinkAutomation() {
       }
 
       if (trackingResult.warning && trackingResult.shouldShowPremiumModal) {
-        DirectCheckoutService.upgradeToPremium('monthly');
+        setShowPaymentModal(true);
       }
 
       // Initialize counters for guest campaign
@@ -2929,7 +2929,7 @@ export default function BacklinkAutomation() {
         // Logged-in user flow - check if they have any campaigns and if they're premium
         if (!isPremium && campaigns.length > 0) {
           // Non-premium users can only have one campaign with 20 links max
-        DirectCheckoutService.upgradeToPremium('monthly');
+        setShowPaymentModal(true);
           return;
         }
 
@@ -3198,7 +3198,7 @@ export default function BacklinkAutomation() {
   const startUrlDiscovery = async () => {
     // Check guest trial limit
     if (!user && guestLinksGenerated >= 20) {
-      DirectCheckoutService.upgradeToPremium('monthly');
+      setShowPaymentModal(true);
       return;
     }
 
@@ -3779,7 +3779,7 @@ export default function BacklinkAutomation() {
                           <div className="flex justify-center gap-4 text-xs text-gray-500">
                             <span>✓ High-authority domains</span>
                             <span>✓ Instant results</span>
-                            <span>✓ No signup required</span>
+                            <span>�� No signup required</span>
                           </div>
                           {guestCampaignResults.length > 0 && (
                             <Button
