@@ -623,7 +623,7 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
                         onClick={() => handleExportReport('pdf')}
                         className="w-full justify-start bg-red-600 hover:bg-red-700"
                       >
-                        <FilePdf className="h-4 w-4 mr-2" />
+                        <FileText className="h-4 w-4 mr-2" />
                         Generate PDF Report
                       </Button>
                     </div>
