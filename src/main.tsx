@@ -4,6 +4,7 @@ import App from './App.tsx'
 import './index.css'
 import './utils/globalErrorHandler'
 import './utils/promiseRejectionHandler'
+import './utils/domTextFixer'
 import './utils/cryptoWalletHandler'
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
