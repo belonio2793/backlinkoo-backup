@@ -1191,23 +1191,6 @@ export function BeautifulBlogPost() {
                   </div>
                 </div>
 
-                {/* Enhanced pricing preview */}
-                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 mb-6 border border-purple-200">
-                  <div className="flex items-center justify-center gap-6 text-sm">
-                    <div className="text-center">
-                      <p className="text-gray-500">Monthly</p>
-                      <p className="font-bold text-gray-900">$29/month</p>
-                    </div>
-                    <div className="text-center relative">
-                      <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs">
-                        Save 42%
-                      </Badge>
-                      <p className="text-gray-500">Yearly</p>
-                      <p className="font-bold text-green-600">$290/year</p>
-                    </div>
-                  </div>
-                </div>
-
                 <Button
                   onClick={() => setShowPaymentModal(true)}
                   className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-10 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative group"
