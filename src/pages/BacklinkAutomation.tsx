@@ -34,6 +34,7 @@ import { AutomationTablesMissingNotice } from '@/components/AutomationTablesMiss
 import { initializeAutomationTables } from '@/utils/createAutomationTables';
 import { testAutomationTablesAccess, testDatabaseConnectivity } from '@/utils/simpleDatabaseTest';
 import { RoutePreservingAuth } from '@/components/RoutePreservingAuth';
+import { RuntimeReporting } from '@/components/automation/RuntimeReporting';
 
 const engines = [
   {
