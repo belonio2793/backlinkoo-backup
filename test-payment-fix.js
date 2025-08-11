@@ -46,7 +46,7 @@ async function testFetchResponseHandling() {
 // Test 3: Test symbol cleaner functionality
 try {
   console.log('🧹 Testing symbol cleaner...');
-  const testString = 'Hello � World';
+  const testString = 'Hello  World';
   const cleaned = testString.replace(/\ufffd/g, '');
   console.log('Original:', testString);
   console.log('Cleaned:', cleaned);

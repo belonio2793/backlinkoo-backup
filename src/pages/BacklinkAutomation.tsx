@@ -579,7 +579,7 @@ export default function BacklinkAutomation() {
       console.log('🗑 Campaign permanently deleted from all storage:', campaignId);
 
       toast({
-        title: '🗑��� Campaign Deleted',
+        title: '🗑 Campaign Deleted',
         description: 'Campaign and all metrics permanently removed from database and local storage',
         duration: 3000
       });
@@ -1442,7 +1442,7 @@ export default function BacklinkAutomation() {
           DirectCheckoutService.upgradeToPremium('monthly');
 
           toast({
-            title: "��� Campaign Paused - Limit Reached",
+            title: " Campaign Paused - Limit Reached",
             description: "This campaign reached the 20 link limit and has been paused. Upgrade to Premium to continue!",
             variant: "default",
             duration: 5000
