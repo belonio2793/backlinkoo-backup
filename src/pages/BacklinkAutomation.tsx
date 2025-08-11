@@ -160,9 +160,16 @@ export default function BacklinkAutomation() {
   const handleCreateCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const metricId = debugLog.startOperation('campaign_management', 'create_campaign', {
+      engineType: selectedEngine,
+      formData: { ...formData, keywords: undefined, anchorTexts: undefined } // Don't log sensitive data
+    });
+
     // Check authentication first
     if (!isAuthenticated) {
+      debugLog.warn('campaign_management', 'create_campaign', 'User not authenticated', { userId: user?.id });
       setShowAuthModal(true);
+      debugLog.endOperation(metricId, false, { error: 'not_authenticated' });
       return;
     }
 
