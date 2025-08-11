@@ -32,10 +32,19 @@ export function ClaimSystemStatus() {
     try {
       // Test if the system is working by getting claimable posts
       const posts = await UnifiedClaimService.getClaimablePosts(1);
-      
+
       let userStats = undefined;
       if (user) {
-        userStats = await UnifiedClaimService.getUserClaimStats(user.id);
+        try {
+          userStats = await UnifiedClaimService.getUserClaimStats(user.id);
+        } catch (userStatsError: any) {
+          console.error('❌ Failed to get user claimed count:', {
+            error: userStatsError?.message || userStatsError,
+            userId: user.id,
+            timestamp: new Date().toISOString()
+          });
+          // Continue without user stats rather than failing completely
+        }
       }
 
       setStatus({
@@ -43,8 +52,14 @@ export function ClaimSystemStatus() {
         claimableCount: posts.length,
         userStats
       });
-    } catch (error) {
-      console.error('Claim system status check failed:', error);
+    } catch (error: any) {
+      console.error('Claim system status check failed:', {
+        error: error?.message || error,
+        stack: error?.stack,
+        name: error?.name,
+        timestamp: new Date().toISOString(),
+        userId: user?.id
+      });
       setStatus({
         isOnline: false,
         claimableCount: 0
