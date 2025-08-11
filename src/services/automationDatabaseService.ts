@@ -243,14 +243,23 @@ export class AutomationDatabaseService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching link placements:', error);
-        return { success: false, error: error.message };
+        console.error('Error fetching link placements:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        return { success: false, error: error.message || 'Failed to fetch link placements' };
       }
 
       return { success: true, data: data || [] };
     } catch (error: any) {
-      console.error('Error fetching link placements:', error);
-      return { success: false, error: error.message };
+      console.error('Error fetching link placements (catch):', {
+        message: error.message,
+        stack: error.stack,
+        error: error
+      });
+      return { success: false, error: error.message || 'Unexpected error fetching link placements' };
     }
   }
 
@@ -381,8 +390,13 @@ export class AutomationDatabaseService {
         .single();
 
       if (error && error.code !== 'PGRST116') { // Not found is OK
-        console.error('Error fetching user quota:', error);
-        return { success: false, error: error.message };
+        console.error('Error fetching user quota:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        return { success: false, error: error.message || 'Failed to fetch user quota' };
       }
 
       if (!data) {
@@ -393,8 +407,12 @@ export class AutomationDatabaseService {
 
       return { success: true, data };
     } catch (error: any) {
-      console.error('Error fetching user quota:', error);
-      return { success: false, error: error.message };
+      console.error('Error fetching user quota (catch):', {
+        message: error.message,
+        stack: error.stack,
+        error: error
+      });
+      return { success: false, error: error.message || 'Unexpected error fetching user quota' };
     }
   }
 
@@ -586,7 +604,12 @@ export class AutomationDatabaseService {
       .single();
 
     if (error) {
-      console.error('Error creating default quota:', error);
+      console.error('Error creating default quota:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       return defaultQuota as UserLinkQuota;
     }
 
