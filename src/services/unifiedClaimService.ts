@@ -76,7 +76,12 @@ export class UnifiedClaimService {
         .eq('user_id', userId);
 
       if (error) {
-        console.error('Failed to get user saved stats:', error.message || error);
+        console.error('Failed to get user saved stats:', {
+          error: error?.message || error,
+          code: error?.code,
+          userId,
+          timestamp: new Date().toISOString()
+        });
         return {
           savedCount: 0,
           maxSaved: isSubscriber ? -1 : this.MAX_SAVED_PER_FREE_USER,
