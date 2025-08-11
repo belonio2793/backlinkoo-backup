@@ -329,7 +329,7 @@ export function BeautifulBlogPost() {
             .eq('user_id', post.user_id)
             .single();
 
-          if (profile?.email) {
+          if (profile?.email && isMounted) {
             setAuthorEmail(profile.email);
           }
         } catch (emailError: any) {
