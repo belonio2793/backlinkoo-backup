@@ -78,7 +78,7 @@ export class EmergencyDatabaseFix {
   }> {
     try {
       console.log('🔧 Starting emergency database fix...');
-      
+
       const health = await this.checkDatabaseHealth();
       console.log('Database health check:', health);
 
@@ -89,49 +89,68 @@ export class EmergencyDatabaseFix {
         };
       }
 
-      // If exec_sql doesn't exist, we need to use alternative approaches
-      if (!health.hasExecSql) {
-        console.log('⚠️ exec_sql function missing - attempting alternative fix...');
-        
-        // Try to add missing columns using direct table operations
-        if (!health.hasColumns) {
-          try {
-            // Test if we can access the table structure
-            const { data: sampleData, error: accessError } = await supabase
-              .from('automation_campaigns')
-              .select('*')
-              .limit(1);
+      // Try the dedicated schema fix function first
+      try {
+        console.log('🔧 Attempting database schema fix via Netlify function...');
 
-            if (!accessError) {
-              // We can access the table, but we can't add columns without SQL DDL
+        const response = await fetch('/.netlify/functions/fix-database-schema', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ action: 'fix_schema' })
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          console.log('Schema fix result:', result);
+
+          if (result.success) {
+            // Verify the fix worked
+            const verifyHealth = await this.checkDatabaseHealth();
+            if (!verifyHealth.needsFix) {
+              return {
+                success: true,
+                message: 'Database schema fixed successfully via automated migration',
+                details: result
+              };
+            } else {
               return {
                 success: false,
-                message: 'Database needs schema migration - exec_sql function and columns are missing. Please contact admin to run database migration.'
+                message: 'Schema fix partially successful but issues remain',
+                details: result
               };
             }
-          } catch (error) {
-            return {
-              success: false,
-              message: 'Cannot access automation_campaigns table. Database setup required.'
-            };
+          } else {
+            console.warn('Schema fix function returned error:', result);
           }
+        } else {
+          console.warn('Schema fix function request failed:', response.status);
         }
+      } catch (fetchError) {
+        console.warn('Failed to call schema fix function:', fetchError);
       }
 
-      // If exec_sql exists but columns are missing, try to add them
+      // Fallback: Try direct fixes if exec_sql exists
       if (health.hasExecSql && !health.hasColumns) {
-        console.log('🔧 Adding missing columns...');
-        
+        console.log('🔧 Adding missing columns using exec_sql...');
+
         const addColumnsSql = `
-          ALTER TABLE automation_campaigns 
+          ALTER TABLE automation_campaigns
           ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ NULL;
-          
-          ALTER TABLE automation_campaigns 
+
+          ALTER TABLE automation_campaigns
           ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ NULL;
+
+          CREATE INDEX IF NOT EXISTS idx_automation_campaigns_started_at
+          ON automation_campaigns(started_at);
+
+          CREATE INDEX IF NOT EXISTS idx_automation_campaigns_completed_at
+          ON automation_campaigns(completed_at);
         `;
 
-        const { data, error } = await supabase.rpc('exec_sql', { 
-          query: addColumnsSql 
+        const { data, error } = await supabase.rpc('exec_sql', {
+          query: addColumnsSql
         });
 
         if (error) {
@@ -152,20 +171,18 @@ export class EmergencyDatabaseFix {
         }
       }
 
-      // If exec_sql is missing, create a minimal version
-      if (!health.hasExecSql) {
-        console.log('🔧 Attempting to create exec_sql function via edge function...');
-        
-        // This would require a database admin or service role to execute
-        return {
-          success: false,
-          message: 'Database requires admin-level schema migration. exec_sql function needs to be created by database administrator.'
-        };
-      }
-
+      // If we get here, we couldn't fix the issues automatically
       return {
         success: false,
-        message: 'Unable to automatically fix database issues. Manual intervention required.'
+        message: 'Unable to automatically fix database issues. Manual database migration required.',
+        details: {
+          issues: health.issues,
+          suggestions: [
+            'Run the SQL migration manually through your database admin panel',
+            'Contact your database administrator',
+            'Use the fallback functionality for basic operations'
+          ]
+        }
       };
 
     } catch (error: any) {
