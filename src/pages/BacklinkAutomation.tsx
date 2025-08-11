@@ -450,6 +450,11 @@ export default function BacklinkAutomation() {
           <QuickDatabaseStatus />
         </div>
 
+        {/* Missing Columns Fix - Always visible when there are schema issues */}
+        <div className="mb-6">
+          <MissingColumnsFix />
+        </div>
+
         {/* Emergency Fix Button - Show when there are critical database issues */}
         {!automationTablesExist && (
           <div className="mb-6">
