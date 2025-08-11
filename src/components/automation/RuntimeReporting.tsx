@@ -28,20 +28,7 @@ import {
 import { stableCampaignMetrics, CampaignMetrics } from '@/services/stableCampaignMetrics';
 import { RealTimeUrlMonitor } from './RealTimeUrlMonitor';
 
-interface Campaign {
-  id: string;
-  name: string;
-  engine_type: string;
-  status: string;
-  links_built: number;
-  daily_limit: number;
-  success_rate: number;
-  last_activity: string;
-  target_url: string;
-}
-
 interface RuntimeReportingProps {
-  campaigns: Campaign[];
   onToggleCampaign?: (campaignId: string) => void;
   onRefreshData?: () => void;
 }
