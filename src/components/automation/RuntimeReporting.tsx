@@ -196,8 +196,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
 
         case 'pdf':
           await exportPDFReport(exportData);
-          toast({
-            title: "PDF Report Generated",
+          toast.success("PDF Report Generated", {
             description: `Link placement audit report created with ${liveLinks} verified placements and detailed verification status.`
           });
           break;
@@ -756,7 +755,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
                     </h5>
                     <div className="text-sm text-gray-600 space-y-1">
                       <p>• <strong>CSV Report:</strong> {campaigns.length > 0 ? 'Essential for tracking ROI and performance trends' : 'Limited value without active campaigns'}</p>
-                      <p>• <strong>PDF Report:</strong> {liveLinks > 10 ? 'High value for client deliverables and auditing' : 'Moderate value - needs more placement data'}</p>
+                      <p>�� <strong>PDF Report:</strong> {liveLinks > 10 ? 'High value for client deliverables and auditing' : 'Moderate value - needs more placement data'}</p>
                       <p>• <strong>Excel Analytics:</strong> {successRate > 75 ? 'High value for optimization insights' : 'Growing value as data accumulates'}</p>
                     </div>
                   </div>
