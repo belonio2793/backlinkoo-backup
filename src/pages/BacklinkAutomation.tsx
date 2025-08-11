@@ -419,13 +419,13 @@ export default function BacklinkAutomation() {
   const getUserStorageKey = useCallback(() => {
     if (user?.id) {
       const key = `permanent_campaigns_${user.id}`;
-      console.log('���� Using user storage key:', key);
+      console.log('🔑 Using user storage key:', key);
       return key;
     } else {
       // For guest users, use a persistent guest ID
       const guestId = guestTrackingService.getGuestData()?.guestId || 'guest_default';
       const key = `permanent_campaigns_guest_${guestId}`;
-      console.log('��� Using guest storage key:', key);
+      console.log('👤 Using guest storage key:', key);
       return key;
     }
   }, [user]);
