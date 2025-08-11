@@ -20,6 +20,8 @@ import {
   Eye,
   Calendar
 } from 'lucide-react';
+import { LiveAutomationEngine, LiveActivity, LiveLinkPlacement } from '@/services/liveAutomationEngine';
+import { LiveActivityFeed } from './LiveActivityFeed';
 
 interface Campaign {
   id: string;
