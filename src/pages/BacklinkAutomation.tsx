@@ -3890,7 +3890,7 @@ export default function BacklinkAutomation() {
                           {!isPremium && (
                             <Button
                               variant="outline"
-                              onClick={() => setShowPremiumPlans(true)}
+                              onClick={() => setShowPaymentModal(true)}
                               className="w-full h-12 px-6 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100"
                             >
                               <Crown className="h-4 w-4 mr-2" />
@@ -3972,7 +3972,7 @@ export default function BacklinkAutomation() {
                               <Button
                                 variant="link"
                                 size="sm"
-                                onClick={() => setShowPremiumPlans(true)}
+                                onClick={() => setShowPaymentModal(true)}
                                 className="p-0 h-auto text-amber-700 hover:text-amber-800"
                               >
                                 View Plans ⬆️
@@ -6128,7 +6128,7 @@ export default function BacklinkAutomation() {
                           { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
-                          { name: 'Marketing & Advertising', count: 54210, icon: '����' },
+                          { name: 'Marketing & Advertising', count: 54210, icon: '������' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '🛒' },
                           { name: 'Travel & Tourism', count: 38920, icon: '✈️' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
