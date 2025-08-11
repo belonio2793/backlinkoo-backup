@@ -374,6 +374,19 @@ export default function BacklinkAutomation() {
           </CardContent>
         </Card>
 
+        {/* Runtime & Reporting Section */}
+        {isAuthenticated && activeCampaignCount > 0 && (
+          <RuntimeReporting
+            campaigns={campaigns}
+            onToggleCampaign={toggleCampaign}
+            onRefreshData={() => {
+              // Refresh campaigns and check tables
+              checkAutomationTables();
+              window.location.reload(); // Simple refresh for now
+            }}
+          />
+        )}
+
         {/* Campaign Management */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Current Campaigns */}
