@@ -281,13 +281,25 @@ export class ClaimableBlogService {
         .rpc('get_user_claimed_count', { user_id: userId });
 
       if (error) {
-        console.error('❌ Failed to get user claimed count:', error);
+        console.error('❌ Failed to get user claimed count:', {
+          error: error?.message || error,
+          code: error?.code,
+          details: error?.details,
+          hint: error?.hint,
+          userId,
+          timestamp: new Date().toISOString()
+        });
         return 0;
       }
 
       return data || 0;
-    } catch (error) {
-      console.error('❌ Error getting user claimed count:', error);
+    } catch (error: any) {
+      console.error('❌ Error getting user claimed count:', {
+        error: error?.message || error,
+        stack: error?.stack,
+        userId,
+        timestamp: new Date().toISOString()
+      });
       return 0;
     }
   }
