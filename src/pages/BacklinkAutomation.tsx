@@ -420,7 +420,7 @@ export default function BacklinkAutomation() {
   const getUserStorageKey = useCallback(() => {
     if (user?.id) {
       const key = `permanent_campaigns_${user.id}`;
-      console.log('����� Using user storage key:', key);
+      console.log('���� Using user storage key:', key);
       return key;
     } else {
       // For guest users, use a persistent guest ID
@@ -6994,7 +6994,7 @@ export default function BacklinkAutomation() {
                       onClick={async () => {
                         console.log('🎯 Yearly plan button clicked');
                         try {
-                          const result = await DirectCheckoutService.upgradeToPremium('annual');
+                          setShowPaymentModal(true);
                           console.log('✅ Yearly checkout result:', result);
                           if (result.success) {
                             setShowPremiumPlans(false);
@@ -7460,7 +7460,7 @@ export default function BacklinkAutomation() {
                 <li>✓ Your current campaign will be saved to your account</li>
                 <li>✓ Get access to 3 free automation campaigns</li>
                 <li>✓ Monitor your backlink progress in real-time</li>
-                <li>�� Receive notifications when links go live</li>
+                <li>✓ Receive notifications when links go live</li>
               </ul>
             </div>
 
