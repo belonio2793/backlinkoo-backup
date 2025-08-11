@@ -137,9 +137,9 @@ export class AutoCleaner {
 
   /**
    * Start automatic cleaning
-   * @param intervalMs - How often to run the cleaner (default: 5 seconds)
+   * @param intervalMs - How often to run the cleaner (default: 1 second for instant removal)
    */
-  start(intervalMs: number = 5000): void {
+  start(intervalMs: number = 1000): void {
     if (this.isRunning) {
       console.warn('AutoCleaner is already running');
       return;
