@@ -429,7 +429,11 @@ export default function BacklinkAutomation() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen bg-gray-50">
+      {/* Site Navigation Header */}
+      <NavigationHeader />
+
+      <div className="container mx-auto px-4 py-8">
       {/* Header */}
       <AutomationHeader
         totalLinksBuilt={totalLinksBuilt}
@@ -526,6 +530,10 @@ export default function BacklinkAutomation() {
         onViewReports={handleViewReports}
         onUpgrade={handleUpgrade}
       />
+      </div>
+
+      {/* Site Footer */}
+      <Footer />
     </div>
   );
 }
