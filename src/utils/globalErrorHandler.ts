@@ -257,7 +257,42 @@ export class GlobalErrorHandler {
 
     if (typeof error === 'string') return error;
 
-    if (error.message) return error.message;
+    // Handle Error objects
+    if (error instanceof Error) {
+      return error.message || error.toString() || 'Error without message';
+    }
+
+    // Handle common API error structures
+    if (error && typeof error === 'object') {
+      // Supabase/database errors
+      if (error.message) return String(error.message);
+      if (error.error && error.error.message) return String(error.error.message);
+      if (error.details) return String(error.details);
+      if (error.hint) return String(error.hint);
+
+      // HTTP errors
+      if (error.statusText) return `${error.status || 'HTTP'} Error: ${error.statusText}`;
+
+      // Try to extract meaningful information
+      const keys = Object.keys(error);
+      if (keys.length > 0) {
+        const meaningfulKeys = keys.filter(key =>
+          ['message', 'error', 'details', 'reason', 'description', 'text', 'hint'].includes(key.toLowerCase())
+        );
+
+        if (meaningfulKeys.length > 0) {
+          const values = meaningfulKeys.map(key => String(error[key])).filter(Boolean);
+          if (values.length > 0) {
+            return values.join('; ');
+          }
+        }
+
+        // If no meaningful keys, show the first few keys/values
+        const firstKeys = keys.slice(0, 3);
+        const keyValues = firstKeys.map(key => `${key}: ${String(error[key])}`);
+        return `Object error: ${keyValues.join(', ')}`;
+      }
+    }
 
     if (error.toString && typeof error.toString === 'function') {
       const str = error.toString();
@@ -265,10 +300,15 @@ export class GlobalErrorHandler {
     }
 
     try {
-      return JSON.stringify(error, null, 2);
+      const stringified = JSON.stringify(error, null, 2);
+      if (stringified && stringified !== '{}' && stringified !== 'null') {
+        return `Error object: ${stringified}`;
+      }
     } catch {
-      return 'Error object could not be serialized';
+      // Fallback if JSON.stringify fails
     }
+
+    return 'Error object could not be serialized';
   }
 
   /**
