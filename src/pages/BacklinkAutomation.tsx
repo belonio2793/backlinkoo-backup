@@ -3778,7 +3778,7 @@ export default function BacklinkAutomation() {
                           </p>
                           <div className="flex justify-center gap-4 text-xs text-gray-500">
                             <span>✓ High-authority domains</span>
-                            <span>✓ Instant results</span>
+                            <span>��� Instant results</span>
                             <span>✓ No signup required</span>
                           </div>
                           {guestCampaignResults.length > 0 && (
@@ -6753,8 +6753,8 @@ export default function BacklinkAutomation() {
 
       <Footer />
 
-      {/* Floating Action Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      {/* Floating Action Button - Fixed Position */}
+      <div className="fixed bottom-6 right-6 z-50" style={{ position: 'fixed' }}>
         <div className="relative">
           {/* Quick Actions Menu */}
           <div className={`absolute bottom-16 right-0 space-y-2 transition-all duration-200 ${
