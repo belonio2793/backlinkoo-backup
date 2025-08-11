@@ -278,7 +278,7 @@ export function BeautifulBlogPost() {
           setBlogPost(result.post!);
         }
         toast({
-          title: "Success! 🎉",
+          title: "Success! ��",
           description: result.message,
         });
       } else {
@@ -543,6 +543,33 @@ export function BeautifulBlogPost() {
       .replace(/^#{1,6}\s+/, '')
       .replace(/^Title:\s*/gi, '') // Final cleanup for any remaining Title: patterns
       .trim();
+  };
+
+  const autoRemoveTitlesFromContent = (content: string, pageTitle: string) => {
+    if (!content || !pageTitle) return content;
+
+    const cleanedPageTitle = cleanTitle(pageTitle).toLowerCase().trim();
+    if (!cleanedPageTitle) return content;
+
+    // Create a temporary div to parse HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+
+    // Find and remove duplicate title headings (h1, h2, h3)
+    const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headings.forEach(heading => {
+      const headingText = cleanTitle(heading.textContent || '').toLowerCase().trim();
+
+      // Remove if heading matches the page title or is very similar
+      if (headingText === cleanedPageTitle ||
+          cleanedPageTitle.includes(headingText) ||
+          headingText.includes(cleanedPageTitle)) {
+        heading.remove();
+      }
+    });
+
+    return tempDiv.innerHTML;
   };
 
   const getTimeRemaining = (expiresAt: string) => {
@@ -914,10 +941,6 @@ export function BeautifulBlogPost() {
                   <span className="font-medium">{blogPost.reading_time || 0} min read</span>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  <span className="font-medium">{blogPost.view_count}&nbsp;views</span>
-                </div>
-                <div className="beautiful-meta flex items-center gap-2">
                   <SEOScoreDisplay
                     score={effectiveScore}
                     title={blogPost.title}
@@ -941,7 +964,7 @@ export function BeautifulBlogPost() {
                 <div
                   className="beautiful-blog-content beautiful-prose prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-strong:font-bold prose-strong:text-gray-900"
                   dangerouslySetInnerHTML={{
-                    __html: blogPost.content || ''
+                    __html: autoRemoveTitlesFromContent(blogPost.content || '', blogPost.title || '')
                   }}
                 />
               </div>
@@ -1020,47 +1043,29 @@ export function BeautifulBlogPost() {
                     <p className="text-sm text-gray-600">24/7 expert assistance when you need it</p>
                   </div>
                 </div>
-                <div
+                <Button
                   onClick={(e) => {
+                    console.log('🚀 Premium button clicked!', { showPaymentModal, e });
                     e.stopPropagation();
                     e.preventDefault();
-                    console.log('🚀 DIV button clicked!');
-                    window.alert('BUTTON CLICKED - OPENING MODAL!');
                     setShowPaymentModal(true);
+                    console.log('🚀 Payment modal state set to true');
                   }}
-                  onMouseDown={(e) => {
-                    console.log('🚀 Mouse down detected!');
-                    e.stopPropagation();
-                  }}
-                  onMouseUp={(e) => {
-                    console.log('🚀 Mouse up detected!');
-                    e.stopPropagation();
-                  }}
-                  onTouchStart={(e) => {
-                    console.log('🚀 Touch start detected!');
-                    e.stopPropagation();
-                  }}
-                  onTouchEnd={(e) => {
-                    console.log('🚀 Touch end detected!');
-                    e.stopPropagation();
-                    setShowPaymentModal(true);
-                  }}
-                  className="w-full cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-full shadow-lg px-8 py-4 text-center flex items-center justify-center gap-2 select-none"
-                  role="button"
-                  tabIndex={0}
+                  className="relative w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-full shadow-lg px-8 py-4 text-lg transition-all duration-300 hover:shadow-xl hover:scale-105 z-10"
+                  size="lg"
+                  disabled={false}
+                  type="button"
                   style={{
-                    userSelect: 'none',
-                    WebkitUserSelect: 'none',
-                    MozUserSelect: 'none',
-                    msUserSelect: 'none',
                     pointerEvents: 'auto',
-                    zIndex: 999
+                    zIndex: 10,
+                    position: 'relative',
+                    cursor: 'pointer'
                   }}
                 >
-                  <Crown className="h-5 w-5" />
+                  <Crown className="h-5 w-5 mr-2" />
                   Upgrade to Premium
-                  <ArrowRight className="h-5 w-5" />
-                </div>
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
                 <p className="mt-4 text-sm text-gray-500">
                   ✨ Join thousands of users already growing their online presence
                 </p>
