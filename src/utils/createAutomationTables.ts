@@ -1,0 +1,79 @@
+import { supabase } from '@/integrations/supabase/client';
+
+export async function initializeAutomationTables() {
+  console.log('🔧 Initializing automation system...');
+  
+  try {
+    // For now, let's just test if the tables exist by trying to select from them
+    // and handle the errors gracefully
+    
+    // Test automation_campaigns table
+    const { data: campaignsTest, error: campaignsError } = await supabase
+      .from('automation_campaigns')
+      .select('count')
+      .limit(1);
+    
+    if (campaignsError) {
+      console.log('automation_campaigns table does not exist or has issues:', {
+        message: campaignsError.message,
+        code: campaignsError.code,
+        details: campaignsError.details
+      });
+    } else {
+      console.log('✅ automation_campaigns table exists');
+    }
+    
+    // Test link_placements table  
+    const { data: placementsTest, error: placementsError } = await supabase
+      .from('link_placements')
+      .select('count')
+      .limit(1);
+    
+    if (placementsError) {
+      console.log('link_placements table does not exist or has issues:', {
+        message: placementsError.message,
+        code: placementsError.code,
+        details: placementsError.details
+      });
+    } else {
+      console.log('✅ link_placements table exists');
+    }
+    
+    // Test user_link_quotas table
+    const { data: quotasTest, error: quotasError } = await supabase
+      .from('user_link_quotas')
+      .select('count')
+      .limit(1);
+    
+    if (quotasError) {
+      console.log('user_link_quotas table does not exist or has issues:', {
+        message: quotasError.message,
+        code: quotasError.code,
+        details: quotasError.details
+      });
+    } else {
+      console.log('✅ user_link_quotas table exists');
+    }
+    
+    // Return status
+    return {
+      automation_campaigns: !campaignsError,
+      link_placements: !placementsError,
+      user_link_quotas: !quotasError,
+      allTablesExist: !campaignsError && !placementsError && !quotasError
+    };
+    
+  } catch (error: any) {
+    console.error('❌ Failed to check automation tables:', {
+      message: error.message,
+      stack: error.stack
+    });
+    return {
+      automation_campaigns: false,
+      link_placements: false,
+      user_link_quotas: false,
+      allTablesExist: false,
+      error: error.message
+    };
+  }
+}
