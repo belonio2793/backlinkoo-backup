@@ -34,7 +34,7 @@ export class SafeAuth {
         return { user: null, error: error.message, needsAuth: true, errorType: 'auth_error' };
       }
       
-      return { user, error: null, needsAuth: false };
+      return { user, error: null, needsAuth: false, errorType: null };
       
     } catch (error: any) {
       console.error('❌ Auth check failed:', error);
