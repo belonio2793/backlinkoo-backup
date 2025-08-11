@@ -84,10 +84,10 @@ export async function initializeAutomationTables() {
     
     // Return status
     return {
-      automation_campaigns: !campaignsError,
-      link_placements: !placementsError,
-      user_link_quotas: !quotasError,
-      allTablesExist: !campaignsError && !placementsError && !quotasError
+      automation_campaigns: campaignsTableExists,
+      link_placements: placementsTableExists,
+      user_link_quotas: quotasTableExists,
+      allTablesExist: campaignsTableExists && placementsTableExists && quotasTableExists
     };
     
   } catch (error: any) {
