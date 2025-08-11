@@ -26,7 +26,7 @@ import {
   Star
 } from 'lucide-react';
 import { LiveAutomationEngine, LiveActivity, LiveLinkPlacement } from '@/services/liveAutomationEngine';
-import { LiveActivityFeed } from './LiveActivityFeed';
+import { RealTimeUrlMonitor } from './RealTimeUrlMonitor';
 
 interface Campaign {
   id: string;
