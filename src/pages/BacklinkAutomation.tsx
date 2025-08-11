@@ -23,7 +23,7 @@ import { AutomationHeader } from '@/components/automation/AutomationHeader';
 import { AutomationFooter } from '@/components/automation/AutomationFooter';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { useCampaignManager } from '@/hooks/useCampaignManager';
+import { useDatabaseCampaignManager } from '@/hooks/useDatabaseCampaignManager';
 import { useLinkTracker } from '@/hooks/useLinkTracker';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
@@ -297,57 +297,7 @@ const SocialMediaEngine = ({
   </div>
 );
 
-const ReportingDashboard = ({ campaigns, totalLinks }: any) => (
-  <div className="space-y-6">
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <BarChart3 className="h-5 w-5" />
-          Campaign Analytics & Reporting
-        </CardTitle>
-        <CardDescription>
-          Comprehensive analytics and postback URL management for all your campaigns
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">{campaigns.length}</div>
-            <div className="text-sm text-muted-foreground">Total Campaigns</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">{totalLinks}</div>
-            <div className="text-sm text-muted-foreground">Links Built</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600">85%</div>
-            <div className="text-sm text-muted-foreground">Success Rate</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-orange-600">0</div>
-            <div className="text-sm text-muted-foreground">Postback URLs</div>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-
-    <Card>
-      <CardHeader>
-        <CardTitle>Postback URL Management</CardTitle>
-        <CardDescription>
-          Configure URLs to receive real-time notifications when backlinks are created
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="text-center py-8 text-muted-foreground">
-          <Target className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>Postback URL Management - Coming Soon</p>
-          <p className="text-sm mt-2">Real-time webhook notifications for successful backlink creation</p>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-);
+import { ReportingDashboard } from '@/components/automation/ReportingDashboard';
 
 const SystemSettings = () => (
   <div className="space-y-6">
@@ -380,8 +330,10 @@ export default function BacklinkAutomation() {
     createCampaign,
     toggleCampaign,
     deleteCampaign,
-    getActiveCampaignCount
-  } = useCampaignManager();
+    getActiveCampaignCount,
+    simulateLinkBuilding,
+    dashboardData
+  } = useDatabaseCampaignManager();
 
   const {
     totalLinksBuilt,
@@ -394,7 +346,7 @@ export default function BacklinkAutomation() {
 
   const activeCampaignCount = getActiveCampaignCount();
 
-  const handleCreateCampaign = (campaignData: any) => {
+  const handleCreateCampaign = async (campaignData: any) => {
     // Check if user can create campaigns (based on link limits)
     if (!canCreateMoreLinks(1)) {
       toast.error('Cannot Create Campaign', {
@@ -403,16 +355,23 @@ export default function BacklinkAutomation() {
       return;
     }
 
-    const newCampaign = createCampaign({
-      ...campaignData,
-      engine: campaignData.engine
+    const newCampaign = await createCampaign({
+      name: campaignData.name,
+      engine_type: campaignData.engine.toLowerCase().replace(' ', '_'),
+      target_url: campaignData.targetUrl,
+      keywords: campaignData.keywords,
+      anchor_texts: campaignData.anchorTexts,
+      status: campaignData.autoStart ? 'active' : 'draft',
+      daily_limit: campaignData.dailyLimit,
+      auto_start: campaignData.autoStart
     });
 
-    if (campaignData.status === 'active') {
-      // Simulate initial link creation (in real implementation, this would be handled by the actual engines)
+    if (newCampaign && campaignData.autoStart) {
+      // Simulate initial link creation for active campaigns
       setTimeout(() => {
         if (canCreateMoreLinks(1)) {
-          addLinks(1); // Add 1 link when campaign starts
+          simulateLinkBuilding(newCampaign.id, 1);
+          addLinks(1);
         }
       }, 2000);
     }
@@ -511,10 +470,7 @@ export default function BacklinkAutomation() {
           </TabsContent>
 
           <TabsContent value="reporting">
-            <ReportingDashboard
-              campaigns={campaigns}
-              totalLinks={totalLinksBuilt}
-            />
+            <ReportingDashboard />
           </TabsContent>
 
           <TabsContent value="settings">
