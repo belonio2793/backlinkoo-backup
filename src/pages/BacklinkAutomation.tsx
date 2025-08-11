@@ -423,12 +423,18 @@ export default function BacklinkAutomation() {
                       Create your first {selectedEngineData?.name.toLowerCase()} campaign to get started
                     </p>
                     <Button
-                      onClick={() => setShowCreateForm(true)}
-                      disabled={!canCreateLinks}
+                      onClick={() => {
+                        if (!isAuthenticated) {
+                          setShowAuthModal(true);
+                          return;
+                        }
+                        setShowCreateForm(true);
+                      }}
+                      disabled={isAuthenticated && !canCreateLinks}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Create Campaign
+                      {isAuthenticated ? 'Create Campaign' : 'Sign In to Create Campaign'}
                     </Button>
                   </div>
                 )}
