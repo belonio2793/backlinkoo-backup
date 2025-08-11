@@ -154,7 +154,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
           await exportPDFReport(exportData);
           toast({
             title: "PDF Report Generated",
-            description: `Link placement audit report created with ${recentPlacements.length} verified placements and detailed verification status.`
+            description: `Link placement audit report created with ${liveLinks} verified placements and detailed verification status.`
           });
           break;
 
