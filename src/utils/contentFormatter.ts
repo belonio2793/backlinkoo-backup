@@ -36,7 +36,15 @@ export class ContentFormatter {
 
       // Clean up malformed sentences and links
       .replace(/([A-Za-z])\s*&lt;[^&]*&gt;\s*([A-Za-z])/g, '$1 $2') // Remove HTML entities between words
-      .replace(/\.\s*&lt;[^&]*&gt;\s*([A-Z])/g, '. $1'); // Clean sentence breaks
+      .replace(/\.\s*&lt;[^&]*&gt;\s*([A-Z])/g, '. $1') // Clean sentence breaks
+
+      // EARLY FIX: Prevent word concatenation by adding spaces where HTML entities removed them
+      .replace(/([a-z])([A-Z])/g, '$1 $2') // Separate camelCase words
+      .replace(/([a-zA-Z])(\d)/g, '$1 $2') // Separate letters from numbers
+      .replace(/(\d)([a-zA-Z])/g, '$1 $2') // Separate numbers from letters
+      .replace(/(beauto)(matically)/gi, '$1 $2') // Fix "beautomatically"
+      .replace(/([a-z])(deleted)/gi, '$1 $2') // Add space before "deleted"
+      .replace(/(be)(automatically)/gi, '$1 $2'); // Fix "beautomatically" -> "be automatically"
 
     // Split content into lines and clean up
     let formattedContent = content
