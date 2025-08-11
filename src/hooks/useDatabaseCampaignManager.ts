@@ -166,8 +166,10 @@ export function useDatabaseCampaignManager() {
         return false;
       }
     } catch (err: any) {
+      const errorMessage = err?.message || err?.toString() || 'Unknown error occurred';
+      console.error('Campaign update error:', err);
       toast.error('Error updating campaign', {
-        description: err.message
+        description: errorMessage
       });
       return false;
     }
