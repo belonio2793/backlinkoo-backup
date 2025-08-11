@@ -484,30 +484,38 @@ export default function BacklinkAutomation() {
 
         {/* Runtime & Reporting Section */}
         {isAuthenticated && activeCampaignCount > 0 && (
-          <RuntimeReporting
-            onToggleCampaign={handleToggleCampaign}
-            onRefreshData={async () => {
-              // Clear all caches and refresh data
-              const { stableCampaignMetrics } = await import('@/services/stableCampaignMetrics');
-              stableCampaignMetrics.clearCache();
-
-              // Refresh campaigns data in the hook
-              try {
-                // Force refresh the campaign manager hook data
-                window.dispatchEvent(new Event('campaign-data-refresh'));
-              } catch (error) {
-                console.error('Error refreshing campaign data:', error);
-              }
-
-              // Check automation tables
-              await checkAutomationTables();
-
-              // Force a complete reload to ensure sync
-              setTimeout(() => {
-                window.location.reload();
-              }, 500);
+          <ErrorBoundary
+            title="Runtime Reporting Error"
+            description="There was an issue loading the campaign reporting dashboard."
+            onError={(error, errorInfo) => {
+              console.error('RuntimeReporting error:', error, errorInfo);
             }}
-          />
+          >
+            <RuntimeReporting
+              onToggleCampaign={handleToggleCampaign}
+              onRefreshData={async () => {
+                // Clear all caches and refresh data
+                const { stableCampaignMetrics } = await import('@/services/stableCampaignMetrics');
+                stableCampaignMetrics.clearCache();
+
+                // Refresh campaigns data in the hook
+                try {
+                  // Force refresh the campaign manager hook data
+                  window.dispatchEvent(new Event('campaign-data-refresh'));
+                } catch (error) {
+                  console.error('Error refreshing campaign data:', error);
+                }
+
+                // Check automation tables
+                await checkAutomationTables();
+
+                // Force a complete reload to ensure sync
+                setTimeout(() => {
+                  window.location.reload();
+                }, 500);
+              }}
+            />
+          </ErrorBoundary>
         )}
 
         {/* Campaign Management */}
