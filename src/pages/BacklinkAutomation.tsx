@@ -200,13 +200,16 @@ export default function BacklinkAutomation() {
           </p>
 
           {/* Authentication Section */}
-          {!isPremium && (
+          {!isAuthenticated && (
             <div className="mb-8">
               <RoutePreservingAuth
                 buttonVariant="default"
                 buttonSize="lg"
                 className="justify-center"
               />
+              <p className="text-sm text-gray-500 mt-3">
+                Sign in to create and manage your automation campaigns
+              </p>
             </div>
           )}
 
