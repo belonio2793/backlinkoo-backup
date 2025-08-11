@@ -110,15 +110,17 @@ export class DatabaseHealthCheck {
     // Also check automation tables specifically
     console.log('🔍 Checking automation tables...');
     const automationStatus = await initializeAutomationTables();
-    console.log('Automation tables status:', automationStatus);
+
+    // Log with proper JSON stringification to avoid [object Object]
+    console.log('Automation tables status:', JSON.stringify(automationStatus, null, 2));
 
     if (result.success && automationStatus.allTablesExist) {
       console.log('✅ Database health check passed');
     } else {
       console.error('❌ Database health check failed:');
       console.error('General errors:', result.errors);
-      console.error('Details:', result.details);
-      console.error('Automation tables status:', automationStatus);
+      console.error('Details:', JSON.stringify(result.details, null, 2));
+      console.error('Automation tables status:', JSON.stringify(automationStatus, null, 2));
     }
   }
 }
