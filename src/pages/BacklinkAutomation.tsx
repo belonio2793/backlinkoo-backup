@@ -244,14 +244,22 @@ export default function BacklinkAutomation() {
         loadCampaigns();
         debugLog.endOperation(metricId, true, { campaignId: result.data.id, campaignName: result.data.name });
       } else {
+        debugLog.error('campaign_management', 'create_campaign', new Error('Campaign verification failed'), {
+          verificationErrors: verification.errors
+        });
         toast.error('Campaign Verification Failed', {
           description: `Campaign was created but has issues: ${verification.errors?.join(', ')}`
         });
+        debugLog.endOperation(metricId, false, { error: 'verification_failed', errors: verification.errors });
       }
     } else {
+      debugLog.error('campaign_management', 'create_campaign', new Error(result.error || 'Campaign creation failed'), {
+        resultError: result.error
+      });
       toast.error('Campaign Creation Failed', {
         description: result.error || 'Unknown error occurred'
       });
+      debugLog.endOperation(metricId, false, { error: 'creation_failed', resultError: result.error });
     }
   };
 
