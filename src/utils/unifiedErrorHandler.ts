@@ -41,6 +41,11 @@ export class UnifiedErrorHandler {
 
     this.initialized = true;
     console.log('🛡️ Unified error handler initialized - [object Object] displays fixed');
+    console.log('🛡️ Error handler features enabled:');
+    console.log('  ✅ Promise rejection handling');
+    console.log('  ✅ Console.error override for object formatting');
+    console.log('  ✅ Test error suppression');
+    console.log('  ✅ Third-party error filtering');
   }
 
   /**
