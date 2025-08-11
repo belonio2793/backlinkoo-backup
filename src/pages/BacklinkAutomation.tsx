@@ -420,7 +420,7 @@ export default function BacklinkAutomation() {
         {isAuthenticated && activeCampaignCount > 0 && (
           <RuntimeReporting
             campaigns={campaigns}
-            onToggleCampaign={toggleCampaign}
+            onToggleCampaign={handleToggleCampaign}
             onRefreshData={() => {
               // Refresh campaigns and check tables
               checkAutomationTables();
