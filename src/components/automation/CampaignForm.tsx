@@ -251,11 +251,14 @@ export function CampaignForm({
               <Input
                 id="target-url"
                 type="url"
-                placeholder="https://yourwebsite.com"
+                placeholder="yourwebsite.com (https:// will be added automatically)"
                 value={formData.targetUrl}
-                onChange={(e) => setFormData(prev => ({ ...prev, targetUrl: e.target.value }))}
+                onChange={(e) => handleUrlChange(e.target.value)}
                 required
               />
+              <p className="text-xs text-muted-foreground">
+                URLs will automatically be formatted to include https://
+              </p>
             </div>
 
             {/* Keywords */}
