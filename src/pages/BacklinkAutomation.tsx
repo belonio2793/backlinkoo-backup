@@ -192,6 +192,17 @@ export default function BacklinkAutomation() {
             Choose your strategy and let our AI do the work.
           </p>
 
+          {/* Authentication Section */}
+          {!isPremium && (
+            <div className="mb-8">
+              <RoutePreservingAuth
+                buttonVariant="default"
+                buttonSize="lg"
+                className="justify-center"
+              />
+            </div>
+          )}
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
             <Card className="border-0 shadow-lg">
