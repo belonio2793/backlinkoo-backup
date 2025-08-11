@@ -166,54 +166,72 @@ export default function BacklinkAutomation() {
       return;
     }
 
-    // Normalize target URL for comparison
-    const normalizedTargetUrl = formData.targetUrl.includes('://') ? formData.targetUrl : `https://${formData.targetUrl}`;
+    // Import the enhanced campaign creation helper
+    const { CampaignCreationHelper } = await import('@/utils/campaignCreationHelper');
 
-    // Check if campaign already exists for this target URL
-    const existingCampaign = campaigns.find(campaign => {
-      const existingUrl = campaign.target_url;
-      return existingUrl === normalizedTargetUrl ||
-             existingUrl === normalizedTargetUrl.replace('https://', '') ||
-             existingUrl === normalizedTargetUrl.replace('http://', '');
-    });
-
-    if (existingCampaign) {
-      toast.error('Campaign Already Exists', {
-        description: `A campaign for "${normalizedTargetUrl}" already exists: "${existingCampaign.name}". You cannot run multiple campaigns for the same destination URL.`
-      });
-      return;
-    }
-
-    const newCampaign = await CampaignErrorHandler.safeCreateCampaign({
+    // Use enhanced campaign creation with unique identifier
+    const result = await CampaignCreationHelper.createCampaignWithUniqueId(user.id, {
       name: formData.name,
       engine_type: selectedEngine.replace('-', '_'),
-      target_url: normalizedTargetUrl,
+      target_url: formData.targetUrl,
       keywords: keywordsArray,
       anchor_texts: anchorTextsArray,
       status: formData.autoStart ? 'active' : 'draft',
       daily_limit: formData.dailyLimit,
       auto_start: formData.autoStart
-    }, createCampaign);
+    });
 
-    if (newCampaign) {
-      toast.success('Campaign created successfully!');
-      setFormData({
-        name: '',
-        targetUrl: '',
-        keywords: '',
-        anchorTexts: '',
-        dailyLimit: 10,
-        autoStart: false
-      });
-      setShowCreateForm(false);
+    if (result.success && result.data) {
+      // Verify the campaign was saved correctly
+      const verification = await CampaignCreationHelper.verifyCampaignSaved(result.campaignId!);
 
-      if (formData.autoStart) {
-        setTimeout(() => {
-          if (canCreateMoreLinks(1)) {
-            addLinks(1);
-          }
-        }, 2000);
+      if (verification.isValid) {
+        // Update local state
+        setCampaigns(prev => [result.data, ...prev]);
+
+        toast.success('Campaign Created Successfully!', {
+          description: `"${result.data.name}" is ready with ${result.data.keywords.length} keywords and ${result.data.anchor_texts.length} anchor texts.`
+        });
+
+        console.log('✅ Campaign successfully created and verified:', {
+          id: result.data.id,
+          name: result.data.name,
+          target_url: result.data.target_url,
+          keywords: result.data.keywords,
+          anchor_texts: result.data.anchor_texts,
+          unique_identifier: result.data.name
+        });
+
+        // Reset form
+        setFormData({
+          name: '',
+          targetUrl: '',
+          keywords: '',
+          anchorTexts: '',
+          dailyLimit: 10,
+          autoStart: false
+        });
+        setShowCreateForm(false);
+
+        if (formData.autoStart) {
+          setTimeout(() => {
+            if (canCreateMoreLinks(1)) {
+              addLinks(1);
+            }
+          }, 2000);
+        }
+
+        // Refresh campaigns list to ensure sync
+        loadCampaigns();
+      } else {
+        toast.error('Campaign Verification Failed', {
+          description: `Campaign was created but has issues: ${verification.errors?.join(', ')}`
+        });
       }
+    } else {
+      toast.error('Campaign Creation Failed', {
+        description: result.error || 'Unknown error occurred'
+      });
     }
   };
 
