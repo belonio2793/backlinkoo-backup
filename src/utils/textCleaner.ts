@@ -134,6 +134,7 @@ export function cleanObject<T>(obj: T): T {
 export class AutoCleaner {
   private intervalId: number | null = null;
   private isRunning = false;
+  private observer: MutationObserver | null = null;
 
   /**
    * Start automatic cleaning
