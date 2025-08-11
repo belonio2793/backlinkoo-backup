@@ -157,6 +157,11 @@ export default function BacklinkAutomation() {
 
   const { plan, limit } = getUserPlan();
 
+  // Run health check on mount for debugging
+  React.useEffect(() => {
+    DatabaseHealthCheck.logHealthCheck();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <Header />
