@@ -28,32 +28,39 @@ class DirectCheckoutService {
    */
   static async openCheckout(options: DirectCheckoutOptions): Promise<CheckoutResult> {
     try {
+      console.log('🚀 Opening checkout with options:', options);
+
       const { data: { user } } = await supabase.auth.getUser();
-      
+
       let checkoutUrl: string;
-      
+
       if (options.type === 'credits') {
         checkoutUrl = await this.createCreditsCheckout(options, user);
       } else {
         checkoutUrl = await this.createPremiumCheckout(options, user);
       }
-      
+
+      console.log('✅ Checkout URL created:', checkoutUrl);
+
       // Open checkout in new window immediately
       const checkoutWindow = window.open(
         checkoutUrl,
         'stripe-checkout',
         'width=800,height=600,scrollbars=yes,resizable=yes,location=yes,status=yes'
       );
-      
+
       if (!checkoutWindow) {
+        console.log('🚫 Popup blocked, redirecting current window');
         // If popup blocked, redirect current window
         window.location.href = checkoutUrl;
+      } else {
+        console.log('🆕 New window opened successfully');
       }
-      
+
       return { success: true };
-      
+
     } catch (error: any) {
-      console.error('Direct checkout failed:', error);
+      console.error('❌ Direct checkout failed:', error);
 
       // Try fallback payment service
       try {
@@ -61,7 +68,9 @@ class DirectCheckoutService {
         await FallbackPaymentService.openPayment(options);
         return { success: true };
       } catch (fallbackError) {
-        console.error('Fallback payment also failed:', fallbackError);
+        console.error('❌ Fallback payment also failed:', fallbackError);
+        // Still return success and try a basic redirect as last resort
+        window.open('https://backlinkoo.com/pricing', '_blank');
         return {
           success: false,
           error: error.message || 'Checkout failed'
