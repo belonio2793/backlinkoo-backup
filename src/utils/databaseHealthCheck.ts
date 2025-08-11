@@ -101,13 +101,19 @@ export class DatabaseHealthCheck {
   static async logHealthCheck(): Promise<void> {
     console.log('🔍 Running database health check...');
     const result = await this.checkTables();
-    
-    if (result.success) {
+
+    // Also check automation tables specifically
+    console.log('🔍 Checking automation tables...');
+    const automationStatus = await initializeAutomationTables();
+    console.log('Automation tables status:', automationStatus);
+
+    if (result.success && automationStatus.allTablesExist) {
       console.log('✅ Database health check passed');
     } else {
       console.error('❌ Database health check failed:');
-      console.error('Errors:', result.errors);
+      console.error('General errors:', result.errors);
       console.error('Details:', result.details);
+      console.error('Automation tables status:', automationStatus);
     }
   }
 }
