@@ -156,6 +156,9 @@ export class AutoCleaner {
     this.intervalId = window.setInterval(() => {
       this.runCleanup();
     }, intervalMs);
+
+    // Set up DOM observer for instant cleaning
+    this.setupDOMObserver();
   }
 
   /**
