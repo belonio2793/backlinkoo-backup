@@ -319,6 +319,16 @@ export default function BacklinkAutomation() {
           )}
         </div>
 
+        {/* Runtime Status Widget - Always visible for authenticated users */}
+        {isAuthenticated && (
+          <RuntimeStatus
+            campaignsCount={campaigns.length}
+            activeCampaigns={activeCampaignCount}
+            systemStatus={automationTablesExist ? 'online' : 'maintenance'}
+            onRefresh={checkAutomationTables}
+          />
+        )}
+
         {/* Show notice if automation tables are missing */}
         {!automationTablesExist && (
           <AutomationTablesMissingNotice
