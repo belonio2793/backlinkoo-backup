@@ -18,6 +18,21 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
   const navigate = useNavigate();
   const { openSignupModal } = useAuthModal();
 
+  // Fix text patterns to prevent malformed display
+  const fixTextContent = (text: string) => {
+    return text
+      .replace(/beautomatically\s*deletedin/gi, ' be automatically deleted in')
+      .replace(/beautomatically/gi, ' be automatically ')
+      .replace(/deletedin(\d+)/gi, ' deleted in $1')
+      .replace(/deletedin/gi, ' deleted in ')
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+  };
+
+  // Process the time remaining text
+  const processedTimeRemaining = fixTextContent(timeRemaining);
+
   // 3-second delay before showing popup
   useEffect(() => {
     if (isVisible) {
