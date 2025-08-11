@@ -35,8 +35,12 @@ export function ClaimStatusIndicator({ onUpgrade, onSignIn }: ClaimStatusIndicat
         const count = await ClaimableBlogService.getUserClaimedCount(user.id);
         setClaimedCount(count);
       }
-    } catch (error) {
-      console.error('Error checking user claims:', error);
+    } catch (error: any) {
+      console.error('Error checking user claims:', {
+        error: error?.message || error,
+        stack: error?.stack,
+        timestamp: new Date().toISOString()
+      });
     } finally {
       setLoading(false);
     }
