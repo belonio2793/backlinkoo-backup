@@ -21,7 +21,20 @@ export async function checkSchemaExecution(): Promise<boolean> {
         `
       });
 
-    const existingColumns = columnInfo?.map(col => col.column_name) || [];
+    // Handle the exec_sql response properly - it might be wrapped in an array or object
+    let existingColumns: string[] = [];
+
+    if (columnInfo) {
+      if (Array.isArray(columnInfo)) {
+        existingColumns = columnInfo.map(col => col.column_name);
+      } else if (columnInfo.length !== undefined) {
+        // Handle case where data is returned as array-like object
+        existingColumns = Array.from(columnInfo as any).map((col: any) => col.column_name);
+      } else {
+        console.warn('Unexpected columnInfo format:', typeof columnInfo, columnInfo);
+      }
+    }
+
     console.log('📋 Existing columns:', existingColumns);
 
     // Build select query with only existing columns
