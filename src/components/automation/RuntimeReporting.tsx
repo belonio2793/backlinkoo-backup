@@ -145,15 +145,21 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
 
   // Update timestamp every minute and load data
   useEffect(() => {
-    loadCampaignData();
+    // Delay initial load to avoid setState during render
+    const timeoutId = setTimeout(() => {
+      loadCampaignData();
+    }, 0);
 
     const interval = setInterval(() => {
       setLastUpdate(new Date());
       loadCampaignData(); // Refresh data every minute
     }, 60000);
 
-    return () => clearInterval(interval);
-  }, [loadCampaignData]);
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(interval);
+    };
+  }, []); // Remove loadCampaignData dependency to prevent infinite loops
 
   // Calculate aggregate metrics from dashboard stats and campaigns
   const totalCampaigns = dashboardStats?.total_campaigns || campaigns.length;
