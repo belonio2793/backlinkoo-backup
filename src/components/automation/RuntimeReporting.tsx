@@ -55,8 +55,6 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
   }, [loadCampaignData]);
 
   const loadCampaignData = useCallback(async () => {
-    if (isLoading) return; // Prevent multiple simultaneous loads
-
     setIsLoading(true);
     setError(null);
 
@@ -83,7 +81,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
       setIsLoading(false);
       setLastUpdate(new Date());
     }
-  }, [isLoading]);
+  }, []);
 
   const toggleCampaignMonitoring = useCallback(async (campaignId: string) => {
     const campaign = campaigns.find(c => c.campaign_id === campaignId);
