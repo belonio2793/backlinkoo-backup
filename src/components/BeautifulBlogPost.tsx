@@ -332,7 +332,7 @@ export function BeautifulBlogPost() {
   const handleDeletePost = async () => {
     setDeleting(true);
     try {
-      console.log('���️ Attempting to delete post:', {
+      console.log('🗑️ Attempting to delete post:', {
         slug,
         userId: user?.id,
         blogPostUserId: blogPost?.user_id,
@@ -968,7 +968,7 @@ export function BeautifulBlogPost() {
                 <div
                   className="beautiful-blog-content beautiful-prose prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-strong:font-bold prose-strong:text-gray-900"
                   dangerouslySetInnerHTML={{
-                    __html: blogPost.content || ''
+                    __html: autoRemoveTitlesFromContent(blogPost.content || '', blogPost.title || '')
                   }}
                 />
               </div>
