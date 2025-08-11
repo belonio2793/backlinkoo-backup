@@ -122,7 +122,8 @@ class DirectCheckoutService {
     options: DirectCheckoutOptions,
     user: any
   ): Promise<string> {
-    const plan = options.plan || 'monthly';
+    // Convert 'annual' to 'yearly' for Netlify function compatibility
+    const plan = options.plan === 'annual' ? 'yearly' : (options.plan || 'monthly');
     
     const response = await fetch('/.netlify/functions/create-subscription', {
       method: 'POST',
