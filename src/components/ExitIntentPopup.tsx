@@ -21,9 +21,15 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
   const navigate = useNavigate();
   const { openSignupModal } = useAuthModal();
 
-  // Ensure proper text spacing with multiple approaches
-  const spacedPostTitle = forceTextSpacing(useTextSpacing(postTitle || ""));
-  const spacedTimeRemaining = forceTextSpacing(useTextSpacing(timeRemaining));
+  // Apply perfect text formatting
+  const { title: perfectTitle, timeRemaining: perfectTime } = formatModalText(
+    postTitle || "",
+    timeRemaining
+  );
+
+  // Additional spacing fixes as backup
+  const spacedPostTitle = forceTextSpacing(useTextSpacing(perfectTitle));
+  const spacedTimeRemaining = formatTimeDisplay(forceTextSpacing(useTextSpacing(perfectTime)));
 
   // 3-second delay before showing popup
   useEffect(() => {
