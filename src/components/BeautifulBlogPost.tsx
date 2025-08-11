@@ -278,7 +278,7 @@ export function BeautifulBlogPost() {
           setBlogPost(result.post!);
         }
         toast({
-          title: "Success! ��",
+          title: "Success! 🎉",
           description: result.message,
         });
       } else {
@@ -445,7 +445,7 @@ export function BeautifulBlogPost() {
         if (result.success) {
           setBlogPost(result.post!);
           toast({
-            title: "Success! ��",
+            title: "Success! 🎉",
             description: "You've successfully claimed this post!",
           });
         } else {
