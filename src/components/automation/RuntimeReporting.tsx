@@ -595,6 +595,11 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
           />
         </TabsContent>
 
+        <TabsContent value="integrated" className="space-y-6">
+          {/* Integrated Campaign Manager */}
+          <IntegratedCampaignManager />
+        </TabsContent>
+
         <TabsContent value="reports" className="space-y-6">
           {/* Reports Section */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
