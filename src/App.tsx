@@ -55,6 +55,12 @@ const SymbolCleanerProvider = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Global Text Cleaner Component
+const TextCleanerProvider = ({ children }: { children: React.ReactNode }) => {
+  useGlobalAutoCleaner(true, 5000); // Enable automatic text cleaning every 5 seconds
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
