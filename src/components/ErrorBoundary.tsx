@@ -1,138 +1,151 @@
-import React from 'react';
-import { logError } from '@/utils/errorFormatter';
-import { useNavigate } from 'react-router-dom';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertTriangle, RefreshCw, Bug } from 'lucide-react';
 
-interface ErrorBoundaryState {
+interface Props {
+  children: ReactNode;
+  fallback?: ReactNode;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
+  title?: string;
+  description?: string;
+}
+
+interface State {
   hasError: boolean;
   error?: Error;
-  redirectSeconds: number;
+  errorInfo?: ErrorInfo;
 }
 
-interface ErrorBoundaryProps {
-  children: React.ReactNode;
-  fallback?: React.ComponentType<{ error?: Error }>;
-}
-
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  private redirectTimer?: NodeJS.Timeout;
-  private countdownTimer?: NodeJS.Timeout;
-
-  constructor(props: ErrorBoundaryProps) {
+export class ErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
     super(props);
-    this.state = { hasError: false, redirectSeconds: 5 };
+    this.state = { hasError: false };
   }
 
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error, redirectSeconds: 5 };
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Filter out browser extension errors and other common non-critical errors
-    const isExtensionError = error.message.includes('Cannot redefine property: ethereum') ||
-                            error.stack?.includes('chrome-extension://') ||
-                            error.message.includes('ethereum') ||
-                            error.message.includes('evmAsk') ||
-                            error.message.includes('ResizeObserver loop limit exceeded') ||
-                            error.message.includes('Non-Error promise rejection captured');
-
-    // Also filter out authentication-related errors that should be handled gracefully
-    const isAuthError = error.message.includes('Auth') ||
-                       error.message.includes('supabase') ||
-                       error.message.includes('session') ||
-                       error.message.includes('user');
-
-    // Filter out dashboard navigation errors
-    const isDashboardError = window.location.pathname.includes('/dashboard') &&
-                            (error.message.includes('navigate') ||
-                             error.message.includes('router') ||
-                             error.message.includes('redirect'));
-
-    // Filter out database table errors (non-existent tables)
-    const isDatabaseTableError = error.message.includes('published_blog_posts') ||
-                                error.message.includes('relation') ||
-                                error.message.includes('does not exist') ||
-                                error.stack?.includes('published_blog_posts') ||
-                                error.message.includes('PGRST') ||
-                                error.message.includes('422') ||
-                                error.message.includes('schema') ||
-                                (error.message.includes('404') && error.message.includes('blog'));
-
-    if (isExtensionError || isAuthError || isDashboardError || isDatabaseTableError) {
-      console.warn('Non-critical error filtered:', error.message);
-      if (isDatabaseTableError) {
-        console.warn('Database table error filtered - app will continue with fallback data');
-      }
-      // Reset error state to prevent app crash
-      this.setState({ hasError: false, error: undefined });
-      return;
-    }
-
-    logError('Application error', {
-      ...error,
-      componentStack: errorInfo.componentStack
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    
+    this.setState({
+      error,
+      errorInfo
     });
-    this.startRedirectCountdown();
+
+    // Call the optional error handler
+    this.props.onError?.(error, errorInfo);
   }
 
-  componentWillUnmount() {
-    this.clearTimers();
-  }
-
-  clearTimers = () => {
-    if (this.redirectTimer) {
-      clearTimeout(this.redirectTimer);
-    }
-    if (this.countdownTimer) {
-      clearInterval(this.countdownTimer);
-    }
-  };
-
-  startRedirectCountdown = () => {
-    // Start countdown
-    this.countdownTimer = setInterval(() => {
-      this.setState(prevState => ({
-        redirectSeconds: prevState.redirectSeconds - 1
-      }));
-    }, 1000);
-
-    // Redirect after 5 seconds
-    this.redirectTimer = setTimeout(() => {
-      this.clearTimers();
-      window.location.href = '/';
-    }, 5000);
+  handleReset = () => {
+    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
   };
 
   render() {
     if (this.state.hasError) {
-      const { fallback: Fallback } = this.props;
-
-      if (Fallback) {
-        return <Fallback error={this.state.error} />;
+      // Custom fallback UI
+      if (this.props.fallback) {
+        return this.props.fallback;
       }
 
+      // Default error UI
       return (
-        <div className="flex flex-col items-center justify-center min-h-[200px] p-8 text-center">
-          <h2 className="text-lg font-semibold text-red-600 mb-2">
-            Something went wrong
-          </h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            Please refresh the page or try again later.
-          </p>
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <p className="text-sm text-blue-700">
-              Redirecting to home page in {this.state.redirectSeconds} seconds...
-            </p>
-            <button
-              onClick={() => window.location.href = '/'}
-              className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-            >
-              Go to Home Now
-            </button>
-          </div>
-        </div>
+        <Card className="w-full max-w-2xl mx-auto border-red-200">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-red-700">
+              <AlertTriangle className="h-5 w-5" />
+              {this.props.title || 'Component Error'}
+            </CardTitle>
+            <CardDescription>
+              {this.props.description || 'Something went wrong while rendering this component.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Alert variant="destructive">
+              <Bug className="h-4 w-4" />
+              <AlertDescription>
+                <div className="space-y-2">
+                  <div className="font-medium">Error Details:</div>
+                  <div className="text-sm font-mono bg-red-50 p-2 rounded border">
+                    {this.state.error?.message || 'Unknown error occurred'}
+                  </div>
+                  {this.state.error?.name && (
+                    <div className="text-xs text-red-600">
+                      Error Type: {this.state.error.name}
+                    </div>
+                  )}
+                </div>
+              </AlertDescription>
+            </Alert>
+
+            <div className="flex gap-2">
+              <Button 
+                onClick={this.handleReset}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Try Again
+              </Button>
+              
+              <Button 
+                variant="outline"
+                onClick={() => window.location.reload()}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Reload Page
+              </Button>
+            </div>
+
+            {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
+              <details className="mt-4">
+                <summary className="cursor-pointer text-sm font-medium text-gray-600 hover:text-gray-800">
+                  Development Details (Click to expand)
+                </summary>
+                <div className="mt-2 text-xs font-mono bg-gray-100 p-3 rounded border max-h-40 overflow-auto">
+                  <div className="mb-2">
+                    <strong>Component Stack:</strong>
+                  </div>
+                  <pre className="whitespace-pre-wrap">
+                    {this.state.errorInfo.componentStack}
+                  </pre>
+                  {this.state.error?.stack && (
+                    <>
+                      <div className="mt-3 mb-2">
+                        <strong>Error Stack:</strong>
+                      </div>
+                      <pre className="whitespace-pre-wrap">
+                        {this.state.error.stack}
+                      </pre>
+                    </>
+                  )}
+                </div>
+              </details>
+            )}
+          </CardContent>
+        </Card>
       );
     }
 
     return this.props.children;
   }
+}
+
+// HOC version for easier usage
+export function withErrorBoundary<T extends object>(
+  Component: React.ComponentType<T>,
+  errorBoundaryProps?: Omit<Props, 'children'>
+) {
+  const WrappedComponent = (props: T) => (
+    <ErrorBoundary {...errorBoundaryProps}>
+      <Component {...props} />
+    </ErrorBoundary>
+  );
+
+  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
+  
+  return WrappedComponent;
 }
