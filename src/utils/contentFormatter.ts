@@ -744,11 +744,10 @@ export class ContentFormatter {
       .replace(/&amp;lt;\s*\/?\s*[a-zA-Z]+[^&]*&amp;gt;/g, '')
       .replace(/&lt;\s*\/?\s*[a-zA-Z]+[^&]*&gt;/g, '')
 
-      // Remove empty paragraphs and malformed content
+      // Remove empty paragraphs and malformed content - NO LINE BREAK MANIPULATION
       .replace(/<p[^>]*>\s*<\/p>/gi, '') // Empty paragraphs
       .replace(/<p[^>]*>\s*&lt;[^&>]*&gt;\s*<\/p>/gi, '') // Paragraphs with only HTML entities
       .replace(/<p[^>]*>\s*h[1-6]&gt;\s*<\/p>/gi, '') // Paragraphs with malformed heading fragments
-      .replace(/\n{3,}/g, '\n\n')
 
       // Clean up any remaining malformed headings that contain only symbols
       .replace(/<h[1-6][^>]*>\s*[&<>]+\s*<\/h[1-6]>/gi, '')
