@@ -42,9 +42,20 @@ export class AutomationDatabaseService {
         return true; // Assume table exists, just permission issue
       }
 
+      // Handle auth session missing errors gracefully
+      if (error.message?.includes('Auth session missing')) {
+        console.warn('⚠️ No auth session for automation_campaigns check, but table likely exists');
+        return true; // Assume table exists, just no authentication
+      }
+
       console.warn('⚠️ Unknown error checking automation_campaigns:', error.message);
       return false;
     } catch (err: any) {
+      // Handle auth session missing errors at the catch level too
+      if (err.message?.includes('Auth session missing')) {
+        console.warn('⚠️ No auth session for automation_campaigns check, but table likely exists');
+        return true; // Assume table exists, just no authentication
+      }
       console.error('❌ Error in checkTablesExist:', err.message);
       return false;
     }
