@@ -318,6 +318,7 @@ export default function BacklinkAutomation() {
   const [isUserPremium, setIsUserPremium] = useState(false);
   const [premiumLimitData, setPremiumLimitData] = useState<any>({});
   const [showPremiumModal, setShowPremiumModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [usageStats, setUsageStats] = useState({ linksPosted: 0, isLimitReached: false });
   const [guestLinksGenerated, setGuestLinksGenerated] = useState(0);
   // Premium modal removed - using direct checkout
