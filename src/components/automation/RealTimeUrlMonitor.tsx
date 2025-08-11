@@ -285,7 +285,33 @@ export function RealTimeUrlMonitor({ campaignId, onUrlProcessed }: RealTimeUrlMo
 
   const addUrlActivity = (activity: UrlActivity) => {
     setUrlActivities(prev => [activity, ...prev].slice(0, 200)); // Keep last 200 activities
-    
+
+    // Siphon data for reporting
+    const siphonedData: SiphonedUrlData = {
+      id: activity.id,
+      timestamp: activity.timestamp,
+      campaign_id: activity.campaign_id,
+      url: activity.url,
+      action: mapActivityToSiphonAction(activity.action),
+      success: activity.status === 'success',
+      metadata: {
+        domain: extractDomain(activity.url),
+        response_time: activity.metadata?.response_time,
+        domain_authority: activity.metadata?.domain_authority,
+        placement_type: activity.metadata?.placement_type,
+        anchor_text: activity.metadata?.anchor_text,
+        target_url: activity.target_url,
+        error_message: activity.status === 'error' ? activity.details : undefined
+      }
+    };
+
+    urlDataSiphon.siphonUrlData(siphonedData);
+
+    // Notify parent component when URLs are processed
+    if (activity.action === 'completed' || activity.action === 'failed') {
+      onUrlProcessed?.(activity.url, activity.status === 'success');
+    }
+
     // Auto-scroll to top for new activities
     setTimeout(() => {
       if (scrollAreaRef.current) {
@@ -295,6 +321,26 @@ export function RealTimeUrlMonitor({ campaignId, onUrlProcessed }: RealTimeUrlMo
         }
       }
     }, 100);
+  };
+
+  const mapActivityToSiphonAction = (action: string): 'discovered' | 'visited' | 'analyzed' | 'posted' | 'verified' => {
+    switch (action) {
+      case 'discovering': return 'discovered';
+      case 'visiting': return 'visited';
+      case 'analyzing': return 'analyzed';
+      case 'posting':
+      case 'completed': return 'posted';
+      case 'verifying': return 'verified';
+      default: return 'visited';
+    }
+  };
+
+  const extractDomain = (url: string): string => {
+    try {
+      return new URL(url).hostname;
+    } catch {
+      return url.split('/')[2] || url;
+    }
   };
 
   const updateSession = (session: UrlSession) => {
