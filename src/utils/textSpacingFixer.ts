@@ -280,9 +280,25 @@ export class TextSpacingFixer {
 
 // Auto-initialize when DOM is ready
 if (typeof window !== 'undefined') {
+  // Run immediately
+  TextSpacingFixer.fixTextSpacing();
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => TextSpacingFixer.initialize());
+    document.addEventListener('DOMContentLoaded', () => {
+      TextSpacingFixer.initialize();
+      // Run multiple times to catch all content
+      setTimeout(() => TextSpacingFixer.fixTextSpacing(), 100);
+      setTimeout(() => TextSpacingFixer.fixTextSpacing(), 500);
+      setTimeout(() => TextSpacingFixer.fixTextSpacing(), 1000);
+    });
   } else {
     TextSpacingFixer.initialize();
+    // Run multiple times since DOM is already loaded
+    setTimeout(() => TextSpacingFixer.fixTextSpacing(), 100);
+    setTimeout(() => TextSpacingFixer.fixTextSpacing(), 500);
+    setTimeout(() => TextSpacingFixer.fixTextSpacing(), 1000);
   }
+
+  // Run periodically to catch any dynamic content
+  setInterval(() => TextSpacingFixer.fixTextSpacing(), 2000);
 }
