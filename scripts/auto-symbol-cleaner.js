@@ -67,7 +67,7 @@ function cleanSymbols(content) {
   const original = content;
   
   // Remove replacement character
-  content = content.replace(/�/g, '');
+  content = content.replace(//g, '');
   content = content.replace(/\uFFFD/g, '');
   
   // Count replacements
