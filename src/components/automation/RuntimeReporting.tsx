@@ -302,7 +302,7 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => onToggleCampaign?.(campaign.id)}
+                        onClick={() => toggleCampaignMonitoring(campaign.id)}
                       >
                         {campaign.status === 'active' ? (
                           <>
