@@ -112,13 +112,19 @@ export class UnifiedErrorHandler {
    * Format any error object to prevent [object Object] displays
    */
   private formatError(error: any): string {
-    // Use our existing error formatting utility
+    // Use our existing error formatting utility first
     try {
-      return formatErrorForUI(error);
+      const formatted = formatErrorForUI(error);
+      // Double-check that we didn't get [object Object]
+      if (formatted && formatted !== '[object Object]') {
+        return formatted;
+      }
     } catch (formattingError) {
-      // Fallback formatting if utility fails
-      return this.fallbackFormatError(error);
+      // Fall through to fallback
     }
+
+    // Use fallback formatting
+    return this.fallbackFormatError(error);
   }
 
   /**
