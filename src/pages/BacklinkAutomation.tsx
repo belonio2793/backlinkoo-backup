@@ -242,6 +242,7 @@ export default function BacklinkAutomation() {
 
         // Refresh campaigns list to ensure sync
         loadCampaigns();
+        debugLog.endOperation(metricId, true, { campaignId: result.data.id, campaignName: result.data.name });
       } else {
         toast.error('Campaign Verification Failed', {
           description: `Campaign was created but has issues: ${verification.errors?.join(', ')}`
