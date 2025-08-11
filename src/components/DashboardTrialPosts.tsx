@@ -100,7 +100,9 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
       }
     };
 
-    processPendingClaim();
+    processPendingClaim().catch(error => {
+      console.error('Error in processPendingClaim:', error);
+    });
   }, [user, toast]);
 
   const loadPosts = async () => {
