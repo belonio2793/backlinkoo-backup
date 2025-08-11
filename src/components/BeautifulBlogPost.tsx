@@ -1022,7 +1022,7 @@ export function BeautifulBlogPost() {
                 </div>
                 <Button
                   onClick={() => {
-                    console.log('Upgrade to Premium button clicked');
+                    console.log('Opening Premium upgrade modal with live Stripe checkout');
                     setShowPaymentModal(true);
                   }}
                   className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
