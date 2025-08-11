@@ -512,7 +512,7 @@ export default function BacklinkAutomation() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => toggleCampaign(campaign.id)}
+                                onClick={() => handleToggleCampaign(campaign.id)}
                               >
                                 {campaign.status === 'active' ? (
                                   <>
@@ -522,7 +522,7 @@ export default function BacklinkAutomation() {
                                 ) : (
                                   <>
                                     <Play className="h-4 w-4 mr-1" />
-                                    Start
+                                    Start Live
                                   </>
                                 )}
                               </Button>
