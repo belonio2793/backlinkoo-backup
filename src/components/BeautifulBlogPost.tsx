@@ -9,6 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { ClaimLoginModal } from '@/components/ClaimLoginModal';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
 import {
   ArrowLeft,
   ExternalLink,
@@ -73,6 +74,7 @@ export function BeautifulBlogPost() {
   const [showKillerWarning, setShowKillerWarning] = useState(false);
   const [showSystemExplanation, setShowSystemExplanation] = useState(false);
   const [showExitPopup, setShowExitPopup] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   // Use premium SEO score logic
   const { effectiveScore, isPremiumScore } = usePremiumSEOScore(blogPost);
@@ -1046,6 +1048,50 @@ export function BeautifulBlogPost() {
               </div>
             </div>
 
+            {/* Premium Upgrade CTA Section */}
+            <div className="mt-12 p-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border border-purple-200">
+              <div className="text-center">
+                <div className="flex items-center justify-center mb-4">
+                  <Crown className="h-8 w-8 text-purple-600 mr-3" />
+                  <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                    Unlock Premium Features
+                  </h3>
+                </div>
+                <p className="text-gray-700 mb-6 text-lg leading-relaxed">
+                  Get unlimited access to premium blog content, advanced SEO tools, and exclusive features.
+                  Take your content strategy to the next level!
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                  <div className="text-center p-4 bg-white/60 rounded-lg border border-purple-100">
+                    <Sparkles className="h-6 w-6 text-purple-600 mx-auto mb-2" />
+                    <h4 className="font-semibold text-gray-900 mb-1">Unlimited Content</h4>
+                    <p className="text-sm text-gray-600">Access all premium blog posts and SEO content</p>
+                  </div>
+                  <div className="text-center p-4 bg-white/60 rounded-lg border border-purple-100">
+                    <TrendingUp className="h-6 w-6 text-purple-600 mx-auto mb-2" />
+                    <h4 className="font-semibold text-gray-900 mb-1">Advanced Analytics</h4>
+                    <p className="text-sm text-gray-600">Detailed performance metrics and insights</p>
+                  </div>
+                  <div className="text-center p-4 bg-white/60 rounded-lg border border-purple-100">
+                    <Target className="h-6 w-6 text-purple-600 mx-auto mb-2" />
+                    <h4 className="font-semibold text-gray-900 mb-1">Priority Support</h4>
+                    <p className="text-sm text-gray-600">24/7 expert assistance when you need it</p>
+                  </div>
+                </div>
+                <Button
+                  onClick={() => setShowPaymentModal(true)}
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                >
+                  <Crown className="mr-2 h-5 w-5" />
+                  Upgrade to Premium
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+                <p className="mt-4 text-sm text-gray-500">
+                  ✨ Join thousands of users already growing their online presence
+                </p>
+              </div>
+            </div>
+
             {/* Post Information Section */}
             <div className="mt-12 space-y-6">
               {/* ENHANCED EXPIRATION WARNING WITH KILLER DELETION ALERT */}
@@ -1214,6 +1260,20 @@ export function BeautifulBlogPost() {
         onClose={() => setShowExitPopup(false)}
         postTitle={cleanTitle(blogPost?.title || '')}
         timeRemaining={blogPost?.expires_at ? getTimeRemaining(blogPost.expires_at) : '24 hours'}
+      />
+
+      {/* Premium Payment Modal */}
+      <EnhancedUnifiedPaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        defaultTab="premium"
+        onSuccess={() => {
+          setShowPaymentModal(false);
+          toast({
+            title: "Welcome to Premium! 🎉",
+            description: "Your premium subscription has been activated. You now have unlimited access!",
+          });
+        }}
       />
 
       {/* Beautiful System Explanation Modal */}
