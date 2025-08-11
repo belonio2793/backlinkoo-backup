@@ -83,7 +83,11 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
               title: "Post Claimed Successfully!",
               description: claimResult.message,
             });
-            await loadPosts(); // Refresh the list
+            try {
+              await loadPosts(); // Refresh the list
+            } catch (loadError) {
+              console.error('Error reloading posts after pending claim:', loadError);
+            }
           } else {
             toast({
               title: "Claim Failed",
