@@ -475,10 +475,10 @@ export function EnhancedUnifiedPaymentModal({
                       ${plan.price}
                     </div>
                     <div className="text-sm text-muted-foreground">
-                      ${plan.pricePerCredit} per credit
+                      ${`${plan.pricePerCredit} per credit`}
                     </div>
                     <div className="text-2xl font-semibold">
-                      {plan.credits} Credits
+                      {`${plan.credits} Credits`}
                     </div>
                   </div>
                 </CardHeader>
