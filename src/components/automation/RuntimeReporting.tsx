@@ -48,6 +48,9 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
   const [error, setError] = useState<string | null>(null);
 
   const loadCampaignData = useCallback(async () => {
+    // Prevent concurrent calls
+    if (isLoading) return;
+
     setIsLoading(true);
     setError(null);
 
