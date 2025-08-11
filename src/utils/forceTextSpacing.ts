@@ -31,12 +31,13 @@ export function forceTextSpacing(text: string): string {
   return spacedText;
 }
 
-export function createSpacedElements(text: string): React.ReactNode[] {
+export function createSpacedText(text: string): string {
+  // Split text and add proper spacing
   const parts = text.split(/(\s+)/);
-  return parts.map((part, index) => {
+  return parts.map(part => {
     if (part.match(/^\s+$/)) {
-      return <span key={index} style={{ marginRight: '0.25em' }}></span>;
+      return '\u00A0'; // non-breaking space
     }
-    return <span key={index} style={{ marginRight: '0.25em' }}>{part}</span>;
-  });
+    return part;
+  }).join('\u00A0'); // Join with non-breaking spaces
 }
