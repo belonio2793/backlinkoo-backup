@@ -285,8 +285,9 @@ export function EnhancedUnifiedPaymentModal({
       }
 
       if (result.success && result.url) {
-        // Redirect to payment provider
-        window.location.href = result.url;
+        // Open payment provider in new window
+        window.open(result.url, '_blank');
+        onClose(); // Close the modal
         return;
       } else if (!result.success) {
         throw new Error(result.error || 'Payment processing failed');
