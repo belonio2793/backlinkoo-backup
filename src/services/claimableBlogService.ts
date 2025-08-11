@@ -244,8 +244,14 @@ export class ClaimableBlogService {
         claimedCount: result.claimed_count
       };
 
-    } catch (error) {
-      console.error('❌ Error claiming blog post:', error);
+    } catch (error: any) {
+      console.error('❌ Error claiming blog post:', {
+        error: error?.message || error,
+        stack: error?.stack,
+        postSlug,
+        userId,
+        timestamp: new Date().toISOString()
+      });
       return {
         success: false,
         message: error instanceof Error ? error.message : 'Unknown error'
