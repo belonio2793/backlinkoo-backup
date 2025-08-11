@@ -23,6 +23,10 @@ export class GlobalErrorHandler {
   init(): void {
     // Handle unhandled promise rejections
     window.addEventListener('unhandledrejection', (event) => {
+      // Prevent the default behavior (console error)
+      event.preventDefault();
+
+      // Handle the error properly
       this.handleError(event.reason, 'Unhandled Promise Rejection');
     });
 
