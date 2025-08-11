@@ -42,18 +42,6 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Update timestamp every minute and load data
-  useEffect(() => {
-    loadCampaignData();
-
-    const interval = setInterval(() => {
-      setLastUpdate(new Date());
-      loadCampaignData(); // Refresh data every minute
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, [loadCampaignData]);
-
   const loadCampaignData = useCallback(async () => {
     setIsLoading(true);
     setError(null);
