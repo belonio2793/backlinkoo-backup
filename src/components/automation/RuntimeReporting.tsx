@@ -270,7 +270,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
       '',
       'CAMPAIGN ANALYSIS',
       'Campaign,Engine Type,Success Rate,Performance Grade',
-      ...data.campaigns.map((campaign: Campaign) => {
+      ...data.campaigns.map((campaign: CampaignMetrics) => {
         const rate = campaign.success_rate || 0;
         const grade = rate > 80 ? 'A' : rate > 60 ? 'B' : rate > 40 ? 'C' : 'D';
         return `${campaign.name},${campaign.engine_type},${rate}%,${grade}`;
