@@ -1026,7 +1026,12 @@ export function BeautifulBlogPost() {
                     console.log('🚀 Premium button clicked - opening modal!');
                     setShowPaymentModal(true);
                   }}
-                  className="inline-flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 font-medium rounded-lg border-0"
+                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                  style={{
+                    pointerEvents: 'auto',
+                    border: 'none',
+                    outline: 'none'
+                  }}
                 >
                   <Crown className="mr-2 h-5 w-5" />
                   Upgrade to Premium
