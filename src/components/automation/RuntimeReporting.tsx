@@ -210,10 +210,8 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
       }
     } catch (error) {
       console.error('Export error:', error);
-      toast({
-        title: "Export Failed",
-        description: "Unable to generate report. Please try again.",
-        variant: "destructive"
+      toast.error("Export Failed", {
+        description: "Unable to generate report. Please try again."
       });
     }
   };
