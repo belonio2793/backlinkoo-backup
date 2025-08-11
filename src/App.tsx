@@ -54,13 +54,13 @@ const queryClient = new QueryClient({
 
 // Global Symbol Cleaner Component
 const SymbolCleanerProvider = ({ children }: { children: React.ReactNode }) => {
-  useSymbolCleaner(true); // Enable automatic symbol cleaning
+  useSymbolCleaner(false); // Disable automatic symbol cleaning to preserve spaces
   return <>{children}</>;
 };
 
 // Global Text Cleaner Component
 const TextCleanerProvider = ({ children }: { children: React.ReactNode }) => {
-  useGlobalAutoCleaner(true, 1000); // Enable automatic text cleaning every 1 second for instant removal
+  useGlobalAutoCleaner(false, 1000); // Disable automatic text cleaning to preserve spaces
   return <>{children}</>;
 };
 
