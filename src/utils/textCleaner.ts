@@ -85,8 +85,16 @@ export function cleanDOMElement(element: Element): void {
   textNodes.forEach(textNode => {
     const originalText = textNode.textContent || '';
     const cleanedText = cleanText(originalText);
-    
+
     if (originalText !== cleanedText) {
+      // Special debugging for the "automatically deleted" issue
+      if (originalText.includes('automatically') || originalText.includes('deleted')) {
+        console.log('🚨 AUTOMATICALLY DELETED TEXT BEING CLEANED:', {
+          original: originalText,
+          cleaned: cleanedText,
+          element: textNode.parentElement
+        });
+      }
       textNode.textContent = cleanedText;
       console.log('Text cleaned:', { original: originalText, cleaned: cleanedText });
     }
