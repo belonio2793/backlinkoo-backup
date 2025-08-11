@@ -125,40 +125,58 @@ export function QuickDatabaseStatus() {
       <Alert className="border-amber-200 bg-amber-50">
         <AlertTriangle className="h-4 w-4 text-amber-600" />
         <AlertDescription>
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <div className="font-medium text-amber-800">Database Issues Detected</div>
-              <div className="text-sm text-amber-700">
-                {issues.slice(0, 2).map((issue, index) => (
-                  <div key={index} className="flex items-center gap-1">
-                    <XCircle className="h-3 w-3 flex-shrink-0" />
-                    {issue}
-                  </div>
-                ))}
-                {issues.length > 2 && (
-                  <div className="text-xs">+ {issues.length - 2} more issues</div>
-                )}
+          <div className="space-y-3">
+            <div>
+              <div className="font-medium text-amber-800">Database Schema Issue</div>
+              <div className="text-sm text-amber-700 mt-1">
+                The automation system can't access required database columns. This prevents campaign creation and management from working properly.
               </div>
             </div>
-            <Button 
-              size="sm" 
-              variant="outline"
-              onClick={attemptQuickFix}
-              disabled={isFixing}
-              className="ml-3 flex-shrink-0"
-            >
-              {isFixing ? (
-                <>
-                  <Wrench className="h-3 w-3 mr-1 animate-spin" />
-                  Fixing...
-                </>
-              ) : (
-                <>
-                  <Wrench className="h-3 w-3 mr-1" />
-                  Quick Fix
-                </>
-              )}
-            </Button>
+
+            <div className="text-xs text-amber-600 space-y-1">
+              {issues.map((issue, index) => (
+                <div key={index} className="flex items-center gap-1">
+                  <XCircle className="h-3 w-3 flex-shrink-0" />
+                  {issue}
+                </div>
+              ))}
+            </div>
+
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-amber-200">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={attemptQuickFix}
+                disabled={isFixing}
+                className="bg-white hover:bg-amber-50 text-amber-800 border-amber-300"
+              >
+                {isFixing ? (
+                  <>
+                    <Wrench className="h-3 w-3 mr-1 animate-spin" />
+                    Attempting Fix...
+                  </>
+                ) : (
+                  <>
+                    <Wrench className="h-3 w-3 mr-1" />
+                    Try Auto Fix
+                  </>
+                )}
+              </Button>
+
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => window.open('/test-database-fix.html', '_blank')}
+                className="text-amber-800 hover:bg-amber-100"
+              >
+                Manual Fix Guide
+              </Button>
+            </div>
+
+            <div className="text-xs text-amber-600 bg-amber-100 p-2 rounded">
+              <strong>What this means:</strong> Your database is missing some required columns for the automation features.
+              This is a one-time setup issue that needs to be resolved by a database administrator.
+            </div>
           </div>
         </AlertDescription>
       </Alert>
