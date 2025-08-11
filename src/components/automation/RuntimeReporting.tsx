@@ -25,7 +25,7 @@ import {
   ExternalLink,
   Star
 } from 'lucide-react';
-import { LiveAutomationEngine, LiveActivity, LiveLinkPlacement } from '@/services/liveAutomationEngine';
+import { stableCampaignMetrics, CampaignMetrics } from '@/services/stableCampaignMetrics';
 import { RealTimeUrlMonitor } from './RealTimeUrlMonitor';
 
 interface Campaign {
