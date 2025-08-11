@@ -63,7 +63,7 @@ class FallbackPaymentService {
     const price = this.getCreditsPrice(credits);
     
     // Try direct payment link if available
-    const directPaymentUrl = process.env.VITE_DIRECT_PAYMENT_URL;
+    const directPaymentUrl = import.meta.env.VITE_DIRECT_PAYMENT_URL;
     
     if (directPaymentUrl) {
       const url = `${directPaymentUrl}?credits=${credits}&amount=${price}`;
