@@ -23,7 +23,8 @@ import {
   FileText,
   FileSpreadsheet,
   ExternalLink,
-  Star
+  Star,
+  Database
 } from 'lucide-react';
 import { stableCampaignMetrics, CampaignMetrics } from '@/services/stableCampaignMetrics';
 import { DataSyncChecker } from '@/utils/dataSyncChecker';
