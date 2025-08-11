@@ -1023,15 +1023,36 @@ export function BeautifulBlogPost() {
                 <button
                   type="button"
                   onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('🚀 Premium button clicked - opening modal!');
-                    toast({
-                      title: "Opening Checkout",
-                      description: "Loading premium upgrade options...",
-                      duration: 1000
-                    });
-                    setShowPaymentModal(true);
+                    try {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      console.log('🚀 Premium button clicked - opening modal!');
+                      console.log('Current showPaymentModal state:', showPaymentModal);
+
+                      // Test if toast is working
+                      if (toast) {
+                        toast({
+                          title: "Button Clicked!",
+                          description: "Opening checkout process...",
+                          duration: 2000
+                        });
+                      } else {
+                        console.error('Toast function not available');
+                      }
+
+                      // Set modal state
+                      console.log('Setting showPaymentModal to true');
+                      setShowPaymentModal(true);
+
+                      // Verify state was set
+                      setTimeout(() => {
+                        console.log('Modal state after click:', showPaymentModal);
+                      }, 100);
+
+                    } catch (error) {
+                      console.error('Error in button click handler:', error);
+                      alert('Button clicked - debugging mode');
+                    }
                   }}
                   className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
                   style={{
