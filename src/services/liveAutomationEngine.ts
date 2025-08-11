@@ -138,7 +138,7 @@ export class LiveAutomationEngine {
           });
 
           // Start verification process
-          setTimeout(() => this.verifyLinkPlacement(placement.commentUrl, campaign.target_url), 5000);
+          setTimeout(() => LiveAutomationEngine.verifyLinkPlacement(placement.commentUrl, campaign.target_url), 5000);
         }
         
       } catch (error: any) {
