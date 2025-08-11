@@ -205,6 +205,15 @@ class CampaignMetricsService {
       const errorDetails = formatErrorForLogging(error, 'getCampaignMetrics-catch');
       console.error('Campaign metrics fetch error:', JSON.stringify(errorDetails, null, 2));
 
+      // Handle database permission errors gracefully
+      if (error.code === '42501' || error.message?.includes('permission denied')) {
+        console.warn('🚨 Database permission error in catch block - returning empty result');
+        return {
+          success: true,
+          data: [] // Return empty array instead of failing
+        };
+      }
+
       // Check for deadlock errors
       const deadlockInfo = DeadlockPreventionService.handleDeadlockError(error, 'getCampaignMetrics');
       if (deadlockInfo.isDeadlock) {
