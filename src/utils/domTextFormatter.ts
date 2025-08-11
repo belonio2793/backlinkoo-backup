@@ -218,7 +218,7 @@ class DOMTextFormatter {
    */
   static formatForms(container: HTMLElement = document.body): number {
     let formattedCount = 0;
-    
+
     // Format labels
     const labels = container.querySelectorAll('label');
     labels.forEach(label => {
@@ -232,19 +232,8 @@ class DOMTextFormatter {
       }
     });
 
-    // Format placeholder text
-    const inputs = container.querySelectorAll('input[placeholder], textarea[placeholder]');
-    inputs.forEach(input => {
-      const element = input as HTMLInputElement | HTMLTextAreaElement;
-      const placeholder = element.placeholder?.trim();
-      if (placeholder) {
-        const formatted = TextFormatter.formatListItem(placeholder);
-        if (formatted !== placeholder) {
-          element.placeholder = formatted;
-          formattedCount++;
-        }
-      }
-    });
+    // Skip placeholder text formatting to prevent issues with URLs and specific formats
+    // Placeholder text should remain as originally specified by developers
 
     return formattedCount;
   }
