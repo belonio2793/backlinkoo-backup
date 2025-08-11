@@ -482,7 +482,7 @@ export default function BacklinkAutomation() {
 
           {/* Campaign Creation Form */}
           <div>
-            {showCreateForm && (
+            {showCreateForm && isAuthenticated && (
               <Card className="shadow-lg border-0">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
