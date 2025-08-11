@@ -257,7 +257,8 @@ class StableCampaignMetricsService {
 
     } catch (error: any) {
       console.error('Error toggling campaign status:', error);
-      return { success: false, error: error.message };
+      const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+      return { success: false, error: `Toggle failed: ${errorMessage}` };
     }
   }
 
