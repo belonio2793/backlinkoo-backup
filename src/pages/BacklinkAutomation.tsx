@@ -411,6 +411,13 @@ export default function BacklinkAutomation() {
           />
         )}
 
+        {/* Campaign Creation Test Section - Only show for authenticated users */}
+        {isAuthenticated && import.meta.env.DEV && (
+          <div className="mb-8">
+            <CampaignCreationTest />
+          </div>
+        )}
+
         {/* Engine Selection */}
         <Card className="mb-8 shadow-lg border-0">
           <CardHeader>
