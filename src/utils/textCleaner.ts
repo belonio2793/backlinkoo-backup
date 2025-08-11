@@ -205,6 +205,59 @@ export class AutoCleaner {
   }
 
   /**
+   * Setup DOM observer for instant cleaning of new content
+   */
+  private setupDOMObserver(): void {
+    if (typeof window === 'undefined' || !window.MutationObserver) {
+      return;
+    }
+
+    this.observer = new MutationObserver((mutations) => {
+      let needsCleaning = false;
+
+      mutations.forEach((mutation) => {
+        // Check for text changes
+        if (mutation.type === 'characterData') {
+          const textContent = mutation.target.textContent || '';
+          if (hasProblematicrChars(textContent)) {
+            needsCleaning = true;
+          }
+        }
+
+        // Check for new nodes
+        if (mutation.type === 'childList') {
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.TEXT_NODE) {
+              const textContent = node.textContent || '';
+              if (hasProblematicrChars(textContent)) {
+                needsCleaning = true;
+              }
+            } else if (node.nodeType === Node.ELEMENT_NODE) {
+              const textContent = (node as Element).textContent || '';
+              if (hasProblematicrChars(textContent)) {
+                needsCleaning = true;
+              }
+            }
+          });
+        }
+      });
+
+      if (needsCleaning) {
+        console.log('🧹 AutoCleaner: Detected problematic characters, cleaning immediately...');
+        this.runCleanup();
+      }
+    });
+
+    // Start observing
+    this.observer.observe(document.body, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+      characterDataOldValue: false
+    });
+  }
+
+  /**
    * Check if the cleaner is currently running
    */
   get running(): boolean {
