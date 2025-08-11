@@ -1,6 +1,6 @@
 /**
- * Perfect text formatter for modal content
- * Ensures flawless spacing and formatting
+ * Perfect text formatter - DISABLED
+ * No autoformatting applied
  */
 
 export function formatModalText(postTitle: string, timeRemaining: string): {
@@ -8,31 +8,15 @@ export function formatModalText(postTitle: string, timeRemaining: string): {
   timeRemaining: string;
   fullText: string;
 } {
-  // Clean and format the title
-  const cleanTitle = postTitle
-    ? postTitle.trim().replace(/^["']|["']$/g, '') // Remove surrounding quotes
-    : 'this content';
-  
-  // Clean and format the time remaining
-  const cleanTime = timeRemaining
-    .replace(/(\d+)\s*h\s*(\d+)\s*m\s*remaining/gi, '$1h $2m remaining')
-    .replace(/(\d+)\s*m\s*remaining/gi, '$1m remaining')
-    .trim();
-  
-  // Create the perfectly formatted full text
-  const fullText = `Your blog post "${cleanTitle}" will be automatically deleted in ${cleanTime} if left unclaimed.`;
-  
+  // Return text unchanged - no autoformatting
   return {
-    title: cleanTitle,
-    timeRemaining: cleanTime,
-    fullText
+    title: postTitle || '',
+    timeRemaining: timeRemaining || '',
+    fullText: `Your blog post "${postTitle}" will be automatically deleted in ${timeRemaining} if left unclaimed.`
   };
 }
 
 export function formatTimeDisplay(timeString: string): string {
-  return timeString
-    .replace(/(\d+)\s*h\s*(\d+)\s*m/gi, '$1h $2m')
-    .replace(/(\d+)\s*m/gi, '$1m')
-    .replace(/\s*remaining\s*/gi, ' remaining')
-    .trim();
+  // Return text unchanged - no autoformatting
+  return timeString;
 }
