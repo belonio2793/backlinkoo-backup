@@ -89,7 +89,7 @@ export function useAutoCleanInput(initialValue: string = '') {
 /**
  * Hook that automatically starts/stops the global auto-cleaner
  */
-export function useGlobalAutoCleaner(enabled: boolean = true, intervalMs: number = 5000) {
+export function useGlobalAutoCleaner(enabled: boolean = true, intervalMs: number = 1000) {
   const { startAutoCleaning, stopAutoCleaning } = useTextCleaner();
 
   useEffect(() => {
