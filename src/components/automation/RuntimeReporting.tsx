@@ -178,8 +178,8 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
       // Headers
       'Campaign ID,Name,Engine Type,Status,Links Built,Daily Limit,Success Rate,Target URL,Last Activity',
       // Data rows
-      ...data.campaigns.map((campaign: Campaign) =>
-        `${campaign.id},${campaign.name},${campaign.engine_type},${campaign.status},${campaign.links_built || 0},${campaign.daily_limit},${campaign.success_rate || 0}%,${campaign.target_url},${campaign.last_activity}`
+      ...data.campaigns.map((campaign: CampaignMetrics) =>
+        `${campaign.campaign_id},${campaign.name},${campaign.engine_type},${campaign.status},${campaign.links_built || 0},${campaign.daily_limit},${campaign.success_rate || 0}%,${campaign.target_url},${campaign.last_activity}`
       ),
       '',
       '--- SUMMARY METRICS ---',
