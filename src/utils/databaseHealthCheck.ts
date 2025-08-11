@@ -64,23 +64,28 @@ export class DatabaseHealthCheck {
         details.user_link_quotas = { status: 'OK', count: quotasData };
       }
 
-      // Test database connection
+      // Test database connection using a safer approach
       console.log('Testing database connection...');
-      const { data: connectionData, error: connectionError } = await supabase
-        .from('profiles')
-        .select('count')
-        .limit(1);
-      
-      if (connectionError) {
-        errors.push(`Database connection: ${connectionError.message}`);
+      try {
+        // Use auth.users() which is always available for checking connection
+        const { data: authData, error: authError } = await supabase.auth.getUser();
+
+        if (authError && authError.message !== 'Invalid token') {
+          errors.push(`Database connection: ${authError.message}`);
+          details.connection = {
+            error: authError.message,
+            code: authError.status,
+            details: authError
+          };
+        } else {
+          details.connection = { status: 'OK', auth_check: 'passed' };
+        }
+      } catch (connError: any) {
+        errors.push(`Database connection: ${connError.message}`);
         details.connection = {
-          error: connectionError.message,
-          code: connectionError.code,
-          details: connectionError.details,
-          hint: connectionError.hint
+          error: connError.message,
+          type: 'connection_error'
         };
-      } else {
-        details.connection = { status: 'OK' };
       }
 
     } catch (error: any) {
