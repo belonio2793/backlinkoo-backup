@@ -113,7 +113,7 @@ export class LiveAutomationEngine {
         const placement = await LiveAutomationEngine.attemptBlogComment(campaign, blog);
         
         if (placement.success) {
-          await this.saveLinkPlacement({
+          await LiveAutomationEngine.saveLinkPlacement({
             id: crypto.randomUUID(),
             campaign_id: campaign.id,
             source_domain: blog.domain,
@@ -184,7 +184,7 @@ export class LiveAutomationEngine {
         const article = await this.createWeb2Article(campaign, platform);
         
         if (article.success) {
-          await this.saveLinkPlacement({
+          await LiveAutomationEngine.saveLinkPlacement({
             id: crypto.randomUUID(),
             campaign_id: campaign.id,
             source_domain: platform.domain,
