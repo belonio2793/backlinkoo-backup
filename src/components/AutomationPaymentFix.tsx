@@ -264,7 +264,7 @@ export function FixedBuyCreditsButton({
       onClick={handleClick}
     >
       <CreditCard className="h-4 w-4 mr-2" />
-      Buy {credits} Credits - {getPrice()}
+      Buy {`${credits} Credits`} - {getPrice()}
     </Button>
   );
 }
