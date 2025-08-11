@@ -81,6 +81,13 @@ export function BeautifulBlogPost() {
   // Use premium SEO score logic
   const { effectiveScore, isPremiumScore } = usePremiumSEOScore(blogPost);
 
+  // Cleanup component mount flag on unmount
+  useEffect(() => {
+    return () => {
+      setIsMounted(false);
+    };
+  }, []);
+
   useEffect(() => {
     if (slug) {
       loadBlogPost(slug);
