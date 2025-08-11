@@ -91,8 +91,9 @@ export function useDatabaseCampaignManager() {
         });
       }
     } catch (err: any) {
+      const errorMessage = err?.message || err?.toString() || 'Unknown error occurred';
       toast.error('Error loading dashboard data', {
-        description: err.message
+        description: errorMessage
       });
     }
   }, [user?.id]);
