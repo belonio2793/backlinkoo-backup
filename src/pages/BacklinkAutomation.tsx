@@ -3447,6 +3447,43 @@ export default function BacklinkAutomation() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
       <ToolsHeader user={user} currentTool="automation-link-building" />
 
+      {/* Test Checkout Buttons - Remove after testing */}
+      <div className="container mx-auto px-4 py-2">
+        <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-4 mb-4">
+          <h3 className="text-sm font-semibold text-yellow-800 mb-2">🧪 Test Checkout Functions</h3>
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              onClick={async () => {
+                console.log('🧪 Testing monthly checkout...');
+                try {
+                  await DirectCheckoutService.upgradeToPremium('monthly');
+                } catch (error) {
+                  console.error('Test monthly error:', error);
+                }
+              }}
+              className="bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              Test Monthly ($29)
+            </Button>
+            <Button
+              size="sm"
+              onClick={async () => {
+                console.log('🧪 Testing yearly checkout...');
+                try {
+                  await DirectCheckoutService.upgradeToPremium('annual');
+                } catch (error) {
+                  console.error('Test yearly error:', error);
+                }
+              }}
+              className="bg-green-600 hover:bg-green-700 text-white"
+            >
+              Test Yearly ($19/mo)
+            </Button>
+          </div>
+        </div>
+      </div>
+
       <div ref={containerRef} className="p-6">
         <div className="max-w-8xl mx-auto space-y-6">
           {/* Header */}
