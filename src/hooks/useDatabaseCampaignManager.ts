@@ -11,6 +11,7 @@ import type {
   CampaignResponse
 } from '@/types/automationTypes';
 import { toast } from 'sonner';
+import { getErrorMessage, logError, formatErrorForUser } from '@/utils/errorUtils';
 
 export function useDatabaseCampaignManager() {
   const { user, isAuthenticated } = useAuth();
