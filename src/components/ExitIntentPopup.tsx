@@ -19,6 +19,10 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
   const navigate = useNavigate();
   const { openSignupModal } = useAuthModal();
 
+  // Ensure proper text spacing
+  const spacedPostTitle = useTextSpacing(postTitle || "");
+  const spacedTimeRemaining = useTextSpacing(timeRemaining);
+
   // 3-second delay before showing popup
   useEffect(() => {
     if (isVisible) {
