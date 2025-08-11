@@ -349,6 +349,37 @@ export class UnifiedClaimService {
   }
 
   /**
+   * Get user claim statistics (compatibility method for ClaimSystemStatus)
+   */
+  static async getUserClaimStats(userId: string): Promise<{
+    claimedCount: number;
+    maxClaims: number;
+    canClaim: boolean;
+  }> {
+    try {
+      const stats = await this.getUserSavedStats(userId);
+
+      return {
+        claimedCount: stats.savedCount,
+        maxClaims: stats.maxSaved === -1 ? Infinity : stats.maxSaved,
+        canClaim: stats.canSave
+      };
+    } catch (error: any) {
+      console.error('Error getting user claim stats:', {
+        error: error?.message || error,
+        userId,
+        timestamp: new Date().toISOString()
+      });
+
+      return {
+        claimedCount: 0,
+        maxClaims: this.MAX_SAVED_PER_FREE_USER,
+        canClaim: true
+      };
+    }
+  }
+
+  /**
    * Check if any users have saved a specific post (prevents auto-deletion)
    */
   static async isPostSavedByAnyUser(postId: string): Promise<boolean> {
