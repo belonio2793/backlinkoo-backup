@@ -157,20 +157,26 @@ export function NavigationUpgradeButton() {
 }
 
 export function ToolsHeaderUpgradeButton() {
+  const handleUpgrade = async () => {
+    try {
+      await DirectCheckoutService.upgradeToPremium('monthly');
+    } catch (error) {
+      console.error('ToolsHeader upgrade failed:', error);
+    }
+  };
+
   return (
-    <PremiumUpgradeButton
+    <Button
       variant="outline"
       size="sm"
-      style="badge"
-      triggerSource="navigation"
-      showText={false}
+      onClick={handleUpgrade}
       className="bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 px-3 py-1.5"
     >
       <div className="flex items-center gap-1">
         <Crown className="h-3 w-3" />
         <span className="text-xs font-medium">Pro</span>
       </div>
-    </PremiumUpgradeButton>
+    </Button>
   );
 }
 
