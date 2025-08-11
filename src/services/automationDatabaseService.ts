@@ -450,6 +450,13 @@ export class AutomationDatabaseService {
 
   static async getUserQuota(userId: string): Promise<{ success: boolean; data?: UserLinkQuota; error?: string }> {
     try {
+      // Check if tables exist first
+      const tablesExist = await this.checkTablesExist();
+      if (!tablesExist) {
+        console.warn('⚠️ Automation tables do not exist, using fallback service');
+        return await FallbackAutomationService.getUserQuota(userId);
+      }
+
       const { data, error } = await supabase
         .from('user_link_quotas')
         .select('*')
@@ -463,6 +470,11 @@ export class AutomationDatabaseService {
           hint: error.hint,
           code: error.code
         });
+        // If it's a table not found error, use fallback
+        if (error.code === '42P01') {
+          console.warn('⚠️ Table not found, using fallback service');
+          return await FallbackAutomationService.getUserQuota(userId);
+        }
         return { success: false, error: error.message || 'Failed to fetch user quota' };
       }
 
