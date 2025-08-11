@@ -314,14 +314,15 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
                 <div className="text-sm text-gray-600">Last Updated</div>
                 <div className="text-sm font-medium">{formatTime(lastUpdate)}</div>
               </div>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
-                onClick={onRefreshData}
+                onClick={handleRefreshData}
+                disabled={isLoading}
                 className="flex items-center gap-2"
               >
-                <RefreshCw className="h-4 w-4" />
-                Refresh
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                {isLoading ? 'Loading...' : 'Refresh'}
               </Button>
             </div>
           </div>
