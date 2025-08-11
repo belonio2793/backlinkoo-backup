@@ -1022,6 +1022,9 @@ export function BeautifulBlogPost() {
                 </div>
                 <button
                   type="button"
+                  role="button"
+                  tabIndex={0}
+                  aria-label="Upgrade to Premium"
                   onClick={(e) => {
                     try {
                       e.preventDefault();
