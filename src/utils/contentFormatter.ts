@@ -12,10 +12,22 @@ export class ContentFormatter {
 
     // VERY EARLY preprocessing to fix critical issues before any HTML processing
     content = content
-      // ULTRA-EARLY FIX: Fix beautomatically deletedin before ANY other processing
+      // MEGA-ULTRA-EARLY FIX: Fix beautomatically deletedin before ANY other processing
       .replace(/beautomatically\s*deletedin/gi, ' be automatically deleted in')
+      .replace(/beauto\s*matically\s*deletedin/gi, ' be automatically deleted in')
+      .replace(/be\s*automatically\s*deletedin/gi, ' be automatically deleted in')
       .replace(/beautomatically/gi, ' be automatically ')
+      .replace(/beauto\s*matically/gi, ' be automatically ')
       .replace(/deletedin(\d+)/gi, ' deleted in $1')
+      .replace(/deletedin/gi, ' deleted in ')
+
+      // Fix malformed HTML at the source
+      .replace(/<h\s+([1-6])\s*=?\s*"?"?\s*([^>]*)>/gi, '<h$1>')
+      .replace(/<h\s*([1-6])\s*=\s*""\s*>/gi, '<h$1>')
+      .replace(/<\/h\s*>/gi, '</h1>')
+
+      // Fix style attribute corruption early
+      .replace(/style="[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
 
       // Fix the specific issue: ## &lt; h2&gt;Pro Tip pattern
       .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
