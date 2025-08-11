@@ -1020,47 +1020,19 @@ export function BeautifulBlogPost() {
                     <p className="text-sm text-gray-600">24/7 expert assistance when you need it</p>
                   </div>
                 </div>
-                <div
+                <Button
                   onClick={(e) => {
                     e.stopPropagation();
                     e.preventDefault();
-                    console.log('🚀 DIV button clicked!');
-                    window.alert('BUTTON CLICKED - OPENING MODAL!');
                     setShowPaymentModal(true);
                   }}
-                  onMouseDown={(e) => {
-                    console.log('🚀 Mouse down detected!');
-                    e.stopPropagation();
-                  }}
-                  onMouseUp={(e) => {
-                    console.log('🚀 Mouse up detected!');
-                    e.stopPropagation();
-                  }}
-                  onTouchStart={(e) => {
-                    console.log('🚀 Touch start detected!');
-                    e.stopPropagation();
-                  }}
-                  onTouchEnd={(e) => {
-                    console.log('🚀 Touch end detected!');
-                    e.stopPropagation();
-                    setShowPaymentModal(true);
-                  }}
-                  className="w-full cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-full shadow-lg px-8 py-4 text-center flex items-center justify-center gap-2 select-none"
-                  role="button"
-                  tabIndex={0}
-                  style={{
-                    userSelect: 'none',
-                    WebkitUserSelect: 'none',
-                    MozUserSelect: 'none',
-                    msUserSelect: 'none',
-                    pointerEvents: 'auto',
-                    zIndex: 999
-                  }}
+                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-full shadow-lg px-8 py-4 text-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+                  size="lg"
                 >
-                  <Crown className="h-5 w-5" />
+                  <Crown className="h-5 w-5 mr-2" />
                   Upgrade to Premium
-                  <ArrowRight className="h-5 w-5" />
-                </div>
+                  <ArrowRight className="h-5 w-5 ml-2" />
+                </Button>
                 <p className="mt-4 text-sm text-gray-500">
                   ✨ Join thousands of users already growing their online presence
                 </p>
