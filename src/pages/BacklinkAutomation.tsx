@@ -3692,7 +3692,7 @@ export default function BacklinkAutomation() {
                         id="targetUrl"
                         value={campaignForm.targetUrl}
                         onChange={(e) => handleUrlChange(e.target.value)}
-                        placeholder="yourwebsite.com (will auto-format to https://)"
+                        placeholder="yourwebsite.com (will auto-format to HTTPS://)"
                         className="h-12"
                       />
                     </div>
