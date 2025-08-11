@@ -399,7 +399,7 @@ export function StreamlinedBlogGenerator() {
                       <div>
                         <h4 className="font-medium text-orange-800">Draft Post</h4>
                         <p className="text-sm text-orange-600">
-                          This post will be automatically deleted in {renderTimeRemaining(generatedPost)?.props.children[1]} unless saved.
+                          This post will be automatically deleted unless saved.
                         </p>
                       </div>
                       <Button 
