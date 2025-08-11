@@ -37,14 +37,22 @@ export async function checkSchemaExecution(): Promise<boolean> {
       .limit(1);
 
     if (testError) {
-      if (testError.message.includes('started_at')) {
-        console.error('❌ started_at column missing - SQL not executed');
-        console.log('🔧 Run the SQL commands from add-missing-columns.sql');
-        return false;
-      } else {
-        console.error('❌ Other database error:', testError.message);
-        return false;
-      }
+      console.error('❌ Database error:', testError.message);
+      return false;
+    }
+
+    // Check for missing required columns
+    const requiredColumns = ['started_at', 'completed_at', 'auto_start'];
+    const missingColumns = requiredColumns.filter(col => !existingColumns.includes(col));
+
+    if (missingColumns.length > 0) {
+      console.error(`❌ Missing columns: ${missingColumns.join(', ')}`);
+      console.log('🔧 Run these SQL commands to fix:');
+      missingColumns.forEach(col => {
+        const dataType = col === 'auto_start' ? 'BOOLEAN DEFAULT false' : 'TIMESTAMPTZ NULL';
+        console.log(`ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS ${col} ${dataType};`);
+      });
+      return false;
     }
 
     console.log('✅ Schema check passed - started_at column exists');
