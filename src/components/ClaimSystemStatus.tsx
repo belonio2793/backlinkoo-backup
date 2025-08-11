@@ -38,7 +38,7 @@ export function ClaimSystemStatus() {
         try {
           userStats = await UnifiedClaimService.getUserClaimStats(user.id);
         } catch (userStatsError: any) {
-          console.error('❌ Failed to get user claimed count:', {
+          console.error('❌ Failed to get user claim stats:', {
             error: userStatsError?.message || userStatsError,
             userId: user.id,
             timestamp: new Date().toISOString()
