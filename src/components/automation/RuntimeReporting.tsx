@@ -52,7 +52,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
     }, 60000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [loadCampaignData]);
 
   const loadCampaignData = useCallback(async () => {
     if (isLoading) return; // Prevent multiple simultaneous loads
