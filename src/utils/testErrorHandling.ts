@@ -60,11 +60,11 @@ export function testErrorHandling() {
 if (typeof window !== 'undefined') {
   (window as any).testErrorHandling = testErrorHandling;
   
-  // Auto-test in development
-  if (import.meta.env.DEV) {
-    setTimeout(() => {
-      console.log('🔧 Running automatic error handling test...');
-      testErrorHandling();
-    }, 2000);
-  }
+  // Auto-test disabled - run manually with window.testErrorHandling()
+  // if (import.meta.env.DEV) {
+  //   setTimeout(() => {
+  //     console.log('🔧 Running automatic error handling test...');
+  //     testErrorHandling();
+  //   }, 2000);
+  // }
 }
