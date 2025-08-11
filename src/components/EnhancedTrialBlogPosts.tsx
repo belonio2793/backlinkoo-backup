@@ -360,11 +360,11 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
               <div className="text-blue-600">SEO</div>
             </div>
             <div className="text-center p-2 bg-emerald-50 rounded">
-              <div className="font-semibold text-emerald-700">{post.reading_time || Math.ceil(post.word_count / 200)}m</div>
+              <div className="font-semibold text-emerald-700">{`${post.reading_time || Math.ceil(post.word_count / 200)}m`}</div>
               <div className="text-emerald-600">Read</div>
             </div>
             <div className="text-center p-2 bg-purple-50 rounded">
-              <div className="font-semibold text-purple-700">{Math.floor((post.word_count || 0) / 100)}k</div>
+              <div className="font-semibold text-purple-700">{`${Math.floor((post.word_count || 0) / 100)}k`}</div>
               <div className="text-purple-600">Words</div>
             </div>
           </div>
