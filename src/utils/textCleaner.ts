@@ -31,10 +31,11 @@ export function cleanText(text: string): string {
 
   // Additional cleanup for common encoding issues
   cleaned = cleaned
-    // Remove multiple consecutive spaces
-    .replace(/\s{2,}/g, ' ')
-    // Remove leading/trailing whitespace
-    .trim();
+    // Only remove excessive spaces (4+ consecutive), preserve intentional double/triple spaces
+    .replace(/\s{4,}/g, ' ')
+    // Remove leading/trailing whitespace only if it's excessive
+    .replace(/^\s{2,}/, ' ')
+    .replace(/\s{2,}$/, ' ');
 
   return cleaned;
 }
