@@ -22,7 +22,6 @@ import {
   Calendar,
   FileText,
   FileSpreadsheet,
-  FilePdf,
   ExternalLink,
   Star
 } from 'lucide-react';
