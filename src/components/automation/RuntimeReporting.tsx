@@ -96,6 +96,18 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
     onRefreshData?.();
   }, [loadCampaignData, onRefreshData]);
 
+  // Update timestamp every minute and load data
+  useEffect(() => {
+    loadCampaignData();
+
+    const interval = setInterval(() => {
+      setLastUpdate(new Date());
+      loadCampaignData(); // Refresh data every minute
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [loadCampaignData]);
+
   // Calculate aggregate metrics from dashboard stats and campaigns
   const totalCampaigns = dashboardStats?.total_campaigns || campaigns.length;
   const activeCampaigns = dashboardStats?.active_campaigns || campaigns.filter(c => c.status === 'active').length;
