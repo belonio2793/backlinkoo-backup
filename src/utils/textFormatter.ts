@@ -138,6 +138,8 @@ class TextFormatter {
       .replace(/\s+([,.!?;:])/g, '$1')
       // Add space after punctuation if missing
       .replace(/([,.!?;:])(?=[a-zA-Z])/g, '$1 ')
+      // Preserve spaces between numbers and Credits/credits
+      .replace(/(\d)(Credits?)/g, '$1 $2')
       // Fix spacing around parentheses
       .replace(/\(\s+/g, '(')
       .replace(/\s+\)/g, ')')
