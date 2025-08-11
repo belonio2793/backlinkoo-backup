@@ -1028,10 +1028,16 @@ export function BeautifulBlogPost() {
                     setShowPaymentModal(true);
                     console.log('🚀 Payment modal state set to true');
                   }}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-full shadow-lg px-8 py-4 text-lg transition-all duration-300 hover:shadow-xl hover:scale-105"
+                  className="relative w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-full shadow-lg px-8 py-4 text-lg transition-all duration-300 hover:shadow-xl hover:scale-105 z-10"
                   size="lg"
                   disabled={false}
-                  style={{ pointerEvents: 'auto', zIndex: 10 }}
+                  type="button"
+                  style={{
+                    pointerEvents: 'auto',
+                    zIndex: 10,
+                    position: 'relative',
+                    cursor: 'pointer'
+                  }}
                 >
                   <Crown className="h-5 w-5 mr-2" />
                   Upgrade to Premium
