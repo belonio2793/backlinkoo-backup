@@ -5410,7 +5410,7 @@ export default function BacklinkAutomation() {
                               {campaign.isLiveMonitored && (
                                 <div className="text-xs text-blue-600 font-medium flex items-center justify-center gap-1">
                                   <Activity className="h-3 w-3 animate-pulse" />
-                                  Live monitored • Progressive count active
+                                  Live monitored �� Progressive count active
                                 </div>
                               )}
                               {campaign.linksGenerated >= 15 && campaign.linksGenerated < 20 && (
@@ -7499,6 +7499,22 @@ export default function BacklinkAutomation() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Premium Payment Modal */}
+      <EnhancedUnifiedPaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        defaultTab="premium"
+        onSuccess={(user) => {
+          setShowPaymentModal(false);
+          toast({
+            title: "Success! 🎉",
+            description: "Welcome to Premium! Your account has been upgraded.",
+          });
+          // Refresh to update premium status
+          window.location.reload();
+        }}
+      />
     </div>
   );
 }
