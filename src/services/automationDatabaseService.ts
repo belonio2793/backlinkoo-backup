@@ -121,14 +121,33 @@ export class AutomationDatabaseService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching campaigns:', error);
-        return { success: false, error: error.message };
+        console.error('Error fetching campaigns:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        // If it's a table not found error, use fallback
+        if (error.code === '42P01') {
+          console.warn('⚠️ Table not found, using fallback service');
+          return await FallbackAutomationService.getCampaigns(userId);
+        }
+        return { success: false, error: error.message || 'Failed to fetch campaigns' };
       }
 
       return { success: true, data: data || [] };
     } catch (error: any) {
-      console.error('Error fetching campaigns:', error);
-      return { success: false, error: error.message };
+      console.error('Error fetching campaigns (catch):', {
+        message: error.message,
+        stack: error.stack,
+        error: error
+      });
+      // Try fallback on any error
+      try {
+        return await FallbackAutomationService.getCampaigns(userId);
+      } catch {
+        return { success: false, error: error.message || 'Unexpected error fetching campaigns' };
+      }
     }
   }
 
