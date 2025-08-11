@@ -249,6 +249,13 @@ export default function BacklinkAutomation() {
           )}
         </div>
 
+        {/* Show notice if automation tables are missing */}
+        {!automationTablesExist && (
+          <AutomationTablesMissingNotice
+            onRetry={checkAutomationTables}
+          />
+        )}
+
         {/* Engine Selection */}
         <Card className="mb-8 shadow-lg border-0">
           <CardHeader>
