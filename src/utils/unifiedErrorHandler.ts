@@ -50,27 +50,31 @@ export class UnifiedErrorHandler {
     const error = event.reason;
     const formattedError = this.formatError(error);
     const errorKey = this.getErrorKey(error);
-    
+
     const count = (this.errorCounts.get(errorKey) || 0) + 1;
     this.errorCounts.set(errorKey, count);
 
-    // Prevent default browser handling
+    // Always prevent default browser handling to suppress console spam
     event.preventDefault();
 
-    // Log with proper formatting
-    if (count <= this.MAX_SAME_ERROR) {
+    // Only log if it's a real application error (not test errors)
+    if (count <= this.MAX_SAME_ERROR && !this.isTestError(error)) {
       if (this.isThirdPartyError(error)) {
         console.warn(`🔍 Third-party promise rejection (${count}):`, formattedError);
       } else if (this.isNetworkError(error)) {
         console.warn(`🌐 Network promise rejection (${count}):`, formattedError);
       } else {
-        console.error(`🚨 Unhandled Promise Rejection (${count}):`, formattedError);
-        
+        // Only log real application errors, not test errors
+        console.warn(`⚠️ Promise rejection handled (${count}):`, formattedError);
+
         // Show user-friendly notification for real application errors
         if (count === 1) {
-          this.showErrorNotification(formattedError, 'Promise Rejection');
+          this.showErrorNotification(formattedError, 'Application Error');
         }
       }
+    } else if (this.isTestError(error)) {
+      // Silently handle test errors
+      console.debug(`🧪 Test error handled: ${formattedError}`);
     }
   }
 
