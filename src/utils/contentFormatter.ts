@@ -478,10 +478,9 @@ export class ContentFormatter {
       .replace(/[\u2018\u2019]/g, "'")
       .replace(/[\u201C\u201D]/g, '"')
 
-      // Remove excessive whitespace but preserve paragraph structure
-      .replace(/[ \t]+/g, ' ')
-      .replace(/\n\s*\n\s*\n/g, '\n\n')
-      .trim();
+      // NO WHITESPACE MANIPULATION - preserve all original spacing
+      .replace(/\r\n/g, '\n')
+      .replace(/\r/g, '\n');
   }
 
   /**
