@@ -69,7 +69,7 @@ export class LiveAutomationEngine {
       
     } catch (error: any) {
       console.error('Error starting live monitoring:', error);
-      this.logActivity({
+      LiveAutomationEngine.logActivity({
         id: crypto.randomUUID(),
         timestamp: new Date().toISOString(),
         campaign_id: campaignId,
@@ -78,6 +78,7 @@ export class LiveAutomationEngine {
         action: 'placement_failed',
         details: `Failed to start monitoring: ${error.message}`
       });
+      throw error; // Re-throw to allow proper error handling
     }
   }
 
