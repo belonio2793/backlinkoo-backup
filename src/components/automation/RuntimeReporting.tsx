@@ -73,20 +73,39 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
 
   const toggleCampaignMonitoring = useCallback(async (campaignId: string) => {
     const campaign = campaigns.find(c => c.campaign_id === campaignId);
-    if (!campaign) return;
+    if (!campaign) {
+      setError('Campaign not found');
+      return;
+    }
 
+    setIsLoading(true);
     try {
+      console.log(`Toggling campaign ${campaignId} from ${campaign.status}`);
+
       const result = await stableCampaignMetrics.toggleCampaignStatus(campaignId);
       if (result.success) {
-        // Refresh data to show updated status
+        console.log('Campaign toggle successful, refreshing data...');
+
+        // Clear cache and refresh data
+        stableCampaignMetrics.clearCache();
         await loadCampaignData();
+
+        // Notify parent component
         onToggleCampaign?.(campaignId);
+
+        // Show success message
+        const newStatus = campaign.status === 'active' ? 'paused' : 'active';
+        console.log(`Campaign ${campaign.name} changed to ${newStatus}`);
+
       } else {
+        console.error('Toggle failed:', result.error);
         setError(result.error || 'Failed to toggle campaign');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error toggling campaign monitoring:', error);
-      setError('Failed to toggle campaign status');
+      setError(typeof error === 'string' ? error : error.message || 'Failed to toggle campaign status');
+    } finally {
+      setIsLoading(false);
     }
   }, [campaigns, loadCampaignData, onToggleCampaign]);
 
