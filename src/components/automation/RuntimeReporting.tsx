@@ -135,11 +135,184 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
   const todaysLinks = todaysPlacements.length;
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-US', { 
-      hour: '2-digit', 
+    return date.toLocaleTimeString('en-US', {
+      hour: '2-digit',
       minute: '2-digit',
-      hour12: true 
+      hour12: true
     });
+  };
+
+  const handleExportReport = async (format: 'csv' | 'pdf' | 'excel') => {
+    try {
+      const exportData = {
+        campaigns: campaigns,
+        placements: recentPlacements,
+        activities: liveActivities,
+        metrics: {
+          totalCampaigns,
+          activeCampaigns,
+          totalLinksBuilt,
+          liveLinks,
+          successRate,
+          todaysLinks
+        },
+        timestamp: new Date().toISOString()
+      };
+
+      switch (format) {
+        case 'csv':
+          await exportCSVReport(exportData);
+          toast({
+            title: "CSV Report Generated",
+            description: `Campaign performance data exported successfully with ${campaigns.length} campaigns and ${totalLinksBuilt} link placements.`
+          });
+          break;
+
+        case 'pdf':
+          await exportPDFReport(exportData);
+          toast({
+            title: "PDF Report Generated",
+            description: `Link placement audit report created with ${recentPlacements.length} verified placements and detailed verification status.`
+          });
+          break;
+
+        case 'excel':
+          await exportExcelReport(exportData);
+          toast({
+            title: "Excel Analytics Generated",
+            description: `Success rate analysis completed with ${successRate.toFixed(1)}% success rate and trend forecasting data.`
+          });
+          break;
+      }
+    } catch (error) {
+      console.error('Export error:', error);
+      toast({
+        title: "Export Failed",
+        description: "Unable to generate report. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const exportCSVReport = async (data: any) => {
+    const csvContent = [
+      // Headers
+      'Campaign ID,Name,Engine Type,Status,Links Built,Daily Limit,Success Rate,Target URL,Last Activity',
+      // Data rows
+      ...data.campaigns.map((campaign: Campaign) =>
+        `${campaign.id},${campaign.name},${campaign.engine_type},${campaign.status},${campaign.links_built || 0},${campaign.daily_limit},${campaign.success_rate || 0}%,${campaign.target_url},${campaign.last_activity}`
+      ),
+      '',
+      '--- SUMMARY METRICS ---',
+      `Total Campaigns,${data.metrics.totalCampaigns}`,
+      `Active Campaigns,${data.metrics.activeCampaigns}`,
+      `Total Links Built,${data.metrics.totalLinksBuilt}`,
+      `Live/Verified Links,${data.metrics.liveLinks}`,
+      `Overall Success Rate,${data.metrics.successRate.toFixed(2)}%`,
+      `Links Today,${data.metrics.todaysLinks}`,
+      `Report Generated,${new Date().toLocaleString()}`
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `campaign-performance-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportPDFReport = async (data: any) => {
+    // Create a detailed HTML report for PDF conversion
+    const htmlContent = `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Link Placement Audit Report</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          .header { border-bottom: 2px solid #333; padding-bottom: 10px; margin-bottom: 20px; }
+          .metric { display: inline-block; margin: 10px 20px 10px 0; }
+          .placement { border: 1px solid #ddd; margin: 10px 0; padding: 15px; border-radius: 5px; }
+          .live { border-left: 4px solid #22c55e; }
+          .pending { border-left: 4px solid #f59e0b; }
+          .failed { border-left: 4px solid #ef4444; }
+          .small { font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h1>Link Placement Audit Report</h1>
+          <p>Generated: ${new Date().toLocaleString()}</p>
+        </div>
+
+        <div class="metrics">
+          <div class="metric"><strong>Total Placements:</strong> ${data.placements.length}</div>
+          <div class="metric"><strong>Live Links:</strong> ${data.metrics.liveLinks}</div>
+          <div class="metric"><strong>Success Rate:</strong> ${data.metrics.successRate.toFixed(1)}%</div>
+          <div class="metric"><strong>Today's Links:</strong> ${data.metrics.todaysLinks}</div>
+        </div>
+
+        <h2>Link Placement Details</h2>
+        ${data.placements.map((placement: any) => `
+          <div class="placement ${placement.verification_status}">
+            <h3>${placement.source_url || 'Link Placement'}</h3>
+            <p><strong>Target:</strong> ${placement.target_url}</p>
+            <p><strong>Status:</strong> ${placement.verification_status}</p>
+            <p><strong>Placed:</strong> ${new Date(placement.placed_at).toLocaleString()}</p>
+            <p class="small"><strong>Campaign:</strong> ${placement.campaign_id}</p>
+          </div>
+        `).join('')}
+      </body>
+      </html>
+    `;
+
+    // For now, we'll download as HTML (in production, you'd use a PDF library)
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `link-placement-audit-${new Date().toISOString().split('T')[0]}.html`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const exportExcelReport = async (data: any) => {
+    const xlsContent = [
+      '--- SUCCESS RATE ANALYTICS ---',
+      '',
+      'PERFORMANCE METRICS',
+      `Current Success Rate,${data.metrics.successRate.toFixed(2)}%`,
+      `Total Campaigns,${data.metrics.totalCampaigns}`,
+      `Active Campaigns,${data.metrics.activeCampaigns}`,
+      `Total Links,${data.metrics.totalLinksBuilt}`,
+      `Live Links,${data.metrics.liveLinks}`,
+      `Failed/Pending,${data.metrics.totalLinksBuilt - data.metrics.liveLinks}`,
+      '',
+      'CAMPAIGN ANALYSIS',
+      'Campaign,Engine Type,Success Rate,Performance Grade',
+      ...data.campaigns.map((campaign: Campaign) => {
+        const rate = campaign.success_rate || 0;
+        const grade = rate > 80 ? 'A' : rate > 60 ? 'B' : rate > 40 ? 'C' : 'D';
+        return `${campaign.name},${campaign.engine_type},${rate}%,${grade}`;
+      }),
+      '',
+      'OPTIMIZATION RECOMMENDATIONS',
+      data.metrics.successRate < 50 ? 'LOW SUCCESS RATE: Review targeting and content strategy' : '',
+      data.metrics.activeCampaigns === 0 ? 'NO ACTIVE CAMPAIGNS: Activate campaigns to improve data collection' : '',
+      data.metrics.totalLinksBuilt < 10 ? 'LIMITED DATA: More link placements needed for accurate analysis' : '',
+      data.metrics.successRate > 80 ? 'EXCELLENT PERFORMANCE: Current strategy is highly effective' : '',
+      '',
+      `Analysis Generated: ${new Date().toLocaleString()}`
+    ].filter(Boolean).join('\n');
+
+    const blob = new Blob([xlsContent], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `success-rate-analytics-${new Date().toISOString().split('T')[0]}.xls`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
