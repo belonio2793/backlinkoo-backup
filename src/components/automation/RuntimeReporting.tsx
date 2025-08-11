@@ -557,7 +557,18 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
         </TabsContent>
 
         <TabsContent value="activity" className="space-y-6">
-          {/* Real-Time URL Processing Monitor */}
+          {/* Enhanced Real-Time URL Processing Monitor */}
+          <LiveUrlPostingMonitor
+            campaignId={campaigns.find(c => c.status === 'active')?.campaign_id || ''}
+            onUrlPosted={(url, success) => {
+              console.log(`URL posted: ${url} - Success: ${success}`);
+              // Update metrics when URLs are processed
+              handleRefreshData();
+            }}
+            showControls={true}
+          />
+
+          {/* Original Real-Time URL Monitor for comparison */}
           <RealTimeUrlMonitor
             campaignId={campaigns.find(c => c.status === 'active')?.campaign_id}
             onUrlProcessed={(url, success) => {
@@ -569,7 +580,12 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
         </TabsContent>
 
         <TabsContent value="siphoned" className="space-y-6">
-          {/* Siphoned URL Data Reporting */}
+          {/* Enhanced Campaign Data Siphon */}
+          <CampaignDataSiphon
+            campaignId={campaigns.find(c => c.status === 'active')?.campaign_id || ''}
+          />
+
+          {/* Original Siphoned URL Reporting for comparison */}
           <SiphonedUrlReporting
             campaignId={campaigns.find(c => c.status === 'active')?.campaign_id}
           />
