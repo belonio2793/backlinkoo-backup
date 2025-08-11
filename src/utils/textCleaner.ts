@@ -243,7 +243,7 @@ export class AutoCleaner {
       });
 
       if (needsCleaning) {
-        console.log('🧹 AutoCleaner: Detected problematic characters, cleaning immediately...');
+        console.log('🧹 AutoCleaner: Detected � or other problematic characters, cleaning immediately...');
         this.runCleanup();
       }
     });
