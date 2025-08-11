@@ -3524,7 +3524,7 @@ export default function BacklinkAutomation() {
                         <Button
                           size="sm"
                           variant="outline"
-                          onClick={() => DirectCheckoutService.upgradeToPremium('monthly')}
+                          onClick={() => setShowPaymentModal(true)}
                           className="h-8 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white border-none"
                         >
                           <Crown className="h-3 w-3 mr-1" />
