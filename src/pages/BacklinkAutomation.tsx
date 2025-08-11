@@ -298,8 +298,19 @@ export default function BacklinkAutomation() {
     }
   }, [checkAutomationTables]);
 
+  // Initialize debug logging for this component
+  React.useEffect(() => {
+    debugLog.info('backlink_automation', 'component_mounted', 'BacklinkAutomation component mounted', {
+      isAuthenticated,
+      isPremium,
+      campaignCount: campaigns.length,
+      selectedEngine
+    });
+  }, [isAuthenticated, isPremium, campaigns.length, selectedEngine]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <AutomationWithDebugging enabledInProduction={isPremium}>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <Header />
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -798,6 +809,7 @@ export default function BacklinkAutomation() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AutomationWithDebugging>
   );
 }
