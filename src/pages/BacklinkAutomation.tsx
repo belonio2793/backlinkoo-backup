@@ -424,7 +424,7 @@ export default function BacklinkAutomation() {
       // For guest users, use a persistent guest ID
       const guestId = guestTrackingService.getGuestData()?.guestId || 'guest_default';
       const key = `permanent_campaigns_guest_${guestId}`;
-      console.log('🔑 Using guest storage key:', key);
+      console.log('��� Using guest storage key:', key);
       return key;
     }
   }, [user]);
@@ -6916,9 +6916,17 @@ export default function BacklinkAutomation() {
                       </li>
                     </ul>
                     <Button
-                      onClick={() => {
-                        DirectCheckoutService.upgradeToPremium('monthly');
-                        setShowPremiumPlans(false);
+                      onClick={async () => {
+                        console.log('🎯 Monthly plan button clicked');
+                        try {
+                          const result = await DirectCheckoutService.upgradeToPremium('monthly');
+                          console.log('✅ Monthly checkout result:', result);
+                          if (result.success) {
+                            setShowPremiumPlans(false);
+                          }
+                        } catch (error) {
+                          console.error('❌ Monthly checkout error:', error);
+                        }
                       }}
                       className="w-full h-12 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold"
                     >
@@ -6972,9 +6980,17 @@ export default function BacklinkAutomation() {
                       </li>
                     </ul>
                     <Button
-                      onClick={() => {
-                        DirectCheckoutService.upgradeToPremium('annual');
-                        setShowPremiumPlans(false);
+                      onClick={async () => {
+                        console.log('🎯 Yearly plan button clicked');
+                        try {
+                          const result = await DirectCheckoutService.upgradeToPremium('annual');
+                          console.log('✅ Yearly checkout result:', result);
+                          if (result.success) {
+                            setShowPremiumPlans(false);
+                          }
+                        } catch (error) {
+                          console.error('❌ Yearly checkout error:', error);
+                        }
                       }}
                       className="w-full h-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold"
                     >
