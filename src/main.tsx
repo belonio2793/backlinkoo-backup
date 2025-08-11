@@ -12,6 +12,8 @@ import './utils/silentErrorTest'
 import './utils/testCampaignFixes'
 // Check if database schema is properly configured
 import './utils/checkSchemaExecution'
+// Auto-fix missing columns
+import './utils/fixMissingColumns'
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
 
