@@ -102,6 +102,12 @@ export default function BacklinkAutomation() {
   const handleCreateCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    // Check authentication first
+    if (!isAuthenticated) {
+      setShowAuthModal(true);
+      return;
+    }
+
     if (!canCreateMoreLinks(1)) {
       toast.error('Cannot Create Campaign', {
         description: 'You\'ve reached your link building limit. Upgrade to Premium for unlimited campaigns.'
