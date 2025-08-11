@@ -5,6 +5,7 @@ import { X, Shield, Clock, Zap, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthModal } from '@/contexts/ModalContext';
 import { useTextSpacing } from '@/hooks/useTextSpacing';
+import { forceTextSpacing } from '@/utils/forceTextSpacing';
 
 interface ExitIntentPopupProps {
   isVisible: boolean;
