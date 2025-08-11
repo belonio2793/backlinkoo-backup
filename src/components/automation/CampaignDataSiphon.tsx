@@ -357,7 +357,7 @@ export function CampaignDataSiphon({ campaignId }: CampaignDataSiphonProps) {
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <Funnel className="h-5 w-5" />
+                <Filter className="h-5 w-5" />
                 Campaign Data Siphon
                 <Badge variant="outline" className="ml-2">
                   <Database className="h-3 w-3 mr-1" />
