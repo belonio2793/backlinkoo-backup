@@ -85,7 +85,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
     }
   }, [isLoading]);
 
-  const toggleCampaignMonitoring = async (campaignId: string) => {
+  const toggleCampaignMonitoring = useCallback(async (campaignId: string) => {
     const campaign = campaigns.find(c => c.campaign_id === campaignId);
     if (!campaign) return;
 
@@ -102,7 +102,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
       console.error('Error toggling campaign monitoring:', error);
       setError('Failed to toggle campaign status');
     }
-  };
+  }, [campaigns, loadCampaignData, onToggleCampaign]);
 
   const handleRefreshData = async () => {
     stableCampaignMetrics.clearCache(); // Clear cache to force refresh
