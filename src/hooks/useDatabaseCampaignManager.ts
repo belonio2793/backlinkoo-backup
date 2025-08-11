@@ -36,7 +36,7 @@ export function useDatabaseCampaignManager() {
       } else {
         setError(result.error || 'Failed to load campaigns');
         toast.error('Failed to load campaigns', {
-          description: result.error
+          description: formatErrorForUser(result.error)
         });
       }
     } catch (err: any) {
@@ -62,7 +62,7 @@ export function useDatabaseCampaignManager() {
       } else {
         console.error('Failed to load link placements:', result.error);
         toast.error('Failed to load link placements', {
-          description: result.error || 'Unknown error occurred'
+          description: formatErrorForUser(result.error) || 'Unknown error occurred'
         });
       }
     } catch (err: any) {
@@ -88,7 +88,7 @@ export function useDatabaseCampaignManager() {
         setDashboardData(result.data || null);
       } else {
         toast.error('Failed to load dashboard data', {
-          description: result.error
+          description: formatErrorForUser(result.error)
         });
       }
     } catch (err: any) {
@@ -129,7 +129,7 @@ export function useDatabaseCampaignManager() {
         return result.data;
       } else {
         toast.error('Failed to create campaign', {
-          description: result.error
+          description: formatErrorForUser(result.error)
         });
         return null;
       }
@@ -199,7 +199,7 @@ export function useDatabaseCampaignManager() {
         return true;
       } else {
         toast.error('Failed to delete campaign', {
-          description: result.error
+          description: formatErrorForUser(result.error)
         });
         return false;
       }
@@ -239,7 +239,7 @@ export function useDatabaseCampaignManager() {
         return result.data || null;
       } else {
         toast.error('Failed to load campaign details', {
-          description: result.error
+          description: formatErrorForUser(result.error)
         });
         return null;
       }
@@ -275,7 +275,7 @@ export function useDatabaseCampaignManager() {
         return result.data;
       } else {
         toast.error('Failed to create link placement', {
-          description: result.error
+          description: formatErrorForUser(result.error)
         });
         return null;
       }
