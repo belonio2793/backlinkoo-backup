@@ -133,38 +133,56 @@ class DirectCheckoutService {
   ): Promise<string> {
     // Convert 'annual' to 'yearly' for Netlify function compatibility
     const plan = options.plan === 'annual' ? 'yearly' : (options.plan || 'monthly');
-    
+
+    console.log('📝 Creating premium checkout for plan:', plan);
+    console.log('👤 User:', user ? 'authenticated' : 'guest');
+
+    const requestBody = {
+      plan,
+      isGuest: !user,
+      guestEmail: options.email || user?.email || 'guest@example.com',
+      successUrl: `${window.location.origin}/payment-success?type=premium&plan=${plan}`,
+      cancelUrl: `${window.location.origin}${window.location.pathname}`
+    };
+
+    console.log('📤 Request body:', requestBody);
+
     const response = await fetch('/.netlify/functions/create-subscription', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        plan,
-        isGuest: !user,
-        guestEmail: options.email || user?.email,
-        successUrl: `${window.location.origin}/payment-success?type=premium&plan=${plan}`,
-        cancelUrl: `${window.location.origin}${window.location.pathname}`
-      })
+      body: JSON.stringify(requestBody)
     });
-    
+
+    console.log('📡 Response status:', response.status);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Premium checkout failed:', {
+      console.error('❌ Premium checkout failed:', {
         status: response.status,
         statusText: response.statusText,
-        error: errorText
+        error: errorText,
+        url: '/.netlify/functions/create-subscription'
       });
+
+      // Throw a more specific error
+      if (response.status === 404) {
+        throw new Error('Payment service not available. Please try again later.');
+      }
+
       throw new Error(`Failed to create premium checkout session: ${response.status} ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();
+    console.log('📄 Response data:', data);
 
     if (!data.url) {
-      console.error('No checkout URL in response:', data);
+      console.error('❌ No checkout URL in response:', data);
       throw new Error('No checkout URL received from server');
     }
-    
+
+    console.log('✅ Checkout URL created successfully');
     return data.url;
   }
   
