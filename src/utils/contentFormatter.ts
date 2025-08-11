@@ -84,28 +84,47 @@ export class ContentFormatter {
    */
   private static validateAndRepairHtml(content: string): string {
     return content
-      // Fix all malformed heading tags
+      // ULTRA-AGGRESSIVE: Fix ALL malformed heading tags with spaces and attributes
       .replace(/<h\s+([1-6])\s*=?\s*"?"?\s*([^>]*)>/gi, '<h$1>')
+      .replace(/<h\s*([1-6])\s*=\s*""\s*([^>]*)>/gi, '<h$1>')
+      .replace(/<h\s*([1-6])\s*([^>]*)>/gi, '<h$1>')
       .replace(/<\/h\s*([1-6])?\s*>/gi, (match, level) => {
         return level ? `</h${level}>` : '</h1>';
       })
+      .replace(/<\/h>/gi, '</h1>') // Fix standalone </h>
 
-      // Repair any remaining tag spacing issues
+      // Fix malformed attributes in any tag
       .replace(/<(\w+)\s+([^>]*)\s*=\s*""\s*([^>]*)>/gi, '<$1 $2$3>')
       .replace(/<(\w+)\s*=\s*""\s*([^>]*)>/gi, '<$1$2>')
+      .replace(/(\w+)\s*=\s*""\s*/g, '') // Remove empty attributes entirely
 
-      // Clean up style attributes with HTML entities
+      // ULTRA-AGGRESSIVE: Clean up ALL corrupted style attributes
       .replace(/style="[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      .replace(/style="[^"]*&amp;lt;[^"]*&amp;gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      .replace(/style="color:\s*#\s*2\s*&lt;p&gt;\s*563\s*eb[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      .replace(/style="color:\s*#\s*\d+\s*&lt;[^"]*&gt;\s*[0-9a-f]+[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
 
-      // Fix word concatenation issues
-      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      // MEGA-AGGRESSIVE: Fix text concatenation at multiple levels
+      .replace(/beautomatically\s*deletedin/gi, ' be automatically deleted in')
+      .replace(/beautomatically/gi, ' be automatically ')
+      .replace(/deletedin(\d+)/gi, ' deleted in $1')
+      .replace(/deletedin/gi, ' deleted in')
+      .replace(/([a-z])([A-Z])/g, '$1 $2') // camelCase breakup
       .replace(/(be)(automatically)/gi, '$1 $2')
       .replace(/([a-z])(deleted)/gi, '$1 $2')
       .replace(/([a-z])(in\d+[hm])/gi, '$1 $2')
+      .replace(/(\w)(in\d+[hm])/gi, '$1 $2')
+
+      // Fix specific patterns found in DOM
+      .replace(/0views/g, '0 views')
+      .replace(/(\d+)min/g, '$1 min')
+      .replace(/(\d+)h/g, '$1h') // Keep hours compact but add space before
+      .replace(/(\d+)m\s+remaining/g, '$1m remaining')
 
       // Remove any empty or malformed attributes
       .replace(/\s+=""(?=\s|>)/g, '')
-      .replace(/\s+=\s*""(?=\s|>)/g, '');
+      .replace(/\s+=\s*""(?=\s|>)/g, '')
+      .replace(/\s*=\s*""\s*/g, ' ');
   }
 
   /**
