@@ -38,11 +38,20 @@ export class CampaignErrorHandler {
         }
         
         // Final attempt failed
-        console.error(`Campaign operation failed after ${retries + 1} attempts (${context}):`, formatErrorForUI(error));
-        
+        const formattedError = formatErrorForUI(error);
+        console.error(`Campaign operation failed after ${retries + 1} attempts (${context}):`, formattedError);
+
+        // Debug log the original error to help diagnose formatting issues
+        if (import.meta.env.DEV) {
+          console.debug('Original error object:', error);
+          console.debug('Formatted error:', formattedError);
+          console.debug('Error type:', typeof error);
+          console.debug('Error keys:', error && typeof error === 'object' ? Object.keys(error) : 'N/A');
+        }
+
         if (showToast) {
           toast.error(`Campaign Error: ${context}`, {
-            description: formatErrorForUI(error)
+            description: formattedError
           });
         }
         
