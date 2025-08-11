@@ -408,9 +408,9 @@ export default function BacklinkAutomation() {
           />
         )}
 
-        {/* Database Health Checker - Always visible for critical issues */}
-        <div className="mb-8">
-          <DatabaseHealthChecker />
+        {/* Quick Database Status - Always visible for critical issues */}
+        <div className="mb-6">
+          <QuickDatabaseStatus />
         </div>
 
         {/* Show notice if automation tables are missing */}
