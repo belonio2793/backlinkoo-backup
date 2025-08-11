@@ -35,7 +35,19 @@ export class TextSpacingFixer {
       
       // Fix patterns like "automaticallydeleted", "beautomatically", etc.
       text = text.replace(/(automatically|beautomatically)(deleted?|deletedin)/gi, 'automatically deleted in');
-      
+
+      // Fix missing spaces around quotes
+      text = text.replace(/("[\w\s]+")([a-z])/gi, '$1 $2');
+      text = text.replace(/([a-z])(in\d+[hm])/gi, '$1 $2');
+      text = text.replace(/(\d+[hm])(\d+[hm])/gi, '$1 $2');
+      text = text.replace(/(\d+[hm])(remaining)/gi, '$1 $2');
+      text = text.replace(/(remaining)([a-z])/gi, '$1 $2');
+
+      // Fix specific patterns from the modal
+      text = text.replace(/"([^"]+)"will/gi, '"$1" will');
+      text = text.replace(/in(\d+h)/gi, 'in $1');
+      text = text.replace(/remaining([a-z])/gi, 'remaining $1');
+
       // Fix general word concatenations
       text = text.replace(/([a-z])([A-Z])/g, '$1 $2'); // camelCase to spaced
       
