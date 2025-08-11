@@ -87,15 +87,28 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
 
         <CardContent className="space-y-6">
           <div className="text-center">
-            <p className="text-gray-700 mb-4" style={{ wordSpacing: '0.3em', letterSpacing: '0.02em', lineHeight: '1.6' }}>
-              <span>Your blog post </span>
-              <span>"{spacedPostTitle || 'this content'}" </span>
-              <span>will be </span>
-              <span className="font-semibold text-red-600">automatically deleted</span>
-              <span> in </span>
-              <span style={{ margin: '0 0.25rem', fontWeight: '600' }}>{spacedTimeRemaining}</span>
-              <span> if left unclaimed.</span>
-            </p>
+            <div className="text-gray-700 mb-4 text-center" style={{ lineHeight: '1.8', fontSize: '16px' }}>
+              <div style={{ marginBottom: '4px' }}>
+                Your blog post <strong>"{spacedPostTitle || 'this content'}"</strong> will be{' '}
+                <span className="font-semibold text-red-600" style={{ padding: '0 4px' }}>
+                  automatically deleted
+                </span>{' '}
+                in{' '}
+                <span
+                  className="font-bold text-gray-800"
+                  style={{
+                    padding: '2px 8px',
+                    backgroundColor: '#fef3c7',
+                    borderRadius: '4px',
+                    border: '1px solid #fbbf24',
+                    margin: '0 4px'
+                  }}
+                >
+                  {spacedTimeRemaining}
+                </span>{' '}
+                if left unclaimed.
+              </div>
+            </div>
             
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
               <div className="flex items-center gap-2 text-amber-800 mb-2">
