@@ -201,6 +201,16 @@ export class ContentFormatter {
       .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*([^&<]+)/gi, '## $1')
       .replace(/##\s*&lt;\s*\/\s*h[1-6]\s*&gt;\s*([^&<]+)/gi, '## $1')
 
+      // PREVENT MALFORMED HTML TAGS: Ensure proper heading tag structure
+      .replace(/^\s*##\s+(.+?)$/gm, (match, text) => {
+        // Clean the text and ensure it doesn't contain HTML entities or malformed content
+        const cleanText = text.trim()
+          .replace(/&lt;[^&>]*&gt;/g, '') // Remove HTML entities
+          .replace(/[<>]/g, '') // Remove any remaining brackets
+          .trim();
+        return cleanText ? `<h2>${cleanText}</h2>` : '';
+      })
+
       // Remove markdown frontmatter separators (triple hyphens)
       .replace(/^---[\s\S]*?---/gm, '')
       .replace(/^---.*$/gm, '')
