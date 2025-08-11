@@ -17,7 +17,21 @@ import type {
 } from '@/types/automationTypes';
 
 export class AutomationDatabaseService {
-  
+
+  // Check if automation tables exist
+  private static async checkTablesExist(): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('automation_campaigns')
+        .select('count')
+        .limit(1);
+
+      return !error;
+    } catch {
+      return false;
+    }
+  }
+
   // ==================== CAMPAIGNS ====================
   
   static async createCampaign(campaignData: AutomationCampaignInsert): Promise<{ success: boolean; data?: AutomationCampaign; error?: string }> {
