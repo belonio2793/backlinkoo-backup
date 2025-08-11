@@ -568,8 +568,31 @@ export function BeautifulBlogPost() {
         title: "URL Copied!",
         description: "Blog post URL copied to clipboard",
       });
-    } catch (error) {
-      console.error('Failed to copy to clipboard:', error);
+    } catch (error: any) {
+      console.error('Failed to copy to clipboard:', {
+        error: error?.message || error,
+        url: window.location.href
+      });
+      // Fallback: try using the old-school method
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = window.location.href;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        toast({
+          title: "URL Copied!",
+          description: "Blog post URL copied to clipboard",
+        });
+      } catch (fallbackError: any) {
+        console.error('Fallback copy also failed:', fallbackError);
+        toast({
+          title: "Copy Failed",
+          description: "Unable to copy URL to clipboard",
+          variant: "destructive"
+        });
+      }
     }
   };
 
@@ -581,11 +604,18 @@ export function BeautifulBlogPost() {
           text: blogPost?.meta_description || blogPost?.excerpt,
           url: window.location.href,
         });
-      } catch (error) {
-        console.error('Error sharing:', error);
+      } catch (error: any) {
+        console.error('Error sharing:', {
+          error: error?.message || error,
+          title: blogPost?.title
+        });
+        // If native sharing fails, fall back to copying
+        if (error?.name !== 'AbortError') { // Don't show error if user cancelled
+          await copyToClipboard();
+        }
       }
     } else {
-      copyToClipboard();
+      await copyToClipboard();
     }
   };
 
