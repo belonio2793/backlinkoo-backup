@@ -344,12 +344,18 @@ export default function BacklinkAutomation() {
                     </CardDescription>
                   </div>
                   <Button
-                    onClick={() => setShowCreateForm(!showCreateForm)}
-                    disabled={!canCreateLinks}
+                    onClick={() => {
+                      if (!isAuthenticated) {
+                        setShowAuthModal(true);
+                        return;
+                      }
+                      setShowCreateForm(!showCreateForm);
+                    }}
+                    disabled={isAuthenticated && !canCreateLinks}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    New Campaign
+                    {isAuthenticated ? 'New Campaign' : 'Sign In to Create Campaign'}
                   </Button>
                 </div>
               </CardHeader>
