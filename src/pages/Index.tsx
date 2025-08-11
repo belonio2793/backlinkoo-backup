@@ -991,7 +991,7 @@ const Index = () => {
                     <span className="text-2xl font-mono">$</span>{plan.price}
                   </div>
                   <div className="text-sm text-gray-500 font-mono">
-                    ${plan.pricePerLink} per link
+                    $1.4 per link
                   </div>
                   <p className="text-gray-600 font-light">{plan.description}</p>
                 </CardHeader>
@@ -1052,10 +1052,10 @@ const Index = () => {
                 <div className="text-center">
                   <div className="text-3xl font-semibold text-gray-900 mb-2">
                     <span className="text-xl font-mono">Total: </span>
-                    <span>${customCredits > 0 ? (customCredits * 1.40).toFixed(2) : '0.00'}</span>
+                    <span>${customCredits > 0 ? (customCredits * 1.4).toFixed(2) : '0.00'}</span>
                   </div>
                   <div className="text-sm text-gray-500 font-mono">
-                    $1.40 per credit
+                    $1.4 per credit
                   </div>
                 </div>
 
