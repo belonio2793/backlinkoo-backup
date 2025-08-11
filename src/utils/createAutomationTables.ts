@@ -62,15 +62,24 @@ export async function initializeAutomationTables() {
       .from('user_link_quotas')
       .select('count')
       .limit(1);
-    
+
+    let quotasTableExists = false;
     if (quotasError) {
-      console.log('user_link_quotas table does not exist or has issues:', {
-        message: quotasError.message,
-        code: quotasError.code,
-        details: quotasError.details
-      });
+      // Handle auth session missing as expected for unauthenticated checks
+      if (quotasError.message?.includes('Auth session missing')) {
+        console.log('✅ user_link_quotas table exists (no auth session required for table check)');
+        quotasTableExists = true;
+      } else {
+        console.log('user_link_quotas table does not exist or has issues:', {
+          message: quotasError.message,
+          code: quotasError.code,
+          details: quotasError.details
+        });
+        quotasTableExists = false;
+      }
     } else {
       console.log('✅ user_link_quotas table exists');
+      quotasTableExists = true;
     }
     
     // Return status
