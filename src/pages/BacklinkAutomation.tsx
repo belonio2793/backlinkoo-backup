@@ -420,7 +420,7 @@ export default function BacklinkAutomation() {
   const getUserStorageKey = useCallback(() => {
     if (user?.id) {
       const key = `permanent_campaigns_${user.id}`;
-      console.log('���� Using user storage key:', key);
+      console.log('����� Using user storage key:', key);
       return key;
     } else {
       // For guest users, use a persistent guest ID
@@ -1439,7 +1439,7 @@ export default function BacklinkAutomation() {
           updateGuestRestrictions();
 
           // Open premium checkout for auto-paused campaign
-          DirectCheckoutService.upgradeToPremium('monthly');
+          setShowPaymentModal(true);
 
           toast({
             title: "🛑 Campaign Paused - Limit Reached",
@@ -1448,7 +1448,7 @@ export default function BacklinkAutomation() {
             duration: 5000
           });
         } else if (trackingResult.shouldShowPremiumModal) {
-          DirectCheckoutService.upgradeToPremium('monthly');
+          setShowPaymentModal(true);
         }
       }
     }
@@ -2363,7 +2363,7 @@ export default function BacklinkAutomation() {
             const activity = {
               id: `activity-${Date.now()}-${i}`,
               type: 'link_published' as const,
-              message: `��� ${newPostback.linkType.replace('_', ' ')} published on ${newPostback.domain}`,
+              message: `🔗 ${newPostback.linkType.replace('_', ' ')} published on ${newPostback.domain}`,
               timestamp: new Date().toISOString(),
               metadata: {
                 domain: newPostback.domain,
@@ -2695,7 +2695,7 @@ export default function BacklinkAutomation() {
 
       if (!trackingResult.success) {
         if (trackingResult.shouldShowPremiumModal) {
-          DirectCheckoutService.upgradeToPremium('monthly');
+          setShowPaymentModal(true);
         }
 
         toast({
@@ -3632,7 +3632,7 @@ export default function BacklinkAutomation() {
                               <Button
                                 size="sm"
                                 onClick={() => {
-                                  DirectCheckoutService.upgradeToPremium('monthly');
+                                  setShowPaymentModal(true);
                                 }}
                                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-xs"
                               >
@@ -5296,7 +5296,7 @@ export default function BacklinkAutomation() {
                                   onClick={() => {
                                     // Check if campaign has reached link limit
                                     if (campaign.linksGenerated >= 20) {
-                                      DirectCheckoutService.upgradeToPremium('monthly');
+                                      setShowPaymentModal(true);
                                       toast({
                                         title: "🚀 Upgrade to Continue",
                                         description: "This campaign has reached the 20-link free limit. Upgrade for unlimited links!",
@@ -5328,7 +5328,7 @@ export default function BacklinkAutomation() {
 
                                     if (!updateResult.success) {
                                       // Campaign cannot be reactivated - open premium checkout
-                                      DirectCheckoutService.upgradeToPremium('monthly');
+                                      setShowPaymentModal(true);
                                       toast({
                                         title: " Premium Required",
                                         description: updateResult.warning?.message || "This campaign reached the 20-link limit. Upgrade to continue building links!",
@@ -5425,7 +5425,7 @@ export default function BacklinkAutomation() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => {
-                                    DirectCheckoutService.upgradeToPremium('monthly');
+                                    setShowPaymentModal(true);
                                   }}
                                   className="text-xs h-5 px-2 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100 mt-1"
                                 >
@@ -5466,7 +5466,7 @@ export default function BacklinkAutomation() {
                                 <Button
                                   size="sm"
                                   onClick={() => {
-                                    DirectCheckoutService.upgradeToPremium('monthly');
+                                    setShowPaymentModal(true);
                                   }}
                                   className="h-6 px-3 text-xs bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                                 >
@@ -7460,7 +7460,7 @@ export default function BacklinkAutomation() {
                 <li>✓ Your current campaign will be saved to your account</li>
                 <li>✓ Get access to 3 free automation campaigns</li>
                 <li>✓ Monitor your backlink progress in real-time</li>
-                <li>✓ Receive notifications when links go live</li>
+                <li>�� Receive notifications when links go live</li>
               </ul>
             </div>
 
