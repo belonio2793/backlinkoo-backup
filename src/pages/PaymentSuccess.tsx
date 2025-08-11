@@ -1,220 +1,118 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+/**
+ * Payment Success Page
+ * Simple page to handle successful payment redirects from Stripe
+ */
+
+import React, { useEffect, useState } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/useAuth';
-import { PremiumUpgradeService } from '@/services/premiumUpgradeService';
-import { PaymentVerificationService } from '@/services/paymentVerificationService';
-import { CheckCircle, Crown, ArrowRight, Sparkles, Loader2, X } from 'lucide-react';
+import { CheckCircle, Crown, CreditCard, ArrowRight } from 'lucide-react';
 
-export default function PaymentSuccess() {
-  const navigate = useNavigate();
+export function PaymentSuccess() {
   const [searchParams] = useSearchParams();
-  const { toast } = useToast();
-  const { user, isLoading: authLoading } = useAuth();
-  const [isProcessing, setIsProcessing] = useState(true);
-  const [redirectUrl, setRedirectUrl] = useState('/dashboard');
-  const [processingError, setProcessingError] = useState<string | null>(null);
+  const navigate = useNavigate();
+  const [countdown, setCountdown] = useState(5);
+
+  const paymentType = searchParams.get('type');
+  const credits = searchParams.get('credits');
+  const plan = searchParams.get('plan');
 
   useEffect(() => {
-    const processPaymentSuccess = async () => {
-      if (authLoading) return;
-
-      const sessionId = searchParams.get('session_id');
-      const orderId = searchParams.get('order_id');
-      const paymentMethod = searchParams.get('payment_method') as 'stripe' | 'paypal' | null;
-      const isDemo = searchParams.get('demo');
-      const isMock = searchParams.get('mock');
-      const credits = searchParams.get('credits');
-      const amount = searchParams.get('amount');
-
-      try {
-        let result;
-
-        // Handle demo or mock mode for development
-        if (isDemo === 'true' || isMock === 'true') {
-          const mode = isMock === 'true' ? 'Mock' : 'Demo';
-          console.log(`🚧 ${mode} mode payment success:`, { credits, amount });
-          result = {
-            success: true,
-            redirectUrl: '/dashboard',
-            message: `${mode} mode: ${credits} credits purchased for $${amount || 'N/A'}`
-          };
-
-          toast({
-            title: `🚧 ${mode} Payment Success`,
-            description: `${mode} mode: ${credits} credits have been simulated for your account.`,
-          });
-        } else if (sessionId || orderId || paymentMethod) {
-          // Process payment verification with enhanced service
-          result = await PaymentVerificationService.verifyPayment({
-            sessionId: sessionId || undefined,
-            orderId: orderId || undefined,
-            paymentMethod: paymentMethod || undefined
-          });
-        } else {
-          // No payment identifiers - might be from fallback service
-          result = await PaymentVerificationService.handleFallbackUpgrade();
+    // Auto-redirect after 5 seconds
+    const timer = setInterval(() => {
+      setCountdown(prev => {
+        if (prev <= 1) {
+          navigate('/dashboard');
+          return 0;
         }
+        return prev - 1;
+      });
+    }, 1000);
 
-        if (result.success) {
-          setRedirectUrl(result.redirectUrl || '/dashboard');
-          if (!isDemo) {
-            toast({
-              title: "🎉 Payment Successful!",
-              description: result.message || "Your payment has been processed successfully!",
-            });
-          }
-        } else {
-          setProcessingError(result.error || 'Failed to process payment');
-        }
-      } catch (error: any) {
-        console.error('Error processing payment success:', error);
-        setProcessingError(error.message || 'An unexpected error occurred');
-      }
+    return () => clearInterval(timer);
+  }, [navigate]);
 
-      setIsProcessing(false);
-    };
+  const handleGoToDashboard = () => {
+    navigate('/dashboard');
+  };
 
-    processPaymentSuccess();
-  }, [user, authLoading, searchParams, toast]);
-
-  // Auto-redirect after 3 seconds
-  useEffect(() => {
-    if (!isProcessing && !processingError) {
-      const timer = setTimeout(() => {
-        navigate(redirectUrl);
-      }, 3000);
-
-      return () => clearTimeout(timer);
+  const getSuccessMessage = () => {
+    if (paymentType === 'premium') {
+      return {
+        title: 'Welcome to Premium!',
+        description: `Your ${plan === 'annual' ? 'annual' : 'monthly'} premium subscription is now active.`,
+        icon: <Crown className="h-8 w-8 text-yellow-500" />
+      };
+    } else {
+      return {
+        title: 'Credits Added Successfully!',
+        description: `${credits || '50'} credits have been added to your account.`,
+        icon: <CreditCard className="h-8 w-8 text-green-500" />
+      };
     }
-  }, [isProcessing, processingError, redirectUrl, navigate]);
+  };
 
-  if (authLoading || isProcessing) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardContent className="text-center py-12">
-            <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Loader2 className="h-8 w-8 text-purple-600 animate-spin" />
-            </div>
-            <h2 className="text-2xl font-bold mb-2">Processing Your Upgrade</h2>
-            <p className="text-gray-600">
-              Please wait while we confirm your payment and activate your premium features...
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (processingError) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <X className="h-8 w-8 text-red-600" />
-            </div>
-            <CardTitle className="text-2xl text-red-600">Upgrade Error</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center space-y-4">
-            <p className="text-gray-600">{processingError}</p>
-            <div className="space-y-2">
-              <Button onClick={() => navigate('/dashboard')} className="w-full">
-                <ArrowRight className="h-4 w-4 mr-2" />
-                Go to Dashboard
-              </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => window.location.href = 'mailto:support@backlinkoo.com'}
-                className="w-full"
-              >
-                Contact Support
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
+  const { title, description, icon } = getSuccessMessage();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-6 relative">
-            <CheckCircle className="h-12 w-12 text-green-600" />
-            <div className="absolute -top-2 -right-2 w-8 h-8 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
-              <Crown className="h-5 w-5 text-purple-600" />
-            </div>
+          <div className="mx-auto mb-4 p-3 bg-green-100 rounded-full w-fit">
+            <CheckCircle className="h-8 w-8 text-green-600" />
           </div>
-          <CardTitle className="text-3xl font-bold text-green-600 mb-2">
-            Welcome to Premium!
+          <CardTitle className="text-2xl font-bold text-green-800">
+            Payment Successful!
           </CardTitle>
-          <p className="text-gray-600">
-            Your payment was successful and your account has been upgraded.
-          </p>
         </CardHeader>
         
-        <CardContent className="space-y-6">
-          {/* Premium Features Unlocked */}
-          <div className="p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200">
-            <div className="flex items-center gap-2 mb-3">
-              <Sparkles className="h-5 w-5 text-purple-600" />
-              <span className="font-semibold text-purple-800">Premium Features Unlocked!</span>
-            </div>
-            <div className="space-y-2 text-sm text-purple-700">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Unlimited high-quality backlinks</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>100/100 SEO optimized content</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Advanced analytics & insights</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4" />
-                <span>Priority customer support</span>
-              </div>
+        <CardContent className="text-center space-y-6">
+          <div className="flex items-center justify-center gap-3">
+            {icon}
+            <div>
+              <h3 className="font-semibold text-lg">{title}</h3>
+              <p className="text-muted-foreground">{description}</p>
             </div>
           </div>
 
-          {/* Auto-redirect Notice */}
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-700 mb-2">
-              Redirecting you to your dashboard in a few seconds...
-            </p>
-            <div className="w-full bg-blue-200 rounded-full h-2 overflow-hidden">
-              <div className="h-full bg-blue-600 rounded-full animate-pulse"></div>
-            </div>
-          </div>
-
-          {/* Manual Navigation */}
-          <div className="space-y-2">
+          <div className="space-y-4">
             <Button 
-              onClick={() => navigate(redirectUrl)} 
-              className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-            >
-              <ArrowRight className="h-4 w-4 mr-2" />
-              Go to Dashboard Now
-            </Button>
-            
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/blog')}
+              onClick={handleGoToDashboard}
               className="w-full"
             >
-              Explore Premium Content
+              <ArrowRight className="h-4 w-4 mr-2" />
+              Go to Dashboard
             </Button>
+            
+            <p className="text-sm text-muted-foreground">
+              Redirecting automatically in {countdown} seconds...
+            </p>
           </div>
+
+          {paymentType === 'premium' && (
+            <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg">
+              <h4 className="font-semibold text-purple-800 mb-2">Premium Features Unlocked:</h4>
+              <ul className="text-sm text-purple-700 space-y-1">
+                <li>• Unlimited blog posts</li>
+                <li>• Advanced campaign automation</li>
+                <li>• Priority support</li>
+                <li>• Advanced analytics</li>
+              </ul>
+            </div>
+          )}
+
+          {paymentType === 'credits' && (
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
+              <p className="text-sm text-green-700">
+                Your credits are ready to use! You can now generate more blog posts and run additional campaigns.
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
   );
 }
+
+export default PaymentSuccess;

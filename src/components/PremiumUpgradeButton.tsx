@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, Sparkles, ArrowRight, Zap } from 'lucide-react';
-import { PremiumPlanModal } from '@/components/PremiumPlanModal';
-import { useAuth } from '@/hooks/useAuth';
+import { DirectCheckoutService } from '@/services/directCheckoutService';
 import { usePremium } from '@/hooks/usePremium';
 
 interface PremiumUpgradeButtonProps {
@@ -28,8 +27,6 @@ export function PremiumUpgradeButton({
   style = 'primary',
   disabled = false
 }: PremiumUpgradeButtonProps) {
-  const [showPremiumModal, setShowPremiumModal] = useState(false);
-  const { user } = useAuth();
   const { isPremium, loading } = usePremium();
 
   // Don't show upgrade button if user is already premium
@@ -96,13 +93,12 @@ export function PremiumUpgradeButton({
     }
   };
 
-  const handleUpgradeClick = () => {
-    setShowPremiumModal(true);
-  };
-
-  const handleModalSuccess = () => {
-    setShowPremiumModal(false);
-    // The modal will handle navigation to dashboard
+  const handleUpgradeClick = async () => {
+    try {
+      await DirectCheckoutService.upgradeToPremium('monthly');
+    } catch (error) {
+      console.error('Premium upgrade failed:', error);
+    }
   };
 
   if (loading) {
@@ -122,24 +118,15 @@ export function PremiumUpgradeButton({
   }
 
   return (
-    <>
-      <Button
-        variant={variant}
-        size={size}
-        onClick={handleUpgradeClick}
-        disabled={disabled || loading}
-        className={getButtonClassName()}
-      >
-        {getButtonContent()}
-      </Button>
-
-      <PremiumPlanModal
-        isOpen={showPremiumModal}
-        onClose={() => setShowPremiumModal(false)}
-        onSuccess={handleModalSuccess}
-        triggerSource={triggerSource}
-      />
-    </>
+    <Button
+      variant={variant}
+      size={size}
+      onClick={handleUpgradeClick}
+      disabled={disabled || loading}
+      className={getButtonClassName()}
+    >
+      {getButtonContent()}
+    </Button>
   );
 }
 
@@ -170,20 +157,26 @@ export function NavigationUpgradeButton() {
 }
 
 export function ToolsHeaderUpgradeButton() {
+  const handleUpgrade = async () => {
+    try {
+      await DirectCheckoutService.upgradeToPremium('monthly');
+    } catch (error) {
+      console.error('ToolsHeader upgrade failed:', error);
+    }
+  };
+
   return (
-    <PremiumUpgradeButton
+    <Button
       variant="outline"
       size="sm"
-      style="badge"
-      triggerSource="navigation"
-      showText={false}
+      onClick={handleUpgrade}
       className="bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 px-3 py-1.5"
     >
       <div className="flex items-center gap-1">
         <Crown className="h-3 w-3" />
         <span className="text-xs font-medium">Pro</span>
       </div>
-    </PremiumUpgradeButton>
+    </Button>
   );
 }
 

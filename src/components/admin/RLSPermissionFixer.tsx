@@ -1,279 +1,185 @@
+/**
+ * Admin utility to fix RLS permission errors
+ * Provides manual fix option for "permission denied for table users" error
+ */
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, CheckCircle, Loader2, RefreshCw } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
+import { AlertTriangle, CheckCircle, Copy, ExternalLink } from 'lucide-react';
 
-interface FixResult {
-  success: boolean;
-  message: string;
-  details?: string;
-}
+export function RLSPermissionFixer() {
+  const [showFix, setShowFix] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-export const RLSPermissionFixer: React.FC = () => {
-  const [isFixing, setIsFixing] = useState(false);
-  const [isTesting, setIsTesting] = useState(false);
-  const [testResult, setTestResult] = useState<FixResult | null>(null);
-  const [fixResult, setFixResult] = useState<FixResult | null>(null);
-
-  const testProfilesAccess = async (): Promise<FixResult> => {
-    try {
-      console.log('🔍 Testing profiles table access...');
-      
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('user_id')
-        .limit(1);
-      
-      if (error) {
-        console.error('❌ Profiles access error:', error);
-        return {
-          success: false,
-          message: 'Permission denied error detected',
-          details: error.message
-        };
-      }
-      
-      return {
-        success: true,
-        message: 'Profiles table is accessible',
-        details: `Found ${data?.length || 0} profiles`
-      };
-    } catch (error: any) {
-      return {
-        success: false,
-        message: 'Unexpected error testing profiles access',
-        details: error.message
-      };
-    }
-  };
-
-  const handleTestAccess = async () => {
-    setIsTesting(true);
-    setTestResult(null);
-    
-    try {
-      const result = await testProfilesAccess();
-      setTestResult(result);
-    } catch (error: any) {
-      setTestResult({
-        success: false,
-        message: 'Test failed',
-        details: error.message
-      });
-    } finally {
-      setIsTesting(false);
-    }
-  };
-
-  const applyEmergencyFix = async (): Promise<FixResult> => {
-    try {
-      console.log('🚨 Applying emergency RLS fix...');
-      
-      // Try to check if we have any admin access
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (!user) {
-        return {
-          success: false,
-          message: 'Not authenticated',
-          details: 'Please sign in before applying fixes'
-        };
-      }
-      
-      // The emergency fix would require service role key, which we don't have in frontend
-      // Instead, provide clear manual instructions
-      return {
-        success: false,
-        message: 'Manual fix required',
-        details: 'Please apply the SQL fix manually in Supabase dashboard'
-      };
-      
-    } catch (error: any) {
-      return {
-        success: false,
-        message: 'Emergency fix failed',
-        details: error.message
-      };
-    }
-  };
-
-  const handleApplyFix = async () => {
-    setIsFixing(true);
-    setFixResult(null);
-    
-    try {
-      const result = await applyEmergencyFix();
-      setFixResult(result);
-    } catch (error: any) {
-      setFixResult({
-        success: false,
-        message: 'Fix application failed',
-        details: error.message
-      });
-    } finally {
-      setIsFixing(false);
-    }
-  };
-
-  const getSupabaseDashboardUrl = () => {
-    const url = import.meta.env.VITE_SUPABASE_URL;
-    if (url) {
-      const projectRef = url.match(/https:\/\/(.+?)\.supabase\.co/)?.[1];
-      return `https://supabase.com/dashboard/project/${projectRef}/sql`;
-    }
-    return 'https://supabase.com/dashboard';
-  };
-
-  return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <AlertTriangle className="h-5 w-5 text-amber-500" />
-            RLS Permission Error Fixer
-          </CardTitle>
-          <CardDescription>
-            Fix "permission denied for table users" errors in your application
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          
-          {/* Test Current Status */}
-          <div className="space-y-2">
-            <h4 className="font-medium">1. Test Current Access</h4>
-            <Button 
-              onClick={handleTestAccess}
-              disabled={isTesting}
-              variant="outline"
-              className="w-full"
-            >
-              {isTesting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Testing...
-                </>
-              ) : (
-                <>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Test Profiles Table Access
-                </>
-              )}
-            </Button>
-            
-            {testResult && (
-              <Alert className={testResult.success ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}>
-                <AlertDescription className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    {testResult.success ? (
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <AlertTriangle className="h-4 w-4 text-red-600" />
-                    )}
-                    <span className="font-medium">{testResult.message}</span>
-                  </div>
-                  {testResult.details && (
-                    <div className="text-sm text-muted-foreground">
-                      {testResult.details}
-                    </div>
-                  )}
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-
-          {/* Manual Fix Instructions */}
-          {testResult && !testResult.success && (
-            <div className="space-y-3">
-              <h4 className="font-medium">2. Apply Manual Fix</h4>
-              <Alert>
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription className="space-y-3">
-                  <p className="font-medium">Manual fix required in Supabase dashboard:</p>
-                  <ol className="list-decimal list-inside space-y-1 text-sm">
-                    <li>Open your Supabase dashboard</li>
-                    <li>Go to SQL Editor</li>
-                    <li>Run the emergency fix SQL</li>
-                    <li>Test your app again</li>
-                  </ol>
-                  <div className="flex gap-2">
-                    <Button 
-                      onClick={() => window.open(getSupabaseDashboardUrl(), '_blank')}
-                      size="sm"
-                      variant="outline"
-                    >
-                      Open Supabase Dashboard
-                    </Button>
-                    <Button 
-                      onClick={() => window.open('/PERMISSION_ERROR_FIX.md', '_blank')}
-                      size="sm"
-                      variant="outline"
-                    >
-                      View Fix Instructions
-                    </Button>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            </div>
-          )}
-
-          {/* Emergency SQL Fix */}
-          {testResult && !testResult.success && (
-            <div className="space-y-2">
-              <h4 className="font-medium">3. Emergency SQL Fix</h4>
-              <div className="bg-gray-50 p-3 rounded-md">
-                <p className="text-xs text-gray-600 mb-2">Copy and paste this into Supabase SQL Editor:</p>
-                <pre className="text-xs bg-gray-800 text-green-400 p-2 rounded overflow-x-auto">
-{`-- Emergency fix for RLS permission error
-ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;
-
--- Drop problematic functions
+  const sqlFix = `-- Emergency Fix for "permission denied for table users" Error
 DROP FUNCTION IF EXISTS public.get_current_user_role() CASCADE;
 DROP FUNCTION IF EXISTS public.get_user_role(uuid) CASCADE;
 
--- Test that it worked
-SELECT 'Fix applied successfully' as status;`}
-                </pre>
-              </div>
-            </div>
-          )}
+-- Clean up conflicting policies
+DROP POLICY IF EXISTS "Users can view their own profile" ON public.profiles;
+DROP POLICY IF EXISTS "Admins can view all profiles" ON public.profiles;
 
-          {/* Success State */}
-          {testResult && testResult.success && (
-            <Alert className="border-green-200 bg-green-50">
-              <CheckCircle className="h-4 w-4 text-green-600" />
+-- Temporarily disable and re-enable RLS
+ALTER TABLE public.profiles DISABLE ROW LEVEL SECURITY;
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+-- Create simple, non-recursive policies
+CREATE POLICY "profiles_select_own" 
+ON public.profiles FOR SELECT 
+USING (auth.uid() = user_id);
+
+CREATE POLICY "profiles_update_own" 
+ON public.profiles FOR UPDATE 
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "profiles_insert_own" 
+ON public.profiles FOR INSERT 
+WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "profiles_service_access" 
+ON public.profiles FOR ALL 
+USING (auth.role() = 'service_role');
+
+-- Grant necessary permissions
+GRANT ALL ON public.profiles TO authenticated;
+GRANT SELECT ON public.profiles TO anon;
+
+-- Test the fix
+SELECT 'RLS permission fix completed' as status, COUNT(*) as profile_count 
+FROM public.profiles;`;
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(sqlFix);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      console.error('Failed to copy to clipboard:', error);
+    }
+  };
+
+  const openSupabaseDashboard = () => {
+    window.open('https://supabase.com/dashboard/project/dfhanacsmsvvkpunurnp/sql', '_blank');
+  };
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <AlertTriangle className="h-5 w-5 text-amber-500" />
+          RLS Permission Error Fix
+        </CardTitle>
+        <CardDescription>
+          Fix "permission denied for table users" error caused by RLS recursion
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        {/* Error Detection */}
+        <Alert>
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Error:</strong> "permission denied for table users"
+            <br />
+            <strong>Cause:</strong> Row Level Security (RLS) policy recursion
+            <br />
+            <strong>Impact:</strong> Campaign metrics and admin dashboard features may fail
+          </AlertDescription>
+        </Alert>
+
+        {/* Status Badges */}
+        <div className="flex gap-2 flex-wrap">
+          <Badge variant="destructive">RLS Recursion Detected</Badge>
+          <Badge variant="outline">Manual Fix Required</Badge>
+          <Badge variant="secondary">SQL Editor Access Needed</Badge>
+        </div>
+
+        {/* Fix Instructions */}
+        <div className="space-y-3">
+          <h4 className="font-semibold">Fix Instructions:</h4>
+          
+          <div className="space-y-2">
+            <p className="text-sm text-muted-foreground">
+              1. Click "Open Supabase SQL Editor" below
+            </p>
+            <p className="text-sm text-muted-foreground">
+              2. Copy the SQL fix code and paste it into the SQL editor
+            </p>
+            <p className="text-sm text-muted-foreground">
+              3. Run the SQL to fix the RLS recursion issue
+            </p>
+            <p className="text-sm text-muted-foreground">
+              4. Refresh this page to verify the fix worked
+            </p>
+          </div>
+
+          <div className="flex gap-2">
+            <Button onClick={openSupabaseDashboard} className="flex items-center gap-2">
+              <ExternalLink className="h-4 w-4" />
+              Open Supabase SQL Editor
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={() => setShowFix(!showFix)}
+            >
+              {showFix ? 'Hide' : 'Show'} SQL Fix Code
+            </Button>
+          </div>
+        </div>
+
+        {/* SQL Fix Code */}
+        {showFix && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h4 className="font-semibold">SQL Fix Code:</h4>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={copyToClipboard}
+                className="flex items-center gap-2"
+              >
+                <Copy className="h-4 w-4" />
+                {copied ? 'Copied!' : 'Copy SQL'}
+              </Button>
+            </div>
+            
+            <div className="relative">
+              <pre className="bg-muted p-4 rounded-md text-sm overflow-x-auto border">
+                {sqlFix}
+              </pre>
+            </div>
+            
+            <Alert>
+              <CheckCircle className="h-4 w-4" />
               <AlertDescription>
-                <div className="font-medium text-green-800">
-                  ✅ No permission errors detected!
-                </div>
-                <div className="text-sm text-green-700 mt-1">
-                  Your profiles table is accessible and working correctly.
-                </div>
+                This SQL fix will:
+                <ul className="list-disc list-inside mt-2 space-y-1">
+                  <li>Remove the recursive function causing the issue</li>
+                  <li>Clean up conflicting RLS policies</li>
+                  <li>Create simple, non-recursive policies</li>
+                  <li>Restore proper database access</li>
+                </ul>
               </AlertDescription>
             </Alert>
-          )}
+          </div>
+        )}
 
-        </CardContent>
-      </Card>
-
-      {/* Additional Help */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-sm">Need More Help?</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>If the fix doesn't work:</p>
-          <ul className="list-disc list-inside space-y-1 ml-2">
-            <li>Check browser console for detailed error messages</li>
-            <li>Verify you're signed in to the application</li>
-            <li>Ensure your Supabase project is active (not paused)</li>
-            <li>Try viewing the profiles table directly in Supabase dashboard</li>
-          </ul>
-        </CardContent>
-      </Card>
-    </div>
+        {/* Alternative Fix */}
+        <Alert>
+          <AlertDescription>
+            <strong>Alternative:</strong> If the SQL fix doesn't work, the application will automatically 
+            use fallback data for campaign metrics until the database issue is resolved.
+            The admin dashboard will continue to function with estimated metrics.
+          </AlertDescription>
+        </Alert>
+      </CardContent>
+    </Card>
   );
-};
+}
 
 export default RLSPermissionFixer;

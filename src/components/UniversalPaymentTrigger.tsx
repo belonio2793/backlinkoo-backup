@@ -1,8 +1,6 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
-import { useToast } from '@/hooks/use-toast';
 import { Crown, CreditCard, Zap } from 'lucide-react';
+import { DirectCheckoutService } from '@/services/directCheckoutService';
 
 interface UniversalPaymentTriggerProps {
   children?: React.ReactNode;
@@ -19,24 +17,21 @@ interface UniversalPaymentTriggerProps {
 
 /**
  * Universal Payment Trigger Component
- * 
- * This component provides a consistent way to trigger payments throughout the app.
- * It can be used for both credit purchases and premium subscriptions.
+ *
+ * Simplified version that opens Stripe checkout directly in a new window
+ * No modals, loading states, or notifications - just direct checkout
  */
 export function UniversalPaymentTrigger({
   children,
   defaultTab = 'credits',
-  initialCredits,
+  initialCredits = 50,
   triggerText,
   triggerVariant = 'default',
   triggerSize = 'default',
   triggerClassName = '',
   showIcon = true,
-  onSuccess,
-  redirectAfterSuccess = '/dashboard'
+  onSuccess
 }: UniversalPaymentTriggerProps) {
-  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
-  const { toast } = useToast();
 
   const getDefaultText = () => {
     if (defaultTab === 'premium') {
@@ -52,22 +47,30 @@ export function UniversalPaymentTrigger({
     return <CreditCard className="h-4 w-4 mr-2" />;
   };
 
-  const handleSuccess = () => {
-    setIsPaymentModalOpen(false);
-    toast({
-      title: "Payment Successful!",
-      description: defaultTab === 'premium' 
-        ? "Welcome to Premium! All features are now available."
-        : "Credits have been added to your account.",
-    });
-    onSuccess?.();
+  const handleClick = async () => {
+    try {
+      if (defaultTab === 'premium') {
+        await DirectCheckoutService.upgradeToPremium('monthly');
+      } else {
+        const credits = initialCredits && [50, 100, 250, 500].includes(initialCredits)
+          ? initialCredits as 50 | 100 | 250 | 500
+          : 50;
+        await DirectCheckoutService.buyCredits(credits);
+      }
+
+      // Call success callback if provided (but no toast/notification)
+      onSuccess?.();
+
+    } catch (error) {
+      console.error('Direct checkout failed:', error);
+    }
   };
 
   return (
     <>
       {children ? (
-        <div 
-          onClick={() => setIsPaymentModalOpen(true)}
+        <div
+          onClick={handleClick}
           className="cursor-pointer"
         >
           {children}
@@ -77,21 +80,12 @@ export function UniversalPaymentTrigger({
           variant={triggerVariant}
           size={triggerSize}
           className={triggerClassName}
-          onClick={() => setIsPaymentModalOpen(true)}
+          onClick={handleClick}
         >
           {showIcon && getDefaultIcon()}
           {triggerText || getDefaultText()}
         </Button>
       )}
-
-      <EnhancedUnifiedPaymentModal
-        isOpen={isPaymentModalOpen}
-        onClose={() => setIsPaymentModalOpen(false)}
-        defaultTab={defaultTab}
-        initialCredits={initialCredits}
-        redirectAfterSuccess={redirectAfterSuccess}
-        onSuccess={handleSuccess}
-      />
     </>
   );
 }
@@ -99,10 +93,10 @@ export function UniversalPaymentTrigger({
 // Convenience components for common use cases
 
 /**
- * Buy Credits Button
+ * Buy Credits Button - Direct checkout
  */
 export function BuyCreditsButton({
-  credits,
+  credits = 50,
   variant = 'default',
   size = 'default',
   className = '',
@@ -114,40 +108,68 @@ export function BuyCreditsButton({
   className?: string;
   onSuccess?: () => void;
 }) {
+
+  const handleClick = async () => {
+    try {
+      const validCredits = [50, 100, 250, 500].includes(credits)
+        ? credits as 50 | 100 | 250 | 500
+        : 50;
+      await DirectCheckoutService.buyCredits(validCredits);
+      onSuccess?.();
+    } catch (error) {
+      console.error('Credits checkout failed:', error);
+    }
+  };
+
   return (
-    <UniversalPaymentTrigger
-      defaultTab="credits"
-      initialCredits={credits}
-      triggerVariant={variant}
-      triggerSize={size}
-      triggerClassName={className}
-      onSuccess={onSuccess}
-    />
+    <Button
+      variant={variant}
+      size={size}
+      className={className}
+      onClick={handleClick}
+    >
+      <CreditCard className="h-4 w-4 mr-2" />
+      Buy {credits} Credits
+    </Button>
   );
 }
 
 /**
- * Upgrade to Premium Button
+ * Upgrade to Premium Button - Direct checkout
  */
 export function UpgradeToPremiumButton({
+  plan = 'monthly',
   variant = 'default',
   size = 'default',
   className = '',
   onSuccess
 }: {
+  plan?: 'monthly' | 'annual';
   variant?: 'default' | 'outline' | 'destructive' | 'secondary' | 'ghost' | 'link';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
   onSuccess?: () => void;
 }) {
+
+  const handleClick = async () => {
+    try {
+      await DirectCheckoutService.upgradeToPremium(plan);
+      onSuccess?.();
+    } catch (error) {
+      console.error('Premium checkout failed:', error);
+    }
+  };
+
   return (
-    <UniversalPaymentTrigger
-      defaultTab="premium"
-      triggerVariant={variant}
-      triggerSize={size}
-      triggerClassName={className}
-      onSuccess={onSuccess}
-    />
+    <Button
+      variant={variant}
+      size={size}
+      className={className}
+      onClick={handleClick}
+    >
+      <Crown className="h-4 w-4 mr-2" />
+      Upgrade to Premium
+    </Button>
   );
 }
 
@@ -157,7 +179,7 @@ export function UpgradeToPremiumButton({
 export function PaymentCard({
   children,
   defaultTab = 'credits',
-  initialCredits,
+  initialCredits = 50,
   onSuccess
 }: {
   children: React.ReactNode;
@@ -165,14 +187,30 @@ export function PaymentCard({
   initialCredits?: number;
   onSuccess?: () => void;
 }) {
+
+  const handleClick = async () => {
+    try {
+      if (defaultTab === 'premium') {
+        await DirectCheckoutService.upgradeToPremium('monthly');
+      } else {
+        const credits = initialCredits && [50, 100, 250, 500].includes(initialCredits)
+          ? initialCredits as 50 | 100 | 250 | 500
+          : 50;
+        await DirectCheckoutService.buyCredits(credits);
+      }
+      onSuccess?.();
+    } catch (error) {
+      console.error('Payment card checkout failed:', error);
+    }
+  };
+
   return (
-    <UniversalPaymentTrigger
-      defaultTab={defaultTab}
-      initialCredits={initialCredits}
-      onSuccess={onSuccess}
+    <div
+      onClick={handleClick}
+      className="cursor-pointer"
     >
       {children}
-    </UniversalPaymentTrigger>
+    </div>
   );
 }
 
