@@ -116,6 +116,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
   const totalLinksBuilt = dashboardStats?.total_links || campaigns.reduce((sum, c) => sum + c.links_built, 0);
   const successRate = dashboardStats?.success_rate || (campaigns.length > 0 ? campaigns.reduce((sum, c) => sum + c.success_rate, 0) / campaigns.length : 0);
   const todaysLinks = dashboardStats?.links_today || 0;
+  const liveLinks = Math.round(totalLinksBuilt * (successRate / 100));
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', {
