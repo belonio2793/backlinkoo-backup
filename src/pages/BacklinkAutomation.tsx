@@ -6754,7 +6754,7 @@ export default function BacklinkAutomation() {
       <Footer />
 
       {/* Floating Action Button - Fixed Position */}
-      <div className="fixed bottom-6 right-6 z-50" style={{ position: 'fixed' }}>
+      <div className="fixed bottom-6 right-6 z-[9999]" style={{ position: 'fixed', bottom: '24px', right: '24px' }}>
         <div className="relative">
           {/* Quick Actions Menu */}
           <div className={`absolute bottom-16 right-0 space-y-2 transition-all duration-200 ${
