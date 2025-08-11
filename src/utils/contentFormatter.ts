@@ -74,7 +74,8 @@ export class ContentFormatter {
       .replace(/[ \t]+/g, ' ')
       .trim();
 
-    // Process the content in correct order - add comprehensive cleanup first
+    // Process the content in correct order - decode entities first, then cleanup
+    formattedContent = this.decodeAllHtmlEntities(formattedContent); // Decode again for safety
     formattedContent = this.removeSpecificMalformedPatterns(formattedContent);
     formattedContent = this.cleanupMarkdownArtifacts(formattedContent);
     formattedContent = this.convertMarkdownToHtml(formattedContent);
