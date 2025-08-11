@@ -1,8 +1,9 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { 
-  AutomationCampaign, 
+import { FallbackAutomationService } from './fallbackAutomationService';
+import type {
+  AutomationCampaign,
   AutomationCampaignInsert,
-  LinkPlacement, 
+  LinkPlacement,
   LinkPlacementInsert,
   CampaignReport,
   AvailableSite,
@@ -16,11 +17,50 @@ import type {
 } from '@/types/automationTypes';
 
 export class AutomationDatabaseService {
-  
+
+  // Check if automation tables exist
+  private static async checkTablesExist(): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('automation_campaigns')
+        .select('id')
+        .limit(1);
+
+      // If no error, table exists and is accessible
+      if (!error) return true;
+
+      // Check for specific error codes that indicate table doesn't exist
+      const tableNotFoundCodes = ['42P01', 'PGRST106'];
+      if (tableNotFoundCodes.includes(error.code)) {
+        console.log('❌ automation_campaigns table does not exist');
+        return false;
+      }
+
+      // For permission errors, log but assume table exists
+      if (error.code === '42501' || error.message.includes('permission denied')) {
+        console.warn('⚠️ Permission issue with automation_campaigns, but table likely exists');
+        return true; // Assume table exists, just permission issue
+      }
+
+      console.warn('⚠️ Unknown error checking automation_campaigns:', error.message);
+      return false;
+    } catch (err: any) {
+      console.error('❌ Error in checkTablesExist:', err.message);
+      return false;
+    }
+  }
+
   // ==================== CAMPAIGNS ====================
   
   static async createCampaign(campaignData: AutomationCampaignInsert): Promise<{ success: boolean; data?: AutomationCampaign; error?: string }> {
     try {
+      // Check if tables exist first
+      const tablesExist = await this.checkTablesExist();
+      if (!tablesExist) {
+        console.warn('⚠️ Automation tables do not exist, using fallback service');
+        return await FallbackAutomationService.createCampaign(campaignData);
+      }
+
       const { data, error } = await supabase
         .from('automation_campaigns')
         .insert(campaignData)
@@ -28,8 +68,18 @@ export class AutomationDatabaseService {
         .single();
 
       if (error) {
-        console.error('Error creating campaign:', error);
-        return { success: false, error: error.message };
+        console.error('Error creating campaign:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        // If it's a table not found error, use fallback
+        if (error.code === '42P01') {
+          console.warn('⚠️ Table not found, using fallback service');
+          return await FallbackAutomationService.createCampaign(campaignData);
+        }
+        return { success: false, error: error.message || 'Failed to create campaign' };
       }
 
       // Initialize user quota tracking
@@ -37,13 +87,29 @@ export class AutomationDatabaseService {
       
       return { success: true, data };
     } catch (error: any) {
-      console.error('Error creating campaign:', error);
-      return { success: false, error: error.message };
+      console.error('Error creating campaign (catch):', {
+        message: error.message,
+        stack: error.stack,
+        error: error
+      });
+      // Try fallback on any error
+      try {
+        return await FallbackAutomationService.createCampaign(campaignData);
+      } catch {
+        return { success: false, error: error.message || 'Unexpected error creating campaign' };
+      }
     }
   }
 
   static async getCampaigns(userId: string, filters?: CampaignFilters): Promise<{ success: boolean; data?: AutomationCampaign[]; error?: string }> {
     try {
+      // Check if tables exist first
+      const tablesExist = await this.checkTablesExist();
+      if (!tablesExist) {
+        console.warn('⚠️ Automation tables do not exist, using fallback service');
+        return await FallbackAutomationService.getCampaigns(userId);
+      }
+
       let query = supabase
         .from('automation_campaigns')
         .select('*')
@@ -73,14 +139,33 @@ export class AutomationDatabaseService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching campaigns:', error);
-        return { success: false, error: error.message };
+        console.error('Error fetching campaigns:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        // If it's a table not found error, use fallback
+        if (error.code === '42P01') {
+          console.warn('⚠️ Table not found, using fallback service');
+          return await FallbackAutomationService.getCampaigns(userId);
+        }
+        return { success: false, error: error.message || 'Failed to fetch campaigns' };
       }
 
       return { success: true, data: data || [] };
     } catch (error: any) {
-      console.error('Error fetching campaigns:', error);
-      return { success: false, error: error.message };
+      console.error('Error fetching campaigns (catch):', {
+        message: error.message,
+        stack: error.stack,
+        error: error
+      });
+      // Try fallback on any error
+      try {
+        return await FallbackAutomationService.getCampaigns(userId);
+      } catch {
+        return { success: false, error: error.message || 'Unexpected error fetching campaigns' };
+      }
     }
   }
 
@@ -208,6 +293,13 @@ export class AutomationDatabaseService {
 
   static async getLinkPlacements(userId: string, filters?: LinkFilters): Promise<{ success: boolean; data?: LinkPlacement[]; error?: string }> {
     try {
+      // Check if tables exist first
+      const tablesExist = await this.checkTablesExist();
+      if (!tablesExist) {
+        console.warn('⚠️ Automation tables do not exist, using fallback service');
+        return await FallbackAutomationService.getLinkPlacements(userId);
+      }
+
       let query = supabase
         .from('link_placements')
         .select('*')
@@ -243,14 +335,23 @@ export class AutomationDatabaseService {
       const { data, error } = await query;
 
       if (error) {
-        console.error('Error fetching link placements:', error);
-        return { success: false, error: error.message };
+        console.error('Error fetching link placements:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        return { success: false, error: error.message || 'Failed to fetch link placements' };
       }
 
       return { success: true, data: data || [] };
     } catch (error: any) {
-      console.error('Error fetching link placements:', error);
-      return { success: false, error: error.message };
+      console.error('Error fetching link placements (catch):', {
+        message: error.message,
+        stack: error.stack,
+        error: error
+      });
+      return { success: false, error: error.message || 'Unexpected error fetching link placements' };
     }
   }
 
@@ -374,6 +475,13 @@ export class AutomationDatabaseService {
 
   static async getUserQuota(userId: string): Promise<{ success: boolean; data?: UserLinkQuota; error?: string }> {
     try {
+      // Check if tables exist first
+      const tablesExist = await this.checkTablesExist();
+      if (!tablesExist) {
+        console.warn('⚠️ Automation tables do not exist, using fallback service');
+        return await FallbackAutomationService.getUserQuota(userId);
+      }
+
       const { data, error } = await supabase
         .from('user_link_quotas')
         .select('*')
@@ -381,8 +489,18 @@ export class AutomationDatabaseService {
         .single();
 
       if (error && error.code !== 'PGRST116') { // Not found is OK
-        console.error('Error fetching user quota:', error);
-        return { success: false, error: error.message };
+        console.error('Error fetching user quota:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        });
+        // If it's a table not found error, use fallback
+        if (error.code === '42P01') {
+          console.warn('⚠️ Table not found, using fallback service');
+          return await FallbackAutomationService.getUserQuota(userId);
+        }
+        return { success: false, error: error.message || 'Failed to fetch user quota' };
       }
 
       if (!data) {
@@ -393,8 +511,17 @@ export class AutomationDatabaseService {
 
       return { success: true, data };
     } catch (error: any) {
-      console.error('Error fetching user quota:', error);
-      return { success: false, error: error.message };
+      console.error('Error fetching user quota (catch):', {
+        message: error.message,
+        stack: error.stack,
+        error: error
+      });
+      // Try fallback on any error
+      try {
+        return await FallbackAutomationService.getUserQuota(userId);
+      } catch {
+        return { success: false, error: error.message || 'Unexpected error fetching user quota' };
+      }
     }
   }
 
@@ -586,7 +713,12 @@ export class AutomationDatabaseService {
       .single();
 
     if (error) {
-      console.error('Error creating default quota:', error);
+      console.error('Error creating default quota:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
       return defaultQuota as UserLinkQuota;
     }
 

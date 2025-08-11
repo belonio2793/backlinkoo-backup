@@ -56,8 +56,25 @@ export function Header({ showHomeLink = true }: HeaderProps) {
 
   const handleAuthSuccess = (user: any) => {
     setShowLoginModal(false);
-    // Navigate to dashboard after successful auth
-    navigate('/dashboard');
+
+    // Don't navigate away from certain pages that should preserve user flow
+    const preserveRoutePages = ['/automation', '/blog', '/ranking'];
+    const shouldPreserveRoute = preserveRoutePages.some(page =>
+      location.pathname.startsWith(page)
+    );
+
+    if (shouldPreserveRoute) {
+      console.log('🎯 Header: Preserving route after auth:', location.pathname);
+      // Stay on current page
+      toast({
+        title: "Welcome back!",
+        description: "You can now access all features on this page.",
+        duration: 3000
+      });
+    } else {
+      // Navigate to dashboard for other pages
+      navigate('/dashboard');
+    }
   };
 
   const handleClearCacheAndCookies = async () => {

@@ -29,14 +29,6 @@ import { useDatabaseCampaignManager } from '@/hooks/useDatabaseCampaignManager';
 import { useLinkTracker } from '@/hooks/useLinkTracker';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
-import { DatabaseHealthCheck } from '@/utils/databaseHealthCheck';
-import { AutomationTablesMissingNotice } from '@/components/AutomationTablesMissingNotice';
-import { initializeAutomationTables } from '@/utils/createAutomationTables';
-import { testAutomationTablesAccess, testDatabaseConnectivity } from '@/utils/simpleDatabaseTest';
-import { RoutePreservingAuth } from '@/components/RoutePreservingAuth';
-import { RuntimeReporting } from '@/components/automation/RuntimeReporting';
-import { RuntimeStatus } from '@/components/automation/RuntimeStatus';
-import { LiveAutomationEngine } from '@/services/liveAutomationEngine';
 
 const engines = [
   {
@@ -69,11 +61,9 @@ const engines = [
   }
 ];
 
-export default function BacklinkAutomation() {
+export default function BacklinkAutomationSimplified() {
   const [selectedEngine, setSelectedEngine] = useState('blog-comments');
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [automationTablesExist, setAutomationTablesExist] = useState(true);
-  const [showAuthModal, setShowAuthModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     targetUrl: '',
@@ -83,7 +73,7 @@ export default function BacklinkAutomation() {
     autoStart: false
   });
 
-  const { isPremium, user, isAuthenticated } = useAuth();
+  const { isPremium } = useAuth();
   const {
     campaigns,
     createCampaign,
@@ -103,44 +93,8 @@ export default function BacklinkAutomation() {
   const activeCampaignCount = getActiveCampaignCount();
   const selectedEngineData = engines.find(e => e.id === selectedEngine);
 
-  // Enhanced toggle campaign with live monitoring
-  const handleToggleCampaign = async (campaignId: string) => {
-    try {
-      const campaign = campaigns.find(c => c.id === campaignId);
-      if (!campaign) return;
-
-      // Toggle campaign status first
-      await toggleCampaign(campaignId);
-
-      // If activating, start live monitoring
-      if (campaign.status !== 'active') {
-        console.log(`🚀 Starting live monitoring for campaign: ${campaign.name}`);
-        await LiveAutomationEngine.startLiveMonitoring(campaignId);
-
-        toast.success('Campaign activated!', {
-          description: `${campaign.name} is now running with live monitoring.`
-        });
-      } else {
-        toast.success('Campaign paused!', {
-          description: `${campaign.name} has been paused.`
-        });
-      }
-    } catch (error: any) {
-      console.error('Error toggling campaign:', error);
-      toast.error('Failed to toggle campaign', {
-        description: error.message
-      });
-    }
-  };
-
   const handleCreateCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Check authentication first
-    if (!isAuthenticated) {
-      setShowAuthModal(true);
-      return;
-    }
 
     if (!canCreateMoreLinks(1)) {
       toast.error('Cannot Create Campaign', {
@@ -157,28 +111,10 @@ export default function BacklinkAutomation() {
       return;
     }
 
-    // Normalize target URL for comparison
-    const normalizedTargetUrl = formData.targetUrl.includes('://') ? formData.targetUrl : `https://${formData.targetUrl}`;
-
-    // Check if campaign already exists for this target URL
-    const existingCampaign = campaigns.find(campaign => {
-      const existingUrl = campaign.target_url;
-      return existingUrl === normalizedTargetUrl ||
-             existingUrl === normalizedTargetUrl.replace('https://', '') ||
-             existingUrl === normalizedTargetUrl.replace('http://', '');
-    });
-
-    if (existingCampaign) {
-      toast.error('Campaign Already Exists', {
-        description: `A campaign for "${normalizedTargetUrl}" already exists: "${existingCampaign.name}". You cannot run multiple campaigns for the same destination URL.`
-      });
-      return;
-    }
-
     const newCampaign = await createCampaign({
       name: formData.name,
       engine_type: selectedEngine.replace('-', '_'),
-      target_url: normalizedTargetUrl,
+      target_url: formData.targetUrl.includes('://') ? formData.targetUrl : `https://${formData.targetUrl}`,
       keywords: keywordsArray,
       anchor_texts: anchorTextsArray,
       status: formData.autoStart ? 'active' : 'draft',
@@ -208,7 +144,7 @@ export default function BacklinkAutomation() {
     }
   };
 
-  const currentEngineCampaigns = campaigns.filter(c =>
+  const currentEngineCampaigns = campaigns.filter(c => 
     c.engine_type?.replace('_', '-') === selectedEngine ||
     (c.engine === selectedEngineData?.name)
   );
@@ -220,55 +156,10 @@ export default function BacklinkAutomation() {
 
   const { plan, limit } = getUserPlan();
 
-  // Check automation tables status
-  const checkAutomationTables = React.useCallback(async () => {
-    try {
-      // First test basic connectivity
-      console.log('🔗 Testing database connectivity...');
-      const connectivity = await testDatabaseConnectivity();
-      console.log('Database connectivity:', JSON.stringify(connectivity, null, 2));
-
-      // Then test automation tables
-      console.log('🔧 Testing automation tables...');
-      const tablesStatus = await testAutomationTablesAccess();
-      console.log('Automation tables status:', JSON.stringify(tablesStatus, null, 2));
-
-      const tablesExist = tablesStatus.allTablesAccessible;
-      setAutomationTablesExist(tablesExist);
-
-      if (!tablesExist) {
-        console.warn('⚠️ Some automation tables are not accessible:', tablesStatus.errors);
-      }
-
-      return tablesExist;
-    } catch (error: any) {
-      console.error('❌ Error checking automation tables:', error.message);
-      setAutomationTablesExist(false);
-      return false;
-    }
-  }, []);
-
-  // Handle authentication success
-  const handleAuthSuccess = (user: any) => {
-    setShowAuthModal(false);
-    toast.success('Welcome! You can now create automation campaigns.');
-  };
-
-  // Run health check on mount for debugging
-  React.useEffect(() => {
-    // Run the improved automation tables check
-    checkAutomationTables();
-
-    // Optionally run full health check in development
-    if (import.meta.env.DEV) {
-      DatabaseHealthCheck.logHealthCheck();
-    }
-  }, [checkAutomationTables]);
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <Header />
-
+      
       <div className="container mx-auto px-4 py-8 max-w-6xl">
         {/* Hero Section */}
         <div className="text-center mb-12">
@@ -279,69 +170,42 @@ export default function BacklinkAutomation() {
             Backlink Automation
           </h1>
           <p className="text-xl text-gray-600 mb-6 max-w-2xl mx-auto">
-            Build high-quality backlinks automatically across multiple platforms.
+            Build high-quality backlinks automatically across multiple platforms. 
             Choose your strategy and let our AI do the work.
           </p>
-
-          {/* Authentication Section */}
-          {!isAuthenticated && (
-            <div className="mb-8">
-              <RoutePreservingAuth
-                buttonVariant="default"
-                buttonSize="lg"
-                className="justify-center"
-              />
-              <p className="text-sm text-gray-500 mt-3">
-                Sign in to create and manage your automation campaigns
-              </p>
-            </div>
-          )}
-
+          
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
             <Card className="border-0 shadow-lg">
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600">
-                    {isAuthenticated ? activeCampaignCount : '—'}
-                  </div>
+                  <div className="text-3xl font-bold text-blue-600">{activeCampaignCount}</div>
                   <div className="text-sm text-gray-600">Active Campaigns</div>
                 </div>
               </CardContent>
             </Card>
-
+            
             <Card className="border-0 shadow-lg">
               <CardContent className="pt-6">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-green-600">
-                    {isAuthenticated ? (
-                      limit === Infinity ? totalLinksBuilt : `${totalLinksBuilt}/${limit}`
-                    ) : '—'}
+                    {limit === Infinity ? totalLinksBuilt : `${totalLinksBuilt}/${limit}`}
                   </div>
                   <div className="text-sm text-gray-600">Links Built</div>
                 </div>
               </CardContent>
             </Card>
-
+            
             <Card className="border-0 shadow-lg">
               <CardContent className="pt-6">
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-2">
-                    {isAuthenticated ? (
-                      <>
-                        {isPremium ? (
-                          <Crown className="h-5 w-5 text-purple-600" />
-                        ) : (
-                          <Shield className="h-5 w-5 text-blue-600" />
-                        )}
-                        <span className="text-lg font-semibold text-gray-900">{plan}</span>
-                      </>
+                    {isPremium ? (
+                      <Crown className="h-5 w-5 text-purple-600" />
                     ) : (
-                      <>
-                        <Shield className="h-5 w-5 text-gray-400" />
-                        <span className="text-lg font-semibold text-gray-400">Guest</span>
-                      </>
+                      <Shield className="h-5 w-5 text-blue-600" />
                     )}
+                    <span className="text-lg font-semibold text-gray-900">{plan}</span>
                   </div>
                   <div className="text-sm text-gray-600">Current Plan</div>
                 </div>
@@ -368,23 +232,6 @@ export default function BacklinkAutomation() {
           )}
         </div>
 
-        {/* Runtime Status Widget - Always visible for authenticated users */}
-        {isAuthenticated && (
-          <RuntimeStatus
-            campaignsCount={campaigns.length}
-            activeCampaigns={activeCampaignCount}
-            systemStatus={automationTablesExist ? 'online' : 'maintenance'}
-            onRefresh={checkAutomationTables}
-          />
-        )}
-
-        {/* Show notice if automation tables are missing */}
-        {!automationTablesExist && (
-          <AutomationTablesMissingNotice
-            onRetry={checkAutomationTables}
-          />
-        )}
-
         {/* Engine Selection */}
         <Card className="mb-8 shadow-lg border-0">
           <CardHeader>
@@ -398,13 +245,13 @@ export default function BacklinkAutomation() {
               {engines.map((engine) => {
                 const Icon = engine.icon;
                 const isSelected = selectedEngine === engine.id;
-
+                
                 return (
                   <Card
                     key={engine.id}
                     className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                      isSelected
-                        ? 'ring-2 ring-blue-500 shadow-md'
+                      isSelected 
+                        ? 'ring-2 ring-blue-500 shadow-md' 
                         : 'hover:shadow-lg'
                     }`}
                     onClick={() => setSelectedEngine(engine.id)}
@@ -434,19 +281,6 @@ export default function BacklinkAutomation() {
           </CardContent>
         </Card>
 
-        {/* Runtime & Reporting Section */}
-        {isAuthenticated && activeCampaignCount > 0 && (
-          <RuntimeReporting
-            campaigns={campaigns}
-            onToggleCampaign={handleToggleCampaign}
-            onRefreshData={() => {
-              // Refresh campaigns and check tables
-              checkAutomationTables();
-              window.location.reload(); // Simple refresh for now
-            }}
-          />
-        )}
-
         {/* Campaign Management */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Current Campaigns */}
@@ -463,43 +297,18 @@ export default function BacklinkAutomation() {
                       {currentEngineCampaigns.length} active campaigns
                     </CardDescription>
                   </div>
-                  <Button
-                    onClick={() => {
-                      if (!isAuthenticated) {
-                        setShowAuthModal(true);
-                        return;
-                      }
-                      setShowCreateForm(!showCreateForm);
-                    }}
-                    disabled={isAuthenticated && !canCreateLinks}
+                  <Button 
+                    onClick={() => setShowCreateForm(!showCreateForm)}
+                    disabled={!canCreateLinks}
                     className="bg-blue-600 hover:bg-blue-700"
                   >
                     <Plus className="h-4 w-4 mr-2" />
-                    {isAuthenticated ? 'New Campaign' : 'Sign In to Create Campaign'}
+                    New Campaign
                   </Button>
                 </div>
               </CardHeader>
               <CardContent>
-                {!isAuthenticated ? (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      {selectedEngineData && <selectedEngineData.icon className="h-8 w-8 text-gray-400" />}
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Sign In Required
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      Create an account to view and manage your {selectedEngineData?.name.toLowerCase()} campaigns
-                    </p>
-                    <Button
-                      onClick={() => setShowAuthModal(true)}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Sign In to Get Started
-                    </Button>
-                  </div>
-                ) : currentEngineCampaigns.length > 0 ? (
+                {currentEngineCampaigns.length > 0 ? (
                   <div className="space-y-4">
                     {currentEngineCampaigns.map((campaign) => (
                       <Card key={campaign.id} className="border border-gray-200">
@@ -508,7 +317,7 @@ export default function BacklinkAutomation() {
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
                                 <h4 className="font-medium text-gray-900">{campaign.name}</h4>
-                                <Badge
+                                <Badge 
                                   variant={campaign.status === 'active' ? 'default' : 'secondary'}
                                   className={campaign.status === 'active' ? 'bg-green-100 text-green-700' : ''}
                                 >
@@ -530,7 +339,7 @@ export default function BacklinkAutomation() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => handleToggleCampaign(campaign.id)}
+                                onClick={() => toggleCampaign(campaign.id)}
                               >
                                 {campaign.status === 'active' ? (
                                   <>
@@ -540,7 +349,7 @@ export default function BacklinkAutomation() {
                                 ) : (
                                   <>
                                     <Play className="h-4 w-4 mr-1" />
-                                    Start Live
+                                    Start
                                   </>
                                 )}
                               </Button>
@@ -561,19 +370,13 @@ export default function BacklinkAutomation() {
                     <p className="text-gray-600 mb-4">
                       Create your first {selectedEngineData?.name.toLowerCase()} campaign to get started
                     </p>
-                    <Button
-                      onClick={() => {
-                        if (!isAuthenticated) {
-                          setShowAuthModal(true);
-                          return;
-                        }
-                        setShowCreateForm(true);
-                      }}
-                      disabled={isAuthenticated && !canCreateLinks}
+                    <Button 
+                      onClick={() => setShowCreateForm(true)}
+                      disabled={!canCreateLinks}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      {isAuthenticated ? 'Create Campaign' : 'Sign In to Create Campaign'}
+                      Create Campaign
                     </Button>
                   </div>
                 )}
@@ -583,7 +386,7 @@ export default function BacklinkAutomation() {
 
           {/* Campaign Creation Form */}
           <div>
-            {showCreateForm && isAuthenticated && (
+            {showCreateForm && (
               <Card className="shadow-lg border-0">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -675,9 +478,9 @@ export default function BacklinkAutomation() {
                       <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">
                         Create Campaign
                       </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
+                      <Button 
+                        type="button" 
+                        variant="outline" 
                         onClick={() => setShowCreateForm(false)}
                       >
                         Cancel
@@ -692,29 +495,6 @@ export default function BacklinkAutomation() {
       </div>
 
       <Footer />
-
-      {/* Authentication Modal - only render invisible one when not showing modal */}
-      {!showAuthModal && <RoutePreservingAuth showAuthButtons={false} />}
-
-      {showAuthModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-2">Authentication Required</h3>
-            <p className="text-gray-600 mb-4">
-              You need to sign in to create and manage automation campaigns.
-            </p>
-            <div className="flex gap-3">
-              <RoutePreservingAuth className="flex-1" />
-              <Button
-                variant="outline"
-                onClick={() => setShowAuthModal(false)}
-              >
-                Cancel
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
