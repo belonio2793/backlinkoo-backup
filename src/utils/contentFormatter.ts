@@ -731,6 +731,11 @@ export class ContentFormatter {
       .replace(/&lt;(\w+)/g, '<$1')
       .replace(/(\w+)&gt;/g, '$1>')
 
+      // FIX MALFORMED HTML TAGS: Fix broken heading tags like <h 1=""> and <h 2="">
+      .replace(/<h\s+([1-6])[^>]*>([^<]*)<\/h>/gi, '<h$1>$2</h$1>')
+      .replace(/<h\s+([1-6])[^>]*>/gi, '<h$1>')
+      .replace(/<\/h>/gi, '</h1>') // Default to h1 if level missing
+
       // FIX MISSING SPACES: Add spaces around concatenated words that lost spacing due to HTML entity removal
       .replace(/([a-z])([A-Z])/g, '$1 $2') // Add space between lowercase and uppercase (camelCase breakup)
       .replace(/([a-zA-Z])(\d)/g, '$1 $2') // Add space between letters and numbers
@@ -740,7 +745,12 @@ export class ContentFormatter {
       .replace(/([a-z])(deleted)/g, '$1 $2') // Add space before "deleted"
       .replace(/(be)(automatically)/g, '$1 $2') // Fix "beautomatically" -> "be automatically"
       .replace(/([a-z])(ly[A-Z])/g, '$1$2') // Handle adverb combinations
-      .replace(/(\w)(in\d+h)/g, '$1 $2'); // Add space before time patterns like "in15h"
+      .replace(/(\w)(in\d+h)/g, '$1 $2') // Add space before time patterns like "in15h"
+
+      // FIX CORRUPTED STYLE ATTRIBUTES: Clean up style attributes with malformed HTML
+      .replace(/style="[^"]*&lt;h\s*[1-6]\s*&gt;[^"]*&lt;\/h\s*[1-6]\s*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      .replace(/style="[^"]*&lt;p&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      .replace(/style="color:[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"');
   }
 
   /**
