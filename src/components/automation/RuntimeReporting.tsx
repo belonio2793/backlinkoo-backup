@@ -84,48 +84,29 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
     }
   };
 
-  const loadRecentPlacements = async () => {
-    try {
-      const placements = await LiveAutomationEngine.getRecentPlacements(20);
-      setRecentPlacements(placements);
-    } catch (error) {
-      console.error('Error loading recent placements:', error);
-    }
-  };
-
-  const startLiveMonitoring = async () => {
-    if (campaigns.length === 0) return;
-
-    setIsMonitoring(true);
-
-    // Start monitoring for active campaigns
-    const activeCampaigns = campaigns.filter(c => c.status === 'active');
-
-    for (const campaign of activeCampaigns) {
-      try {
-        await LiveAutomationEngine.startLiveMonitoring(campaign.id);
-      } catch (error) {
-        console.error(`Error starting monitoring for campaign ${campaign.id}:`, error);
-      }
-    }
-  };
-
   const toggleCampaignMonitoring = async (campaignId: string) => {
-    const campaign = campaigns.find(c => c.id === campaignId);
+    const campaign = campaigns.find(c => c.campaign_id === campaignId);
     if (!campaign) return;
 
     try {
-      if (campaign.status === 'active') {
-        // Pause campaign
+      const result = await stableCampaignMetrics.toggleCampaignStatus(campaignId);
+      if (result.success) {
+        // Refresh data to show updated status
+        await loadCampaignData();
         onToggleCampaign?.(campaignId);
       } else {
-        // Start campaign and monitoring
-        onToggleCampaign?.(campaignId);
-        await LiveAutomationEngine.startLiveMonitoring(campaignId);
+        setError(result.error || 'Failed to toggle campaign');
       }
     } catch (error) {
       console.error('Error toggling campaign monitoring:', error);
+      setError('Failed to toggle campaign status');
     }
+  };
+
+  const handleRefreshData = async () => {
+    stableCampaignMetrics.clearCache(); // Clear cache to force refresh
+    await loadCampaignData();
+    onRefreshData?.();
   };
 
   // Calculate aggregate metrics from real data
