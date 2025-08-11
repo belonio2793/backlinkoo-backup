@@ -809,6 +809,12 @@ export class ContentFormatter {
       .replace(/\s+automatically\s+deleted\s+/gi, ' automatically deleted ')
       .replace(/beautomatically\s*deletedin/gi, ' be automatically deleted in')
 
+      // ULTRA-AGGRESSIVE: Fix the exact pattern that's still showing
+      .replace(/beautomatically/gi, ' be automatically ')
+      .replace(/deletedin/gi, ' deleted in ')
+      .replace(/be\s+automatically\s+automatically/gi, ' be automatically ')
+      .replace(/deleted\s+in\s+deleted/gi, ' deleted in ')
+
       // FIX CORRUPTED STYLE ATTRIBUTES: Clean up style attributes with malformed HTML
       .replace(/style="[^"]*&lt;h\s*[1-6]\s*&gt;[^"]*&lt;\/h\s*[1-6]\s*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
       .replace(/style="[^"]*&lt;p&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
