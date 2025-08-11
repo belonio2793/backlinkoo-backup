@@ -189,8 +189,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
       switch (format) {
         case 'csv':
           await exportCSVReport(exportData);
-          toast({
-            title: "CSV Report Generated",
+          toast.success("CSV Report Generated", {
             description: `Campaign performance data exported successfully with ${campaigns.length} campaigns and ${totalLinksBuilt} link placements.`
           });
           break;
