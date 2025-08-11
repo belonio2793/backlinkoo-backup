@@ -3,11 +3,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  MessageSquare, 
-  Globe, 
-  Users, 
-  Share2, 
+import {
+  MessageSquare,
+  Globe,
+  Users,
+  Share2,
   BarChart3,
   Settings,
   Play,
@@ -21,6 +21,8 @@ import {
 import { CampaignForm } from '@/components/automation/CampaignForm';
 import { AutomationHeader } from '@/components/automation/AutomationHeader';
 import { AutomationFooter } from '@/components/automation/AutomationFooter';
+import { NavigationHeader } from '@/components/shared/NavigationHeader';
+import { Footer } from '@/components/Footer';
 import { useCampaignManager } from '@/hooks/useCampaignManager';
 import { useLinkTracker } from '@/hooks/useLinkTracker';
 import { useAuth } from '@/hooks/useAuth';
