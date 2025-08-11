@@ -415,7 +415,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
             <CardContent>
               <div className="space-y-4">
                 {campaigns.length > 0 ? campaigns.map((campaign) => (
-                  <div key={campaign.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div key={campaign.campaign_id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h4 className="font-medium">{campaign.name}</h4>
