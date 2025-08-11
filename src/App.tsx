@@ -39,6 +39,7 @@ const LazyCampaignMetricsDBVerifier = lazy(() => import("./components/CampaignMe
 const LazyPremiumUpgradeTest = lazy(() => import("./components/PremiumUpgradeTest"));
 const LazyAutomationSystem = lazy(() => import("./pages/AutomationSystem"));
 const LazyAuthErrorDebug = lazy(() => import("./pages/AuthErrorDebug"));
+const LazyTextCleanerDebug = lazy(() => import("./pages/TextCleanerDebug"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
