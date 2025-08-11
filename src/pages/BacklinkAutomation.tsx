@@ -103,6 +103,36 @@ export default function BacklinkAutomation() {
   const activeCampaignCount = getActiveCampaignCount();
   const selectedEngineData = engines.find(e => e.id === selectedEngine);
 
+  // Enhanced toggle campaign with live monitoring
+  const handleToggleCampaign = async (campaignId: string) => {
+    try {
+      const campaign = campaigns.find(c => c.id === campaignId);
+      if (!campaign) return;
+
+      // Toggle campaign status first
+      await toggleCampaign(campaignId);
+
+      // If activating, start live monitoring
+      if (campaign.status !== 'active') {
+        console.log(`🚀 Starting live monitoring for campaign: ${campaign.name}`);
+        await LiveAutomationEngine.startLiveMonitoring(campaignId);
+
+        toast.success('Campaign activated!', {
+          description: `${campaign.name} is now running with live monitoring.`
+        });
+      } else {
+        toast.success('Campaign paused!', {
+          description: `${campaign.name} has been paused.`
+        });
+      }
+    } catch (error: any) {
+      console.error('Error toggling campaign:', error);
+      toast.error('Failed to toggle campaign', {
+        description: error.message
+      });
+    }
+  };
+
   const handleCreateCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
 
