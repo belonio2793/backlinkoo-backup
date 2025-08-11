@@ -187,9 +187,6 @@ export default function BacklinkAutomation() {
       const verification = await CampaignCreationHelper.verifyCampaignSaved(result.campaignId!);
 
       if (verification.isValid) {
-        // Update local state
-        setCampaigns(prev => [result.data, ...prev]);
-
         toast.success('Campaign Created Successfully!', {
           description: `"${result.data.name}" is ready with ${result.data.keywords.length} keywords and ${result.data.anchor_texts.length} anchor texts.`
         });
