@@ -544,7 +544,7 @@ export function EnhancedUnifiedPaymentModal({
                         ${calculateCustomPrice(customCredits)}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {customCredits} × $1.40 = ${calculateCustomPrice(customCredits)}
+                        {`${customCredits} × $1.40 = $${calculateCustomPrice(customCredits)}`}
                       </div>
                     </div>
                   </div>
