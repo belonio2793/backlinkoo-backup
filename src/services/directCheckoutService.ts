@@ -105,7 +105,12 @@ class DirectCheckoutService {
     });
     
     if (!response.ok) {
-      const errorText = await response.text();
+      let errorText: string;
+      try {
+        errorText = await response.text();
+      } catch {
+        errorText = `HTTP ${response.status} ${response.statusText}`;
+      }
       console.error('Credits checkout failed:', {
         status: response.status,
         statusText: response.statusText,
