@@ -44,6 +44,29 @@ export function cleanText(text: string): string {
  * Clean all text content in a DOM element recursively
  */
 export function cleanDOMElement(element: Element): void {
+  // Skip elements that contain React component text that should preserve spacing
+  const skipSelectors = [
+    '[data-testid*="exit-intent"]',
+    '[class*="modal"]',
+    '[class*="popup"]',
+    '[data-loc]', // React components often have data-loc attributes
+    '.text-gray-700', // Common class for component text
+    '.font-semibold'
+  ];
+
+  // Check if this element or its parent should be skipped
+  const shouldSkip = skipSelectors.some(selector => {
+    try {
+      return element.matches(selector) || element.closest(selector);
+    } catch {
+      return false;
+    }
+  });
+
+  if (shouldSkip) {
+    return;
+  }
+
   // Clean text nodes
   const walker = document.createTreeWalker(
     element,
