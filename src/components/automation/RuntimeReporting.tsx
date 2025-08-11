@@ -27,6 +27,7 @@ import {
 } from 'lucide-react';
 import { stableCampaignMetrics, CampaignMetrics } from '@/services/stableCampaignMetrics';
 import { RealTimeUrlMonitor } from './RealTimeUrlMonitor';
+import { SiphonedUrlReporting } from './SiphonedUrlReporting';
 
 interface RuntimeReportingProps {
   onToggleCampaign?: (campaignId: string) => void;
