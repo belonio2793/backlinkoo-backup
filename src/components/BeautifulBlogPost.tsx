@@ -1022,21 +1022,39 @@ export function BeautifulBlogPost() {
                 </div>
                 <div
                   onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
                     console.log('🚀 DIV button clicked!');
-                    console.log('Event:', e);
-                    console.log('Target:', e.target);
-                    alert('Button clicked!'); // Immediate feedback
+                    window.alert('BUTTON CLICKED - OPENING MODAL!');
                     setShowPaymentModal(true);
                   }}
-                  className="w-full cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-full shadow-lg px-8 py-4 text-center flex items-center justify-center gap-2 transition-all duration-200 hover:scale-105"
+                  onMouseDown={(e) => {
+                    console.log('🚀 Mouse down detected!');
+                    e.stopPropagation();
+                  }}
+                  onMouseUp={(e) => {
+                    console.log('🚀 Mouse up detected!');
+                    e.stopPropagation();
+                  }}
+                  onTouchStart={(e) => {
+                    console.log('🚀 Touch start detected!');
+                    e.stopPropagation();
+                  }}
+                  onTouchEnd={(e) => {
+                    console.log('🚀 Touch end detected!');
+                    e.stopPropagation();
+                    setShowPaymentModal(true);
+                  }}
+                  className="w-full cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-full shadow-lg px-8 py-4 text-center flex items-center justify-center gap-2 select-none"
                   role="button"
                   tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      console.log('🚀 Keyboard activated!');
-                      setShowPaymentModal(true);
-                    }
+                  style={{
+                    userSelect: 'none',
+                    WebkitUserSelect: 'none',
+                    MozUserSelect: 'none',
+                    msUserSelect: 'none',
+                    pointerEvents: 'auto',
+                    zIndex: 999
                   }}
                 >
                   <Crown className="h-5 w-5" />
