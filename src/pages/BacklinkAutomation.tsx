@@ -414,6 +414,13 @@ export default function BacklinkAutomation() {
           <QuickDatabaseStatus />
         </div>
 
+        {/* Emergency Fix Button - Show when there are critical database issues */}
+        {!automationTablesExist && (
+          <div className="mb-6">
+            <EmergencyFixButton />
+          </div>
+        )}
+
         {/* Show notice if automation tables are missing */}
         {!automationTablesExist && (
           <AutomationTablesMissingNotice
