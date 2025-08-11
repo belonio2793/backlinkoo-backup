@@ -37,6 +37,7 @@ import { RoutePreservingAuth } from '@/components/RoutePreservingAuth';
 import { RuntimeReporting } from '@/components/automation/RuntimeReporting';
 import { RuntimeStatus } from '@/components/automation/RuntimeStatus';
 import { LiveAutomationEngine } from '@/services/liveAutomationEngine';
+import { CampaignErrorHandler } from '@/utils/campaignErrorHandler';
 
 const engines = [
   {
