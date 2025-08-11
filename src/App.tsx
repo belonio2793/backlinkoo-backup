@@ -11,6 +11,8 @@ import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PremiumUpgradeProvider } from "@/components/PremiumUpgradeProvider";
 import { useSymbolCleaner } from "@/utils/symbolCleaner";
 import "@/utils/consoleSymbolCleaner"; // Load console utilities
+import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
+import "@/utils/testReplacementCharacter"; // Load replacement character test
 import Index from "./pages/Index";
 
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
@@ -38,6 +40,7 @@ const LazyCampaignMetricsDBVerifier = lazy(() => import("./components/CampaignMe
 const LazyPremiumUpgradeTest = lazy(() => import("./components/PremiumUpgradeTest"));
 const LazyAutomationSystem = lazy(() => import("./pages/AutomationSystem"));
 const LazyAuthErrorDebug = lazy(() => import("./pages/AuthErrorDebug"));
+const LazyTextCleanerDebug = lazy(() => import("./pages/TextCleanerDebug"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -54,12 +57,19 @@ const SymbolCleanerProvider = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Global Text Cleaner Component
+const TextCleanerProvider = ({ children }: { children: React.ReactNode }) => {
+  useGlobalAutoCleaner(true, 1000); // Enable automatic text cleaning every 1 second for instant removal
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ModalProvider>
         <SymbolCleanerProvider>
-          <Toaster />
+          <TextCleanerProvider>
+            <Toaster />
           <Sonner />
           <UnifiedModalManager />
           <BrowserRouter>
@@ -293,6 +303,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/debug/text-cleaner"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyTextCleanerDebug />
+                </Suspense>
+              }
+            />
 
             {/* 404 Catch-all route */}
             <Route
@@ -307,6 +325,7 @@ const App = () => (
               </ReportSyncProvider>
             </PremiumUpgradeProvider>
           </BrowserRouter>
+          </TextCleanerProvider>
         </SymbolCleanerProvider>
       </ModalProvider>
     </TooltipProvider>

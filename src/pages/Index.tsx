@@ -172,7 +172,7 @@ const Index = () => {
       name: 'Starter 100',
       credits: 100,
       price: 140,
-      pricePerLink: 1.40,
+      pricePerLink: 1.4,
       description: 'Perfect for testing our platform',
       features: [
         'High DA backlinks',
@@ -186,7 +186,7 @@ const Index = () => {
       name: 'Starter 200',
       credits: 200,
       price: 280,
-      pricePerLink: 1.40,
+      pricePerLink: 1.4,
       description: 'Most popular starting package',
       features: [
         'High DA backlinks',
@@ -201,7 +201,7 @@ const Index = () => {
       name: 'Starter 300',
       credits: 300,
       price: 420,
-      pricePerLink: 1.40,
+      pricePerLink: 1.4,
       description: 'Maximum starter value',
       features: [
         'High DA backlinks',
@@ -796,8 +796,7 @@ const Index = () => {
                 </li>
               </ul>
               <Button onClick={() => {
-                setLoginModalTab("login");
-                setShowLoginModal(true);
+                openLoginModal();
               }} className="font-medium">
                 Launch Campaign
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -991,7 +990,7 @@ const Index = () => {
                     <span className="text-2xl font-mono">$</span>{plan.price}
                   </div>
                   <div className="text-sm text-gray-500 font-mono">
-                    ${plan.pricePerLink} per link
+                    $1.4 per link
                   </div>
                   <p className="text-gray-600 font-light">{plan.description}</p>
                 </CardHeader>
@@ -1052,10 +1051,10 @@ const Index = () => {
                 <div className="text-center">
                   <div className="text-3xl font-semibold text-gray-900 mb-2">
                     <span className="text-xl font-mono">Total: </span>
-                    <span>${customCredits > 0 ? (customCredits * 1.40).toFixed(2) : '0.00'}</span>
+                    <span>${customCredits > 0 ? (customCredits * 1.4).toFixed(2) : '0.00'}</span>
                   </div>
                   <div className="text-sm text-gray-500 font-mono">
-                    $1.40 per credit
+                    $1.4 per credit
                   </div>
                 </div>
 

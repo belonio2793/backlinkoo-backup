@@ -32,6 +32,7 @@ import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionSta
 import { DirectOpenAITest } from "@/components/admin/DirectOpenAITest";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { CampaignMetricsDBVerifier } from "@/components/CampaignMetricsDBVerifier";
+import { TextCleanerControls } from "@/components/admin/TextCleanerControls";
 
 // Testing Tools
 import { AuthEmailTest } from "@/components/AuthEmailTest";
@@ -170,12 +171,13 @@ export function OrganizedAdminDashboard() {
 
         {activeSection === "system" && (
           <Tabs defaultValue="assessment" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-5">
+            <TabsList className="grid w-full grid-cols-6">
               <TabsTrigger value="assessment">Systems Assessment</TabsTrigger>
               <TabsTrigger value="environment">Environment & API Keys</TabsTrigger>
               <TabsTrigger value="deployment">Deployment</TabsTrigger>
               <TabsTrigger value="database">Database</TabsTrigger>
               <TabsTrigger value="network">Network</TabsTrigger>
+              <TabsTrigger value="text-cleaner">Text Cleaner</TabsTrigger>
             </TabsList>
 
             <TabsContent value="assessment">
@@ -214,6 +216,10 @@ export function OrganizedAdminDashboard() {
                 <FullStoryTestComponent />
                 <ServiceConnectionStatus />
               </div>
+            </TabsContent>
+
+            <TabsContent value="text-cleaner">
+              <TextCleanerControls />
             </TabsContent>
           </Tabs>
         )}
