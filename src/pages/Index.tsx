@@ -172,7 +172,7 @@ const Index = () => {
       name: 'Starter 100',
       credits: 100,
       price: 140,
-      pricePerLink: 1.40,
+      pricePerLink: 1.4,
       description: 'Perfect for testing our platform',
       features: [
         'High DA backlinks',
@@ -186,7 +186,7 @@ const Index = () => {
       name: 'Starter 200',
       credits: 200,
       price: 280,
-      pricePerLink: 1.40,
+      pricePerLink: 1.4,
       description: 'Most popular starting package',
       features: [
         'High DA backlinks',
@@ -201,7 +201,7 @@ const Index = () => {
       name: 'Starter 300',
       credits: 300,
       price: 420,
-      pricePerLink: 1.40,
+      pricePerLink: 1.4,
       description: 'Maximum starter value',
       features: [
         'High DA backlinks',
