@@ -52,16 +52,16 @@ export class LiveAutomationEngine {
       // Start the automation engine based on type
       switch (campaign.engine_type) {
         case 'blog_comments':
-          await this.startBlogCommentEngine(campaign);
+          await LiveAutomationEngine.startBlogCommentEngine(campaign);
           break;
         case 'web2_platforms':
-          await this.startWeb2Engine(campaign);
+          await LiveAutomationEngine.startWeb2Engine(campaign);
           break;
         case 'forum_profiles':
-          await this.startForumEngine(campaign);
+          await LiveAutomationEngine.startForumEngine(campaign);
           break;
         case 'social_media':
-          await this.startSocialEngine(campaign);
+          await LiveAutomationEngine.startSocialEngine(campaign);
           break;
         default:
           throw new Error(`Unknown engine type: ${campaign.engine_type}`);
