@@ -10,6 +10,8 @@ import './utils/campaignErrorHandler'
 import './utils/silentErrorTest'
 // Test campaign error fixes
 import './utils/testCampaignFixes'
+// Check if database schema is properly configured
+import './utils/checkSchemaExecution'
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
 
