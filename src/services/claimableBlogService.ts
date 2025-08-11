@@ -209,7 +209,13 @@ export class ClaimableBlogService {
         });
 
       if (error) {
-        console.error('❌ Failed to claim blog post:', error);
+        console.error('❌ Failed to claim blog post:', {
+          error: error?.message || error,
+          code: error?.code,
+          postSlug,
+          userId,
+          timestamp: new Date().toISOString()
+        });
         return {
           success: false,
           message: `Failed to claim blog post: ${error.message}`
