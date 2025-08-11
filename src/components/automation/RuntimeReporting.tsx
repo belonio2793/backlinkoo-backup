@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import {
   BarChart3,
   Activity,
@@ -23,7 +23,8 @@ import {
   FileText,
   FileSpreadsheet,
   ExternalLink,
-  Star
+  Star,
+  Database
 } from 'lucide-react';
 import { stableCampaignMetrics, CampaignMetrics } from '@/services/stableCampaignMetrics';
 import { DataSyncChecker } from '@/utils/dataSyncChecker';
@@ -47,6 +48,9 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
   const [error, setError] = useState<string | null>(null);
 
   const loadCampaignData = useCallback(async () => {
+    // Prevent concurrent calls
+    if (isLoading) return;
+
     setIsLoading(true);
     setError(null);
 
@@ -144,15 +148,21 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
 
   // Update timestamp every minute and load data
   useEffect(() => {
-    loadCampaignData();
+    // Delay initial load to avoid setState during render
+    const timeoutId = setTimeout(() => {
+      loadCampaignData();
+    }, 0);
 
     const interval = setInterval(() => {
       setLastUpdate(new Date());
       loadCampaignData(); // Refresh data every minute
     }, 60000);
 
-    return () => clearInterval(interval);
-  }, [loadCampaignData]);
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(interval);
+    };
+  }, []); // Remove loadCampaignData dependency to prevent infinite loops
 
   // Calculate aggregate metrics from dashboard stats and campaigns
   const totalCampaigns = dashboardStats?.total_campaigns || campaigns.length;
@@ -188,34 +198,29 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
       switch (format) {
         case 'csv':
           await exportCSVReport(exportData);
-          toast({
-            title: "CSV Report Generated",
+          toast.success("CSV Report Generated", {
             description: `Campaign performance data exported successfully with ${campaigns.length} campaigns and ${totalLinksBuilt} link placements.`
           });
           break;
 
         case 'pdf':
           await exportPDFReport(exportData);
-          toast({
-            title: "PDF Report Generated",
+          toast.success("PDF Report Generated", {
             description: `Link placement audit report created with ${liveLinks} verified placements and detailed verification status.`
           });
           break;
 
         case 'excel':
           await exportExcelReport(exportData);
-          toast({
-            title: "Excel Analytics Generated",
+          toast.success("Excel Analytics Generated", {
             description: `Success rate analysis completed with ${successRate.toFixed(1)}% success rate and trend forecasting data.`
           });
           break;
       }
     } catch (error) {
       console.error('Export error:', error);
-      toast({
-        title: "Export Failed",
-        description: "Unable to generate report. Please try again.",
-        variant: "destructive"
+      toast.error("Export Failed", {
+        description: "Unable to generate report. Please try again."
       });
     }
   };

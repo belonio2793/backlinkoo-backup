@@ -5,6 +5,52 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
+async function checkSchemaWithoutExecSql(): Promise<boolean> {
+  console.log('🔍 Checking schema without exec_sql function...');
+
+  try {
+    // Test each column individually by trying to select it
+    const requiredColumns = ['started_at', 'completed_at', 'auto_start'];
+    const existingColumns: string[] = [];
+
+    for (const columnName of requiredColumns) {
+      try {
+        const { error } = await supabase
+          .from('automation_campaigns')
+          .select(columnName)
+          .limit(1);
+
+        if (!error) {
+          existingColumns.push(columnName);
+        } else if (error.message.includes('column') && error.message.includes('does not exist')) {
+          console.log(`❌ Column ${columnName} does not exist`);
+        }
+      } catch (e) {
+        console.warn(`Could not test column ${columnName}:`, e);
+      }
+    }
+
+    const missingColumns = requiredColumns.filter(col => !existingColumns.includes(col));
+
+    if (missingColumns.length > 0) {
+      console.error(`❌ Missing columns: ${missingColumns.join(', ')}`);
+      console.log('🔧 Run these SQL commands to fix:');
+      missingColumns.forEach(col => {
+        const dataType = col === 'auto_start' ? 'BOOLEAN DEFAULT false' : 'TIMESTAMPTZ NULL';
+        console.log(`ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS ${col} ${dataType};`);
+      });
+      return false;
+    }
+
+    console.log('✅ All required columns exist');
+    return true;
+
+  } catch (error) {
+    console.error('❌ Fallback schema check failed:', error);
+    return false;
+  }
+}
+
 export async function checkSchemaExecution(): Promise<boolean> {
   console.log('🔍 Checking if SQL commands were executed...');
   
@@ -21,7 +67,31 @@ export async function checkSchemaExecution(): Promise<boolean> {
         `
       });
 
-    const existingColumns = columnInfo?.map(col => col.column_name) || [];
+    // Handle case where exec_sql function doesn't exist
+    if (columnError && columnError.message.includes('function exec_sql')) {
+      console.error('❌ exec_sql function not found. Using fallback method...');
+      return await checkSchemaWithoutExecSql();
+    }
+
+    if (columnError) {
+      console.error('❌ Column query error:', columnError.message);
+      return false;
+    }
+
+    // Handle the exec_sql response properly - it might be wrapped in an array or object
+    let existingColumns: string[] = [];
+
+    if (columnInfo) {
+      if (Array.isArray(columnInfo)) {
+        existingColumns = columnInfo.map(col => col.column_name);
+      } else if (columnInfo.length !== undefined) {
+        // Handle case where data is returned as array-like object
+        existingColumns = Array.from(columnInfo as any).map((col: any) => col.column_name);
+      } else {
+        console.warn('Unexpected columnInfo format:', typeof columnInfo, columnInfo);
+      }
+    }
+
     console.log('📋 Existing columns:', existingColumns);
 
     // Build select query with only existing columns
@@ -72,7 +142,18 @@ export async function checkSchemaExecution(): Promise<boolean> {
 
     if (!schemaError && schemaInfo) {
       console.log('📊 Found columns:');
-      console.table(schemaInfo);
+      try {
+        // Handle potential array/object format issues
+        if (Array.isArray(schemaInfo)) {
+          console.table(schemaInfo);
+        } else if (schemaInfo.length !== undefined) {
+          console.table(Array.from(schemaInfo as any));
+        } else {
+          console.log('Schema info:', schemaInfo);
+        }
+      } catch (tableError) {
+        console.log('Schema info (raw):', schemaInfo);
+      }
     }
 
     // Test actual campaign functionality
@@ -92,8 +173,15 @@ export async function checkSchemaExecution(): Promise<boolean> {
     console.log('🎉 SQL commands appear to have been executed successfully');
     return true;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Schema check failed:', error);
+
+    // If the error is related to exec_sql function, try the fallback
+    if (error.message && error.message.includes('exec_sql')) {
+      console.log('🔄 Attempting fallback schema check...');
+      return await checkSchemaWithoutExecSql();
+    }
+
     return false;
   }
 }
