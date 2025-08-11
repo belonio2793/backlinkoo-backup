@@ -379,16 +379,10 @@ export class ContentFormatter {
   }
 
   /**
-   * Fix spacing throughout the content
+   * Fix spacing throughout the content - DISABLED to prevent formatting issues
    */
   private static fixSpacing(content: string): string {
-    return content
-      // Remove excessive line breaks
-      .replace(/\n{3,}/g, '\n\n')
-      // Ensure proper spacing around block elements
-      .replace(/(<\/?(h[1-6]|p|div|ul|ol|blockquote)[^>]*>)\s*\n?\s*/g, '$1\n\n')
-      // Clean up start and end
-      .trim();
+    return content; // Return content unchanged - no space manipulation
   }
 
   /**
