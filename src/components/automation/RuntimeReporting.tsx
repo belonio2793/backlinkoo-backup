@@ -396,7 +396,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
 
       {/* Detailed Reporting Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Overview
@@ -404,6 +404,10 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
           <TabsTrigger value="activity" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
             Live Activity
+          </TabsTrigger>
+          <TabsTrigger value="siphoned" className="flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            URL Data
           </TabsTrigger>
           <TabsTrigger value="reports" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
