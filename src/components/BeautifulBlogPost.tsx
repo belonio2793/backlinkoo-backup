@@ -58,7 +58,9 @@ export function BeautifulBlogPost() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  
+
+  // Track component mount status to prevent promise rejections after unmount
+  const [isMounted, setIsMounted] = useState(true);
   const [blogPost, setBlogPost] = useState<BlogPost | null>(null);
   const [authorEmail, setAuthorEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
