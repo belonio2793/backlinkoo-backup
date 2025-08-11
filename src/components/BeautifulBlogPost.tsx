@@ -1020,18 +1020,29 @@ export function BeautifulBlogPost() {
                     <p className="text-sm text-gray-600">24/7 expert assistance when you need it</p>
                   </div>
                 </div>
-                <Button
-                  onClick={() => {
-                    console.log('🚀 Simple button clicked!');
+                <div
+                  onClick={(e) => {
+                    console.log('🚀 DIV button clicked!');
+                    console.log('Event:', e);
+                    console.log('Target:', e.target);
+                    alert('Button clicked!'); // Immediate feedback
                     setShowPaymentModal(true);
                   }}
-                  className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-full shadow-lg"
-                  size="lg"
+                  className="w-full cursor-pointer bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-full shadow-lg px-8 py-4 text-center flex items-center justify-center gap-2 transition-all duration-200 hover:scale-105"
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      console.log('🚀 Keyboard activated!');
+                      setShowPaymentModal(true);
+                    }
+                  }}
                 >
-                  <Crown className="mr-2 h-5 w-5" />
+                  <Crown className="h-5 w-5" />
                   Upgrade to Premium
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
+                  <ArrowRight className="h-5 w-5" />
+                </div>
                 <p className="mt-4 text-sm text-gray-500">
                   ✨ Join thousands of users already growing their online presence
                 </p>
