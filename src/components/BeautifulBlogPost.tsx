@@ -377,7 +377,9 @@ export function BeautifulBlogPost() {
       const result = await EnhancedBlogClaimService.claimPost(slug!, user);
       
       if (result.success) {
-        setBlogPost(result.post!);
+        if (isMounted) {
+          setBlogPost(result.post!);
+        }
         toast({
           title: "Success! 🎉",
           description: result.message,
