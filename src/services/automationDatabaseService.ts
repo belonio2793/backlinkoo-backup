@@ -85,6 +85,13 @@ export class AutomationDatabaseService {
 
   static async getCampaigns(userId: string, filters?: CampaignFilters): Promise<{ success: boolean; data?: AutomationCampaign[]; error?: string }> {
     try {
+      // Check if tables exist first
+      const tablesExist = await this.checkTablesExist();
+      if (!tablesExist) {
+        console.warn('⚠️ Automation tables do not exist, using fallback service');
+        return await FallbackAutomationService.getCampaigns(userId);
+      }
+
       let query = supabase
         .from('automation_campaigns')
         .select('*')
