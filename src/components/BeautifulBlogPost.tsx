@@ -915,7 +915,7 @@ export function BeautifulBlogPost() {
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <Eye className="h-4 w-4" />
-                  <span className="font-medium">{blogPost.view_count} views</span>
+                  <span className="font-medium">{blogPost.view_count}&nbsp;views</span>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <SEOScoreDisplay
