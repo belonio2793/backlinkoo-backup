@@ -89,7 +89,7 @@ export function ClaimSystemStatus() {
           className="flex items-center gap-1"
         >
           <Users className="h-3 w-3" />
-          {status.userStats.claimedCount}/{status.userStats.maxClaims} claimed
+          {`${status.userStats.claimedCount}/${status.userStats.maxClaims} claimed`}
         </Badge>
       )}
       
