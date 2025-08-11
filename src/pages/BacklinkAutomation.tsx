@@ -41,6 +41,7 @@ import { CampaignErrorHandler } from '@/utils/campaignErrorHandler';
 import { CampaignCreationTest } from '@/components/testing/CampaignCreationTest';
 import { DatabaseMigrationTest } from '@/components/testing/DatabaseMigrationTest';
 import { DatabaseHealthChecker } from '@/components/system/DatabaseHealthChecker';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const engines = [
   {
@@ -331,7 +332,7 @@ export default function BacklinkAutomation() {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-blue-600">
-                    {isAuthenticated ? activeCampaignCount : '��'}
+                    {isAuthenticated ? activeCampaignCount : '—'}
                   </div>
                   <div className="text-sm text-gray-600">Active Campaigns</div>
                 </div>
