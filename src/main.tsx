@@ -8,6 +8,8 @@ import './utils/unifiedErrorHandler'
 import './utils/campaignErrorHandler'
 // Test error formatting in development (no promise rejections)
 import './utils/silentErrorTest'
+// Test campaign error fixes
+import './utils/testCampaignFixes'
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
 
