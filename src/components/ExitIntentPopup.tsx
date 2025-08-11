@@ -4,9 +4,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { X, Shield, Clock, Zap, CheckCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthModal } from '@/contexts/ModalContext';
-import { useTextSpacing } from '@/hooks/useTextSpacing';
-import { forceTextSpacing } from '@/utils/forceTextSpacing';
-import { formatModalText, formatTimeDisplay } from '@/utils/perfectTextFormatter';
 
 interface ExitIntentPopupProps {
   isVisible: boolean;
