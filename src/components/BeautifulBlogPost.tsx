@@ -913,9 +913,10 @@ export function BeautifulBlogPost() {
                   <Clock className="h-4 w-4" />
                   <span className="font-medium">{blogPost.reading_time || 0} min read</span>
                 </div>
-                <div className="beautiful-meta flex items-center gap-2">
+                <div className="beautiful-meta flex items-center gap-2 emergency-spacing">
                   <Eye className="h-4 w-4" />
-                  <span className="font-medium">{blogPost.view_count}&nbsp;views</span>
+                  <span className="font-medium number-text-spacing">{blogPost.view_count}</span>
+                  <span className="view-count-fix">views</span>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <SEOScoreDisplay
