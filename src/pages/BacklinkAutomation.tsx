@@ -106,12 +106,12 @@ export default function BacklinkAutomation() {
 
   // Enhanced toggle campaign with live monitoring
   const handleToggleCampaign = async (campaignId: string) => {
-    try {
-      const campaign = campaigns.find(c => c.id === campaignId);
-      if (!campaign) return;
+    const campaign = campaigns.find(c => c.id === campaignId);
+    if (!campaign) return;
 
-      // Toggle campaign status first
-      await toggleCampaign(campaignId);
+    // Use campaign error handler to prevent unhandled promise rejections
+    const success = await CampaignErrorHandler.safeToggleCampaign(campaignId, async (id) => {
+      await toggleCampaign(id);
 
       // Clear stable metrics cache to force refresh
       const { stableCampaignMetrics } = await import('@/services/stableCampaignMetrics');
@@ -120,7 +120,7 @@ export default function BacklinkAutomation() {
       // If activating, start live monitoring
       if (campaign.status !== 'active') {
         console.log(`🚀 Starting live monitoring for campaign: ${campaign.name}`);
-        await LiveAutomationEngine.startLiveMonitoring(campaignId);
+        await CampaignErrorHandler.safeStartLiveMonitoring(id, LiveAutomationEngine.startLiveMonitoring);
 
         toast.success('Campaign activated!', {
           description: `${campaign.name} is now running with live monitoring.`
@@ -135,12 +135,10 @@ export default function BacklinkAutomation() {
       setTimeout(() => {
         window.location.reload();
       }, 1000);
+    });
 
-    } catch (error: any) {
-      console.error('Error toggling campaign:', error);
-      toast.error('Failed to toggle campaign', {
-        description: error.message || 'Unknown error occurred'
-      });
+    if (!success) {
+      console.warn(`Campaign toggle failed for campaign: ${campaignId}`);
     }
   };
 
