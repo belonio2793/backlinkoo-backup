@@ -157,6 +157,24 @@ export default function BacklinkAutomation() {
       return;
     }
 
+    // Normalize target URL for comparison
+    const normalizedTargetUrl = formData.targetUrl.includes('://') ? formData.targetUrl : `https://${formData.targetUrl}`;
+
+    // Check if campaign already exists for this target URL
+    const existingCampaign = campaigns.find(campaign => {
+      const existingUrl = campaign.target_url;
+      return existingUrl === normalizedTargetUrl ||
+             existingUrl === normalizedTargetUrl.replace('https://', '') ||
+             existingUrl === normalizedTargetUrl.replace('http://', '');
+    });
+
+    if (existingCampaign) {
+      toast.error('Campaign Already Exists', {
+        description: `A campaign for "${normalizedTargetUrl}" already exists: "${existingCampaign.name}". You cannot run multiple campaigns for the same destination URL.`
+      });
+      return;
+    }
+
     const newCampaign = await createCampaign({
       name: formData.name,
       engine_type: selectedEngine.replace('-', '_'),
