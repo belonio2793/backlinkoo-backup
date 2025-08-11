@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, Sparkles, ArrowRight, Zap } from 'lucide-react';
-import { DirectCheckoutService } from '@/services/directCheckoutService';
 import { usePremium } from '@/hooks/usePremium';
+import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
+import { useToast } from '@/hooks/use-toast';
 
 interface PremiumUpgradeButtonProps {
   variant?: 'default' | 'outline' | 'ghost' | 'secondary';
@@ -93,12 +94,11 @@ export function PremiumUpgradeButton({
     }
   };
 
-  const handleUpgradeClick = async () => {
-    try {
-      await DirectCheckoutService.upgradeToPremium('monthly');
-    } catch (error) {
-      console.error('Premium upgrade failed:', error);
-    }
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const { toast } = useToast();
+
+  const handleUpgradeClick = () => {
+    setPaymentModalOpen(true);
   };
 
   if (loading) {
@@ -130,11 +130,139 @@ export function PremiumUpgradeButton({
   );
 }
 
+// Base PremiumUpgradeButton with Modal
+function PremiumUpgradeButtonWithModal({
+  variant = 'default',
+  size = 'default',
+  className = '',
+  showIcon = true,
+  showText = true,
+  triggerSource = 'upgrade_button',
+  children,
+  style = 'primary',
+  disabled = false
+}: PremiumUpgradeButtonProps) {
+  const { isPremium, loading } = usePremium();
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const { toast } = useToast();
+
+  // Don't show upgrade button if user is already premium
+  if (isPremium && !loading) {
+    return null;
+  }
+
+  const getButtonContent = () => {
+    if (children) {
+      return children;
+    }
+
+    switch (style) {
+      case 'gradient':
+        return (
+          <div className="flex items-center gap-2">
+            {showIcon && <Crown className="h-4 w-4" />}
+            {showText && <span>Upgrade to Premium</span>}
+            <ArrowRight className="h-4 w-4" />
+          </div>
+        );
+
+      case 'minimal':
+        return (
+          <div className="flex items-center gap-1">
+            {showIcon && <Crown className="h-3 w-3" />}
+            {showText && <span className="text-xs">Premium</span>}
+          </div>
+        );
+
+      case 'badge':
+        return (
+          <div className="flex items-center gap-1">
+            {showIcon && <Sparkles className="h-3 w-3" />}
+            {showText && <span className="text-xs font-medium">Upgrade</span>}
+          </div>
+        );
+
+      default:
+        return (
+          <div className="flex items-center gap-2">
+            {showIcon && <Crown className="h-4 w-4" />}
+            {showText && <span>Upgrade to Premium</span>}
+          </div>
+        );
+    }
+  };
+
+  const getButtonClassName = () => {
+    const baseClass = className;
+
+    switch (style) {
+      case 'gradient':
+        return `bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white border-0 ${baseClass}`;
+
+      case 'minimal':
+        return `bg-yellow-50 text-yellow-700 border border-yellow-200 hover:bg-yellow-100 hover:border-yellow-300 ${baseClass}`;
+
+      case 'badge':
+        return `bg-amber-100 text-amber-800 border border-amber-200 hover:bg-amber-200 hover:border-amber-300 ${baseClass}`;
+
+      default:
+        return baseClass;
+    }
+  };
+
+  const handleUpgradeClick = () => {
+    setPaymentModalOpen(true);
+  };
+
+  if (loading) {
+    return (
+      <Button
+        variant={variant}
+        size={size}
+        disabled
+        className={getButtonClassName()}
+      >
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 border-2 border-gray-300 border-t-transparent rounded-full animate-spin" />
+          {showText && <span>Loading...</span>}
+        </div>
+      </Button>
+    );
+  }
+
+  return (
+    <>
+      <Button
+        variant={variant}
+        size={size}
+        onClick={handleUpgradeClick}
+        disabled={disabled || loading}
+        className={getButtonClassName()}
+      >
+        {getButtonContent()}
+      </Button>
+
+      <EnhancedUnifiedPaymentModal
+        isOpen={paymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+        defaultTab="premium"
+        onSuccess={() => {
+          setPaymentModalOpen(false);
+          toast({
+            title: "Welcome to Premium! 🎉",
+            description: "Your premium subscription has been activated.",
+          });
+        }}
+      />
+    </>
+  );
+}
+
 // Specialized variants for different use cases
 
 export function HeaderUpgradeButton() {
   return (
-    <PremiumUpgradeButton
+    <PremiumUpgradeButtonWithModal
       variant="outline"
       size="sm"
       style="gradient"
@@ -146,7 +274,7 @@ export function HeaderUpgradeButton() {
 
 export function NavigationUpgradeButton() {
   return (
-    <PremiumUpgradeButton
+    <PremiumUpgradeButtonWithModal
       variant="default"
       size="sm"
       style="primary"
@@ -157,32 +285,46 @@ export function NavigationUpgradeButton() {
 }
 
 export function ToolsHeaderUpgradeButton() {
-  const handleUpgrade = async () => {
-    try {
-      await DirectCheckoutService.upgradeToPremium('monthly');
-    } catch (error) {
-      console.error('ToolsHeader upgrade failed:', error);
-    }
+  const [paymentModalOpen, setPaymentModalOpen] = useState(false);
+  const { toast } = useToast();
+
+  const handleUpgrade = () => {
+    setPaymentModalOpen(true);
   };
 
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={handleUpgrade}
-      className="bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 px-3 py-1.5"
-    >
-      <div className="flex items-center gap-1">
-        <Crown className="h-3 w-3" />
-        <span className="text-xs font-medium">Pro</span>
-      </div>
-    </Button>
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleUpgrade}
+        className="bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 hover:border-amber-300 px-3 py-1.5"
+      >
+        <div className="flex items-center gap-1">
+          <Crown className="h-3 w-3" />
+          <span className="text-xs font-medium">Pro</span>
+        </div>
+      </Button>
+
+      <EnhancedUnifiedPaymentModal
+        isOpen={paymentModalOpen}
+        onClose={() => setPaymentModalOpen(false)}
+        defaultTab="premium"
+        onSuccess={() => {
+          setPaymentModalOpen(false);
+          toast({
+            title: "Welcome to Premium! 🎉",
+            description: "Your premium subscription has been activated.",
+          });
+        }}
+      />
+    </>
   );
 }
 
 export function SettingsUpgradeButton() {
   return (
-    <PremiumUpgradeButton
+    <PremiumUpgradeButtonWithModal
       variant="default"
       size="lg"
       style="gradient"
@@ -194,7 +336,7 @@ export function SettingsUpgradeButton() {
 
 export function CompactUpgradeButton() {
   return (
-    <PremiumUpgradeButton
+    <PremiumUpgradeButtonWithModal
       variant="outline"
       size="sm"
       style="minimal"
