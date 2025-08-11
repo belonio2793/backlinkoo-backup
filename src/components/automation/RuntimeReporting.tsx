@@ -33,12 +33,13 @@ interface RuntimeReportingProps {
   onRefreshData?: () => void;
 }
 
-export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }: RuntimeReportingProps) {
+export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeReportingProps) {
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [activeTab, setActiveTab] = useState('overview');
-  const [recentPlacements, setRecentPlacements] = useState<LiveLinkPlacement[]>([]);
-  const [liveActivities, setLiveActivities] = useState<LiveActivity[]>([]);
-  const [isMonitoring, setIsMonitoring] = useState(false);
+  const [campaigns, setCampaigns] = useState<CampaignMetrics[]>([]);
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Update timestamp every minute
   useEffect(() => {
