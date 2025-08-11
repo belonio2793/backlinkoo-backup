@@ -78,7 +78,7 @@ export default function BacklinkAutomation() {
     autoStart: false
   });
 
-  const { isPremium } = useAuth();
+  const { isPremium, user, isAuthenticated } = useAuth();
   const {
     campaigns,
     createCampaign,
