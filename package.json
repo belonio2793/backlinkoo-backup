@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:netlify": "netlify dev",
-    "build": "vite build",
+    "build": "npm run clean:symbols && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "clean:symbols": "node scripts/auto-symbol-cleaner.js",
