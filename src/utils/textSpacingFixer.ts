@@ -219,25 +219,61 @@ export class TextSpacingFixer {
   }
 
   /**
+   * Specifically fix modal dialogs
+   */
+  static fixModalDialogs(): void {
+    const modals = document.querySelectorAll('[role="dialog"], .modal, .popup, .fixed');
+    modals.forEach(modal => {
+      this.fixTextSpacing();
+    });
+  }
+
+  /**
    * Initialize the text spacing fixer with automatic detection
    */
   static initialize(): void {
     // Run immediately
     this.fixTextSpacing();
-    
-    // Run after a short delay to catch dynamically rendered content
+
+    // Run after multiple delays to catch dynamically rendered content
+    setTimeout(() => this.fixTextSpacing(), 50);
     setTimeout(() => this.fixTextSpacing(), 100);
+    setTimeout(() => this.fixTextSpacing(), 200);
     setTimeout(() => this.fixTextSpacing(), 500);
-    
+    setTimeout(() => this.fixTextSpacing(), 1000);
+
     // Set up a mutation observer to fix text spacing when content changes
-    const observer = new MutationObserver(() => {
-      setTimeout(() => this.fixTextSpacing(), 50);
+    const observer = new MutationObserver((mutations) => {
+      let hasModalChanges = false;
+      mutations.forEach(mutation => {
+        if (mutation.target instanceof Element) {
+          const element = mutation.target as Element;
+          if (element.matches('[role="dialog"], .modal, .popup') ||
+              element.closest('[role="dialog"], .modal, .popup')) {
+            hasModalChanges = true;
+          }
+        }
+      });
+
+      if (hasModalChanges) {
+        // Run immediately for modal changes
+        this.fixTextSpacing();
+        setTimeout(() => this.fixTextSpacing(), 10);
+        setTimeout(() => this.fixTextSpacing(), 50);
+      } else {
+        setTimeout(() => this.fixTextSpacing(), 50);
+      }
     });
-    
+
     observer.observe(document.body, {
       childList: true,
       subtree: true,
       characterData: true
+    });
+
+    // Also run when modals are likely to appear
+    document.addEventListener('click', () => {
+      setTimeout(() => this.fixModalDialogs(), 100);
     });
   }
 }
