@@ -617,7 +617,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
 
                     <div className="text-sm text-gray-600 space-y-1">
                       <p><strong>Contains:</strong> Live link verification, placement screenshots, anchor text analysis, domain authority scores</p>
-                      <p><strong>Data Points:</strong> {recentPlacements.length} verified placements • {liveLinks} live links • Quality scores</p>
+                      <p><strong>Data Points:</strong> {liveLinks} verified placements • {liveLinks} live links • Quality scores</p>
                       <p><strong>Use Case:</strong> Client reports, link audit trails, placement verification, quality assurance</p>
                     </div>
 
