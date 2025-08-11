@@ -203,8 +203,9 @@ export function useDatabaseCampaignManager() {
         return false;
       }
     } catch (err: any) {
+      const errorMessage = err?.message || err?.toString() || 'Unknown error occurred';
       toast.error('Error deleting campaign', {
-        description: err.message
+        description: errorMessage
       });
       return false;
     }
