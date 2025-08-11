@@ -68,7 +68,39 @@ export class ContentFormatter {
     formattedContent = this.processBlockquotes(formattedContent);
     formattedContent = this.fixSpacing(formattedContent);
 
+    // Final HTML validation and repair
+    formattedContent = this.validateAndRepairHtml(formattedContent);
+
     return formattedContent;
+  }
+
+  /**
+   * Validate and repair HTML structure to prevent malformed tags
+   */
+  private static validateAndRepairHtml(content: string): string {
+    return content
+      // Fix all malformed heading tags
+      .replace(/<h\s+([1-6])\s*=?\s*"?"?\s*([^>]*)>/gi, '<h$1>')
+      .replace(/<\/h\s*([1-6])?\s*>/gi, (match, level) => {
+        return level ? `</h${level}>` : '</h1>';
+      })
+
+      // Repair any remaining tag spacing issues
+      .replace(/<(\w+)\s+([^>]*)\s*=\s*""\s*([^>]*)>/gi, '<$1 $2$3>')
+      .replace(/<(\w+)\s*=\s*""\s*([^>]*)>/gi, '<$1$2>')
+
+      // Clean up style attributes with HTML entities
+      .replace(/style="[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+
+      // Fix word concatenation issues
+      .replace(/([a-z])([A-Z])/g, '$1 $2')
+      .replace(/(be)(automatically)/gi, '$1 $2')
+      .replace(/([a-z])(deleted)/gi, '$1 $2')
+      .replace(/([a-z])(in\d+[hm])/gi, '$1 $2')
+
+      // Remove any empty or malformed attributes
+      .replace(/\s+=""(?=\s|>)/g, '')
+      .replace(/\s+=\s*""(?=\s|>)/g, '');
   }
 
   /**
