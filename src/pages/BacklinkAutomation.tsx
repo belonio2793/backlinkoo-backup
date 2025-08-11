@@ -175,6 +175,12 @@ export default function BacklinkAutomation() {
     return status.allTablesExist;
   }, []);
 
+  // Handle authentication success
+  const handleAuthSuccess = (user: any) => {
+    setShowAuthModal(false);
+    toast.success('Welcome! You can now create automation campaigns.');
+  };
+
   // Run health check on mount for debugging
   React.useEffect(() => {
     DatabaseHealthCheck.logHealthCheck();
