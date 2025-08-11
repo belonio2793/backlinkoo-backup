@@ -169,6 +169,10 @@ export class AutoCleaner {
       clearInterval(this.intervalId);
       this.intervalId = null;
     }
+    if (this.observer) {
+      this.observer.disconnect();
+      this.observer = null;
+    }
     this.isRunning = false;
     console.log('AutoCleaner stopped');
   }
