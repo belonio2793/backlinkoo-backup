@@ -132,27 +132,43 @@ export class UnifiedErrorHandler {
    */
   private fallbackFormatError(error: any): string {
     if (!error) return 'Unknown error occurred';
-    
+
     if (typeof error === 'string') return error;
-    
+
     if (error.message && typeof error.message === 'string') return error.message;
-    
+
     if (error.details && typeof error.details === 'string') return error.details;
-    
+
+    if (error.error && typeof error.error === 'string') return error.error;
+
     if (error.toString && typeof error.toString === 'function') {
       const str = error.toString();
       if (str !== '[object Object]') return str;
     }
-    
+
     // Try to extract useful information from object
-    if (typeof error === 'object') {
+    if (typeof error === 'object' && error !== null) {
       const keys = Object.keys(error);
       if (keys.length > 0) {
-        const info = keys.slice(0, 3).map(key => `${key}: ${error[key]}`).join(', ');
-        return `Error details: ${info}`;
+        // Look for common error properties first
+        if (error.code) return `Error ${error.code}: ${error.message || 'Unknown error'}`;
+        if (error.status) return `HTTP ${error.status}: ${error.statusText || error.message || 'Unknown error'}`;
+
+        // Extract meaningful properties
+        const meaningfulKeys = keys.filter(key =>
+          !['stack', 'constructor', '__proto__'].includes(key)
+        ).slice(0, 3);
+
+        const info = meaningfulKeys.map(key => {
+          const value = error[key];
+          if (typeof value === 'object') return `${key}: [object]`;
+          return `${key}: ${value}`;
+        }).join(', ');
+
+        return info || 'Error object with no readable properties';
       }
     }
-    
+
     return 'Unknown error occurred';
   }
 
