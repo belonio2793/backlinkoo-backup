@@ -69,3 +69,79 @@
   display: inline-block;
   min-width: 1px;
 }
+
+/* COMPREHENSIVE FIXES TO PREVENT TEXT CONCATENATION */
+
+/* Ensure all inline elements have proper spacing */
+span:not(:last-child):not(.no-space) {
+  margin-right: 0.1em;
+}
+
+/* Fix for text that appears after other text */
+.text-after-space::before {
+  content: " ";
+  white-space: pre;
+}
+
+/* Prevent words from running together in flex containers */
+.flex > *:not(:last-child) {
+  margin-right: 0.25rem;
+}
+
+/* Force space preservation in critical areas */
+.preserve-spaces {
+  white-space: pre-wrap;
+}
+
+/* Ensure proper spacing around numbers and text */
+.number-text-spacing {
+  display: inline-block;
+}
+
+.number-text-spacing::after {
+  content: " ";
+  white-space: pre;
+}
+
+/* Specific fix for time remaining displays */
+.time-remaining-fix {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.time-remaining-fix::before,
+.time-remaining-fix::after {
+  content: " ";
+  white-space: pre;
+}
+
+/* Fix for modal content text concatenation */
+.modal-text-fix p > span:not(:first-child)::before {
+  content: " ";
+  white-space: pre;
+}
+
+/* Emergency text spacing fix for any concatenated text */
+.emergency-spacing > *:not(:first-child)::before {
+  content: " ";
+  white-space: pre;
+}
+
+/* Global fix for common text concatenation patterns */
+.font-semibold::before,
+.font-medium::before,
+.font-bold::before {
+  white-space: pre;
+}
+
+/* Ensure spans within paragraphs have proper spacing */
+p > span:not(:first-child):not(.no-space-before)::before {
+  content: " ";
+  white-space: pre;
+}
+
+/* Fix for view count displays */
+.view-count-fix::before {
+  content: " ";
+  white-space: pre;
+}
