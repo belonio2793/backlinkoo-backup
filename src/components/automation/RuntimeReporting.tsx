@@ -599,7 +599,7 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                          <FilePdf className="h-5 w-5 text-red-600" />
+                          <FileText className="h-5 w-5 text-red-600" />
                         </div>
                         <div>
                           <h4 className="font-medium">Link Placement Audit Report</h4>
