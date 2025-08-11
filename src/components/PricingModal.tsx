@@ -353,7 +353,7 @@ export const PricingModal = ({
                           ${plan.pricePerLink} per credit
                         </div>
                         <div className="text-2xl font-semibold">
-                          {plan.credits} Credits
+                          {plan.credits}&nbsp;Credits
                         </div>
                       </div>
                       <p className="text-sm text-muted-foreground">{plan.description}</p>
