@@ -232,13 +232,13 @@ export class AutomationDatabaseService {
 
       if (error) {
         console.error('Error updating campaign:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: error?.message || error?.toString() || 'Unknown database error' };
       }
 
       return { success: true, data };
     } catch (error: any) {
       console.error('Error updating campaign:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error?.message || error?.toString() || 'Unknown error occurred' };
     }
   }
 
