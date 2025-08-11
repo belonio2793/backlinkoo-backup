@@ -22,6 +22,11 @@ export function cleanText(text: string): string {
     return text;
   }
 
+  // Debug logging for the "automatically deleted" issue
+  if (text.includes('automatically') || text.includes('deleted')) {
+    console.log('🚨 CLEANING TEXT WITH AUTOMATICALLY/DELETED:', text);
+  }
+
   let cleaned = text;
   
   // Remove all problematic characters
