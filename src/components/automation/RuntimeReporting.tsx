@@ -310,7 +310,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
                 Real-time campaign monitoring and performance analytics
                 {error && (
                   <div className="mt-2 text-red-600 text-sm">
-                    ⚠️ {error}
+                    ⚠��� {error}
                   </div>
                 )}
               </CardDescription>
@@ -510,6 +510,13 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
               // Update metrics when URLs are processed
               handleRefreshData();
             }}
+          />
+        </TabsContent>
+
+        <TabsContent value="siphoned" className="space-y-6">
+          {/* Siphoned URL Data Reporting */}
+          <SiphonedUrlReporting
+            campaignId={campaigns.find(c => c.status === 'active')?.campaign_id}
           />
         </TabsContent>
 
