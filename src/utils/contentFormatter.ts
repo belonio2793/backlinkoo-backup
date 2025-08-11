@@ -721,7 +721,18 @@ export class ContentFormatter {
 
       // Fix broken HTML entities
       .replace(/&lt;(\w+)/g, '<$1')
-      .replace(/(\w+)&gt;/g, '$1>');
+      .replace(/(\w+)&gt;/g, '$1>')
+
+      // FIX MISSING SPACES: Add spaces around concatenated words that lost spacing due to HTML entity removal
+      .replace(/([a-z])([A-Z])/g, '$1 $2') // Add space between lowercase and uppercase (camelCase breakup)
+      .replace(/([a-zA-Z])(\d)/g, '$1 $2') // Add space between letters and numbers
+      .replace(/(\d)([a-zA-Z])/g, '$1 $2') // Add space between numbers and letters
+      .replace(/([a-z])(in\d+[hm])/g, '$1 $2') // Fix patterns like "deletedin15h" -> "deleted in15h"
+      .replace(/(beauto)(matically)/g, '$1 $2') // Fix compound words that got mashed together
+      .replace(/([a-z])(deleted)/g, '$1 $2') // Add space before "deleted"
+      .replace(/(be)(automatically)/g, '$1 $2') // Fix "beautomatically" -> "be automatically"
+      .replace(/([a-z])(ly[A-Z])/g, '$1$2') // Handle adverb combinations
+      .replace(/(\w)(in\d+h)/g, '$1 $2'); // Add space before time patterns like "in15h"
   }
 
   /**
