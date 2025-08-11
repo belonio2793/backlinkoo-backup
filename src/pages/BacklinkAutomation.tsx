@@ -573,8 +573,9 @@ export default function BacklinkAutomation() {
 
       <Footer />
 
-      {/* Authentication Modal */}
-      <RoutePreservingAuth showAuthButtons={false} />
+      {/* Authentication Modal - only render invisible one when not showing modal */}
+      {!showAuthModal && <RoutePreservingAuth showAuthButtons={false} />}
+
       {showAuthModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
