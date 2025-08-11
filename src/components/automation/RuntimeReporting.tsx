@@ -359,12 +359,16 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
                     <span className="font-medium">{totalLinksBuilt}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Average Success Rate</span>
-                    <span className="font-medium">{avgSuccessRate.toFixed(1)}%</span>
+                    <span className="text-sm text-gray-600">Live/Verified Links</span>
+                    <span className="font-medium">{liveLinks}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-sm text-gray-600">Cost per Link</span>
-                    <span className="font-medium">$0.00</span>
+                    <span className="text-sm text-gray-600">Success Rate</span>
+                    <span className="font-medium">{successRate.toFixed(1)}%</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-sm text-gray-600">Links Today</span>
+                    <span className="font-medium">{todaysLinks}</span>
                   </div>
                 </div>
               </CardContent>
