@@ -418,13 +418,13 @@ export default function BacklinkAutomation() {
   const getUserStorageKey = useCallback(() => {
     if (user?.id) {
       const key = `permanent_campaigns_${user.id}`;
-      console.log('���� Using user storage key:', key);
+      console.log(' Using user storage key:', key);
       return key;
     } else {
       // For guest users, use a persistent guest ID
       const guestId = guestTrackingService.getGuestData()?.guestId || 'guest_default';
       const key = `permanent_campaigns_guest_${guestId}`;
-      console.log('��� Using guest storage key:', key);
+      console.log(' Using guest storage key:', key);
       return key;
     }
   }, [user]);
@@ -500,7 +500,7 @@ export default function BacklinkAutomation() {
           // Show user-friendly notification for database setup issues
           if (result.error?.includes('Database function missing') || result.error?.includes('table missing')) {
             toast({
-              title: "⚠�� Database Setup Required",
+              title: "⚠ Database Setup Required",
               description: "Campaign metrics will use local storage until database is configured. Visit Admin → Database to set up.",
               duration: 5000
             });
@@ -574,7 +574,7 @@ export default function BacklinkAutomation() {
       setCampaigns(prev => prev.filter(c => c.id !== campaignId));
       setGuestCampaignResults(prev => prev.filter(c => c.id !== campaignId));
 
-      console.log('🗑�� Campaign permanently deleted from all storage:', campaignId);
+      console.log('🗑 Campaign permanently deleted from all storage:', campaignId);
 
       toast({
         title: '🗑️ Campaign Deleted',
@@ -783,7 +783,7 @@ export default function BacklinkAutomation() {
         }
 
         // Attempt retry
-        console.log('�� Retrying failed database sync for campaign:', failedSync.metrics.campaignId);
+        console.log(' Retrying failed database sync for campaign:', failedSync.metrics.campaignId);
 
         const retryPromise = campaignMetricsService
           .updateCampaignMetrics(failedSync.userId, failedSync.metrics)
@@ -1222,7 +1222,7 @@ export default function BacklinkAutomation() {
           if (permanentCampaigns.length > 0) {
             setTimeout(() => {
               toast({
-                title: "��� Data Restored Successfully",
+                title: " Data Restored Successfully",
                 description: `${permanentCampaigns.length} campaigns restored with all metrics preserved. Your data is safe across sessions.`,
                 duration: 4000,
               });
@@ -1501,7 +1501,7 @@ export default function BacklinkAutomation() {
 
     // Show toast notification for new link
     toast({
-      title: "��� New Backlink Published!",
+      title: " New Backlink Published!",
       description: `Link published on ${linkToPublish.domain} • Total: ${newCount} links built`,
       duration: 3000,
     });
@@ -2296,7 +2296,7 @@ export default function BacklinkAutomation() {
     const existingInterval = activeCampaignIntervals.get(campaignId);
     if (existingInterval) {
       clearInterval(existingInterval);
-      console.log('���� Cleared existing interval for campaign:', campaignId);
+      console.log(' Cleared existing interval for campaign:', campaignId);
     }
 
     // Add debouncing to prevent rapid restarts
@@ -2440,7 +2440,7 @@ export default function BacklinkAutomation() {
           heartbeatActivity.push({
             id: `heartbeat-${Date.now()}`,
             type: 'system_monitoring' as const,
-            message: `📊 Campaign actively monitored �� ${campaignMetrics.get(campaignId)?.domainsReached?.size || 0} domains tracked`,
+            message: `📊 Campaign actively monitored  ${campaignMetrics.get(campaignId)?.domainsReached?.size || 0} domains tracked`,
             timestamp: new Date().toISOString(),
             metadata: {
               type: 'heartbeat',
@@ -2509,7 +2509,7 @@ export default function BacklinkAutomation() {
                 const isLastRetry = retryCount >= maxRetries;
 
                 if (isLastRetry) {
-                  console.warn('��� Database sync failed after', maxRetries, 'attempts for campaign:', campaign.id, formatErrorForUI(error));
+                  console.warn(' Database sync failed after', maxRetries, 'attempts for campaign:', campaign.id, formatErrorForUI(error));
 
                   // Store failed sync for later retry
                   try {
@@ -6118,19 +6118,19 @@ export default function BacklinkAutomation() {
                           { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
-                          { name: 'Marketing & Advertising', count: 54210, icon: '����' },
+                          { name: 'Marketing & Advertising', count: 54210, icon: '' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '🛒' },
                           { name: 'Travel & Tourism', count: 38920, icon: '✈️' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
                           { name: 'Entertainment & Gaming', count: 32180, icon: '🎮' },
                           { name: 'Food & Restaurants', count: 29870, icon: '🍕' },
-                          { name: 'Real Estate', count: 27450, icon: '���' },
+                          { name: 'Real Estate', count: 27450, icon: '' },
                           { name: 'Automotive', count: 25340, icon: '🚗' },
                           { name: 'Fashion & Beauty', count: 23120, icon: '👗' },
                           { name: 'Home & Garden', count: 21890, icon: '🏠' },
                           { name: 'Legal Services', count: 19650, icon: '⚖️' },
                           { name: 'Non-profit & Charity', count: 17430, icon: '❤️' },
-                          { name: 'Government & Politics', count: 15820, icon: '🏛��' },
+                          { name: 'Government & Politics', count: 15820, icon: '🏛' },
                           { name: 'Science & Research', count: 14560, icon: '🔬' },
                           { name: 'Arts & Culture', count: 13290, icon: '🎨' }
                         ].map((category, idx) => (

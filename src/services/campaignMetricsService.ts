@@ -489,7 +489,7 @@ class CampaignMetricsService {
             const result = await this.updateCampaignMetrics(userId, metrics);
             if (result.success) {
               migratedCount++;
-              console.log('��� Migrated campaign to database:', campaign.id);
+              console.log(' Migrated campaign to database:', campaign.id);
             }
           }
         } catch (parseError) {

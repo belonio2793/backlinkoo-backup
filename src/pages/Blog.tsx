@@ -65,7 +65,7 @@ function Blog() {
 
       // Set a timeout to prevent infinite loading
       const timeoutId = setTimeout(() => {
-        console.warn('��️ Loading timeout reached, stopping loading state');
+        console.warn('️ Loading timeout reached, stopping loading state');
         setLoading(false);
       }, 10000); // 10 second timeout
 
@@ -132,7 +132,7 @@ function Blog() {
         const sortedPosts = sortPosts(allPosts, sortBy);
         setBlogPosts(sortedPosts);
 
-        console.log('��� Blog posts loaded:', {
+        console.log(' Blog posts loaded:', {
           databasePosts: posts.length,
           localBlogPosts: localBlogPosts.length,
           totalPosts: allPosts.length,

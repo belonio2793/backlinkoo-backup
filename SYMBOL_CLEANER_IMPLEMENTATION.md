@@ -55,7 +55,7 @@ toggleGlobalCleaner()
 - **Bullet variants**: ● ○ ◉ ◎ ⦿ ⦾ ⊙ ⊚
 - **Box drawing**: ⬢ ⬡ ⬟ ⬠ ⬞ ⬝ ⬜ ⬛
 - **Control characters**: Zero-width spaces, joiners, BOM
-- **Encoding errors**: � (replacement character)
+- **Encoding errors**:  (replacement character)
 
 ### **Symbols Preserved:**
 - **∞** (infinity) - Part of "Backlink ∞" branding

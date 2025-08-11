@@ -2,7 +2,7 @@
 
 /**
  * Automatic Symbol Cleaner
- * Removes the Unicode replacement character "�" from all source files
+ * Removes the Unicode replacement character "" from all source files
  */
 
 import fs from 'fs';
@@ -13,7 +13,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Replacement character to remove
-const REPLACEMENT_CHAR = '�';
+const REPLACEMENT_CHAR = '';
 const REPLACEMENT_CHAR_UNICODE = '\uFFFD';
 
 // File extensions to process
@@ -67,7 +67,7 @@ function cleanSymbols(content) {
   const original = content;
   
   // Remove replacement character
-  content = content.replace(/�/g, '');
+  content = content.replace(//g, '');
   content = content.replace(/\uFFFD/g, '');
   
   // Count replacements
