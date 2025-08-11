@@ -32,8 +32,19 @@ export function ClaimStatusIndicator({ onUpgrade, onSignIn }: ClaimStatusIndicat
       setUser(user);
 
       if (user) {
-        const count = await ClaimableBlogService.getUserClaimedCount(user.id);
-        setClaimedCount(count);
+        try {
+          const stats = await UnifiedClaimService.getUserSavedStats(user.id);
+          setClaimedCount(stats.savedCount);
+        } catch (statsError: any) {
+          console.error('❌ Failed to get user saved stats:', {
+            error: statsError?.message || statsError,
+            stack: statsError?.stack,
+            userId: user.id,
+            timestamp: new Date().toISOString()
+          });
+          // Fallback to 0 if stats fail
+          setClaimedCount(0);
+        }
       }
     } catch (error: any) {
       console.error('Error checking user claims:', {
