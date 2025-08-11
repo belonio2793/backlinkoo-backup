@@ -109,19 +109,12 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
     onRefreshData?.();
   };
 
-  // Calculate aggregate metrics from real data
-  const totalCampaigns = campaigns.length;
-  const activeCampaigns = campaigns.filter(c => c.status === 'active').length;
-  const totalLinksBuilt = recentPlacements.length;
-  const liveLinks = recentPlacements.filter(p => p.verification_status === 'live').length;
-  const successRate = totalLinksBuilt > 0 ? (liveLinks / totalLinksBuilt) * 100 : 0;
-
-  // Today's activity
-  const today = new Date().toDateString();
-  const todaysPlacements = recentPlacements.filter(p =>
-    new Date(p.placed_at).toDateString() === today
-  );
-  const todaysLinks = todaysPlacements.length;
+  // Calculate aggregate metrics from dashboard stats and campaigns
+  const totalCampaigns = dashboardStats?.total_campaigns || campaigns.length;
+  const activeCampaigns = dashboardStats?.active_campaigns || campaigns.filter(c => c.status === 'active').length;
+  const totalLinksBuilt = dashboardStats?.total_links || campaigns.reduce((sum, c) => sum + c.links_built, 0);
+  const successRate = dashboardStats?.success_rate || (campaigns.length > 0 ? campaigns.reduce((sum, c) => sum + c.success_rate, 0) / campaigns.length : 0);
+  const todaysLinks = dashboardStats?.links_today || 0;
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', {
