@@ -87,21 +87,7 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
               <div className="flex items-center gap-2 text-amber-800 mb-2">
                 <Clock className="h-4 w-4" />
-                <span className="font-medium" style={{ fontSize: '15px' }}>
-                  Time Remaining:{' '}
-                  <span
-                    style={{
-                      fontWeight: '700',
-                      color: '#d97706',
-                      padding: '2px 6px',
-                      backgroundColor: '#fef3c7',
-                      borderRadius: '3px',
-                      border: '1px solid #fbbf24'
-                    }}
-                  >
-                    {spacedTimeRemaining}
-                  </span>
-                </span>
+                <span className="font-medium">Time Remaining: {displayTime}</span>
               </div>
               <p className="text-sm text-amber-700">
                 Create a free account to claim and keep your content permanently.
