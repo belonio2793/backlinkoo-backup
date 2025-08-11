@@ -42,6 +42,7 @@ import { Footer } from '@/components/Footer';
 import DeleteCampaignDialog from '@/components/campaigns/DeleteCampaignDialog';
 import { AllCompletedURLsRundown } from '@/components/campaigns/AllCompletedURLsRundown';
 import { DirectCheckoutService } from '@/services/directCheckoutService';
+import { EnhancedPremiumCheckoutModal } from '@/components/EnhancedPremiumCheckoutModal';
 
 import { campaignService, type CampaignApiError, type CampaignDeletionOptions } from '@/services/campaignService';
 import { CampaignBlogIntegrationService } from '@/services/campaignBlogIntegrationService';
