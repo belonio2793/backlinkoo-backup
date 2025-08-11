@@ -26,7 +26,8 @@ import {
   CheckCircle, XCircle, Clock3, Loader2, ArrowUp, ArrowDown, Trash2,
   Link, Sparkles, Network, Rocket, Crown, Heart, Flag, RefreshCw,
   ThumbsUp, ThumbsDown, Plus, Filter, ChevronRight, Zap as Lightning, User,
-  ChevronDown, ChevronUp, X, Monitor, LinkIcon, Send, Clock4, AlertCircle, Lock
+  ChevronDown, ChevronUp, X, Monitor, LinkIcon, Send, Clock4, AlertCircle, Lock,
+  Star, CreditCard, Gift
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
