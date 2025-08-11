@@ -100,12 +100,27 @@ export function CampaignForm({
     }));
   };
 
+  // Auto-format URL to include https://
+  const formatUrl = (url: string) => {
+    if (!url) return url;
+    const trimmedUrl = url.trim();
+    if (trimmedUrl && !trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://')) {
+      return `https://${trimmedUrl}`;
+    }
+    return trimmedUrl;
+  };
+
+  const handleUrlChange = (value: string) => {
+    const formattedUrl = formatUrl(value);
+    setFormData(prev => ({ ...prev, targetUrl: formattedUrl }));
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const filteredKeywords = formData.keywords.filter(k => k.trim());
     const filteredAnchorTexts = formData.anchorTexts.filter(a => a.trim());
-    
+
     if (!formData.name || !formData.targetUrl || filteredKeywords.length === 0 || filteredAnchorTexts.length === 0) {
       return;
     }
