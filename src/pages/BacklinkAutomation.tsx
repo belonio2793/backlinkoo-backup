@@ -3972,7 +3972,7 @@ export default function BacklinkAutomation() {
                               <Button
                                 variant="link"
                                 size="sm"
-                                onClick={() => setShowPremiumPlans(true)}
+                                onClick={() => setShowPremiumCheckoutModal(true)}
                                 className="p-0 h-auto text-amber-700 hover:text-amber-800"
                               >
                                 View Plans ⬆️
