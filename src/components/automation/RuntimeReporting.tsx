@@ -114,20 +114,19 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
     }
   };
 
-  // Calculate aggregate metrics
+  // Calculate aggregate metrics from real data
   const totalCampaigns = campaigns.length;
   const activeCampaigns = campaigns.filter(c => c.status === 'active').length;
-  const totalLinksBuilt = campaigns.reduce((sum, c) => sum + (c.links_built || 0), 0);
-  const avgSuccessRate = campaigns.length > 0 
-    ? campaigns.reduce((sum, c) => sum + (c.success_rate || 0), 0) / campaigns.length 
-    : 0;
+  const totalLinksBuilt = recentPlacements.length;
+  const liveLinks = recentPlacements.filter(p => p.verification_status === 'live').length;
+  const successRate = totalLinksBuilt > 0 ? (liveLinks / totalLinksBuilt) * 100 : 0;
 
-  // Recent activity (last 24 hours simulation)
-  const recentActivity = campaigns.map(campaign => ({
-    ...campaign,
-    recent_links: Math.floor(Math.random() * 5),
-    last_success: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000)
-  }));
+  // Today's activity
+  const today = new Date().toDateString();
+  const todaysPlacements = recentPlacements.filter(p =>
+    new Date(p.placed_at).toDateString() === today
+  );
+  const todaysLinks = todaysPlacements.length;
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', { 
