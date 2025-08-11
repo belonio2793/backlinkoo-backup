@@ -55,7 +55,7 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md bg-white shadow-2xl border-0 animate-fade-in modal-perfect-spacing">
+      <Card className="w-full max-w-md bg-white shadow-2xl border-0 animate-fade-in">
         <CardHeader className="relative text-center pb-4">
           <Button
             variant="ghost"
