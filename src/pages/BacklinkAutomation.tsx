@@ -39,6 +39,7 @@ import { RuntimeStatus } from '@/components/automation/RuntimeStatus';
 import { LiveAutomationEngine } from '@/services/liveAutomationEngine';
 import { CampaignErrorHandler } from '@/utils/campaignErrorHandler';
 import { CampaignCreationTest } from '@/components/testing/CampaignCreationTest';
+import { DatabaseMigrationTest } from '@/components/testing/DatabaseMigrationTest';
 
 const engines = [
   {
