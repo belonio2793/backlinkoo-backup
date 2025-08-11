@@ -6128,7 +6128,7 @@ export default function BacklinkAutomation() {
                           { name: 'Health & Medicine', count: 87320, icon: '🏥' },
                           { name: 'Education & Research', count: 76890, icon: '🎓' },
                           { name: 'News & Media', count: 65430, icon: '📰' },
-                          { name: 'Marketing & Advertising', count: 54210, icon: '������' },
+                          { name: 'Marketing & Advertising', count: 54210, icon: '����' },
                           { name: 'E-commerce & Retail', count: 45670, icon: '🛒' },
                           { name: 'Travel & Tourism', count: 38920, icon: '✈️' },
                           { name: 'Sports & Recreation', count: 34560, icon: '⚽' },
@@ -6804,7 +6804,7 @@ export default function BacklinkAutomation() {
                   <Button
                     size="sm"
                     onClick={() => {
-                      setShowPremiumPlans(true);
+                      setShowPaymentModal(true);
                       setShowFabMenu(false);
                     }}
                     className="w-48 justify-start bg-purple-600 text-white shadow-lg hover:bg-purple-700"
