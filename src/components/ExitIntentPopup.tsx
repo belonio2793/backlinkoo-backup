@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuthModal } from '@/contexts/ModalContext';
 import { useTextSpacing } from '@/hooks/useTextSpacing';
 import { forceTextSpacing } from '@/utils/forceTextSpacing';
+import { formatModalText, formatTimeDisplay } from '@/utils/perfectTextFormatter';
 
 interface ExitIntentPopupProps {
   isVisible: boolean;
