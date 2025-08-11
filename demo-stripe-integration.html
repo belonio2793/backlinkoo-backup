@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stripe Integration Demo - Backlinkoo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .feature-card {
+            transition: all 0.3s ease;
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="min-h-screen py-12">
+        <div class="max-w-4xl mx-auto px-6">
+            <!-- Header -->
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold text-gray-900 mb-4">
+                    🎉 Stripe Integration Demo
+                </h1>
+                <p class="text-xl text-gray-600">
+                    Full Stripe checkout integration with new window popup
+                </p>
+            </div>
+
+            <!-- Integration Status -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6 flex items-center">
+                    <span class="bg-green-100 p-2 rounded-full mr-3">
+                        ✅
+                    </span>
+                    Integration Status
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                            <span class="font-medium text-gray-900">Payment Modal</span>
+                            <span class="text-green-600 font-semibold">✅ Configured</span>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                            <span class="font-medium text-gray-900">Stripe Integration</span>
+                            <span class="text-green-600 font-semibold">✅ Active</span>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                            <span class="font-medium text-gray-900">New Window Checkout</span>
+                            <span class="text-green-600 font-semibold">✅ Enabled</span>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                            <span class="font-medium text-gray-900">Premium Plans</span>
+                            <span class="text-green-600 font-semibold">✅ Monthly & Yearly</span>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                            <span class="font-medium text-gray-900">Credit Purchases</span>
+                            <span class="text-green-600 font-semibold">✅ Multiple Tiers</span>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                            <span class="font-medium text-gray-900">Popup Handling</span>
+                            <span class="text-green-600 font-semibold">✅ Advanced</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- How It Works -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                    🚀 How It Works
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="text-center feature-card">
+                        <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl">1️⃣</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Click Upgrade</h3>
+                        <p class="text-gray-600 text-sm">User clicks the "Upgrade to Premium" button</p>
+                    </div>
+                    <div class="text-center feature-card">
+                        <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl">2️⃣</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Select Plan</h3>
+                        <p class="text-gray-600 text-sm">Choose between monthly or yearly subscription</p>
+                    </div>
+                    <div class="text-center feature-card">
+                        <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl">3️⃣</span>
+                        </div>
+                        <h3 class="font-semibold text-gray-900 mb-2">Stripe Checkout</h3>
+                        <p class="text-gray-600 text-sm">New window opens with secure Stripe payment</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                    ⭐ Key Features
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-purple-100 p-2 rounded-full">
+                                <span class="text-purple-600">🔒</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Secure Payment Processing</h4>
+                                <p class="text-gray-600 text-sm">Powered by Stripe with industry-standard security</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-blue-100 p-2 rounded-full">
+                                <span class="text-blue-600">🪟</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">New Window Checkout</h4>
+                                <p class="text-gray-600 text-sm">Opens in popup for seamless user experience</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-green-100 p-2 rounded-full">
+                                <span class="text-green-600">🔄</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Smart Fallbacks</h4>
+                                <p class="text-gray-600 text-sm">Handles popup blockers and connection issues</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-orange-100 p-2 rounded-full">
+                                <span class="text-orange-600">💳</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Multiple Plans</h4>
+                                <p class="text-gray-600 text-sm">Monthly ($29) and Yearly ($290) options</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-indigo-100 p-2 rounded-full">
+                                <span class="text-indigo-600">👤</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Guest & User Checkout</h4>
+                                <p class="text-gray-600 text-sm">Supports both authenticated and guest users</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="bg-pink-100 p-2 rounded-full">
+                                <span class="text-pink-600">📱</span>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Mobile Responsive</h4>
+                                <p class="text-gray-600 text-sm">Works perfectly on all devices</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Implementation Details -->
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                    🛠️ Implementation Details
+                </h2>
+                
+                <div class="space-y-6">
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="font-semibold text-gray-900 mb-3">Component Structure</h3>
+                        <div class="text-sm text-gray-600 space-y-2">
+                            <p><span class="font-mono bg-gray-200 px-2 py-1 rounded">EnhancedUnifiedPaymentModal</span> - Main payment modal component</p>
+                            <p><span class="font-mono bg-gray-200 px-2 py-1 rounded">paymentIntegrationService</span> - Handles Stripe API calls</p>
+                            <p><span class="font-mono bg-gray-200 px-2 py-1 rounded">create-subscription</span> - Netlify function for subscriptions</p>
+                            <p><span class="font-mono bg-gray-200 px-2 py-1 rounded">create-payment</span> - Netlify function for credit purchases</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="font-semibold text-gray-900 mb-3">New Window Configuration</h3>
+                        <div class="text-sm text-gray-600">
+                            <pre class="bg-gray-800 text-green-400 p-4 rounded-lg overflow-x-auto"><code>window.open(
+  result.url, 
+  '_blank',
+  'width=800,height=900,scrollbars=yes,resizable=yes'
+)</code></pre>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-6">
+                        <h3 class="font-semibold text-gray-900 mb-3">Enhanced Features</h3>
+                        <ul class="text-sm text-gray-600 space-y-2">
+                            <li>✅ Popup blocker detection and fallback</li>
+                            <li>✅ Payment window monitoring</li>
+                            <li>✅ User feedback and notifications</li>
+                            <li>✅ Error handling and retry logic</li>
+                            <li>✅ Mobile-responsive design</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Test Integration Button -->
+            <div class="text-center mt-12">
+                <p class="text-gray-600 mb-4">Ready to test the integration?</p>
+                <button 
+                    onclick="window.location.href = '/blog'"
+                    class="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                >
+                    👑 Try the Premium Upgrade
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple animation for feature cards
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.feature-card');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+        
+        console.log('🎉 Stripe Integration Demo Loaded');
+        console.log('📋 Features:');
+        console.log('  ✅ Full Stripe integration');
+        console.log('  ✅ New window checkout');
+        console.log('  ✅ Popup blocker handling');
+        console.log('  ✅ Mobile responsive');
+        console.log('  ✅ Error handling');
+        console.log('  ✅ Multiple payment options');
+    </script>
+</body>
+</html>
