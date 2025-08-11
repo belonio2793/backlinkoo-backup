@@ -12,6 +12,11 @@ export class ContentFormatter {
 
     // VERY EARLY preprocessing to fix critical issues before any HTML processing
     content = content
+      // ULTRA-EARLY FIX: Fix beautomatically deletedin before ANY other processing
+      .replace(/beautomatically\s*deletedin/gi, ' be automatically deleted in')
+      .replace(/beautomatically/gi, ' be automatically ')
+      .replace(/deletedin(\d+)/gi, ' deleted in $1')
+
       // Fix the specific issue: ## &lt; h2&gt;Pro Tip pattern
       .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*&lt;\s*\/\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
