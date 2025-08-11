@@ -501,7 +501,7 @@ export default function BacklinkAutomation() {
           // Show user-friendly notification for database setup issues
           if (result.error?.includes('Database function missing') || result.error?.includes('table missing')) {
             toast({
-              title: "⚠�� Database Setup Required",
+              title: "⚠️ Database Setup Required",
               description: "Campaign metrics will use local storage until database is configured. Visit Admin → Database to set up.",
               duration: 5000
             });
@@ -575,7 +575,7 @@ export default function BacklinkAutomation() {
       setCampaigns(prev => prev.filter(c => c.id !== campaignId));
       setGuestCampaignResults(prev => prev.filter(c => c.id !== campaignId));
 
-      console.log('🗑�� Campaign permanently deleted from all storage:', campaignId);
+      console.log('🗑️ Campaign permanently deleted from all storage:', campaignId);
 
       toast({
         title: '🗑️ Campaign Deleted',
@@ -784,7 +784,7 @@ export default function BacklinkAutomation() {
         }
 
         // Attempt retry
-        console.log('�� Retrying failed database sync for campaign:', failedSync.metrics.campaignId);
+        console.log('🔄 Retrying failed database sync for campaign:', failedSync.metrics.campaignId);
 
         const retryPromise = campaignMetricsService
           .updateCampaignMetrics(failedSync.userId, failedSync.metrics)
