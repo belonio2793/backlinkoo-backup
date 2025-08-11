@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { blogService } from '@/services/blogService';
+import { RotatingTrialText } from '@/components/RotatingTrialText';
 import {
   Clock,
   Eye,
