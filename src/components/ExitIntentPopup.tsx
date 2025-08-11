@@ -80,8 +80,8 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
         <CardContent className="space-y-6">
           <div className="text-center">
             <p className="text-gray-700 mb-4">
-              {displayTitle ? `Your blog post "${displayTitle}"` : "Your newly created blog post"}&nbsp;will&nbsp;be&nbsp;
-              <span className="font-semibold text-red-600">automatically&nbsp;deleted</span>&nbsp;in&nbsp;{displayTime}&nbsp;if&nbsp;left&nbsp;unclaimed.
+              {displayTitle ? `Your blog post "${displayTitle}" ` : "Your newly created blog post "}
+              will&nbsp;be&nbsp;<span className="font-semibold text-red-600">automatically&nbsp;deleted</span>&nbsp;in&nbsp;{displayTime}&nbsp;if&nbsp;left&nbsp;unclaimed.
             </p>
             
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
