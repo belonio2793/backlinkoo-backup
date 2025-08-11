@@ -42,6 +42,7 @@ import { CampaignCreationTest } from '@/components/testing/CampaignCreationTest'
 import { DatabaseMigrationTest } from '@/components/testing/DatabaseMigrationTest';
 import { DatabaseHealthChecker } from '@/components/system/DatabaseHealthChecker';
 import { QuickDatabaseStatus } from '@/components/system/QuickDatabaseStatus';
+import { EmergencyFixButton } from '@/components/system/EmergencyFixButton';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 const engines = [
