@@ -245,38 +245,49 @@ export function BeautifulBlogPost() {
   }, [blogPost]);
 
   const processClaimIntent = async () => {
-    // Only process claim intents for signed-in users
-    if (!user) {
-      // Clear any claim intents if user is not authenticated to prevent processing on login
-      localStorage.removeItem('claim_intent');
-      return;
-    }
-
-    // Check if there's actually a claim intent before processing
-    const claimIntentStr = localStorage.getItem('claim_intent');
-    if (!claimIntentStr) return; // No pending claim intent, don't show notifications
-
-    // Double-check user is still authenticated before processing
-    if (!user.id) {
-      localStorage.removeItem('claim_intent');
-      return;
-    }
-
-    const result = await EnhancedBlogClaimService.processPendingClaimIntent(user);
-    if (result) {
-      if (result.success) {
-        toast({
-          title: "Post Claimed! 🎉",
-          description: result.message,
-        });
-        if (slug) loadBlogPost(slug);
-      } else {
-        toast({
-          title: "Claim Failed",
-          description: result.message,
-          variant: "destructive"
-        });
+    try {
+      // Only process claim intents for signed-in users
+      if (!user) {
+        // Clear any claim intents if user is not authenticated to prevent processing on login
+        localStorage.removeItem('claim_intent');
+        return;
       }
+
+      // Check if there's actually a claim intent before processing
+      const claimIntentStr = localStorage.getItem('claim_intent');
+      if (!claimIntentStr) return; // No pending claim intent, don't show notifications
+
+      // Double-check user is still authenticated before processing
+      if (!user.id) {
+        localStorage.removeItem('claim_intent');
+        return;
+      }
+
+      const result = await EnhancedBlogClaimService.processPendingClaimIntent(user);
+      if (result) {
+        if (result.success) {
+          toast({
+            title: "Post Claimed! 🎉",
+            description: result.message,
+          });
+          if (slug) await loadBlogPost(slug);
+        } else {
+          toast({
+            title: "Claim Failed",
+            description: result.message,
+            variant: "destructive"
+          });
+        }
+      }
+    } catch (error: any) {
+      console.error('Error processing claim intent:', error);
+      // Clear the intent if it's causing issues
+      localStorage.removeItem('claim_intent');
+      toast({
+        title: "Claim Processing Error",
+        description: "There was an issue processing your claim. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
