@@ -32,6 +32,7 @@ import { ServiceConnectionStatus } from "@/components/admin/ServiceConnectionSta
 import { DirectOpenAITest } from "@/components/admin/DirectOpenAITest";
 import { UserManagement } from "@/components/admin/UserManagement";
 import { CampaignMetricsDBVerifier } from "@/components/CampaignMetricsDBVerifier";
+import { TextCleanerControls } from "@/components/admin/TextCleanerControls";
 
 // Testing Tools
 import { AuthEmailTest } from "@/components/AuthEmailTest";
