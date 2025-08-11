@@ -13,7 +13,7 @@ import { PremiumUpgradeProvider } from "@/components/PremiumUpgradeProvider";
 import { useSymbolCleaner } from "@/utils/symbolCleaner";
 import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
-import "@/utils/testReplacementCharacter"; // Load replacement character test
+// import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
 import Index from "./pages/Index";
 
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
