@@ -39,9 +39,10 @@ export function useDatabaseCampaignManager() {
         });
       }
     } catch (err: any) {
-      setError(err.message);
+      const errorMessage = err?.message || err?.toString() || 'Unknown error occurred';
+      setError(errorMessage);
       toast.error('Error loading campaigns', {
-        description: err.message
+        description: errorMessage
       });
     } finally {
       setLoading(false);
