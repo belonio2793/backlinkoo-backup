@@ -162,8 +162,15 @@ export async function checkSchemaExecution(): Promise<boolean> {
     console.log('🎉 SQL commands appear to have been executed successfully');
     return true;
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('❌ Schema check failed:', error);
+
+    // If the error is related to exec_sql function, try the fallback
+    if (error.message && error.message.includes('exec_sql')) {
+      console.log('🔄 Attempting fallback schema check...');
+      return await checkSchemaWithoutExecSql();
+    }
+
     return false;
   }
 }
