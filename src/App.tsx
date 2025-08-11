@@ -72,6 +72,7 @@ const App = () => (
           <TextCleanerProvider>
             <Toaster />
           <Sonner />
+          <GlobalErrorHandler />
           <UnifiedModalManager />
           <BrowserRouter>
             <PremiumUpgradeProvider>
