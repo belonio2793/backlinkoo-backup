@@ -387,7 +387,7 @@ export function EnhancedTrialBlogPosts({ user }: EnhancedTrialBlogPostsProps) {
           {isExpiringSoon && (
             <div className="p-2 bg-amber-50 border border-amber-200 rounded text-xs text-amber-700 mb-3">
               <AlertCircle className="h-3 w-3 inline mr-1" />
-              Expires in {timeRemaining}h
+              {`Expires in ${timeRemaining}h`}
             </div>
           )}
 
