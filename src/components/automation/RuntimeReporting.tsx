@@ -494,11 +494,11 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
         <TabsContent value="activity" className="space-y-6">
           {/* Real-Time URL Processing Monitor */}
           <RealTimeUrlMonitor
-            campaignId={campaigns.find(c => c.status === 'active')?.id}
+            campaignId={campaigns.find(c => c.status === 'active')?.campaign_id}
             onUrlProcessed={(url, success) => {
               console.log(`URL processed: ${url} - Success: ${success}`);
               // Update metrics when URLs are processed
-              onRefreshData?.();
+              handleRefreshData();
             }}
           />
         </TabsContent>
