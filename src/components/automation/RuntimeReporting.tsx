@@ -606,7 +606,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
                         </div>
                         <div>
                           <h4 className="font-medium">Link Placement Audit Report</h4>
-                          <p className="text-sm text-gray-500">PDF format • ~{Math.max(recentPlacements.length * 25, 500)}KB</p>
+                          <p className="text-sm text-gray-500">PDF format • ~{Math.max(liveLinks * 25, 500)}KB</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
