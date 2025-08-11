@@ -160,10 +160,18 @@ export default function BacklinkAutomation() {
 
   const { plan, limit } = getUserPlan();
 
+  // Check automation tables status
+  const checkAutomationTables = React.useCallback(async () => {
+    const status = await initializeAutomationTables();
+    setAutomationTablesExist(status.allTablesExist);
+    return status.allTablesExist;
+  }, []);
+
   // Run health check on mount for debugging
   React.useEffect(() => {
     DatabaseHealthCheck.logHealthCheck();
-  }, []);
+    checkAutomationTables();
+  }, [checkAutomationTables]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
