@@ -282,6 +282,7 @@ export class ContentFormatter {
           .replace(/&gt;/g, '>')
           .replace(/^\s*<\s*$/, '') // Remove standalone <
           .replace(/^\s*>\s*$/, '') // Remove standalone >
+          .replace(/[=""]/g, '') // Remove any stray equals signs and quotes
           .trim();
 
         if (!cleanContent) {
@@ -291,7 +292,10 @@ export class ContentFormatter {
         return `<h2>${cleanContent}</h2>`;
       })
       // Convert # headings to h1
-      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/^# (.+)$/gm, (match, content) => {
+        const cleanContent = content.replace(/[=""]/g, '').trim();
+        return `<h1>${cleanContent}</h1>`;
+      })
       // Remove any remaining standalone "Title:" patterns at start of lines
       .replace(/^Title:\s*[^\n]*\n?/gmi, '')
       // Clean up any remaining triple hyphens that might be inline
