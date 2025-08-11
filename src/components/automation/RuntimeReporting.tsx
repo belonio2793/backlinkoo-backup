@@ -128,13 +128,10 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
     try {
       const exportData = {
         campaigns: campaigns,
-        placements: recentPlacements,
-        activities: liveActivities,
         metrics: {
           totalCampaigns,
           activeCampaigns,
           totalLinksBuilt,
-          liveLinks,
           successRate,
           todaysLinks
         },
