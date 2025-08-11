@@ -2295,7 +2295,7 @@ export default function BacklinkAutomation() {
     const existingInterval = activeCampaignIntervals.get(campaignId);
     if (existingInterval) {
       clearInterval(existingInterval);
-      console.log('🔄 Cleared existing interval for campaign:', campaignId);
+      console.log('���� Cleared existing interval for campaign:', campaignId);
     }
 
     // Add debouncing to prevent rapid restarts
@@ -3886,14 +3886,7 @@ export default function BacklinkAutomation() {
                           {!isPremium && (
                             <Button
                               variant="outline"
-                              onClick={() => {
-
-                                if (user) {
-                                  DirectCheckoutService.upgradeToPremium('monthly');
-                                } else {
-                                  DirectCheckoutService.upgradeToPremium('monthly');
-                                }
-                              }}
+                              onClick={() => setShowPremiumPlans(true)}
                               className="w-full h-12 px-6 bg-purple-50 border-purple-200 text-purple-600 hover:bg-purple-100"
                             >
                               <Crown className="h-4 w-4 mr-2" />
