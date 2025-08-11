@@ -5,27 +5,54 @@
 
 export class ContentFormatter {
   /**
+   * Comprehensive HTML entity decoder - must be called FIRST
+   */
+  static decodeAllHtmlEntities(content: string): string {
+    return content
+      // Decode multiple levels of encoding
+      .replace(/&amp;lt;/g, '<')
+      .replace(/&amp;gt;/g, '>')
+      .replace(/&amp;amp;/g, '&')
+      .replace(/&amp;quot;/g, '"')
+      .replace(/&amp;#39;/g, "'")
+      .replace(/&amp;nbsp;/g, ' ')
+
+      // Decode standard HTML entities
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&nbsp;/g, ' ')
+
+      // Last decode &amp; to prevent breaking already decoded entities
+      .replace(/&amp;/g, '&');
+  }
+
+  /**
    * Format blog content with proper paragraph and headline structure
    */
   static formatBlogContent(content: string, title?: string): string {
     if (!content) return '';
 
+    // CRITICAL: Decode ALL HTML entities FIRST to prevent display as text
+    content = this.decodeAllHtmlEntities(content);
+
     // VERY EARLY preprocessing to fix critical issues before any HTML processing
     content = content
-      // Fix the specific issue: ## &lt; h2&gt;Pro Tip pattern
-      .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
-      .replace(/##\s*&lt;\s*\/\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
-      .replace(/##\s*&lt;\s*$/gm, '') // Remove lines that are just ## &lt;
+      // Fix the specific issue: ## < h2>Pro Tip pattern (now decoded)
+      .replace(/##\s*<\s*h[1-6]\s*>\s*Pro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*<\s*\/\s*h[1-6]\s*>\s*Pro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*<\s*$/gm, '') // Remove lines that are just ## <
 
       // Remove empty heading lines (just ##)
       .replace(/^\s*##\s*$/gm, '')
       .replace(/^\s*###\s*$/gm, '')
       .replace(/^\s*####\s*$/gm, '')
 
-      // Fix malformed HTML entities that break headings
-      .replace(/##\s*&lt;[^&]*&gt;\s*([A-Za-z][^\n]*)/gi, '## $1')
-      .replace(/&lt;\s*\/\s*[a-zA-Z]+\s*&gt;/g, '') // Remove &lt;/tag&gt; patterns
-      .replace(/&lt;\s*[a-zA-Z]+[^&]*&gt;/g, '') // Remove &lt;tag&gt; patterns
+      // Fix malformed HTML entities that break headings (after decoding)
+      .replace(/##\s*<[^>]*>\s*([A-Za-z][^\n]*)/gi, '## $1')
+      .replace(/<\s*\/\s*[a-zA-Z]+\s*>/g, '') // Remove </tag> patterns
+      .replace(/<\s*[a-zA-Z]+[^>]*>/g, '') // Remove <tag> patterns
 
       // Fix Pro Tip issue immediately - most aggressive patterns
       .replace(/##\s*P\s*[\n\r\s]*ro\s*Tip/gi, '## Pro Tip')
@@ -34,9 +61,9 @@ export class ContentFormatter {
       .replace(/##\s*P\s*\n?\s*ro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*P\s+ro\s*Tip/gi, '## Pro Tip')
 
-      // Clean up malformed sentences and links
-      .replace(/([A-Za-z])\s*&lt;[^&]*&gt;\s*([A-Za-z])/g, '$1 $2') // Remove HTML entities between words
-      .replace(/\.\s*&lt;[^&]*&gt;\s*([A-Z])/g, '. $1'); // Clean sentence breaks
+      // Clean up malformed sentences and links (after decoding)
+      .replace(/([A-Za-z])\s*<[^>]*>\s*([A-Za-z])/g, '$1 $2') // Remove HTML tags between words
+      .replace(/\.\s*<[^>]*>\s*([A-Z])/g, '. $1'); // Clean sentence breaks
 
     // Split content into lines and clean up
     let formattedContent = content
