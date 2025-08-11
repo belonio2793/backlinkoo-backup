@@ -32,6 +32,7 @@ import { toast } from 'sonner';
 import { DatabaseHealthCheck } from '@/utils/databaseHealthCheck';
 import { AutomationTablesMissingNotice } from '@/components/AutomationTablesMissingNotice';
 import { initializeAutomationTables } from '@/utils/createAutomationTables';
+import { testAutomationTablesAccess, testDatabaseConnectivity } from '@/utils/simpleDatabaseTest';
 import { RoutePreservingAuth } from '@/components/RoutePreservingAuth';
 
 const engines = [
