@@ -1146,45 +1146,82 @@ export function BeautifulBlogPost() {
             </div>
 
             {/* Premium Upgrade CTA Section */}
-            <div className="mt-12 p-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border border-purple-200">
-              <div className="text-center">
+            <div className="mt-12 p-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border border-purple-200 relative overflow-hidden">
+              {/* Background decoration */}
+              <div className="absolute inset-0 bg-gradient-to-br from-purple-100/20 to-blue-100/20" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-purple-200/30 to-blue-200/30 rounded-full -translate-y-16 translate-x-16" />
+              <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-blue-200/30 to-purple-200/30 rounded-full translate-y-12 -translate-x-12" />
+
+              <div className="text-center relative z-10">
                 <div className="flex items-center justify-center mb-4">
-                  <Crown className="h-8 w-8 text-purple-600 mr-3" />
-                  <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                  <div className="bg-gradient-to-r from-purple-600 to-blue-600 p-3 rounded-full mr-3">
+                    <Crown className="h-8 w-8 text-white" />
+                  </div>
+                  <h3 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                     Unlock Premium Features
                   </h3>
                 </div>
-                <p className="text-gray-700 mb-6 text-lg leading-relaxed">
+                <p className="text-gray-700 mb-6 text-lg leading-relaxed max-w-2xl mx-auto">
                   Get unlimited access to premium blog content, advanced SEO tools, and exclusive features.
-                  Take your content strategy to the next level!
+                  Take your content strategy to the next level with our comprehensive suite!
                 </p>
+
+                {/* Feature grid with enhanced styling */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                  <div className="text-center p-4 bg-white/60 rounded-lg border border-purple-100">
-                    <Sparkles className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-                    <h4 className="font-semibold text-gray-900 mb-1">Unlimited Content</h4>
+                  <div className="text-center p-6 bg-white/80 backdrop-blur-sm rounded-xl border border-purple-100 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105">
+                    <div className="bg-gradient-to-r from-purple-500 to-purple-600 p-3 rounded-full w-fit mx-auto mb-3">
+                      <Sparkles className="h-6 w-6 text-white" />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Unlimited Content</h4>
                     <p className="text-sm text-gray-600">Access all premium blog posts and SEO content</p>
                   </div>
-                  <div className="text-center p-4 bg-white/60 rounded-lg border border-purple-100">
-                    <TrendingUp className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-                    <h4 className="font-semibold text-gray-900 mb-1">Advanced Analytics</h4>
+                  <div className="text-center p-6 bg-white/80 backdrop-blur-sm rounded-xl border border-purple-100 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105">
+                    <div className="bg-gradient-to-r from-blue-500 to-blue-600 p-3 rounded-full w-fit mx-auto mb-3">
+                      <TrendingUp className="h-6 w-6 text-white" />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Advanced Analytics</h4>
                     <p className="text-sm text-gray-600">Detailed performance metrics and insights</p>
                   </div>
-                  <div className="text-center p-4 bg-white/60 rounded-lg border border-purple-100">
-                    <Target className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-                    <h4 className="font-semibold text-gray-900 mb-1">Priority Support</h4>
+                  <div className="text-center p-6 bg-white/80 backdrop-blur-sm rounded-xl border border-purple-100 shadow-sm hover:shadow-md transition-all duration-300 hover:scale-105">
+                    <div className="bg-gradient-to-r from-indigo-500 to-indigo-600 p-3 rounded-full w-fit mx-auto mb-3">
+                      <Target className="h-6 w-6 text-white" />
+                    </div>
+                    <h4 className="font-semibold text-gray-900 mb-2">Priority Support</h4>
                     <p className="text-sm text-gray-600">24/7 expert assistance when you need it</p>
                   </div>
                 </div>
+
+                {/* Enhanced pricing preview */}
+                <div className="bg-white/90 backdrop-blur-sm rounded-xl p-4 mb-6 border border-purple-200">
+                  <div className="flex items-center justify-center gap-6 text-sm">
+                    <div className="text-center">
+                      <p className="text-gray-500">Monthly</p>
+                      <p className="font-bold text-gray-900">$29/month</p>
+                    </div>
+                    <div className="text-center relative">
+                      <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-orange-500 to-red-500 text-white text-xs">
+                        Save 42%
+                      </Badge>
+                      <p className="text-gray-500">Yearly</p>
+                      <p className="font-bold text-green-600">$290/year</p>
+                    </div>
+                  </div>
+                </div>
+
                 <Button
                   onClick={() => setShowPaymentModal(true)}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-10 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative group"
                 >
-                  <Crown className="mr-2 h-5 w-5" />
+                  <Crown className="mr-2 h-5 w-5 group-hover:animate-pulse" />
                   Upgrade to Premium
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
+
                 <p className="mt-4 text-sm text-gray-500">
                   ✨ Join thousands of users already growing their online presence
+                </p>
+                <p className="mt-2 text-xs text-gray-400">
+                  🔒 Secure payment powered by Stripe • Opens in new window
                 </p>
               </div>
             </div>
