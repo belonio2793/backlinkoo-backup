@@ -3,6 +3,7 @@
 @import './styles/elite-blog.css';
 @import './styles/modal-layout-fix.css';
 @import './styles/strong-fix.css';
+@import './styles/text-spacing-fix.css';
 
 @tailwind base;
 @tailwind components;
