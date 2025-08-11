@@ -3968,17 +3968,10 @@ export default function BacklinkAutomation() {
                               <Button
                                 variant="link"
                                 size="sm"
-                                onClick={() => {
-
-                                  if (user) {
-                                    DirectCheckoutService.upgradeToPremium('monthly');
-                                  } else {
-                                    DirectCheckoutService.upgradeToPremium('monthly');
-                                  }
-                                }}
+                                onClick={() => setShowPremiumPlans(true)}
                                 className="p-0 h-auto text-amber-700 hover:text-amber-800"
                               >
-                                Upgrade ⬆️
+                                View Plans ⬆️
                               </Button>
                             </div>
                           </div>
