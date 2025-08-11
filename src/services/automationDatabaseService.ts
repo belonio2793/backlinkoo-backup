@@ -1,8 +1,9 @@
 import { supabase } from '@/integrations/supabase/client';
-import type { 
-  AutomationCampaign, 
+import { FallbackAutomationService } from './fallbackAutomationService';
+import type {
+  AutomationCampaign,
   AutomationCampaignInsert,
-  LinkPlacement, 
+  LinkPlacement,
   LinkPlacementInsert,
   CampaignReport,
   AvailableSite,
