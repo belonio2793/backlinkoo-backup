@@ -420,9 +420,10 @@ export default function BacklinkAutomation() {
           />
         )}
 
-        {/* Database Migration Test Section - Only show in development */}
+        {/* Database Health & Migration Test Section - Only show in development */}
         {import.meta.env.DEV && (
-          <div className="mb-8">
+          <div className="mb-8 space-y-6">
+            <DatabaseHealthChecker />
             <DatabaseMigrationTest />
           </div>
         )}
