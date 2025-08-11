@@ -981,6 +981,18 @@ export class ContentFormatter {
       .replace(/&lt;\s*p\s*&gt;/gi, '') // Remove &lt;p&gt; patterns
       .replace(/&lt;\s*\/\s*p\s*&gt;/gi, '') // Remove &lt;/p&gt; patterns
 
+      // FINAL HTML TAG SANITIZATION: Fix any remaining malformed tags
+      .replace(/<(h[1-6])\s+[^>]*=""[^>]*>/gi, '<$1>') // Fix <h1 ="" > to <h1>
+      .replace(/<(h[1-6])\s+[^>]*>/gi, '<$1>') // Fix <h1 anything> to <h1>
+      .replace(/<(h[1-6])[^>]*=""[^>]*>/gi, '<$1>') // Fix <h1=""attributes> to <h1>
+      .replace(/<(h[1-6])[^a-z0-9>][^>]*>/gi, '<$1>') // Fix any malformed h tag
+
+      // Fix views and time patterns that are concatenated
+      .replace(/(\d+)views/g, '$1 views')
+      .replace(/(\d+)min(?!\s)/g, '$1 min')
+      .replace(/(\d+)h(?!\s)/g, '$1h ')
+      .replace(/(\d+)m\s*remaining/g, '$1m remaining')
+
       // Final pass: ensure any remaining ## patterns become proper headings
       .replace(/^\s*##\s+([A-Za-z][^\n]*)/gm, '<h2>$1</h2>')
 
