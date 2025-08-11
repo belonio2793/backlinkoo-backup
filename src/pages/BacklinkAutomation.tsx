@@ -2917,7 +2917,7 @@ export default function BacklinkAutomation() {
             description: "See your incredible results and unlock unlimited campaigns!",
             duration: 6000,
           });
-          setTimeout(() => DirectCheckoutService.upgradeToPremium('monthly'), 3000);
+          setTimeout(() => setShowPaymentModal(true), 3000);
         } else {
           // Progress update
           toast({
@@ -3233,7 +3233,7 @@ export default function BacklinkAutomation() {
                 description: `Found ${additionalLinks} premium opportunities! You've now built ${newTotal} total backlinks!`,
                 duration: 5000,
               });
-              setTimeout(() => DirectCheckoutService.upgradeToPremium('monthly'), 3000);
+              setTimeout(() => setShowPaymentModal(true), 3000);
             } else {
               toast({
                 title: "🎯 Discovery Complete!",
@@ -3779,7 +3779,7 @@ export default function BacklinkAutomation() {
                           <div className="flex justify-center gap-4 text-xs text-gray-500">
                             <span>✓ High-authority domains</span>
                             <span>✓ Instant results</span>
-                            <span>�� No signup required</span>
+                            <span>✓ No signup required</span>
                           </div>
                           {guestCampaignResults.length > 0 && (
                             <Button
