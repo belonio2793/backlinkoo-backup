@@ -51,6 +51,10 @@ export const RotatingTrialText: React.FC = () => {
     };
   }, []);
 
+  // Ensure currentIndex is always valid
+  const safeIndex = Math.max(0, Math.min(currentIndex, rotatingTexts.length - 1));
+  const displayText = rotatingTexts[safeIndex] || rotatingTexts[0] || "Loading...";
+
   return (
     <div className="min-h-[3rem] flex items-center">
       <p
@@ -58,7 +62,7 @@ export const RotatingTrialText: React.FC = () => {
           isVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-2'
         }`}
       >
-        {rotatingTexts[currentIndex] || rotatingTexts[0]}
+        {displayText}
       </p>
     </div>
   );
