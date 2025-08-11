@@ -112,6 +112,10 @@ export default function BacklinkAutomation() {
       // Toggle campaign status first
       await toggleCampaign(campaignId);
 
+      // Clear stable metrics cache to force refresh
+      const { stableCampaignMetrics } = await import('@/services/stableCampaignMetrics');
+      stableCampaignMetrics.clearCache();
+
       // If activating, start live monitoring
       if (campaign.status !== 'active') {
         console.log(`🚀 Starting live monitoring for campaign: ${campaign.name}`);
@@ -125,10 +129,16 @@ export default function BacklinkAutomation() {
           description: `${campaign.name} has been paused.`
         });
       }
+
+      // Force a full page refresh to sync all data
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+
     } catch (error: any) {
       console.error('Error toggling campaign:', error);
       toast.error('Failed to toggle campaign', {
-        description: error.message
+        description: error.message || 'Unknown error occurred'
       });
     }
   };
