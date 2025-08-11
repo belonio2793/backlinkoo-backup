@@ -55,6 +55,29 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
 
       if (campaignsResult.success && campaignsResult.data) {
         setCampaigns(campaignsResult.data);
+
+        // Check for data sync issues (in development)
+        if (import.meta.env.DEV) {
+          try {
+            // Compare with any cached data
+            const cachedData = localStorage.getItem('last_campaign_data');
+            if (cachedData) {
+              const lastData = JSON.parse(cachedData);
+              const syncIssues = DataSyncChecker.checkCampaignSync(
+                campaignsResult.data,
+                lastData,
+                'Current Data',
+                'Cached Data'
+              );
+              DataSyncChecker.logSyncIssues(syncIssues);
+            }
+
+            // Store current data for next comparison
+            localStorage.setItem('last_campaign_data', JSON.stringify(campaignsResult.data));
+          } catch (error) {
+            console.warn('Sync check failed:', error);
+          }
+        }
       } else {
         setError(campaignsResult.error || 'Failed to load campaigns');
       }
