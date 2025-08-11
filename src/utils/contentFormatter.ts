@@ -499,6 +499,17 @@ export class ContentFormatter {
       .replace(/^\s*#{1,6}\s*&lt;[^&>]*&gt;\s*$/gm, '') // Remove headings that are just ## &lt;tag&gt;
       .replace(/^\s*#{1,6}\s*$/gm, '') // Remove empty headings like just ##
 
+      // FIX MALFORMED HTML TAGS: Repair broken heading tags with spaces or missing closing levels
+      .replace(/<h\s+([1-6])[^>]*>/gi, '<h$1>') // Fix <h 1=""> to <h1>
+      .replace(/<\/h\s*>/gi, '</h1>') // Fix </h> to </h1> (default level)
+      .replace(/<h([1-6])[^>]*=""[^>]*>/gi, '<h$1>') // Fix attributes like h1="" or h2=""
+
+      // COMPREHENSIVE SPACE RESTORATION: Fix concatenated words caused by entity removal
+      .replace(/([a-z])([A-Z])/g, '$1 $2') // camelCase -> camel Case
+      .replace(/(be)(automatically)/gi, '$1 $2') // beautomatically -> be automatically
+      .replace(/([a-z])(deleted)/gi, '$1 $2') // ...deleted -> ... deleted
+      .replace(/([a-z])(in\d+[hm])/gi, '$1 $2') // deletedin15h -> deleted in15h
+
       // Fix common HTML issues
       .replace(/&nbsp;/g, ' ')
       .replace(/&quot;/g, '"')
