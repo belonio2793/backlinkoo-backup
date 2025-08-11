@@ -998,7 +998,7 @@ const Index = () => {
                 
                 <CardContent className="space-y-6">
                   <div className="text-3xl font-semibold text-gray-900 mb-4">
-                    {plan.credits} Credits
+                    {plan.credits}&nbsp;Credits
                   </div>
                   
                   <ul className="space-y-3 text-left">
