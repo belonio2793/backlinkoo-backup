@@ -22,27 +22,43 @@ export const RotatingTrialText: React.FC = () => {
   const [isVisible, setIsVisible] = useState(true);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setIsVisible(false);
-      
-      setTimeout(() => {
-        setCurrentIndex((prevIndex) => (prevIndex + 1) % rotatingTexts.length);
-        setIsVisible(true);
-      }, 300); // Half second fade out
-      
-    }, 4000); // Change text every 4 seconds
+    let interval: NodeJS.Timeout;
+    let timeout: NodeJS.Timeout;
+    let isMounted = true;
 
-    return () => clearInterval(interval);
+    try {
+      interval = setInterval(() => {
+        if (!isMounted) return;
+
+        setIsVisible(false);
+
+        timeout = setTimeout(() => {
+          if (!isMounted) return;
+          setCurrentIndex((prevIndex) => (prevIndex + 1) % rotatingTexts.length);
+          setIsVisible(true);
+        }, 300);
+
+      }, 4000);
+
+    } catch (error) {
+      console.error('Error in RotatingTrialText:', error);
+    }
+
+    return () => {
+      isMounted = false;
+      if (interval) clearInterval(interval);
+      if (timeout) clearTimeout(timeout);
+    };
   }, []);
 
   return (
     <div className="min-h-[3rem] flex items-center">
-      <p 
+      <p
         className={`text-gray-600 transition-all duration-300 ease-in-out ${
           isVisible ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-2'
         }`}
       >
-        {rotatingTexts[currentIndex]}
+        {rotatingTexts[currentIndex] || rotatingTexts[0]}
       </p>
     </div>
   );
