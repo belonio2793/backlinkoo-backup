@@ -1259,7 +1259,7 @@ export function BeautifulBlogPost() {
                   <ul className="space-y-2 text-sm">
                     <li>• This post will return to the claimable pool for 24 hours</li>
                     <li>• Other users will be able to claim it during this time</li>
-                    <li>• If not reclaimed, it will be automatically deleted</li>
+                    <li>• If not reclaimed, it will be automatically deleted </li>
                     <li>• You can reclaim it yourself if it's still available</li>
                   </ul>
                 </div>
