@@ -30,6 +30,8 @@ import { useLinkTracker } from '@/hooks/useLinkTracker';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 import { DatabaseHealthCheck } from '@/utils/databaseHealthCheck';
+import { AutomationTablesMissingNotice } from '@/components/AutomationTablesMissingNotice';
+import { initializeAutomationTables } from '@/utils/createAutomationTables';
 
 const engines = [
   {
