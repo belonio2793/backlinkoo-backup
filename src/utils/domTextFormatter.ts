@@ -103,8 +103,15 @@ class DOMTextFormatter {
     // Check if it's within an editable element
     if (parent.isContentEditable) return false;
 
-    // Check if it's within form inputs
+    // Check if it's within form inputs (including any with placeholders)
     if (parent.closest('input, textarea, select')) return false;
+    if (parent.closest('input[placeholder], textarea[placeholder]')) return false;
+
+    // Skip any text that looks like placeholder content
+    const text = node.textContent?.trim();
+    if (text && (text.includes('.com') || text.includes('website') || text.includes('landing-page'))) {
+      return false;
+    }
 
     return true;
   }
