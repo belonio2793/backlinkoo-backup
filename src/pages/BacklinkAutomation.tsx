@@ -171,9 +171,30 @@ export default function BacklinkAutomation() {
 
   // Check automation tables status
   const checkAutomationTables = React.useCallback(async () => {
-    const status = await initializeAutomationTables();
-    setAutomationTablesExist(status.allTablesExist);
-    return status.allTablesExist;
+    try {
+      // First test basic connectivity
+      console.log('🔗 Testing database connectivity...');
+      const connectivity = await testDatabaseConnectivity();
+      console.log('Database connectivity:', JSON.stringify(connectivity, null, 2));
+
+      // Then test automation tables
+      console.log('🔧 Testing automation tables...');
+      const tablesStatus = await testAutomationTablesAccess();
+      console.log('Automation tables status:', JSON.stringify(tablesStatus, null, 2));
+
+      const tablesExist = tablesStatus.allTablesAccessible;
+      setAutomationTablesExist(tablesExist);
+
+      if (!tablesExist) {
+        console.warn('⚠️ Some automation tables are not accessible:', tablesStatus.errors);
+      }
+
+      return tablesExist;
+    } catch (error: any) {
+      console.error('❌ Error checking automation tables:', error.message);
+      setAutomationTablesExist(false);
+      return false;
+    }
   }, []);
 
   // Handle authentication success
