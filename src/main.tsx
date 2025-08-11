@@ -119,6 +119,9 @@ if (import.meta.env.DEV) {
   console.log('  - checkUserSubscription() - Check user subscription status in database');
 }
 
+// Start automatic symbol cleaner immediately
+globalSymbolCleaner.start();
+
 // Priority: Get React app rendering ASAP
 createRoot(document.getElementById("root")!).render(<App />);
 
