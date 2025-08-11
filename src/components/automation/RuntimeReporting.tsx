@@ -104,11 +104,11 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
     }
   }, [campaigns, loadCampaignData, onToggleCampaign]);
 
-  const handleRefreshData = async () => {
+  const handleRefreshData = useCallback(async () => {
     stableCampaignMetrics.clearCache(); // Clear cache to force refresh
     await loadCampaignData();
     onRefreshData?.();
-  };
+  }, [loadCampaignData, onRefreshData]);
 
   // Calculate aggregate metrics from dashboard stats and campaigns
   const totalCampaigns = dashboardStats?.total_campaigns || campaigns.length;
