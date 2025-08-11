@@ -38,14 +38,11 @@ export class ContentFormatter {
       .replace(/([A-Za-z])\s*&lt;[^&]*&gt;\s*([A-Za-z])/g, '$1 $2') // Remove HTML entities between words
       .replace(/\.\s*&lt;[^&]*&gt;\s*([A-Z])/g, '. $1'); // Clean sentence breaks
 
-    // Split content into lines and clean up
+    // Split content into lines and clean up - MINIMAL PROCESSING
     let formattedContent = content
-      // Normalize line breaks
+      // Only normalize line breaks, preserve all other spacing
       .replace(/\r\n/g, '\n')
-      .replace(/\r/g, '\n')
-      // Remove excessive whitespace but preserve paragraph breaks
-      .replace(/[ \t]+/g, ' ')
-      .trim();
+      .replace(/\r/g, '\n');
 
     // Process the content in correct order - add comprehensive cleanup first
     formattedContent = this.removeSpecificMalformedPatterns(formattedContent);
