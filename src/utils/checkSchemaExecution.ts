@@ -9,10 +9,31 @@ export async function checkSchemaExecution(): Promise<boolean> {
   console.log('🔍 Checking if SQL commands were executed...');
   
   try {
-    // Check if started_at column exists by trying to select it
+    // First check which columns exist to avoid selection errors
+    const { data: columnInfo, error: columnError } = await supabase
+      .rpc('exec_sql', {
+        query: `
+          SELECT column_name
+          FROM information_schema.columns
+          WHERE table_name = 'automation_campaigns'
+          AND table_schema = 'public'
+          AND column_name IN ('started_at', 'completed_at', 'auto_start');
+        `
+      });
+
+    const existingColumns = columnInfo?.map(col => col.column_name) || [];
+    console.log('📋 Existing columns:', existingColumns);
+
+    // Build select query with only existing columns
+    const baseColumns = ['id', 'name', 'status', 'created_at'];
+    const optionalColumns = ['started_at', 'completed_at', 'auto_start'].filter(col =>
+      existingColumns.includes(col)
+    );
+    const selectColumns = [...baseColumns, ...optionalColumns].join(', ');
+
     const { data: testData, error: testError } = await supabase
       .from('automation_campaigns')
-      .select('id, name, status, started_at, completed_at, auto_start, created_at')
+      .select(selectColumns)
       .limit(1);
 
     if (testError) {
