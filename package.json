@@ -9,6 +9,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "clean:symbols": "node scripts/auto-symbol-cleaner.js",
     "supabase:link": "supabase link --project-ref dfhanacsmsvvkpunurnp",
     "supabase:pull": "node scripts/db-utils.js pull",
     "supabase:types": "node scripts/db-utils.js types",
