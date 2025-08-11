@@ -184,7 +184,7 @@ export default function BacklinkAutomation() {
       return;
     }
 
-    const newCampaign = await createCampaign({
+    const newCampaign = await CampaignErrorHandler.safeCreateCampaign({
       name: formData.name,
       engine_type: selectedEngine.replace('-', '_'),
       target_url: normalizedTargetUrl,
@@ -193,7 +193,7 @@ export default function BacklinkAutomation() {
       status: formData.autoStart ? 'active' : 'draft',
       daily_limit: formData.dailyLimit,
       auto_start: formData.autoStart
-    });
+    }, createCampaign);
 
     if (newCampaign) {
       toast.success('Campaign created successfully!');
