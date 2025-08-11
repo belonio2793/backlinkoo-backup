@@ -68,18 +68,55 @@ export function logError(context: string, error: any): void {
  */
 export function formatErrorForUser(error: any, context?: string): string {
   const message = getErrorMessage(error);
-  
+
   // Remove technical details that users don't need to see
   const cleanMessage = message
     .replace(/^Error: /, '')
     .replace(/\n.*$/s, '') // Remove stack traces
     .replace(/at [^(]*\([^)]*\)/g, ''); // Remove function references
-    
+
   if (context) {
     return `${context}: ${cleanMessage}`;
   }
-  
+
   return cleanMessage;
+}
+
+/**
+ * Alias for formatErrorForUser to match common import patterns
+ */
+export const formatErrorForUI = formatErrorForUser;
+
+/**
+ * Creates a detailed error message for logging purposes
+ */
+export function formatErrorForLogging(error: any, context?: string): string {
+  const message = getErrorMessage(error);
+
+  // Include more technical details for logging
+  let logMessage = message;
+
+  // Add stack trace if available
+  if (error?.stack) {
+    logMessage += `\nStack: ${error.stack}`;
+  }
+
+  // Add error code if available
+  if (error?.code) {
+    logMessage += `\nCode: ${error.code}`;
+  }
+
+  // Add error status if available
+  if (error?.status) {
+    logMessage += `\nStatus: ${error.status}`;
+  }
+
+  // Add context if provided
+  if (context) {
+    logMessage = `[${context}] ${logMessage}`;
+  }
+
+  return logMessage;
 }
 
 /**
