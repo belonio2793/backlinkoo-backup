@@ -115,8 +115,14 @@ export default function BacklinkAutomation() {
 
   // Enhanced toggle campaign with live monitoring
   const handleToggleCampaign = async (campaignId: string) => {
+    const metricId = debugLog.startOperation('campaign_management', 'toggle_campaign', { campaignId });
+
     const campaign = campaigns.find(c => c.id === campaignId);
-    if (!campaign) return;
+    if (!campaign) {
+      debugLog.error('campaign_management', 'toggle_campaign', new Error('Campaign not found'), { campaignId });
+      debugLog.endOperation(metricId, false, { error: 'campaign_not_found' });
+      return;
+    }
 
     // Use campaign error handler to prevent unhandled promise rejections
     const success = await CampaignErrorHandler.safeToggleCampaign(campaignId, async (id) => {
