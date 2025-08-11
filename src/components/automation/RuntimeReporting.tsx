@@ -56,6 +56,64 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
     return () => clearInterval(interval);
   }, []);
 
+  // Load real placements and start monitoring
+  useEffect(() => {
+    loadRecentPlacements();
+    startLiveMonitoring();
+
+    // Subscribe to live activities
+    const unsubscribe = LiveAutomationEngine.subscribeToActivity((activity) => {
+      setLiveActivities(prev => [activity, ...prev].slice(0, 50));
+      setLastUpdate(new Date());
+    });
+
+    return unsubscribe;
+  }, []);
+
+  const loadRecentPlacements = async () => {
+    try {
+      const placements = await LiveAutomationEngine.getRecentPlacements(20);
+      setRecentPlacements(placements);
+    } catch (error) {
+      console.error('Error loading recent placements:', error);
+    }
+  };
+
+  const startLiveMonitoring = async () => {
+    if (campaigns.length === 0) return;
+
+    setIsMonitoring(true);
+
+    // Start monitoring for active campaigns
+    const activeCampaigns = campaigns.filter(c => c.status === 'active');
+
+    for (const campaign of activeCampaigns) {
+      try {
+        await LiveAutomationEngine.startLiveMonitoring(campaign.id);
+      } catch (error) {
+        console.error(`Error starting monitoring for campaign ${campaign.id}:`, error);
+      }
+    }
+  };
+
+  const toggleCampaignMonitoring = async (campaignId: string) => {
+    const campaign = campaigns.find(c => c.id === campaignId);
+    if (!campaign) return;
+
+    try {
+      if (campaign.status === 'active') {
+        // Pause campaign
+        onToggleCampaign?.(campaignId);
+      } else {
+        // Start campaign and monitoring
+        onToggleCampaign?.(campaignId);
+        await LiveAutomationEngine.startLiveMonitoring(campaignId);
+      }
+    } catch (error) {
+      console.error('Error toggling campaign monitoring:', error);
+    }
+  };
+
   // Calculate aggregate metrics
   const totalCampaigns = campaigns.length;
   const activeCampaigns = campaigns.filter(c => c.status === 'active').length;
