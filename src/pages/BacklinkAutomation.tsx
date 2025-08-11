@@ -87,7 +87,6 @@ export default function BacklinkAutomation() {
   const { isPremium, user, isAuthenticated } = useAuth();
   const {
     campaigns,
-    setCampaigns,
     createCampaign,
     toggleCampaign,
     deleteCampaign,
