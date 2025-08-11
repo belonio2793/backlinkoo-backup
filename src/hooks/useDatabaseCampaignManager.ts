@@ -54,17 +54,23 @@ export function useDatabaseCampaignManager() {
 
     try {
       const result = await AutomationDatabaseService.getLinkPlacements(user.id, filters);
-      
+
       if (result.success) {
         setLinkPlacements(result.data || []);
       } else {
+        console.error('Failed to load link placements:', result.error);
         toast.error('Failed to load link placements', {
-          description: result.error
+          description: result.error || 'Unknown error occurred'
         });
       }
     } catch (err: any) {
+      console.error('Error loading link placements (catch):', {
+        message: err.message,
+        stack: err.stack,
+        error: err
+      });
       toast.error('Error loading link placements', {
-        description: err.message
+        description: err.message || 'Unexpected error occurred'
       });
     }
   }, [user?.id]);
