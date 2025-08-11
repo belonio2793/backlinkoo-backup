@@ -5,6 +5,52 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
+async function checkSchemaWithoutExecSql(): Promise<boolean> {
+  console.log('🔍 Checking schema without exec_sql function...');
+
+  try {
+    // Test each column individually by trying to select it
+    const requiredColumns = ['started_at', 'completed_at', 'auto_start'];
+    const existingColumns: string[] = [];
+
+    for (const columnName of requiredColumns) {
+      try {
+        const { error } = await supabase
+          .from('automation_campaigns')
+          .select(columnName)
+          .limit(1);
+
+        if (!error) {
+          existingColumns.push(columnName);
+        } else if (error.message.includes('column') && error.message.includes('does not exist')) {
+          console.log(`❌ Column ${columnName} does not exist`);
+        }
+      } catch (e) {
+        console.warn(`Could not test column ${columnName}:`, e);
+      }
+    }
+
+    const missingColumns = requiredColumns.filter(col => !existingColumns.includes(col));
+
+    if (missingColumns.length > 0) {
+      console.error(`❌ Missing columns: ${missingColumns.join(', ')}`);
+      console.log('🔧 Run these SQL commands to fix:');
+      missingColumns.forEach(col => {
+        const dataType = col === 'auto_start' ? 'BOOLEAN DEFAULT false' : 'TIMESTAMPTZ NULL';
+        console.log(`ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS ${col} ${dataType};`);
+      });
+      return false;
+    }
+
+    console.log('✅ All required columns exist');
+    return true;
+
+  } catch (error) {
+    console.error('❌ Fallback schema check failed:', error);
+    return false;
+  }
+}
+
 export async function checkSchemaExecution(): Promise<boolean> {
   console.log('🔍 Checking if SQL commands were executed...');
   
