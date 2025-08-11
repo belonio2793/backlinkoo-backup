@@ -701,27 +701,38 @@ export class ContentFormatter {
    */
   static fixDOMDisplayIssues(content: string): string {
     return content
+      // FIRST: Complete HTML entity decoding to prevent display as text
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&nbsp;/g, ' ')
+
       // CRITICAL FIX: The exact broken pattern from DOM
       // <h2>&lt;</h2><p> strong&gt;Hook Introduction...</p> -> <h2>Hook Introduction...</h2>
-      .replace(/<h([1-6])[^>]*>&lt;<\/h[1-6]>\s*<p[^>]*>\s*strong&gt;([^<]+?)<\/p>/gi, '<h$1><strong>$2</strong></h$1>')
+      .replace(/<h([1-6])[^>]*><\/h[1-6]>\s*<p[^>]*>\s*strong>([^<]+?)<\/p>/gi, '<h$1><strong>$2</strong></h$1>')
 
-      // Fix standalone strong&gt; patterns
-      .replace(/(\s*)strong&gt;([^<>\n&]+?)(?=\s*<|\s*$|\n)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
+      // Fix standalone strong> patterns (after decoding)
+      .replace(/(\s*)strong>([^<>\n]+?)(?=\s*<|\s*$|\n)/gi, '$1<strong class="font-bold text-inherit">$2</strong>')
 
-      // Fix &lt; in headings
-      .replace(/<h([1-6])[^>]*>&lt;<\/h[1-6]>/gi, '')
+      // Fix empty headings that remain after decoding
+      .replace(/<h([1-6])[^>]*><\/h[1-6]>/gi, '')
 
-      // Fix stray &lt; and &gt;
-      .replace(/(^|\n|\s)&lt;/g, '$1<')
-      .replace(/(\s)&gt;(\s)/g, '$1>$2')
-      .replace(/^&gt;/gm, '')
+      // Fix corrupted style attributes that contain HTML
+      .replace(/style="[^"]*<\/p>[^"]*<p>[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      .replace(/style="[^"]*color:[^#]*#[^0-9a-f]*([0-9a-f]{6})[^"]*"/gi, 'style="color:#$1;font-weight:500;"')
 
       // Ensure proper strong tag structure
       .replace(/<strong([^>]*)>([^<]+?)(?!<\/strong>)/gi, '<strong$1>$2</strong>')
 
-      // Fix broken HTML entities
-      .replace(/&lt;(\w+)/g, '<$1')
-      .replace(/(\w+)&gt;/g, '$1>');
+      // Fix malformed headings after entity decoding
+      .replace(/<h([1-6])[^>]*>\s*<\s*<\/h[1-6]>/gi, '')
+      .replace(/<h([1-6])[^>]*>\s*>\s*<\/h[1-6]>/gi, '')
+
+      // Clean up any remaining broken HTML patterns
+      .replace(/<p[^>]*>\s*h[1-6]>\s*([^<]*)<\/p>/gi, '<h2>$1</h2>')
+      .replace(/<p[^>]*>\s*h[1-6]>\s*<\/p>/gi, '');
   }
 
   /**
