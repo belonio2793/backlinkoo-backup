@@ -1020,23 +1020,25 @@ export function BeautifulBlogPost() {
                     <p className="text-sm text-gray-600">24/7 expert assistance when you need it</p>
                   </div>
                 </div>
-                <Button
+                <button
                   type="button"
-                  disabled={false}
                   onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Premium button clicked!', { showPaymentModal });
+                    console.log('🚀 Premium button clicked - opening modal!');
                     setShowPaymentModal(true);
-                    console.log('Modal state set to true');
                   }}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
-                  style={{ pointerEvents: 'auto', zIndex: 10 }}
+                  className="inline-flex items-center justify-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                  style={{
+                    pointerEvents: 'auto',
+                    zIndex: 1000,
+                    position: 'relative',
+                    border: 'none',
+                    outline: 'none'
+                  }}
                 >
                   <Crown className="mr-2 h-5 w-5" />
                   Upgrade to Premium
                   <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
+                </button>
                 <p className="mt-4 text-sm text-gray-500">
                   ✨ Join thousands of users already growing their online presence
                 </p>
