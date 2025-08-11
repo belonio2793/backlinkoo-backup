@@ -14,6 +14,7 @@ import { useSymbolCleaner } from "@/utils/symbolCleaner";
 import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
 import "@/utils/testReplacementCharacter"; // Load replacement character test
+import "@/utils/textSpacingFixer"; // Load text spacing fixer
 import Index from "./pages/Index";
 
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
