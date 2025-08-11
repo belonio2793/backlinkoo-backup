@@ -467,61 +467,41 @@ export class ContentFormatter {
    * Sanitize and clean content for display
    */
   static sanitizeContent(content: string): string {
+    // Content should already be decoded by this point
     return content
       // Remove dangerous HTML tags but keep formatting
       .replace(/<script[^>]*>.*?<\/script>/gi, '')
       .replace(/<style[^>]*>.*?<\/style>/gi, '')
       .replace(/<iframe[^>]*>.*?<\/iframe>/gi, '')
 
-      // FIRST: Decode all levels of HTML entity encoding immediately
-      .replace(/&amp;lt;/g, '<')
-      .replace(/&amp;gt;/g, '>')
-      .replace(/&amp;amp;/g, '&')
-      .replace(/&amp;quot;/g, '"')
+      // Fix specific Pro Tip pattern that may remain after decoding
+      .replace(/<h2[^>]*>\s*<\s*<\/h2>\s*<p[^>]*>\s*h2>\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
+      .replace(/<h[1-6][^>]*>\s*<\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]>\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
 
-      // EARLIEST CATCH: Fix specific Pro Tip pattern before any other processing
-      .replace(/<h2[^>]*>\s*&lt;\s*<\/h2>\s*<p[^>]*>\s*h2&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
-      .replace(/<h[1-6][^>]*>\s*&lt;\s*<\/h[1-6]>\s*<p[^>]*>\s*h[1-6]&gt;\s*Pro\s*Tip[\s\S]*?<\/p>/gi, '<h2>Pro Tip</h2>')
+      // Clean up malformed patterns after decoding
+      .replace(/##\s*<[\s\S]*?h[1-6]\s*>\s*Pro\s*Tip/gi, '## Pro Tip')
+      .replace(/##\s*<.*$/gm, '') // Remove any line starting with ## <
 
-      // AGGRESSIVE removal of the specific malformed pattern first
-      .replace(/##\s*(&amp;lt;|&lt;)[\s\S]*?h[1-6]\s*(&amp;gt;|&gt;)\s*Pro\s*Tip/gi, '## Pro Tip')
-      .replace(/##\s*(&amp;lt;|&lt;).*$/gm, '') // Remove any line starting with ## <
+      // Remove malformed HTML tag patterns after decoding
+      .replace(/<\s*\/\s*[a-zA-Z]+\s*>/g, '') // Remove </tag> patterns that appear as text
+      .replace(/##\s*<\s*h[1-6]\s*>\s*(Pro\s*Tip|[^<]*)/gi, '## $1') // Fix ## <h2>Pro Tip patterns
 
-      // Fix malformed HTML entities first (most critical)
-      .replace(/&lt;\s*\/\s*[a-zA-Z]+\s*&gt;/g, '') // Remove &lt;/tag&gt; patterns
-      .replace(/&lt;\s*[a-zA-Z]+[^&]*&gt;/g, '') // Remove &lt;tag&gt; patterns
-      .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*(Pro\s*Tip|[^<]*)/gi, '## $1') // Fix ## &lt;h2&gt;Pro Tip patterns
-      .replace(/&lt;\s*\/\s*p\s*&gt;\s*#\s*\d+\s*&lt;\s*p\s*&gt;/g, '') // Remove malformed p tag patterns
-
-      // Clean up corrupted style attributes with malformed content
-      .replace(/style="[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      // Clean up corrupted style attributes
+      .replace(/style="[^"]*<\/p>[^"]*<p>[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
       .replace(/style="[^"]*color:[^#]*#[^0-9a-f]*([0-9a-f]{6})[^"]*"/gi, 'style="color:#$1;font-weight:500;"')
 
-      // Remove any remaining markdown artifacts
+      // Remove markdown artifacts
       .replace(/---+/g, '')
       .replace(/^\s*---\s*$/gm, '')
+
       // Remove malformed HTML headings with single letters
       .replace(/<h[1-6][^>]*>\s*[A-Z]\.\s*(Assessment|needed|required|evaluation)\s*<\/h[1-6]>/gi, '')
+
       // Remove empty headings
       .replace(/<h[1-6][^>]*>\s*<\/h[1-6]>/gi, '')
+      .replace(/^\s*#{1,6}\s*$/gm, '') // Remove empty markdown headings
 
-      // Final cleanup for remaining malformed markdown headings
-      .replace(/^\s*#{1,6}\s*&lt;[^&>]*&gt;\s*$/gm, '') // Remove headings that are just ## &lt;tag&gt;
-      .replace(/^\s*#{1,6}\s*$/gm, '') // Remove empty headings like just ##
-
-      // Fix common HTML issues
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-
-      // VERY CONSERVATIVE HTML entity decoding to prevent corruption
-      .replace(/&amp;(?!lt;|gt;|amp;|quot;|#\d)/g, '&')
-
-      // Don't decode &lt; and &gt; in sanitizeContent at all!
-      // Let our specialized fixing functions handle these cases
-      // This prevents corruption of our generated HTML tags
-
-      // Normalize quotes
+      // Normalize quotes and special characters
       .replace(/[\u2018\u2019]/g, "'")
       .replace(/[\u201C\u201D]/g, '"')
 
