@@ -142,7 +142,18 @@ export async function checkSchemaExecution(): Promise<boolean> {
 
     if (!schemaError && schemaInfo) {
       console.log('📊 Found columns:');
-      console.table(schemaInfo);
+      try {
+        // Handle potential array/object format issues
+        if (Array.isArray(schemaInfo)) {
+          console.table(schemaInfo);
+        } else if (schemaInfo.length !== undefined) {
+          console.table(Array.from(schemaInfo as any));
+        } else {
+          console.log('Schema info:', schemaInfo);
+        }
+      } catch (tableError) {
+        console.log('Schema info (raw):', schemaInfo);
+      }
     }
 
     // Test actual campaign functionality
