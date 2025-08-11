@@ -16,6 +16,7 @@ class DOMTextFormatter {
     'script', 'style', 'code', 'pre',
     '.no-format', '[data-no-format]',
     'input', 'textarea', 'select',
+    'input[placeholder]', 'textarea[placeholder]',
     '.monaco-editor', '.cm-editor'
   ];
 
