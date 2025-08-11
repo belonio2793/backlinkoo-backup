@@ -30,299 +30,36 @@ import { useLinkTracker } from '@/hooks/useLinkTracker';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
-// Individual Engine Components
-const BlogCommentsEngine = ({ 
-  campaigns, 
-  onCreateCampaign, 
-  onToggleCampaign, 
-  onDeleteCampaign,
-  canCreateLinks
-}: any) => (
-  <div className="space-y-6">
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MessageSquare className="h-5 w-5" />
-          Blog Comments Engine
-          {!canCreateLinks && (
-            <Badge variant="destructive" className="ml-2">
-              <AlertTriangle className="h-3 w-3 mr-1" />
-              Limit Reached
-            </Badge>
-          )}
-        </CardTitle>
-        <CardDescription>
-          Automated blog comment posting system for building high-quality contextual backlinks
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">0</div>
-            <div className="text-sm text-muted-foreground">Blogs Discovered</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">0</div>
-            <div className="text-sm text-muted-foreground">Comments Posted</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600">0%</div>
-            <div className="text-sm text-muted-foreground">Approval Rate</div>
-          </div>
-        </div>
-        <p className="text-sm text-muted-foreground mb-4">
-          This engine finds relevant blogs accepting comments and posts contextual, valuable comments 
-          with your backlinks integrated naturally.
-        </p>
-        {!canCreateLinks && (
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
-            <div className="flex items-center gap-2 text-orange-700">
-              <AlertTriangle className="h-4 w-4" />
-              <span className="text-sm font-medium">
-                Link building limit reached. Upgrade to Premium for unlimited backlinks.
-              </span>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-
-    <CampaignForm
-      engineName="Blog Comments"
-      engineIcon={<MessageSquare className="h-4 w-4" />}
-      onCreateCampaign={onCreateCampaign}
-      activeCampaigns={campaigns}
-      onToggleCampaign={onToggleCampaign}
-      onDeleteCampaign={onDeleteCampaign}
-    />
-  </div>
-);
-
-const Web2PlatformsEngine = ({ 
-  campaigns, 
-  onCreateCampaign, 
-  onToggleCampaign, 
-  onDeleteCampaign,
-  canCreateLinks
-}: any) => (
-  <div className="space-y-6">
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Globe className="h-5 w-5" />
-          Web 2.0 Platforms Engine
-          {!canCreateLinks && (
-            <Badge variant="destructive" className="ml-2">
-              <AlertTriangle className="h-3 w-3 mr-1" />
-              Limit Reached
-            </Badge>
-          )}
-        </CardTitle>
-        <CardDescription>
-          Create and manage high-authority content on Web 2.0 platforms for powerful backlinks
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">0</div>
-            <div className="text-sm text-muted-foreground">Platforms Active</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">0</div>
-            <div className="text-sm text-muted-foreground">Articles Published</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600">0</div>
-            <div className="text-sm text-muted-foreground">Total Backlinks</div>
-          </div>
-        </div>
-        <p className="text-sm text-muted-foreground mb-4">
-          Leverages high-authority Web 2.0 platforms like WordPress.com, Blogger, Medium, and others 
-          to create content with embedded backlinks.
-        </p>
-        {!canCreateLinks && (
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
-            <div className="flex items-center gap-2 text-orange-700">
-              <AlertTriangle className="h-4 w-4" />
-              <span className="text-sm font-medium">
-                Link building limit reached. Upgrade to Premium for unlimited backlinks.
-              </span>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-
-    <CampaignForm
-      engineName="Web 2.0 Platforms"
-      engineIcon={<Globe className="h-4 w-4" />}
-      onCreateCampaign={onCreateCampaign}
-      activeCampaigns={campaigns}
-      onToggleCampaign={onToggleCampaign}
-      onDeleteCampaign={onDeleteCampaign}
-    />
-  </div>
-);
-
-const ForumProfilesEngine = ({ 
-  campaigns, 
-  onCreateCampaign, 
-  onToggleCampaign, 
-  onDeleteCampaign,
-  canCreateLinks
-}: any) => (
-  <div className="space-y-6">
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Users className="h-5 w-5" />
-          Forum Profiles Engine
-          {!canCreateLinks && (
-            <Badge variant="destructive" className="ml-2">
-              <AlertTriangle className="h-3 w-3 mr-1" />
-              Limit Reached
-            </Badge>
-          )}
-        </CardTitle>
-        <CardDescription>
-          Build authority through strategic forum profile creation and intelligent engagement
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">0</div>
-            <div className="text-sm text-muted-foreground">Forums Joined</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">0</div>
-            <div className="text-sm text-muted-foreground">Profile Links</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600">0</div>
-            <div className="text-sm text-muted-foreground">Posts Made</div>
-          </div>
-        </div>
-        <p className="text-sm text-muted-foreground mb-4">
-          Creates profiles on relevant forums and community sites, building authority through 
-          valuable contributions while naturally incorporating backlinks.
-        </p>
-        {!canCreateLinks && (
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
-            <div className="flex items-center gap-2 text-orange-700">
-              <AlertTriangle className="h-4 w-4" />
-              <span className="text-sm font-medium">
-                Link building limit reached. Upgrade to Premium for unlimited backlinks.
-              </span>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-
-    <CampaignForm
-      engineName="Forum Profiles"
-      engineIcon={<Users className="h-4 w-4" />}
-      onCreateCampaign={onCreateCampaign}
-      activeCampaigns={campaigns}
-      onToggleCampaign={onToggleCampaign}
-      onDeleteCampaign={onDeleteCampaign}
-    />
-  </div>
-);
-
-const SocialMediaEngine = ({ 
-  campaigns, 
-  onCreateCampaign, 
-  onToggleCampaign, 
-  onDeleteCampaign,
-  canCreateLinks
-}: any) => (
-  <div className="space-y-6">
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Share2 className="h-5 w-5" />
-          Social Media Engine
-          {!canCreateLinks && (
-            <Badge variant="destructive" className="ml-2">
-              <AlertTriangle className="h-3 w-3 mr-1" />
-              Limit Reached
-            </Badge>
-          )}
-        </CardTitle>
-        <CardDescription>
-          Leverage social media platforms for brand awareness and strategic backlink opportunities
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-blue-600">0</div>
-            <div className="text-sm text-muted-foreground">Platforms Connected</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">0</div>
-            <div className="text-sm text-muted-foreground">Posts Published</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600">0</div>
-            <div className="text-sm text-muted-foreground">Engagement Rate</div>
-          </div>
-        </div>
-        <p className="text-sm text-muted-foreground mb-4">
-          Automates social media posting across multiple platforms with strategic content that 
-          drives traffic and builds social signals for SEO.
-        </p>
-        {!canCreateLinks && (
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
-            <div className="flex items-center gap-2 text-orange-700">
-              <AlertTriangle className="h-4 w-4" />
-              <span className="text-sm font-medium">
-                Link building limit reached. Upgrade to Premium for unlimited backlinks.
-              </span>
-            </div>
-          </div>
-        )}
-      </CardContent>
-    </Card>
-
-    <CampaignForm
-      engineName="Social Media"
-      engineIcon={<Share2 className="h-4 w-4" />}
-      onCreateCampaign={onCreateCampaign}
-      activeCampaigns={campaigns}
-      onToggleCampaign={onToggleCampaign}
-      onDeleteCampaign={onDeleteCampaign}
-    />
-  </div>
-);
-
-import { ReportingDashboard } from '@/components/automation/ReportingDashboard';
-
-const SystemSettings = () => (
-  <div className="space-y-6">
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Settings className="h-5 w-5" />
-          Global System Settings
-        </CardTitle>
-        <CardDescription>
-          Configure automation engines and global campaign settings
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="text-center py-8 text-muted-foreground">
-          <Settings className="h-12 w-12 mx-auto mb-4 opacity-50" />
-          <p>System Settings - Coming Soon</p>
-          <p className="text-sm mt-2">Global configuration, API settings, and engine management</p>
-        </div>
-      </CardContent>
-    </Card>
-  </div>
-);
+const engines = [
+  {
+    id: 'blog-comments',
+    name: 'Blog Comments',
+    icon: MessageSquare,
+    description: 'Post contextual comments on relevant blogs',
+    color: 'bg-blue-100 text-blue-700 border-blue-200'
+  },
+  {
+    id: 'web2-platforms',
+    name: 'Web 2.0 Sites',
+    icon: Globe,
+    description: 'Create content on high-authority platforms',
+    color: 'bg-green-100 text-green-700 border-green-200'
+  },
+  {
+    id: 'forum-profiles',
+    name: 'Forum Profiles',
+    icon: Users,
+    description: 'Build authority through forum engagement',
+    color: 'bg-purple-100 text-purple-700 border-purple-200'
+  },
+  {
+    id: 'social-media',
+    name: 'Social Media',
+    icon: Share2,
+    description: 'Leverage social platforms for brand awareness',
+    color: 'bg-pink-100 text-pink-700 border-pink-200'
+  }
+];
 
 export default function BacklinkAutomation() {
   const [activeTab, setActiveTab] = useState('blog-comments');
