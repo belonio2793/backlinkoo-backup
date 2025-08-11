@@ -36,8 +36,8 @@ class FallbackPaymentService {
   private static async openPremiumFallback(plan: 'monthly' | 'annual'): Promise<void> {
     // Try direct Stripe checkout URLs if available
     const stripeUrls = {
-      monthly: process.env.VITE_STRIPE_PREMIUM_CHECKOUT_URL_MONTHLY,
-      annual: process.env.VITE_STRIPE_PREMIUM_CHECKOUT_URL_ANNUAL
+      monthly: import.meta.env.VITE_STRIPE_PREMIUM_CHECKOUT_URL_MONTHLY,
+      annual: import.meta.env.VITE_STRIPE_PREMIUM_CHECKOUT_URL_ANNUAL
     };
     
     const checkoutUrl = stripeUrls[plan];
