@@ -229,20 +229,21 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
         </div>
 
         <div class="metrics">
-          <div class="metric"><strong>Total Placements:</strong> ${data.placements.length}</div>
+          <div class="metric"><strong>Total Campaigns:</strong> ${data.metrics.totalCampaigns}</div>
           <div class="metric"><strong>Live Links:</strong> ${data.metrics.liveLinks}</div>
           <div class="metric"><strong>Success Rate:</strong> ${data.metrics.successRate.toFixed(1)}%</div>
           <div class="metric"><strong>Today's Links:</strong> ${data.metrics.todaysLinks}</div>
         </div>
 
-        <h2>Link Placement Details</h2>
-        ${data.placements.map((placement: any) => `
-          <div class="placement ${placement.verification_status}">
-            <h3>${placement.source_url || 'Link Placement'}</h3>
-            <p><strong>Target:</strong> ${placement.target_url}</p>
-            <p><strong>Status:</strong> ${placement.verification_status}</p>
-            <p><strong>Placed:</strong> ${new Date(placement.placed_at).toLocaleString()}</p>
-            <p class="small"><strong>Campaign:</strong> ${placement.campaign_id}</p>
+        <h2>Campaign Details</h2>
+        ${data.campaigns.map((campaign: any) => `
+          <div class="placement ${campaign.status}">
+            <h3>${campaign.name}</h3>
+            <p><strong>Target:</strong> ${campaign.target_url}</p>
+            <p><strong>Status:</strong> ${campaign.status}</p>
+            <p><strong>Links Built:</strong> ${campaign.links_built}</p>
+            <p><strong>Success Rate:</strong> ${campaign.success_rate}%</p>
+            <p class="small"><strong>Engine:</strong> ${campaign.engine_type}</p>
           </div>
         `).join('')}
       </body>
