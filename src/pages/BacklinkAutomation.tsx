@@ -205,8 +205,13 @@ export default function BacklinkAutomation() {
 
   // Run health check on mount for debugging
   React.useEffect(() => {
-    DatabaseHealthCheck.logHealthCheck();
+    // Run the improved automation tables check
     checkAutomationTables();
+
+    // Optionally run full health check in development
+    if (import.meta.env.DEV) {
+      DatabaseHealthCheck.logHealthCheck();
+    }
   }, [checkAutomationTables]);
 
   return (
