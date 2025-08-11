@@ -456,7 +456,7 @@ function Blog() {
                 Expert Content Hub
               </Badge>
               <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight">
-                Backlink ∞{" "}
+                Backlink ∞&nbsp;
                 <span className="bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent">
                   Blog
                 </span>
