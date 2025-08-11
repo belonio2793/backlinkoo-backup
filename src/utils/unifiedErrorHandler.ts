@@ -252,29 +252,35 @@ export class UnifiedErrorHandler {
    */
   private overrideConsoleError(): void {
     const originalError = console.error;
-    
+
     console.error = (...args: any[]) => {
       const formattedArgs = args.map(arg => {
-        if (typeof arg === 'object' && arg !== null && arg.toString() === '[object Object]') {
-          return this.formatError(arg);
+        if (typeof arg === 'object' && arg !== null) {
+          const str = arg.toString();
+          if (str === '[object Object]') {
+            return this.formatError(arg);
+          }
         }
         return arg;
       });
-      
+
       originalError.apply(console, formattedArgs);
     };
 
     // Also override console.warn for consistency
     const originalWarn = console.warn;
-    
+
     console.warn = (...args: any[]) => {
       const formattedArgs = args.map(arg => {
-        if (typeof arg === 'object' && arg !== null && arg.toString() === '[object Object]') {
-          return this.formatError(arg);
+        if (typeof arg === 'object' && arg !== null) {
+          const str = arg.toString();
+          if (str === '[object Object]') {
+            return this.formatError(arg);
+          }
         }
         return arg;
       });
-      
+
       originalWarn.apply(console, formattedArgs);
     };
   }
