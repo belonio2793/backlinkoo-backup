@@ -41,27 +41,48 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Update timestamp every minute
+  // Update timestamp every minute and load data
   useEffect(() => {
+    loadCampaignData();
+
     const interval = setInterval(() => {
       setLastUpdate(new Date());
+      loadCampaignData(); // Refresh data every minute
     }, 60000);
+
     return () => clearInterval(interval);
   }, []);
 
-  // Load real placements and start monitoring
-  useEffect(() => {
-    loadRecentPlacements();
-    startLiveMonitoring();
+  const loadCampaignData = async () => {
+    if (isLoading) return; // Prevent multiple simultaneous loads
 
-    // Subscribe to live activities
-    const unsubscribe = LiveAutomationEngine.subscribeToActivity((activity) => {
-      setLiveActivities(prev => [activity, ...prev].slice(0, 50));
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const [campaignsResult, statsResult] = await Promise.all([
+        stableCampaignMetrics.getCampaignMetrics(),
+        stableCampaignMetrics.getDashboardStats()
+      ]);
+
+      if (campaignsResult.success && campaignsResult.data) {
+        setCampaigns(campaignsResult.data);
+      } else {
+        setError(campaignsResult.error || 'Failed to load campaigns');
+      }
+
+      if (statsResult.success && statsResult.data) {
+        setDashboardStats(statsResult.data);
+      }
+
+    } catch (error: any) {
+      console.error('Error loading campaign data:', error);
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
       setLastUpdate(new Date());
-    });
-
-    return unsubscribe;
-  }, []);
+    }
+  };
 
   const loadRecentPlacements = async () => {
     try {
