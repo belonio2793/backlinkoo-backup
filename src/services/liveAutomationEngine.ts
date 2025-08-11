@@ -84,7 +84,7 @@ export class LiveAutomationEngine {
 
   // Blog Comment Engine - Real Implementation
   private static async startBlogCommentEngine(campaign: any) {
-    this.logActivity({
+    LiveAutomationEngine.logActivity({
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       campaign_id: campaign.id,
@@ -99,7 +99,7 @@ export class LiveAutomationEngine {
     
     for (const blog of potentialBlogs) {
       try {
-        this.logActivity({
+        LiveAutomationEngine.logActivity({
           id: crypto.randomUUID(),
           timestamp: new Date().toISOString(),
           campaign_id: campaign.id,
@@ -126,7 +126,7 @@ export class LiveAutomationEngine {
             verification_status: 'pending'
           });
 
-          this.logActivity({
+          LiveAutomationEngine.logActivity({
             id: crypto.randomUUID(),
             timestamp: new Date().toISOString(),
             campaign_id: campaign.id,
@@ -142,7 +142,7 @@ export class LiveAutomationEngine {
         }
         
       } catch (error: any) {
-        this.logActivity({
+        LiveAutomationEngine.logActivity({
           id: crypto.randomUUID(),
           timestamp: new Date().toISOString(),
           campaign_id: campaign.id,
@@ -170,7 +170,7 @@ export class LiveAutomationEngine {
 
     for (const platform of platforms) {
       try {
-        this.logActivity({
+        LiveAutomationEngine.logActivity({
           id: crypto.randomUUID(),
           timestamp: new Date().toISOString(),
           campaign_id: campaign.id,
@@ -197,7 +197,7 @@ export class LiveAutomationEngine {
             verification_status: 'pending'
           });
 
-          this.logActivity({
+          LiveAutomationEngine.logActivity({
             id: crypto.randomUUID(),
             timestamp: new Date().toISOString(),
             campaign_id: campaign.id,
@@ -210,7 +210,7 @@ export class LiveAutomationEngine {
         }
         
       } catch (error: any) {
-        this.logActivity({
+        LiveAutomationEngine.logActivity({
           id: crypto.randomUUID(),
           timestamp: new Date().toISOString(),
           campaign_id: campaign.id,
@@ -307,7 +307,7 @@ export class LiveAutomationEngine {
 
   // Verify link placement
   private static async verifyLinkPlacement(sourceUrl: string, targetUrl: string) {
-    this.logActivity({
+    LiveAutomationEngine.logActivity({
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       campaign_id: 'current',
@@ -328,7 +328,7 @@ export class LiveAutomationEngine {
       const verification = await this.checkLinkExists(sourceUrl, targetUrl);
       
       if (verification.found) {
-        this.logActivity({
+        LiveAutomationEngine.logActivity({
           id: crypto.randomUUID(),
           timestamp: new Date().toISOString(),
           campaign_id: 'current',
@@ -342,7 +342,7 @@ export class LiveAutomationEngine {
         // Update database with verification
         await this.updateLinkVerification(sourceUrl, 'live');
       } else {
-        this.logActivity({
+        LiveAutomationEngine.logActivity({
           id: crypto.randomUUID(),
           timestamp: new Date().toISOString(),
           campaign_id: 'current',
@@ -357,7 +357,7 @@ export class LiveAutomationEngine {
       }
       
     } catch (error: any) {
-      this.logActivity({
+      LiveAutomationEngine.logActivity({
         id: crypto.randomUUID(),
         timestamp: new Date().toISOString(),
         campaign_id: 'current',
@@ -486,7 +486,7 @@ export class LiveAutomationEngine {
   // Forum and Social engines would be implemented similarly
   private static async startForumEngine(campaign: any) {
     // Implementation for forum posting
-    this.logActivity({
+    LiveAutomationEngine.logActivity({
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       campaign_id: campaign.id,
@@ -499,7 +499,7 @@ export class LiveAutomationEngine {
 
   private static async startSocialEngine(campaign: any) {
     // Implementation for social media posting
-    this.logActivity({
+    LiveAutomationEngine.logActivity({
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       campaign_id: campaign.id,
