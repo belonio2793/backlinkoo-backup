@@ -425,73 +425,81 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {campaigns.length > 0 ? campaigns.map((campaign) => (
-                  <div key={campaign.campaign_id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h4 className="font-medium">{campaign.name}</h4>
-                        <Badge 
-                          variant={campaign.status === 'active' ? 'default' : 'secondary'}
-                          className={campaign.status === 'active' ? 'bg-green-100 text-green-700' : ''}
+                {campaigns.length > 0 ? campaigns.map((campaign) => {
+                  // Calculate actual daily progress percentage
+                  const dailyProgressPercent = campaign.daily_limit > 0
+                    ? Math.round(((campaign.links_built || 0) / campaign.daily_limit) * 100)
+                    : 0;
+
+                  return (
+                    <div key={campaign.campaign_id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h4 className="font-medium">{campaign.name}</h4>
+                          <Badge
+                            variant={campaign.status === 'active' ? 'default' : 'secondary'}
+                            className={campaign.status === 'active' ? 'bg-green-100 text-green-700' : ''}
+                          >
+                            {campaign.status}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {campaign.engine_type?.replace('_', ' ')}
+                          </Badge>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4 mb-3">
+                          <div>
+                            <p className="text-xs text-gray-500">Links Built</p>
+                            <p className="font-medium">{campaign.links_built || 0}/{campaign.daily_limit}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Success Rate</p>
+                            <p className="font-medium">{campaign.success_rate || 0}%</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Target</p>
+                            <p className="font-medium text-xs truncate">{campaign.target_url}</p>
+                          </div>
+                        </div>
+
+                        <div className="w-full">
+                          <div className="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>Daily Progress</span>
+                            <span>{dailyProgressPercent}%</span>
+                          </div>
+                          <Progress
+                            value={dailyProgressPercent}
+                            className="h-2"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 ml-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toggleCampaignMonitoring(campaign.campaign_id)}
+                          disabled={isLoading}
                         >
-                          {campaign.status}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          {campaign.engine_type?.replace('_', ' ')}
-                        </Badge>
-                      </div>
-                      
-                      <div className="grid grid-cols-3 gap-4 mb-3">
-                        <div>
-                          <p className="text-xs text-gray-500">Links Built</p>
-                          <p className="font-medium">{campaign.links_built || 0}/{campaign.daily_limit}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Success Rate</p>
-                          <p className="font-medium">{campaign.success_rate || 0}%</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Target</p>
-                          <p className="font-medium text-xs truncate">{campaign.target_url}</p>
-                        </div>
-                      </div>
-
-                      <div className="w-full">
-                        <div className="flex justify-between text-xs text-gray-500 mb-1">
-                          <span>Daily Progress</span>
-                          <span>{Math.round(((campaign.links_built || 0) / campaign.daily_limit) * 100)}%</span>
-                        </div>
-                        <Progress 
-                          value={((campaign.links_built || 0) / campaign.daily_limit) * 100} 
-                          className="h-2"
-                        />
+                          {campaign.status === 'active' ? (
+                            <>
+                              <Pause className="h-4 w-4 mr-1" />
+                              Pause
+                            </>
+                          ) : (
+                            <>
+                              <Play className="h-4 w-4 mr-1" />
+                              Start
+                            </>
+                          )}
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-2 ml-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => toggleCampaignMonitoring(campaign.campaign_id)}
-                      >
-                        {campaign.status === 'active' ? (
-                          <>
-                            <Pause className="h-4 w-4 mr-1" />
-                            Pause
-                          </>
-                        ) : (
-                          <>
-                            <Play className="h-4 w-4 mr-1" />
-                            Start
-                          </>
-                        )}
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                )) : (
+                  );
+                }) : (
                   <div className="text-center py-8 text-gray-500">
                     <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>No campaigns running. Create a campaign to see performance data.</p>
