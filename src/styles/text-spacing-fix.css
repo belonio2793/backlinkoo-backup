@@ -148,53 +148,17 @@ p > span:not(:first-child):not(.no-space-before)::before {
 
 /* GLOBAL EMERGENCY FIXES FOR TEXT CONCATENATION */
 
-/* Fix any text that comes after numbers */
-*:not(script):not(style)::after {
-  white-space: normal;
-}
-
 /* Ensure all text elements have proper word spacing */
 span, p, div, a, button, label {
   word-spacing: normal;
   letter-spacing: normal;
 }
 
-/* Fix for common concatenation patterns */
-span:contains("views")::before,
-span:contains("remaining")::before,
-span:contains("views"):before,
-span:contains("remaining"):before {
-  content: " " !important;
-  white-space: pre !important;
-}
-
-/* Force proper spacing around common text patterns */
-[class*="font-"]:not(:first-child)::before {
-  content: " ";
-  white-space: pre;
-}
-
 /* Emergency fix for modal and popup text */
-.modal-content *,
-.popup-content *,
-[role="dialog"] * {
+[role="dialog"] *,
+.modal *,
+.popup * {
   word-spacing: normal !important;
-  white-space: normal !important;
-}
-
-/* Fix for time and number displays */
-span:matches-regex("[0-9]+[hm]"):not(:last-child)::after {
-  content: " ";
-  white-space: pre;
-}
-
-/* Force space before "views", "remaining", "left", etc. */
-span:contains("views"),
-span:contains("remaining"),
-span:contains("left"),
-span:contains("hours"),
-span:contains("minutes") {
-  margin-left: 0.25em !important;
 }
 
 /* General fix for concatenated text in flexbox */
@@ -206,5 +170,15 @@ span:contains("minutes") {
 /* Fix for inline-flex containers */
 .inline-flex > span:not(:first-child),
 .inline-flex > div:not(:first-child) {
+  margin-left: 0.25rem !important;
+}
+
+/* Force spacing in gap-2 containers that might lose spacing */
+.gap-2 > * + * {
+  margin-left: 0.5rem !important;
+}
+
+/* Emergency fix for items-center containers */
+.items-center > span:not(:first-child) {
   margin-left: 0.25rem !important;
 }
