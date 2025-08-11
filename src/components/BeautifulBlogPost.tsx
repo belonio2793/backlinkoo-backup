@@ -1021,11 +1021,17 @@ export function BeautifulBlogPost() {
                   </div>
                 </div>
                 <Button
-                  onClick={() => {
-                    console.log('Opening Premium upgrade modal with live Stripe checkout');
+                  type="button"
+                  disabled={false}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Premium button clicked!', { showPaymentModal });
                     setShowPaymentModal(true);
+                    console.log('Modal state set to true');
                   }}
-                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+                  className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-8 py-4 text-lg font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+                  style={{ pointerEvents: 'auto', zIndex: 10 }}
                 >
                   <Crown className="mr-2 h-5 w-5" />
                   Upgrade to Premium
@@ -1051,7 +1057,7 @@ export function BeautifulBlogPost() {
                       return (
                         <div className="max-w-2xl mx-auto bg-red-600 text-white p-4 rounded-lg animate-pulse border-4 border-yellow-400">
                           <div className="text-center font-black text-lg">
-                            💀 CRITICAL: LESS THAN 1 HOUR REMAINING! 💀
+                            💀 CRITICAL: LESS THAN 1 HOUR REMAINING! ����
                           </div>
                           <div className="text-center text-sm mt-2">
                             Your content is entering the DEATH ZONE!
