@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Crown, Sparkles, Lock } from 'lucide-react';
-import { ClaimableBlogService } from '@/services/claimableBlogService';
+import { UnifiedClaimService } from '@/services/unifiedClaimService';
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 
