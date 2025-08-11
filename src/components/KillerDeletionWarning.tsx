@@ -62,7 +62,7 @@ export function KillerDeletionWarning({
       icon: Bomb,
       title: "💣 CONTENT BOMB ACTIVATED! 💣",
       subtitle: "DETONATION SEQUENCE INITIATED",
-      message: "Your SEO goldmine for '{targetUrl}' is rigged with a DELETION BOMB! When the timer hits zero, BOOM - everything EXPLODES into nothing!",
+      message: "Your SEO goldmine for {targetUrl} is rigged with a DELETION BOMB! When the timer hits zero, BOOM - everything EXPLODES into nothing!",
       bgColor: "from-orange-600 via-red-600 to-yellow-600",
       urgency: "EXPLOSIVE DANGER"
     },
