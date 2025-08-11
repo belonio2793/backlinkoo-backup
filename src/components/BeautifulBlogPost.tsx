@@ -990,6 +990,20 @@ export function BeautifulBlogPost() {
               </div>
             </div>
 
+            {/* Test Button - Debug Modal */}
+            <div className="mt-8 text-center">
+              <Button
+                onClick={() => {
+                  console.log('🔥 TEST BUTTON CLICKED');
+                  setShowPaymentModal(true);
+                }}
+                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2"
+              >
+                TEST - Open Modal
+              </Button>
+              <p className="text-xs mt-1">Modal state: {showPaymentModal ? 'OPEN' : 'CLOSED'}</p>
+            </div>
+
             {/* Premium Upgrade CTA Section */}
             <div className="mt-12 p-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border border-purple-200">
               <div className="text-center">
