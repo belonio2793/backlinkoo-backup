@@ -377,27 +377,29 @@ export class UnifiedErrorHandler {
   }
 
   /**
-   * Test the error handler with various error types
+   * Test the error handler with various error types (manual use only)
    */
   test(): void {
     console.log('🧪 Testing unified error handler...');
-    
+    console.log('📝 Note: Test errors will be suppressed and handled silently');
+
     // Test object error
     setTimeout(() => {
       Promise.reject({ error: 'test error', code: 500 });
     }, 100);
-    
+
     // Test string error
     setTimeout(() => {
       Promise.reject('string error test');
     }, 200);
-    
+
     // Test null error
     setTimeout(() => {
       Promise.reject(null);
     }, 300);
-    
-    console.log('🧪 Test errors dispatched - check console for proper formatting');
+
+    console.log('🧪 Test errors dispatched - they should be handled silently');
+    console.log('🔍 Check browser console for "🧪 Test error handled" debug messages');
   }
 }
 
