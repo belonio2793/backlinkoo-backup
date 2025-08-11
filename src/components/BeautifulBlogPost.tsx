@@ -91,13 +91,25 @@ export function BeautifulBlogPost() {
 
   useEffect(() => {
     if (slug) {
-      loadBlogPost(slug);
+      loadBlogPost(slug).catch((error) => {
+        console.error('Failed to load blog post in useEffect:', error);
+        if (isMounted) {
+          toast({
+            title: "Error",
+            description: "Failed to load blog post",
+            variant: "destructive"
+          });
+        }
+      });
     }
   }, [slug]);
 
   useEffect(() => {
     if (user) {
-      processClaimIntent();
+      processClaimIntent().catch((error) => {
+        console.error('Failed to process claim intent in useEffect:', error);
+        // Don't show toast for claim intent errors as they're handled internally
+      });
     }
   }, [user]);
 
