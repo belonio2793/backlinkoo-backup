@@ -134,6 +134,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
           totalCampaigns,
           activeCampaigns,
           totalLinksBuilt,
+          liveLinks,
           successRate,
           todaysLinks
         },
