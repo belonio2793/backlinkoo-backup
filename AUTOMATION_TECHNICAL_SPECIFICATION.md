@@ -97,7 +97,7 @@ User Input → Form Validation → Campaign Creation → Database Storage → Qu
 
 ### **Link Building Process**
 ```
-URL Discovery → Verification �� Content Generation → Posting → Result Tracking → Analytics Update
+URL Discovery → Verification → Content Generation → Posting → Result Tracking → Analytics Update
 ```
 
 ### **State Management Flow**
