@@ -302,6 +302,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/debug/text-cleaner"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyTextCleanerDebug />
+                </Suspense>
+              }
+            />
 
             {/* 404 Catch-all route */}
             <Route
