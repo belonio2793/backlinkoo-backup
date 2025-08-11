@@ -332,7 +332,7 @@ export function BeautifulBlogPost() {
   const handleDeletePost = async () => {
     setDeleting(true);
     try {
-      console.log('🗑️ Attempting to delete post:', {
+      console.log('���️ Attempting to delete post:', {
         slug,
         userId: user?.id,
         blogPostUserId: blogPost?.user_id,
@@ -543,6 +543,33 @@ export function BeautifulBlogPost() {
       .replace(/^#{1,6}\s+/, '')
       .replace(/^Title:\s*/gi, '') // Final cleanup for any remaining Title: patterns
       .trim();
+  };
+
+  const autoRemoveTitlesFromContent = (content: string, pageTitle: string) => {
+    if (!content || !pageTitle) return content;
+
+    const cleanedPageTitle = cleanTitle(pageTitle).toLowerCase().trim();
+    if (!cleanedPageTitle) return content;
+
+    // Create a temporary div to parse HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+
+    // Find and remove duplicate title headings (h1, h2, h3)
+    const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
+
+    headings.forEach(heading => {
+      const headingText = cleanTitle(heading.textContent || '').toLowerCase().trim();
+
+      // Remove if heading matches the page title or is very similar
+      if (headingText === cleanedPageTitle ||
+          cleanedPageTitle.includes(headingText) ||
+          headingText.includes(cleanedPageTitle)) {
+        heading.remove();
+      }
+    });
+
+    return tempDiv.innerHTML;
   };
 
   const getTimeRemaining = (expiresAt: string) => {
