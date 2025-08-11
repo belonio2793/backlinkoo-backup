@@ -37,6 +37,7 @@ import { RoutePreservingAuth } from '@/components/RoutePreservingAuth';
 import { RuntimeReporting } from '@/components/automation/RuntimeReporting';
 import { RuntimeStatus } from '@/components/automation/RuntimeStatus';
 import { LiveAutomationEngine } from '@/services/liveAutomationEngine';
+import { CampaignErrorHandler } from '@/utils/campaignErrorHandler';
 
 const engines = [
   {
@@ -105,17 +106,21 @@ export default function BacklinkAutomation() {
 
   // Enhanced toggle campaign with live monitoring
   const handleToggleCampaign = async (campaignId: string) => {
-    try {
-      const campaign = campaigns.find(c => c.id === campaignId);
-      if (!campaign) return;
+    const campaign = campaigns.find(c => c.id === campaignId);
+    if (!campaign) return;
 
-      // Toggle campaign status first
-      await toggleCampaign(campaignId);
+    // Use campaign error handler to prevent unhandled promise rejections
+    const success = await CampaignErrorHandler.safeToggleCampaign(campaignId, async (id) => {
+      await toggleCampaign(id);
+
+      // Clear stable metrics cache to force refresh
+      const { stableCampaignMetrics } = await import('@/services/stableCampaignMetrics');
+      stableCampaignMetrics.clearCache();
 
       // If activating, start live monitoring
       if (campaign.status !== 'active') {
         console.log(`🚀 Starting live monitoring for campaign: ${campaign.name}`);
-        await LiveAutomationEngine.startLiveMonitoring(campaignId);
+        await CampaignErrorHandler.safeStartLiveMonitoring(id, LiveAutomationEngine.startLiveMonitoring);
 
         toast.success('Campaign activated!', {
           description: `${campaign.name} is now running with live monitoring.`
@@ -125,11 +130,15 @@ export default function BacklinkAutomation() {
           description: `${campaign.name} has been paused.`
         });
       }
-    } catch (error: any) {
-      console.error('Error toggling campaign:', error);
-      toast.error('Failed to toggle campaign', {
-        description: error.message
-      });
+
+      // Force a full page refresh to sync all data
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    });
+
+    if (!success) {
+      console.warn(`Campaign toggle failed for campaign: ${campaignId}`);
     }
   };
 
@@ -175,7 +184,7 @@ export default function BacklinkAutomation() {
       return;
     }
 
-    const newCampaign = await createCampaign({
+    const newCampaign = await CampaignErrorHandler.safeCreateCampaign({
       name: formData.name,
       engine_type: selectedEngine.replace('-', '_'),
       target_url: normalizedTargetUrl,
@@ -184,7 +193,7 @@ export default function BacklinkAutomation() {
       status: formData.autoStart ? 'active' : 'draft',
       daily_limit: formData.dailyLimit,
       auto_start: formData.autoStart
-    });
+    }, createCampaign);
 
     if (newCampaign) {
       toast.success('Campaign created successfully!');
@@ -437,12 +446,27 @@ export default function BacklinkAutomation() {
         {/* Runtime & Reporting Section */}
         {isAuthenticated && activeCampaignCount > 0 && (
           <RuntimeReporting
-            campaigns={campaigns}
             onToggleCampaign={handleToggleCampaign}
-            onRefreshData={() => {
-              // Refresh campaigns and check tables
-              checkAutomationTables();
-              window.location.reload(); // Simple refresh for now
+            onRefreshData={async () => {
+              // Clear all caches and refresh data
+              const { stableCampaignMetrics } = await import('@/services/stableCampaignMetrics');
+              stableCampaignMetrics.clearCache();
+
+              // Refresh campaigns data in the hook
+              try {
+                // Force refresh the campaign manager hook data
+                window.dispatchEvent(new Event('campaign-data-refresh'));
+              } catch (error) {
+                console.error('Error refreshing campaign data:', error);
+              }
+
+              // Check automation tables
+              await checkAutomationTables();
+
+              // Force a complete reload to ensure sync
+              setTimeout(() => {
+                window.location.reload();
+              }, 500);
             }}
           />
         )}

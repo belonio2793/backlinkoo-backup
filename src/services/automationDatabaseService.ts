@@ -42,9 +42,20 @@ export class AutomationDatabaseService {
         return true; // Assume table exists, just permission issue
       }
 
+      // Handle auth session missing errors gracefully
+      if (error.message?.includes('Auth session missing')) {
+        console.warn('⚠️ No auth session for automation_campaigns check, but table likely exists');
+        return true; // Assume table exists, just no authentication
+      }
+
       console.warn('⚠️ Unknown error checking automation_campaigns:', error.message);
       return false;
     } catch (err: any) {
+      // Handle auth session missing errors at the catch level too
+      if (err.message?.includes('Auth session missing')) {
+        console.warn('⚠️ No auth session for automation_campaigns check, but table likely exists');
+        return true; // Assume table exists, just no authentication
+      }
       console.error('❌ Error in checkTablesExist:', err.message);
       return false;
     }
@@ -221,13 +232,13 @@ export class AutomationDatabaseService {
 
       if (error) {
         console.error('Error updating campaign:', error);
-        return { success: false, error: error.message };
+        return { success: false, error: error?.message || error?.toString() || 'Unknown database error' };
       }
 
       return { success: true, data };
     } catch (error: any) {
       console.error('Error updating campaign:', error);
-      return { success: false, error: error.message };
+      return { success: false, error: error?.message || error?.toString() || 'Unknown error occurred' };
     }
   }
 

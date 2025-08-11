@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -25,113 +25,142 @@ import {
   ExternalLink,
   Star
 } from 'lucide-react';
-import { LiveAutomationEngine, LiveActivity, LiveLinkPlacement } from '@/services/liveAutomationEngine';
-import { LiveActivityFeed } from './LiveActivityFeed';
-
-interface Campaign {
-  id: string;
-  name: string;
-  engine_type: string;
-  status: string;
-  links_built: number;
-  daily_limit: number;
-  success_rate: number;
-  last_activity: string;
-  target_url: string;
-}
+import { stableCampaignMetrics, CampaignMetrics } from '@/services/stableCampaignMetrics';
+import { DataSyncChecker } from '@/utils/dataSyncChecker';
+import { RealTimeUrlMonitor } from './RealTimeUrlMonitor';
+import { SiphonedUrlReporting } from './SiphonedUrlReporting';
+import { LiveUrlPostingMonitor } from './LiveUrlPostingMonitor';
+import { CampaignDataSiphon } from './CampaignDataSiphon';
+import { IntegratedCampaignManager } from './IntegratedCampaignManager';
 
 interface RuntimeReportingProps {
-  campaigns: Campaign[];
   onToggleCampaign?: (campaignId: string) => void;
   onRefreshData?: () => void;
 }
 
-export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }: RuntimeReportingProps) {
+export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeReportingProps) {
   const [lastUpdate, setLastUpdate] = useState(new Date());
   const [activeTab, setActiveTab] = useState('overview');
-  const [recentPlacements, setRecentPlacements] = useState<LiveLinkPlacement[]>([]);
-  const [liveActivities, setLiveActivities] = useState<LiveActivity[]>([]);
-  const [isMonitoring, setIsMonitoring] = useState(false);
+  const [campaigns, setCampaigns] = useState<CampaignMetrics[]>([]);
+  const [dashboardStats, setDashboardStats] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Update timestamp every minute
+  const loadCampaignData = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const [campaignsResult, statsResult] = await Promise.all([
+        stableCampaignMetrics.getCampaignMetrics(),
+        stableCampaignMetrics.getDashboardStats()
+      ]);
+
+      if (campaignsResult.success && campaignsResult.data) {
+        setCampaigns(campaignsResult.data);
+
+        // Check for data sync issues (in development)
+        if (import.meta.env.DEV) {
+          try {
+            // Compare with any cached data
+            const cachedData = localStorage.getItem('last_campaign_data');
+            if (cachedData) {
+              const lastData = JSON.parse(cachedData);
+              const syncIssues = DataSyncChecker.checkCampaignSync(
+                campaignsResult.data,
+                lastData,
+                'Current Data',
+                'Cached Data'
+              );
+              DataSyncChecker.logSyncIssues(syncIssues);
+            }
+
+            // Store current data for next comparison
+            localStorage.setItem('last_campaign_data', JSON.stringify(campaignsResult.data));
+          } catch (error) {
+            console.warn('Sync check failed:', error);
+          }
+        }
+      } else {
+        setError(campaignsResult.error || 'Failed to load campaigns');
+      }
+
+      if (statsResult.success && statsResult.data) {
+        setDashboardStats(statsResult.data);
+      }
+
+    } catch (error: any) {
+      console.error('Error loading campaign data:', error);
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+      setLastUpdate(new Date());
+    }
+  }, []);
+
+  const toggleCampaignMonitoring = useCallback(async (campaignId: string) => {
+    const campaign = campaigns.find(c => c.campaign_id === campaignId);
+    if (!campaign) {
+      setError('Campaign not found');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      console.log(`Toggling campaign ${campaignId} from ${campaign.status}`);
+
+      const result = await stableCampaignMetrics.toggleCampaignStatus(campaignId);
+      if (result.success) {
+        console.log('Campaign toggle successful, refreshing data...');
+
+        // Clear cache and refresh data
+        stableCampaignMetrics.clearCache();
+        await loadCampaignData();
+
+        // Notify parent component
+        onToggleCampaign?.(campaignId);
+
+        // Show success message
+        const newStatus = campaign.status === 'active' ? 'paused' : 'active';
+        console.log(`Campaign ${campaign.name} changed to ${newStatus}`);
+
+      } else {
+        console.error('Toggle failed:', result.error);
+        setError(result.error || 'Failed to toggle campaign');
+      }
+    } catch (error: any) {
+      console.error('Error toggling campaign monitoring:', error);
+      setError(typeof error === 'string' ? error : error.message || 'Failed to toggle campaign status');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [campaigns, loadCampaignData, onToggleCampaign]);
+
+  const handleRefreshData = useCallback(async () => {
+    stableCampaignMetrics.clearCache(); // Clear cache to force refresh
+    await loadCampaignData();
+    onRefreshData?.();
+  }, [loadCampaignData, onRefreshData]);
+
+  // Update timestamp every minute and load data
   useEffect(() => {
+    loadCampaignData();
+
     const interval = setInterval(() => {
       setLastUpdate(new Date());
+      loadCampaignData(); // Refresh data every minute
     }, 60000);
+
     return () => clearInterval(interval);
-  }, []);
+  }, [loadCampaignData]);
 
-  // Load real placements and start monitoring
-  useEffect(() => {
-    loadRecentPlacements();
-    startLiveMonitoring();
-
-    // Subscribe to live activities
-    const unsubscribe = LiveAutomationEngine.subscribeToActivity((activity) => {
-      setLiveActivities(prev => [activity, ...prev].slice(0, 50));
-      setLastUpdate(new Date());
-    });
-
-    return unsubscribe;
-  }, []);
-
-  const loadRecentPlacements = async () => {
-    try {
-      const placements = await LiveAutomationEngine.getRecentPlacements(20);
-      setRecentPlacements(placements);
-    } catch (error) {
-      console.error('Error loading recent placements:', error);
-    }
-  };
-
-  const startLiveMonitoring = async () => {
-    if (campaigns.length === 0) return;
-
-    setIsMonitoring(true);
-
-    // Start monitoring for active campaigns
-    const activeCampaigns = campaigns.filter(c => c.status === 'active');
-
-    for (const campaign of activeCampaigns) {
-      try {
-        await LiveAutomationEngine.startLiveMonitoring(campaign.id);
-      } catch (error) {
-        console.error(`Error starting monitoring for campaign ${campaign.id}:`, error);
-      }
-    }
-  };
-
-  const toggleCampaignMonitoring = async (campaignId: string) => {
-    const campaign = campaigns.find(c => c.id === campaignId);
-    if (!campaign) return;
-
-    try {
-      if (campaign.status === 'active') {
-        // Pause campaign
-        onToggleCampaign?.(campaignId);
-      } else {
-        // Start campaign and monitoring
-        onToggleCampaign?.(campaignId);
-        await LiveAutomationEngine.startLiveMonitoring(campaignId);
-      }
-    } catch (error) {
-      console.error('Error toggling campaign monitoring:', error);
-    }
-  };
-
-  // Calculate aggregate metrics from real data
-  const totalCampaigns = campaigns.length;
-  const activeCampaigns = campaigns.filter(c => c.status === 'active').length;
-  const totalLinksBuilt = recentPlacements.length;
-  const liveLinks = recentPlacements.filter(p => p.verification_status === 'live').length;
-  const successRate = totalLinksBuilt > 0 ? (liveLinks / totalLinksBuilt) * 100 : 0;
-
-  // Today's activity
-  const today = new Date().toDateString();
-  const todaysPlacements = recentPlacements.filter(p =>
-    new Date(p.placed_at).toDateString() === today
-  );
-  const todaysLinks = todaysPlacements.length;
+  // Calculate aggregate metrics from dashboard stats and campaigns
+  const totalCampaigns = dashboardStats?.total_campaigns || campaigns.length;
+  const activeCampaigns = dashboardStats?.active_campaigns || campaigns.filter(c => c.status === 'active').length;
+  const totalLinksBuilt = dashboardStats?.total_links || campaigns.reduce((sum, c) => sum + c.links_built, 0);
+  const successRate = dashboardStats?.success_rate || (campaigns.length > 0 ? campaigns.reduce((sum, c) => sum + c.success_rate, 0) / campaigns.length : 0);
+  const todaysLinks = dashboardStats?.links_today || 0;
+  const liveLinks = Math.round(totalLinksBuilt * (successRate / 100));
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString('en-US', {
@@ -145,8 +174,6 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
     try {
       const exportData = {
         campaigns: campaigns,
-        placements: recentPlacements,
-        activities: liveActivities,
         metrics: {
           totalCampaigns,
           activeCampaigns,
@@ -171,7 +198,7 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
           await exportPDFReport(exportData);
           toast({
             title: "PDF Report Generated",
-            description: `Link placement audit report created with ${recentPlacements.length} verified placements and detailed verification status.`
+            description: `Link placement audit report created with ${liveLinks} verified placements and detailed verification status.`
           });
           break;
 
@@ -198,8 +225,8 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
       // Headers
       'Campaign ID,Name,Engine Type,Status,Links Built,Daily Limit,Success Rate,Target URL,Last Activity',
       // Data rows
-      ...data.campaigns.map((campaign: Campaign) =>
-        `${campaign.id},${campaign.name},${campaign.engine_type},${campaign.status},${campaign.links_built || 0},${campaign.daily_limit},${campaign.success_rate || 0}%,${campaign.target_url},${campaign.last_activity}`
+      ...data.campaigns.map((campaign: CampaignMetrics) =>
+        `${campaign.campaign_id},${campaign.name},${campaign.engine_type},${campaign.status},${campaign.links_built || 0},${campaign.daily_limit},${campaign.success_rate || 0}%,${campaign.target_url},${campaign.last_activity}`
       ),
       '',
       '--- SUMMARY METRICS ---',
@@ -246,20 +273,21 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
         </div>
 
         <div class="metrics">
-          <div class="metric"><strong>Total Placements:</strong> ${data.placements.length}</div>
+          <div class="metric"><strong>Total Campaigns:</strong> ${data.metrics.totalCampaigns}</div>
           <div class="metric"><strong>Live Links:</strong> ${data.metrics.liveLinks}</div>
           <div class="metric"><strong>Success Rate:</strong> ${data.metrics.successRate.toFixed(1)}%</div>
           <div class="metric"><strong>Today's Links:</strong> ${data.metrics.todaysLinks}</div>
         </div>
 
-        <h2>Link Placement Details</h2>
-        ${data.placements.map((placement: any) => `
-          <div class="placement ${placement.verification_status}">
-            <h3>${placement.source_url || 'Link Placement'}</h3>
-            <p><strong>Target:</strong> ${placement.target_url}</p>
-            <p><strong>Status:</strong> ${placement.verification_status}</p>
-            <p><strong>Placed:</strong> ${new Date(placement.placed_at).toLocaleString()}</p>
-            <p class="small"><strong>Campaign:</strong> ${placement.campaign_id}</p>
+        <h2>Campaign Details</h2>
+        ${data.campaigns.map((campaign: any) => `
+          <div class="placement ${campaign.status}">
+            <h3>${campaign.name}</h3>
+            <p><strong>Target:</strong> ${campaign.target_url}</p>
+            <p><strong>Status:</strong> ${campaign.status}</p>
+            <p><strong>Links Built:</strong> ${campaign.links_built}</p>
+            <p><strong>Success Rate:</strong> ${campaign.success_rate}%</p>
+            <p class="small"><strong>Engine:</strong> ${campaign.engine_type}</p>
           </div>
         `).join('')}
       </body>
@@ -290,7 +318,7 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
       '',
       'CAMPAIGN ANALYSIS',
       'Campaign,Engine Type,Success Rate,Performance Grade',
-      ...data.campaigns.map((campaign: Campaign) => {
+      ...data.campaigns.map((campaign: CampaignMetrics) => {
         const rate = campaign.success_rate || 0;
         const grade = rate > 80 ? 'A' : rate > 60 ? 'B' : rate > 40 ? 'C' : 'D';
         return `${campaign.name},${campaign.engine_type},${rate}%,${grade}`;
@@ -327,6 +355,11 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
               </CardTitle>
               <CardDescription className="mt-2">
                 Real-time campaign monitoring and performance analytics
+                {error && (
+                  <div className="mt-2 text-red-600 text-sm">
+                    ⚠��� {error}
+                  </div>
+                )}
               </CardDescription>
             </div>
             <div className="flex items-center gap-3">
@@ -334,14 +367,15 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
                 <div className="text-sm text-gray-600">Last Updated</div>
                 <div className="text-sm font-medium">{formatTime(lastUpdate)}</div>
               </div>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
-                onClick={onRefreshData}
+                onClick={handleRefreshData}
+                disabled={isLoading}
                 className="flex items-center gap-2"
               >
-                <RefreshCw className="h-4 w-4" />
-                Refresh
+                <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+                {isLoading ? 'Loading...' : 'Refresh'}
               </Button>
             </div>
           </div>
@@ -409,7 +443,7 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
 
       {/* Detailed Reporting Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="overview" className="flex items-center gap-2">
             <BarChart3 className="h-4 w-4" />
             Overview
@@ -417,6 +451,14 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
           <TabsTrigger value="activity" className="flex items-center gap-2">
             <Activity className="h-4 w-4" />
             Live Activity
+          </TabsTrigger>
+          <TabsTrigger value="siphoned" className="flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            URL Data
+          </TabsTrigger>
+          <TabsTrigger value="integrated" className="flex items-center gap-2">
+            <Database className="h-4 w-4" />
+            Integrated
           </TabsTrigger>
           <TabsTrigger value="reports" className="flex items-center gap-2">
             <Calendar className="h-4 w-4" />
@@ -433,73 +475,81 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {campaigns.length > 0 ? campaigns.map((campaign) => (
-                  <div key={campaign.id} className="flex items-center justify-between p-4 border rounded-lg">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h4 className="font-medium">{campaign.name}</h4>
-                        <Badge 
-                          variant={campaign.status === 'active' ? 'default' : 'secondary'}
-                          className={campaign.status === 'active' ? 'bg-green-100 text-green-700' : ''}
+                {campaigns.length > 0 ? campaigns.map((campaign) => {
+                  // Calculate actual daily progress percentage
+                  const dailyProgressPercent = campaign.daily_limit > 0
+                    ? Math.round(((campaign.links_built || 0) / campaign.daily_limit) * 100)
+                    : 0;
+
+                  return (
+                    <div key={campaign.campaign_id} className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <h4 className="font-medium">{campaign.name}</h4>
+                          <Badge
+                            variant={campaign.status === 'active' ? 'default' : 'secondary'}
+                            className={campaign.status === 'active' ? 'bg-green-100 text-green-700' : ''}
+                          >
+                            {campaign.status}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {campaign.engine_type?.replace('_', ' ')}
+                          </Badge>
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4 mb-3">
+                          <div>
+                            <p className="text-xs text-gray-500">Links Built</p>
+                            <p className="font-medium">{campaign.links_built || 0}/{campaign.daily_limit}</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Success Rate</p>
+                            <p className="font-medium">{campaign.success_rate || 0}%</p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-gray-500">Target</p>
+                            <p className="font-medium text-xs truncate">{campaign.target_url}</p>
+                          </div>
+                        </div>
+
+                        <div className="w-full">
+                          <div className="flex justify-between text-xs text-gray-500 mb-1">
+                            <span>Daily Progress</span>
+                            <span>{dailyProgressPercent}%</span>
+                          </div>
+                          <Progress
+                            value={dailyProgressPercent}
+                            className="h-2"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 ml-4">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => toggleCampaignMonitoring(campaign.campaign_id)}
+                          disabled={isLoading}
                         >
-                          {campaign.status}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          {campaign.engine_type?.replace('_', ' ')}
-                        </Badge>
-                      </div>
-                      
-                      <div className="grid grid-cols-3 gap-4 mb-3">
-                        <div>
-                          <p className="text-xs text-gray-500">Links Built</p>
-                          <p className="font-medium">{campaign.links_built || 0}/{campaign.daily_limit}</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Success Rate</p>
-                          <p className="font-medium">{campaign.success_rate || 0}%</p>
-                        </div>
-                        <div>
-                          <p className="text-xs text-gray-500">Target</p>
-                          <p className="font-medium text-xs truncate">{campaign.target_url}</p>
-                        </div>
-                      </div>
-
-                      <div className="w-full">
-                        <div className="flex justify-between text-xs text-gray-500 mb-1">
-                          <span>Daily Progress</span>
-                          <span>{Math.round(((campaign.links_built || 0) / campaign.daily_limit) * 100)}%</span>
-                        </div>
-                        <Progress 
-                          value={((campaign.links_built || 0) / campaign.daily_limit) * 100} 
-                          className="h-2"
-                        />
+                          {campaign.status === 'active' ? (
+                            <>
+                              <Pause className="h-4 w-4 mr-1" />
+                              Pause
+                            </>
+                          ) : (
+                            <>
+                              <Play className="h-4 w-4 mr-1" />
+                              Start
+                            </>
+                          )}
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Eye className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-
-                    <div className="flex items-center gap-2 ml-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => toggleCampaignMonitoring(campaign.id)}
-                      >
-                        {campaign.status === 'active' ? (
-                          <>
-                            <Pause className="h-4 w-4 mr-1" />
-                            Pause
-                          </>
-                        ) : (
-                          <>
-                            <Play className="h-4 w-4 mr-1" />
-                            Start
-                          </>
-                        )}
-                      </Button>
-                      <Button variant="ghost" size="sm">
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                )) : (
+                  );
+                }) : (
                   <div className="text-center py-8 text-gray-500">
                     <BarChart3 className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     <p>No campaigns running. Create a campaign to see performance data.</p>
@@ -511,11 +561,43 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
         </TabsContent>
 
         <TabsContent value="activity" className="space-y-6">
-          {/* Real Live Activity Feed */}
-          <LiveActivityFeed
-            maxItems={50}
-            autoScroll={true}
+          {/* Enhanced Real-Time URL Processing Monitor */}
+          <LiveUrlPostingMonitor
+            campaignId={campaigns.find(c => c.status === 'active')?.campaign_id || ''}
+            onUrlPosted={(url, success) => {
+              console.log(`URL posted: ${url} - Success: ${success}`);
+              // Update metrics when URLs are processed
+              handleRefreshData();
+            }}
+            showControls={true}
           />
+
+          {/* Original Real-Time URL Monitor for comparison */}
+          <RealTimeUrlMonitor
+            campaignId={campaigns.find(c => c.status === 'active')?.campaign_id}
+            onUrlProcessed={(url, success) => {
+              console.log(`URL processed: ${url} - Success: ${success}`);
+              // Update metrics when URLs are processed
+              handleRefreshData();
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="siphoned" className="space-y-6">
+          {/* Enhanced Campaign Data Siphon */}
+          <CampaignDataSiphon
+            campaignId={campaigns.find(c => c.status === 'active')?.campaign_id || ''}
+          />
+
+          {/* Original Siphoned URL Reporting for comparison */}
+          <SiphonedUrlReporting
+            campaignId={campaigns.find(c => c.status === 'active')?.campaign_id}
+          />
+        </TabsContent>
+
+        <TabsContent value="integrated" className="space-y-6">
+          {/* Integrated Campaign Manager */}
+          <IntegratedCampaignManager />
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-6">
@@ -603,7 +685,7 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
                         </div>
                         <div>
                           <h4 className="font-medium">Link Placement Audit Report</h4>
-                          <p className="text-sm text-gray-500">PDF format • ~{Math.max(recentPlacements.length * 25, 500)}KB</p>
+                          <p className="text-sm text-gray-500">PDF format • ~{Math.max(liveLinks * 25, 500)}KB</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
@@ -614,7 +696,7 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
 
                     <div className="text-sm text-gray-600 space-y-1">
                       <p><strong>Contains:</strong> Live link verification, placement screenshots, anchor text analysis, domain authority scores</p>
-                      <p><strong>Data Points:</strong> {recentPlacements.length} verified placements • {liveLinks} live links • Quality scores</p>
+                      <p><strong>Data Points:</strong> {liveLinks} verified placements • {liveLinks} live links • Quality scores</p>
                       <p><strong>Use Case:</strong> Client reports, link audit trails, placement verification, quality assurance</p>
                     </div>
 
@@ -674,7 +756,7 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
                     </h5>
                     <div className="text-sm text-gray-600 space-y-1">
                       <p>• <strong>CSV Report:</strong> {campaigns.length > 0 ? 'Essential for tracking ROI and performance trends' : 'Limited value without active campaigns'}</p>
-                      <p>• <strong>PDF Report:</strong> {recentPlacements.length > 10 ? 'High value for client deliverables and auditing' : 'Moderate value - needs more placement data'}</p>
+                      <p>• <strong>PDF Report:</strong> {liveLinks > 10 ? 'High value for client deliverables and auditing' : 'Moderate value - needs more placement data'}</p>
                       <p>• <strong>Excel Analytics:</strong> {successRate > 75 ? 'High value for optimization insights' : 'Growing value as data accumulates'}</p>
                     </div>
                   </div>

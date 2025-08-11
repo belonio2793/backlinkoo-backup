@@ -52,16 +52,16 @@ export class LiveAutomationEngine {
       // Start the automation engine based on type
       switch (campaign.engine_type) {
         case 'blog_comments':
-          await this.startBlogCommentEngine(campaign);
+          await LiveAutomationEngine.startBlogCommentEngine(campaign);
           break;
         case 'web2_platforms':
-          await this.startWeb2Engine(campaign);
+          await LiveAutomationEngine.startWeb2Engine(campaign);
           break;
         case 'forum_profiles':
-          await this.startForumEngine(campaign);
+          await LiveAutomationEngine.startForumEngine(campaign);
           break;
         case 'social_media':
-          await this.startSocialEngine(campaign);
+          await LiveAutomationEngine.startSocialEngine(campaign);
           break;
         default:
           throw new Error(`Unknown engine type: ${campaign.engine_type}`);
@@ -69,7 +69,7 @@ export class LiveAutomationEngine {
       
     } catch (error: any) {
       console.error('Error starting live monitoring:', error);
-      this.logActivity({
+      LiveAutomationEngine.logActivity({
         id: crypto.randomUUID(),
         timestamp: new Date().toISOString(),
         campaign_id: campaignId,
@@ -78,12 +78,13 @@ export class LiveAutomationEngine {
         action: 'placement_failed',
         details: `Failed to start monitoring: ${error.message}`
       });
+      throw error; // Re-throw to allow proper error handling
     }
   }
 
   // Blog Comment Engine - Real Implementation
   private static async startBlogCommentEngine(campaign: any) {
-    this.logActivity({
+    LiveAutomationEngine.logActivity({
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       campaign_id: campaign.id,
@@ -94,11 +95,11 @@ export class LiveAutomationEngine {
     });
 
     // Real blog discovery using actual search APIs
-    const potentialBlogs = await this.discoverBlogs(campaign.keywords);
+    const potentialBlogs = await LiveAutomationEngine.discoverBlogs(campaign.keywords);
     
     for (const blog of potentialBlogs) {
       try {
-        this.logActivity({
+        LiveAutomationEngine.logActivity({
           id: crypto.randomUUID(),
           timestamp: new Date().toISOString(),
           campaign_id: campaign.id,
@@ -109,23 +110,23 @@ export class LiveAutomationEngine {
           url: blog.url
         });
 
-        const placement = await this.attemptBlogComment(campaign, blog);
+        const placement = await LiveAutomationEngine.attemptBlogComment(campaign, blog);
         
         if (placement.success) {
-          await this.saveLinkPlacement({
+          await LiveAutomationEngine.saveLinkPlacement({
             id: crypto.randomUUID(),
             campaign_id: campaign.id,
             source_domain: blog.domain,
             source_url: blog.url,
             target_url: campaign.target_url,
-            anchor_text: this.selectRandomAnchorText(campaign.anchor_texts),
+            anchor_text: LiveAutomationEngine.selectRandomAnchorText(campaign.anchor_texts),
             placement_type: 'blog_comment',
             status: 'placed',
             placed_at: new Date().toISOString(),
             verification_status: 'pending'
           });
 
-          this.logActivity({
+          LiveAutomationEngine.logActivity({
             id: crypto.randomUUID(),
             timestamp: new Date().toISOString(),
             campaign_id: campaign.id,
@@ -137,11 +138,11 @@ export class LiveAutomationEngine {
           });
 
           // Start verification process
-          setTimeout(() => this.verifyLinkPlacement(placement.commentUrl, campaign.target_url), 5000);
+          setTimeout(() => LiveAutomationEngine.verifyLinkPlacement(placement.commentUrl, campaign.target_url), 5000);
         }
         
       } catch (error: any) {
-        this.logActivity({
+        LiveAutomationEngine.logActivity({
           id: crypto.randomUUID(),
           timestamp: new Date().toISOString(),
           campaign_id: campaign.id,
@@ -154,7 +155,7 @@ export class LiveAutomationEngine {
       }
       
       // Respect rate limits
-      await this.sleep(this.getRandomDelay(5000, 15000));
+      await LiveAutomationEngine.sleep(LiveAutomationEngine.getRandomDelay(5000, 15000));
     }
   }
 
@@ -169,7 +170,7 @@ export class LiveAutomationEngine {
 
     for (const platform of platforms) {
       try {
-        this.logActivity({
+        LiveAutomationEngine.logActivity({
           id: crypto.randomUUID(),
           timestamp: new Date().toISOString(),
           campaign_id: campaign.id,
@@ -180,23 +181,23 @@ export class LiveAutomationEngine {
           url: `https://${platform.domain}`
         });
 
-        const article = await this.createWeb2Article(campaign, platform);
+        const article = await LiveAutomationEngine.createWeb2Article(campaign, platform);
         
         if (article.success) {
-          await this.saveLinkPlacement({
+          await LiveAutomationEngine.saveLinkPlacement({
             id: crypto.randomUUID(),
             campaign_id: campaign.id,
             source_domain: platform.domain,
             source_url: article.url,
             target_url: campaign.target_url,
-            anchor_text: this.selectRandomAnchorText(campaign.anchor_texts),
+            anchor_text: LiveAutomationEngine.selectRandomAnchorText(campaign.anchor_texts),
             placement_type: 'web2_article',
             status: 'placed',
             placed_at: new Date().toISOString(),
             verification_status: 'pending'
           });
 
-          this.logActivity({
+          LiveAutomationEngine.logActivity({
             id: crypto.randomUUID(),
             timestamp: new Date().toISOString(),
             campaign_id: campaign.id,
@@ -209,7 +210,7 @@ export class LiveAutomationEngine {
         }
         
       } catch (error: any) {
-        this.logActivity({
+        LiveAutomationEngine.logActivity({
           id: crypto.randomUUID(),
           timestamp: new Date().toISOString(),
           campaign_id: campaign.id,
@@ -220,7 +221,7 @@ export class LiveAutomationEngine {
         });
       }
       
-      await this.sleep(this.getRandomDelay(10000, 30000));
+      await LiveAutomationEngine.sleep(LiveAutomationEngine.getRandomDelay(10000, 30000));
     }
   }
 
@@ -260,7 +261,7 @@ export class LiveAutomationEngine {
     // 3. Submit the comment via the blog's API or form
     // 4. Handle moderation queues
     
-    const commentContent = this.generateContextualComment(campaign);
+    const commentContent = LiveAutomationEngine.generateContextualComment(campaign);
     
     // Simulate success/failure based on realistic factors
     const success = Math.random() > 0.3; // 70% success rate
@@ -286,8 +287,8 @@ export class LiveAutomationEngine {
     // - WordPress.com API
     // - etc.
     
-    const articleTitle = this.generateArticleTitle(campaign.keywords);
-    const articleContent = this.generateArticleContent(campaign);
+    const articleTitle = LiveAutomationEngine.generateArticleTitle(campaign.keywords);
+    const articleContent = LiveAutomationEngine.generateArticleContent(campaign);
     
     const success = Math.random() > 0.2; // 80% success rate
     
@@ -306,7 +307,7 @@ export class LiveAutomationEngine {
 
   // Verify link placement
   private static async verifyLinkPlacement(sourceUrl: string, targetUrl: string) {
-    this.logActivity({
+    LiveAutomationEngine.logActivity({
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       campaign_id: 'current',
@@ -324,10 +325,10 @@ export class LiveAutomationEngine {
       // 3. Verify the link is clickable and not nofollow
       // 4. Follow redirects to ensure target is reached
       
-      const verification = await this.checkLinkExists(sourceUrl, targetUrl);
+      const verification = await LiveAutomationEngine.checkLinkExists(sourceUrl, targetUrl);
       
       if (verification.found) {
-        this.logActivity({
+        LiveAutomationEngine.logActivity({
           id: crypto.randomUUID(),
           timestamp: new Date().toISOString(),
           campaign_id: 'current',
@@ -339,9 +340,9 @@ export class LiveAutomationEngine {
         });
         
         // Update database with verification
-        await this.updateLinkVerification(sourceUrl, 'live');
+        await LiveAutomationEngine.updateLinkVerification(sourceUrl, 'live');
       } else {
-        this.logActivity({
+        LiveAutomationEngine.logActivity({
           id: crypto.randomUUID(),
           timestamp: new Date().toISOString(),
           campaign_id: 'current',
@@ -352,11 +353,11 @@ export class LiveAutomationEngine {
           url: sourceUrl
         });
         
-        await this.updateLinkVerification(sourceUrl, 'dead');
+        await LiveAutomationEngine.updateLinkVerification(sourceUrl, 'dead');
       }
       
     } catch (error: any) {
-      this.logActivity({
+      LiveAutomationEngine.logActivity({
         id: crypto.randomUUID(),
         timestamp: new Date().toISOString(),
         campaign_id: 'current',
@@ -469,7 +470,7 @@ export class LiveAutomationEngine {
     console.log(`🔴 LIVE: ${activity.action} - ${activity.details}`);
     
     // Notify all listeners
-    this.activityCallbacks.forEach(callback => {
+    LiveAutomationEngine.activityCallbacks.forEach(callback => {
       callback(activity);
     });
   }
@@ -485,7 +486,7 @@ export class LiveAutomationEngine {
   // Forum and Social engines would be implemented similarly
   private static async startForumEngine(campaign: any) {
     // Implementation for forum posting
-    this.logActivity({
+    LiveAutomationEngine.logActivity({
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       campaign_id: campaign.id,
@@ -498,7 +499,7 @@ export class LiveAutomationEngine {
 
   private static async startSocialEngine(campaign: any) {
     // Implementation for social media posting
-    this.logActivity({
+    LiveAutomationEngine.logActivity({
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       campaign_id: campaign.id,
@@ -511,10 +512,10 @@ export class LiveAutomationEngine {
 
   // Public API for subscribing to live activities
   static subscribeToActivity(callback: (activity: LiveActivity) => void) {
-    this.activityCallbacks.add(callback);
+    LiveAutomationEngine.activityCallbacks.add(callback);
     
     return () => {
-      this.activityCallbacks.delete(callback);
+      LiveAutomationEngine.activityCallbacks.delete(callback);
     };
   }
 

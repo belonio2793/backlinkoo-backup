@@ -11,6 +11,7 @@ import type {
   CampaignResponse
 } from '@/types/automationTypes';
 import { toast } from 'sonner';
+import { getErrorMessage, logError, formatErrorForUser } from '@/utils/errorUtils';
 
 export function useDatabaseCampaignManager() {
   const { user, isAuthenticated } = useAuth();
@@ -35,13 +36,14 @@ export function useDatabaseCampaignManager() {
       } else {
         setError(result.error || 'Failed to load campaigns');
         toast.error('Failed to load campaigns', {
-          description: result.error
+          description: formatErrorForUser(result.error)
         });
       }
     } catch (err: any) {
-      setError(err.message);
+      const errorMessage = err?.message || err?.toString() || 'Unknown error occurred';
+      setError(errorMessage);
       toast.error('Error loading campaigns', {
-        description: err.message
+        description: errorMessage
       });
     } finally {
       setLoading(false);
@@ -60,7 +62,7 @@ export function useDatabaseCampaignManager() {
       } else {
         console.error('Failed to load link placements:', result.error);
         toast.error('Failed to load link placements', {
-          description: result.error || 'Unknown error occurred'
+          description: formatErrorForUser(result.error) || 'Unknown error occurred'
         });
       }
     } catch (err: any) {
@@ -86,12 +88,13 @@ export function useDatabaseCampaignManager() {
         setDashboardData(result.data || null);
       } else {
         toast.error('Failed to load dashboard data', {
-          description: result.error
+          description: formatErrorForUser(result.error)
         });
       }
     } catch (err: any) {
+      const errorMessage = err?.message || err?.toString() || 'Unknown error occurred';
       toast.error('Error loading dashboard data', {
-        description: err.message
+        description: errorMessage
       });
     }
   }, [user?.id]);
@@ -126,13 +129,14 @@ export function useDatabaseCampaignManager() {
         return result.data;
       } else {
         toast.error('Failed to create campaign', {
-          description: result.error
+          description: formatErrorForUser(result.error)
         });
         return null;
       }
     } catch (err: any) {
+      const errorMessage = err?.message || err?.toString() || 'Unknown error occurred';
       toast.error('Error creating campaign', {
-        description: err.message
+        description: errorMessage
       });
       return null;
     } finally {
@@ -161,13 +165,15 @@ export function useDatabaseCampaignManager() {
         return true;
       } else {
         toast.error('Failed to update campaign', {
-          description: result.error
+          description: formatErrorForUser(result.error)
         });
         return false;
       }
     } catch (err: any) {
+      logError('Campaign Update', err);
+      const errorMessage = formatErrorForUser(err, 'Failed to update campaign');
       toast.error('Error updating campaign', {
-        description: err.message
+        description: errorMessage
       });
       return false;
     }
@@ -193,13 +199,14 @@ export function useDatabaseCampaignManager() {
         return true;
       } else {
         toast.error('Failed to delete campaign', {
-          description: result.error
+          description: formatErrorForUser(result.error)
         });
         return false;
       }
     } catch (err: any) {
+      const errorMessage = err?.message || err?.toString() || 'Unknown error occurred';
       toast.error('Error deleting campaign', {
-        description: err.message
+        description: errorMessage
       });
       return false;
     }
@@ -232,13 +239,14 @@ export function useDatabaseCampaignManager() {
         return result.data || null;
       } else {
         toast.error('Failed to load campaign details', {
-          description: result.error
+          description: formatErrorForUser(result.error)
         });
         return null;
       }
     } catch (err: any) {
+      const errorMessage = err?.message || err?.toString() || 'Unknown error occurred';
       toast.error('Error loading campaign details', {
-        description: err.message
+        description: errorMessage
       });
       return null;
     }
@@ -267,13 +275,14 @@ export function useDatabaseCampaignManager() {
         return result.data;
       } else {
         toast.error('Failed to create link placement', {
-          description: result.error
+          description: formatErrorForUser(result.error)
         });
         return null;
       }
     } catch (err: any) {
+      const errorMessage = err?.message || err?.toString() || 'Unknown error occurred';
       toast.error('Error creating link placement', {
-        description: err.message
+        description: errorMessage
       });
       return null;
     }
