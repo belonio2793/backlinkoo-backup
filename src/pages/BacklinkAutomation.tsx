@@ -448,10 +448,26 @@ export default function BacklinkAutomation() {
         {isAuthenticated && activeCampaignCount > 0 && (
           <RuntimeReporting
             onToggleCampaign={handleToggleCampaign}
-            onRefreshData={() => {
-              // Refresh campaigns and check tables
-              checkAutomationTables();
-              window.location.reload(); // Simple refresh for now
+            onRefreshData={async () => {
+              // Clear all caches and refresh data
+              const { stableCampaignMetrics } = await import('@/services/stableCampaignMetrics');
+              stableCampaignMetrics.clearCache();
+
+              // Refresh campaigns data in the hook
+              try {
+                // Force refresh the campaign manager hook data
+                window.dispatchEvent(new Event('campaign-data-refresh'));
+              } catch (error) {
+                console.error('Error refreshing campaign data:', error);
+              }
+
+              // Check automation tables
+              await checkAutomationTables();
+
+              // Force a complete reload to ensure sync
+              setTimeout(() => {
+                window.location.reload();
+              }, 500);
             }}
           />
         )}
