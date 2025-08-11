@@ -14,19 +14,8 @@ import './utils/testCampaignFixes'
 import './utils/checkSchemaExecution'
 // Auto-fix missing columns
 import './utils/fixMissingColumns'
-// Automatic database migration
-import { runAutomaticMigration } from './utils/automaticMigration'
-
-// Run migration on app start
-setTimeout(() => {
-  runAutomaticMigration().then(success => {
-    if (success) {
-      console.log('🎉 Database is ready for campaign operations');
-    } else {
-      console.log('⚠️ Manual database fix required - see console instructions');
-    }
-  });
-}, 1000);
+// Direct database fix
+import './utils/directDatabaseFix'
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
 
