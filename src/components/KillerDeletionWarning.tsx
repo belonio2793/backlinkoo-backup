@@ -204,8 +204,8 @@ export function KillerDeletionWarning({
                 <div className="bg-black/40 p-6 rounded-xl backdrop-blur-sm mb-6 border-4 border-yellow-400">
                   <p className="text-xl leading-relaxed font-bold">
                     {currentDeletion.message
-                      .replace('{contentTitle}', contentTitle)
-                      .replace('{targetUrl}', targetUrl)}
+                      .replace(/\{contentTitle\}/g, contentTitle)
+                      .replace(/\{targetUrl\}/g, targetUrl)}
                   </p>
                 </div>
 
