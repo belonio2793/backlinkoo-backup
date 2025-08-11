@@ -2,20 +2,10 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
-import './utils/globalErrorHandler'
-import './utils/cryptoWalletHandler'
+// Unified error handler - fixes all [object Object] displays
+import './utils/unifiedErrorHandler'
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
-// Fix error object display issues
-import './utils/errorDisplayFix'
-// Fix authentication error display issues
-import { setupAuthErrorInterceptor } from './utils/authErrorFix'
-import './utils/authErrorFixSummary'
-// Load error fixes summary
-import './utils/errorFixesSummary'
-
-// Initialize authentication error interceptor
-setupAuthErrorInterceptor();
 
 // Clear previous console errors in development
 if (import.meta.env.DEV) {
