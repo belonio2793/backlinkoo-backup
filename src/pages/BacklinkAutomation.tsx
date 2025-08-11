@@ -218,7 +218,9 @@ export default function BacklinkAutomation() {
             <Card className="border-0 shadow-lg">
               <CardContent className="pt-6">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600">{activeCampaignCount}</div>
+                  <div className="text-3xl font-bold text-blue-600">
+                    {isAuthenticated ? activeCampaignCount : '—'}
+                  </div>
                   <div className="text-sm text-gray-600">Active Campaigns</div>
                 </div>
               </CardContent>
@@ -228,7 +230,9 @@ export default function BacklinkAutomation() {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-green-600">
-                    {limit === Infinity ? totalLinksBuilt : `${totalLinksBuilt}/${limit}`}
+                    {isAuthenticated ? (
+                      limit === Infinity ? totalLinksBuilt : `${totalLinksBuilt}/${limit}`
+                    ) : '—'}
                   </div>
                   <div className="text-sm text-gray-600">Links Built</div>
                 </div>
@@ -239,12 +243,21 @@ export default function BacklinkAutomation() {
               <CardContent className="pt-6">
                 <div className="text-center">
                   <div className="flex items-center justify-center gap-2">
-                    {isPremium ? (
-                      <Crown className="h-5 w-5 text-purple-600" />
+                    {isAuthenticated ? (
+                      <>
+                        {isPremium ? (
+                          <Crown className="h-5 w-5 text-purple-600" />
+                        ) : (
+                          <Shield className="h-5 w-5 text-blue-600" />
+                        )}
+                        <span className="text-lg font-semibold text-gray-900">{plan}</span>
+                      </>
                     ) : (
-                      <Shield className="h-5 w-5 text-blue-600" />
+                      <>
+                        <Shield className="h-5 w-5 text-gray-400" />
+                        <span className="text-lg font-semibold text-gray-400">Guest</span>
+                      </>
                     )}
-                    <span className="text-lg font-semibold text-gray-900">{plan}</span>
                   </div>
                   <div className="text-sm text-gray-600">Current Plan</div>
                 </div>
