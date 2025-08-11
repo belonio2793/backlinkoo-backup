@@ -181,7 +181,7 @@ export class LiveAutomationEngine {
           url: `https://${platform.domain}`
         });
 
-        const article = await this.createWeb2Article(campaign, platform);
+        const article = await LiveAutomationEngine.createWeb2Article(campaign, platform);
         
         if (article.success) {
           await LiveAutomationEngine.saveLinkPlacement({
@@ -221,7 +221,7 @@ export class LiveAutomationEngine {
         });
       }
       
-      await this.sleep(this.getRandomDelay(10000, 30000));
+      await LiveAutomationEngine.sleep(LiveAutomationEngine.getRandomDelay(10000, 30000));
     }
   }
 
@@ -261,7 +261,7 @@ export class LiveAutomationEngine {
     // 3. Submit the comment via the blog's API or form
     // 4. Handle moderation queues
     
-    const commentContent = this.generateContextualComment(campaign);
+    const commentContent = LiveAutomationEngine.generateContextualComment(campaign);
     
     // Simulate success/failure based on realistic factors
     const success = Math.random() > 0.3; // 70% success rate
@@ -287,8 +287,8 @@ export class LiveAutomationEngine {
     // - WordPress.com API
     // - etc.
     
-    const articleTitle = this.generateArticleTitle(campaign.keywords);
-    const articleContent = this.generateArticleContent(campaign);
+    const articleTitle = LiveAutomationEngine.generateArticleTitle(campaign.keywords);
+    const articleContent = LiveAutomationEngine.generateArticleContent(campaign);
     
     const success = Math.random() > 0.2; // 80% success rate
     
@@ -325,7 +325,7 @@ export class LiveAutomationEngine {
       // 3. Verify the link is clickable and not nofollow
       // 4. Follow redirects to ensure target is reached
       
-      const verification = await this.checkLinkExists(sourceUrl, targetUrl);
+      const verification = await LiveAutomationEngine.checkLinkExists(sourceUrl, targetUrl);
       
       if (verification.found) {
         LiveAutomationEngine.logActivity({
@@ -340,7 +340,7 @@ export class LiveAutomationEngine {
         });
         
         // Update database with verification
-        await this.updateLinkVerification(sourceUrl, 'live');
+        await LiveAutomationEngine.updateLinkVerification(sourceUrl, 'live');
       } else {
         LiveAutomationEngine.logActivity({
           id: crypto.randomUUID(),
@@ -353,7 +353,7 @@ export class LiveAutomationEngine {
           url: sourceUrl
         });
         
-        await this.updateLinkVerification(sourceUrl, 'dead');
+        await LiveAutomationEngine.updateLinkVerification(sourceUrl, 'dead');
       }
       
     } catch (error: any) {
@@ -470,7 +470,7 @@ export class LiveAutomationEngine {
     console.log(`🔴 LIVE: ${activity.action} - ${activity.details}`);
     
     // Notify all listeners
-    this.activityCallbacks.forEach(callback => {
+    LiveAutomationEngine.activityCallbacks.forEach(callback => {
       callback(activity);
     });
   }
@@ -512,10 +512,10 @@ export class LiveAutomationEngine {
 
   // Public API for subscribing to live activities
   static subscribeToActivity(callback: (activity: LiveActivity) => void) {
-    this.activityCallbacks.add(callback);
+    LiveAutomationEngine.activityCallbacks.add(callback);
     
     return () => {
-      this.activityCallbacks.delete(callback);
+      LiveAutomationEngine.activityCallbacks.delete(callback);
     };
   }
 
