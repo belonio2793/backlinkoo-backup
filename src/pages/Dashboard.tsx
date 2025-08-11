@@ -189,7 +189,7 @@ const TrialBlogPostsDisplay = ({ user }: { user: User | null }) => {
           setError('NOT_FOUND');
         }
       } else {
-        console.log(`✅ Successfully loaded ${finalPosts.length} blog posts`);
+        console.log(`��� Successfully loaded ${finalPosts.length} blog posts`);
         setError(null);
 
         // Show success notification on first load
@@ -1296,7 +1296,7 @@ const Dashboard = () => {
                 className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary px-4 py-3 relative"
               >
                 <Sparkles className="h-4 w-4 sm:mr-2" />
-                <span className="hidden sm:inline">Trial</span>
+                <span className="hidden sm:inline">Community Blog</span>
                 <div className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full"></div>
               </Button>
               <Button
