@@ -120,6 +120,18 @@ export class TextSpacingFixer {
         text = text.replace(/(deleted?)(in)/gi, '$1 $2');
         text = text.replace(/(\d+h)(\d+m)/gi, '$1 $2');
         text = text.replace(/(remaining)(if)/gi, '$1 $2');
+
+        // Fix specific patterns seen in the modal
+        text = text.replace(/"([^"]+)"will/gi, '"$1" will');
+        text = text.replace(/in(\d+h)/gi, 'in $1');
+        text = text.replace(/(\d+m)(remaining)/gi, '$1 $2');
+        text = text.replace(/(remaining)([a-z])/gi, '$1 $2');
+
+        // Ultra-aggressive fix for any missing spaces
+        text = text.replace(/([a-z])([a-z])([A-Z])/g, '$1$2 $3');
+        text = text.replace(/(["])([a-z])/gi, '$1 $2');
+        text = text.replace(/([a-z])(\d)/gi, '$1 $2');
+        text = text.replace(/(\d)([a-z])/gi, '$1 $2');
         
         if (text !== node.textContent) {
           node.textContent = text;
