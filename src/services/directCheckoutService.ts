@@ -163,7 +163,12 @@ class DirectCheckoutService {
     console.log('📡 Response status:', response.status);
 
     if (!response.ok) {
-      const errorText = await response.text();
+      let errorText: string;
+      try {
+        errorText = await response.text();
+      } catch {
+        errorText = `HTTP ${response.status} ${response.statusText}`;
+      }
       console.error('❌ Premium checkout failed:', {
         status: response.status,
         statusText: response.statusText,
