@@ -27,6 +27,16 @@ export function getErrorMessage(error: any): string {
     return error.details;
   }
 
+  // Try to get error property (common in API responses)
+  if (error.error && typeof error.error === 'string') {
+    return error.error;
+  }
+
+  // Try to get data.error (nested error structures)
+  if (error.data && error.data.error && typeof error.data.error === 'string') {
+    return error.data.error;
+  }
+
   // Try toString method
   if (typeof error.toString === 'function') {
     const stringified = error.toString();
@@ -35,11 +45,37 @@ export function getErrorMessage(error: any): string {
     }
   }
 
-  // Try to stringify if it's an object with useful properties
-  if (typeof error === 'object') {
+  // Try to extract useful information from object properties
+  if (typeof error === 'object' && error !== null) {
+    const keys = Object.keys(error);
+    if (keys.length > 0) {
+      // Look for common error properties
+      const errorKeys = ['message', 'error', 'details', 'description', 'reason'];
+      for (const key of errorKeys) {
+        if (error[key] && typeof error[key] === 'string') {
+          return error[key];
+        }
+      }
+
+      // If no standard error property, try to build a meaningful message
+      const meaningfulKeys = keys.filter(key =>
+        !['stack', 'constructor', '__proto__', 'name'].includes(key)
+      ).slice(0, 3);
+
+      if (meaningfulKeys.length > 0) {
+        const parts = meaningfulKeys.map(key => {
+          const value = error[key];
+          if (typeof value === 'object') return `${key}: [object]`;
+          return `${key}: ${value}`;
+        });
+        return `Error: ${parts.join(', ')}`;
+      }
+    }
+
+    // Try to stringify if it's an object with useful properties
     try {
       const errorObj = JSON.stringify(error, null, 2);
-      if (errorObj !== '{}') {
+      if (errorObj !== '{}' && errorObj !== 'null') {
         return `Error details: ${errorObj}`;
       }
     } catch {
