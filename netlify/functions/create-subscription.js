@@ -127,6 +127,10 @@ async function createStripeSubscription(subscriptionData, email, originUrl) {
 }
 
 exports.handler = async (event, context) => {
+  console.log('🚀 Subscription function called');
+  console.log('📝 Method:', event.httpMethod);
+  console.log('📄 Body:', event.body);
+
   // CORS headers
   const headers = {
     "Content-Type": "application/json",
@@ -137,10 +141,12 @@ exports.handler = async (event, context) => {
 
   // Handle preflight request
   if (event.httpMethod === 'OPTIONS') {
+    console.log('✅ Handling OPTIONS request');
     return { statusCode: 200, headers, body: '' };
   }
 
   if (event.httpMethod !== 'POST') {
+    console.log('❌ Method not allowed:', event.httpMethod);
     return {
       statusCode: 405,
       headers,
@@ -162,8 +168,11 @@ exports.handler = async (event, context) => {
     const body = JSON.parse(event.body || '{}');
     const { plan, isGuest, guestEmail, paymentMethod = 'stripe' } = body;
 
+    console.log('📦 Parsed request:', { plan, isGuest, guestEmail, paymentMethod });
+
     // Input validation
     if (!plan || !['monthly', 'yearly'].includes(plan)) {
+      console.log('❌ Invalid plan:', plan);
       return {
         statusCode: 400,
         headers,
@@ -199,7 +208,8 @@ exports.handler = async (event, context) => {
     
     const result = await createStripeSubscription(body, email, originUrl);
 
-    console.log(`Subscription initiated: ${plan} - ${email}`);
+    console.log(`✅ Subscription initiated: ${plan} - ${email}`);
+    console.log('🔗 Checkout URL:', result.url);
 
     return {
       statusCode: 200,
