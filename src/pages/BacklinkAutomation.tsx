@@ -14,10 +14,16 @@ import {
   Pause,
   Activity,
   Zap,
-  Target
+  Target,
+  Crown,
+  AlertTriangle
 } from 'lucide-react';
 import { CampaignForm } from '@/components/automation/CampaignForm';
+import { AutomationHeader } from '@/components/automation/AutomationHeader';
+import { AutomationFooter } from '@/components/automation/AutomationFooter';
 import { useCampaignManager } from '@/hooks/useCampaignManager';
+import { useLinkTracker } from '@/hooks/useLinkTracker';
+import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
 // Individual Engine Components
@@ -25,7 +31,8 @@ const BlogCommentsEngine = ({
   campaigns, 
   onCreateCampaign, 
   onToggleCampaign, 
-  onDeleteCampaign 
+  onDeleteCampaign,
+  canCreateLinks
 }: any) => (
   <div className="space-y-6">
     <Card>
@@ -33,6 +40,12 @@ const BlogCommentsEngine = ({
         <CardTitle className="flex items-center gap-2">
           <MessageSquare className="h-5 w-5" />
           Blog Comments Engine
+          {!canCreateLinks && (
+            <Badge variant="destructive" className="ml-2">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              Limit Reached
+            </Badge>
+          )}
         </CardTitle>
         <CardDescription>
           Automated blog comment posting system for building high-quality contextual backlinks
@@ -57,6 +70,16 @@ const BlogCommentsEngine = ({
           This engine finds relevant blogs accepting comments and posts contextual, valuable comments 
           with your backlinks integrated naturally.
         </p>
+        {!canCreateLinks && (
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+            <div className="flex items-center gap-2 text-orange-700">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                Link building limit reached. Upgrade to Premium for unlimited backlinks.
+              </span>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
 
@@ -75,7 +98,8 @@ const Web2PlatformsEngine = ({
   campaigns, 
   onCreateCampaign, 
   onToggleCampaign, 
-  onDeleteCampaign 
+  onDeleteCampaign,
+  canCreateLinks
 }: any) => (
   <div className="space-y-6">
     <Card>
@@ -83,6 +107,12 @@ const Web2PlatformsEngine = ({
         <CardTitle className="flex items-center gap-2">
           <Globe className="h-5 w-5" />
           Web 2.0 Platforms Engine
+          {!canCreateLinks && (
+            <Badge variant="destructive" className="ml-2">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              Limit Reached
+            </Badge>
+          )}
         </CardTitle>
         <CardDescription>
           Create and manage high-authority content on Web 2.0 platforms for powerful backlinks
@@ -107,6 +137,16 @@ const Web2PlatformsEngine = ({
           Leverages high-authority Web 2.0 platforms like WordPress.com, Blogger, Medium, and others 
           to create content with embedded backlinks.
         </p>
+        {!canCreateLinks && (
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+            <div className="flex items-center gap-2 text-orange-700">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                Link building limit reached. Upgrade to Premium for unlimited backlinks.
+              </span>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
 
@@ -125,7 +165,8 @@ const ForumProfilesEngine = ({
   campaigns, 
   onCreateCampaign, 
   onToggleCampaign, 
-  onDeleteCampaign 
+  onDeleteCampaign,
+  canCreateLinks
 }: any) => (
   <div className="space-y-6">
     <Card>
@@ -133,6 +174,12 @@ const ForumProfilesEngine = ({
         <CardTitle className="flex items-center gap-2">
           <Users className="h-5 w-5" />
           Forum Profiles Engine
+          {!canCreateLinks && (
+            <Badge variant="destructive" className="ml-2">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              Limit Reached
+            </Badge>
+          )}
         </CardTitle>
         <CardDescription>
           Build authority through strategic forum profile creation and intelligent engagement
@@ -157,6 +204,16 @@ const ForumProfilesEngine = ({
           Creates profiles on relevant forums and community sites, building authority through 
           valuable contributions while naturally incorporating backlinks.
         </p>
+        {!canCreateLinks && (
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+            <div className="flex items-center gap-2 text-orange-700">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                Link building limit reached. Upgrade to Premium for unlimited backlinks.
+              </span>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
 
@@ -175,7 +232,8 @@ const SocialMediaEngine = ({
   campaigns, 
   onCreateCampaign, 
   onToggleCampaign, 
-  onDeleteCampaign 
+  onDeleteCampaign,
+  canCreateLinks
 }: any) => (
   <div className="space-y-6">
     <Card>
@@ -183,6 +241,12 @@ const SocialMediaEngine = ({
         <CardTitle className="flex items-center gap-2">
           <Share2 className="h-5 w-5" />
           Social Media Engine
+          {!canCreateLinks && (
+            <Badge variant="destructive" className="ml-2">
+              <AlertTriangle className="h-3 w-3 mr-1" />
+              Limit Reached
+            </Badge>
+          )}
         </CardTitle>
         <CardDescription>
           Leverage social media platforms for brand awareness and strategic backlink opportunities
@@ -207,6 +271,16 @@ const SocialMediaEngine = ({
           Automates social media posting across multiple platforms with strategic content that 
           drives traffic and builds social signals for SEO.
         </p>
+        {!canCreateLinks && (
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4">
+            <div className="flex items-center gap-2 text-orange-700">
+              <AlertTriangle className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                Link building limit reached. Upgrade to Premium for unlimited backlinks.
+              </span>
+            </div>
+          </div>
+        )}
       </CardContent>
     </Card>
 
@@ -298,53 +372,68 @@ const SystemSettings = () => (
 
 export default function BacklinkAutomation() {
   const [activeTab, setActiveTab] = useState('blog-comments');
+  const { isPremium } = useAuth();
   const {
     campaigns,
     createCampaign,
     toggleCampaign,
     deleteCampaign,
-    getTotalLinksBuilt,
     getActiveCampaignCount
   } = useCampaignManager();
 
-  const totalLinks = getTotalLinksBuilt();
+  const {
+    totalLinksBuilt,
+    canCreateLinks,
+    addLinks,
+    canCreateMoreLinks,
+    isNearLimit,
+    hasReachedLimit
+  } = useLinkTracker();
+
   const activeCampaignCount = getActiveCampaignCount();
 
   const handleCreateCampaign = (campaignData: any) => {
+    // Check if user can create campaigns (based on link limits)
+    if (!canCreateMoreLinks(1)) {
+      toast.error('Cannot Create Campaign', {
+        description: 'You\'ve reached your link building limit. Upgrade to Premium for unlimited campaigns.'
+      });
+      return;
+    }
+
     const newCampaign = createCampaign({
       ...campaignData,
       engine: campaignData.engine
     });
 
     if (campaignData.status === 'active') {
-      toast.success('Campaign Started!', {
-        description: `${newCampaign.name} is now actively building backlinks`
-      });
+      // Simulate initial link creation (in real implementation, this would be handled by the actual engines)
+      setTimeout(() => {
+        if (canCreateMoreLinks(1)) {
+          addLinks(1); // Add 1 link when campaign starts
+        }
+      }, 2000);
     }
+  };
+
+  const handleUpgrade = () => {
+    toast.info('Upgrade Feature', {
+      description: 'Premium upgrade functionality coming soon!'
+    });
+  };
+
+  const handleViewReports = () => {
+    setActiveTab('reporting');
   };
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Backlink Automation System</h1>
-        <p className="text-muted-foreground">
-          Advanced multi-engine automation platform for intelligent backlink building across the web
-        </p>
-        <div className="flex items-center gap-4 mt-4">
-          <Badge variant="outline" className="flex items-center gap-1">
-            <Activity className="h-3 w-3" />
-            System Online
-          </Badge>
-          <Badge variant={activeCampaignCount > 0 ? "default" : "secondary"} className="flex items-center gap-1">
-            <Zap className="h-3 w-3" />
-            {activeCampaignCount} Active Campaign{activeCampaignCount !== 1 ? 's' : ''}
-          </Badge>
-          <Badge variant="secondary" className="flex items-center gap-1">
-            <Target className="h-3 w-3" />
-            {totalLinks} Total Links
-          </Badge>
-        </div>
-      </div>
+      {/* Header */}
+      <AutomationHeader
+        totalLinksBuilt={totalLinksBuilt}
+        activeCampaigns={activeCampaignCount}
+        onUpgrade={handleUpgrade}
+      />
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-6">
@@ -381,6 +470,7 @@ export default function BacklinkAutomation() {
               onCreateCampaign={handleCreateCampaign}
               onToggleCampaign={toggleCampaign}
               onDeleteCampaign={deleteCampaign}
+              canCreateLinks={canCreateLinks}
             />
           </TabsContent>
 
@@ -390,6 +480,7 @@ export default function BacklinkAutomation() {
               onCreateCampaign={handleCreateCampaign}
               onToggleCampaign={toggleCampaign}
               onDeleteCampaign={deleteCampaign}
+              canCreateLinks={canCreateLinks}
             />
           </TabsContent>
 
@@ -399,6 +490,7 @@ export default function BacklinkAutomation() {
               onCreateCampaign={handleCreateCampaign}
               onToggleCampaign={toggleCampaign}
               onDeleteCampaign={deleteCampaign}
+              canCreateLinks={canCreateLinks}
             />
           </TabsContent>
 
@@ -408,13 +500,14 @@ export default function BacklinkAutomation() {
               onCreateCampaign={handleCreateCampaign}
               onToggleCampaign={toggleCampaign}
               onDeleteCampaign={deleteCampaign}
+              canCreateLinks={canCreateLinks}
             />
           </TabsContent>
 
           <TabsContent value="reporting">
             <ReportingDashboard
               campaigns={campaigns}
-              totalLinks={totalLinks}
+              totalLinks={totalLinksBuilt}
             />
           </TabsContent>
 
@@ -423,6 +516,14 @@ export default function BacklinkAutomation() {
           </TabsContent>
         </div>
       </Tabs>
+
+      {/* Footer */}
+      <AutomationFooter
+        totalLinksBuilt={totalLinksBuilt}
+        activeCampaigns={activeCampaignCount}
+        onViewReports={handleViewReports}
+        onUpgrade={handleUpgrade}
+      />
     </div>
   );
 }
