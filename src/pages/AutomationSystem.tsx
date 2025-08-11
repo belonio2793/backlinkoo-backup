@@ -23,24 +23,15 @@ import {
   AlertTriangle,
   TrendingUp,
   RefreshCw,
-  Zap
+  Zap,
+  ArrowRight
 } from 'lucide-react';
-import { AutomationSystemControls } from '@/components/automation/AutomationSystemControls';
-import { CampaignManager } from '@/components/automation/CampaignManager';
-import { EngineStatus } from '@/components/automation/EngineStatus';
-import { QueueMonitor } from '@/components/automation/QueueMonitor';
-import { SystemLogs } from '@/components/automation/SystemLogs';
-import { SafetyControls } from '@/components/automation/SafetyControls';
-import { ConfigurationPanel } from '@/components/automation/ConfigurationPanel';
-import { PerformanceMetrics } from '@/components/automation/PerformanceMetrics';
 import { NavigationHeader } from '@/components/shared/NavigationHeader';
+import { useNavigate } from 'react-router-dom';
 
 export default function AutomationSystem() {
+  const navigate = useNavigate();
   const [systemStatus, setSystemStatus] = useState('stopped');
-  const [activeCampaigns, setActiveCampaigns] = useState(0);
-  const [totalTasks, setTotalTasks] = useState(0);
-  const [completedTasks, setCompletedTasks] = useState(0);
-  const [failedTasks, setFailedTasks] = useState(0);
   const [systemMetrics, setSystemMetrics] = useState({
     uptime: 0,
     successRate: 98.2,
@@ -150,126 +141,145 @@ export default function AutomationSystem() {
       <NavigationHeader />
       <div className="p-6">
         <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-              <Zap className="h-8 w-8 text-blue-600" />
-              Automation System
-            </h1>
-            <p className="text-gray-600 mt-1">Enterprise-grade backlinking automation platform with advanced safety controls</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <Badge variant={systemStatus === 'running' ? 'default' : 'secondary'} className="px-3 py-1">
-              <div className={`w-2 h-2 rounded-full mr-2 ${systemStatus === 'running' ? 'bg-green-400' : 'bg-gray-400'}`} />
-              System {systemStatus === 'running' ? 'Running' : 'Stopped'}
-            </Badge>
-            <Button
-              onClick={() => setSystemStatus(systemStatus === 'running' ? 'stopped' : 'running')}
-              variant={systemStatus === 'running' ? 'destructive' : 'default'}
-              className="flex items-center gap-2"
-            >
-              {systemStatus === 'running' ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-              {systemStatus === 'running' ? 'Stop System' : 'Start System'}
-            </Button>
-          </div>
-        </div>
-
-        {/* System Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="border-l-4 border-l-blue-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Campaigns</CardTitle>
-              <Activity className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">3</div>
-              <p className="text-xs text-muted-foreground">
-                +2 from last week
-              </p>
+          {/* Migration Notice */}
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-blue-900 mb-2">
+                    🚀 New Automation System Available!
+                  </h3>
+                  <p className="text-blue-700">
+                    We've rebuilt the automation system with improved campaign management, 
+                    better tracking, and enhanced user experience.
+                  </p>
+                </div>
+                <Button 
+                  onClick={() => navigate('/automation')}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Try New System
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
             </CardContent>
           </Card>
 
-          <Card className="border-l-4 border-l-green-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{systemMetrics.successRate}%</div>
-              <p className="text-xs text-muted-foreground">
-                +2.1% from yesterday
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-yellow-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">286</div>
-              <p className="text-xs text-muted-foreground">
-                +45 tasks queued
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="border-l-4 border-l-purple-500">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Actions/Hour</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{systemMetrics.actionsPerHour}</div>
-              <p className="text-xs text-muted-foreground">
-                Within safety limits
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Dashboard Tabs */}
-        <Tabs defaultValue="overview" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
-            <TabsTrigger value="engines">Engines</TabsTrigger>
-            <TabsTrigger value="queues">Queues</TabsTrigger>
-            <TabsTrigger value="logs">Logs</TabsTrigger>
-            <TabsTrigger value="safety">Safety</TabsTrigger>
-            <TabsTrigger value="config">Config</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            {/* Engine Status Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {engines.map((engine) => {
-                const IconComponent = engine.icon;
-                return (
-                  <Card key={engine.id} className="hover:shadow-lg transition-shadow">
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <div className="flex items-center gap-2">
-                        <IconComponent className="h-5 w-5 text-blue-600" />
-                        <CardTitle className="text-sm font-medium">{engine.name}</CardTitle>
-                      </div>
-                      <div className={`w-3 h-3 rounded-full ${getStatusColor(engine.status)}`} />
-                    </CardHeader>
-                    <CardContent>
-                      <div className="space-y-2">
-                        <p className="text-xs text-muted-foreground">{engine.description}</p>
-                        <div className="flex justify-between text-sm">
-                          <span>Tasks: {engine.taskCount}</span>
-                          <span className="text-green-600">{engine.successRate}%</span>
-                        </div>
-                        <Progress value={engine.successRate} className="h-2" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <Zap className="h-8 w-8 text-blue-600" />
+                Automation System (Legacy)
+              </h1>
+              <p className="text-gray-600 mt-1">Enterprise-grade backlinking automation platform with advanced safety controls</p>
             </div>
+            <div className="flex items-center gap-3">
+              <Badge variant={systemStatus === 'running' ? 'default' : 'secondary'} className="px-3 py-1">
+                <div className={`w-2 h-2 rounded-full mr-2 ${systemStatus === 'running' ? 'bg-green-400' : 'bg-gray-400'}`} />
+                System {systemStatus === 'running' ? 'Running' : 'Stopped'}
+              </Badge>
+              <Button
+                onClick={() => setSystemStatus(systemStatus === 'running' ? 'stopped' : 'running')}
+                variant={systemStatus === 'running' ? 'destructive' : 'default'}
+                className="flex items-center gap-2"
+              >
+                {systemStatus === 'running' ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                {systemStatus === 'running' ? 'Stop System' : 'Start System'}
+              </Button>
+            </div>
+          </div>
+
+          {/* System Overview Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <Card className="border-l-4 border-l-blue-500">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Active Campaigns</CardTitle>
+                <Activity className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">3</div>
+                <p className="text-xs text-muted-foreground">
+                  +2 from last week
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-l-4 border-l-green-500">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Success Rate</CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{systemMetrics.successRate}%</div>
+                <p className="text-xs text-muted-foreground">
+                  +2.1% from yesterday
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-l-4 border-l-yellow-500">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Total Tasks</CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">286</div>
+                <p className="text-xs text-muted-foreground">
+                  +45 tasks queued
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-l-4 border-l-purple-500">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">Actions/Hour</CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">{systemMetrics.actionsPerHour}</div>
+                <p className="text-xs text-muted-foreground">
+                  Within safety limits
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Main Dashboard */}
+          <div className="space-y-6">
+            {/* Engine Status Grid */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Engine Status Overview</CardTitle>
+                <CardDescription>Current status and performance of all automation engines</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {engines.map((engine) => {
+                    const IconComponent = engine.icon;
+                    return (
+                      <div key={engine.id} className="border rounded-lg p-4 hover:shadow-lg transition-shadow">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <IconComponent className="h-5 w-5 text-blue-600" />
+                            <h3 className="text-sm font-medium">{engine.name}</h3>
+                          </div>
+                          <div className={`w-3 h-3 rounded-full ${getStatusColor(engine.status)}`} />
+                        </div>
+                        <div className="space-y-2">
+                          <p className="text-xs text-muted-foreground">{engine.description}</p>
+                          <div className="flex justify-between text-sm">
+                            <span>Tasks: {engine.taskCount}</span>
+                            <span className="text-green-600">{engine.successRate}%</span>
+                          </div>
+                          <Progress value={engine.successRate} className="h-2" />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
 
             {/* Recent Activity */}
             <Card>
@@ -302,42 +312,31 @@ export default function AutomationSystem() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          </div>
 
-          <TabsContent value="campaigns">
-            <CampaignManager />
-          </TabsContent>
+          {/* System Alerts */}
+          {systemStatus === 'stopped' && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                The automation system is currently stopped. Click "Start System" to begin processing campaigns.
+              </AlertDescription>
+            </Alert>
+          )}
 
-          <TabsContent value="engines">
-            <EngineStatus engines={engines} />
-          </TabsContent>
-
-          <TabsContent value="queues">
-            <QueueMonitor />
-          </TabsContent>
-
-          <TabsContent value="logs">
-            <SystemLogs />
-          </TabsContent>
-
-          <TabsContent value="safety">
-            <SafetyControls />
-          </TabsContent>
-
-          <TabsContent value="config">
-            <ConfigurationPanel />
-          </TabsContent>
-        </Tabs>
-
-        {/* System Alerts */}
-        {systemStatus === 'stopped' && (
-          <Alert>
-            <AlertTriangle className="h-4 w-4" />
-            <AlertDescription>
-              The automation system is currently stopped. Click "Start System" to begin processing campaigns.
+          {/* Deprecation Notice */}
+          <Alert className="border-orange-200 bg-orange-50">
+            <AlertTriangle className="h-4 w-4 text-orange-600" />
+            <AlertDescription className="text-orange-700">
+              <strong>Notice:</strong> This legacy automation system will be deprecated soon. 
+              Please migrate to the new system at <button 
+                onClick={() => navigate('/automation')}
+                className="underline hover:no-underline font-medium"
+              >
+                /automation
+              </button> for the latest features and improved performance.
             </AlertDescription>
           </Alert>
-        )}
         </div>
       </div>
     </div>
