@@ -547,6 +547,11 @@ export function BeautifulBlogPost() {
           });
         }
       } catch (error: any) {
+        console.error('Error claiming post after auth:', {
+          error: error?.message || error,
+          slug,
+          userId: user?.id
+        });
         toast({
           title: "Error",
           description: "An unexpected error occurred while claiming the post",
