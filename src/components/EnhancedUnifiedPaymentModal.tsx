@@ -285,8 +285,51 @@ export function EnhancedUnifiedPaymentModal({
       }
 
       if (result.success && result.url) {
-        // Open payment provider in new window
-        window.open(result.url, '_blank');
+        // Open payment provider in new window with enhanced features
+        const paymentWindow = window.open(
+          result.url,
+          '_blank',
+          'width=800,height=900,scrollbars=yes,resizable=yes,status=yes,toolbar=no,menubar=no,location=yes'
+        );
+
+        // Check if popup was blocked
+        if (!paymentWindow || paymentWindow.closed || typeof paymentWindow.closed === 'undefined') {
+          toast({
+            title: "Popup Blocked",
+            description: "Please allow popups for this site and try again, or click the link below to complete payment.",
+            variant: "destructive"
+          });
+
+          // Provide fallback - redirect in same window
+          setTimeout(() => {
+            window.location.href = result.url!;
+          }, 3000);
+          return;
+        }
+
+        // Show success message about new window
+        toast({
+          title: "Opening Stripe Checkout",
+          description: "A new window has opened for secure payment processing. Complete your payment there to activate your subscription.",
+        });
+
+        // Monitor the payment window
+        const checkClosed = setInterval(() => {
+          if (paymentWindow.closed) {
+            clearInterval(checkClosed);
+            // Window closed - user might have completed payment
+            toast({
+              title: "Payment Window Closed",
+              description: "If you completed your payment, your subscription will be activated shortly. Please refresh the page in a moment.",
+            });
+          }
+        }, 1000);
+
+        // Clean up interval after 5 minutes
+        setTimeout(() => {
+          clearInterval(checkClosed);
+        }, 300000);
+
         onClose(); // Close the modal
         return;
       } else if (!result.success) {
