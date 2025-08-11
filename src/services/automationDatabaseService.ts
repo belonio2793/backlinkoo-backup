@@ -491,7 +491,12 @@ export class AutomationDatabaseService {
         stack: error.stack,
         error: error
       });
-      return { success: false, error: error.message || 'Unexpected error fetching user quota' };
+      // Try fallback on any error
+      try {
+        return await FallbackAutomationService.getUserQuota(userId);
+      } catch {
+        return { success: false, error: error.message || 'Unexpected error fetching user quota' };
+      }
     }
   }
 
