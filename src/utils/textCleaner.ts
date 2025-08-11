@@ -194,7 +194,7 @@ export class AutoCleaner {
           
           if (originalValue !== cleanedValue) {
             input.value = cleanedValue;
-            console.log('Input value cleaned:', { original: originalValue, cleaned: cleanedValue });
+            console.log('🧹 Input value cleaned - removed � and other problematic chars:', { original: originalValue, cleaned: cleanedValue });
           }
         }
       });
