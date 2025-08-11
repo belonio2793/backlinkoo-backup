@@ -61,7 +61,9 @@ export function DashboardTrialPosts({ user }: DashboardTrialPostsProps) {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
-    loadPosts();
+    loadPosts().catch(error => {
+      console.error('Error in initial loadPosts:', error);
+    });
   }, []);
 
   // Process any pending claim intent after user login
