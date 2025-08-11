@@ -569,14 +569,23 @@ export function EnhancedUnifiedPaymentModal({
 
 
       {/* Continue Button */}
-      <Button 
+      <Button
         onClick={handleContinue}
         className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
         size="lg"
         disabled={!getFinalSelection() || (checkoutType === 'guest' && !guestEmail)}
       >
-        Continue to Payment
-        <ArrowRight className="ml-2 h-4 w-4" />
+        {paymentType === 'premium' ? (
+          <>
+            <Crown className="mr-2 h-4 w-4" />
+            Upgrade to Premium
+          </>
+        ) : (
+          <>
+            Purchase Credits
+            <ArrowRight className="ml-2 h-4 w-4" />
+          </>
+        )}
       </Button>
     </div>
   );
