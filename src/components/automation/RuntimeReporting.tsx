@@ -333,38 +333,11 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
         </TabsContent>
 
         <TabsContent value="activity" className="space-y-6">
-          {/* Live Activity Feed */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Live Activity Feed</CardTitle>
-              <CardDescription>Real-time updates from your automation campaigns</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {recentActivity.slice(0, 10).map((activity, index) => (
-                  <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                    <div className="flex-1">
-                      <p className="text-sm">
-                        <span className="font-medium">{activity.name}</span> placed {activity.recent_links} new links
-                      </p>
-                      <p className="text-xs text-gray-500">
-                        {activity.last_success.toLocaleTimeString()} • {activity.engine_type.replace('_', ' ')}
-                      </p>
-                    </div>
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                  </div>
-                ))}
-                
-                {activeCampaigns === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <Clock className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No active campaigns. Start a campaign to see live activity.</p>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+          {/* Real Live Activity Feed */}
+          <LiveActivityFeed
+            maxItems={50}
+            autoScroll={true}
+          />
         </TabsContent>
 
         <TabsContent value="reports" className="space-y-6">
