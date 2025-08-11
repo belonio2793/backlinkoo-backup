@@ -51,8 +51,12 @@ export class UnifiedClaimService {
         isSubscriber,
         subscriptionTier: data.subscription_tier
       };
-    } catch (error) {
-      console.error('Error checking subscription status:', error.message || error);
+    } catch (error: any) {
+      console.error('Error checking subscription status:', {
+        error: error?.message || error,
+        userId,
+        timestamp: new Date().toISOString()
+      });
       return { isSubscriber: false, subscriptionTier: null };
     }
   }
