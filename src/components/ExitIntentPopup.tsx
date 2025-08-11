@@ -28,6 +28,12 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
     if (isVisible) {
       const timer = setTimeout(() => {
         setShowPopup(true);
+        // Run text spacing fixer when modal appears
+        setTimeout(() => {
+          import('@/utils/textSpacingFixer').then(({ TextSpacingFixer }) => {
+            TextSpacingFixer.fixTextSpacing();
+          });
+        }, 50);
       }, 3000);
 
       return () => {
