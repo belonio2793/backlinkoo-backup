@@ -74,17 +74,6 @@ export function AnimatedBlogHeadline() {
           ))}
         </h2>
 
-        {/* Animated decorative lines with bouncing */}
-        <div
-          className={`absolute -top-2 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-blue-400 to-purple-400 rounded-full transition-all duration-1000 delay-1000 ${
-            showText ? 'w-20 opacity-70 animate-[bounce_2s_ease-in-out_infinite]' : 'w-0 opacity-0'
-          }`}
-        ></div>
-        <div
-          className={`absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-0 h-0.5 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full transition-all duration-1000 delay-1200 ${
-            showText ? 'w-14 opacity-50 animate-[bounce_2s_ease-in-out_infinite_0.5s]' : 'w-0 opacity-0'
-          }`}
-        ></div>
       </div>
 
       {/* Animated subtitle */}
