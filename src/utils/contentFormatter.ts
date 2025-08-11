@@ -413,20 +413,10 @@ export class ContentFormatter {
   }
 
   /**
-   * Add proper spacing between sections
+   * Add proper spacing between sections - DISABLED to prevent formatting issues
    */
   static addSectionSpacing(content: string): string {
-    return content
-      // Add spacing before headings
-      .replace(/(\n|^)(#{1,6}\s)/g, '\n\n$2')
-      // Add spacing after paragraphs before headings
-      .replace(/(<\/p>)\s*(#{1,6}\s)/g, '$1\n\n$2')
-      // Add spacing around lists
-      .replace(/(<\/(ul|ol)>)\s*(<p>)/g, '$1\n\n$3')
-      .replace(/(<\/p>)\s*(<(ul|ol)>)/g, '$1\n\n$2')
-      // Clean up multiple line breaks
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
+    return content; // Return content unchanged - no section spacing manipulation
   }
 
   /**
