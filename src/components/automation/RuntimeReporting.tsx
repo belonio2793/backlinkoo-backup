@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { toast } from '@/hooks/use-toast';
 import {
   BarChart3,
   Activity,
@@ -18,7 +19,12 @@ import {
   Download,
   RefreshCw,
   Eye,
-  Calendar
+  Calendar,
+  FileText,
+  FileSpreadsheet,
+  FilePdf,
+  ExternalLink,
+  Star
 } from 'lucide-react';
 import { LiveAutomationEngine, LiveActivity, LiveLinkPlacement } from '@/services/liveAutomationEngine';
 import { LiveActivityFeed } from './LiveActivityFeed';
@@ -377,22 +383,129 @@ export function RuntimeReporting({ campaigns, onToggleCampaign, onRefreshData }:
             <Card>
               <CardHeader>
                 <CardTitle>Export Reports</CardTitle>
-                <CardDescription>Download detailed performance reports</CardDescription>
+                <CardDescription>Download comprehensive performance and analytics reports</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Campaign Performance (CSV)
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Link Placement Report (PDF)
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start">
-                    <Download className="h-4 w-4 mr-2" />
-                    Success Rate Analysis (Excel)
-                  </Button>
+                <div className="space-y-4">
+                  {/* Campaign Performance CSV */}
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                          <FileSpreadsheet className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">Campaign Performance Report</h4>
+                          <p className="text-sm text-gray-500">CSV format • ~{Math.max(campaigns.length * 50, 100)}KB</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">HIGH VALUE</Badge>
+                        <Star className="h-4 w-4 text-yellow-500" />
+                      </div>
+                    </div>
+
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p><strong>Contains:</strong> Campaign metrics, daily performance, conversion rates, ROI analysis</p>
+                      <p><strong>Data Points:</strong> {campaigns.length} campaigns • {totalLinksBuilt} link placements • 30-day historical trends</p>
+                      <p><strong>Use Case:</strong> Excel analysis, reporting dashboards, performance tracking, ROI calculations</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <Button
+                        onClick={() => handleExportReport('csv')}
+                        className="w-full justify-start bg-green-600 hover:bg-green-700"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Export CSV Report
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Link Placement PDF */}
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                          <FilePdf className="h-5 w-5 text-red-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">Link Placement Audit Report</h4>
+                          <p className="text-sm text-gray-500">PDF format • ~{Math.max(recentPlacements.length * 25, 500)}KB</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">ESSENTIAL</Badge>
+                        <Star className="h-4 w-4 text-yellow-500" />
+                      </div>
+                    </div>
+
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p><strong>Contains:</strong> Live link verification, placement screenshots, anchor text analysis, domain authority scores</p>
+                      <p><strong>Data Points:</strong> {recentPlacements.length} verified placements • {liveLinks} live links • Quality scores</p>
+                      <p><strong>Use Case:</strong> Client reports, link audit trails, placement verification, quality assurance</p>
+                    </div>
+
+                    <div className="pt-2">
+                      <Button
+                        onClick={() => handleExportReport('pdf')}
+                        className="w-full justify-start bg-red-600 hover:bg-red-700"
+                      >
+                        <FilePdf className="h-4 w-4 mr-2" />
+                        Generate PDF Report
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Success Rate Analysis Excel */}
+                  <div className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                          <BarChart3 className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h4 className="font-medium">Success Rate Analytics</h4>
+                          <p className="text-sm text-gray-500">Excel format • ~{Math.max(campaigns.length * 75, 200)}KB</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">{successRate > 75 ? 'HIGH VALUE' : 'MODERATE'}</Badge>
+                        {successRate > 75 && <Star className="h-4 w-4 text-yellow-500" />}
+                      </div>
+                    </div>
+
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p><strong>Contains:</strong> Statistical analysis, trend forecasting, A/B test results, optimization recommendations</p>
+                      <p><strong>Data Points:</strong> {successRate.toFixed(1)}% success rate • Pattern analysis • Predictive models</p>
+                      <p><strong>Use Case:</strong> Strategy optimization, performance forecasting, campaign improvement insights</p>
+                      {successRate < 50 && <p className="text-orange-600"><strong>Note:</strong> Consider more data collection for robust analysis</p>}
+                    </div>
+
+                    <div className="pt-2">
+                      <Button
+                        onClick={() => handleExportReport('excel')}
+                        variant={successRate > 75 ? 'default' : 'outline'}
+                        className={`w-full justify-start ${successRate > 75 ? 'bg-blue-600 hover:bg-blue-700' : ''}`}
+                      >
+                        <FileSpreadsheet className="h-4 w-4 mr-2" />
+                        Export Analytics
+                      </Button>
+                    </div>
+                  </div>
+
+                  {/* Value Assessment Summary */}
+                  <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                    <h5 className="font-medium mb-2 flex items-center gap-2">
+                      <Target className="h-4 w-4" />
+                      Report Value Assessment
+                    </h5>
+                    <div className="text-sm text-gray-600 space-y-1">
+                      <p>• <strong>CSV Report:</strong> {campaigns.length > 0 ? 'Essential for tracking ROI and performance trends' : 'Limited value without active campaigns'}</p>
+                      <p>• <strong>PDF Report:</strong> {recentPlacements.length > 10 ? 'High value for client deliverables and auditing' : 'Moderate value - needs more placement data'}</p>
+                      <p>• <strong>Excel Analytics:</strong> {successRate > 75 ? 'High value for optimization insights' : 'Growing value as data accumulates'}</p>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
