@@ -23,11 +23,29 @@ export class AutomationDatabaseService {
     try {
       const { error } = await supabase
         .from('automation_campaigns')
-        .select('count')
+        .select('id')
         .limit(1);
 
-      return !error;
-    } catch {
+      // If no error, table exists and is accessible
+      if (!error) return true;
+
+      // Check for specific error codes that indicate table doesn't exist
+      const tableNotFoundCodes = ['42P01', 'PGRST106'];
+      if (tableNotFoundCodes.includes(error.code)) {
+        console.log('❌ automation_campaigns table does not exist');
+        return false;
+      }
+
+      // For permission errors, log but assume table exists
+      if (error.code === '42501' || error.message.includes('permission denied')) {
+        console.warn('⚠️ Permission issue with automation_campaigns, but table likely exists');
+        return true; // Assume table exists, just permission issue
+      }
+
+      console.warn('⚠️ Unknown error checking automation_campaigns:', error.message);
+      return false;
+    } catch (err: any) {
+      console.error('❌ Error in checkTablesExist:', err.message);
       return false;
     }
   }
