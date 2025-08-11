@@ -54,7 +54,7 @@ export function KillerDeletionWarning({
       icon: Skull,
       title: "💀 YOUR CONTENT IS DYING! 💀",
       subtitle: "CONTENT EXECUTION IN PROGRESS",
-      message: "This masterpiece about '{contentTitle}' is being MURDERED by our deletion system! Every second brings it closer to DEATH!",
+      message: "This masterpiece about {contentTitle} is being MURDERED by our deletion system! Every second brings it closer to DEATH!",
       bgColor: "from-red-600 via-black to-red-600",
       urgency: "CRITICAL THREAT LEVEL"
     },
