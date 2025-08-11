@@ -99,8 +99,13 @@ export class UnifiedClaimService {
         canSave: isSubscriber || savedCount < this.MAX_SAVED_PER_FREE_USER,
         isSubscriber
       };
-    } catch (error) {
-      console.error('Error getting user saved stats:', error.message || error);
+    } catch (error: any) {
+      console.error('Error getting user saved stats:', {
+        error: error?.message || error,
+        stack: error?.stack,
+        userId,
+        timestamp: new Date().toISOString()
+      });
       return {
         savedCount: 0,
         maxSaved: this.MAX_SAVED_PER_FREE_USER,
