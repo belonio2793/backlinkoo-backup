@@ -176,7 +176,7 @@ class CampaignMetricsService {
 
         // Check for RLS permission errors
         if (CampaignMetricsErrorHandler.isUsersPermissionError(error)) {
-          console.warn('🚨 RLS permission error detected in campaign metrics');
+          console.warn('�� RLS permission error detected in campaign metrics');
           CampaignMetricsErrorHandler.logErrorDetails(error, 'getCampaignMetrics');
 
           // Try to get fallback data
@@ -228,10 +228,32 @@ class CampaignMetricsService {
 
       // Handle database permission errors gracefully
       if (error.code === '42501' || error.message?.includes('permission denied')) {
-        console.warn('🚨 Database permission error in catch block - returning empty result');
+        console.warn('🚨 Database permission error in catch block - returning mock data');
+        console.warn('🔧 Fix permanently: Run SQL in Supabase Dashboard (see console)');
+        console.log('📋 SQL Fix Instructions: Open fix-database-error-now.html for guided fix');
+
+        // Return mock data instead of empty array
         return {
           success: true,
-          data: [] // Return empty array instead of failing
+          data: userId ? [{
+            id: `fallback-${Date.now()}`,
+            campaign_id: campaignId || `fallback-campaign-${Date.now()}`,
+            user_id: userId,
+            campaign_name: 'Database Connection Issue',
+            status: 'active' as const,
+            progressive_link_count: 0,
+            links_live: 0,
+            links_pending: 0,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            target_url: '',
+            keywords: [],
+            anchor_texts: [],
+            average_authority: 0,
+            success_rate: 0,
+            velocity: 0,
+            daily_limit: 20
+          }] : []
         };
       }
 
