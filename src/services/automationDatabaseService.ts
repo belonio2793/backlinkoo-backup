@@ -275,6 +275,13 @@ export class AutomationDatabaseService {
 
   static async getLinkPlacements(userId: string, filters?: LinkFilters): Promise<{ success: boolean; data?: LinkPlacement[]; error?: string }> {
     try {
+      // Check if tables exist first
+      const tablesExist = await this.checkTablesExist();
+      if (!tablesExist) {
+        console.warn('⚠️ Automation tables do not exist, using fallback service');
+        return await FallbackAutomationService.getLinkPlacements(userId);
+      }
+
       let query = supabase
         .from('link_placements')
         .select('*')
