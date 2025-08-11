@@ -69,8 +69,17 @@ export class AutomationDatabaseService {
       
       return { success: true, data };
     } catch (error: any) {
-      console.error('Error creating campaign:', error);
-      return { success: false, error: error.message };
+      console.error('Error creating campaign (catch):', {
+        message: error.message,
+        stack: error.stack,
+        error: error
+      });
+      // Try fallback on any error
+      try {
+        return await FallbackAutomationService.createCampaign(campaignData);
+      } catch {
+        return { success: false, error: error.message || 'Unexpected error creating campaign' };
+      }
     }
   }
 
