@@ -49,6 +49,7 @@ import { campaignMetricsService, type CampaignMetrics } from '@/services/campaig
 import { LoginModal } from '@/components/LoginModal';
 import { guestTrackingService } from '@/services/guestTrackingService';
 import { GuestCampaignRestrictionsOverlay } from '@/components/GuestCampaignRestrictionsOverlay';
+import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
 
 // Import our enterprise engines
 import { CampaignQueueManager, type CampaignConfig } from '@/services/automationEngine/CampaignQueueManager';
