@@ -217,6 +217,10 @@ export function OrganizedAdminDashboard() {
                 <ServiceConnectionStatus />
               </div>
             </TabsContent>
+
+            <TabsContent value="text-cleaner">
+              <TextCleanerControls />
+            </TabsContent>
           </Tabs>
         )}
 
