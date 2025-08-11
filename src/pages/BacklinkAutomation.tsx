@@ -69,6 +69,7 @@ export default function BacklinkAutomation() {
   const [selectedEngine, setSelectedEngine] = useState('blog-comments');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [automationTablesExist, setAutomationTablesExist] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     targetUrl: '',
