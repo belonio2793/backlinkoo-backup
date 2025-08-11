@@ -782,6 +782,23 @@ export class ContentFormatter {
    * Final post-processing cleanup to catch patterns that slip through
    */
   static postProcessCleanup(content: string): string {
+    // FIRST: Fix all malformed HTML tags before any other processing
+    content = content
+      // Fix malformed heading tags with spaces and attributes
+      .replace(/<h\s+([1-6])[^>]*>/gi, '<h$1>')
+      .replace(/<\/h\s*[1-6]?\s*>/gi, '</h$1>')
+      .replace(/<\/h>/gi, '</h1>') // Default closing tag
+
+      // Fix specific malformed patterns from DOM
+      .replace(/<h\s+([1-6])\s*=\s*""\s*([^>]*)>/gi, '<h$1>')
+      .replace(/<h([1-6])\s*=\s*""\s*([^>]*)>/gi, '<h$1>')
+
+      // Fix style attributes corrupted with HTML entities
+      .replace(/style="[^"]*&lt;h[^"]*&gt;[^"]*&lt;\/h[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      .replace(/style="[^"]*&lt;p&gt;[^"]*563[^"]*eb[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
+      .replace(/style="color:[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"');
+
+    return content
     return content
       // ULTIMATE FIX: Handle double-encoded HTML entities first
       .replace(/&amp;lt;/g, '<')
