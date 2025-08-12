@@ -410,6 +410,41 @@ export default function BlogCommentsSystem() {
     }
   };
 
+  // Quick fix for common schema issues
+  const quickFixSchema = async () => {
+    setIsFixingSchema(true);
+    try {
+      toast.loading('🔧 Applying quick schema fixes...');
+
+      const response = await fetch('/.netlify/functions/quick-fix-schema', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (!response.ok) {
+        throw new Error('Quick fix failed');
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success(`✅ Applied ${result.successful_fixes}/${result.total_fixes} schema fixes`);
+
+        // Refresh the page to reload with fixed schema
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        throw new Error(result.message || 'Quick fix failed');
+      }
+    } catch (error: any) {
+      console.error('Quick fix error:', error);
+      toast.error(`Quick fix failed: ${error.message}`);
+    } finally {
+      setIsFixingSchema(false);
+    }
+  };
+
   // Approve comment for posting
   const approveComment = async (commentId: string) => {
     try {
