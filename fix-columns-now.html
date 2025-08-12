@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fix Missing Columns - URGENT</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; background: #f5f5f5; }
+        .container { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .error { background: #fee; border: 1px solid #fcc; padding: 15px; border-radius: 5px; margin: 20px 0; color: #c00; }
+        .success { background: #efe; border: 1px solid #cfc; padding: 15px; border-radius: 5px; margin: 20px 0; color: #060; }
+        button { background: #007cba; color: white; border: none; padding: 12px 24px; border-radius: 5px; cursor: pointer; margin: 10px 5px; font-size: 16px; }
+        button:hover { background: #005a8a; }
+        .code { background: #f4f4f4; padding: 15px; border-radius: 5px; font-family: 'Courier New', monospace; margin: 10px 0; white-space: pre-wrap; border: 1px solid #ddd; }
+        .steps { background: #f0f8ff; border: 1px solid #add8e6; padding: 15px; border-radius: 5px; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 URGENT: Fix Missing Database Columns</h1>
+        
+        <div class="error">
+            <h3>❌ ERROR DETECTED</h3>
+            <p><strong>Missing columns in automation_campaigns table:</strong></p>
+            <ul>
+                <li><code>started_at</code> - TIMESTAMPTZ NULL</li>
+                <li><code>completed_at</code> - TIMESTAMPTZ NULL</li>
+                <li><code>auto_start</code> - BOOLEAN DEFAULT false</li>
+            </ul>
+            <p><strong>Impact:</strong> Campaign functionality will not work until these columns are added.</p>
+        </div>
+
+        <div class="steps">
+            <h3>🔧 QUICK FIX (2 minutes)</h3>
+            <ol>
+                <li>Click "Copy SQL Fix" below</li>
+                <li>Click "Open Supabase Dashboard"</li>
+                <li>Go to SQL Editor in Supabase</li>
+                <li>Paste the SQL and click "Run"</li>
+                <li>Refresh your automation page</li>
+            </ol>
+        </div>
+
+        <div class="code" id="sqlCode">-- Fix Missing Columns in automation_campaigns
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ NULL;
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ NULL;
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS auto_start BOOLEAN DEFAULT false;
+
+-- Create performance indexes
+CREATE INDEX IF NOT EXISTS idx_automation_campaigns_started_at ON automation_campaigns(started_at);
+CREATE INDEX IF NOT EXISTS idx_automation_campaigns_completed_at ON automation_campaigns(completed_at);
+
+-- Verify columns were added
+SELECT column_name, data_type, is_nullable 
+FROM information_schema.columns 
+WHERE table_name = 'automation_campaigns' 
+AND column_name IN ('started_at', 'completed_at', 'auto_start')
+ORDER BY column_name;</div>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <button onclick="copySQL()">📋 Copy SQL Fix</button>
+            <button onclick="openSupabase()">🔗 Open Supabase Dashboard</button>
+        </div>
+
+        <div class="success" id="successMessage" style="display: none;">
+            <h3>✅ SQL COPIED</h3>
+            <p>Now go to Supabase SQL Editor and paste the SQL to fix the missing columns.</p>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <h3>📋 Alternative: Manual Steps</h3>
+            <p>If the buttons don't work, manually:</p>
+            <ol>
+                <li>Copy the SQL code above</li>
+                <li>Go to <a href="https://supabase.com/dashboard/project/dfhanacsmsvvkpunurnp/sql/templates" target="_blank">your Supabase SQL Editor</a></li>
+                <li>Paste and run the SQL</li>
+                <li>Verify the columns were created</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function copySQL() {
+            const sql = document.getElementById('sqlCode').textContent;
+            navigator.clipboard.writeText(sql).then(() => {
+                document.getElementById('successMessage').style.display = 'block';
+                setTimeout(() => {
+                    document.getElementById('successMessage').style.display = 'none';
+                }, 5000);
+            }).catch(() => {
+                alert('❌ Copy failed. Please select and copy the SQL manually.');
+            });
+        }
+
+        function openSupabase() {
+            window.open('https://supabase.com/dashboard/project/dfhanacsmsvvkpunurnp/sql/templates', '_blank');
+        }
+    </script>
+</body>
+</html>
