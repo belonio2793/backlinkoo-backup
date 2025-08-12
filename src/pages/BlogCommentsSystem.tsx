@@ -269,19 +269,27 @@ export default function BlogCommentsSystem() {
     setIsCreating(true);
 
     try {
+      // Prepare campaign data
+      const campaignData: any = {
+        user_id: user?.id,
+        name: formData.name,
+        target_url: formData.target_url,
+        keyword: formData.keyword,
+        anchor_text: formData.anchor_text,
+        status: formData.auto_start ? 'active' : 'paused',
+        links_found: 0,
+        links_posted: 0
+      };
+
+      // Only add automation_enabled if the user has it enabled
+      // This prevents errors if the column doesn't exist yet
+      if (formData.automation_enabled) {
+        campaignData.automation_enabled = true;
+      }
+
       const { data: campaign, error } = await supabase
         .from('blog_campaigns')
-        .insert([{
-          user_id: user?.id,
-          name: formData.name,
-          target_url: formData.target_url,
-          keyword: formData.keyword,
-          anchor_text: formData.anchor_text,
-          status: formData.auto_start ? 'active' : 'paused',
-          automation_enabled: formData.automation_enabled,
-          links_found: 0,
-          links_posted: 0
-        }])
+        .insert([campaignData])
         .select('*')
         .single();
 
