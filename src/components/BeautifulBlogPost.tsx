@@ -547,14 +547,26 @@ export function BeautifulBlogPost() {
   };
 
   const autoRemoveTitlesFromContent = (content: string, pageTitle: string) => {
-    if (!content || !pageTitle) return content;
+    if (!content) return content;
+
+    // First, check if content is markdown or already HTML
+    const isMarkdown = content.includes('**') || content.includes('##') || content.includes('*') && !content.includes('<');
+
+    // If it's markdown, convert it to HTML first
+    let processedContent = content;
+    if (isMarkdown) {
+      processedContent = ContentFormatter.formatBlogContent(content, pageTitle);
+    }
+
+    // Now remove duplicate titles if pageTitle is provided
+    if (!pageTitle) return processedContent;
 
     const cleanedPageTitle = cleanTitle(pageTitle).toLowerCase().trim();
-    if (!cleanedPageTitle) return content;
+    if (!cleanedPageTitle) return processedContent;
 
     // Create a temporary div to parse HTML
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = content;
+    tempDiv.innerHTML = processedContent;
 
     // Find and remove duplicate title headings (h1, h2, h3)
     const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
