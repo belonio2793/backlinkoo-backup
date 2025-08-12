@@ -300,6 +300,8 @@ export default function BlogCommentsSystem() {
       setTargets(data || []);
     } catch (error: any) {
       console.error('Error loading targets:', error);
+      toast.error(`Error loading targets: ${error.message || error}`);
+      setTargets([]);
     }
   };
 
@@ -318,6 +320,8 @@ export default function BlogCommentsSystem() {
       setFormMaps(data || []);
     } catch (error: any) {
       console.error('Error loading form maps:', error);
+      toast.error(`Error loading form maps: ${error.message || error}`);
+      setFormMaps([]);
     }
   };
 
@@ -366,6 +370,7 @@ export default function BlogCommentsSystem() {
       setBlogPosts(data || []);
     } catch (error: any) {
       console.error('Error loading blog posts:', error);
+      toast.error(`Error loading blog posts: ${error.message || error}`);
       setBlogPosts([]);
     }
   };
