@@ -125,7 +125,7 @@ export default function BlogCommentsSystem() {
   // Check if our tables exist
   const checkTablesExist = async () => {
     try {
-      // Try to query our blog campaigns table
+      // Try to query our blog campaigns table (main table)
       const { data, error } = await supabase
         .from('blog_campaigns')
         .select('count')
@@ -136,7 +136,16 @@ export default function BlogCommentsSystem() {
         setShowDatabaseSetup(true);
         return false;
       }
-      
+
+      // Check if automation tables exist (these are optional)
+      try {
+        await supabase.from('blog_accounts').select('count').limit(1);
+        await supabase.from('automation_jobs').select('count').limit(1);
+        console.log('All automation tables exist');
+      } catch (error) {
+        console.log('Some automation tables missing - advanced features will be limited');
+      }
+
       return true;
     } catch (error) {
       console.log('Database check failed');
