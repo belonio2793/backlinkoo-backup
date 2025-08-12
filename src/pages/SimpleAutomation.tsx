@@ -126,6 +126,16 @@ export default function SimpleAutomation() {
     setProgress(0);
 
     try {
+      // Auto-setup posting account if needed
+      await fetch('/.netlify/functions/auto-setup-account', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user?.id,
+          userEmail: user?.email,
+          userName: user?.user_metadata?.full_name
+        })
+      });
       // Create or update campaign
       const campaignData = {
         user_id: user?.id,
