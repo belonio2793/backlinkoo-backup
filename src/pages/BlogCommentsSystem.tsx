@@ -780,12 +780,21 @@ AND table_name IN ('blog_campaigns', 'blog_comments');`;
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => generateMoreComments(campaign.id, campaign.keyword)}
+                                    className="flex items-center gap-1"
+                                  >
+                                    <Bot className="h-3 w-3" />
+                                    Generate
+                                  </Button>
+                                  <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => toggleCampaign(campaign.id, campaign.status)}
                                   >
-                                    {campaign.status === 'active' ? 
-                                      <Pause className="h-4 w-4" /> : 
+                                    {campaign.status === 'active' ?
+                                      <Pause className="h-4 w-4" /> :
                                       <Play className="h-4 w-4" />
                                     }
                                   </Button>
