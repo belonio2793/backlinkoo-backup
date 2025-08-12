@@ -237,8 +237,8 @@ export default function BlogCommentsSystem() {
 
         if (error) {
           console.log(`Table ${table} does not exist`);
-          setShowDatabaseSetup(true);
-          return false;
+        setTimeout(() => setShowDatabaseSetup(true), 0);
+        return false;
         }
       }
 
@@ -246,7 +246,7 @@ export default function BlogCommentsSystem() {
       return true;
     } catch (error) {
       console.log('Database check failed');
-      setShowDatabaseSetup(true);
+      setTimeout(() => setShowDatabaseSetup(true), 0);
       return false;
     }
   };
@@ -283,7 +283,7 @@ export default function BlogCommentsSystem() {
     } catch (error: any) {
       console.error('Error loading campaigns:', error);
       if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
-        setShowDatabaseSetup(true);
+        setTimeout(() => setShowDatabaseSetup(true), 0);
       }
     }
   };
