@@ -465,6 +465,7 @@ export default function AdvancedFormAutomation() {
       if (!response.ok) {
         // Fallback to simulated posting
         console.log('API posting failed, using simulated posting');
+        setIsSimulationMode(true);
 
         const form = discoveredForms.find(f => f.id === formId);
         const activeAccounts = postingAccounts.filter(a => a.isActive);
