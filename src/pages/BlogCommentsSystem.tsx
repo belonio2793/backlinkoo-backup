@@ -259,7 +259,7 @@ export default function BlogCommentsSystem() {
       const randomPrompt = commentPrompts[Math.floor(Math.random() * commentPrompts.length)];
       const prompt = randomPrompt.replace('{{keyword}}', keyword);
 
-      const response = await fetch('/api/generate-comment', {
+      const response = await fetch('/.netlify/functions/generate-comment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
