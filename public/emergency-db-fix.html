@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Database Fix</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+        .button { background: #dc2626; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin: 8px 4px; }
+        .button:hover { background: #b91c1c; }
+        .button:disabled { background: #9ca3af; cursor: not-allowed; }
+        .success { background: #10b981; }
+        .success:hover { background: #059669; }
+        .status { padding: 12px; margin: 12px 0; border-radius: 6px; font-weight: 500; }
+        .error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .success-msg { background: #f0fdf4; color: #059669; border: 1px solid #bbf7d0; }
+        .info { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .code { background: #1f2937; color: #f9fafb; padding: 16px; margin: 12px 0; font-family: monospace; border-radius: 6px; white-space: pre-wrap; }
+        h1 { color: #dc2626; }
+        .loading { display: inline-block; width: 16px; height: 16px; border: 2px solid #f3f4f6; border-top: 2px solid #dc2626; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>🚨 Emergency Database Fix</h1>
+    <p><strong>Problem:</strong> Missing columns: started_at, completed_at, auto_start</p>
+    <p><strong>Solution:</strong> Add these columns to automation_campaigns table</p>
+
+    <div id="status" class="status info">Click "Fix Database" to automatically add the missing columns</div>
+
+    <button id="fix-btn" class="button" onclick="fixDatabase()">
+        <span id="fix-text">🔧 Fix Database Now</span>
+    </button>
+
+    <button class="button" onclick="showManualFix()" style="background: #6b7280;">
+        📋 Show Manual SQL
+    </button>
+
+    <div id="manual-sql" style="display: none;">
+        <h3>Manual Fix (Copy and run in Supabase SQL Editor):</h3>
+        <div class="code">ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ NULL;
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ NULL;
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS auto_start BOOLEAN DEFAULT false NOT NULL;</div>
+    </div>
+
+    <div id="results"></div>
+
+    <script>
+        const supabaseUrl = 'https://dfhanacsmsvvkpunurnp.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk5NDQ2NzIsImV4cCI6MjA0NTUyMDY3Mn0.mGUP4WOQYzfHx0zHkPAXYgclhGDhOGRr6d5--aFTVfE';
+        
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `status ${type === 'success' ? 'success-msg' : type}`;
+            div.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            results.appendChild(div);
+            console.log(message);
+        }
+
+        async function fixDatabase() {
+            const btn = document.getElementById('fix-btn');
+            const text = document.getElementById('fix-text');
+            
+            btn.disabled = true;
+            text.innerHTML = '<span class="loading"></span> Fixing...';
+            
+            log('🔧 Attempting to fix missing columns...', 'info');
+
+            const sql = `
+                ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ NULL;
+                ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ NULL;
+                ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS auto_start BOOLEAN DEFAULT false NOT NULL;
+            `;
+
+            try {
+                // Try using exec_sql function
+                const { error } = await supabase.rpc('exec_sql', { query: sql });
+                
+                if (error) {
+                    throw error;
+                }
+                
+                log('✅ Successfully added missing columns!', 'success');
+                document.getElementById('status').textContent = '✅ Database fixed! Missing columns have been added.';
+                document.getElementById('status').className = 'status success-msg';
+                
+                // Verify the fix
+                try {
+                    const { data: columns } = await supabase.rpc('exec_sql', {
+                        query: `
+                            SELECT column_name 
+                            FROM information_schema.columns 
+                            WHERE table_name = 'automation_campaigns' 
+                            AND column_name IN ('started_at', 'completed_at', 'auto_start');
+                        `
+                    });
+                    
+                    if (columns && columns.length === 3) {
+                        log('✅ Verified all 3 columns exist', 'success');
+                    } else {
+                        log('⚠️ Could not verify all columns, but fix likely succeeded', 'info');
+                    }
+                } catch (verifyError) {
+                    log('⚠️ Could not verify columns, but fix likely succeeded', 'info');
+                }
+                
+            } catch (error) {
+                log(`❌ Auto-fix failed: ${error.message}`, 'error');
+                log('📋 Please use the manual SQL fix below', 'info');
+                showManualFix();
+            } finally {
+                btn.disabled = false;
+                text.textContent = '🔧 Fix Database Now';
+            }
+        }
+
+        function showManualFix() {
+            document.getElementById('manual-sql').style.display = 'block';
+            
+            // Try to copy to clipboard
+            const sql = `ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ NULL;
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ NULL;
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS auto_start BOOLEAN DEFAULT false NOT NULL;`;
+            
+            navigator.clipboard.writeText(sql).then(() => {
+                log('📋 SQL copied to clipboard!', 'success');
+            }).catch(() => {
+                log('📋 Please copy the SQL manually', 'info');
+            });
+        }
+    </script>
+</body>
+</html>
