@@ -369,6 +369,7 @@ export default function AdvancedFormAutomation() {
       }
 
       // Always fallback to simulated discovery
+      setIsSimulationMode(true);
       toast.warning(toastMessage);
       const fallbackForms = generateSimulatedForms(searchQuery, 8);
       setDiscoveredForms(fallbackForms);
