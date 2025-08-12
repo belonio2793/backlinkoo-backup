@@ -198,10 +198,19 @@ export default function BlogCommentsSystem() {
         .eq('user_id', user?.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        // Table doesn't exist yet - this is expected until SQL setup is run
+        if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
+          console.log('blog_accounts table does not exist yet - run SQL setup');
+          setAccounts([]);
+          return;
+        }
+        throw error;
+      }
       setAccounts(data || []);
     } catch (error: any) {
-      console.error('Error loading accounts:', error);
+      console.error('Error loading accounts:', error.message || error);
+      setAccounts([]);
     }
   };
 
@@ -219,10 +228,19 @@ export default function BlogCommentsSystem() {
         .order('created_at', { ascending: false })
         .limit(20);
 
-      if (error) throw error;
+      if (error) {
+        // Table doesn't exist yet - this is expected until SQL setup is run
+        if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
+          console.log('automation_jobs table does not exist yet - run SQL setup');
+          setAutomationJobs([]);
+          return;
+        }
+        throw error;
+      }
       setAutomationJobs(data || []);
     } catch (error: any) {
-      console.error('Error loading automation jobs:', error);
+      console.error('Error loading automation jobs:', error.message || error);
+      setAutomationJobs([]);
     }
   };
 
