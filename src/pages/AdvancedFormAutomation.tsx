@@ -222,10 +222,57 @@ export default function AdvancedFormAutomation() {
       validatedForms: discoveredForms.filter(f => f.status === 'validated').length,
       successfulPosts: discoveredForms.filter(f => f.status === 'posted').length,
       failedPosts: discoveredForms.filter(f => f.status === 'failed').length,
-      successRate: discoveredForms.length > 0 ? 
+      successRate: discoveredForms.length > 0 ?
         (discoveredForms.filter(f => f.status === 'posted').length / discoveredForms.length) * 100 : 0,
       activeJobs: automationJobs.filter(j => j.status === 'processing').length
     });
+  };
+
+  // Generate simulated forms for testing/fallback
+  const generateSimulatedForms = (query: string, count: number): FormMap[] => {
+    const domains = [
+      'techblog.example.com',
+      'startup.insights.io',
+      'marketing.expert.com',
+      'business.journal.org',
+      'innovation.hub.net',
+      'industry.trends.co',
+      'professional.dev',
+      'thought.leadership.com'
+    ];
+
+    const platforms = ['wordpress', 'medium', 'substack', 'ghost', 'generic'] as const;
+    const forms: FormMap[] = [];
+
+    for (let i = 0; i < count; i++) {
+      const domain = domains[i % domains.length];
+      const platform = platforms[i % platforms.length];
+      const slug = query.toLowerCase().replace(/[^\w\s]/g, '').replace(/\s+/g, '-');
+
+      forms.push({
+        id: `sim_${i + 1}`,
+        url: `https://${domain}/blog/${slug}-${i + 1}`,
+        domain,
+        formSelector: platform === 'wordpress' ? 'form#commentform' : 'form.comment-form',
+        action: platform === 'wordpress' ? '/wp-comments-post.php' : '/comments',
+        method: 'POST',
+        fields: {
+          comment: platform === 'wordpress' ? 'textarea#comment' : 'textarea[name="content"]',
+          name: platform === 'wordpress' ? 'input#author' : 'input[name="name"]',
+          email: platform === 'wordpress' ? 'input#email' : 'input[name="email"]',
+          website: platform === 'wordpress' ? 'input#url' : 'input[name="website"]'
+        },
+        hidden: platform === 'wordpress' ?
+          { 'comment_post_ID': '123', 'comment_parent': '0' } :
+          { '_token': 'csrf_token_value' },
+        submitSelector: platform === 'wordpress' ? 'input#submit' : 'button[type="submit"]',
+        confidence: 75 + Math.floor(Math.random() * 20),
+        status: Math.random() > 0.5 ? 'detected' : 'validated',
+        detectedAt: new Date().toISOString()
+      });
+    }
+
+    return forms;
   };
 
   // Discovery functions
