@@ -129,7 +129,7 @@ const App = () => (
                     </div>
                   </div>
                 }>
-                  <LazyNewAutomationPage />
+                  <LazyBlogCommentAutomation />
                 </Suspense>
               }
             />
