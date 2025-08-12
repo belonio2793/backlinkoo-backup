@@ -606,7 +606,13 @@ export default function BlogCommentsSystem() {
           verification_status: 'pending'
         }]);
 
-      if (error) throw error;
+      if (error) {
+        if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
+          toast.error('Database setup required - please run the SQL setup script first');
+          return;
+        }
+        throw error;
+      }
 
       toast.success('Account created! Verification needed for automation.');
       setShowAccountForm(false);
@@ -618,7 +624,7 @@ export default function BlogCommentsSystem() {
 
       await loadAccounts();
     } catch (error: any) {
-      console.error('Error creating account:', error);
+      console.error('Error creating account:', error.message || error);
       toast.error(error.message || 'Failed to create account');
     } finally {
       setIsCreating(false);
