@@ -665,7 +665,6 @@ const Dashboard = () => {
     const hash = window.location.hash.replace('#', '');
 
     // Handle hash-based navigation for specific sections
-    if (hash === 'keyword-research' || hash === 'rank-tracker') return 'dashboard';
     if (hash === 'automation') return 'seo-tools';
 
     return urlParams.get('section') || "dashboard";
