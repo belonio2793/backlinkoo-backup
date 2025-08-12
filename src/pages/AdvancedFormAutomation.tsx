@@ -396,6 +396,8 @@ export default function AdvancedFormAutomation() {
       if (!response.ok) {
         // Fallback to simulated validation
         console.log('API validation failed, using simulated validation');
+        setIsSimulationMode(true);
+
         const form = discoveredForms.find(f => f.id === formId);
         if (form) {
           // Simulate validation success/failure based on confidence
