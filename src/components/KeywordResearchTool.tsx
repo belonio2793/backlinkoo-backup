@@ -682,9 +682,9 @@ Consider local search patterns and cultural preferences for ${country}. Optimize
                 <div className="h-11">
                   <SearchableSelect
                     options={countries.map(country => ({
-                      value: country.code,
+                      value: country.name,
                       label: `${country.flag} ${country.name}`,
-                      searchableText: `${country.name} ${country.code}`
+                      searchableText: country.name
                     }))}
                     value={selectedCountry}
                     onValueChange={(value: string) => {
