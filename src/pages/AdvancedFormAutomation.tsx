@@ -597,6 +597,12 @@ export default function AdvancedFormAutomation() {
                   <Chrome className="h-3 w-3 mr-1" />
                   Playwright Powered
                 </Badge>
+                {isSimulationMode && (
+                  <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">
+                    <Activity className="h-3 w-3 mr-1" />
+                    Simulation Mode
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
