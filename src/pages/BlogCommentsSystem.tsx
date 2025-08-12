@@ -467,7 +467,7 @@ export default function BlogCommentsSystem() {
   const postedComments = comments.filter(c => c.status === 'posted');
 
   // Database setup SQL
-  const setupSQL = `-- Blog Comment System Tables
+  const setupSQL = `-- Advanced Blog Comment Automation System
 -- Run this in your Supabase SQL Editor
 
 -- Blog campaigns table
@@ -479,28 +479,65 @@ CREATE TABLE IF NOT EXISTS blog_campaigns (
   keyword text not null,
   anchor_text text,
   status text not null default 'paused' check (status in ('active', 'paused', 'completed')),
+  automation_enabled boolean default false,
   links_found integer default 0,
   links_posted integer default 0,
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
 
--- Blog comments table  
+-- Blog comments table with enhanced automation support
 CREATE TABLE IF NOT EXISTS blog_comments (
   id uuid default gen_random_uuid() primary key,
   campaign_id uuid references blog_campaigns(id) on delete cascade,
   blog_url text not null,
   comment_text text not null,
-  status text not null default 'pending' check (status in ('pending', 'approved', 'posted', 'failed')),
+  status text not null default 'pending' check (status in ('pending', 'approved', 'posted', 'failed', 'processing', 'needs_verification')),
+  platform text not null default 'generic' check (platform in ('substack', 'medium', 'wordpress', 'generic')),
+  account_id uuid references blog_accounts(id),
+  error_message text,
   posted_at timestamptz,
+  created_at timestamptz default now()
+);
+
+-- Blog accounts for authentication management
+CREATE TABLE IF NOT EXISTS blog_accounts (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade,
+  platform text not null check (platform in ('substack', 'medium', 'wordpress', 'generic')),
+  email text not null,
+  display_name text,
+  cookies text, -- Encrypted session data
+  session_data jsonb,
+  is_verified boolean default false,
+  verification_status text default 'pending' check (verification_status in ('pending', 'verified', 'failed', 'expired')),
+  last_used timestamptz,
+  created_at timestamptz default now(),
+  UNIQUE(user_id, platform, email)
+);
+
+-- Automation jobs queue
+CREATE TABLE IF NOT EXISTS automation_jobs (
+  id uuid default gen_random_uuid() primary key,
+  campaign_id uuid references blog_campaigns(id) on delete cascade,
+  job_type text not null check (job_type in ('discover_blogs', 'post_comments', 'verify_accounts')),
+  status text not null default 'pending' check (status in ('pending', 'processing', 'completed', 'failed')),
+  payload jsonb,
+  result jsonb,
+  error_message text,
+  scheduled_at timestamptz default now(),
+  started_at timestamptz,
+  completed_at timestamptz,
   created_at timestamptz default now()
 );
 
 -- Enable RLS
 ALTER TABLE blog_campaigns ENABLE ROW LEVEL SECURITY;
 ALTER TABLE blog_comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE blog_accounts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE automation_jobs ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies
+-- RLS Policies for blog_campaigns
 CREATE POLICY "Users can view their own campaigns" ON blog_campaigns
   FOR SELECT USING (auth.uid() = user_id);
 
@@ -513,10 +550,11 @@ CREATE POLICY "Users can update their own campaigns" ON blog_campaigns
 CREATE POLICY "Users can delete their own campaigns" ON blog_campaigns
   FOR DELETE USING (auth.uid() = user_id);
 
+-- RLS Policies for blog_comments
 CREATE POLICY "Users can view comments for their campaigns" ON blog_comments
   FOR SELECT USING (EXISTS (
-    SELECT 1 FROM blog_campaigns 
-    WHERE blog_campaigns.id = blog_comments.campaign_id 
+    SELECT 1 FROM blog_campaigns
+    WHERE blog_campaigns.id = blog_comments.campaign_id
     AND blog_campaigns.user_id = auth.uid()
   ));
 
@@ -526,16 +564,74 @@ CREATE POLICY "System can create comments" ON blog_comments
 CREATE POLICY "System can update comments" ON blog_comments
   FOR UPDATE USING (true);
 
+-- RLS Policies for blog_accounts
+CREATE POLICY "Users can view their own accounts" ON blog_accounts
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can create their own accounts" ON blog_accounts
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update their own accounts" ON blog_accounts
+  FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete their own accounts" ON blog_accounts
+  FOR DELETE USING (auth.uid() = user_id);
+
+-- RLS Policies for automation_jobs
+CREATE POLICY "Users can view jobs for their campaigns" ON automation_jobs
+  FOR SELECT USING (EXISTS (
+    SELECT 1 FROM blog_campaigns
+    WHERE blog_campaigns.id = automation_jobs.campaign_id
+    AND blog_campaigns.user_id = auth.uid()
+  ));
+
+CREATE POLICY "System can manage automation jobs" ON automation_jobs
+  FOR ALL USING (true);
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_blog_campaigns_user_id ON blog_campaigns(user_id);
 CREATE INDEX IF NOT EXISTS idx_blog_campaigns_status ON blog_campaigns(status);
+CREATE INDEX IF NOT EXISTS idx_blog_campaigns_automation ON blog_campaigns(automation_enabled);
+
 CREATE INDEX IF NOT EXISTS idx_blog_comments_campaign_id ON blog_comments(campaign_id);
 CREATE INDEX IF NOT EXISTS idx_blog_comments_status ON blog_comments(status);
+CREATE INDEX IF NOT EXISTS idx_blog_comments_platform ON blog_comments(platform);
+
+CREATE INDEX IF NOT EXISTS idx_blog_accounts_user_id ON blog_accounts(user_id);
+CREATE INDEX IF NOT EXISTS idx_blog_accounts_platform ON blog_accounts(platform);
+CREATE INDEX IF NOT EXISTS idx_blog_accounts_verified ON blog_accounts(is_verified);
+
+CREATE INDEX IF NOT EXISTS idx_automation_jobs_campaign_id ON automation_jobs(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_automation_jobs_status ON automation_jobs(status);
+CREATE INDEX IF NOT EXISTS idx_automation_jobs_type ON automation_jobs(job_type);
+
+-- Functions for automation
+CREATE OR REPLACE FUNCTION update_campaign_stats()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Update campaign statistics when comments are updated
+  UPDATE blog_campaigns
+  SET
+    links_posted = (
+      SELECT COUNT(*) FROM blog_comments
+      WHERE campaign_id = NEW.campaign_id AND status = 'posted'
+    ),
+    updated_at = now()
+  WHERE id = NEW.campaign_id;
+
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_campaign_stats_trigger
+  AFTER UPDATE ON blog_comments
+  FOR EACH ROW
+  EXECUTE FUNCTION update_campaign_stats();
 
 -- Verify tables were created
-SELECT table_name FROM information_schema.tables 
-WHERE table_schema = 'public' 
-AND table_name IN ('blog_campaigns', 'blog_comments');`;
+SELECT table_name FROM information_schema.tables
+WHERE table_schema = 'public'
+AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automation_jobs');`;
 
   const copySetupSQL = async () => {
     try {
