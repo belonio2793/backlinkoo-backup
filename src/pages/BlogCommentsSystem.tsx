@@ -40,7 +40,7 @@ import {
   Users,
   Settings,
   Brain,
-  Spider,
+  Network,
   Crosshair,
   Monitor,
   FileText,
