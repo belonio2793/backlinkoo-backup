@@ -286,6 +286,10 @@ export default function AdvancedFormAutomation() {
     try {
       toast.loading('🔍 Discovering comment forms...');
 
+      // Create timeout controller
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 second timeout
+
       const response = await fetch('/.netlify/functions/form-discovery', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -293,8 +297,11 @@ export default function AdvancedFormAutomation() {
           query: searchQuery,
           maxResults: 50,
           targetDomains: targetDomains.length > 0 ? targetDomains : undefined
-        })
+        }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       if (!response.ok) {
         // Handle specific error cases
