@@ -17,6 +17,10 @@ import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
 import Index from "./pages/Index";
 
 const LazyBacklinkAutomation = lazy(() => import("./pages/NewBacklinkAutomation"));
+const LazyNewAutomationPage = lazy(() => import("./pages/NewAutomationPage"));
+const LazyBlogCommentAutomation = lazy(() => import("./pages/BlogCommentAutomation"));
+const LazyBlogCommentsSystem = lazy(() => import("./pages/BlogCommentsSystem"));
+const LazyAdvancedFormAutomation = lazy(() => import("./pages/AdvancedFormAutomation"));
 const LazyBacklinkReport = lazy(() => import("./pages/BacklinkReport"));
 const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDiscoveryDashboard"));
 const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
@@ -127,6 +131,14 @@ const App = () => (
                     </div>
                   </div>
                 }>
+                  <LazyBlogCommentsSystem />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/automation/legacy"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
                   <LazyBacklinkAutomation />
                 </Suspense>
               }
@@ -146,6 +158,24 @@ const App = () => (
                   </div>
                 }>
                   <LazyAutomationSystem />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/automation/1"
+              element={
+                <Suspense fallback={
+                  <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center">
+                    <div className="text-center">
+                      <LoadingSpinner />
+                      <div className="mt-4">
+                        <h2 className="text-xl font-semibold text-gray-900">Loading Advanced Form Automation v1.0</h2>
+                        <p className="text-gray-600 mt-2">Initializing Playwright-powered form detection engine...</p>
+                      </div>
+                    </div>
+                  </div>
+                }>
+                  <LazyAdvancedFormAutomation />
                 </Suspense>
               }
             />
