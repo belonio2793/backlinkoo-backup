@@ -111,7 +111,8 @@ exports.handler = async (event, context) => {
         query,
         searchTime: 2.5,
         storedResults: discoveredUrls.length,
-        message: `Discovered ${searchResults.length} potential comment forms`
+        databaseAvailable,
+        message: `Discovered ${searchResults.length} potential comment forms${!databaseAvailable ? ' (database storage skipped)' : ''}`
       })
     };
 
