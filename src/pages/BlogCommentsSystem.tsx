@@ -317,7 +317,7 @@ export default function BlogCommentsSystem() {
   const toggleCampaign = async (campaignId: string, currentStatus: string) => {
     try {
       const newStatus = currentStatus === 'active' ? 'paused' : 'active';
-      
+
       const { error } = await supabase
         .from('blog_campaigns')
         .update({ status: newStatus })
@@ -330,6 +330,25 @@ export default function BlogCommentsSystem() {
     } catch (error: any) {
       console.error('Error toggling campaign:', error);
       toast.error('Failed to update campaign');
+    }
+  };
+
+  // Delete campaign
+  const deleteCampaign = async (campaignId: string) => {
+    try {
+      const { error } = await supabase
+        .from('blog_campaigns')
+        .delete()
+        .eq('id', campaignId);
+
+      if (error) throw error;
+
+      toast.success('Campaign deleted successfully');
+      setDeletingCampaignId(null);
+      await loadCampaigns();
+    } catch (error: any) {
+      console.error('Error deleting campaign:', error);
+      toast.error('Failed to delete campaign');
     }
   };
 
