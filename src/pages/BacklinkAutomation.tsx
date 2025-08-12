@@ -38,14 +38,6 @@ import { RuntimeReporting } from '@/components/automation/RuntimeReporting';
 import { RuntimeStatus } from '@/components/automation/RuntimeStatus';
 import { LiveAutomationEngine } from '@/services/liveAutomationEngine';
 import { CampaignErrorHandler } from '@/utils/campaignErrorHandler';
-import { CampaignCreationTest } from '@/components/testing/CampaignCreationTest';
-import { DatabaseMigrationTest } from '@/components/testing/DatabaseMigrationTest';
-import { DatabaseHealthChecker } from '@/components/system/DatabaseHealthChecker';
-import { QuickDatabaseStatus } from '@/components/system/QuickDatabaseStatus';
-import { EmergencyFixButton } from '@/components/system/EmergencyFixButton';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { AutomationWithDebugging } from '@/components/automation/AutomationWithDebugging';
-import { MissingColumnsFix } from '@/components/system/MissingColumnsFix';
 import { debugLog } from '@/services/activeErrorLogger';
 
 const engines = [
@@ -362,7 +354,7 @@ export default function BacklinkAutomation() {
                   <div className="text-3xl font-bold text-green-600">
                     {isAuthenticated ? (
                       limit === Infinity ? totalLinksBuilt : `${totalLinksBuilt}/${limit}`
-                    ) : '��'}
+                    ) : '—'}
                   </div>
                   <div className="text-sm text-gray-600">Links Built</div>
                 </div>
