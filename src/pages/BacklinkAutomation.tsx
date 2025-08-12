@@ -277,7 +277,7 @@ export default function BacklinkAutomation() {
   const { plan, limit } = getUserPlan();
 
   // Check automation tables status
-  const checkAutomationTables = React.useCallback(async () => {
+  const checkAutomationTables = useCallback(async () => {
     try {
       // First test basic connectivity
       console.log('🔗 Testing database connectivity...');
