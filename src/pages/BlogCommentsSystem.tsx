@@ -358,11 +358,7 @@ export default function BlogCommentsSystem() {
     try {
       const { data, error } = await supabase
         .from('blog_posts')
-        .select(`
-          *,
-          blog_campaigns (name, keyword),
-          form_maps (target_id, crawler_targets (url, domain))
-        `)
+        .select('*')
         .order('created_at', { ascending: false })
         .limit(100);
 
@@ -370,6 +366,7 @@ export default function BlogCommentsSystem() {
       setBlogPosts(data || []);
     } catch (error: any) {
       console.error('Error loading blog posts:', error);
+      setBlogPosts([]);
     }
   };
 
