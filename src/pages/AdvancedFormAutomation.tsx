@@ -776,7 +776,7 @@ export default function AdvancedFormAutomation() {
                 </div>
 
                 <div className="flex gap-3">
-                  <Button 
+                  <Button
                     onClick={startFormDiscovery}
                     disabled={isDiscovering || !searchQuery.trim()}
                     className="flex-1"
@@ -792,6 +792,18 @@ export default function AdvancedFormAutomation() {
                         Start Discovery
                       </>
                     )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSearchQuery('AI tools marketing');
+                      setTimeout(() => startFormDiscovery(), 100);
+                    }}
+                    disabled={isDiscovering}
+                    className="border-green-300 text-green-700 hover:bg-green-50"
+                  >
+                    <Zap className="h-4 w-4 mr-2" />
+                    Test
                   </Button>
                   <Button variant="outline" onClick={() => setSearchQuery('')}>
                     Clear
