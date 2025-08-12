@@ -249,6 +249,8 @@
   font-size: 1.125rem;
   line-height: 1.8;
   color: rgb(55, 65, 81);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .beautiful-prose a {
