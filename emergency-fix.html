@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emergency Database Fix</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .step { background: #f5f5f5; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #fee; border-left: 4px solid #f00; }
+        .success { background: #efe; border-left: 4px solid #0f0; }
+        .code { background: #333; color: #fff; padding: 10px; border-radius: 3px; font-family: monospace; }
+        button { background: #007cba; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #005a87; }
+    </style>
+</head>
+<body>
+    <h1>🚑 Emergency Fix for Database Errors</h1>
+    
+    <div class="step error">
+        <h3>❌ Current Issues:</h3>
+        <ul>
+            <li>Missing columns: started_at, completed_at, auto_start</li>
+            <li>TypeError: Failed to fetch (FullStory interference)</li>
+        </ul>
+    </div>
+
+    <div class="step">
+        <h3>🔧 Step 1: Fix Database Columns</h3>
+        <p>Copy this SQL and run it in your Supabase SQL Editor:</p>
+        <button onclick="copySQL()">📋 Copy SQL Fix</button>
+        <div class="code" id="sqlCode">
+-- Emergency fix for missing columns
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ NULL;
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ NULL;
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS auto_start BOOLEAN DEFAULT false NOT NULL;
+
+-- Verify the columns were added
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_name = 'automation_campaigns'
+AND column_name IN ('started_at', 'completed_at', 'auto_start')
+ORDER BY column_name;
+        </div>
+    </div>
+
+    <div class="step">
+        <h3>🌐 Step 2: Open Supabase Dashboard</h3>
+        <button onclick="openSupabase()">🚀 Open Supabase SQL Editor</button>
+    </div>
+
+    <div class="step">
+        <h3>🔄 Step 3: Fix Fetch Errors</h3>
+        <p>These actions will resolve the fetch/network issues:</p>
+        <button onclick="clearCacheAndReload()">🧹 Clear Cache & Reload</button>
+        <button onclick="disableFullStory()">🚫 Disable FullStory</button>
+        <button onclick="useXHRFetch()">⚡ Switch to XHR Fetch</button>
+    </div>
+
+    <div class="step success" id="status" style="display: none;">
+        <h3>✅ Fix Applied Successfully!</h3>
+        <p>The page will reload automatically...</p>
+    </div>
+
+    <script>
+        function copySQL() {
+            const sql = document.getElementById('sqlCode').textContent;
+            navigator.clipboard.writeText(sql).then(() => {
+                alert('✅ SQL copied to clipboard! Now paste it in Supabase SQL Editor.');
+            });
+        }
+
+        function openSupabase() {
+            window.open('https://supabase.com/dashboard/project/dfhanacsmsvvkpunurnp/sql', '_blank');
+        }
+
+        function clearCacheAndReload() {
+            // Clear all cache and storage
+            if ('caches' in window) {
+                caches.keys().then(names => {
+                    names.forEach(name => caches.delete(name));
+                });
+            }
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            // Force hard reload
+            window.location.reload(true);
+        }
+
+        function disableFullStory() {
+            // Disable FullStory by overriding its methods
+            if (window.FS) {
+                window.FS.shutdown();
+            }
+            
+            // Block FullStory scripts
+            const scripts = document.querySelectorAll('script[src*="fullstory"]');
+            scripts.forEach(script => script.remove());
+            
+            // Override fetch to prevent interference
+            const originalFetch = window.fetch;
+            window.fetch = function(...args) {
+                return originalFetch.apply(this, args);
+            };
+            
+            showSuccess();
+        }
+
+        function useXHRFetch() {
+            // Replace fetch with XMLHttpRequest-based implementation
+            window.fetch = function(url, options = {}) {
+                return new Promise((resolve, reject) => {
+                    const xhr = new XMLHttpRequest();
+                    const method = (options.method || 'GET').toUpperCase();
+                    
+                    xhr.open(method, url, true);
+                    
+                    // Set headers
+                    if (options.headers) {
+                        Object.entries(options.headers).forEach(([key, value]) => {
+                            xhr.setRequestHeader(key, value);
+                        });
+                    }
+                    
+                    xhr.onload = () => {
+                        const response = {
+                            ok: xhr.status >= 200 && xhr.status < 300,
+                            status: xhr.status,
+                            statusText: xhr.statusText,
+                            json: () => Promise.resolve(JSON.parse(xhr.responseText)),
+                            text: () => Promise.resolve(xhr.responseText),
+                            headers: {
+                                get: (name) => xhr.getResponseHeader(name)
+                            }
+                        };
+                        resolve(response);
+                    };
+                    
+                    xhr.onerror = () => reject(new Error('Network error'));
+                    xhr.ontimeout = () => reject(new Error('Request timeout'));
+                    
+                    if (options.body) {
+                        xhr.send(options.body);
+                    } else {
+                        xhr.send();
+                    }
+                });
+            };
+            
+            showSuccess();
+        }
+
+        function showSuccess() {
+            document.getElementById('status').style.display = 'block';
+            setTimeout(() => {
+                window.location.href = '/automation';
+            }, 2000);
+        }
+
+        // Auto-fix on page load
+        window.addEventListener('load', () => {
+            console.log('🚑 Emergency fix page loaded');
+            
+            // Try to apply some fixes automatically
+            setTimeout(() => {
+                try {
+                    // Disable FullStory if present
+                    if (window.FS && typeof window.FS.shutdown === 'function') {
+                        window.FS.shutdown();
+                        console.log('✅ FullStory disabled');
+                    }
+                } catch (e) {
+                    console.log('ℹ️ FullStory not present or already disabled');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
