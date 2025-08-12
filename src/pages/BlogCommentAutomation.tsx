@@ -332,20 +332,63 @@ export default function BlogCommentAutomation() {
   // Start discovery for a campaign
   const startDiscovery = async (campaignId: string) => {
     try {
-      const response = await fetch('/.netlify/functions/startDiscovery', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ campaign_id: campaignId }),
-      });
+      // Get campaign details
+      const { data: campaign, error: campaignError } = await supabase
+        .from('campaigns')
+        .select('*')
+        .eq('id', campaignId)
+        .single();
 
-      if (!response.ok) {
-        throw new Error('Failed to start discovery');
+      if (campaignError || !campaign) {
+        throw new Error('Campaign not found');
       }
+
+      // Check if there's already a pending discovery job
+      const { data: existingJob } = await supabase
+        .from('jobs')
+        .select('id')
+        .eq('job_type', 'discover')
+        .contains('payload', { campaign_id: campaignId })
+        .in('status', ['queued', 'running'])
+        .single();
+
+      if (existingJob) {
+        toast.info('Discovery job already queued or running');
+        return;
+      }
+
+      // Create discovery job
+      await supabase.from('jobs').insert([{
+        job_type: 'discover',
+        payload: {
+          campaign_id: campaign.id,
+          keyword: campaign.keyword,
+          destination_url: campaign.destination_url,
+          auto_post: false
+        },
+        status: 'queued'
+      }]);
+
+      // Update campaign status
+      await supabase
+        .from('campaigns')
+        .update({
+          status: 'running',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', campaignId);
+
+      // Log the discovery start
+      await supabase.from('campaign_logs').insert([{
+        campaign_id: campaignId,
+        level: 'info',
+        message: `Discovery job queued for keyword: ${campaign.keyword}`,
+        meta: { keyword: campaign.keyword }
+      }]);
 
       toast.success('Discovery started');
       await loadJobs();
+      await loadCampaigns();
     } catch (error: any) {
       console.error('Error starting discovery:', error);
       toast.error('Failed to start discovery');
