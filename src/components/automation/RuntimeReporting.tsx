@@ -362,7 +362,7 @@ export function RuntimeReporting({ onToggleCampaign, onRefreshData }: RuntimeRep
                 Real-time campaign monitoring and performance analytics
                 {error && (
                   <div className="mt-2 text-red-600 text-sm">
-                    ⚠��� {error}
+                    ⚠ {error}
                   </div>
                 )}
               </CardDescription>

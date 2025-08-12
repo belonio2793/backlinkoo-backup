@@ -78,7 +78,7 @@ export class QueueManager extends EventEmitter {
   async start(): Promise<void> {
     if (this.isRunning) return;
 
-    console.log('��� Starting Queue Manager...');
+    console.log('🚀 Starting Queue Manager...');
     this.isRunning = true;
 
     // Start workers for each engine type

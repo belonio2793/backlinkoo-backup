@@ -656,8 +656,6 @@ const Dashboard = () => {
     const hash = window.location.hash.replace('#', '');
 
     // Handle hash-based navigation for specific sections
-    if (hash === 'keyword-research') return 'keyword-research';
-    if (hash === 'rank-tracker') return 'rank-tracker';
     if (hash === 'automation') return 'seo-tools';
 
     return urlParams.get('tab') || "overview";
@@ -667,7 +665,6 @@ const Dashboard = () => {
     const hash = window.location.hash.replace('#', '');
 
     // Handle hash-based navigation for specific sections
-    if (hash === 'keyword-research' || hash === 'rank-tracker') return 'dashboard';
     if (hash === 'automation') return 'seo-tools';
 
     return urlParams.get('section') || "dashboard";
@@ -683,13 +680,7 @@ const Dashboard = () => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
 
-      if (hash === 'keyword-research') {
-        setActiveSection('dashboard');
-        setActiveTab('keyword-research');
-      } else if (hash === 'rank-tracker') {
-        setActiveSection('dashboard');
-        setActiveTab('rank-tracker');
-      } else if (hash === 'automation') {
+      if (hash === 'automation') {
         setActiveSection('seo-tools');
       }
     };
@@ -819,8 +810,6 @@ const Dashboard = () => {
 
       // Map hash values to tab values
       const hashToTabMap: { [key: string]: string } = {
-        'keyword-research': 'keyword-research',
-        'rank-tracker': 'rank-tracker',
         'automation-link-building': 'automation-link-building',
         'campaigns': 'campaigns',
         'overview': 'overview',
@@ -1329,21 +1318,13 @@ const Dashboard = () => {
           <>
             {activeSection === "dashboard" ? (
               <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+            <TabsList className="grid w-full grid-cols-2 h-auto">
               <TabsTrigger value="overview" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 <span className="hidden sm:inline">Overview</span>
                 <span className="sm:hidden">Home</span>
               </TabsTrigger>
               <TabsTrigger value="campaigns" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
                 Campaigns
-              </TabsTrigger>
-              <TabsTrigger value="keyword-research" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
-                <span className="hidden sm:inline">Keyword Research</span>
-                <span className="sm:hidden">Keywords</span>
-              </TabsTrigger>
-              <TabsTrigger value="rank-tracker" className="text-xs sm:text-sm py-2 px-1 sm:px-3">
-                <span className="hidden sm:inline">Rankings</span>
-                <span className="sm:hidden">Ranks</span>
               </TabsTrigger>
             </TabsList>
 
@@ -1847,16 +1828,8 @@ const Dashboard = () => {
               )}
             </TabsContent>
 
-            <TabsContent value="keyword-research" data-section="keyword-research">
-              <KeywordResearchTool />
-            </TabsContent>
-
             <TabsContent value="automation-link-building" data-section="automation-link-building">
               <NoHandsSEODashboard />
-            </TabsContent>
-
-            <TabsContent value="rank-tracker" data-section="rank-tracker">
-              <RankingTracker />
             </TabsContent>
               </Tabs>
             ) : activeSection === "seo-tools" ? (

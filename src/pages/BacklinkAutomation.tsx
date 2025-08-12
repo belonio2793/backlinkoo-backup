@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,16 +34,10 @@ import { AutomationTablesMissingNotice } from '@/components/AutomationTablesMiss
 import { initializeAutomationTables } from '@/utils/createAutomationTables';
 import { testAutomationTablesAccess, testDatabaseConnectivity } from '@/utils/simpleDatabaseTest';
 import { RoutePreservingAuth } from '@/components/RoutePreservingAuth';
-import { RuntimeReporting } from '@/components/automation/RuntimeReporting';
 import { RuntimeStatus } from '@/components/automation/RuntimeStatus';
 import { LiveAutomationEngine } from '@/services/liveAutomationEngine';
 import { CampaignErrorHandler } from '@/utils/campaignErrorHandler';
-import { CampaignCreationTest } from '@/components/testing/CampaignCreationTest';
-import { DatabaseMigrationTest } from '@/components/testing/DatabaseMigrationTest';
-import { DatabaseHealthChecker } from '@/components/system/DatabaseHealthChecker';
-import { QuickDatabaseStatus } from '@/components/system/QuickDatabaseStatus';
-import { EmergencyFixButton } from '@/components/system/EmergencyFixButton';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
+import { debugLog } from '@/services/activeErrorLogger';
 
 const engines = [
   {
@@ -52,27 +46,6 @@ const engines = [
     icon: MessageSquare,
     description: 'Post contextual comments on relevant blogs',
     color: 'bg-blue-100 text-blue-700 border-blue-200'
-  },
-  {
-    id: 'web2-platforms',
-    name: 'Web 2.0 Sites',
-    icon: Globe,
-    description: 'Create content on high-authority platforms',
-    color: 'bg-green-100 text-green-700 border-green-200'
-  },
-  {
-    id: 'forum-profiles',
-    name: 'Forum Profiles',
-    icon: Users,
-    description: 'Build authority through forum engagement',
-    color: 'bg-purple-100 text-purple-700 border-purple-200'
-  },
-  {
-    id: 'social-media',
-    name: 'Social Media',
-    icon: Share2,
-    description: 'Leverage social platforms for brand awareness',
-    color: 'bg-pink-100 text-pink-700 border-pink-200'
   }
 ];
 
@@ -113,8 +86,14 @@ export default function BacklinkAutomation() {
 
   // Enhanced toggle campaign with live monitoring
   const handleToggleCampaign = async (campaignId: string) => {
+    const metricId = debugLog.startOperation('campaign_management', 'toggle_campaign', { campaignId });
+
     const campaign = campaigns.find(c => c.id === campaignId);
-    if (!campaign) return;
+    if (!campaign) {
+      debugLog.error('campaign_management', 'toggle_campaign', new Error('Campaign not found'), { campaignId });
+      debugLog.endOperation(metricId, false, { error: 'campaign_not_found' });
+      return;
+    }
 
     // Use campaign error handler to prevent unhandled promise rejections
     const success = await CampaignErrorHandler.safeToggleCampaign(campaignId, async (id) => {
@@ -152,9 +131,16 @@ export default function BacklinkAutomation() {
   const handleCreateCampaign = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    const metricId = debugLog.startOperation('campaign_management', 'create_campaign', {
+      engineType: selectedEngine,
+      formData: { ...formData, keywords: undefined, anchorTexts: undefined } // Don't log sensitive data
+    });
+
     // Check authentication first
     if (!isAuthenticated) {
+      debugLog.warn('campaign_management', 'create_campaign', 'User not authenticated', { userId: user?.id });
       setShowAuthModal(true);
+      debugLog.endOperation(metricId, false, { error: 'not_authenticated' });
       return;
     }
 
@@ -227,15 +213,24 @@ export default function BacklinkAutomation() {
 
         // Refresh campaigns list to ensure sync
         loadCampaigns();
+        debugLog.endOperation(metricId, true, { campaignId: result.data.id, campaignName: result.data.name });
       } else {
+        debugLog.error('campaign_management', 'create_campaign', new Error('Campaign verification failed'), {
+          verificationErrors: verification.errors
+        });
         toast.error('Campaign Verification Failed', {
           description: `Campaign was created but has issues: ${verification.errors?.join(', ')}`
         });
+        debugLog.endOperation(metricId, false, { error: 'verification_failed', errors: verification.errors });
       }
     } else {
+      debugLog.error('campaign_management', 'create_campaign', new Error(result.error || 'Campaign creation failed'), {
+        resultError: result.error
+      });
       toast.error('Campaign Creation Failed', {
         description: result.error || 'Unknown error occurred'
       });
+      debugLog.endOperation(metricId, false, { error: 'creation_failed', resultError: result.error });
     }
   };
 
@@ -252,7 +247,7 @@ export default function BacklinkAutomation() {
   const { plan, limit } = getUserPlan();
 
   // Check automation tables status
-  const checkAutomationTables = React.useCallback(async () => {
+  const checkAutomationTables = useCallback(async () => {
     try {
       // First test basic connectivity
       console.log('🔗 Testing database connectivity...');
@@ -286,7 +281,7 @@ export default function BacklinkAutomation() {
   };
 
   // Run health check on mount for debugging
-  React.useEffect(() => {
+  useEffect(() => {
     // Run the improved automation tables check
     checkAutomationTables();
 
@@ -296,8 +291,19 @@ export default function BacklinkAutomation() {
     }
   }, [checkAutomationTables]);
 
+  // Initialize debug logging for this component
+  useEffect(() => {
+    debugLog.info('backlink_automation', 'component_mounted', 'BacklinkAutomation component mounted', {
+      isAuthenticated,
+      isPremium,
+      campaignCount: campaigns.length,
+      selectedEngine
+    });
+  }, [isAuthenticated, isPremium, campaigns.length, selectedEngine]);
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <AutomationWithDebugging enabledInProduction={isPremium}>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <Header />
 
       <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -409,18 +415,6 @@ export default function BacklinkAutomation() {
           />
         )}
 
-        {/* Quick Database Status - Always visible for critical issues */}
-        <div className="mb-6">
-          <QuickDatabaseStatus />
-        </div>
-
-        {/* Emergency Fix Button - Show when there are critical database issues */}
-        {!automationTablesExist && (
-          <div className="mb-6">
-            <EmergencyFixButton />
-          </div>
-        )}
-
         {/* Show notice if automation tables are missing */}
         {!automationTablesExist && (
           <AutomationTablesMissingNotice
@@ -428,104 +422,43 @@ export default function BacklinkAutomation() {
           />
         )}
 
-        {/* Database Health & Migration Test Section - Only show in development */}
-        {import.meta.env.DEV && (
-          <div className="mb-8 space-y-6">
-            <DatabaseHealthChecker />
-            <DatabaseMigrationTest />
-          </div>
-        )}
-
-        {/* Campaign Creation Test Section - Only show for authenticated users */}
-        {isAuthenticated && import.meta.env.DEV && (
-          <div className="mb-8">
-            <CampaignCreationTest />
-          </div>
-        )}
-
-        {/* Engine Selection */}
+        {/* Blog Comments Campaign Management */}
         <Card className="mb-8 shadow-lg border-0">
           <CardHeader>
-            <CardTitle className="text-2xl">Choose Your Strategy</CardTitle>
+            <CardTitle className="text-2xl flex items-center gap-3">
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-blue-100 text-blue-700 border-blue-200">
+                <MessageSquare className="h-6 w-6" />
+              </div>
+              Blog Comments Automation
+            </CardTitle>
             <CardDescription>
-              Select the backlink building approach that best fits your goals
+              Create and manage automated blog commenting campaigns to build high-quality backlinks
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {engines.map((engine) => {
-                const Icon = engine.icon;
-                const isSelected = selectedEngine === engine.id;
-
-                return (
-                  <Card
-                    key={engine.id}
-                    className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                      isSelected
-                        ? 'ring-2 ring-blue-500 shadow-md'
-                        : 'hover:shadow-lg'
-                    }`}
-                    onClick={() => setSelectedEngine(engine.id)}
-                  >
-                    <CardContent className="pt-6">
-                      <div className="text-center">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3 ${engine.color}`}>
-                          <Icon className="h-6 w-6" />
-                        </div>
-                        <h3 className="font-semibold text-gray-900 mb-2">
-                          {engine.name}
-                        </h3>
-                        <p className="text-sm text-gray-600 leading-relaxed">
-                          {engine.description}
-                        </p>
-                        {isSelected && (
-                          <Badge className="mt-3" variant="default">
-                            Selected
-                          </Badge>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </CardContent>
         </Card>
 
-        {/* Runtime & Reporting Section */}
+        {/* Runtime Status */}
         {isAuthenticated && activeCampaignCount > 0 && (
-          <ErrorBoundary
-            title="Runtime Reporting Error"
-            description="There was an issue loading the campaign reporting dashboard."
-            onError={(error, errorInfo) => {
-              console.error('RuntimeReporting error:', error, errorInfo);
-            }}
-          >
-            <RuntimeReporting
-              onToggleCampaign={handleToggleCampaign}
-              onRefreshData={async () => {
-                // Clear all caches and refresh data
-                const { stableCampaignMetrics } = await import('@/services/stableCampaignMetrics');
-                stableCampaignMetrics.clearCache();
-
-                // Refresh campaigns data in the hook
-                try {
-                  // Force refresh the campaign manager hook data
-                  window.dispatchEvent(new Event('campaign-data-refresh'));
-                } catch (error) {
-                  console.error('Error refreshing campaign data:', error);
-                }
-
-                // Check automation tables
-                await checkAutomationTables();
-
-                // Force a complete reload to ensure sync
-                setTimeout(() => {
-                  window.location.reload();
-                }, 500);
-              }}
-            />
-          </ErrorBoundary>
+          <Card className="mb-8 bg-blue-50 border-blue-200">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="font-medium text-blue-900">
+                    {activeCampaignCount} active campaign{activeCampaignCount !== 1 ? 's' : ''} running
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.reload()}
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                >
+                  Refresh Status
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Campaign Management */}
@@ -796,6 +729,7 @@ export default function BacklinkAutomation() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </AutomationWithDebugging>
   );
 }

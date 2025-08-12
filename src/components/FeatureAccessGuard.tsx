@@ -14,13 +14,13 @@ interface FeatureAccessGuardProps {
   fallbackMessage?: string;
 }
 
-export const FeatureAccessGuard = ({ 
-  children, 
-  feature, 
+export const FeatureAccessGuard = ({
+  children,
+  feature,
   featureName,
   fallbackMessage
 }: FeatureAccessGuardProps) => {
-  const { user } = useAuth();
+  const { user, isPremium } = useAuth();
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
@@ -29,6 +29,12 @@ export const FeatureAccessGuard = ({
   useEffect(() => {
     const checkAccess = async () => {
       if (!user) {
+        setIsLoading(false);
+        return;
+      }
+
+      // If isPremium is already true, we don't need to wait for subscription service
+      if (isPremium) {
         setIsLoading(false);
         return;
       }
@@ -44,7 +50,7 @@ export const FeatureAccessGuard = ({
     };
 
     checkAccess();
-  }, [user]);
+  }, [user, isPremium]);
 
   // Loading state
   if (isLoading) {
@@ -81,7 +87,7 @@ export const FeatureAccessGuard = ({
   }
 
   // User has access - show feature
-  if (subscriptionStatus?.features[feature]) {
+  if (isPremium || subscriptionStatus?.features[feature]) {
     return <>{children}</>;
   }
 

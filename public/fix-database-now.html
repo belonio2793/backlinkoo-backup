@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Database Columns NOW</title>
+    <style>
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            max-width: 900px; 
+            margin: 20px auto; 
+            padding: 20px; 
+            background: #f8fafc;
+        }
+        .container { background: white; padding: 24px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .button { 
+            background: #dc2626; 
+            color: white; 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 6px;
+            cursor: pointer; 
+            margin: 8px 4px; 
+            font-weight: 600;
+            font-size: 14px;
+        }
+        .button:hover { background: #b91c1c; }
+        .button.success { background: #059669; }
+        .button.success:hover { background: #047857; }
+        .button.secondary { background: #6b7280; }
+        .button.secondary:hover { background: #4b5563; }
+        .status { 
+            padding: 12px; 
+            margin: 12px 0; 
+            border-radius: 6px; 
+            font-weight: 500;
+        }
+        .error { background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .success { background: #f0fdf4; color: #059669; border: 1px solid #bbf7d0; }
+        .warning { background: #fffbeb; color: #d97706; border: 1px solid #fed7aa; }
+        .info { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+        .code { 
+            background: #1f2937; 
+            color: #f9fafb; 
+            padding: 16px; 
+            margin: 12px 0; 
+            font-family: 'Courier New', monospace; 
+            border-radius: 6px;
+            white-space: pre-wrap; 
+            overflow-x: auto;
+        }
+        .hidden { display: none; }
+        .grid { display: grid; gap: 12px; }
+        .column-item { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 12px; 
+            background: #f9fafb; 
+            border-radius: 6px;
+            border-left: 4px solid #e5e7eb;
+        }
+        .column-item.exists { background: #f0fdf4; border-left-color: #059669; }
+        .column-item.missing { background: #fef2f2; border-left-color: #dc2626; }
+        .badge { 
+            padding: 4px 8px; 
+            border-radius: 4px; 
+            font-size: 12px; 
+            font-weight: 600;
+        }
+        .badge.exists { background: #dcfce7; color: #059669; }
+        .badge.missing { background: #fef2f2; color: #dc2626; }
+        h1 { color: #111827; margin-bottom: 8px; }
+        h2 { color: #374151; margin: 24px 0 12px 0; }
+        p { color: #6b7280; line-height: 1.5; }
+        .loading { 
+            display: inline-block; 
+            width: 16px; 
+            height: 16px; 
+            border: 2px solid #f3f4f6; 
+            border-top: 2px solid #dc2626; 
+            border-radius: 50%; 
+            animation: spin 1s linear infinite; 
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>🚨 Fix Missing Database Columns</h1>
+        <p>This tool will fix the automation_campaigns table by adding: <strong>started_at</strong>, <strong>completed_at</strong>, <strong>auto_start</strong></p>
+        
+        <div id="status-section">
+            <h2>Current Status</h2>
+            <div id="connection-status" class="status info">🔄 Connecting to database...</div>
+            <div id="columns-grid" class="grid hidden"></div>
+        </div>
+
+        <div id="actions-section">
+            <h2>Actions</h2>
+            <button class="button" onclick="checkDatabase()" id="check-btn">
+                <span id="check-text">🔍 Check Database</span>
+            </button>
+            <button class="button" onclick="fixDatabase()" id="fix-btn" disabled>
+                <span id="fix-text">🔧 Fix Missing Columns</span>
+            </button>
+            <button class="button secondary" onclick="showManualFix()" id="manual-btn">
+                📋 Manual Fix Instructions
+            </button>
+        </div>
+
+        <div id="results"></div>
+        <div id="manual-section" class="hidden">
+            <h2>Manual Fix Instructions</h2>
+            <p class="warning status">Copy and run this SQL in your <strong>Supabase SQL Editor</strong>:</p>
+            <div class="code" id="manual-sql"></div>
+        </div>
+    </div>
+
+    <script>
+        let supabase = null;
+        let checkResults = null;
+
+        // Initialize with your actual Supabase credentials
+        function initSupabase() {
+            // Replace with actual values from your environment
+            const url = 'https://dfhanacsmsvvkpunurnp.supabase.co';
+            const key = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mjk5NDQ2NzIsImV4cCI6MjA0NTUyMDY3Mn0.mGUP4WOQYzfHx0zHkPAXYgclhGDhOGRr6d5--aFTVfE';
+            
+            try {
+                supabase = window.supabase.createClient(url, key);
+                log('✅ Connected to Supabase successfully', 'success');
+                return true;
+            } catch (error) {
+                log('❌ Failed to connect to Supabase: ' + error.message, 'error');
+                return false;
+            }
+        }
+
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            
+            // Add timestamp
+            const timestamp = new Date().toLocaleTimeString();
+            div.innerHTML = `[${timestamp}] ${message}`;
+            
+            results.appendChild(div);
+            console.log(`[${timestamp}] ${message}`);
+            
+            // Scroll to latest message
+            div.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function setButtonLoading(buttonId, textId, loading) {
+            const btn = document.getElementById(buttonId);
+            const text = document.getElementById(textId);
+            
+            btn.disabled = loading;
+            if (loading) {
+                text.innerHTML = '<span class="loading"></span> Working...';
+            }
+        }
+
+        async function checkDatabase() {
+            if (!supabase && !initSupabase()) return;
+
+            setButtonLoading('check-btn', 'check-text', true);
+            log('🔍 Checking automation_campaigns table structure...', 'info');
+
+            const requiredColumns = [
+                { name: 'started_at', type: 'TIMESTAMPTZ', nullable: true },
+                { name: 'completed_at', type: 'TIMESTAMPTZ', nullable: true },
+                { name: 'auto_start', type: 'BOOLEAN', nullable: false, default: 'false' }
+            ];
+
+            try {
+                // Test connection first
+                const { data: tables, error: tablesError } = await supabase
+                    .from('automation_campaigns')
+                    .select('id')
+                    .limit(1);
+
+                if (tablesError) {
+                    throw new Error(`Cannot access automation_campaigns table: ${tablesError.message}`);
+                }
+
+                log('✅ automation_campaigns table exists and is accessible', 'success');
+
+                // Check each column
+                const columnResults = [];
+                let hasExecSql = false;
+
+                // Try using exec_sql function first
+                try {
+                    const { data, error } = await supabase.rpc('exec_sql', {
+                        query: `
+                            SELECT column_name, data_type, is_nullable, column_default
+                            FROM information_schema.columns
+                            WHERE table_name = 'automation_campaigns'
+                            AND table_schema = 'public'
+                            AND column_name IN ('started_at', 'completed_at', 'auto_start')
+                            ORDER BY column_name;
+                        `
+                    });
+
+                    if (!error && data) {
+                        hasExecSql = true;
+                        log('✅ exec_sql function is available', 'success');
+                        
+                        for (const reqCol of requiredColumns) {
+                            const found = data.find(col => col.column_name === reqCol.name);
+                            columnResults.push({
+                                ...reqCol,
+                                exists: !!found,
+                                actualType: found?.data_type || 'N/A'
+                            });
+                        }
+                    } else {
+                        throw new Error('exec_sql not available');
+                    }
+                } catch (execError) {
+                    log('⚠️ exec_sql function not available, using fallback method', 'warning');
+                    
+                    // Fallback: test each column individually
+                    for (const reqCol of requiredColumns) {
+                        try {
+                            const { error } = await supabase
+                                .from('automation_campaigns')
+                                .select(reqCol.name)
+                                .limit(1);
+                            
+                            columnResults.push({
+                                ...reqCol,
+                                exists: !error,
+                                actualType: error ? 'MISSING' : 'UNKNOWN'
+                            });
+                        } catch (e) {
+                            columnResults.push({
+                                ...reqCol,
+                                exists: false,
+                                actualType: 'MISSING'
+                            });
+                        }
+                    }
+                }
+
+                // Display results
+                displayColumnStatus(columnResults);
+                
+                const missingCount = columnResults.filter(col => !col.exists).length;
+                checkResults = { columnResults, hasExecSql, missingCount };
+
+                if (missingCount === 0) {
+                    log('🎉 All required columns are present!', 'success');
+                    document.getElementById('fix-btn').disabled = true;
+                } else {
+                    log(`❌ Found ${missingCount} missing columns that need to be added`, 'error');
+                    document.getElementById('fix-btn').disabled = false;
+                    
+                    if (hasExecSql) {
+                        log('✅ Auto-fix is available', 'success');
+                    } else {
+                        log('⚠️ Auto-fix not available, manual fix required', 'warning');
+                    }
+                }
+
+            } catch (error) {
+                log(`❌ Database check failed: ${error.message}`, 'error');
+                checkResults = null;
+            } finally {
+                document.getElementById('check-text').textContent = '🔍 Check Database';
+                document.getElementById('check-btn').disabled = false;
+            }
+        }
+
+        function displayColumnStatus(columnResults) {
+            const grid = document.getElementById('columns-grid');
+            grid.innerHTML = '';
+            grid.classList.remove('hidden');
+
+            for (const col of columnResults) {
+                const item = document.createElement('div');
+                item.className = `column-item ${col.exists ? 'exists' : 'missing'}`;
+                
+                item.innerHTML = `
+                    <div>
+                        <strong>${col.name}</strong>
+                        <small style="color: #6b7280; margin-left: 8px;">
+                            ${col.exists ? col.actualType : `Expected: ${col.type}`}
+                        </small>
+                    </div>
+                    <span class="badge ${col.exists ? 'exists' : 'missing'}">
+                        ${col.exists ? '✅ EXISTS' : '❌ MISSING'}
+                    </span>
+                `;
+                
+                grid.appendChild(item);
+            }
+        }
+
+        async function fixDatabase() {
+            if (!checkResults) {
+                log('❌ Please run database check first', 'error');
+                return;
+            }
+
+            if (checkResults.missingCount === 0) {
+                log('ℹ️ No columns need to be fixed', 'info');
+                return;
+            }
+
+            if (!checkResults.hasExecSql) {
+                log('❌ Cannot auto-fix: exec_sql function not available', 'error');
+                showManualFix();
+                return;
+            }
+
+            setButtonLoading('fix-btn', 'fix-text', true);
+            log('🔧 Applying database fixes...', 'info');
+
+            try {
+                const missingColumns = checkResults.columnResults.filter(col => !col.exists);
+                const alterStatements = [];
+
+                for (const col of missingColumns) {
+                    switch (col.name) {
+                        case 'started_at':
+                            alterStatements.push('ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ NULL;');
+                            break;
+                        case 'completed_at':
+                            alterStatements.push('ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ NULL;');
+                            break;
+                        case 'auto_start':
+                            alterStatements.push('ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS auto_start BOOLEAN DEFAULT false NOT NULL;');
+                            break;
+                    }
+                }
+
+                const sql = alterStatements.join('\n');
+                log(`📝 Executing SQL:\n${sql}`, 'info');
+
+                const { error } = await supabase.rpc('exec_sql', { query: sql });
+
+                if (error) {
+                    throw error;
+                }
+
+                log('✅ Database fix applied successfully!', 'success');
+                log('🔄 Verifying changes...', 'info');
+
+                // Verify the fix
+                setTimeout(() => {
+                    checkDatabase();
+                }, 1000);
+
+            } catch (error) {
+                log(`❌ Database fix failed: ${error.message}`, 'error');
+                log('📋 Please try the manual fix method', 'warning');
+                showManualFix();
+            } finally {
+                document.getElementById('fix-text').textContent = '🔧 Fix Missing Columns';
+                document.getElementById('fix-btn').disabled = false;
+            }
+        }
+
+        function showManualFix() {
+            const sql = `-- Missing Database Columns Fix
+-- Run this in your Supabase SQL Editor
+
+-- Add missing columns to automation_campaigns table
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ NULL;
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ NULL;
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS auto_start BOOLEAN DEFAULT false NOT NULL;
+
+-- Verify the columns were added
+SELECT column_name, data_type, is_nullable, column_default
+FROM information_schema.columns
+WHERE table_name = 'automation_campaigns'
+AND column_name IN ('started_at', 'completed_at', 'auto_start')
+ORDER BY column_name;
+
+-- Optional: Create exec_sql function for future use
+CREATE OR REPLACE FUNCTION exec_sql(query text)
+RETURNS json
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  result json;
+BEGIN
+  EXECUTE query;
+  GET DIAGNOSTICS result = ROW_COUNT;
+  RETURN json_build_object('rows_affected', result);
+EXCEPTION
+  WHEN OTHERS THEN
+    RAISE EXCEPTION 'SQL execution failed: %', SQLERRM;
+END;
+$$;`;
+
+            document.getElementById('manual-sql').textContent = sql;
+            document.getElementById('manual-section').classList.remove('hidden');
+            
+            // Try to copy to clipboard
+            navigator.clipboard.writeText(sql).then(() => {
+                log('📋 SQL copied to clipboard automatically!', 'success');
+            }).catch(() => {
+                log('📋 Please copy the SQL manually from below', 'info');
+            });
+        }
+
+        // Auto-run check on page load
+        window.onload = function() {
+            if (initSupabase()) {
+                // Small delay to ensure UI is ready
+                setTimeout(checkDatabase, 500);
+            }
+        };
+    </script>
+</body>
+</html>
