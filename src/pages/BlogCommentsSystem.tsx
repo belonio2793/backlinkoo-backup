@@ -1554,13 +1554,24 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="auto_start"
-                    checked={formData.auto_start}
-                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, auto_start: checked }))}
-                  />
-                  <Label htmlFor="auto_start">Start campaign immediately</Label>
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="auto_start"
+                      checked={formData.auto_start}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, auto_start: checked }))}
+                    />
+                    <Label htmlFor="auto_start">Start campaign immediately</Label>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="automation_enabled"
+                      checked={formData.automation_enabled}
+                      onCheckedChange={(checked) => setFormData(prev => ({ ...prev, automation_enabled: checked }))}
+                    />
+                    <Label htmlFor="automation_enabled">Enable advanced automation (Playwright)</Label>
+                  </div>
                 </div>
 
                 <div className="flex justify-end gap-3">
