@@ -303,22 +303,51 @@ export default function BlogCommentsSystem() {
   // Blog discovery and comment generation
   const startCommentGeneration = async (campaignId: string, keyword: string) => {
     try {
-      // Discover blog URLs (simulated for now)
+      // Update campaign status to show generation is in progress
+      await supabase
+        .from('blog_campaigns')
+        .update({
+          status: 'active',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', campaignId);
+
+      // Discover blog URLs
+      toast.loading('🔍 Discovering relevant blogs...');
       const discoveredBlogs = await discoverBlogUrls(keyword);
 
-      // Generate comments for each discovered blog
-      for (const blogUrl of discoveredBlogs) {
-        const commentText = await generateComment(keyword);
+      // Update links found count
+      await supabase
+        .from('blog_campaigns')
+        .update({ links_found: discoveredBlogs.length })
+        .eq('id', campaignId);
 
-        await supabase.from('blog_comments').insert([{
-          campaign_id: campaignId,
-          blog_url: blogUrl,
-          comment_text: commentText,
-          status: 'pending'
-        }]);
+      toast.loading('🤖 Generating unique comments with ChatGPT 3.5 Turbo...');
+
+      // Generate comments for each discovered blog
+      let successCount = 0;
+      for (const blogUrl of discoveredBlogs) {
+        try {
+          const commentText = await generateComment(keyword);
+
+          await supabase.from('blog_comments').insert([{
+            campaign_id: campaignId,
+            blog_url: blogUrl,
+            comment_text: commentText,
+            status: 'pending'
+          }]);
+
+          successCount++;
+        } catch (error) {
+          console.error(`Failed to generate comment for ${blogUrl}:`, error);
+        }
       }
 
-      toast.success(`Generated ${discoveredBlogs.length} comments for review`);
+      toast.success(`✅ Generated ${successCount} unique comments for review`);
+
+      // Reload data to show updates
+      await Promise.all([loadCampaigns(), loadComments()]);
+
     } catch (error) {
       console.error('Error in comment generation:', error);
       toast.error('Failed to generate comments');
