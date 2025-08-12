@@ -43,6 +43,7 @@ const LazyAutomationSystem = lazy(() => import("./pages/AutomationSystem"));
 const LazyAuthErrorDebug = lazy(() => import("./pages/AuthErrorDebug"));
 const LazyTextCleanerDebug = lazy(() => import("./pages/TextCleanerDebug"));
 const LazyDatabaseColumnsFix = lazy(() => import("./pages/DatabaseColumnsFix"));
+const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
