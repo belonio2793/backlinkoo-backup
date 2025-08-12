@@ -154,6 +154,9 @@ export default function BlogCommentAutomation() {
       setCampaigns(data || []);
     } catch (error: any) {
       console.error('Error loading campaigns:', error);
+      if (error.message?.includes('relation') || error.message?.includes('column')) {
+        setShowDatabaseFix(true);
+      }
       toast.error('Failed to load campaigns');
     }
   };
