@@ -108,24 +108,36 @@ exports.handler = async (event, context) => {
 
   } catch (error) {
     console.error('Error generating comment:', error);
-    
+    console.error('Error details:', {
+      message: error.message,
+      stack: error.stack,
+      code: error.code
+    });
+
+    // Check if it's an OpenAI specific error
+    if (error.status) {
+      console.error('OpenAI API error status:', error.status);
+      console.error('OpenAI API error details:', error.error);
+    }
+
     // Return a fallback comment if OpenAI fails
+    const { keyword } = JSON.parse(event.body || '{}');
     const fallbackComments = [
-      `Really valuable insights about ${keyword}! This is exactly what I was looking for.`,
-      `Thanks for sharing this perspective on ${keyword} - very helpful!`,
-      `Great points about ${keyword}. Have you considered the impact on user experience too?`,
-      `This article on ${keyword} really opened my eyes to new possibilities.`,
-      `Appreciate the detailed breakdown of ${keyword}. Looking forward to implementing these ideas!`
+      `Really valuable insights about ${keyword || 'this topic'}! This is exactly what I was looking for.`,
+      `Thanks for sharing this perspective on ${keyword || 'this topic'} - very helpful!`,
+      `Great points about ${keyword || 'this topic'}. Have you considered the impact on user experience too?`,
+      `This article on ${keyword || 'this topic'} really opened my eyes to new possibilities.`,
+      `Appreciate the detailed breakdown of ${keyword || 'this topic'}. Looking forward to implementing these ideas!`
     ];
-    
+
     const fallbackComment = fallbackComments[Math.floor(Math.random() * fallbackComments.length)];
-    
+
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         comment: fallbackComment,
-        keyword,
+        keyword: keyword || 'unknown',
         fallback: true,
         error: error.message
       })
