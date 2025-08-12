@@ -530,7 +530,7 @@ export function BeautifulBlogPost() {
 
   const cleanTitle = (title: string) => {
     if (!title) return '';
-    // Remove all markdown artifacts from title including ** wrappers and Title: prefix
+    // Enhanced title cleaning with better pattern matching
     return title
       .replace(/^\s*\*\*Title:\s*([^*]*)\*\*\s*/i, '$1') // Remove **Title:** wrapper and extract content
       .replace(/^\*\*H1\*\*:\s*/i, '')
@@ -542,6 +542,7 @@ export function BeautifulBlogPost() {
       .replace(/\*/g, '') // Remove any remaining * symbols
       .replace(/^#{1,6}\s+/, '')
       .replace(/^Title:\s*/gi, '') // Final cleanup for any remaining Title: patterns
+      .replace(/\s+/g, ' ') // Normalize whitespace
       .trim();
   };
 
@@ -840,7 +841,7 @@ export function BeautifulBlogPost() {
                         <div className="space-y-1">
                           <p className="font-semibold">Available to Claim</p>
                           <p className="text-sm">This post is unclaimed and anyone can take ownership of it.</p>
-                          <p className="text-xs text-gray-400">⏳ May be deleted if not claimed soon</p>
+                          <p className="text-xs text-gray-400">�� May be deleted if not claimed soon</p>
                         </div>
                       </TooltipContent>
                     </Tooltip>
