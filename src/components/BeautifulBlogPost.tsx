@@ -662,37 +662,37 @@ export function BeautifulBlogPost() {
       
       <Header />
 
-      {/* Floating Action Bar */}
-      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-40 space-y-4">
+      {/* Floating Action Bar - Hidden on mobile */}
+      <div className="hidden lg:flex fixed right-6 top-1/2 transform -translate-y-1/2 z-40 flex-col space-y-4">
         <Button
           variant="ghost"
           size="icon"
-          className="w-11 h-11 rounded-full bg-transparent border-0 shadow-none hover:bg-white/10 hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 text-gray-400 hover:text-blue-600 hover:scale-110 group backdrop-blur-none"
+          className="w-11 h-11 rounded-full bg-white/90 border border-gray-200 shadow-md hover:bg-white hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 text-gray-600 hover:text-blue-600 hover:scale-110 backdrop-blur-sm"
           onClick={() => setIsBookmarked(!isBookmarked)}
         >
           {isBookmarked ? (
-            <BookmarkCheck className="h-5 w-5 text-blue-600 drop-shadow-sm" />
+            <BookmarkCheck className="h-5 w-5 text-blue-600" />
           ) : (
-            <Bookmark className="h-5 w-5 drop-shadow-sm" />
+            <Bookmark className="h-5 w-5" />
           )}
         </Button>
 
         <Button
           variant="ghost"
           size="icon"
-          className="w-11 h-11 rounded-full bg-transparent border-0 shadow-none hover:bg-white/10 hover:shadow-lg hover:shadow-red-500/25 transition-all duration-300 text-gray-400 hover:text-red-600 hover:scale-110 group backdrop-blur-none"
+          className="w-11 h-11 rounded-full bg-white/90 border border-gray-200 shadow-md hover:bg-white hover:shadow-lg hover:shadow-red-500/25 transition-all duration-300 text-gray-600 hover:text-red-600 hover:scale-110 backdrop-blur-sm"
           onClick={() => setIsLiked(!isLiked)}
         >
-          <Heart className={`h-5 w-5 drop-shadow-sm ${isLiked ? 'text-red-500 fill-current' : ''}`} />
+          <Heart className={`h-5 w-5 ${isLiked ? 'text-red-500 fill-current' : ''}`} />
         </Button>
 
         <Button
           variant="ghost"
           size="icon"
-          className="w-11 h-11 rounded-full bg-transparent border-0 shadow-none hover:bg-white/10 hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 text-gray-400 hover:text-purple-600 hover:scale-110 group backdrop-blur-none"
+          className="w-11 h-11 rounded-full bg-white/90 border border-gray-200 shadow-md hover:bg-white hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 text-gray-600 hover:text-purple-600 hover:scale-110 backdrop-blur-sm"
           onClick={sharePost}
         >
-          <Share2 className="h-5 w-5 drop-shadow-sm" />
+          <Share2 className="h-5 w-5" />
         </Button>
       </div>
 
