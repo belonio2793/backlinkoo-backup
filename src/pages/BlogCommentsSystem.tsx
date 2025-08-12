@@ -1783,6 +1783,48 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
             </Card>
           </div>
         )}
+
+        {/* Delete Campaign Confirmation Dialog */}
+        {deletingCampaignId && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-md">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-red-900">
+                  <AlertTriangle className="h-5 w-5" />
+                  Delete Campaign
+                </CardTitle>
+                <CardDescription>
+                  Are you sure you want to delete this campaign? This action cannot be undone.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Alert className="border-red-200 bg-red-50">
+                  <AlertTriangle className="h-4 w-4 text-red-600" />
+                  <AlertDescription className="text-red-800">
+                    This will permanently delete the campaign and all associated comments and data.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="flex justify-end gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setDeletingCampaignId(null)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={() => deleteCampaign(deletingCampaignId)}
+                    className="bg-red-600 hover:bg-red-700"
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Delete Campaign
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
 
       <Footer />
