@@ -55,27 +55,6 @@ const engines = [
     icon: MessageSquare,
     description: 'Post contextual comments on relevant blogs',
     color: 'bg-blue-100 text-blue-700 border-blue-200'
-  },
-  {
-    id: 'web2-platforms',
-    name: 'Web 2.0 Sites',
-    icon: Globe,
-    description: 'Create content on high-authority platforms',
-    color: 'bg-green-100 text-green-700 border-green-200'
-  },
-  {
-    id: 'forum-profiles',
-    name: 'Forum Profiles',
-    icon: Users,
-    description: 'Build authority through forum engagement',
-    color: 'bg-purple-100 text-purple-700 border-purple-200'
-  },
-  {
-    id: 'social-media',
-    name: 'Social Media',
-    icon: Share2,
-    description: 'Leverage social platforms for brand awareness',
-    color: 'bg-pink-100 text-pink-700 border-pink-200'
   }
 ];
 
