@@ -908,7 +908,8 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
                 Database Setup Required
               </CardTitle>
               <CardDescription className="text-orange-700">
-                The blog comment system needs its own database tables to avoid conflicts with existing automation.
+                The advanced blog comment automation system needs its database tables to be created.
+                This includes tables for campaigns, comments, accounts, and automation jobs.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
