@@ -398,24 +398,40 @@ export default function BlogCommentAutomation() {
   // Approve a pending post
   const approvePendingPost = async (post: PendingPost) => {
     try {
-      const response = await fetch('/.netlify/functions/enqueuePostComment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Generate a simple comment
+      const comment_text = `Great insights about ${post.keyword}! Thanks for sharing this valuable information.`;
+
+      // Update the backlink record
+      await supabase
+        .from('backlinks')
+        .update({
+          comment_text,
+          indexed_status: 'pending'
+        })
+        .eq('id', post.id);
+
+      // Enqueue post_comment job
+      await supabase.from('jobs').insert([{
+        job_type: 'post_comment',
+        payload: {
           campaign_id: post.campaign_id,
           candidate_url: post.candidate_url,
+          comment_text,
           anchor_text: post.anchor_text,
-          keyword: post.keyword,
           name: 'Blog Commenter',
-          email: 'noreply@example.com'
-        }),
-      });
+          email: 'noreply@example.com',
+          keyword: post.keyword
+        },
+        status: 'queued'
+      }]);
 
-      if (!response.ok) {
-        throw new Error('Failed to approve post');
-      }
+      // Log the event
+      await supabase.from('campaign_logs').insert([{
+        campaign_id: post.campaign_id,
+        level: 'info',
+        message: `Comment approved and queued for posting to ${post.candidate_url}`,
+        meta: { candidate_url: post.candidate_url }
+      }]);
 
       toast.success('Post approved and queued for submission');
       await loadPendingPosts();
