@@ -11,11 +11,11 @@ import './utils/silentErrorTest'
 // Test campaign error fixes
 import './utils/testCampaignFixes'
 // Check if database schema is properly configured
-import './utils/checkSchemaExecution'
+// import './utils/checkSchemaExecution' // Disabled - using new blog comment system
 // Auto-fix missing columns
-import './utils/fixMissingColumns'
+// import './utils/fixMissingColumns' // Disabled - using new blog comment system
 // Direct database fix
-import './utils/directDatabaseFix'
+// import './utils/directDatabaseFix' // Disabled - using new blog comment system
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
 
