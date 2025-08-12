@@ -110,6 +110,7 @@ export default function BlogCommentsSystem() {
   const [showDatabaseSetup, setShowDatabaseSetup] = useState(false);
   const [deletingCampaignId, setDeletingCampaignId] = useState<string | null>(null);
   const [isFixingSchema, setIsFixingSchema] = useState(false);
+  const [browserPoolActive, setBrowserPoolActive] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -577,7 +578,7 @@ export default function BlogCommentsSystem() {
         .eq('id', campaignId);
 
       // Discover blog URLs
-      toast.loading('��� Discovering relevant blogs...');
+      toast.loading('🔍 Discovering relevant blogs...');
       const discoveredBlogs = await discoverBlogUrls(keyword);
 
       // Update links found count
