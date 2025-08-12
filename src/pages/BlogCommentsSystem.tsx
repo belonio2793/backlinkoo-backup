@@ -271,7 +271,8 @@ export default function BlogCommentsSystem() {
         target_url: '',
         keyword: '',
         anchor_text: '',
-        auto_start: false
+        auto_start: false,
+        automation_enabled: false
       });
       
       await loadCampaigns();
