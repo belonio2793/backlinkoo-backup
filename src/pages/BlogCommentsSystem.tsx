@@ -776,6 +776,31 @@ AND table_name IN ('blog_campaigns', 'blog_comments');`;
                     </div>
                   </CardContent>
                 </Card>
+
+                {/* AI Prompts Display */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Bot className="h-5 w-5" />
+                      Active ChatGPT 3.5 Turbo Prompts
+                    </CardTitle>
+                    <CardDescription>
+                      Five unique prompts ensure comment variety and authenticity
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {commentPrompts.map((prompt, index) => (
+                        <div key={index} className="p-3 bg-gray-50 rounded-lg border">
+                          <div className="flex items-center gap-2 mb-2">
+                            <Badge variant="secondary">Prompt {index + 1}</Badge>
+                          </div>
+                          <p className="text-sm text-gray-700">{prompt}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
               </TabsContent>
 
               {/* Campaigns Tab */}
