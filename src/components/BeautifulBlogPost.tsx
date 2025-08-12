@@ -935,16 +935,16 @@ export function BeautifulBlogPost() {
               )}
 
               {/* Article Meta */}
-              <div className="flex flex-wrap items-center justify-center gap-6 text-gray-500 mb-8">
+              <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-gray-500 mb-8">
                 <div className="beautiful-meta flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <span className="font-medium">
+                  <span className="font-medium text-sm md:text-base">
                     {format(new Date(blogPost.created_at), 'MMMM dd, yyyy')}
                   </span>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  <span className="font-medium">{blogPost.reading_time || 0} min read</span>
+                  <span className="font-medium text-sm md:text-base">{blogPost.reading_time || 0} min read</span>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <SEOScoreDisplay
