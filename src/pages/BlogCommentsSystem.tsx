@@ -495,6 +495,107 @@ export default function BlogCommentsSystem() {
     }
   };
 
+  // Advanced blog discovery
+  const runBlogDiscovery = async (campaignId: string) => {
+    setIsProcessing(true);
+    try {
+      toast.loading('🔍 Running advanced blog discovery...');
+
+      const response = await fetch('/.netlify/functions/process-automation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          campaignId,
+          jobType: 'discover_blogs'
+        })
+      });
+
+      if (!response.ok) throw new Error('Discovery failed');
+
+      const result = await response.json();
+      toast.success(`✅ Discovered ${result.result.total_found} new blog opportunities`);
+
+      await Promise.all([loadCampaigns(), loadComments(), loadAutomationJobs()]);
+    } catch (error) {
+      console.error('Error in blog discovery:', error);
+      toast.error('Blog discovery failed');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Automated comment posting
+  const runAutomatedPosting = async (campaignId: string) => {
+    setIsProcessing(true);
+    try {
+      toast.loading('🤖 Starting automated comment posting...');
+
+      const response = await fetch('/.netlify/functions/process-automation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          campaignId,
+          jobType: 'post_comments'
+        })
+      });
+
+      if (!response.ok) throw new Error('Posting failed');
+
+      const result = await response.json();
+      toast.success(`✅ Posted ${result.result.successful_posts} comments successfully`);
+
+      await Promise.all([loadCampaigns(), loadComments(), loadAutomationJobs()]);
+    } catch (error) {
+      console.error('Error in automated posting:', error);
+      toast.error('Automated posting failed');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Create blog account
+  const createAccount = async () => {
+    if (!isAuthenticated) {
+      toast.error('Please sign in to create accounts');
+      return;
+    }
+
+    if (!accountFormData.email || !accountFormData.platform) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setIsCreating(true);
+    try {
+      const { error } = await supabase
+        .from('blog_accounts')
+        .insert([{
+          user_id: user?.id,
+          platform: accountFormData.platform,
+          email: accountFormData.email,
+          display_name: accountFormData.display_name,
+          verification_status: 'pending'
+        }]);
+
+      if (error) throw error;
+
+      toast.success('Account created! Verification needed for automation.');
+      setShowAccountForm(false);
+      setAccountFormData({
+        platform: 'substack',
+        email: '',
+        display_name: ''
+      });
+
+      await loadAccounts();
+    } catch (error: any) {
+      console.error('Error creating account:', error);
+      toast.error(error.message || 'Failed to create account');
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   // Initialize
   useEffect(() => {
     const initialize = async () => {
