@@ -413,12 +413,13 @@ export default function BlogCommentsSystem() {
         })
       });
 
+      const responseText = await response.text();
+
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Failed to start target discovery: ${response.status} ${errorText}`);
+        throw new Error(`Failed to start target discovery: ${response.status} ${responseText}`);
       }
 
-      const result = await response.json();
+      const result = JSON.parse(responseText);
       toast.success(`✅ Discovery started - estimated ${result.estimated_targets} targets`);
       
       // Monitor progress
