@@ -708,14 +708,20 @@ export function BeautifulBlogPost() {
               <ArrowLeft className="h-4 w-4" />
               Back to Blog
             </Button>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" onClick={sharePost} className="rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-blue-300 hover:text-blue-600 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center gap-2 md:gap-3">
+              <Button variant="outline" size="sm" onClick={sharePost} className="hidden md:flex rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-blue-300 hover:text-blue-600 hover:shadow-md transition-all duration-300">
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
               </Button>
-              <Button variant="outline" size="sm" onClick={copyToClipboard} className="rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-purple-300 hover:text-purple-600 hover:shadow-md transition-all duration-300">
+              <Button variant="outline" size="sm" onClick={sharePost} className="flex md:hidden rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-blue-300 hover:text-blue-600 hover:shadow-md transition-all duration-300">
+                <Share2 className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={copyToClipboard} className="hidden md:flex rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-purple-300 hover:text-purple-600 hover:shadow-md transition-all duration-300">
                 <Copy className="h-4 w-4 mr-2" />
                 Copy Link
+              </Button>
+              <Button variant="outline" size="sm" onClick={copyToClipboard} className="flex md:hidden rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-purple-300 hover:text-purple-600 hover:shadow-md transition-all duration-300">
+                <Copy className="h-4 w-4" />
               </Button>
             </div>
           </div>
