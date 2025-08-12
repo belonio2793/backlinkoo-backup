@@ -530,7 +530,7 @@ export function BeautifulBlogPost() {
 
   const cleanTitle = (title: string) => {
     if (!title) return '';
-    // Remove all markdown artifacts from title including ** wrappers and Title: prefix
+    // Enhanced title cleaning with better pattern matching
     return title
       .replace(/^\s*\*\*Title:\s*([^*]*)\*\*\s*/i, '$1') // Remove **Title:** wrapper and extract content
       .replace(/^\*\*H1\*\*:\s*/i, '')
@@ -542,18 +542,31 @@ export function BeautifulBlogPost() {
       .replace(/\*/g, '') // Remove any remaining * symbols
       .replace(/^#{1,6}\s+/, '')
       .replace(/^Title:\s*/gi, '') // Final cleanup for any remaining Title: patterns
+      .replace(/\s+/g, ' ') // Normalize whitespace
       .trim();
   };
 
   const autoRemoveTitlesFromContent = (content: string, pageTitle: string) => {
-    if (!content || !pageTitle) return content;
+    if (!content) return content;
+
+    // First, check if content is markdown or already HTML
+    const isMarkdown = content.includes('**') || content.includes('##') || content.includes('*') && !content.includes('<');
+
+    // If it's markdown, convert it to HTML first
+    let processedContent = content;
+    if (isMarkdown) {
+      processedContent = ContentFormatter.formatBlogContent(content, pageTitle);
+    }
+
+    // Now remove duplicate titles if pageTitle is provided
+    if (!pageTitle) return processedContent;
 
     const cleanedPageTitle = cleanTitle(pageTitle).toLowerCase().trim();
-    if (!cleanedPageTitle) return content;
+    if (!cleanedPageTitle) return processedContent;
 
     // Create a temporary div to parse HTML
     const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = content;
+    tempDiv.innerHTML = processedContent;
 
     // Find and remove duplicate title headings (h1, h2, h3)
     const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
@@ -662,37 +675,37 @@ export function BeautifulBlogPost() {
       
       <Header />
 
-      {/* Floating Action Bar */}
-      <div className="fixed right-6 top-1/2 transform -translate-y-1/2 z-40 space-y-4">
+      {/* Floating Action Bar - Hidden on mobile */}
+      <div className="hidden lg:flex fixed right-6 top-1/2 transform -translate-y-1/2 z-40 flex-col space-y-4">
         <Button
           variant="ghost"
           size="icon"
-          className="w-11 h-11 rounded-full bg-transparent border-0 shadow-none hover:bg-white/10 hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 text-gray-400 hover:text-blue-600 hover:scale-110 group backdrop-blur-none"
+          className="w-11 h-11 rounded-full bg-white/90 border border-gray-200 shadow-md hover:bg-white hover:shadow-lg hover:shadow-blue-500/25 transition-all duration-300 text-gray-600 hover:text-blue-600 hover:scale-110 backdrop-blur-sm"
           onClick={() => setIsBookmarked(!isBookmarked)}
         >
           {isBookmarked ? (
-            <BookmarkCheck className="h-5 w-5 text-blue-600 drop-shadow-sm" />
+            <BookmarkCheck className="h-5 w-5 text-blue-600" />
           ) : (
-            <Bookmark className="h-5 w-5 drop-shadow-sm" />
+            <Bookmark className="h-5 w-5" />
           )}
         </Button>
 
         <Button
           variant="ghost"
           size="icon"
-          className="w-11 h-11 rounded-full bg-transparent border-0 shadow-none hover:bg-white/10 hover:shadow-lg hover:shadow-red-500/25 transition-all duration-300 text-gray-400 hover:text-red-600 hover:scale-110 group backdrop-blur-none"
+          className="w-11 h-11 rounded-full bg-white/90 border border-gray-200 shadow-md hover:bg-white hover:shadow-lg hover:shadow-red-500/25 transition-all duration-300 text-gray-600 hover:text-red-600 hover:scale-110 backdrop-blur-sm"
           onClick={() => setIsLiked(!isLiked)}
         >
-          <Heart className={`h-5 w-5 drop-shadow-sm ${isLiked ? 'text-red-500 fill-current' : ''}`} />
+          <Heart className={`h-5 w-5 ${isLiked ? 'text-red-500 fill-current' : ''}`} />
         </Button>
 
         <Button
           variant="ghost"
           size="icon"
-          className="w-11 h-11 rounded-full bg-transparent border-0 shadow-none hover:bg-white/10 hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 text-gray-400 hover:text-purple-600 hover:scale-110 group backdrop-blur-none"
+          className="w-11 h-11 rounded-full bg-white/90 border border-gray-200 shadow-md hover:bg-white hover:shadow-lg hover:shadow-purple-500/25 transition-all duration-300 text-gray-600 hover:text-purple-600 hover:scale-110 backdrop-blur-sm"
           onClick={sharePost}
         >
-          <Share2 className="h-5 w-5 drop-shadow-sm" />
+          <Share2 className="h-5 w-5" />
         </Button>
       </div>
 
@@ -708,14 +721,20 @@ export function BeautifulBlogPost() {
               <ArrowLeft className="h-4 w-4" />
               Back to Blog
             </Button>
-            <div className="flex items-center gap-3">
-              <Button variant="outline" size="sm" onClick={sharePost} className="rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-blue-300 hover:text-blue-600 hover:shadow-md transition-all duration-300">
+            <div className="flex items-center gap-2 md:gap-3">
+              <Button variant="outline" size="sm" onClick={sharePost} className="hidden md:flex rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-blue-300 hover:text-blue-600 hover:shadow-md transition-all duration-300">
                 <Share2 className="h-4 w-4 mr-2" />
                 Share
               </Button>
-              <Button variant="outline" size="sm" onClick={copyToClipboard} className="rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-purple-300 hover:text-purple-600 hover:shadow-md transition-all duration-300">
+              <Button variant="outline" size="sm" onClick={sharePost} className="flex md:hidden rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-blue-300 hover:text-blue-600 hover:shadow-md transition-all duration-300">
+                <Share2 className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={copyToClipboard} className="hidden md:flex rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-purple-300 hover:text-purple-600 hover:shadow-md transition-all duration-300">
                 <Copy className="h-4 w-4 mr-2" />
                 Copy Link
+              </Button>
+              <Button variant="outline" size="sm" onClick={copyToClipboard} className="flex md:hidden rounded-full bg-transparent border-gray-200 hover:bg-transparent hover:border-purple-300 hover:text-purple-600 hover:shadow-md transition-all duration-300">
+                <Copy className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -834,7 +853,7 @@ export function BeautifulBlogPost() {
                         <div className="space-y-1">
                           <p className="font-semibold">Available to Claim</p>
                           <p className="text-sm">This post is unclaimed and anyone can take ownership of it.</p>
-                          <p className="text-xs text-gray-400">⏳ May be deleted if not claimed soon</p>
+                          <p className="text-xs text-gray-400">�� May be deleted if not claimed soon</p>
                         </div>
                       </TooltipContent>
                     </Tooltip>
@@ -917,7 +936,7 @@ export function BeautifulBlogPost() {
               </div>
 
               {/* Title */}
-              <h1 className="beautiful-blog-title text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight">
+              <h1 className="beautiful-blog-title text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight break-words">
                 {cleanTitle(blogPost.title)}
               </h1>
 
@@ -929,16 +948,16 @@ export function BeautifulBlogPost() {
               )}
 
               {/* Article Meta */}
-              <div className="flex flex-wrap items-center justify-center gap-6 text-gray-500 mb-8">
+              <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-gray-500 mb-8">
                 <div className="beautiful-meta flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <span className="font-medium">
+                  <span className="font-medium text-sm md:text-base">
                     {format(new Date(blogPost.created_at), 'MMMM dd, yyyy')}
                   </span>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  <span className="font-medium">{blogPost.reading_time || 0} min read</span>
+                  <span className="font-medium text-sm md:text-base">{blogPost.reading_time || 0} min read</span>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <SEOScoreDisplay
@@ -958,11 +977,11 @@ export function BeautifulBlogPost() {
 
 
 
-            {/* Article Content - Moved higher */}
-            <div className="prose prose-lg max-w-none -mt-8">
-              <div className="beautiful-card pt-4 px-8 pb-8 md:pt-6 md:px-12 md:pb-12">
+            {/* Article Content */}
+            <div className="prose prose-lg max-w-none mt-8">
+              <div className="beautiful-card pt-6 px-6 pb-8 md:pt-8 md:px-12 md:pb-12 lg:px-16">
                 <div
-                  className="beautiful-blog-content beautiful-prose prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h1:text-4xl prose-h2:text-3xl prose-h3:text-2xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-strong:font-bold prose-strong:text-gray-900"
+                  className="beautiful-blog-content beautiful-prose prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-strong:font-bold prose-strong:text-gray-900 prose-img:rounded-lg prose-img:shadow-lg"
                   dangerouslySetInnerHTML={{
                     __html: autoRemoveTitlesFromContent(blogPost.content || '', blogPost.title || '')
                   }}
