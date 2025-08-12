@@ -480,11 +480,12 @@ export default function SimpleAutomation() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">{currentCampaign.name}</p>
-                      <p className="text-sm text-gray-600">
-                        Status: <Badge variant={currentCampaign.status === 'active' ? 'default' : 'secondary'}>
+                      <div className="text-sm text-gray-600 flex items-center gap-2">
+                        <span>Status:</span>
+                        <Badge variant={currentCampaign.status === 'active' ? 'default' : 'secondary'}>
                           {currentCampaign.status}
                         </Badge>
-                      </p>
+                      </div>
                     </div>
                     <div className="text-right text-sm">
                       <div>Found: {currentCampaign.links_found} blogs</div>
