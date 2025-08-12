@@ -49,12 +49,12 @@ exports.handler = async (event, context) => {
     }
 
     // Generate comment using ChatGPT 3.5 Turbo
-    const completion = await openai.createChatCompletion({
+    const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
         {
           role: 'system',
-          content: `You are a helpful assistant that generates authentic, engaging blog comments. 
+          content: `You are a helpful assistant that generates authentic, engaging blog comments.
                    Generate comments that:
                    - Are natural and conversational
                    - Add value to the discussion
@@ -74,7 +74,7 @@ exports.handler = async (event, context) => {
       presence_penalty: 0.3
     });
 
-    const comment = completion.data.choices[0]?.message?.content?.trim();
+    const comment = completion.choices[0]?.message?.content?.trim();
 
     if (!comment) {
       throw new Error('No comment generated');
