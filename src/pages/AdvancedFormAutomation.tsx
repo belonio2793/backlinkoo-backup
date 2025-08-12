@@ -861,8 +861,13 @@ export default function AdvancedFormAutomation() {
                   <Alert>
                     <Target className="h-4 w-4" />
                     <AlertDescription>
-                      Latest discovery found {discoveredForms.length} potential comment forms. 
+                      Latest discovery found {discoveredForms.length} potential comment forms.
                       {discoveredForms.filter(f => f.confidence > 80).length} have high confidence scores.
+                      {isSimulationMode && (
+                        <span className="block mt-1 text-yellow-700 text-sm">
+                          📝 Note: Using simulated data for demonstration. Real discovery requires database setup.
+                        </span>
+                      )}
                     </AlertDescription>
                   </Alert>
                 )}
