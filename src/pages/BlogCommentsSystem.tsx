@@ -779,7 +779,7 @@ export default function BlogCommentsSystem() {
   const runBlogDiscovery = async (campaignId: string) => {
     setIsProcessing(true);
     try {
-      toast.loading('🔍 Running advanced blog discovery...');
+      toast.loading('���� Running advanced blog discovery...');
 
       const response = await fetch('/.netlify/functions/process-automation', {
         method: 'POST',
@@ -910,6 +910,7 @@ export default function BlogCommentsSystem() {
         // Try to load advanced features (may fail if tables don't exist)
         await loadAccounts();
         await loadAutomationJobs();
+        await loadAutomationStatus();
       }
       
       setIsLoading(false);
