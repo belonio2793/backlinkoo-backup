@@ -410,7 +410,10 @@ export default function BlogCommentsSystem() {
         })
       });
 
-      if (!response.ok) throw new Error('Failed to start target discovery');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to start target discovery: ${response.status} ${errorText}`);
+      }
 
       const result = await response.json();
       toast.success(`✅ Discovery started - estimated ${result.estimated_targets} targets`);
