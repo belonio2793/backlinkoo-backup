@@ -606,7 +606,9 @@ export default function BlogCommentsSystem() {
       if (tablesExist && isAuthenticated) {
         await Promise.all([
           loadCampaigns(),
-          loadComments()
+          loadComments(),
+          loadAccounts(),
+          loadAutomationJobs()
         ]);
       }
       
