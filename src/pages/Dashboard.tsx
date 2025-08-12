@@ -810,8 +810,6 @@ const Dashboard = () => {
 
       // Map hash values to tab values
       const hashToTabMap: { [key: string]: string } = {
-        'keyword-research': 'keyword-research',
-        'rank-tracker': 'rank-tracker',
         'automation-link-building': 'automation-link-building',
         'campaigns': 'campaigns',
         'overview': 'overview',
