@@ -41,30 +41,63 @@ exports.handler = async (event, context) => {
     // In production, this would use search APIs like Bing Custom Search, SerpAPI, etc.
     const searchResults = await simulateFormDiscovery(query, maxResults, targetDomains);
 
-    // Store discovered URLs in database for processing
+    // Try to store discovered URLs in database (graceful failure if tables don't exist)
     const discoveredUrls = [];
+    let databaseAvailable = true;
+
     for (const result of searchResults) {
       try {
-        const { data, error } = await supabase
-          .from('discovered_forms')
-          .upsert([{
+        if (databaseAvailable) {
+          const { data, error } = await supabase
+            .from('discovered_forms')
+            .upsert([{
+              url: result.url,
+              domain: result.domain,
+              title: result.title,
+              snippet: result.snippet,
+              discovery_query: query,
+              confidence_score: result.confidence,
+              status: 'pending_detection',
+              discovered_at: new Date().toISOString()
+            }], { onConflict: 'url' })
+            .select();
+
+          if (error) {
+            if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
+              console.log('Database tables not set up yet, skipping database storage');
+              databaseAvailable = false;
+              // Add to results anyway for frontend display
+              discoveredUrls.push({
+                url: result.url,
+                domain: result.domain,
+                title: result.title,
+                confidence_score: result.confidence
+              });
+            } else {
+              console.error('Database error:', error);
+            }
+          } else if (data) {
+            discoveredUrls.push(data[0]);
+          }
+        } else {
+          // Database not available, just add to results for display
+          discoveredUrls.push({
             url: result.url,
             domain: result.domain,
             title: result.title,
-            snippet: result.snippet,
-            discovery_query: query,
-            confidence_score: result.confidence,
-            status: 'pending_detection',
-            discovered_at: new Date().toISOString()
-          }], { onConflict: 'url' })
-          .select();
-
-        if (!error && data) {
-          discoveredUrls.push(data[0]);
+            confidence_score: result.confidence
+          });
         }
       } catch (dbError) {
-        console.error('Database error:', dbError);
+        console.error('Database operation error:', dbError);
+        databaseAvailable = false;
         // Continue processing other URLs
+        discoveredUrls.push({
+          url: result.url,
+          domain: result.domain,
+          title: result.title,
+          confidence_score: result.confidence
+        });
       }
     }
 
