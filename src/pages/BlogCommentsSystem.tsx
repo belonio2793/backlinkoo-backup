@@ -243,6 +243,115 @@ export default function BlogCommentsSystem() {
     }
   };
 
+  // Comment generation prompts for variety
+  const commentPrompts = [
+    "Write a short, one-sentence comment that expresses a positive or engaging opinion about {{keyword}}.",
+    "In one sentence, give a casual, friendly remark about {{keyword}} that would fit in a social media conversation.",
+    "Create a single-sentence comment about {{keyword}} that feels authentic and relevant.",
+    "Write one concise, conversational comment that reacts to {{keyword}} in a relatable way.",
+    "In one sentence, share a quick thought or reaction about {{keyword}} that would encourage further discussion."
+  ];
+
+  // Generate comment using OpenAI
+  const generateComment = async (keyword: string) => {
+    try {
+      // Select random prompt
+      const randomPrompt = commentPrompts[Math.floor(Math.random() * commentPrompts.length)];
+      const prompt = randomPrompt.replace('{{keyword}}', keyword);
+
+      const response = await fetch('/api/generate-comment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          prompt,
+          keyword
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate comment');
+      }
+
+      const data = await response.json();
+      return data.comment;
+    } catch (error) {
+      console.error('Error generating comment:', error);
+      // Fallback to manual templates
+      return generateFallbackComment(keyword);
+    }
+  };
+
+  // Fallback comment generation
+  const generateFallbackComment = (keyword: string) => {
+    const templates = [
+      `Really valuable insights about ${keyword}! This is exactly what I was looking for.`,
+      `Thanks for sharing this perspective on ${keyword} - very helpful!`,
+      `Great points about ${keyword}. Have you considered the impact on user experience too?`,
+      `This article on ${keyword} really opened my eyes to new possibilities.`,
+      `Appreciate the detailed breakdown of ${keyword}. Looking forward to implementing these ideas!`,
+      `Excellent work on explaining ${keyword} in such an accessible way.`,
+      `The section about ${keyword} was particularly enlightening. Thanks for the great content!`,
+      `As someone working with ${keyword}, I found this incredibly useful. Bookmarked!`,
+      `Your approach to ${keyword} is refreshing. Have you written more on this topic?`,
+      `This ${keyword} guide is going straight to my reference folder. Much appreciated!`
+    ];
+    return templates[Math.floor(Math.random() * templates.length)];
+  };
+
+  // Blog discovery and comment generation
+  const startCommentGeneration = async (campaignId: string, keyword: string) => {
+    try {
+      // Discover blog URLs (simulated for now)
+      const discoveredBlogs = await discoverBlogUrls(keyword);
+
+      // Generate comments for each discovered blog
+      for (const blogUrl of discoveredBlogs) {
+        const commentText = await generateComment(keyword);
+
+        await supabase.from('blog_comments').insert([{
+          campaign_id: campaignId,
+          blog_url: blogUrl,
+          comment_text: commentText,
+          status: 'pending'
+        }]);
+      }
+
+      toast.success(`Generated ${discoveredBlogs.length} comments for review`);
+    } catch (error) {
+      console.error('Error in comment generation:', error);
+      toast.error('Failed to generate comments');
+    }
+  };
+
+  // Blog URL discovery (enhanced simulation)
+  const discoverBlogUrls = async (keyword: string) => {
+    // This would be replaced with real blog discovery logic
+    const blogDomains = [
+      'blog1.example.com', 'blog2.example.com', 'blog3.example.com',
+      'techblog.example.com', 'insights.example.com', 'articles.example.com',
+      'reviews.example.com', 'news.example.com', 'updates.example.com'
+    ];
+
+    const blogPaths = [
+      'posts', 'articles', 'reviews', 'insights', 'guides', 'tutorials',
+      'news', 'updates', 'resources', 'blog'
+    ];
+
+    const urls = [];
+    const numBlogs = Math.min(5, blogDomains.length);
+
+    for (let i = 0; i < numBlogs; i++) {
+      const domain = blogDomains[Math.floor(Math.random() * blogDomains.length)];
+      const path = blogPaths[Math.floor(Math.random() * blogPaths.length)];
+      const slug = keyword.toLowerCase().replace(/\s+/g, '-');
+      urls.push(`https://${domain}/${path}/${slug}`);
+    }
+
+    return urls;
+  };
+
   // Initialize
   useEffect(() => {
     const initialize = async () => {
