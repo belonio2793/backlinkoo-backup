@@ -287,11 +287,38 @@ export default function BlogCommentsSystem() {
         campaignData.automation_enabled = true;
       }
 
-      const { data: campaign, error } = await supabase
+      let campaign, error;
+
+      // Try with automation_enabled first
+      const result = await supabase
         .from('blog_campaigns')
         .insert([campaignData])
         .select('*')
         .single();
+
+      campaign = result.data;
+      error = result.error;
+
+      // If error is about missing column, try without automation_enabled
+      if (error && (error.message?.includes('automation_enabled') || error.message?.includes('column'))) {
+        console.log('Retrying campaign creation without automation_enabled column...');
+
+        const fallbackData = { ...campaignData };
+        delete fallbackData.automation_enabled;
+
+        const fallbackResult = await supabase
+          .from('blog_campaigns')
+          .insert([fallbackData])
+          .select('*')
+          .single();
+
+        campaign = fallbackResult.data;
+        error = fallbackResult.error;
+
+        if (!error) {
+          console.log('Campaign created successfully without automation column');
+        }
+      }
 
       if (error) throw error;
 
