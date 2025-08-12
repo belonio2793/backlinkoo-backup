@@ -1145,6 +1145,12 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
                                     }>
                                       {campaign.status}
                                     </Badge>
+                                    {campaign.automation_enabled && (
+                                      <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200">
+                                        <Bot className="h-3 w-3 mr-1" />
+                                        Auto
+                                      </Badge>
+                                    )}
                                   </div>
                                   <div className="space-y-1 text-sm text-gray-600">
                                     <p><strong>Target URL:</strong> {campaign.target_url}</p>
