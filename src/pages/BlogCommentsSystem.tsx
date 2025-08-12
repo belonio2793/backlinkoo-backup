@@ -935,6 +935,22 @@ CREATE TRIGGER update_campaign_stats_trigger
   FOR EACH ROW
   EXECUTE FUNCTION update_campaign_stats();
 
+-- Helper function for schema checking
+CREATE OR REPLACE FUNCTION get_table_columns(table_name text)
+RETURNS TABLE(column_name text, data_type text, is_nullable text) AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        c.column_name::text,
+        c.data_type::text,
+        c.is_nullable::text
+    FROM information_schema.columns c
+    WHERE c.table_name = $1
+    AND c.table_schema = 'public'
+    ORDER BY c.ordinal_position;
+END;
+$$ LANGUAGE plpgsql;
+
 -- Verify tables were created
 SELECT table_name FROM information_schema.tables
 WHERE table_schema = 'public'
