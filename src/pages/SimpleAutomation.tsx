@@ -359,9 +359,9 @@ export default function SimpleAutomation() {
                   <Progress value={progress} className="w-full h-3" />
                   {jobStatus && (
                     <p className="text-sm text-gray-600 text-center">
-                      {jobStatus.job_type === 'discover' && 'Finding relevant blogs...'}
-                      {jobStatus.job_type === 'detect' && 'Analyzing comment forms...'}
-                      {jobStatus.job_type === 'post' && 'Posting comments with your links...'}
+                      {jobStatus.result?.message ||
+                       (jobStatus.job_type === 'discover' && 'Finding relevant blogs...') ||
+                       'Processing automation...'}
                     </p>
                   )}
                 </div>
