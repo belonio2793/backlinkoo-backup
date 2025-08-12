@@ -448,6 +448,62 @@ export default function BlogCommentsSystem() {
     }
   };
 
+  // Start browser pool for automation
+  const startBrowserPool = async () => {
+    try {
+      toast.loading('🚀 Starting browser automation pool...');
+      await campaignBrowserManager.startCampaignMonitoring();
+      setBrowserPoolActive(true);
+      toast.success('✅ Browser automation pool started');
+    } catch (error: any) {
+      console.error('Failed to start browser pool:', error);
+      toast.error('Failed to start browser pool');
+    }
+  };
+
+  // Stop browser pool
+  const stopBrowserPool = async () => {
+    try {
+      toast.loading('🛑 Stopping browser automation pool...');
+      await campaignBrowserManager.stopCampaignMonitoring();
+      setBrowserPoolActive(false);
+      toast.success('✅ Browser automation pool stopped');
+    } catch (error: any) {
+      console.error('Failed to stop browser pool:', error);
+      toast.error('Failed to stop browser pool');
+    }
+  };
+
+  // Start browser automation for a specific campaign
+  const startCampaignBrowserAutomation = async (campaignId: string, campaignName: string) => {
+    try {
+      const result = await campaignBrowserManager.startCampaignAutomation(campaignId, campaignName);
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error: any) {
+      console.error('Failed to start browser automation:', error);
+      toast.error('Failed to start browser automation');
+    }
+  };
+
+  // Stop browser automation for a specific campaign
+  const stopCampaignBrowserAutomation = async (campaignId: string) => {
+    try {
+      const result = await campaignBrowserManager.stopCampaignAutomation(campaignId);
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error: any) {
+      console.error('Failed to stop browser automation:', error);
+      toast.error('Failed to stop browser automation');
+    }
+  };
+
   // Approve comment for posting
   const approveComment = async (commentId: string) => {
     try {
