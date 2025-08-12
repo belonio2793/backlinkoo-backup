@@ -423,6 +423,11 @@ export default function BacklinkAutomation() {
           />
         )}
 
+        {/* Database Column Fix Component */}
+        <div className="mb-8">
+          <MissingColumnsFix />
+        </div>
+
         {/* Blog Comments Campaign Management */}
         <Card className="mb-8 shadow-lg border-0">
           <CardHeader>
