@@ -463,53 +463,19 @@ export default function BacklinkAutomation() {
           </div>
         )}
 
-        {/* Engine Selection */}
+        {/* Blog Comments Campaign Management */}
         <Card className="mb-8 shadow-lg border-0">
           <CardHeader>
-            <CardTitle className="text-2xl">Choose Your Strategy</CardTitle>
+            <CardTitle className="text-2xl flex items-center gap-3">
+              <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-blue-100 text-blue-700 border-blue-200">
+                <MessageSquare className="h-6 w-6" />
+              </div>
+              Blog Comments Automation
+            </CardTitle>
             <CardDescription>
-              Select the backlink building approach that best fits your goals
+              Create and manage automated blog commenting campaigns to build high-quality backlinks
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {engines.map((engine) => {
-                const Icon = engine.icon;
-                const isSelected = selectedEngine === engine.id;
-
-                return (
-                  <Card
-                    key={engine.id}
-                    className={`cursor-pointer transition-all duration-200 hover:shadow-md ${
-                      isSelected
-                        ? 'ring-2 ring-blue-500 shadow-md'
-                        : 'hover:shadow-lg'
-                    }`}
-                    onClick={() => setSelectedEngine(engine.id)}
-                  >
-                    <CardContent className="pt-6">
-                      <div className="text-center">
-                        <div className={`w-12 h-12 rounded-lg flex items-center justify-center mx-auto mb-3 ${engine.color}`}>
-                          <Icon className="h-6 w-6" />
-                        </div>
-                        <h3 className="font-semibold text-gray-900 mb-2">
-                          {engine.name}
-                        </h3>
-                        <p className="text-sm text-gray-600 leading-relaxed">
-                          {engine.description}
-                        </p>
-                        {isSelected && (
-                          <Badge className="mt-3" variant="default">
-                            Selected
-                          </Badge>
-                        )}
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
-          </CardContent>
         </Card>
 
         {/* Runtime & Reporting Section */}
