@@ -132,7 +132,7 @@ const App = () => (
                     </div>
                   </div>
                 }>
-                  <LazyWorkingAutomation />
+                  <LazySimpleAutomation />
                 </Suspense>
               }
             />
