@@ -132,11 +132,12 @@ requestIdleCallback(() => {
   // Import test utilities for development
   if (import.meta.env.DEV) {
     import('./utils/testBlogGeneration');
-    import('./services/databaseSyncService').then(({ DatabaseSyncService }) => {
-      DatabaseSyncService.scheduleCleanup();
-      // Run initial sync verification
-      DatabaseSyncService.forceSyncVerification().catch(console.error);
-    });
+    // Disabled database sync service - using new blog comment system
+    // import('./services/databaseSyncService').then(({ DatabaseSyncService }) => {
+    //   DatabaseSyncService.scheduleCleanup();
+    //   // Run initial sync verification
+    //   DatabaseSyncService.forceSyncVerification().catch(console.error);
+    // });
   }
 }, { timeout: 5000 });
 
