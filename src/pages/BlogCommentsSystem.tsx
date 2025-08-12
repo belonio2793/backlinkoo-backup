@@ -293,7 +293,7 @@ export default function BlogCommentsSystem() {
       const { data, error } = await supabase
         .from('crawler_targets')
         .select('*')
-        .order('discovered_at', { ascending: false })
+        .order('created_at', { ascending: false })
         .limit(100);
 
       if (error) throw error;
@@ -311,7 +311,7 @@ export default function BlogCommentsSystem() {
           *,
           crawler_targets (url, domain)
         `)
-        .order('confidence', { ascending: false })
+        .order('detection_confidence', { ascending: false })
         .limit(100);
 
       if (error) throw error;
