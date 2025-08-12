@@ -195,6 +195,7 @@ export function OrganizedAdminDashboard() {
 
             <TabsContent value="database">
               <div className="space-y-6">
+                <MissingColumnsFix />
                 <CampaignMetricsDBVerifier />
                 <DatabaseTestComponent />
                 <Card>
