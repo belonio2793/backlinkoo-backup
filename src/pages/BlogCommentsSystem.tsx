@@ -1427,109 +1427,133 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Bot className="h-5 w-5" />
-                      Advanced Automation
+                      Browser Automation System
                     </CardTitle>
                     <CardDescription>
-                      Automated blog discovery and comment posting with Playwright
+                      Dedicated Playwright browser instances for each active campaign
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {/* Automation Controls */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {campaigns.map((campaign) => (
-                        <Card key={campaign.id} className="border-l-4 border-l-purple-500">
-                          <CardContent className="pt-6">
-                            <div className="space-y-4">
-                              <div className="flex items-center justify-between">
-                                <h3 className="font-semibold">{campaign.name}</h3>
-                                <Badge variant={campaign.automation_enabled ? 'default' : 'secondary'}>
-                                  {campaign.automation_enabled ? 'Auto-Enabled' : 'Manual'}
-                                </Badge>
-                              </div>
-
-                              <div className="text-sm text-gray-600">
-                                <p>Keyword: {campaign.keyword}</p>
-                                <p>Status: {campaign.status}</p>
-                              </div>
-
-                              <div className="flex flex-wrap gap-2">
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => runBlogDiscovery(campaign.id)}
-                                  disabled={isProcessing}
-                                  className="flex items-center gap-1"
-                                >
-                                  <Search className="h-3 w-3" />
-                                  Discover Blogs
-                                </Button>
-
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => runAutomatedPosting(campaign.id)}
-                                  disabled={isProcessing || approvedComments.filter(c => c.campaign_id === campaign.id).length === 0}
-                                  className="flex items-center gap-1 border-green-300 text-green-700 hover:bg-green-50"
-                                >
-                                  <Bot className="h-3 w-3" />
-                                  Auto-Post
-                                </Button>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+                    {/* Browser Pool Controls */}
+                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-3 h-3 rounded-full ${browserPoolActive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                        <div>
+                          <h3 className="font-medium">Browser Pool Status</h3>
+                          <p className="text-sm text-gray-600">
+                            {browserPoolActive ? 'Active - Monitoring campaigns' : 'Inactive - Start to begin automation'}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        {!browserPoolActive ? (
+                          <Button
+                            onClick={startBrowserPool}
+                            className="bg-green-600 hover:bg-green-700"
+                          >
+                            <Play className="h-4 w-4 mr-2" />
+                            Start Browser Pool
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={stopBrowserPool}
+                            variant="destructive"
+                          >
+                            <Square className="h-4 w-4 mr-2" />
+                            Stop Browser Pool
+                          </Button>
+                        )}
+                      </div>
                     </div>
 
-                    {campaigns.length === 0 && (
+                    {/* Campaign Browser Controls */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {campaigns.filter(c => c.automation_enabled).map((campaign) => {
+                        const browserStatus = campaignBrowserManager.getBrowserInstanceStatus(campaign.id);
+                        const hasBrowser = campaignBrowserManager.hasBrowserInstance(campaign.id);
+
+                        return (
+                          <Card key={campaign.id} className="border-l-4 border-l-purple-500">
+                            <CardContent className="pt-6">
+                              <div className="space-y-4">
+                                <div className="flex items-center justify-between">
+                                  <h3 className="font-semibold">{campaign.name}</h3>
+                                  <div className="flex items-center gap-2">
+                                    <div className={`w-2 h-2 rounded-full ${
+                                      hasBrowser && browserStatus?.isActive ? 'bg-green-500' :
+                                      hasBrowser ? 'bg-yellow-500' : 'bg-gray-400'
+                                    }`}></div>
+                                    <Badge variant={hasBrowser ? 'default' : 'secondary'}>
+                                      {hasBrowser ? 'Browser Active' : 'No Browser'}
+                                    </Badge>
+                                  </div>
+                                </div>
+
+                                <div className="text-sm text-gray-600">
+                                  <p>Keyword: {campaign.keyword}</p>
+                                  <p>Status: {campaign.status}</p>
+                                  {browserStatus && (
+                                    <>
+                                      <p>Browser Status: {browserStatus.status}</p>
+                                      <p>Jobs Processed: {browserStatus.processedJobs}</p>
+                                    </>
+                                  )}
+                                </div>
+
+                                <div className="flex flex-wrap gap-2">
+                                  {!hasBrowser ? (
+                                    <Button
+                                      size="sm"
+                                      onClick={() => startCampaignBrowserAutomation(campaign.id, campaign.name)}
+                                      className="bg-green-600 hover:bg-green-700"
+                                    >
+                                      <Chrome className="h-3 w-3 mr-1" />
+                                      Start Browser
+                                    </Button>
+                                  ) : (
+                                    <Button
+                                      size="sm"
+                                      variant="destructive"
+                                      onClick={() => stopCampaignBrowserAutomation(campaign.id)}
+                                    >
+                                      <Square className="h-3 w-3 mr-1" />
+                                      Stop Browser
+                                    </Button>
+                                  )}
+
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => runBlogDiscovery(campaign.id)}
+                                    disabled={isProcessing}
+                                  >
+                                    <Search className="h-3 w-3 mr-1" />
+                                    Discover
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        );
+                      })}
+                    </div>
+
+                    {campaigns.filter(c => c.automation_enabled).length === 0 && (
                       <div className="text-center py-12">
                         <Bot className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                        <h3 className="text-xl font-medium text-gray-900 mb-2">No campaigns for automation</h3>
-                        <p className="text-gray-600 mb-6">Create a campaign first to enable automation</p>
+                        <h3 className="text-xl font-medium text-gray-900 mb-2">No automation-enabled campaigns</h3>
+                        <p className="text-gray-600 mb-6">Enable automation when creating campaigns to use browser automation</p>
                         <Button onClick={() => setShowCreateForm(true)}>
                           <Plus className="h-4 w-4 mr-2" />
                           Create Campaign
                         </Button>
                       </div>
                     )}
-
-                    {/* Recent Automation Jobs */}
-                    {automationJobs.length > 0 && (
-                      <Card>
-                        <CardHeader>
-                          <CardTitle>Recent Automation Jobs</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-3">
-                            {automationJobs.slice(0, 5).map((job) => (
-                              <div key={job.id} className="flex items-center justify-between p-3 border rounded-lg">
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <Badge variant="outline">{job.job_type.replace('_', ' ')}</Badge>
-                                    <span className="text-sm text-gray-600">
-                                      {new Date(job.created_at).toLocaleDateString()}
-                                    </span>
-                                  </div>
-                                  {job.error_message && (
-                                    <p className="text-sm text-red-600">{job.error_message}</p>
-                                  )}
-                                </div>
-                                <Badge variant={
-                                  job.status === 'completed' ? 'default' :
-                                  job.status === 'failed' ? 'destructive' :
-                                  job.status === 'processing' ? 'secondary' :
-                                  'outline'
-                                }>
-                                  {job.status}
-                                </Badge>
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )}
                   </CardContent>
                 </Card>
+
+                {/* Browser Pool Monitor */}
+                <BrowserPoolMonitor />
               </TabsContent>
 
               {/* Accounts Tab */}
