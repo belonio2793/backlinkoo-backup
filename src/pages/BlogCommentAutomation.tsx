@@ -639,6 +639,13 @@ export default function BlogCommentAutomation() {
           </Card>
         </div>
 
+        {/* Database Fix */}
+        {showDatabaseFix && (
+          <div className="mb-6">
+            <DatabaseFix />
+          </div>
+        )}
+
         {/* Authentication Check */}
         {!isAuthenticated && (
           <Alert className="mb-6">
