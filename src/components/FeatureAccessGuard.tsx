@@ -81,7 +81,7 @@ export const FeatureAccessGuard = ({
   }
 
   // User has access - show feature
-  if (subscriptionStatus?.features[feature]) {
+  if (isPremium || subscriptionStatus?.features[feature]) {
     return <>{children}</>;
   }
 
