@@ -1591,6 +1591,103 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
             </Card>
           </div>
         )}
+
+        {/* Create Account Modal */}
+        {showAccountForm && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <Card className="w-full max-w-lg">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <CardTitle>Add Blog Platform Account</CardTitle>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowAccountForm(false)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <CardDescription>
+                  Add an account for automated blog commenting
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="platform">Platform</Label>
+                  <select
+                    id="platform"
+                    className="w-full p-2 border border-gray-300 rounded-md"
+                    value={accountFormData.platform}
+                    onChange={(e) => setAccountFormData(prev => ({
+                      ...prev,
+                      platform: e.target.value as 'substack' | 'medium' | 'wordpress' | 'generic'
+                    }))}
+                  >
+                    <option value="substack">Substack</option>
+                    <option value="medium">Medium</option>
+                    <option value="wordpress">WordPress</option>
+                    <option value="generic">Generic Blog</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="account_email">Email Address</Label>
+                  <Input
+                    id="account_email"
+                    type="email"
+                    value={accountFormData.email}
+                    onChange={(e) => setAccountFormData(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="your-account@example.com"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="display_name">Display Name (Optional)</Label>
+                  <Input
+                    id="display_name"
+                    value={accountFormData.display_name}
+                    onChange={(e) => setAccountFormData(prev => ({ ...prev, display_name: e.target.value }))}
+                    placeholder="Your Name"
+                  />
+                </div>
+
+                <Alert>
+                  <AlertTriangle className="h-4 w-4" />
+                  <AlertDescription>
+                    Account verification will be required for automated posting.
+                    You'll need to complete email verification on the platform.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="flex justify-end gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowAccountForm(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={createAccount}
+                    disabled={isCreating || !accountFormData.email || !accountFormData.platform}
+                  >
+                    {isCreating ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Add Account
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </div>
 
       <Footer />
