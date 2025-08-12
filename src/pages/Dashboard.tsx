@@ -680,13 +680,7 @@ const Dashboard = () => {
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
 
-      if (hash === 'keyword-research') {
-        setActiveSection('dashboard');
-        setActiveTab('keyword-research');
-      } else if (hash === 'rank-tracker') {
-        setActiveSection('dashboard');
-        setActiveTab('rank-tracker');
-      } else if (hash === 'automation') {
+      if (hash === 'automation') {
         setActiveSection('seo-tools');
       }
     };
