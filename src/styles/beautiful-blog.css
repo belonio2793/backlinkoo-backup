@@ -96,9 +96,9 @@
 
 /* Enhanced card styling */
 .beautiful-card {
-  background: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(229, 231, 235, 0.3);
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
   border-radius: 1.5rem;
   transition: all 0.3s ease;
