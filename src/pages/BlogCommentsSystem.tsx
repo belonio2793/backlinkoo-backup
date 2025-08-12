@@ -250,6 +250,7 @@ export default function BlogCommentsSystem() {
           keyword: formData.keyword,
           anchor_text: formData.anchor_text,
           status: formData.auto_start ? 'active' : 'paused',
+          automation_enabled: formData.automation_enabled,
           links_found: 0,
           links_posted: 0
         }])
