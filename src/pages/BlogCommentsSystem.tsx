@@ -528,7 +528,7 @@ export default function BlogCommentsSystem() {
   const runBlogDiscovery = async (campaignId: string) => {
     setIsProcessing(true);
     try {
-      toast.loading('🔍 Running advanced blog discovery...');
+      toast.loading('���� Running advanced blog discovery...');
 
       const response = await fetch('/.netlify/functions/process-automation', {
         method: 'POST',
@@ -573,15 +573,21 @@ export default function BlogCommentsSystem() {
         })
       });
 
-      if (!response.ok) throw new Error('Posting failed');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Posting failed: ${response.status} ${errorText}`);
+      }
 
       const result = await response.json();
-      toast.success(`✅ Posted ${result.result.successful_posts} comments successfully`);
+      const successCount = result.result?.successful_posts || 0;
+      toast.success(`✅ Posted ${successCount} comments successfully`);
 
-      await Promise.all([loadCampaigns(), loadComments(), loadAutomationJobs()]);
-    } catch (error) {
-      console.error('Error in automated posting:', error);
-      toast.error('Automated posting failed');
+      // Reload data safely
+      await Promise.all([loadCampaigns(), loadComments()]);
+      await loadAutomationJobs(); // This may fail if table doesn't exist
+    } catch (error: any) {
+      console.error('Error in automated posting:', error.message || error);
+      toast.error(`Automated posting failed: ${error.message || 'Unknown error'}`);
     } finally {
       setIsProcessing(false);
     }
