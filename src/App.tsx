@@ -323,6 +323,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/verify-columns"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyVerifyColumns />
+                </Suspense>
+              }
+            />
 
             {/* 404 Catch-all route */}
             <Route
