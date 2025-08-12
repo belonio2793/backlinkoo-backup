@@ -479,6 +479,9 @@ export default function BlogCommentsSystem() {
       const randomPrompt = commentPrompts[Math.floor(Math.random() * commentPrompts.length)];
       const prompt = randomPrompt.replace('{{keyword}}', keyword);
 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
       const response = await fetch('/.netlify/functions/generate-comment', {
         method: 'POST',
         headers: {
@@ -488,7 +491,10 @@ export default function BlogCommentsSystem() {
           prompt,
           keyword
         }),
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
 
       let data;
 
