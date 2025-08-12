@@ -53,7 +53,7 @@ export default function NewBacklinkAutomation() {
   // Load campaigns
   const loadCampaigns = async () => {
     if (!isAuthenticated || !user) return;
-    
+
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -62,7 +62,21 @@ export default function NewBacklinkAutomation() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        // Check if error is due to missing columns
+        if (error.message.includes('column') && (
+          error.message.includes('started_at') ||
+          error.message.includes('completed_at') ||
+          error.message.includes('auto_start')
+        )) {
+          toast.error('Database columns missing', {
+            description: 'Missing columns: started_at, completed_at, auto_start. Please fix the database schema.'
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
       setCampaigns(data || []);
     } catch (error) {
       console.error('Failed to load campaigns:', error);
