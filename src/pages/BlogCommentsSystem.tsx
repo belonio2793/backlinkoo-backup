@@ -1182,6 +1182,193 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
                 </Card>
               </TabsContent>
 
+              {/* Automation Tab */}
+              <TabsContent value="automation" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Bot className="h-5 w-5" />
+                      Advanced Automation
+                    </CardTitle>
+                    <CardDescription>
+                      Automated blog discovery and comment posting with Playwright
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {/* Automation Controls */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {campaigns.map((campaign) => (
+                        <Card key={campaign.id} className="border-l-4 border-l-purple-500">
+                          <CardContent className="pt-6">
+                            <div className="space-y-4">
+                              <div className="flex items-center justify-between">
+                                <h3 className="font-semibold">{campaign.name}</h3>
+                                <Badge variant={campaign.automation_enabled ? 'default' : 'secondary'}>
+                                  {campaign.automation_enabled ? 'Auto-Enabled' : 'Manual'}
+                                </Badge>
+                              </div>
+
+                              <div className="text-sm text-gray-600">
+                                <p>Keyword: {campaign.keyword}</p>
+                                <p>Status: {campaign.status}</p>
+                              </div>
+
+                              <div className="flex flex-wrap gap-2">
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => runBlogDiscovery(campaign.id)}
+                                  disabled={isProcessing}
+                                  className="flex items-center gap-1"
+                                >
+                                  <Search className="h-3 w-3" />
+                                  Discover Blogs
+                                </Button>
+
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => runAutomatedPosting(campaign.id)}
+                                  disabled={isProcessing || approvedComments.filter(c => c.campaign_id === campaign.id).length === 0}
+                                  className="flex items-center gap-1 border-green-300 text-green-700 hover:bg-green-50"
+                                >
+                                  <Bot className="h-3 w-3" />
+                                  Auto-Post
+                                </Button>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+
+                    {campaigns.length === 0 && (
+                      <div className="text-center py-12">
+                        <Bot className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-xl font-medium text-gray-900 mb-2">No campaigns for automation</h3>
+                        <p className="text-gray-600 mb-6">Create a campaign first to enable automation</p>
+                        <Button onClick={() => setShowCreateForm(true)}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Create Campaign
+                        </Button>
+                      </div>
+                    )}
+
+                    {/* Recent Automation Jobs */}
+                    {automationJobs.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Recent Automation Jobs</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            {automationJobs.slice(0, 5).map((job) => (
+                              <div key={job.id} className="flex items-center justify-between p-3 border rounded-lg">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <Badge variant="outline">{job.job_type.replace('_', ' ')}</Badge>
+                                    <span className="text-sm text-gray-600">
+                                      {new Date(job.created_at).toLocaleDateString()}
+                                    </span>
+                                  </div>
+                                  {job.error_message && (
+                                    <p className="text-sm text-red-600">{job.error_message}</p>
+                                  )}
+                                </div>
+                                <Badge variant={
+                                  job.status === 'completed' ? 'default' :
+                                  job.status === 'failed' ? 'destructive' :
+                                  job.status === 'processing' ? 'secondary' :
+                                  'outline'
+                                }>
+                                  {job.status}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Accounts Tab */}
+              <TabsContent value="accounts" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle>Blog Platform Accounts</CardTitle>
+                        <CardDescription>Manage accounts for automated commenting</CardDescription>
+                      </div>
+                      {isAuthenticated && (
+                        <Button onClick={() => setShowAccountForm(true)}>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add Account
+                        </Button>
+                      )}
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {accounts.length === 0 ? (
+                      <div className="text-center py-12">
+                        <Shield className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                        <h3 className="text-xl font-medium text-gray-900 mb-2">No accounts configured</h3>
+                        <p className="text-gray-600 mb-6">Add platform accounts to enable automated posting</p>
+                        {isAuthenticated && (
+                          <Button onClick={() => setShowAccountForm(true)} size="lg">
+                            <Plus className="h-5 w-5 mr-2" />
+                            Add Your First Account
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {accounts.map((account) => (
+                          <Card key={account.id} className="border">
+                            <CardContent className="pt-6">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <Badge variant="outline" className="capitalize">
+                                      {account.platform}
+                                    </Badge>
+                                    <span className="font-medium">{account.email}</span>
+                                    {account.display_name && (
+                                      <span className="text-sm text-gray-600">({account.display_name})</span>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-2">
+                                    <Badge variant={
+                                      account.verification_status === 'verified' ? 'default' :
+                                      account.verification_status === 'failed' ? 'destructive' :
+                                      'secondary'
+                                    }>
+                                      {account.verification_status}
+                                    </Badge>
+                                    {account.last_used && (
+                                      <span className="text-sm text-gray-500">
+                                        Last used: {new Date(account.last_used).toLocaleDateString()}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                {!account.is_verified && (
+                                  <Button size="sm" variant="outline">
+                                    Verify
+                                  </Button>
+                                )}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
               {/* Moderation Tab */}
               <TabsContent value="moderation" className="space-y-6">
                 <Card>
