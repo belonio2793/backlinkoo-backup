@@ -48,9 +48,33 @@ interface BlogCampaign {
   keyword: string;
   anchor_text: string;
   status: 'active' | 'paused' | 'completed';
+  automation_enabled: boolean;
   created_at: string;
   links_found: number;
   links_posted: number;
+}
+
+interface BlogAccount {
+  id: string;
+  user_id: string;
+  platform: 'substack' | 'medium' | 'wordpress' | 'generic';
+  email: string;
+  display_name?: string;
+  is_verified: boolean;
+  verification_status: 'pending' | 'verified' | 'failed' | 'expired';
+  last_used?: string;
+  created_at: string;
+}
+
+interface AutomationJob {
+  id: string;
+  campaign_id: string;
+  job_type: 'discover_blogs' | 'post_comments' | 'verify_accounts';
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  result?: any;
+  error_message?: string;
+  created_at: string;
+  completed_at?: string;
 }
 
 interface BlogComment {
@@ -58,7 +82,11 @@ interface BlogComment {
   campaign_id: string;
   blog_url: string;
   comment_text: string;
-  status: 'pending' | 'approved' | 'posted' | 'failed';
+  status: 'pending' | 'approved' | 'posted' | 'failed' | 'processing' | 'needs_verification';
+  platform: 'substack' | 'medium' | 'wordpress' | 'generic';
+  account_id?: string;
+  error_message?: string;
+  posted_at?: string;
   created_at: string;
 }
 
@@ -68,10 +96,14 @@ export default function BlogCommentsSystem() {
   // State
   const [campaigns, setCampaigns] = useState<BlogCampaign[]>([]);
   const [comments, setComments] = useState<BlogComment[]>([]);
+  const [accounts, setAccounts] = useState<BlogAccount[]>([]);
+  const [automationJobs, setAutomationJobs] = useState<AutomationJob[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState('overview');
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showAccountForm, setShowAccountForm] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const [showDatabaseSetup, setShowDatabaseSetup] = useState(false);
 
   // Form state
@@ -80,7 +112,14 @@ export default function BlogCommentsSystem() {
     target_url: '',
     keyword: '',
     anchor_text: '',
-    auto_start: false
+    auto_start: false,
+    automation_enabled: false
+  });
+
+  const [accountFormData, setAccountFormData] = useState({
+    platform: 'substack' as 'substack' | 'medium' | 'wordpress' | 'generic',
+    email: '',
+    display_name: ''
   });
 
   // Check if our tables exist
