@@ -753,6 +753,22 @@ AND table_name IN ('blog_campaigns', 'blog_comments');`;
                           New Campaign
                         </Button>
                       )}
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          try {
+                            toast.loading('Testing ChatGPT 3.5 Turbo...');
+                            const testComment = await generateComment('go high level');
+                            toast.success(`✅ Test successful: "${testComment}"`);
+                          } catch (error) {
+                            toast.error('Test failed - check OpenAI configuration');
+                          }
+                        }}
+                        className="flex items-center gap-2 border-green-300 text-green-700 hover:bg-green-50"
+                      >
+                        <Bot className="h-4 w-4" />
+                        Test ChatGPT
+                      </Button>
                       <Button variant="outline" onClick={loadCampaigns} className="flex items-center gap-2">
                         <RefreshCw className="h-4 w-4" />
                         Refresh Data
