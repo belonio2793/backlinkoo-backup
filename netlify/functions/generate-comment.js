@@ -54,6 +54,7 @@ exports.handler = async (event, context) => {
     console.log('OpenAI API key found, making request...');
 
     // Generate comment using ChatGPT 3.5 Turbo
+    console.log('Making OpenAI API request...');
     const completion = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
@@ -79,21 +80,26 @@ exports.handler = async (event, context) => {
       presence_penalty: 0.3
     });
 
+    console.log('OpenAI API response received');
     const comment = completion.choices[0]?.message?.content?.trim();
+    console.log('Generated comment:', comment);
 
     if (!comment) {
+      console.error('No comment generated from OpenAI response');
       throw new Error('No comment generated');
     }
 
     // Basic quality check
     if (comment.length < 10 || comment.length > 300) {
+      console.error('Comment length outside acceptable range:', comment.length);
       throw new Error('Generated comment outside acceptable length range');
     }
 
+    console.log('Comment generation successful');
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify({ 
+      body: JSON.stringify({
         comment,
         keyword,
         prompt_used: prompt
