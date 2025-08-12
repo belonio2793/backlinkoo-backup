@@ -1010,13 +1010,16 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
                   <div className="space-y-2">
-                    <p className="font-medium">One-time setup needed:</p>
+                    <p className="font-medium">One-time setup needed for advanced features:</p>
                     <ol className="list-decimal list-inside text-sm space-y-1">
                       <li>Copy the SQL script below</li>
                       <li>Open your Supabase SQL Editor</li>
-                      <li>Run the script to create blog comment tables</li>
+                      <li>Run the script to create automation tables and columns</li>
                       <li>Refresh this page</li>
                     </ol>
+                    <p className="text-xs text-orange-600">
+                      Note: Basic campaigns work without this setup, but automation features require the full database schema.
+                    </p>
                   </div>
                 </AlertDescription>
               </Alert>
