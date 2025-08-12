@@ -169,7 +169,7 @@ export default function BlogCommentsSystem() {
   // Load comments
   const loadComments = async () => {
     if (!isAuthenticated) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('blog_comments')
@@ -184,6 +184,45 @@ export default function BlogCommentsSystem() {
       setComments(data || []);
     } catch (error: any) {
       console.error('Error loading comments:', error);
+    }
+  };
+
+  // Load accounts
+  const loadAccounts = async () => {
+    if (!isAuthenticated) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('blog_accounts')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setAccounts(data || []);
+    } catch (error: any) {
+      console.error('Error loading accounts:', error);
+    }
+  };
+
+  // Load automation jobs
+  const loadAutomationJobs = async () => {
+    if (!isAuthenticated) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('automation_jobs')
+        .select(`
+          *,
+          blog_campaigns (name)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (error) throw error;
+      setAutomationJobs(data || []);
+    } catch (error: any) {
+      console.error('Error loading automation jobs:', error);
     }
   };
 
