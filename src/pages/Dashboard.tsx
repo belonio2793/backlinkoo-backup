@@ -1839,16 +1839,8 @@ const Dashboard = () => {
               )}
             </TabsContent>
 
-            <TabsContent value="keyword-research" data-section="keyword-research">
-              <KeywordResearchTool />
-            </TabsContent>
-
             <TabsContent value="automation-link-building" data-section="automation-link-building">
               <NoHandsSEODashboard />
-            </TabsContent>
-
-            <TabsContent value="rank-tracker" data-section="rank-tracker">
-              <RankingTracker />
             </TabsContent>
               </Tabs>
             ) : activeSection === "seo-tools" ? (
