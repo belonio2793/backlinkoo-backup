@@ -158,19 +158,27 @@ export default function BlogCommentAutomation() {
 
   const loadPendingPosts = async () => {
     if (!isAuthenticated) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('backlinks')
         .select('*')
         .is('posted_at', null)
+        .eq('indexed_status', 'pending')
         .order('created_at', { ascending: false })
         .limit(50);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading pending posts:', error.message);
+        // Don't throw, just log and continue
+        setPendingPosts([]);
+        return;
+      }
+
       setPendingPosts(data || []);
     } catch (error: any) {
       console.error('Error loading pending posts:', error);
+      setPendingPosts([]);
     }
   };
 
