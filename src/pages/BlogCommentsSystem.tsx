@@ -448,59 +448,111 @@ export default function BlogCommentsSystem() {
     }
   };
 
-  // Start browser pool for automation
-  const startBrowserPool = async () => {
+  // Start automation system
+  const startAutomationSystem = async () => {
     try {
-      toast.loading('🚀 Starting browser automation pool...');
-      await campaignBrowserManager.startCampaignMonitoring();
-      setBrowserPoolActive(true);
-      toast.success('✅ Browser automation pool started');
+      toast.loading('🚀 Starting automation system...');
+
+      const response = await fetch('/.netlify/functions/automation-control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'start_system' })
+      });
+
+      if (!response.ok) throw new Error('Failed to start automation system');
+
+      setIsAutomationActive(true);
+      toast.success('✅ Automation system started');
     } catch (error: any) {
-      console.error('Failed to start browser pool:', error);
-      toast.error('Failed to start browser pool');
+      console.error('Failed to start automation system:', error);
+      toast.error('Failed to start automation system');
     }
   };
 
-  // Stop browser pool
-  const stopBrowserPool = async () => {
+  // Stop automation system
+  const stopAutomationSystem = async () => {
     try {
-      toast.loading('🛑 Stopping browser automation pool...');
-      await campaignBrowserManager.stopCampaignMonitoring();
-      setBrowserPoolActive(false);
-      toast.success('✅ Browser automation pool stopped');
+      toast.loading('🛑 Stopping automation system...');
+
+      const response = await fetch('/.netlify/functions/automation-control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'stop_system' })
+      });
+
+      if (!response.ok) throw new Error('Failed to stop automation system');
+
+      setIsAutomationActive(false);
+      setAutomationInstances([]);
+      toast.success('✅ Automation system stopped');
     } catch (error: any) {
-      console.error('Failed to stop browser pool:', error);
-      toast.error('Failed to stop browser pool');
+      console.error('Failed to stop automation system:', error);
+      toast.error('Failed to stop automation system');
     }
   };
 
-  // Start browser automation for a specific campaign
-  const startCampaignBrowserAutomation = async (campaignId: string, campaignName: string) => {
+  // Start automation for a specific campaign
+  const startCampaignAutomation = async (campaignId: string, campaignName: string) => {
     try {
-      const result = await campaignBrowserManager.startCampaignAutomation(campaignId, campaignName);
-      if (result.success) {
-        toast.success(result.message);
-      } else {
-        toast.error(result.message);
+      const response = await fetch('/.netlify/functions/automation-control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'start_campaign',
+          campaignId,
+          campaignName
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to start campaign automation');
+
+      const result = await response.json();
+      toast.success(`Started automation for ${campaignName}`);
+      loadAutomationStatus();
+    } catch (error: any) {
+      console.error('Failed to start campaign automation:', error);
+      toast.error('Failed to start campaign automation');
+    }
+  };
+
+  // Stop automation for a specific campaign
+  const stopCampaignAutomation = async (campaignId: string) => {
+    try {
+      const response = await fetch('/.netlify/functions/automation-control', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'stop_campaign',
+          campaignId
+        })
+      });
+
+      if (!response.ok) throw new Error('Failed to stop campaign automation');
+
+      toast.success('Campaign automation stopped');
+      loadAutomationStatus();
+    } catch (error: any) {
+      console.error('Failed to stop campaign automation:', error);
+      toast.error('Failed to stop campaign automation');
+    }
+  };
+
+  // Load automation status
+  const loadAutomationStatus = async () => {
+    try {
+      const response = await fetch('/.netlify/functions/automation-status', {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        const status = await response.json();
+        setAutomationInstances(status.instances || []);
+        setIsAutomationActive(status.active || false);
       }
-    } catch (error: any) {
-      console.error('Failed to start browser automation:', error);
-      toast.error('Failed to start browser automation');
-    }
-  };
-
-  // Stop browser automation for a specific campaign
-  const stopCampaignBrowserAutomation = async (campaignId: string) => {
-    try {
-      const result = await campaignBrowserManager.stopCampaignAutomation(campaignId);
-      if (result.success) {
-        toast.success(result.message);
-      } else {
-        toast.error(result.message);
-      }
-    } catch (error: any) {
-      console.error('Failed to stop browser automation:', error);
-      toast.error('Failed to stop browser automation');
+    } catch (error) {
+      // Silently fail - automation system might not be set up yet
+      console.log('Automation status not available');
     }
   };
 
