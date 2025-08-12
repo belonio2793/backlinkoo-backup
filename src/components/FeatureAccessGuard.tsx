@@ -14,13 +14,13 @@ interface FeatureAccessGuardProps {
   fallbackMessage?: string;
 }
 
-export const FeatureAccessGuard = ({ 
-  children, 
-  feature, 
+export const FeatureAccessGuard = ({
+  children,
+  feature,
   featureName,
   fallbackMessage
 }: FeatureAccessGuardProps) => {
-  const { user } = useAuth();
+  const { user, isPremium } = useAuth();
   const [subscriptionStatus, setSubscriptionStatus] = useState<SubscriptionStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showCheckoutModal, setShowCheckoutModal] = useState(false);
