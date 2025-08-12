@@ -333,19 +333,37 @@ export default function AdvancedFormAutomation() {
       }
 
     } catch (error: any) {
-      console.error('Discovery error:', error);
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack
-      });
+      console.error('Discovery error:', error?.message || error);
 
-      // Fallback to simulated discovery
-      toast.warning('Using simulated discovery data');
+      // Handle different error types
+      let toastMessage = 'Using simulated discovery data';
+      let successMessage = '✅ Generated simulated comment forms for testing';
+
+      if (error?.message === 'FUNCTION_NOT_FOUND') {
+        toastMessage = 'Netlify functions not available - using simulation mode';
+        successMessage = '🧪 Simulation mode: Generated test forms for demonstration';
+      } else if (error?.message?.includes('404')) {
+        toastMessage = 'API not available - using local simulation';
+        successMessage = '🔧 Development mode: Generated sample forms';
+      } else if (error?.message?.includes('Network')) {
+        toastMessage = 'Network error - working offline with simulated data';
+        successMessage = '📱 Offline mode: Generated sample forms';
+      } else {
+        console.error('Full error details:', {
+          message: error?.message || 'Unknown error',
+          stack: error?.stack || 'No stack trace',
+          type: typeof error,
+          error: error
+        });
+      }
+
+      // Always fallback to simulated discovery
+      toast.warning(toastMessage);
       const fallbackForms = generateSimulatedForms(searchQuery, 8);
       setDiscoveredForms(fallbackForms);
       updateStats();
 
-      toast.success(`✅ Generated ${fallbackForms.length} simulated comment forms for testing`);
+      toast.success(successMessage);
     } finally {
       setIsDiscovering(false);
     }
