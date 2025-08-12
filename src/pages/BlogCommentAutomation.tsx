@@ -128,6 +128,7 @@ export default function BlogCommentAutomation() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [selectedCampaign, setSelectedCampaign] = useState<string>('');
+  const [showDatabaseFix, setShowDatabaseFix] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
