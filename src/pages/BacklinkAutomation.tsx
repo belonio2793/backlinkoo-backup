@@ -424,43 +424,11 @@ export default function BacklinkAutomation() {
           />
         )}
 
-        {/* Quick Database Status - Always visible for critical issues */}
-        <div className="mb-6">
-          <QuickDatabaseStatus />
-        </div>
-
-        {/* Missing Columns Fix - Always visible when there are schema issues */}
-        <div className="mb-6">
-          <MissingColumnsFix />
-        </div>
-
-        {/* Emergency Fix Button - Show when there are critical database issues */}
-        {!automationTablesExist && (
-          <div className="mb-6">
-            <EmergencyFixButton />
-          </div>
-        )}
-
         {/* Show notice if automation tables are missing */}
         {!automationTablesExist && (
           <AutomationTablesMissingNotice
             onRetry={checkAutomationTables}
           />
-        )}
-
-        {/* Database Health & Migration Test Section - Only show in development */}
-        {import.meta.env.DEV && (
-          <div className="mb-8 space-y-6">
-            <DatabaseHealthChecker />
-            <DatabaseMigrationTest />
-          </div>
-        )}
-
-        {/* Campaign Creation Test Section - Only show for authenticated users */}
-        {isAuthenticated && import.meta.env.DEV && (
-          <div className="mb-8">
-            <CampaignCreationTest />
-          </div>
         )}
 
         {/* Blog Comments Campaign Management */}
