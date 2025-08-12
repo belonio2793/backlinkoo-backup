@@ -126,8 +126,8 @@ const App = () => (
                     <div className="text-center">
                       <LoadingSpinner />
                       <div className="mt-4">
-                        <h2 className="text-xl font-semibold text-gray-900">Loading Automation Platform</h2>
-                        <p className="text-gray-600 mt-2">Preparing your enterprise-grade link building tools...</p>
+                        <h2 className="text-xl font-semibold text-gray-900">Loading Working Automation</h2>
+                        <p className="text-gray-600 mt-2">Preparing real blog comment automation...</p>
                       </div>
                     </div>
                   </div>
