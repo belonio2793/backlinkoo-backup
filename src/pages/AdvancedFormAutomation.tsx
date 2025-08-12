@@ -94,6 +94,7 @@ export default function AdvancedFormAutomation() {
   const [discoveredForms, setDiscoveredForms] = useState<FormMap[]>([]);
   const [automationJobs, setAutomationJobs] = useState<AutomationJob[]>([]);
   const [postingAccounts, setPostingAccounts] = useState<PostingAccount[]>([]);
+  const [isSimulationMode, setIsSimulationMode] = useState(false);
   
   // Discovery state
   const [searchQuery, setSearchQuery] = useState('');
