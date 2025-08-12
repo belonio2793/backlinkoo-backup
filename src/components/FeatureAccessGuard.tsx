@@ -33,6 +33,12 @@ export const FeatureAccessGuard = ({
         return;
       }
 
+      // If isPremium is already true, we don't need to wait for subscription service
+      if (isPremium) {
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const status = await SubscriptionService.getSubscriptionStatus(user);
         setSubscriptionStatus(status);
@@ -44,7 +50,7 @@ export const FeatureAccessGuard = ({
     };
 
     checkAccess();
-  }, [user]);
+  }, [user, isPremium]);
 
   // Loading state
   if (isLoading) {
