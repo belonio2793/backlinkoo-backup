@@ -1479,50 +1479,50 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <Bot className="h-5 w-5" />
-                      Browser Automation System
+                      Advanced Automation System
                     </CardTitle>
                     <CardDescription>
-                      Dedicated Playwright browser instances for each active campaign
+                      Server-side browser automation for comment posting
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-6">
-                    {/* Browser Pool Controls */}
+                    {/* Automation System Status */}
                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <div className={`w-3 h-3 rounded-full ${browserPoolActive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                        <div className={`w-3 h-3 rounded-full ${isAutomationActive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
                         <div>
-                          <h3 className="font-medium">Browser Pool Status</h3>
+                          <h3 className="font-medium">Automation System Status</h3>
                           <p className="text-sm text-gray-600">
-                            {browserPoolActive ? 'Active - Monitoring campaigns' : 'Inactive - Start to begin automation'}
+                            {isAutomationActive ? 'Active - Processing campaigns' : 'Inactive - Start to begin automation'}
                           </p>
                         </div>
                       </div>
                       <div className="flex gap-2">
-                        {!browserPoolActive ? (
+                        {!isAutomationActive ? (
                           <Button
-                            onClick={startBrowserPool}
+                            onClick={startAutomationSystem}
                             className="bg-green-600 hover:bg-green-700"
                           >
                             <Play className="h-4 w-4 mr-2" />
-                            Start Browser Pool
+                            Start Automation
                           </Button>
                         ) : (
                           <Button
-                            onClick={stopBrowserPool}
+                            onClick={stopAutomationSystem}
                             variant="destructive"
                           >
                             <Square className="h-4 w-4 mr-2" />
-                            Stop Browser Pool
+                            Stop Automation
                           </Button>
                         )}
                       </div>
                     </div>
 
-                    {/* Campaign Browser Controls */}
+                    {/* Campaign Automation Controls */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {campaigns.filter(c => c.automation_enabled).map((campaign) => {
-                        const browserStatus = campaignBrowserManager.getBrowserInstanceStatus(campaign.id);
-                        const hasBrowser = campaignBrowserManager.hasBrowserInstance(campaign.id);
+                        const instance = automationInstances.find(i => i.campaignId === campaign.id);
+                        const isActive = instance?.status === 'active';
 
                         return (
                           <Card key={campaign.id} className="border-l-4 border-l-purple-500">
@@ -1532,11 +1532,11 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
                                   <h3 className="font-semibold">{campaign.name}</h3>
                                   <div className="flex items-center gap-2">
                                     <div className={`w-2 h-2 rounded-full ${
-                                      hasBrowser && browserStatus?.isActive ? 'bg-green-500' :
-                                      hasBrowser ? 'bg-yellow-500' : 'bg-gray-400'
+                                      isActive ? 'bg-green-500' :
+                                      instance ? 'bg-yellow-500' : 'bg-gray-400'
                                     }`}></div>
-                                    <Badge variant={hasBrowser ? 'default' : 'secondary'}>
-                                      {hasBrowser ? 'Browser Active' : 'No Browser'}
+                                    <Badge variant={isActive ? 'default' : 'secondary'}>
+                                      {isActive ? 'Active' : instance ? 'Idle' : 'Stopped'}
                                     </Badge>
                                   </div>
                                 </div>
@@ -1544,32 +1544,32 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
                                 <div className="text-sm text-gray-600">
                                   <p>Keyword: {campaign.keyword}</p>
                                   <p>Status: {campaign.status}</p>
-                                  {browserStatus && (
+                                  {instance && (
                                     <>
-                                      <p>Browser Status: {browserStatus.status}</p>
-                                      <p>Jobs Processed: {browserStatus.processedJobs}</p>
+                                      <p>Jobs Processed: {instance.processedJobs || 0}</p>
+                                      <p>Last Activity: {instance.lastActivity ? new Date(instance.lastActivity).toLocaleTimeString() : 'Never'}</p>
                                     </>
                                   )}
                                 </div>
 
                                 <div className="flex flex-wrap gap-2">
-                                  {!hasBrowser ? (
+                                  {!instance ? (
                                     <Button
                                       size="sm"
-                                      onClick={() => startCampaignBrowserAutomation(campaign.id, campaign.name)}
+                                      onClick={() => startCampaignAutomation(campaign.id, campaign.name)}
                                       className="bg-green-600 hover:bg-green-700"
                                     >
-                                      <Chrome className="h-3 w-3 mr-1" />
-                                      Start Browser
+                                      <Play className="h-3 w-3 mr-1" />
+                                      Start
                                     </Button>
                                   ) : (
                                     <Button
                                       size="sm"
                                       variant="destructive"
-                                      onClick={() => stopCampaignBrowserAutomation(campaign.id)}
+                                      onClick={() => stopCampaignAutomation(campaign.id)}
                                     >
                                       <Square className="h-3 w-3 mr-1" />
-                                      Stop Browser
+                                      Stop
                                     </Button>
                                   )}
 
@@ -1581,6 +1581,17 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
                                   >
                                     <Search className="h-3 w-3 mr-1" />
                                     Discover
+                                  </Button>
+
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => runAutomatedPosting(campaign.id)}
+                                    disabled={isProcessing || approvedComments.filter(c => c.campaign_id === campaign.id).length === 0}
+                                    className="border-green-300 text-green-700 hover:bg-green-50"
+                                  >
+                                    <Bot className="h-3 w-3 mr-1" />
+                                    Process
                                   </Button>
                                 </div>
                               </div>
@@ -1601,11 +1612,39 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
                         </Button>
                       </div>
                     )}
+
+                    {/* Automation Instances Status */}
+                    {automationInstances.length > 0 && (
+                      <Card>
+                        <CardHeader>
+                          <CardTitle>Active Automation Instances</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <div className="space-y-3">
+                            {automationInstances.map((instance, index) => (
+                              <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <div className={`w-2 h-2 rounded-full ${
+                                      instance.status === 'active' ? 'bg-green-500' : 'bg-gray-400'
+                                    }`}></div>
+                                    <span className="font-medium">{instance.campaignName}</span>
+                                  </div>
+                                  <p className="text-sm text-gray-600">
+                                    Status: {instance.status} | Jobs: {instance.processedJobs || 0}
+                                  </p>
+                                </div>
+                                <Badge variant={instance.status === 'active' ? 'default' : 'secondary'}>
+                                  {instance.status}
+                                </Badge>
+                              </div>
+                            ))}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
                   </CardContent>
                 </Card>
-
-                {/* Browser Pool Monitor */}
-                <BrowserPoolMonitor />
               </TabsContent>
 
               {/* Accounts Tab */}
