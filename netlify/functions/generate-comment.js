@@ -29,9 +29,12 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    console.log('Generate comment function called');
     const { prompt, keyword } = JSON.parse(event.body || '{}');
+    console.log('Request data:', { prompt, keyword });
 
     if (!prompt || !keyword) {
+      console.error('Missing prompt or keyword:', { prompt, keyword });
       return {
         statusCode: 400,
         headers,
@@ -47,6 +50,8 @@ exports.handler = async (event, context) => {
         body: JSON.stringify({ error: 'OpenAI API not configured' })
       };
     }
+
+    console.log('OpenAI API key found, making request...');
 
     // Generate comment using ChatGPT 3.5 Turbo
     const completion = await openai.chat.completions.create({
