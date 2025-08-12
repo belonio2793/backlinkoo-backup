@@ -327,29 +327,50 @@ export default function BlogCommentsSystem() {
 
   // Blog URL discovery (enhanced simulation)
   const discoverBlogUrls = async (keyword: string) => {
-    // This would be replaced with real blog discovery logic
-    const blogDomains = [
-      'blog1.example.com', 'blog2.example.com', 'blog3.example.com',
-      'techblog.example.com', 'insights.example.com', 'articles.example.com',
-      'reviews.example.com', 'news.example.com', 'updates.example.com'
+    // This simulates real blog discovery - in production this would use:
+    // - Google Search API to find blogs
+    // - Web scraping for comment forms
+    // - Content relevance analysis
+    const popularBlogDomains = [
+      'medium.com', 'dev.to', 'hashnode.com', 'substack.com',
+      'wordpress.com', 'blogger.com', 'ghost.org', 'webflow.com',
+      'techcrunch.com', 'mashable.com', 'theverge.com', 'wired.com',
+      'arstechnica.com', 'engadget.com', 'gizmodo.com', 'lifehacker.com'
     ];
 
-    const blogPaths = [
+    const contentTypes = [
       'posts', 'articles', 'reviews', 'insights', 'guides', 'tutorials',
-      'news', 'updates', 'resources', 'blog'
+      'news', 'updates', 'resources', 'blog', 'stories', 'features'
     ];
 
     const urls = [];
-    const numBlogs = Math.min(5, blogDomains.length);
+    const numBlogs = Math.min(8, popularBlogDomains.length);
 
     for (let i = 0; i < numBlogs; i++) {
-      const domain = blogDomains[Math.floor(Math.random() * blogDomains.length)];
-      const path = blogPaths[Math.floor(Math.random() * blogPaths.length)];
-      const slug = keyword.toLowerCase().replace(/\s+/g, '-');
-      urls.push(`https://${domain}/${path}/${slug}`);
+      const domain = popularBlogDomains[Math.floor(Math.random() * popularBlogDomains.length)];
+      const contentType = contentTypes[Math.floor(Math.random() * contentTypes.length)];
+      const slug = keyword.toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-');
+
+      // Add some variety to URL structures
+      if (domain.includes('medium.com') || domain.includes('dev.to')) {
+        urls.push(`https://${domain}/${slug}-${Math.floor(Math.random() * 1000)}`);
+      } else {
+        urls.push(`https://${domain}/${contentType}/${slug}`);
+      }
     }
 
     return urls;
+  };
+
+  // Generate more comments for existing campaign
+  const generateMoreComments = async (campaignId: string, keyword: string) => {
+    try {
+      toast.loading('Discovering new blog opportunities...');
+      await startCommentGeneration(campaignId, keyword);
+    } catch (error) {
+      console.error('Error generating more comments:', error);
+      toast.error('Failed to generate additional comments');
+    }
   };
 
   // Initialize
