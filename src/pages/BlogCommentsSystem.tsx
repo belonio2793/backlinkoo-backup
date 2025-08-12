@@ -511,13 +511,14 @@ export default function BlogCommentsSystem() {
       }
 
       return data.comment;
-    } catch (error) {
-      console.error('Error generating comment:', error);
-      console.error('Full error details:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
+    } catch (error: any) {
+      console.error('Error generating comment:', error?.message || error);
+      console.error('Full error details:', JSON.stringify({
+        message: error?.message || 'Unknown error',
+        stack: error?.stack || 'No stack trace',
+        name: error?.name || 'Unknown error type',
+        type: typeof error
+      }, null, 2));
 
       // Fallback to manual templates
       return generateFallbackComment(keyword);
