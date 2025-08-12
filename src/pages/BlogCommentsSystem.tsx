@@ -37,9 +37,11 @@ import {
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { DatabaseStatusChecker } from '@/components/DatabaseStatusChecker';
+import { BrowserPoolMonitor } from '@/components/BrowserPoolMonitor';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { campaignBrowserManager } from '@/services/automationEngine/CampaignBrowserManager';
 
 interface BlogCampaign {
   id: string;
@@ -575,7 +577,7 @@ export default function BlogCommentsSystem() {
         .eq('id', campaignId);
 
       // Discover blog URLs
-      toast.loading('🔍 Discovering relevant blogs...');
+      toast.loading('��� Discovering relevant blogs...');
       const discoveredBlogs = await discoverBlogUrls(keyword);
 
       // Update links found count
