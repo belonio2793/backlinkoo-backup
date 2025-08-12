@@ -986,9 +986,11 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
 
             {/* Main Content Tabs */}
             <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-6">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="campaigns">Campaigns</TabsTrigger>
+                <TabsTrigger value="automation">Automation</TabsTrigger>
+                <TabsTrigger value="accounts">Accounts ({accounts.length})</TabsTrigger>
                 <TabsTrigger value="moderation">Moderation ({pendingComments.length})</TabsTrigger>
                 <TabsTrigger value="results">Results</TabsTrigger>
               </TabsList>
