@@ -34,7 +34,6 @@ import { AutomationTablesMissingNotice } from '@/components/AutomationTablesMiss
 import { initializeAutomationTables } from '@/utils/createAutomationTables';
 import { testAutomationTablesAccess, testDatabaseConnectivity } from '@/utils/simpleDatabaseTest';
 import { RoutePreservingAuth } from '@/components/RoutePreservingAuth';
-import { RuntimeReporting } from '@/components/automation/RuntimeReporting';
 import { RuntimeStatus } from '@/components/automation/RuntimeStatus';
 import { LiveAutomationEngine } from '@/services/liveAutomationEngine';
 import { CampaignErrorHandler } from '@/utils/campaignErrorHandler';
