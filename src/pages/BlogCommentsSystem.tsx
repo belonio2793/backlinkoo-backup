@@ -445,7 +445,10 @@ export default function BlogCommentsSystem() {
         })
       });
 
-      if (!response.ok) throw new Error('Failed to start form detection');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to start form detection: ${response.status} ${errorText}`);
+      }
 
       const result = await response.json();
       toast.success(`✅ Form detection started on ${targetIds.length} targets`);
