@@ -272,6 +272,7 @@ export default function BlogCommentsSystem() {
 
   const loadCampaigns = async () => {
     try {
+      console.log('Loading campaigns for user:', user?.id);
       const { data, error } = await supabase
         .from('blog_campaigns')
         .select('*')
@@ -279,9 +280,11 @@ export default function BlogCommentsSystem() {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
+      console.log('Campaigns loaded:', data?.length || 0);
       setCampaigns(data || []);
     } catch (error: any) {
       console.error('Error loading campaigns:', error);
+      toast.error(`Error loading campaigns: ${error.message || error}`);
       if (error.message?.includes('relation') || error.message?.includes('does not exist')) {
         setTimeout(() => setShowDatabaseSetup(true), 0);
       }
