@@ -311,7 +311,7 @@ export default function BacklinkAutomation() {
   };
 
   // Run health check on mount for debugging
-  React.useEffect(() => {
+  useEffect(() => {
     // Run the improved automation tables check
     checkAutomationTables();
 
