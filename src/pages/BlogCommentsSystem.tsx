@@ -519,12 +519,26 @@ export default function BlogCommentsSystem() {
       return data.comment;
     } catch (error: any) {
       console.error('Error generating comment:', error?.message || error);
+
+      // Handle specific error types
+      let errorMessage = 'Unknown error';
+      if (error?.name === 'AbortError') {
+        errorMessage = 'Request timed out - using fallback comment';
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
       console.error('Full error details:', JSON.stringify({
-        message: error?.message || 'Unknown error',
+        message: errorMessage,
         stack: error?.stack || 'No stack trace',
         name: error?.name || 'Unknown error type',
         type: typeof error
       }, null, 2));
+
+      // Show user-friendly error message
+      if (error?.name === 'AbortError') {
+        toast.warning('Comment generation timed out, using fallback');
+      }
 
       // Fallback to manual templates
       return generateFallbackComment(keyword);
