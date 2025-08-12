@@ -48,6 +48,7 @@ import DatabaseSchemaFix from "@/components/DatabaseSchemaFix";
 import { SMTPConfigTest } from "@/components/SMTPConfigTest";
 import { DeploymentStatus } from "@/components/DeploymentStatus";
 import { DatabaseTestComponent } from "../DatabaseTestComponent";
+import { MissingColumnsFix } from "@/components/system/MissingColumnsFix";
 
 import {
   Users,
