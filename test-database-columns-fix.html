@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Columns Fix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .error {
+            background: #fee;
+            border: 1px solid #fcc;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            color: #c00;
+        }
+        .success {
+            background: #efe;
+            border: 1px solid #cfc;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            color: #060;
+        }
+        .warning {
+            background: #fff8dc;
+            border: 1px solid #ffd700;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            color: #8b7355;
+        }
+        button {
+            background: #007cba;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #005a8a;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        code {
+            background: #f4f4f4;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+        .sql-output {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.missing {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .status.exists {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Database Columns Fix</h1>
+        
+        <div class="warning">
+            <h3>⚠️ Missing Database Columns Detected</h3>
+            <p>The automation_campaigns table is missing these required columns:</p>
+            <ul>
+                <li><code>started_at</code> - TIMESTAMPTZ NULL</li>
+                <li><code>completed_at</code> - TIMESTAMPTZ NULL</li>
+                <li><code>auto_start</code> - BOOLEAN DEFAULT false</li>
+            </ul>
+            <p>Campaign functionality will not work until these columns are added.</p>
+        </div>
+
+        <div id="results"></div>
+        
+        <div>
+            <button onclick="checkColumns()">Check Columns Status</button>
+            <button onclick="fixColumns()">Fix Missing Columns</button>
+            <button onclick="copyManualSQL()">Copy Manual SQL</button>
+        </div>
+
+        <div id="sqlOutput" class="sql-output" style="display:none;"></div>
+    </div>
+
+    <script>
+        let columnStatus = {};
+
+        function showMessage(type, title, message) {
+            const results = document.getElementById('results');
+            results.innerHTML = `
+                <div class="${type}">
+                    <h3>${title}</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+
+        function showSQLOutput(sql) {
+            const sqlOutput = document.getElementById('sqlOutput');
+            sqlOutput.textContent = sql;
+            sqlOutput.style.display = 'block';
+        }
+
+        async function checkColumns() {
+            try {
+                showMessage('warning', '🔍 Checking columns...', 'Verifying database schema...');
+                
+                const response = await fetch('/.netlify/functions/fix-database-schema', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ action: 'check' })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    let statusHtml = '<h3>✅ Column Check Results</h3>';
+                    
+                    if (result.columnCheck && result.columnCheck.columns) {
+                        const existingCols = result.columnCheck.columns.map(c => c.column_name);
+                        const requiredCols = ['started_at', 'completed_at', 'auto_start'];
+                        
+                        statusHtml += '<div style="margin: 15px 0;">';
+                        requiredCols.forEach(col => {
+                            const exists = existingCols.includes(col);
+                            statusHtml += `
+                                <div style="margin: 5px 0;">
+                                    <code>${col}</code> 
+                                    <span class="status ${exists ? 'exists' : 'missing'}">
+                                        ${exists ? 'EXISTS' : 'MISSING'}
+                                    </span>
+                                </div>
+                            `;
+                        });
+                        statusHtml += '</div>';
+                        
+                        const missingCount = requiredCols.filter(col => !existingCols.includes(col)).length;
+                        if (missingCount === 0) {
+                            showMessage('success', '✅ All columns exist!', statusHtml + 'Your automation system should work correctly.');
+                        } else {
+                            showMessage('error', `❌ ${missingCount} columns missing`, statusHtml + 'Campaign functionality will not work until these are fixed.');
+                        }
+                    } else {
+                        showMessage('warning', '⚠️ Could not verify columns', 'Database check completed but column verification failed. Try the fix anyway.');
+                    }
+                } else {
+                    showMessage('error', '❌ Check failed', result.error || 'Failed to check database columns.');
+                }
+            } catch (error) {
+                console.error('Check failed:', error);
+                showMessage('error', '❌ Network error', 'Failed to connect to database check service.');
+            }
+        }
+
+        async function fixColumns() {
+            try {
+                showMessage('warning', '🔧 Fixing columns...', 'Adding missing columns to database...');
+                
+                const response = await fetch('/.netlify/functions/fix-database-schema', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    let message = `✅ Database fix completed!<br><br>`;
+                    message += `<strong>Summary:</strong><br>`;
+                    message += `• Total statements: ${result.summary?.totalStatements || 0}<br>`;
+                    message += `• Errors: ${result.summary?.errors || 0}<br>`;
+                    message += `• Success rate: ${result.summary?.successRate || '0%'}<br><br>`;
+                    
+                    if (result.summary?.errors > 0) {
+                        message += `⚠️ Some statements failed. You may need to run manual SQL.`;
+                        showMessage('warning', '⚠️ Partial success', message);
+                    } else {
+                        message += `🎉 All columns should now be available!`;
+                        showMessage('success', '✅ Fix successful', message);
+                    }
+                    
+                    // Auto-check after fix
+                    setTimeout(checkColumns, 2000);
+                } else {
+                    showMessage('error', '❌ Fix failed', result.error || result.details || 'Database fix failed.');
+                    if (result.suggestion) {
+                        showMessage('warning', '💡 Suggestion', result.suggestion);
+                    }
+                }
+            } catch (error) {
+                console.error('Fix failed:', error);
+                showMessage('error', '❌ Network error', 'Failed to connect to database fix service.');
+            }
+        }
+
+        function copyManualSQL() {
+            const sql = `-- Fix Missing Columns for automation_campaigns
+-- Run this in your Supabase SQL Editor
+
+-- Step 1: Create exec_sql function (if not exists)
+CREATE OR REPLACE FUNCTION public.exec_sql(query text)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+DECLARE
+    result jsonb;
+    record_count integer;
+BEGIN
+    EXECUTE query;
+    IF LOWER(TRIM(query)) LIKE 'select%' THEN
+        EXECUTE 'SELECT jsonb_agg(row_to_json(t)) FROM (' || query || ') t' INTO result;
+        RETURN COALESCE(result, '[]'::jsonb);
+    ELSE
+        GET DIAGNOSTICS record_count = ROW_COUNT;
+        RETURN jsonb_build_object('success', true, 'rows_affected', record_count);
+    END IF;
+EXCEPTION
+    WHEN OTHERS THEN
+        RETURN jsonb_build_object('error', SQLERRM, 'success', false);
+END;
+$$;
+
+-- Grant permissions
+GRANT EXECUTE ON FUNCTION public.exec_sql(text) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.exec_sql(text) TO service_role;
+GRANT EXECUTE ON FUNCTION public.exec_sql(text) TO anon;
+
+-- Step 2: Add missing columns
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ NULL;
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ NULL;
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS auto_start BOOLEAN DEFAULT false;
+
+-- Step 3: Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_automation_campaigns_started_at ON automation_campaigns(started_at);
+CREATE INDEX IF NOT EXISTS idx_automation_campaigns_completed_at ON automation_campaigns(completed_at);
+
+-- Step 4: Verify columns exist
+SELECT column_name, data_type, is_nullable
+FROM information_schema.columns
+WHERE table_name = 'automation_campaigns'
+AND column_name IN ('started_at', 'completed_at', 'auto_start')
+ORDER BY column_name;`;
+
+            navigator.clipboard.writeText(sql).then(() => {
+                showMessage('success', '📋 SQL copied to clipboard!', 'Paste this into your Supabase SQL editor and run it.');
+                showSQLOutput(sql);
+            }).catch(() => {
+                showMessage('warning', '⚠️ Copy failed', 'Please copy the SQL manually from below:');
+                showSQLOutput(sql);
+            });
+        }
+
+        // Auto-check on page load
+        window.addEventListener('load', () => {
+            setTimeout(checkColumns, 1000);
+        });
+    </script>
+</body>
+</html>
