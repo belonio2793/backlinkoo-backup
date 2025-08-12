@@ -562,6 +562,15 @@ AND table_name IN ('blog_campaigns', 'blog_comments');`;
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Blog Comment System</h1>
               <p className="text-gray-600">Automated blog commenting for backlink building</p>
+              <div className="flex items-center gap-2 mt-2">
+                <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
+                  <Bot className="h-3 w-3 mr-1" />
+                  ChatGPT 3.5 Turbo Active
+                </Badge>
+                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  5 Unique Prompts
+                </Badge>
+              </div>
             </div>
           </div>
         </div>
