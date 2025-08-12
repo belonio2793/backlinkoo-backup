@@ -352,7 +352,10 @@ export default function AdvancedFormAutomation() {
       } else if (error?.message?.includes('404')) {
         toastMessage = 'API not available - using local simulation';
         successMessage = '🔧 Development mode: Generated sample forms';
-      } else if (error?.message?.includes('Network')) {
+      } else if (error?.name === 'AbortError') {
+        toastMessage = 'Request timed out - using simulated data';
+        successMessage = '⏱️ Timeout: Generated sample forms for testing';
+      } else if (error?.message?.includes('Network') || error?.message?.includes('fetch')) {
         toastMessage = 'Network error - working offline with simulated data';
         successMessage = '📱 Offline mode: Generated sample forms';
       } else {
