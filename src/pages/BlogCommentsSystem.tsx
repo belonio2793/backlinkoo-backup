@@ -490,13 +490,25 @@ export default function BlogCommentsSystem() {
         }),
       });
 
+      let data;
+
       if (!response.ok) {
-        const errorText = await response.text();
+        let errorText;
+        try {
+          errorText = await response.text();
+        } catch (e) {
+          errorText = 'Unknown error';
+        }
         console.error('API response not ok:', response.status, errorText);
         throw new Error(`API Error ${response.status}: ${errorText}`);
       }
 
-      const data = await response.json();
+      try {
+        data = await response.json();
+      } catch (error) {
+        console.error('Failed to parse response as JSON:', error);
+        throw new Error('Invalid response format from comment generation API');
+      }
 
       // Check if we got a fallback response
       if (data.fallback) {
