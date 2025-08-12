@@ -917,7 +917,7 @@ export function BeautifulBlogPost() {
               </div>
 
               {/* Title */}
-              <h1 className="beautiful-blog-title text-5xl md:text-6xl lg:text-7xl font-black mb-8 leading-tight">
+              <h1 className="beautiful-blog-title text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight break-words">
                 {cleanTitle(blogPost.title)}
               </h1>
 
