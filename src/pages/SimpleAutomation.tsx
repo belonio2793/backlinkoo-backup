@@ -175,18 +175,13 @@ export default function SimpleAutomation() {
       toast.loading('Starting blog comment automation...');
 
       // Start the automation
-      const response = await fetch('/.netlify/functions/campaign-orchestrator', {
+      const response = await fetch('/.netlify/functions/simple-automation', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'start_campaign',
+          action: 'start',
           campaignId: campaign.id,
-          settings: {
-            maxTargets: 15,
-            maxPosts: 8,
-            autoPost: true,
-            dryRun: false
-          }
+          userId: user?.id
         })
       });
 
