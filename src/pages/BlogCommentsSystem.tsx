@@ -1189,6 +1189,19 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
                         <Bot className="h-4 w-4" />
                         Test ChatGPT
                       </Button>
+                      <Button
+                        variant="outline"
+                        onClick={quickFixSchema}
+                        disabled={isFixingSchema}
+                        className="flex items-center gap-2 border-orange-300 text-orange-700 hover:bg-orange-50"
+                      >
+                        {isFixingSchema ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Database className="h-4 w-4" />
+                        )}
+                        Quick Fix Schema
+                      </Button>
                       <Button variant="outline" onClick={loadCampaigns} className="flex items-center gap-2">
                         <RefreshCw className="h-4 w-4" />
                         Refresh Data
