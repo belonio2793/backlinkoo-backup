@@ -107,6 +107,7 @@ export default function BlogCommentsSystem() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showDatabaseSetup, setShowDatabaseSetup] = useState(false);
   const [deletingCampaignId, setDeletingCampaignId] = useState<string | null>(null);
+  const [isFixingSchema, setIsFixingSchema] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
