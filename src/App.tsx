@@ -20,6 +20,7 @@ const LazyBacklinkAutomation = lazy(() => import("./pages/NewBacklinkAutomation"
 const LazyNewAutomationPage = lazy(() => import("./pages/NewAutomationPage"));
 const LazyBlogCommentAutomation = lazy(() => import("./pages/BlogCommentAutomation"));
 const LazyBlogCommentsSystem = lazy(() => import("./pages/BlogCommentsSystem"));
+const LazyAdvancedFormAutomation = lazy(() => import("./pages/AdvancedFormAutomation"));
 const LazyBacklinkReport = lazy(() => import("./pages/BacklinkReport"));
 const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDiscoveryDashboard"));
 const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
