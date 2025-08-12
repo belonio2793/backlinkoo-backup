@@ -18,6 +18,7 @@ import Index from "./pages/Index";
 
 const LazyBacklinkAutomation = lazy(() => import("./pages/NewBacklinkAutomation"));
 const LazyNewAutomationPage = lazy(() => import("./pages/NewAutomationPage"));
+const LazyBlogCommentAutomation = lazy(() => import("./pages/BlogCommentAutomation"));
 const LazyBacklinkReport = lazy(() => import("./pages/BacklinkReport"));
 const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDiscoveryDashboard"));
 const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
