@@ -322,7 +322,7 @@ export default function BacklinkAutomation() {
   }, [checkAutomationTables]);
 
   // Initialize debug logging for this component
-  React.useEffect(() => {
+  useEffect(() => {
     debugLog.info('backlink_automation', 'component_mounted', 'BacklinkAutomation component mounted', {
       isAuthenticated,
       isPremium,
