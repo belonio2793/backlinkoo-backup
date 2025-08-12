@@ -297,14 +297,24 @@ export default function AdvancedFormAutomation() {
       });
 
       if (!response.ok) {
-        // Get error details for better debugging
-        let errorMessage = 'Discovery failed';
+        // Handle specific error cases
+        if (response.status === 404) {
+          console.log('Netlify function not found, using simulated discovery');
+          throw new Error('FUNCTION_NOT_FOUND');
+        }
+
+        // Get error details for other errors
+        let errorMessage = `HTTP ${response.status}: Discovery failed`;
         try {
           const errorData = await response.json();
           errorMessage = errorData.error || errorMessage;
         } catch (e) {
-          const errorText = await response.text().catch(() => 'Unknown error');
-          errorMessage = `HTTP ${response.status}: ${errorText}`;
+          try {
+            const errorText = await response.text();
+            errorMessage = `HTTP ${response.status}: ${errorText || 'Unknown error'}`;
+          } catch (textError) {
+            errorMessage = `HTTP ${response.status}: Network error`;
+          }
         }
         throw new Error(errorMessage);
       }
