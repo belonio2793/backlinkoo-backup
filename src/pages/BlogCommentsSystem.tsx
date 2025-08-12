@@ -493,14 +493,8 @@ export default function BlogCommentsSystem() {
       let data;
 
       if (!response.ok) {
-        let errorText;
-        try {
-          errorText = await response.text();
-        } catch (e) {
-          errorText = 'Unknown error';
-        }
-        console.error('API response not ok:', response.status, errorText);
-        throw new Error(`API Error ${response.status}: ${errorText}`);
+        console.error('API response not ok:', response.status, response.statusText);
+        throw new Error(`API Error ${response.status}: ${response.statusText}`);
       }
 
       try {
