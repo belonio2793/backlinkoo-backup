@@ -1522,7 +1522,7 @@ AND table_name IN ('blog_campaigns', 'crawler_targets', 'form_maps', 'blog_accou
                                     onClick={() => startTargetDiscovery(campaign.id, [campaign.keyword])}
                                     className="flex items-center gap-1"
                                   >
-                                    <Spider className="h-3 w-3" />
+                                    <Network className="h-3 w-3" />
                                     Discover
                                   </Button>
                                   <Button
