@@ -633,12 +633,15 @@ export default function BlogCommentsSystem() {
       const tablesExist = await checkTablesExist();
       
       if (tablesExist && isAuthenticated) {
+        // Always load basic features
         await Promise.all([
           loadCampaigns(),
-          loadComments(),
-          loadAccounts(),
-          loadAutomationJobs()
+          loadComments()
         ]);
+
+        // Try to load advanced features (may fail if tables don't exist)
+        await loadAccounts();
+        await loadAutomationJobs();
       }
       
       setIsLoading(false);
