@@ -128,6 +128,14 @@ const App = () => (
                     </div>
                   </div>
                 }>
+                  <LazyNewAutomationPage />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/automation/legacy"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
                   <LazyBacklinkAutomation />
                 </Suspense>
               }
