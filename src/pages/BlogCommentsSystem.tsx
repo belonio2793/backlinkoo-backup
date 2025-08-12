@@ -995,65 +995,9 @@ AND table_name IN ('blog_campaigns', 'blog_comments', 'blog_accounts', 'automati
 
         {/* Database Setup Required */}
         {showDatabaseSetup && (
-          <Card className="border-orange-200 bg-orange-50 mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-orange-900">
-                <Database className="h-5 w-5" />
-                Database Setup Required
-              </CardTitle>
-              <CardDescription className="text-orange-700">
-                The advanced blog comment automation system needs its database tables to be created.
-                This includes tables for campaigns, comments, accounts, and automation jobs.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <Alert>
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  <div className="space-y-2">
-                    <p className="font-medium">One-time setup needed for advanced features:</p>
-                    <ol className="list-decimal list-inside text-sm space-y-1">
-                      <li>Copy the SQL script below</li>
-                      <li>Open your Supabase SQL Editor</li>
-                      <li>Run the script to create automation tables and columns</li>
-                      <li>Refresh this page</li>
-                    </ol>
-                    <p className="text-xs text-orange-600">
-                      Note: Basic campaigns work without this setup, but automation features require the full database schema.
-                    </p>
-                  </div>
-                </AlertDescription>
-              </Alert>
-
-              <div className="flex gap-3">
-                <Button 
-                  onClick={copySetupSQL}
-                  className="flex items-center gap-2 bg-orange-600 hover:bg-orange-700"
-                >
-                  <Copy className="h-4 w-4" />
-                  Copy Setup SQL
-                </Button>
-                
-                <Button 
-                  variant="outline"
-                  onClick={() => window.open('https://supabase.com/dashboard/project/dfhanacsmsvvkpunurnp/sql', '_blank')}
-                  className="flex items-center gap-2 border-orange-300 text-orange-700 hover:bg-orange-100"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Open Supabase SQL Editor
-                </Button>
-                
-                <Button 
-                  variant="outline"
-                  onClick={() => window.location.reload()}
-                  className="flex items-center gap-2 border-orange-300 text-orange-700 hover:bg-orange-100"
-                >
-                  <RefreshCw className="h-4 w-4" />
-                  Refresh Page
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="mb-6">
+            <DatabaseStatusChecker />
+          </div>
         )}
 
         {/* Authentication Check */}
