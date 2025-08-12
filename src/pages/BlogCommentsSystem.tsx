@@ -38,11 +38,9 @@ import {
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { DatabaseStatusChecker } from '@/components/DatabaseStatusChecker';
-import { BrowserPoolMonitor } from '@/components/BrowserPoolMonitor';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { campaignBrowserManager } from '@/services/automationEngine/CampaignBrowserManager';
 
 interface BlogCampaign {
   id: string;
