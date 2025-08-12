@@ -484,18 +484,33 @@ export default function AdvancedFormAutomation() {
     }
 
     setIsProcessing(true);
+    let successCount = 0;
+    let errorCount = 0;
+
     try {
       toast.loading(`🔄 Validating ${unvalidatedForms.length} forms...`);
-      
+
       for (const form of unvalidatedForms) {
-        await validateForm(form.id);
+        try {
+          await validateForm(form.id);
+          successCount++;
+        } catch (error) {
+          console.error(`Validation failed for form ${form.id}:`, error);
+          errorCount++;
+        }
+
         // Add delay to avoid overwhelming servers
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        await new Promise(resolve => setTimeout(resolve, 1500));
       }
-      
-      toast.success('✅ Batch validation completed');
+
+      if (successCount > 0) {
+        toast.success(`✅ Batch validation completed: ${successCount} successful, ${errorCount} failed`);
+      } else {
+        toast.error('❌ All validations failed');
+      }
     } catch (error) {
-      toast.error('Batch validation failed');
+      console.error('Batch validation error:', error);
+      toast.error('Batch validation encountered errors');
     } finally {
       setIsProcessing(false);
     }
