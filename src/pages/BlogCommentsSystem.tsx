@@ -528,7 +528,7 @@ export default function BlogCommentsSystem() {
   const runBlogDiscovery = async (campaignId: string) => {
     setIsProcessing(true);
     try {
-      toast.loading('���� Running advanced blog discovery...');
+      toast.loading('🔍 Running advanced blog discovery...');
 
       const response = await fetch('/.netlify/functions/process-automation', {
         method: 'POST',
@@ -716,20 +716,6 @@ CREATE TABLE IF NOT EXISTS blog_campaigns (
   updated_at timestamptz default now()
 );
 
--- Blog comments table with enhanced automation support
-CREATE TABLE IF NOT EXISTS blog_comments (
-  id uuid default gen_random_uuid() primary key,
-  campaign_id uuid references blog_campaigns(id) on delete cascade,
-  blog_url text not null,
-  comment_text text not null,
-  status text not null default 'pending' check (status in ('pending', 'approved', 'posted', 'failed', 'processing', 'needs_verification')),
-  platform text not null default 'generic' check (platform in ('substack', 'medium', 'wordpress', 'generic')),
-  account_id uuid references blog_accounts(id),
-  error_message text,
-  posted_at timestamptz,
-  created_at timestamptz default now()
-);
-
 -- Blog accounts for authentication management
 CREATE TABLE IF NOT EXISTS blog_accounts (
   id uuid default gen_random_uuid() primary key,
@@ -744,6 +730,20 @@ CREATE TABLE IF NOT EXISTS blog_accounts (
   last_used timestamptz,
   created_at timestamptz default now(),
   UNIQUE(user_id, platform, email)
+);
+
+-- Blog comments table with enhanced automation support
+CREATE TABLE IF NOT EXISTS blog_comments (
+  id uuid default gen_random_uuid() primary key,
+  campaign_id uuid references blog_campaigns(id) on delete cascade,
+  blog_url text not null,
+  comment_text text not null,
+  status text not null default 'pending' check (status in ('pending', 'approved', 'posted', 'failed', 'processing', 'needs_verification')),
+  platform text not null default 'generic' check (platform in ('substack', 'medium', 'wordpress', 'generic')),
+  account_id uuid references blog_accounts(id),
+  error_message text,
+  posted_at timestamptz,
+  created_at timestamptz default now()
 );
 
 -- Automation jobs queue
