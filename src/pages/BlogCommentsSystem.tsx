@@ -180,22 +180,9 @@ export default function BlogCommentsSystem() {
 
       if (error) throw error;
 
-      // If auto-start, create some demo blog comment opportunities
+      // If auto-start, discover blogs and generate diverse comments
       if (formData.auto_start) {
-        const demoBlogUrls = [
-          `https://blog1.example.com/posts/${formData.keyword.replace(/\s+/g, '-')}`,
-          `https://blog2.example.com/articles/${formData.keyword.replace(/\s+/g, '-')}`,
-          `https://blog3.example.com/reviews/${formData.keyword.replace(/\s+/g, '-')}`
-        ];
-
-        for (const blogUrl of demoBlogUrls) {
-          await supabase.from('blog_comments').insert([{
-            campaign_id: campaign.id,
-            blog_url: blogUrl,
-            comment_text: `Great insights about ${formData.keyword}! Thanks for sharing.`,
-            status: 'pending'
-          }]);
-        }
+        await startCommentGeneration(campaign.id, formData.keyword);
       }
 
       toast.success('Campaign created successfully!');
