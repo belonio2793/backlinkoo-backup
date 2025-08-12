@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fix Missing Columns</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .error { background: #ffe6e6; border: 1px solid #ff9999; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        .fix { background: #e6f3ff; border: 1px solid #99ccff; padding: 15px; border-radius: 5px; margin: 20px 0; }
+        button { background: #007cba; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #005a8a; }
+        .code { background: #f5f5f5; padding: 15px; border-radius: 5px; font-family: monospace; margin: 10px 0; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Emergency Database Fix</h1>
+    
+    <div class="error">
+        <h3>❌ ERROR DETECTED</h3>
+        <p><strong>Missing columns:</strong> started_at, completed_at, auto_start</p>
+        <p>These columns are required in the automation_campaigns table for the system to work properly.</p>
+    </div>
+
+    <div class="fix">
+        <h3>✅ QUICK FIX</h3>
+        <p>Copy the SQL below and run it in your Supabase SQL Editor:</p>
+        
+        <div class="code" id="sqlCode">ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ NULL;
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ NULL;
+ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS auto_start BOOLEAN DEFAULT false;
+
+-- Verify fix worked:
+SELECT column_name FROM information_schema.columns 
+WHERE table_name = 'automation_campaigns' 
+AND column_name IN ('started_at', 'completed_at', 'auto_start');</div>
+        
+        <button onclick="copySQL()">📋 Copy SQL</button>
+        <button onclick="openSupabase()">🔗 Open Supabase</button>
+    </div>
+
+    <div style="margin-top: 30px;">
+        <h3>📋 Steps to Fix:</h3>
+        <ol>
+            <li>Click "Copy SQL" above</li>
+            <li>Click "Open Supabase" to go to your database</li>
+            <li>Go to SQL Editor in Supabase</li>
+            <li>Paste the SQL and click "Run"</li>
+            <li>Refresh your application</li>
+        </ol>
+    </div>
+
+    <script>
+        function copySQL() {
+            const sql = document.getElementById('sqlCode').textContent;
+            navigator.clipboard.writeText(sql).then(() => {
+                alert('✅ SQL copied to clipboard!');
+            }).catch(() => {
+                alert('❌ Copy failed. Please select and copy manually.');
+            });
+        }
+
+        function openSupabase() {
+            window.open('https://supabase.com/dashboard/project/dfhanacsmsvvkpunurnp/sql/templates', '_blank');
+        }
+    </script>
+</body>
+</html>

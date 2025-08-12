@@ -16,7 +16,7 @@ import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
 // import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
 import Index from "./pages/Index";
 
-const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
+const LazyBacklinkAutomation = lazy(() => import("./pages/NewBacklinkAutomation"));
 const LazyBacklinkReport = lazy(() => import("./pages/BacklinkReport"));
 const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDiscoveryDashboard"));
 const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
@@ -42,6 +42,8 @@ const LazyPremiumUpgradeTest = lazy(() => import("./components/PremiumUpgradeTes
 const LazyAutomationSystem = lazy(() => import("./pages/AutomationSystem"));
 const LazyAuthErrorDebug = lazy(() => import("./pages/AuthErrorDebug"));
 const LazyTextCleanerDebug = lazy(() => import("./pages/TextCleanerDebug"));
+const LazyDatabaseColumnsFix = lazy(() => import("./pages/DatabaseColumnsFix"));
+const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -310,6 +312,22 @@ const App = () => (
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazyTextCleanerDebug />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/debug/database-fix"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyDatabaseColumnsFix />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/verify-columns"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyVerifyColumns />
                 </Suspense>
               }
             />
