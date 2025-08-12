@@ -314,6 +314,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/debug/database-fix"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyDatabaseColumnsFix />
+                </Suspense>
+              }
+            />
 
             {/* 404 Catch-all route */}
             <Route
