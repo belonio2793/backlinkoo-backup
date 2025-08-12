@@ -258,29 +258,56 @@ export default function BlogCommentAutomation() {
     setIsCreating(true);
 
     try {
-      // Call Netlify function to create campaign and enqueue discovery
-      const response = await fetch('/.netlify/functions/createCampaign', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Create campaign directly in Supabase since Netlify functions aren't ready
+      const { data: campaign, error: campaignError } = await supabase
+        .from('campaigns')
+        .insert([{
           user_id: user?.id,
           destination_url: formData.destination_url,
           keyword: formData.keyword,
-          anchor_text: formData.anchor_text,
-          auto_discover: formData.auto_discover,
-          auto_post: formData.auto_post
-        }),
-      });
+          anchor_text: formData.anchor_text || '',
+          status: 'pending'
+        }])
+        .select('*')
+        .single();
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to create campaign');
+      if (campaignError) {
+        throw new Error(campaignError.message || 'Failed to create campaign');
       }
 
-      const result = await response.json();
-      
+      // Log campaign creation
+      await supabase.from('campaign_logs').insert([{
+        campaign_id: campaign.id,
+        level: 'info',
+        message: `Campaign created for keyword: ${formData.keyword}`,
+        meta: {
+          destination_url: formData.destination_url,
+          keyword: formData.keyword,
+          anchor_text: formData.anchor_text
+        }
+      }]);
+
+      // If auto-discover is enabled, add a demo discovery job
+      if (formData.auto_discover) {
+        await supabase.from('jobs').insert([{
+          job_type: 'discover',
+          payload: {
+            campaign_id: campaign.id,
+            keyword: formData.keyword,
+            destination_url: formData.destination_url,
+            auto_post: formData.auto_post || false
+          },
+          status: 'queued'
+        }]);
+
+        await supabase.from('campaign_logs').insert([{
+          campaign_id: campaign.id,
+          level: 'info',
+          message: 'Discovery job queued',
+          meta: { keyword: formData.keyword }
+        }]);
+      }
+
       toast.success('Campaign created successfully!');
       setShowCreateForm(false);
       setFormData({
@@ -291,7 +318,7 @@ export default function BlogCommentAutomation() {
         auto_post: false,
         daily_limit: 10
       });
-      
+
       await loadCampaigns();
       await loadJobs();
     } catch (error: any) {
