@@ -271,13 +271,28 @@ export default function BlogCommentsSystem() {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to generate comment');
+        const errorText = await response.text();
+        console.error('API response not ok:', response.status, errorText);
+        throw new Error(`API Error ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
+
+      // Check if we got a fallback response
+      if (data.fallback) {
+        console.warn('OpenAI API failed, using fallback:', data.error);
+        toast.warning('Using fallback comment generation');
+      }
+
       return data.comment;
     } catch (error) {
       console.error('Error generating comment:', error);
+      console.error('Full error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+
       // Fallback to manual templates
       return generateFallbackComment(keyword);
     }
