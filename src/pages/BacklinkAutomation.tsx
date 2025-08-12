@@ -362,7 +362,7 @@ export default function BacklinkAutomation() {
                   <div className="text-3xl font-bold text-green-600">
                     {isAuthenticated ? (
                       limit === Infinity ? totalLinksBuilt : `${totalLinksBuilt}/${limit}`
-                    ) : '—'}
+                    ) : '��'}
                   </div>
                   <div className="text-sm text-gray-600">Links Built</div>
                 </div>
@@ -446,40 +446,28 @@ export default function BacklinkAutomation() {
           </CardHeader>
         </Card>
 
-        {/* Runtime & Reporting Section */}
+        {/* Runtime Status */}
         {isAuthenticated && activeCampaignCount > 0 && (
-          <ErrorBoundary
-            title="Runtime Reporting Error"
-            description="There was an issue loading the campaign reporting dashboard."
-            onError={(error, errorInfo) => {
-              console.error('RuntimeReporting error:', error, errorInfo);
-            }}
-          >
-            <RuntimeReporting
-              onToggleCampaign={handleToggleCampaign}
-              onRefreshData={async () => {
-                // Clear all caches and refresh data
-                const { stableCampaignMetrics } = await import('@/services/stableCampaignMetrics');
-                stableCampaignMetrics.clearCache();
-
-                // Refresh campaigns data in the hook
-                try {
-                  // Force refresh the campaign manager hook data
-                  window.dispatchEvent(new Event('campaign-data-refresh'));
-                } catch (error) {
-                  console.error('Error refreshing campaign data:', error);
-                }
-
-                // Check automation tables
-                await checkAutomationTables();
-
-                // Force a complete reload to ensure sync
-                setTimeout(() => {
-                  window.location.reload();
-                }, 500);
-              }}
-            />
-          </ErrorBoundary>
+          <Card className="mb-8 bg-blue-50 border-blue-200">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  <span className="font-medium text-blue-900">
+                    {activeCampaignCount} active campaign{activeCampaignCount !== 1 ? 's' : ''} running
+                  </span>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.location.reload()}
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                >
+                  Refresh Status
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         )}
 
         {/* Campaign Management */}
