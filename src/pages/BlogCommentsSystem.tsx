@@ -539,15 +539,20 @@ export default function BlogCommentsSystem() {
         })
       });
 
-      if (!response.ok) throw new Error('Discovery failed');
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Discovery failed: ${response.status} ${errorText}`);
+      }
 
       const result = await response.json();
-      toast.success(`✅ Discovered ${result.result.total_found} new blog opportunities`);
+      toast.success(`✅ Discovered ${result.result?.total_found || 0} new blog opportunities`);
 
-      await Promise.all([loadCampaigns(), loadComments(), loadAutomationJobs()]);
-    } catch (error) {
-      console.error('Error in blog discovery:', error);
-      toast.error('Blog discovery failed');
+      // Reload data safely
+      await Promise.all([loadCampaigns(), loadComments()]);
+      await loadAutomationJobs(); // This may fail if table doesn't exist
+    } catch (error: any) {
+      console.error('Error in blog discovery:', error.message || error);
+      toast.error(`Blog discovery failed: ${error.message || 'Unknown error'}`);
     } finally {
       setIsProcessing(false);
     }
