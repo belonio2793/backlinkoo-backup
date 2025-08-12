@@ -31,13 +31,18 @@ export class PlaywrightCommentEngine {
   constructor() {}
 
   async initialize(headless: boolean = true) {
-    this.browser = await chromium.launch({ 
+    this.browser = await chromium.launch({
       headless,
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
     this.context = await this.browser.newContext({
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
     });
+  }
+
+  async initializeWithContext(context: BrowserContext) {
+    this.context = context;
+    // Don't set this.browser since it's managed by the pool
   }
 
   async cleanup() {
