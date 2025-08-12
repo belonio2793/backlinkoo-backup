@@ -703,11 +703,11 @@ export default function BlogCommentsSystem() {
     
     tables.forEach(table => {
       const channel = supabase
-        .channel(table)
-        .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
-          loadAllData();
-        })
-        .subscribe();
+      .channel(table)
+      .on('postgres_changes', { event: '*', schema: 'public', table }, () => {
+        setTimeout(() => loadAllData(), 0);
+      })
+      .subscribe();
       channels.push(channel);
     });
 
