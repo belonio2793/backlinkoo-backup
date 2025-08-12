@@ -307,7 +307,28 @@ export default function BlogCommentsSystem() {
       await loadComments();
     } catch (error: any) {
       console.error('Error creating campaign:', error);
-      toast.error(error.message || 'Failed to create campaign');
+
+      // Better error message extraction
+      let errorMessage = 'Failed to create campaign';
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error?.details) {
+        errorMessage = error.details;
+      } else if (error?.hint) {
+        errorMessage = error.hint;
+      }
+
+      // Check for specific database errors
+      if (errorMessage.includes('relation') || errorMessage.includes('does not exist')) {
+        errorMessage = 'Database setup required - please run the SQL setup script first';
+      } else if (errorMessage.includes('automation_enabled')) {
+        errorMessage = 'Database column missing - please update your database schema';
+      }
+
+      console.error('Processed error message:', errorMessage);
+      toast.error(errorMessage);
     } finally {
       setIsCreating(false);
     }
