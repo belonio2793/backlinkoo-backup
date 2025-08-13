@@ -7,7 +7,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Crown, CreditCard, Zap, Star } from 'lucide-react';
-import { DirectCheckoutService } from '@/services/directCheckoutService';
+import { stripeCheckout } from '@/services/universalStripeCheckout';
 
 interface DirectPaymentButtonProps {
   variant?: 'default' | 'outline' | 'destructive' | 'secondary' | 'ghost' | 'link';
@@ -28,7 +28,7 @@ export function DirectBuyCreditsButton({
 }: DirectPaymentButtonProps & { credits?: 50 | 100 | 250 | 500 }) {
   
   const handleClick = async () => {
-    await DirectCheckoutService.buyCredits(credits);
+    await stripeCheckout.quickBuyCredits(credits);
   };
   
   const getPrice = () => {
