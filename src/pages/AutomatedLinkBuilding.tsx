@@ -228,6 +228,39 @@ export default function AutomatedLinkBuilding() {
           });
         }
 
+        // Fetch analytics data from automation_analytics table
+        const { data: analyticsData, error: analyticsError } = await supabase
+          .from('automation_analytics')
+          .select(`
+            total_links_built,
+            referring_domains,
+            avg_domain_rating,
+            traffic_impact,
+            monthly_growth_links,
+            monthly_growth_domains,
+            monthly_growth_dr
+          `)
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .single();
+
+        if (analyticsError) {
+          console.error('Error loading analytics data:', analyticsError);
+        } else if (analyticsData) {
+          setAnalyticsStats({
+            totalLinksBuilt: analyticsData.total_links_built || 0,
+            referringDomains: analyticsData.referring_domains || 0,
+            avgDomainRating: analyticsData.avg_domain_rating || 0,
+            trafficImpact: analyticsData.traffic_impact || 0,
+            monthlyGrowth: {
+              links: analyticsData.monthly_growth_links || 0,
+              domains: analyticsData.monthly_growth_domains || 0,
+              dr: analyticsData.monthly_growth_dr || 0
+            }
+          });
+        }
+
       } catch (error) {
         console.error('Error loading automation data:', error);
         toast.error('Failed to load automation data');
