@@ -80,6 +80,25 @@ export default function Automation() {
     target_url: ''
   });
 
+  // Auto-format URL to add https:// if missing
+  const formatUrl = (url: string): string => {
+    if (!url) return url;
+    const trimmedUrl = url.trim();
+    if (!trimmedUrl.startsWith('http://') && !trimmedUrl.startsWith('https://')) {
+      return `https://${trimmedUrl}`;
+    }
+    return trimmedUrl;
+  };
+
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, target_url: e.target.value });
+  };
+
+  const handleUrlBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const formattedUrl = formatUrl(e.target.value);
+    setFormData({ ...formData, target_url: formattedUrl });
+  };
+
   // Auto-generate campaign name based on keywords, URL, and timestamp
   const generateCampaignName = (keywords: string, targetUrl: string): string => {
     const now = new Date();
