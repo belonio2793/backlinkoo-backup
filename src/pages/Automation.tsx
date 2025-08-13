@@ -501,9 +501,12 @@ export default function Automation() {
                               <p className="text-sm font-medium">{campaign.keywords?.length || 0} keywords</p>
                             </div>
                             <div>
-                              <p className="text-sm text-gray-500">Progress</p>
+                              <p className="text-sm text-gray-500">Sites & Progress</p>
                               <p className="text-sm font-medium">
-                                {campaign.links_built || 0} / {campaign.target_links || 0} links
+                                {campaign.links_built || 0} links built
+                              </p>
+                              <p className="text-xs text-gray-400">
+                                {campaign.available_sites || 0} sites available
                               </p>
                             </div>
                           </div>
