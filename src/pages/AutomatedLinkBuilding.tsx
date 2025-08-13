@@ -425,7 +425,12 @@ export default function AutomatedLinkBuilding() {
 
   // Production automation start function with rate limiting
   const handleStartAutomation = async () => {
-    if (!user || !campaignForm.name || !campaignForm.target_url || !campaignForm.keywords) {
+    if (!user) {
+      toast.error('Please sign in to start automation campaigns');
+      return;
+    }
+
+    if (!campaignForm.name || !campaignForm.target_url || !campaignForm.keywords) {
       toast.error('Please fill in all required fields');
       return;
     }
