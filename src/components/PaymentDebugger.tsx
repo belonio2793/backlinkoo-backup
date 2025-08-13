@@ -81,6 +81,16 @@ export function PaymentDebugger() {
     toast.success('Copied to clipboard');
   };
 
+  const generateReport = async () => {
+    try {
+      const report = await PaymentQuickFix.generateDiagnosticReport();
+      copyToClipboard(report);
+      toast.success('Diagnostic report copied to clipboard');
+    } catch (error) {
+      toast.error('Failed to generate report');
+    }
+  };
+
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'success': return <CheckCircle className="h-4 w-4 text-green-600" />;
