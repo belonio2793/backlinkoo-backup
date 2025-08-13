@@ -36,6 +36,7 @@ export function PaymentDebugger() {
   const [results, setResults] = useState<DiagnosticResults | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [quickResults, setQuickResults] = useState<PaymentDiagnosticResult[]>([]);
+  const [healthCheck, setHealthCheck] = useState(PaymentQuickFix.performHealthCheck());
 
   const diagnostics = new PaymentDiagnostics();
 
