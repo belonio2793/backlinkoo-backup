@@ -248,6 +248,17 @@ export default function Automation() {
       return; // User will be prompted to sign in, progress is saved
     }
 
+    // Validate user object
+    if (!user || !user.id) {
+      automationLogger.error('campaign', 'Campaign creation attempted with invalid user object', {
+        hasUser: !!user,
+        userId: user?.id,
+        userEmail: user?.email
+      });
+      toast.error('Authentication error. Please sign in again.');
+      return;
+    }
+
     if (!formData.keywords || !formData.anchor_texts || !formData.target_url) {
       automationLogger.warn('campaign', 'Campaign creation attempted with missing fields', formData);
       toast.error('Please fill in all required fields');
