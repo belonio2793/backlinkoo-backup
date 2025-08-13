@@ -28,7 +28,6 @@ const LazyBlog = lazy(() => import("./pages/Blog"));
 const LazyDashboard = lazy(() => import("./pages/Dashboard"));
 const LazyLogin = lazy(() => import("./pages/Login"));
 const LazyBeautifulBlogPost = lazy(() => import("./components/BeautifulBlogPost").then(module => ({ default: module.BeautifulBlogPost })));
-const LazySimpleBlogPost = lazy(() => import("./components/SimpleBlogPost").then(module => ({ default: module.SimpleBlogPost })));
 const LazyAuthCallback = lazy(() => import("./pages/AuthCallback"));
 const LazyEmailConfirmation = lazy(() => import("./pages/EmailConfirmation"));
 const LazyPasswordReset = lazy(() => import("./pages/PasswordReset"));
@@ -115,7 +114,7 @@ const App = () => (
           element={
             <EnhancedErrorBoundary>
               <Suspense fallback={<LoadingSpinner />}>
-                <LazySimpleBlogPost />
+                <LazyBeautifulBlogPost />
               </Suspense>
             </EnhancedErrorBoundary>
           }
