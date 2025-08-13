@@ -877,6 +877,19 @@ export class ContentFormatter {
       .replace(/&amp;gt;/g, '>')
       .replace(/&amp;amp;/g, '&')
 
+      // Fix corrupted link attributes before other processing
+      .replace(/<a\s+([^>]*?)\s*>/gi, (match, attrs) => {
+        // Fix malformed attributes by ensuring proper key="value" format
+        const fixedAttrs = attrs
+          .replace(/\s*([a-zA-Z-]+)([^\s=]*?)="/g, ' $1="')  // Fix missing = signs
+          .replace(/([a-zA-Z-]+)([^\s=]+?)\s/g, '$1="$2" ')  // Fix missing quotes
+          .replace(/href([^\s="]+)/g, 'href="$1"')  // Fix href specifically
+          .replace(/target([^\s="]+)/g, 'target="$1"')  // Fix target
+          .replace(/rel([^\s="]+)/g, 'rel="$1"')  // Fix rel
+          .replace(/style([^\s="]+)/g, 'style="$1"');  // Fix style
+        return `<a${fixedAttrs}>`;
+      })
+
       // Remove HTML syntax artifacts that shouldn't be displayed
       .replace(/Hook Introduction:\s*["=]*\s*H[1-6]:\s*/gi, '')
       .replace(/["=]+\s*H[1-6]:\s*/gi, '')
