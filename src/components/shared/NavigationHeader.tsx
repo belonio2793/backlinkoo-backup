@@ -20,8 +20,6 @@ export function NavigationHeader() {
   const navigationItems = [
     { path: '/', label: 'Home', icon: Home },
     { path: '/dashboard', label: 'Dashboard', icon: BarChart3 },
-    { path: '/automation', label: 'Automation', icon: Settings },
-    { path: '/automation/system', label: 'System Control', icon: Zap, badge: 'New' },
     { path: '/blog', label: 'Blog', icon: FileText }
   ];
 
