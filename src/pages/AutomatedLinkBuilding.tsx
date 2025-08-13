@@ -96,6 +96,9 @@ export default function AutomatedLinkBuilding() {
   // Modal states
   const [showSignInModal, setShowSignInModal] = useState(false);
 
+  // Database table status
+  const [tableExists, setTableExists] = useState<boolean | null>(null);
+
   // Load generated posts
   useEffect(() => {
     if (!isAuthenticated || !user) return;
