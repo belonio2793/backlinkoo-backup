@@ -1,6 +1,7 @@
 import { useState, useEffect, startTransition } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/beautiful-blog.css';
+import '../styles/blog-template.css';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
@@ -549,14 +550,14 @@ export function BeautifulBlogPost() {
   const autoRemoveTitlesFromContent = (content: string, pageTitle: string) => {
     if (!content) return content;
 
-    // First, check if content is markdown or already HTML
-    const isMarkdown = content.includes('**') || content.includes('##') || content.includes('*') && !content.includes('<');
+    // Always process content through the formatter to ensure proper HTML formatting
+    let processedContent = ContentFormatter.formatBlogContent(content, pageTitle);
 
-    // If it's markdown, convert it to HTML first
-    let processedContent = content;
-    if (isMarkdown) {
-      processedContent = ContentFormatter.formatBlogContent(content, pageTitle);
-    }
+    // Apply additional post-processing to fix any remaining issues
+    processedContent = ContentFormatter.preProcessMalformedHtml(processedContent);
+    processedContent = ContentFormatter.fixDisplayedHtmlAsText(processedContent);
+    processedContent = ContentFormatter.fixDOMDisplayIssues(processedContent);
+    processedContent = ContentFormatter.postProcessCleanup(processedContent);
 
     // Now remove duplicate titles if pageTitle is provided
     if (!pageTitle) return processedContent;
@@ -981,7 +982,7 @@ export function BeautifulBlogPost() {
             <div className="prose prose-lg max-w-none mt-8">
               <div className="beautiful-card pt-6 px-6 pb-8 md:pt-8 md:px-12 md:pb-12 lg:px-16">
                 <div
-                  className="beautiful-blog-content beautiful-prose prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-strong:font-bold prose-strong:text-gray-900 prose-img:rounded-lg prose-img:shadow-lg"
+                  className="beautiful-blog-content beautiful-prose modern-blog-content article-content prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-strong:font-bold prose-strong:text-gray-900 prose-img:rounded-lg prose-img:shadow-lg"
                   dangerouslySetInnerHTML={{
                     __html: autoRemoveTitlesFromContent(blogPost.content || '', blogPost.title || '')
                   }}
