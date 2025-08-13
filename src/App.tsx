@@ -110,13 +110,15 @@ const App = () => (
           }
         />
             <Route
-              path="/blog/:slug"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyBeautifulBlogPost />
-                </Suspense>
-              }
-            />
+          path="/blog/:slug"
+          element={
+            <EnhancedErrorBoundary>
+              <Suspense fallback={<LoadingSpinner />}>
+                <LazyBeautifulBlogPost />
+              </Suspense>
+            </EnhancedErrorBoundary>
+          }
+        />
             <Route
               path="/dashboard"
               element={
