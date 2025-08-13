@@ -186,13 +186,62 @@
   }
 }
 
+/* Mobile payment layout optimizations */
+@media (max-width: 768px) {
+  /* Premium payment grid responsive layout */
+  .premium-payment-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--mobile-spacing);
+    padding: var(--mobile-spacing);
+  }
+
+  .premium-plan-card {
+    padding: var(--mobile-spacing);
+    border-radius: var(--mobile-border-radius);
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+  }
+
+  .premium-plan-card.selected {
+    border-color: #3b82f6;
+    background: #eff6ff;
+  }
+
+  /* Payment button groups for mobile */
+  .payment-button-group {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: var(--mobile-spacing);
+  }
+
+  .payment-button-group.two-column {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Credits selection mobile layout */
+  .credits-selection-mobile {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+}
+
 /* Landscape mobile orientation fixes */
 @media (max-width: 768px) and (orientation: landscape) {
   /* Optimize payment modal height for landscape */
-  .payment-modal-content {
+  .payment-modal-content,
+  .premium-payment-modal {
     max-height: 90vh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* Adjust premium plan layout for landscape */
+  .premium-payment-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
   }
 }
 
