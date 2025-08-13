@@ -132,6 +132,7 @@ export default function AutomatedLinkBuilding() {
 
         // Check database health first
         const { allTablesExist, missingTables } = await dbHealthCheck.checkRequiredTables();
+        setDbStatus({ healthy: allTablesExist, missingTables });
         if (!allTablesExist) {
           console.warn('Some database tables are missing:', missingTables);
           // Continue anyway but with limited functionality
