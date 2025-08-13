@@ -398,6 +398,13 @@ export default function BacklinkAutomation() {
           </div>
         </div>
 
+        {/* Database Setup */}
+        {showDatabaseSetup && (
+          <div className="mb-6">
+            <BacklinkDatabaseSetup />
+          </div>
+        )}
+
         <Tabs defaultValue="campaign" className="max-w-6xl mx-auto">
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="campaign">Campaign</TabsTrigger>
