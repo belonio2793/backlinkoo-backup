@@ -48,6 +48,7 @@ const LazyTextCleanerDebug = lazy(() => import("./pages/TextCleanerDebug"));
 const LazyDatabaseColumnsFix = lazy(() => import("./pages/DatabaseColumnsFix"));
 const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
+const LazyBlogPostChecker = lazy(() => import("./components/BlogPostChecker").then(module => ({ default: module.BlogPostChecker })));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -376,6 +377,14 @@ const App = () => (
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazyVerifyColumns />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/debug/blog-checker"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyBlogPostChecker />
                 </Suspense>
               }
             />
