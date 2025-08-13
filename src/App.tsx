@@ -398,6 +398,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/premium-seo-test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyPremiumSEOAnalysisTest />
+                </Suspense>
+              }
+            />
 
             {/* 404 Catch-all route */}
             <Route
