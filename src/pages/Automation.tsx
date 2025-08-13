@@ -56,10 +56,38 @@ export default function Automation() {
     target_links: 10
   });
 
-  // Load user campaigns
+  // Load user campaigns or demo data
   useEffect(() => {
     if (user) {
       loadCampaigns();
+    } else {
+      // Show demo campaigns for unauthenticated users
+      setCampaigns([
+        {
+          id: 'demo-1',
+          name: 'Demo SEO Campaign',
+          keywords: ['SEO tools', 'digital marketing', 'link building'],
+          anchor_texts: ['best SEO tools', 'click here', 'learn more'],
+          target_url: 'https://example.com',
+          status: 'active',
+          created_at: new Date().toISOString(),
+          user_id: 'demo',
+          links_built: 15,
+          target_links: 25
+        },
+        {
+          id: 'demo-2',
+          name: 'Content Marketing Links',
+          keywords: ['content marketing', 'blog promotion'],
+          anchor_texts: ['great content', 'read more', 'check this out'],
+          target_url: 'https://example.com/blog',
+          status: 'paused',
+          created_at: new Date(Date.now() - 86400000).toISOString(),
+          user_id: 'demo',
+          links_built: 8,
+          target_links: 20
+        }
+      ]);
     }
   }, [user]);
 
