@@ -5,9 +5,9 @@
 import { environmentVariablesService } from '@/services/environmentVariablesService';
 
 export async function setDefaultOpenAIKey(): Promise<boolean> {
-  const NEW_OPENAI_API_KEY = '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';
-
-  console.log('🎯 Setting API key ending with:', NEW_OPENAI_API_KEY.slice(-4));
+  // API keys should NEVER be hardcoded in client-side code
+  // This function should only work with environment variables
+  console.log('⚠️ This function should not set hardcoded API keys');
   
   try {
     console.log('🔄 Setting OpenAI API key in database...');

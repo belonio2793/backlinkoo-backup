@@ -13,7 +13,7 @@ export function ApiKeyStatusFix() {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const { toast } = useToast();
 
-  const CORRECT_KEY = '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';
+  // API key should be retrieved from secure environment variables only
 
   const checkCurrentKey = () => {
     // Check various sources for the current key
