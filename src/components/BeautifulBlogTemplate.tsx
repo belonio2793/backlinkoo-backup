@@ -35,6 +35,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { blogService } from '@/services/blogService';
 import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
+import { processBlogContent } from '@/utils/markdownProcessor';
 
 type BlogPost = Tables<'blog_posts'>;
 
