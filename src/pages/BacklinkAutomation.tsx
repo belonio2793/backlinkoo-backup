@@ -152,6 +152,7 @@ export default function BacklinkAutomation() {
     } catch (error: any) {
       console.error('Error loading campaigns:', error);
       if (error?.message?.includes('relation') || error?.message?.includes('does not exist')) {
+        setShowDatabaseSetup(true);
         toast.error('Database tables not set up. Please run the database migration.');
       }
     }
