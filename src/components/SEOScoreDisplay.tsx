@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { SEOAnalyzer, type SEOAnalysisResult } from '@/services/seoAnalyzer';
 import { EnhancedPremiumCheckoutModal } from '@/components/EnhancedPremiumCheckoutModal';
+import { PremiumSEOAnalysisModal } from '@/components/PremiumSEOAnalysisModal';
 import { userService } from '@/services/userService';
 import { useToast } from '@/hooks/use-toast';
 
