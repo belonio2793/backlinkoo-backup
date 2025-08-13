@@ -380,6 +380,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/debug/blog-checker"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyBlogPostChecker />
+                </Suspense>
+              }
+            />
 
             {/* 404 Catch-all route */}
             <Route
