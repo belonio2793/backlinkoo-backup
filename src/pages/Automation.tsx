@@ -27,6 +27,8 @@ import { Footer } from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { automationLogger } from '@/services/automationLogger';
+import { targetSitesManager } from '@/services/targetSitesManager';
 
 interface Campaign {
   id: string;
@@ -38,7 +40,8 @@ interface Campaign {
   created_at: string;
   user_id: string;
   links_built?: number;
-  target_links?: number;
+  available_sites?: number;
+  target_sites_used?: string[];
 }
 
 export default function Automation() {
@@ -46,15 +49,38 @@ export default function Automation() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
+
+  // Initialize logging
+  useEffect(() => {
+    automationLogger.info('system', 'Automation page loaded');
+    if (user) {
+      automationLogger.setUserId(user.id);
+    }
+    loadSitesInfo();
+  }, [user]);
+
+  const loadSitesInfo = async () => {
+    try {
+      const stats = targetSitesManager.getStats();
+      setSitesStats(stats);
+      setAvailableSites(stats.active_sites);
+      automationLogger.debug('system', 'Sites info loaded', stats);
+    } catch (error) {
+      automationLogger.error('system', 'Failed to load sites info', {}, undefined, error as Error);
+    }
+  };
   
   // Form state
   const [formData, setFormData] = useState({
     name: '',
     keywords: '',
     anchor_texts: '',
-    target_url: '',
-    target_links: 10
+    target_url: ''
   });
+
+  // Available sites info
+  const [availableSites, setAvailableSites] = useState(0);
+  const [sitesStats, setSitesStats] = useState<any>(null);
 
   // Load user campaigns or demo data
   useEffect(() => {
