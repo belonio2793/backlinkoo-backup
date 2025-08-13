@@ -34,6 +34,7 @@ import { targetSitesManager } from '@/services/targetSitesManager';
 import { automationOrchestrator } from '@/services/automationOrchestrator';
 import AutomationTestDashboard from '@/components/automation/AutomationTestDashboard';
 import { LoginModal } from '@/components/LoginModal';
+import { DatabaseInit } from '@/utils/databaseInit';
 
 interface Campaign {
   id: string;
