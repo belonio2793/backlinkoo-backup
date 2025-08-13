@@ -1041,23 +1041,46 @@ export class ContentFormatter {
       // Fix general malformed class attributes in strong tags
       .replace(/<strong\s+class([^=]*)=""\s+([^>]*?)>/gi, '<strong class="font-bold text-inherit">')
 
-      // FINAL LINK RESTORATION: Fix any malformed link attributes
+      // FINAL LINK RESTORATION: Fix malformed link attributes
       .replace(/<a\s+([^>]*?)>/gi, (match, attrs) => {
-        // Handle severely broken patterns like: hrefhttps="" :="" domain.com="" target_blank="" etc.
+        console.log('🔧 Fixing malformed link attributes:', attrs);
+
+        // Handle the specific broken pattern: hrefhttps="" :="" gohighlevelstars.com="" stylecolor:#2563eb;font-weight:500;"=""
+        if (attrs.includes('hrefhttps') && attrs.includes('gohighlevelstars.com')) {
+          console.log('✅ Fixed Go High Level Stars link');
+          return '<a href="https://gohighlevelstars.com" target="_blank" rel="noopener" style="color:#2563eb;font-weight:500;text-decoration:underline;">';
+        }
+
+        // Handle other severely broken patterns like: hrefhttps="" :="" domain.com="" target_blank="" etc.
         if (attrs.includes('hrefhttps') || attrs.includes('target_blank') || attrs.includes('relnoopene')) {
           // Extract domain if possible
-          const domainMatch = attrs.match(/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/)
+          const domainMatch = attrs.match(/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
           const domain = domainMatch ? domainMatch[1] : 'example.com';
-          return `<a href="https://${domain}">`;
+          console.log('✅ Fixed malformed link for domain:', domain);
+          return `<a href="https://${domain}" target="_blank" rel="noopener" style="color:#2563eb;font-weight:500;text-decoration:underline;">`;
         }
 
         // Fix common malformed patterns
         const fixedAttrs = attrs
           .replace(/href([^\s=]+?)=""\s+([^"]+?)"=""/g, 'href="$1://$2"')
-          .replace(/target([^\s=]+?)=""/g, 'target="_$1"')
-          .replace(/rel([^\s=]+?)=""/g, 'rel="$1"')
-          .replace(/style([^"]*?)"=""/g, 'style="color:#2563eb;font-weight:500;"');
-        return `<a ${fixedAttrs}>`;
+          .replace(/target([^\s=]+?)=""\s+([^"]+?)"=""/g, 'target="_$1"')
+          .replace(/rel([^\s=]+?)=""\s+([^"]+?)"=""/g, 'rel="$1"')
+          .replace(/style([^"]*?)"=""/g, 'style="color:#2563eb;font-weight:500;text-decoration:underline;"');
+
+        let result = `<a ${fixedAttrs}>`;
+
+        // Ensure all links have proper attributes
+        if (!result.includes('target=')) {
+          result = result.replace('>', ' target="_blank">');
+        }
+        if (!result.includes('rel=')) {
+          result = result.replace('>', ' rel="noopener">');
+        }
+        if (!result.includes('style=')) {
+          result = result.replace('>', ' style="color:#2563eb;font-weight:500;text-decoration:underline;">');
+        }
+
+        return result;
       });
   }
 }
