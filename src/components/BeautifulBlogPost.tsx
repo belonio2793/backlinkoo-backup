@@ -53,6 +53,7 @@ import { maskEmail } from '@/utils/emailMasker';
 import { SEOScoreDisplay } from '@/components/SEOScoreDisplay';
 import { KillerDeletionWarning } from '@/components/KillerDeletionWarning';
 import { ExitIntentPopup } from '@/components/ExitIntentPopup';
+import { processBlogContent } from '@/utils/markdownProcessor';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -358,7 +359,7 @@ export function BeautifulBlogPost() {
         .eq('slug', slug!);
 
       if (error) {
-        console.error('❌ Direct delete failed:', error);
+        console.error('�� Direct delete failed:', error);
 
         // If RLS blocks the delete, try using a serverless function as fallback
         try {
@@ -1200,7 +1201,7 @@ export function BeautifulBlogPost() {
                       return (
                         <div className="max-w-2xl mx-auto bg-red-600 text-white p-4 rounded-lg animate-pulse border-4 border-yellow-400">
                           <div className="text-center font-black text-lg">
-                            💀 CRITICAL: LESS THAN 1 HOUR REMAINING! ⚠️⚠️⚠️
+                            💀 CRITICAL: LESS THAN 1 HOUR REMAINING! ⚠️⚠️���️
                           </div>
                           <div className="text-center text-sm mt-2">
                             Your content is entering the DEATH ZONE!
