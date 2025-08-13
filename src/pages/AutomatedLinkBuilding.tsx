@@ -349,7 +349,12 @@ export default function AutomatedLinkBuilding() {
 
   // Production campaign creation function
   const handleSaveCampaign = async () => {
-    if (!user || !campaignForm.name || !campaignForm.target_url || !campaignForm.keywords) {
+    if (!user) {
+      toast.error('Please sign in to create campaigns');
+      return;
+    }
+
+    if (!campaignForm.name || !campaignForm.target_url || !campaignForm.keywords) {
       toast.error('Please fill in all required fields');
       return;
     }
