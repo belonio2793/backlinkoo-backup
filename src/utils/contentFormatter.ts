@@ -35,10 +35,24 @@ export class ContentFormatter {
 
     // VERY EARLY preprocessing to fix critical issues before any HTML processing
     content = content
+      // Preserve user anchor text by converting common patterns to markdown format first
+      .replace(/\b([A-Z][A-Za-z\s]+)\s+(https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, '[$1]($2)')
+      .replace(/\b(Go High Level Stars)\s*([a-zA-Z0-9.-]+\.com)/gi, '[Go High Level Stars](https://$2)')
+
       // Fix the specific issue: ## &lt; h2&gt;Pro Tip pattern
       .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*&lt;\s*\/\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*&lt;\s*$/gm, '') // Remove lines that are just ## &lt;
+
+      // Fix HTML syntax artifacts that shouldn't be displayed
+      .replace(/Hook Introduction:\s*["=]+\s*H1:\s*/gi, '')
+      .replace(/["=]+\s*H[1-6]:\s*/gi, '')
+      .replace(/^\s*H[1-6]:\s*/gmi, '') // Remove H1:, H2:, etc. at line start
+      .replace(/Hook Introduction:\s*/gi, '') // Remove standalone "Hook Introduction:" text
+      .replace(/Conclusion:\s*/gi, '') // Remove "Conclusion:" prefix
+      .replace(/Call-to-Action:\s*/gi, '') // Remove "Call-to-Action:" prefix
+      .replace(/^\s*Conclusion:\s*/gmi, '') // Remove "Conclusion:" at line start
+      .replace(/^\s*Call-to-Action:\s*/gmi, '') // Remove "Call-to-Action:" at line start
 
       // Remove empty heading lines (just ##)
       .replace(/^\s*##\s*$/gm, '')
@@ -59,7 +73,11 @@ export class ContentFormatter {
 
       // Clean up malformed sentences and links
       .replace(/([A-Za-z])\s*&lt;[^&]*&gt;\s*([A-Za-z])/g, '$1 $2') // Remove HTML entities between words
-      .replace(/\.\s*&lt;[^&]*&gt;\s*([A-Z])/g, '. $1'); // Clean sentence breaks
+      .replace(/\.\s*&lt;[^&]*&gt;\s*([A-Z])/g, '. $1') // Clean sentence breaks
+
+      // Remove any displayed HTML tag syntax that shouldn't be visible
+      .replace(/\s*&lt;\/?[a-zA-Z][^&]*&gt;\s*/g, ' ') // Remove any remaining HTML entity tags
+      .replace(/\s*<\/?[a-zA-Z][^>]*>\s*/g, ' '); // Remove actual HTML tags that shouldn't be displayed
 
     // Split content into lines and clean up - MINIMAL PROCESSING
     let formattedContent = content
@@ -84,6 +102,7 @@ export class ContentFormatter {
     formattedContent = this.processLists(formattedContent);
     formattedContent = this.processBlockquotes(formattedContent);
     formattedContent = this.fixSpacing(formattedContent);
+    formattedContent = this.postProcessLists(formattedContent);
 
     // CRITICAL: Ensure we have proper HTML structure for production
     if (!formattedContent.includes('<p>') && !formattedContent.includes('<h')) {
@@ -265,18 +284,18 @@ export class ContentFormatter {
       .replace(/\n---$/gm, '')
       // Remove any "Title:" patterns at the very beginning of content (most aggressive)
       .replace(/^[\s\n]*Title:\s*[^\n]*\n?/i, '')
-      // Convert markdown links [text](url) to <a> tags with proper styling
-      .replace(/\[([^\]]+?)\]\(([^)]+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$1</a>')
+      // Convert markdown links [text](url) to simple <a> tags - preserve user anchor text
+      .replace(/\[([^\]]+?)\]\(([^)]+?)\)/g, '<a href="$2">$1</a>')
 
-      // Convert plain URLs to clickable links
-      .replace(/(^|[^<"'])(https?:\/\/[^\s<>"']+)/gi, '$1<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$2</a>')
+      // Convert plain URLs to simple clickable links
+      .replace(/(^|[^<"'])(https?:\/\/[^\s<>"']+)/gi, '$1<a href="$2">$2</a>')
 
       // Handle specific case: "Play now at Runescape.com" pattern
-      .replace(/(Play now at\s+)([a-zA-Z0-9.-]+\.com)/gi, '$1<a href="https://$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$2</a>')
+      .replace(/(Play now at\s+)([a-zA-Z0-9.-]+\.com)/gi, '$1<a href="https://$2">$2</a>')
 
       // Handle malformed "Claim your place" patterns that may be broken by HTML entities
       .replace(/Claim\s+your\s+place\s+among\s+the\s+legends[^.]*\.\s*Play\s+now\s+at\s+([a-zA-Z0-9.-]+\.com)/gi,
-        'Claim your place among the legends. Play now at <a href="https://$1" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$1</a>.')
+        'Claim your place among the legends. Play now at <a href="https://$1">$1</a>.')
       // Convert **H1**: patterns to <h1> tags
       .replace(/\*\*H1\*\*:\s*(.+?)(?=\n|$)/gi, '<h1>$1</h1>')
       // Convert **Title**: patterns to nothing (remove completely since it's duplicate)
@@ -357,10 +376,51 @@ export class ContentFormatter {
    */
   private static processHeadings(content: string): string {
     return content
-      // Only normalize H3 to H2, NO SPACING CHANGES
-      .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, '<h2$1>$2</h2>')
+      // Only normalize H3 to H2, NO SPACING CHANGES, but limit length
+      .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, (match, attrs, heading) => {
+        const cleanHeading = this.limitHeadingLength(heading.trim());
+        return `<h2${attrs}>${cleanHeading}</h2>`;
+      })
+      .replace(/<h2([^>]*)>(.*?)<\/h2>/gi, (match, attrs, heading) => {
+        const cleanHeading = this.limitHeadingLength(heading.trim());
+        return `<h2${attrs}>${cleanHeading}</h2>`;
+      })
+      .replace(/<h1([^>]*)>(.*?)<\/h1>/gi, (match, attrs, heading) => {
+        const cleanHeading = this.limitHeadingLength(heading.trim());
+        return `<h1${attrs}>${cleanHeading}</h1>`;
+      })
       // Fix heading hierarchy - normalize H3+ to H2
       .replace(/#{3,6}/g, '##');
+  }
+
+  /**
+   * Limit heading length to one sentence maximum
+   */
+  private static limitHeadingLength(heading: string): string {
+    // Remove any remaining prefixes
+    heading = heading
+      .replace(/^(Conclusion|Call-to-Action):\s*/gi, '')
+      .replace(/^H[1-6]:\s*/gi, '')
+      .trim();
+
+    // If heading contains multiple sentences, take only the first one
+    const sentences = heading.split(/[.!?]+/);
+    if (sentences.length > 1 && sentences[0].trim().length > 0) {
+      return sentences[0].trim();
+    }
+
+    // If single sentence is too long (over 80 characters), truncate at logical break
+    if (heading.length > 80) {
+      const words = heading.split(' ');
+      let truncated = '';
+      for (const word of words) {
+        if ((truncated + ' ' + word).length > 80) break;
+        truncated += (truncated ? ' ' : '') + word;
+      }
+      return truncated || heading.substring(0, 80);
+    }
+
+    return heading;
   }
 
   /**
@@ -394,13 +454,27 @@ export class ContentFormatter {
    * Process lists with proper formatting
    */
   private static processLists(content: string): string {
-    // Process unordered lists
+    // First, convert content that should be bullet points but is formatted as headings
+    // Look for patterns like: "## Short Title\nLonger description" and convert to bullet format
+    content = content
+      .replace(/^##\s+([A-Z][^\n]{5,50})\n([A-Z][^\n#*]{20,})/gm, '* **$1:** $2')
+      .replace(/^###\s+([A-Z][^\n]{5,40})\n([A-Z][^\n#*]{20,})/gm, '* **$1:** $2')
+      // Fix broken strong tags in list items like: * **E**nhanced -> * **Enhanced
+      .replace(/^(\s*[\*\-\+]\s+)\*\*([A-Z])\*\*([a-z][^:\n]*:)/gm, '$1**$2$3**')
+      // Fix list items with HTML artifacts
+      .replace(/^(\s*[\*\-\+]\s+)([^\n]*?)H[1-6]:[^\n]*/gm, '$1$2')
+      // Clean up any remaining HTML syntax in list items
+      .replace(/^(\s*[\*\-\+]\s+)([^\n]*?)["=]+H[1-6]:[^\n]*/gm, '$1$2');
+
+    // Process unordered lists - improved to handle markdown bold
     content = content.replace(
       /((^[\*\-\+]\s.+\n?)+)/gm,
       (match) => {
         const items = match.trim().split('\n')
           .map(line => {
-            const cleanLine = line.replace(/^[\*\-\+]\s/, '').trim();
+            let cleanLine = line.replace(/^[\*\-\+]\s/, '').trim();
+            // Convert markdown bold to HTML strong tags with proper styling
+            cleanLine = cleanLine.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-inherit">$1</strong>');
             return `  <li>${cleanLine}</li>`;
           })
           .join('\n');
@@ -408,19 +482,27 @@ export class ContentFormatter {
       }
     );
 
-    // Process ordered lists
+    // Merge consecutive <ul> elements that got separated
+    content = content.replace(/<\/ul>\s*<ul>/g, '');
+
+    // Process ordered lists - improved to handle markdown bold
     content = content.replace(
       /((^\d+\.\s.+\n?)+)/gm,
       (match) => {
         const items = match.trim().split('\n')
           .map(line => {
-            const cleanLine = line.replace(/^\d+\.\s/, '').trim();
+            let cleanLine = line.replace(/^\d+\.\s/, '').trim();
+            // Convert markdown bold to HTML strong tags with proper styling
+            cleanLine = cleanLine.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-inherit">$1</strong>');
             return `  <li>${cleanLine}</li>`;
           })
           .join('\n');
         return `\n<ol>\n${items}\n</ol>\n\n`;
       }
     );
+
+    // Merge consecutive <ol> elements that got separated
+    content = content.replace(/<\/ol>\s*<ol>/g, '');
 
     return content;
   }
@@ -439,6 +521,21 @@ export class ContentFormatter {
         return `\n<blockquote><p>${quote}</p></blockquote>\n\n`;
       }
     );
+  }
+
+  /**
+   * Post-process lists to fix merging and markdown issues
+   */
+  private static postProcessLists(content: string): string {
+    return content
+      // Merge consecutive <ul> elements that might have been separated
+      .replace(/<\/ul>\s*<ul>/g, '')
+      // Merge consecutive <ol> elements that might have been separated
+      .replace(/<\/ol>\s*<ol>/g, '')
+      // Fix any remaining markdown bold syntax in HTML
+      .replace(/\*\*([^*<>]+?)\*\*/g, '<strong class="font-bold text-inherit">$1</strong>')
+      // Clean up any double-encoded strong tags
+      .replace(/<strong>\s*<strong>([^<]+?)<\/strong>\s*<\/strong>/g, '<strong>$1</strong>');
   }
 
   /**
@@ -616,11 +713,11 @@ export class ContentFormatter {
 
       // Fix specific gaming site patterns like "Play now at Runescape.com"
       .replace(/(Play\s+now\s+at)\s*&lt;[^&]*&gt;\s*([a-zA-Z0-9.-]+\.com)/gi,
-        '$1 <a href="https://$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$2</a>')
+        '$1 <a href="https://$2">$2</a>')
 
       // Fix "Claim your place among the legends" patterns
       .replace(/Claim\s+your\s+place\s+among\s+the\s+legends[^.]*\.\s*Play\s+now\s+at\s+([a-zA-Z0-9.-]+\.com)/gi,
-        'Claim your place among the legends. Play now at <a href="https://$1" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$1</a>.')
+        'Claim your place among the legends. Play now at <a href="https://$1">$1</a>.')
 
       // General cleanup of malformed HTML entities in text
       .replace(/&lt;\s*\/\s*[a-zA-Z]+\s*&gt;/g, '') // Remove &lt;/tag&gt; patterns
@@ -779,10 +876,44 @@ export class ContentFormatter {
    */
   static postProcessCleanup(content: string): string {
     return content
-      // ULTIMATE FIX: Handle double-encoded HTML entities first
+      // Fix malformed link attributes FIRST before any other processing
+      .replace(/<a\s+href([^=\s]+?)=""\s+([^"]+?)"=""\s+target([^=\s]+?)"=""\s+rel([^=\s]+?)"=""\s+style([^>]*?)"=""([^>]*)>/gi,
+        '<a href="$1://$2" target="_$3" rel="$4" style="color:#2563eb;font-weight:500;">$6')
+
+      // ULTIMATE FIX: Handle double-encoded HTML entities
       .replace(/&amp;lt;/g, '<')
       .replace(/&amp;gt;/g, '>')
       .replace(/&amp;amp;/g, '&')
+
+      // Fix specific malformed link patterns from DOM
+      .replace(/<a\s+hrefhttps\s*=""\s*:\s*=""\s*([a-zA-Z0-9.-]+)\s*=""\s*target_blank\s*=""\s*rel([^\s]+?)\s*=""\s*([^>]*?)>/gi,
+        '<a href="https://$1" target="_blank" rel="$2" style="color:#2563eb;font-weight:500;">')
+
+      // Fix corrupted link attributes before other processing
+      .replace(/<a\s+([^>]*?)\s*>/gi, (match, attrs) => {
+        // Handle severely malformed attributes
+        if (attrs.includes('hrefhttps') && attrs.includes('gohighlevelstars.com')) {
+          return '<a href="https://gohighlevelstars.com">';
+        }
+
+        // Fix malformed attributes by ensuring proper key="value" format
+        const fixedAttrs = attrs
+          .replace(/\s*([a-zA-Z-]+)([^\s=]*?)="/g, ' $1="')  // Fix missing = signs
+          .replace(/([a-zA-Z-]+)([^\s=]+?)\s/g, '$1="$2" ')  // Fix missing quotes
+          .replace(/href([^\s="]+)/g, 'href="$1"')  // Fix href specifically
+          .replace(/target([^\s="]+)/g, 'target="$1"')  // Fix target
+          .replace(/rel([^\s="]+)/g, 'rel="$1"')  // Fix rel
+          .replace(/style([^\s="]+)/g, 'style="$1"');  // Fix style
+        return `<a${fixedAttrs}>`;
+      })
+
+      // Remove HTML syntax artifacts that shouldn't be displayed
+      .replace(/Hook Introduction:\s*["=]*\s*H[1-6]:\s*/gi, '')
+      .replace(/["=]+\s*H[1-6]:\s*/gi, '')
+      .replace(/\bH[1-6]:\s*/gi, '') // Remove H1:, H2:, etc. anywhere in text
+      .replace(/Hook Introduction:\s*/gi, '') // Remove standalone Hook Introduction: text
+      .replace(/Conclusion:\s*/gi, '') // Remove "Conclusion:" text
+      .replace(/Call-to-Action:\s*/gi, '') // Remove "Call-to-Action:" text
 
       // CRITICAL: Fix the broken heading pattern we see in DOM
       // Pattern: <h2>&lt;</h2><p> strong&gt;Hook Introduction...</p>
@@ -901,6 +1032,32 @@ export class ContentFormatter {
           return match;
         }
         return `<strong class="font-bold text-inherit"${attrs}>`;
+      })
+
+      // Fix broken strong tags where only first letter is bold (includes hyphens)
+      .replace(/<strong\s+class([^=]*)=""\s+([^"]+?)"="">([A-Z])<\/strong>([a-z][A-Za-z\s-]*:)/gi,
+        '<strong class="font-bold text-inherit">$3$4</strong>')
+
+      // Fix general malformed class attributes in strong tags
+      .replace(/<strong\s+class([^=]*)=""\s+([^>]*?)>/gi, '<strong class="font-bold text-inherit">')
+
+      // FINAL LINK RESTORATION: Fix any malformed link attributes
+      .replace(/<a\s+([^>]*?)>/gi, (match, attrs) => {
+        // Handle severely broken patterns like: hrefhttps="" :="" domain.com="" target_blank="" etc.
+        if (attrs.includes('hrefhttps') || attrs.includes('target_blank') || attrs.includes('relnoopene')) {
+          // Extract domain if possible
+          const domainMatch = attrs.match(/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/)
+          const domain = domainMatch ? domainMatch[1] : 'example.com';
+          return `<a href="https://${domain}">`;
+        }
+
+        // Fix common malformed patterns
+        const fixedAttrs = attrs
+          .replace(/href([^\s=]+?)=""\s+([^"]+?)"=""/g, 'href="$1://$2"')
+          .replace(/target([^\s=]+?)=""/g, 'target="_$1"')
+          .replace(/rel([^\s=]+?)=""/g, 'rel="$1"')
+          .replace(/style([^"]*?)"=""/g, 'style="color:#2563eb;font-weight:500;"');
+        return `<a ${fixedAttrs}>`;
       });
   }
 }

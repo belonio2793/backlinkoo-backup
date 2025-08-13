@@ -235,7 +235,7 @@ export function EnhancedBlogPreview({
                       )
                     }}
                     className="prose prose-lg max-w-none blog-content
-                      prose-headings:text-foreground prose-headings:font-bold
+                      prose-headings:text-black prose-headings:font-bold
                       prose-p:text-foreground prose-p:leading-relaxed
                       prose-a:text-blue-600 prose-a:font-medium prose-a:no-underline hover:prose-a:underline
                       prose-strong:text-foreground prose-strong:font-bold

@@ -283,7 +283,7 @@ export function BlogPostViewer() {
             <div
               className="prose prose-lg max-w-none blog-content
                 prose-a:text-blue-600 prose-a:font-medium prose-a:no-underline hover:prose-a:underline
-                prose-strong:font-bold prose-strong:text-foreground prose-headings:font-bold
+                prose-strong:font-bold prose-strong:text-foreground prose-headings:font-bold prose-headings:text-black
                 [&_a]:text-blue-600 [&_a]:opacity-100 [&_a]:font-medium [&_a]:no-underline hover:[&_a]:underline
                 [&_strong]:font-bold [&_strong]:text-foreground"
               dangerouslySetInnerHTML={{

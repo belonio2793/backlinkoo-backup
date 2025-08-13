@@ -537,6 +537,14 @@ export function BeautifulBlogPost() {
       .replace(/^\*\*H1\*\*:\s*/i, '')
       .replace(/^\*\*Title\*\*:\s*/i, '') // Remove **Title**: prefix
       .replace(/^Title:\s*/gi, '') // Remove Title: prefix (global + case insensitive)
+      .replace(/^H[1-6]:\s*/gi, '') // Remove H1:, H2:, etc. prefixes
+      .replace(/Hook Introduction:\s*["=]*\s*H[1-6]:\s*/gi, '') // Remove "Hook Introduction: "="H1: " pattern
+      .replace(/["=]+\s*H[1-6]:\s*/gi, '') // Remove "="H1: " pattern
+      .replace(/Hook Introduction:\s*/gi, '') // Remove standalone Hook Introduction:
+      .replace(/^Conclusion:\s*/gi, '') // Remove Conclusion: prefix
+      .replace(/^Call-to-Action:\s*/gi, '') // Remove Call-to-Action: prefix
+      .replace(/Conclusion:\s*/gi, '') // Remove Conclusion: anywhere
+      .replace(/Call-to-Action:\s*/gi, '') // Remove Call-to-Action: anywhere
       .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
       .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
       .replace(/\*\*/g, '') // Remove any remaining ** symbols
@@ -594,8 +602,22 @@ export function BeautifulBlogPost() {
       .replace(/<strong[^>]*>T<\/strong>argeted Traffic Generation:/gi, '<strong class="font-bold text-inherit">Targeted Traffic Generation:</strong>')
       // Fix Building Authority and Credibility pattern
       .replace(/<strong[^>]*>B<\/strong>uilding Authority and Credibility:/gi, '<strong class="font-bold text-inherit">Building Authority and Credibility:</strong>')
+      // Fix Data-Driven Decision-Making pattern
+      .replace(/<strong[^>]*>D<\/strong>ata-Driven Decision-Making:/gi, '<strong class="font-bold text-inherit">Data-Driven Decision-Making:</strong>')
       // Generic fix for any similar pattern: <strong>X</strong>word Something: -> <strong>Xword Something:</strong>
-      .replace(/<strong[^>]*>([A-Z])<\/strong>([a-z][A-Za-z\s]*:)/gi, '<strong class="font-bold text-inherit">$1$2</strong>');
+      .replace(/<strong[^>]*>([A-Z])<\/strong>([a-z][A-Za-z\s-]*:)/gi, '<strong class="font-bold text-inherit">$1$2</strong>')
+
+      // Remove HTML syntax artifacts that shouldn't be displayed
+      .replace(/Hook Introduction:\s*["=]*\s*H[1-6]:\s*/gi, '')
+      .replace(/["=]+\s*H[1-6]:\s*/gi, '')
+      .replace(/\bH[1-6]:\s*/gi, '') // Remove H1:, H2:, etc. anywhere in text
+      .replace(/Hook Introduction:\s*/gi, '') // Remove standalone Hook Introduction: text
+      .replace(/Conclusion:\s*/gi, '') // Remove "Conclusion:" text
+      .replace(/Call-to-Action:\s*/gi, '') // Remove "Call-to-Action:" text
+
+      // Clean up any remaining HTML entity artifacts
+      .replace(/&lt;[^&]*&gt;/g, '') // Remove any &lt;tag&gt; patterns
+      .replace(/["=]{2,}/g, '') // Remove multiple quotes/equals signs;
 
     return finalHtml;
   };
@@ -861,12 +883,12 @@ export function BeautifulBlogPost() {
                       <TooltipTrigger asChild>
                         <Badge className="px-4 py-2 text-sm font-medium rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300 cursor-help">
                           <Timer className="mr-2 h-4 w-4" />
-                          Available to Claim
+                          Unclaimed
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" className="max-w-xs">
                         <div className="space-y-1">
-                          <p className="font-semibold">Available to Claim</p>
+                          <p className="font-semibold">Unclaimed</p>
                           <p className="text-sm">This post is unclaimed and anyone can take ownership of it.</p>
                           <p className="text-xs text-gray-400">�� May be deleted if not claimed soon</p>
                         </div>
@@ -996,7 +1018,7 @@ export function BeautifulBlogPost() {
             <div className="prose prose-lg max-w-none mt-8">
               <div className="beautiful-card pt-6 px-6 pb-8 md:pt-8 md:px-12 md:pb-12 lg:px-16">
                 <div
-                  className="beautiful-blog-content beautiful-prose modern-blog-content article-content prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-strong:font-bold prose-strong:text-gray-900 prose-img:rounded-lg prose-img:shadow-lg"
+                  className="beautiful-blog-content beautiful-prose modern-blog-content article-content prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-black prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-strong:font-bold prose-strong:text-gray-900 prose-img:rounded-lg prose-img:shadow-lg"
                   style={{
                     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
                     lineHeight: '1.8',
