@@ -221,7 +221,7 @@ export default function BacklinkAutomation() {
       await loadCampaigns();
     } catch (error: any) {
       console.error('Error saving campaign:', error);
-      toast.error('Failed to save campaign');
+      toast.error(`Failed to save campaign: ${error?.message || error}`);
     }
   };
 
