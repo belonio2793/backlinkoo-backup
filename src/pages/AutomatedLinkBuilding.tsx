@@ -131,6 +131,72 @@ export default function AutomatedLinkBuilding() {
       try {
         setLoading(true);
 
+        // If user is not authenticated, show demo data
+        if (!isAuthenticated || !user) {
+          // Set demo data for unauthenticated users
+          setStats({
+            linksBuiltToday: 12,
+            domainsReached: 45,
+            avgDomainRating: 68,
+            successRate: 85,
+            trafficGained: 2847
+          });
+          setCampaigns([
+            {
+              id: 'demo-1',
+              name: 'Demo Campaign',
+              status: 'active' as const,
+              keywords: ['SEO', 'digital marketing', 'link building'],
+              target_url: 'https://example.com',
+              strategy: 'natural_growth' as const,
+              created_at: new Date().toISOString(),
+              metrics: {
+                links_built: 25,
+                domains_reached: 15,
+                dr_average: 65,
+                traffic_gained: 1200
+              }
+            }
+          ]);
+          setOutreachStats({
+            emailsSent: 156,
+            responseRate: 24,
+            positiveResponses: 37,
+            linkPlacements: 25
+          });
+          setAnalyticsStats({
+            totalLinksBuilt: 342,
+            referringDomains: 89,
+            avgDomainRating: 68,
+            trafficImpact: 15600,
+            monthlyGrowth: {
+              links: 25,
+              domains: 18,
+              dr: 12
+            }
+          });
+          setRecentActivity([
+            {
+              id: 'demo-activity-1',
+              type: 'link_published',
+              title: 'Link Published on TechCrunch',
+              description: 'High-quality guest post with dofollow link',
+              status: 'Live',
+              created_at: new Date().toISOString()
+            },
+            {
+              id: 'demo-activity-2',
+              type: 'outreach_sent',
+              title: 'Outreach Email Sent',
+              description: 'Sent personalized pitch to 15 editors',
+              status: 'Active',
+              created_at: new Date().toISOString()
+            }
+          ]);
+          setLoading(false);
+          return;
+        }
+
         // Check database health first
         const { allTablesExist, missingTables } = await dbHealthCheck.checkRequiredTables();
         setDbStatus({ healthy: allTablesExist, missingTables });
@@ -145,7 +211,7 @@ export default function AutomatedLinkBuilding() {
           20, // Limit for pagination
           0   // Offset
         );
-        
+
         setStats(aggregatedStats);
         setCampaigns(campaigns);
         
