@@ -42,9 +42,8 @@ export function clearAllApiKeyCaches(): void {
 }
 
 export function setCorrectApiKey(): void {
-  const CORRECT_KEY = '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';
-  
-  console.log('🔑 Setting correct API key ending with:', CORRECT_KEY.slice(-4));
+  // SECURITY: API keys should NEVER be hardcoded in client-side code
+  console.log('⚠️ This function should not contain hardcoded API keys');
   
   // Set in localStorage for the admin configuration
   const adminConfig = [{

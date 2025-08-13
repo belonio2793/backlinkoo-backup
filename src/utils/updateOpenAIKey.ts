@@ -7,9 +7,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { adminGlobalSync } from '@/services/adminGlobalConfigSync';
 
 export async function updateOpenAIKeyEverywhere() {
-  const newApiKey = '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';
-  
-  console.log('🔄 Updating OpenAI API key in all configuration sources...');
+  // SECURITY: API keys should NEVER be hardcoded in client-side code
+  console.log('⚠️ This function should not contain hardcoded API keys');
 
   try {
     // 1. Update in admin_environment_variables table
