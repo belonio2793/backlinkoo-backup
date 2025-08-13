@@ -242,8 +242,8 @@ class TelegraphService {
 
   // Test method for development
   async testPost(campaignId: string): Promise<TelegraphPostResult> {
-    automationLogger.info('api', 'Running test Telegraph post', {}, campaignId);
-    
+    automationLogger.info('api', 'Running test Telegraph post via Netlify', {}, campaignId);
+
     return this.postArticle({
       title: 'Test Article - SEO Tools Guide',
       content: `# SEO Tools Guide
@@ -255,7 +255,7 @@ This is a test article about **SEO tools** and digital marketing.
 Digital marketing requires the right tools to succeed. Here are some key points:
 
 - Search engine optimization
-- Content marketing strategies  
+- Content marketing strategies
 - [Link building techniques](https://example.com)
 
 ## Conclusion
@@ -267,11 +267,10 @@ Using the right SEO tools can significantly improve your online presence.`,
   }
 
   // Get service status
-  getStatus(): { configured: boolean; message: string; hasToken: boolean } {
+  getStatus(): { configured: boolean; message: string } {
     return {
       configured: true,
-      message: 'Telegraph service ready (will create account automatically)',
-      hasToken: this.accessToken !== null
+      message: 'Telegraph publishing ready via Netlify functions'
     };
   }
 }
