@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment System Diagnosis</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        .success { background: #f0f8f0; border-color: #4caf50; }
+        .error { background: #fff5f5; border-color: #f44336; }
+        .warning { background: #fff8f0; border-color: #ff9800; }
+        button { padding: 10px 20px; margin: 5px; border: none; border-radius: 4px; background: #007bff; color: white; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .mobile-test { display: none; }
+        @media (max-width: 768px) {
+            .mobile-test { display: block; }
+            .desktop-only { display: none; }
+            button { min-height: 44px; font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <h1>💳 Payment System Diagnosis</h1>
+    
+    <div class="mobile-test">
+        <div class="test-section warning">
+            <h3>📱 Mobile Device Detected</h3>
+            <p>Running mobile-specific payment tests...</p>
+        </div>
+    </div>
+
+    <div id="results"></div>
+
+    <div class="test-section">
+        <h3>1. Environment Variables Check</h3>
+        <button onclick="testEnvironment()">Check Environment</button>
+        <div id="env-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>2. Netlify Functions Test</h3>
+        <button onclick="testFunctions()">Test Payment Functions</button>
+        <div id="functions-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>3. Premium Plan Test</h3>
+        <button onclick="testPremiumPayment()">Test Premium Subscription</button>
+        <div id="premium-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>4. Credits Purchase Test</h3>
+        <button onclick="testCreditsPayment()">Test Credits Purchase</button>
+        <div id="credits-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h3>5. Mobile Compatibility Test</h3>
+        <button onclick="testMobileCompatibility()">Test Mobile Features</button>
+        <div id="mobile-results"></div>
+    </div>
+
+    <script>
+        function log(selector, message, type = 'info') {
+            const element = document.querySelector(selector);
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'blue';
+            element.innerHTML += `<div style="color: ${color}; margin: 5px 0;">[${timestamp}] ${message}</div>`;
+        }
+
+        async function testEnvironment() {
+            log('#env-results', '🔍 Checking environment variables...', 'info');
+            
+            // Check if we're on mobile
+            const isMobile = window.innerWidth <= 768;
+            log('#env-results', `📱 Device type: ${isMobile ? 'Mobile' : 'Desktop'}`, 'info');
+            
+            // Check current URL
+            log('#env-results', `🌐 Current URL: ${window.location.href}`, 'info');
+            
+            // Check if HTTPS
+            const isHTTPS = window.location.protocol === 'https:';
+            log('#env-results', `🔒 HTTPS: ${isHTTPS ? '✅' : '❌'}`, isHTTPS ? 'success' : 'error');
+            
+            // Check Stripe configuration (frontend)
+            const hasStripeKey = window.ENV?.VITE_STRIPE_PUBLISHABLE_KEY || 'Not available in browser';
+            log('#env-results', `🔑 Stripe key available: ${hasStripeKey !== 'Not available in browser' ? '✅' : '❌'}`, 'info');
+        }
+
+        async function testFunctions() {
+            log('#functions-results', '🔍 Testing Netlify functions...', 'info');
+            
+            const endpoints = [
+                '/.netlify/functions/create-payment',
+                '/.netlify/functions/create-subscription',
+                '/.netlify/functions/verify-payment'
+            ];
+            
+            for (const endpoint of endpoints) {
+                try {
+                    log('#functions-results', `Testing ${endpoint}...`, 'info');
+                    
+                    // Test OPTIONS first (CORS)
+                    const optionsResponse = await fetch(endpoint, { method: 'OPTIONS' });
+                    log('#functions-results', `${endpoint} OPTIONS: ${optionsResponse.status}`, 
+                        optionsResponse.ok ? 'success' : 'error');
+                    
+                    // Test POST with minimal data
+                    const postResponse = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ test: true })
+                    });
+                    
+                    const result = await postResponse.text();
+                    log('#functions-results', `${endpoint} POST: ${postResponse.status} - ${result.substring(0, 100)}...`, 
+                        postResponse.status < 500 ? 'success' : 'error');
+                        
+                } catch (error) {
+                    log('#functions-results', `${endpoint} ERROR: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function testPremiumPayment() {
+            log('#premium-results', '🔍 Testing premium subscription flow...', 'info');
+            
+            try {
+                const response = await fetch('/.netlify/functions/create-subscription', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        plan: 'monthly',
+                        isGuest: true,
+                        guestEmail: 'test@example.com',
+                        paymentMethod: 'stripe'
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.url) {
+                    log('#premium-results', '✅ Premium subscription endpoint working!', 'success');
+                    log('#premium-results', `Checkout URL generated: ${result.url.substring(0, 50)}...`, 'success');
+                } else {
+                    log('#premium-results', `❌ Premium subscription failed: ${result.error || 'Unknown error'}`, 'error');
+                }
+                
+            } catch (error) {
+                log('#premium-results', `❌ Premium subscription error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCreditsPayment() {
+            log('#credits-results', '🔍 Testing credits purchase flow...', 'info');
+            
+            try {
+                const response = await fetch('/.netlify/functions/create-payment', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        amount: 29,
+                        productName: '50 Backlink Credits',
+                        isGuest: true,
+                        guestEmail: 'test@example.com',
+                        paymentMethod: 'stripe',
+                        credits: 50
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.url) {
+                    log('#credits-results', '✅ Credits payment endpoint working!', 'success');
+                    log('#credits-results', `Checkout URL generated: ${result.url.substring(0, 50)}...`, 'success');
+                } else {
+                    log('#credits-results', `❌ Credits payment failed: ${result.error || 'Unknown error'}`, 'error');
+                }
+                
+            } catch (error) {
+                log('#credits-results', `❌ Credits payment error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testMobileCompatibility() {
+            log('#mobile-results', '🔍 Testing mobile compatibility...', 'info');
+            
+            const isMobile = window.innerWidth <= 768;
+            log('#mobile-results', `📱 Mobile device: ${isMobile ? 'Yes' : 'No'}`, 'info');
+            
+            // Test touch events
+            const hasTouchEvents = 'ontouchstart' in window;
+            log('#mobile-results', `👆 Touch events: ${hasTouchEvents ? '✅' : '❌'}`, 'info');
+            
+            // Test viewport
+            const viewport = document.querySelector('meta[name="viewport"]');
+            log('#mobile-results', `📐 Viewport meta: ${viewport ? '✅' : '❌'}`, viewport ? 'success' : 'error');
+            
+            // Test mobile CSS
+            const mobileCSS = window.getComputedStyle(document.body).getPropertyValue('--mobile-optimized');
+            log('#mobile-results', `🎨 Mobile CSS loaded: ${mobileCSS ? '✅' : '❌'}`, 'info');
+            
+            // Test payment button size on mobile
+            if (isMobile) {
+                const testButton = document.createElement('button');
+                testButton.style.cssText = 'min-height: 44px; min-width: 44px; position: absolute; left: -9999px;';
+                document.body.appendChild(testButton);
+                
+                const buttonHeight = testButton.offsetHeight;
+                log('#mobile-results', `🔲 Button touch target: ${buttonHeight >= 44 ? '✅' : '❌'} (${buttonHeight}px)`, 
+                    buttonHeight >= 44 ? 'success' : 'error');
+                
+                document.body.removeChild(testButton);
+            }
+            
+            // Test for iOS Safari specific issues
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            if (isIOS) {
+                log('#mobile-results', '🍎 iOS Safari detected - checking specific issues...', 'info');
+                
+                // Check for zoom prevention
+                const inputs = document.querySelectorAll('input');
+                let hasZoomPrevention = true;
+                inputs.forEach(input => {
+                    const fontSize = window.getComputedStyle(input).fontSize;
+                    if (parseInt(fontSize) < 16) {
+                        hasZoomPrevention = false;
+                    }
+                });
+                
+                log('#mobile-results', `🔍 iOS zoom prevention: ${hasZoomPrevention ? '✅' : '❌'}`, 
+                    hasZoomPrevention ? 'success' : 'warning');
+            }
+        }
+
+        // Auto-run basic tests on page load
+        window.onload = function() {
+            testEnvironment();
+            setTimeout(() => {
+                testFunctions();
+            }, 1000);
+        };
+    </script>
+</body>
+</html>
