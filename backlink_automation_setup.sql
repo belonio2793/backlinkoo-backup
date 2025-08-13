@@ -2,13 +2,19 @@
 -- BACKLINK AUTOMATION SYSTEM - COMPLETE DATABASE SETUP
 -- Copy and paste this entire script into your Supabase SQL Editor
 -- ===============================================
+--
+-- 🚨 FIXES BOOLEAN ERROR: "invalid input syntax for type boolean"
+-- This error occurs when there's a conflict between automation_campaigns and backlink_campaigns tables
+-- This script resolves all table conflicts and ensures proper schema
 
--- Step 1: Drop existing conflicting tables if they exist (optional - only if you have schema conflicts)
--- DROP TABLE IF EXISTS backlink_campaigns CASCADE;
--- DROP TABLE IF EXISTS backlink_posts CASCADE;
--- DROP TABLE IF EXISTS platform_domains CASCADE;
--- DROP TABLE IF EXISTS automation_sessions CASCADE;
--- DROP TABLE IF EXISTS ai_content_log CASCADE;
+-- Step 1: Drop existing conflicting tables and policies
+DROP POLICY IF EXISTS "Users can manage their own campaigns" ON backlink_campaigns;
+DROP POLICY IF EXISTS "Users can manage their own posts" ON backlink_posts;
+DROP TABLE IF EXISTS backlink_campaigns CASCADE;
+DROP TABLE IF EXISTS backlink_posts CASCADE;
+DROP TABLE IF EXISTS platform_domains CASCADE;
+DROP TABLE IF EXISTS automation_sessions CASCADE;
+DROP TABLE IF EXISTS ai_content_log CASCADE;
 
 -- Step 2: Create Backlink Campaigns Table
 CREATE TABLE IF NOT EXISTS backlink_campaigns (
