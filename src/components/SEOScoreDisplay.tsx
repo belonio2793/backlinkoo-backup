@@ -196,27 +196,32 @@ export function SEOScoreDisplay({
         </Tooltip>
 
         {showDetails && title && content && (
-          <Dialog open={showAnalysis} onOpenChange={setShowAnalysis}>
-            <DialogTrigger asChild>
+          <>
+            {isPremiumScore ? (
+              // Premium button - standalone, not wrapped in DialogTrigger
               <Button
                 variant="outline"
                 size="sm"
                 onClick={runAnalysis}
-                className={`h-8 px-3 text-xs ${isPremiumScore ? 'bg-gradient-to-r from-purple-100 to-blue-100 hover:from-purple-200 hover:to-blue-200 border-purple-300 text-purple-800' : ''}`}
+                className="h-8 px-3 text-xs bg-gradient-to-r from-purple-100 to-blue-100 hover:from-purple-200 hover:to-blue-200 border-purple-300 text-purple-800"
               >
-                {isPremiumScore ? (
-                  <>
-                    <Crown className="mr-1 h-3 w-3" />
-                    Premium Analysis
-                  </>
-                ) : (
-                  <>
+                <Crown className="mr-1 h-3 w-3" />
+                Premium Analysis
+              </Button>
+            ) : (
+              // Regular analysis button - wrapped in DialogTrigger
+              <Dialog open={showAnalysis} onOpenChange={setShowAnalysis}>
+                <DialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={runAnalysis}
+                    className="h-8 px-3 text-xs"
+                  >
                     <BarChart3 className="mr-1 h-3 w-3" />
                     Analyze
-                  </>
-                )}
-              </Button>
-            </DialogTrigger>
+                  </Button>
+                </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle className="flex items-center gap-2">
@@ -476,8 +481,10 @@ export function SEOScoreDisplay({
                   )}
                 </div>
               )}
-            </DialogContent>
-          </Dialog>
+                </DialogContent>
+              </Dialog>
+            )}
+          </>
         )}
 
         {/* Premium SEO Analysis Modal */}
