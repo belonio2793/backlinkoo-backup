@@ -174,9 +174,13 @@ export function BeautifulBlogTemplate() {
     return toc;
   };
 
-  // Process content to add IDs to headings
+  // Process content to handle markdown and add IDs to headings
   const processContent = (content: string) => {
-    return content.replace(/<h([2-6])([^>]*)>([^<]+)<\/h[2-6]>/g, (match, level, attrs, text) => {
+    // First process markdown formatting (including bold text)
+    const markdownProcessed = processBlogContent(content);
+
+    // Then add IDs to headings for table of contents
+    return markdownProcessed.replace(/<h([2-6])([^>]*)>([^<]+)<\/h[2-6]>/g, (match, level, attrs, text) => {
       const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       return `<h${level}${attrs} id="${id}">${text}</h${level}>`;
     });
