@@ -82,16 +82,28 @@ serve(async (req) => {
 
     if (!isGuest) {
       const authHeader = req.headers.get("Authorization");
-      if (!authHeader) throw new Error("No authorization header provided");
-      
-      const token = authHeader.replace("Bearer ", "");
-      const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-      if (userError || !userData.user?.email) {
-        throw new Error("User not authenticated");
+      if (authHeader) {
+        try {
+          const token = authHeader.replace("Bearer ", "");
+          const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+          if (!userError && userData.user?.email) {
+            user = userData.user;
+            email = userData.user.email;
+          } else {
+            console.warn("Auth failed, treating as guest:", userError?.message);
+            isGuest = true;
+          }
+        } catch (authError) {
+          console.warn("Auth error, treating as guest:", authError);
+          isGuest = true;
+        }
+      } else {
+        console.warn("No auth header, treating as guest");
+        isGuest = true;
       }
-      user = userData.user;
-      email = user.email;
-    } else {
+    }
+
+    if (isGuest) {
       if (!guestEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
         throw new Error('Valid guest email is required for guest checkout');
       }
