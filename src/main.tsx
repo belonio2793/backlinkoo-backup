@@ -2,6 +2,7 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
+import './styles/mobile-payment-fix.css'
 // Unified error handler - fixes all [object Object] displays
 import './utils/unifiedErrorHandler'
 // Campaign-specific error handling
