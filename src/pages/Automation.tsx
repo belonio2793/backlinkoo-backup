@@ -415,9 +415,27 @@ export default function Automation() {
       const userSubmissions = await automationOrchestrator.getUserSubmissions(user.id, 20);
       setSubmissions(userSubmissions);
       automationLogger.debug('database', `Loaded ${userSubmissions.length} submissions`);
+
+      // If no submissions and user is authenticated, show helpful message
+      if (userSubmissions.length === 0 && user) {
+        console.log('ℹ️ No submissions found for user, this is normal for new accounts');
+      }
     } catch (error) {
-      automationLogger.error('database', 'Failed to load submissions', {}, undefined, error as Error);
-      toast.error('Failed to load submissions');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      automationLogger.error('database', 'Failed to load submissions', {
+        errorMessage,
+        userId: user.id
+      }, undefined, error as Error);
+
+      console.error('📊 Submission loading error details:', {
+        error,
+        user: user?.id,
+        errorType: typeof error,
+        errorMessage
+      });
+
+      // Show a user-friendly error message
+      toast.error('Unable to load submission history. Database tables may not be initialized.');
     } finally {
       setLoadingSubmissions(false);
     }
