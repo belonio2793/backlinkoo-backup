@@ -240,8 +240,24 @@ export const PricingModal = ({
       const data = await response.json();
 
       if (data.url) {
-        window.location.href = data.url; // Use location.href instead of window.open for better compatibility
-        onClose();
+        // Use mobile-optimized payment handler
+        await MobilePaymentHandler.handlePaymentRedirect({
+          url: data.url,
+          onSuccess: () => {
+            console.log('✅ Payment redirect successful');
+            onClose();
+          },
+          onError: (error) => {
+            console.error('❌ Payment redirect failed:', error);
+            toast({
+              title: "Redirect Failed",
+              description: "Trying alternative redirect method...",
+              variant: "destructive",
+            });
+            // Fallback to basic redirect
+            window.location.href = data.url;
+          }
+        });
       } else {
         throw new Error('No payment URL received');
       }
