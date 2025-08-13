@@ -10,6 +10,9 @@ export class ContentFormatter {
   static formatBlogContent(content: string, title?: string): string {
     if (!content) return '';
 
+    // CRITICAL: Add debug logging for production issues
+    console.log('ContentFormatter: Original content length:', content.length);
+
     // VERY EARLY preprocessing to fix critical issues before any HTML processing
     content = content
       // Fix the specific issue: ## &lt; h2&gt;Pro Tip pattern
@@ -57,7 +60,47 @@ export class ContentFormatter {
     formattedContent = this.processBlockquotes(formattedContent);
     formattedContent = this.fixSpacing(formattedContent);
 
+    // CRITICAL: Ensure we have proper HTML structure for production
+    if (!formattedContent.includes('<p>') && !formattedContent.includes('<h')) {
+      // If no HTML tags detected, force paragraph formatting
+      console.warn('ContentFormatter: No HTML structure detected, forcing paragraph formatting');
+      formattedContent = this.forceBasicHtmlStructure(formattedContent);
+    }
+
+    console.log('ContentFormatter: Final formatted content has HTML tags:',
+      formattedContent.includes('<p>') || formattedContent.includes('<h'));
+
     return formattedContent;
+  }
+
+  /**
+   * Force basic HTML structure when all else fails
+   */
+  private static forceBasicHtmlStructure(content: string): string {
+    if (!content || !content.trim()) return '';
+
+    // Split by double line breaks for paragraphs
+    const paragraphs = content.split(/\n\s*\n/);
+
+    return paragraphs
+      .map(paragraph => {
+        paragraph = paragraph.trim();
+        if (!paragraph) return '';
+
+        // Check if it's a heading
+        if (paragraph.startsWith('#')) {
+          const headingMatch = paragraph.match(/^(#{1,6})\s+(.+)$/);
+          if (headingMatch) {
+            const level = Math.min(headingMatch[1].length, 6);
+            return `<h${level}>${headingMatch[2]}</h${level}>`;
+          }
+        }
+
+        // Otherwise treat as paragraph
+        return `<p>${paragraph}</p>`;
+      })
+      .filter(p => p.length > 0)
+      .join('\n\n');
   }
 
   /**
