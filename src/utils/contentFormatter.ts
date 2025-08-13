@@ -815,6 +815,8 @@ export class ContentFormatter {
       .replace(/["=]+\s*H[1-6]:\s*/gi, '')
       .replace(/\bH[1-6]:\s*/gi, '') // Remove H1:, H2:, etc. anywhere in text
       .replace(/Hook Introduction:\s*/gi, '') // Remove standalone Hook Introduction: text
+      .replace(/Conclusion:\s*/gi, '') // Remove "Conclusion:" text
+      .replace(/Call-to-Action:\s*/gi, '') // Remove "Call-to-Action:" text
 
       // CRITICAL: Fix the broken heading pattern we see in DOM
       // Pattern: <h2>&lt;</h2><p> strong&gt;Hook Introduction...</p>
