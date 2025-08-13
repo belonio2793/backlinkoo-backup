@@ -405,6 +405,18 @@ export default function AutomatedLinkBuilding() {
           )}
         </div>
 
+        {/* Database Table Setup - Show if authenticated but table doesn't exist */}
+        {isAuthenticated && tableExists === false && (
+          <div className="max-w-4xl mx-auto mb-6">
+            <AutomationTableSetup
+              onTableReady={() => {
+                setTableExists(true);
+                loadGeneratedPosts();
+              }}
+            />
+          </div>
+        )}
+
         <Tabs defaultValue="generator" className="max-w-6xl mx-auto">
           <TabsList className="grid w-full grid-cols-2 mb-6">
             <TabsTrigger value="generator">Content Generator</TabsTrigger>
