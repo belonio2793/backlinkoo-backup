@@ -280,10 +280,13 @@ function Blog() {
 
   // Function to generate clean excerpt from content
   const generateExcerpt = (post: any): string => {
-    // Try to use meta_description first
+    // Try to use meta_description first, but only if it's not the same as title
     if (post.meta_description) {
       const cleanMeta = cleanDescription(post.meta_description);
-      if (cleanMeta.length > 20) {
+      const cleanedTitle = cleanTitle(post.title);
+
+      // Only use meta if it's different from title and meaningful
+      if (cleanMeta.length > 20 && cleanMeta.toLowerCase() !== cleanedTitle.toLowerCase()) {
         return cleanMeta.length > 150 ? cleanMeta.substring(0, 150) + '...' : cleanMeta;
       }
     }
@@ -304,35 +307,66 @@ function Blog() {
         .replace(/\s+/g, ' ') // Clean up multiple spaces
         .trim();
 
-      // Remove common prefixes that might be titles
+      // Get the cleaned title to remove it from content
+      const cleanedTitle = cleanTitle(post.title);
+
+      // Remove the title if it appears at the beginning of content
+      if (cleanedTitle && excerpt.toLowerCase().startsWith(cleanedTitle.toLowerCase())) {
+        excerpt = excerpt.substring(cleanedTitle.length).trim();
+      }
+
+      // Remove common section headers and prefixes more aggressively
       excerpt = excerpt
         .replace(/^(?:H[1-6]|Title|Heading|Header):\s*/gi, '')
-        .replace(/^(?:Introduction|Overview|Summary):\s*/gi, '')
-        .replace(/^(?:Blog post|Article|Post):\s*/gi, '')
+        .replace(/^(?:Introduction|Overview|Summary|Conclusion|Abstract|Preface):\s*/gi, '')
+        .replace(/^(?:Blog post|Article|Post|Content|Text|Document):\s*/gi, '')
+        .replace(/^(?:In this|This is|Here is|Welcome to|Let's|Today we|In today's)\s+.*?[.,]\s*/gi, '')
+        .replace(/^[.:;,-]\s*/g, '') // Remove leading punctuation
         .trim();
 
-      // Take first meaningful sentence or paragraph
+      // Split into sentences and find the first meaningful one
       const sentences = excerpt.split(/[.!?]+/);
       let result = '';
 
       for (const sentence of sentences) {
         const cleanSentence = sentence.trim();
-        if (cleanSentence.length > 10 && !cleanSentence.toLowerCase().startsWith('h1') && !cleanSentence.toLowerCase().startsWith('title')) {
+
+        // Skip sentences that are likely titles or headers
+        if (
+          cleanSentence.length > 15 &&
+          !cleanSentence.toLowerCase().startsWith('h1') &&
+          !cleanSentence.toLowerCase().startsWith('title') &&
+          !cleanSentence.toLowerCase().startsWith('introduction') &&
+          !cleanSentence.toLowerCase().startsWith('overview') &&
+          !cleanSentence.toLowerCase().includes('definitive guide') &&
+          !cleanSentence.toLowerCase().includes('ultimate guide') &&
+          !/^(the|a|an)\s+(ultimate|definitive|complete|comprehensive|guide|tutorial)/i.test(cleanSentence)
+        ) {
           result = cleanSentence;
           break;
         }
+      }
+
+      // If no good sentence found, take the cleaned excerpt but skip obvious title parts
+      if (!result && excerpt.length > 0) {
+        result = excerpt;
+
+        // Remove common title patterns at the start
+        result = result
+          .replace(/^(the|a|an)\s+(ultimate|definitive|complete|comprehensive)\s+(guide|tutorial|handbook)\s+to\s+[^.!?]*[.!?]\s*/gi, '')
+          .replace(/^[^.!?]*:\s*/, '') // Remove anything before a colon
+          .trim();
       }
 
       if (result.length > 150) {
         result = result.substring(0, 150) + '...';
       }
 
-      return result || excerpt.substring(0, 150) + '...';
+      return result || 'Expert content covering important topics in digital marketing and SEO.';
     }
 
-    // Fallback to cleaned title if no content
-    const cleanedTitle = cleanTitle(post.title);
-    return cleanedTitle.length > 150 ? cleanedTitle.substring(0, 150) + '...' : cleanedTitle;
+    // Fallback if no content
+    return 'Expert content covering important topics in digital marketing and SEO.';
   };
 
   const filteredPosts = blogPosts.filter(post => {
