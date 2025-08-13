@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { clearAllApiKeyCaches, setCorrectApiKey } from '@/utils/clearApiKeyCache';
+import { clearAllApiKeyCaches } from '@/utils/clearApiKeyCache';
 import { Key, AlertTriangle, CheckCircle, RefreshCw, Zap } from 'lucide-react';
 
 export function ApiKeyStatusFix() {

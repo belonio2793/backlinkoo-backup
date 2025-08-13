@@ -20,7 +20,6 @@ export function ForceAPIKeyUpdate() {
       
       console.log('🔍 Current key check:');
       console.log('Database key ends with:', key ? key.slice(-4) : 'NONE');
-      console.log('Should end with: 1PsA');
       console.log('Environment key:', import.meta.env.VITE_OPENAI_API_KEY?.slice(-4) || 'NONE');
     } catch (error) {
       console.error('Error checking current key:', error);
