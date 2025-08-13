@@ -32,6 +32,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { SeamlessSignInModal } from '@/components/SeamlessSignInModal';
+import { AutomationTableSetup } from '@/components/AutomationTableSetup';
+import { checkAutomationPostsTable } from '@/utils/automationTableSetup';
 
 interface GeneratedPost {
   id: string;
