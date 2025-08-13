@@ -459,6 +459,15 @@ export function SEOScoreDisplay({
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Premium SEO Analysis Modal */}
+        <PremiumSEOAnalysisModal
+          isOpen={showPremiumAnalysis}
+          onClose={() => setShowPremiumAnalysis(false)}
+          title={title}
+          content={content}
+          targetUrl={content ? extractTargetUrlFromContent(content) : ''}
+        />
       </div>
 
       {/* Enhanced Premium Checkout Modal */}
