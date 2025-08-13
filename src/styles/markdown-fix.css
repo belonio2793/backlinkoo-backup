@@ -1,0 +1,100 @@
+/* Global Markdown Formatting Fix */
+/* Ensures markdown content displays properly across all components */
+
+/* Universal markdown content container styling */
+.markdown-content,
+.markdown-list,
+.content-area,
+.blog-content,
+.article-content {
+  /* Ensure all strong tags are properly bold */
+}
+
+.markdown-content strong,
+.markdown-list strong,
+.content-area strong,
+.blog-content strong,
+.article-content strong {
+  font-weight: 700 !important;
+  color: rgb(17, 24, 39) !important;
+}
+
+/* Specific fix for list items containing bold text */
+.markdown-list li strong,
+ul li strong,
+ol li strong,
+div[class*="list"] strong {
+  font-weight: 700 !important;
+  color: rgb(17, 24, 39) !important;
+}
+
+/* Fix for content that might still contain raw markdown */
+.markdown-content,
+.content-area,
+.blog-content {
+  /* Process any remaining **text** patterns that weren't converted */
+}
+
+/* Ensure proper rendering in different contexts */
+[dangerouslySetInnerHTML] strong,
+.prose strong,
+.prose-content strong {
+  font-weight: 700 !important;
+  color: inherit !important;
+}
+
+/* List styling with proper bold formatting */
+.markdown-list li,
+ul.markdown-list li,
+ol.markdown-list li {
+  margin-bottom: 0.5rem;
+  line-height: 1.6;
+}
+
+.markdown-list li strong:first-child,
+ul.markdown-list li strong:first-child,
+ol.markdown-list li strong:first-child {
+  /* For list items that start with bold text (like "Enhanced SEO Performance:") */
+  display: inline-block;
+  font-weight: 700 !important;
+  color: rgb(17, 24, 39) !important;
+  margin-right: 0.25rem;
+}
+
+/* Fallback for any remaining **text** patterns */
+.content-area::before,
+.blog-content::before,
+.markdown-content::before {
+  content: '';
+  display: none;
+}
+
+/* Force proper display in all viewing contexts */
+.preview-content strong,
+.blog-preview strong,
+.content-preview strong {
+  font-weight: 700 !important;
+  color: rgb(17, 24, 39) !important;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .markdown-content strong,
+  .markdown-list strong,
+  .content-area strong,
+  .blog-content strong,
+  .article-content strong {
+    color: rgb(243, 244, 246) !important;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .markdown-content strong,
+  .markdown-list strong,
+  .content-area strong,
+  .blog-content strong,
+  .article-content strong {
+    font-weight: 900 !important;
+  }
+}
