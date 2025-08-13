@@ -219,6 +219,11 @@ export default function BacklinkAutomation() {
     }
 
     try {
+      // Test Supabase connection
+      console.log('Testing Supabase connection...');
+      const { data: testData, error: testError } = await supabase.auth.getUser();
+      console.log('Supabase test result:', { testData, testError });
+
       const campaignData = {
         user_id: user?.id,
         name: formData.name,
