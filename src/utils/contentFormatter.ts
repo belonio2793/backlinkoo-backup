@@ -297,7 +297,10 @@ export class ContentFormatter {
       .replace(/\*\*([A-Z])\*\*([a-z][^:]*:)/g, '**$1$2**')
 
       // Convert remaining **text** to <strong> tags (inline bold) - use simpler markup initially
-      .replace(/\*\*([^*]+?)\*\*/g, '<strong class="font-bold text-inherit">$1</strong>')
+      .replace(/\*\*([^*]+?)\*\*/g, (match, content) => {
+        console.log('Converting bold text:', match, '->', content);
+        return `<strong class="font-bold text-inherit">${content}</strong>`;
+      })
       // Convert *text* to <em> tags (italic)
       .replace(/\*([^*]+?)\*/g, '<em>$1</em>')
       // Convert ### headings to h3
