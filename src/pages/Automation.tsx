@@ -212,6 +212,8 @@ export default function Automation() {
   };
 
   const updateCampaignStatus = async (campaignId: string, status: Campaign['status']) => {
+    automationLogger.info('campaign', `Updating campaign status to ${status}`, {}, campaignId);
+
     try {
       const { error } = await supabase
         .from('automation_campaigns')
@@ -221,19 +223,28 @@ export default function Automation() {
 
       if (error) throw error;
 
-      setCampaigns(prev => prev.map(c => 
+      setCampaigns(prev => prev.map(c =>
         c.id === campaignId ? { ...c, status } : c
       ));
 
+      if (status === 'active') {
+        automationLogger.campaignStarted(campaignId);
+      } else if (status === 'paused') {
+        automationLogger.campaignPaused(campaignId);
+      }
+
       toast.success(`Campaign ${status === 'active' ? 'started' : 'paused'}`);
     } catch (error) {
-      console.error('Error updating campaign:', error);
+      automationLogger.error('campaign', 'Failed to update campaign status',
+        { status }, campaignId, error as Error);
       toast.error('Failed to update campaign');
     }
   };
 
   const deleteCampaign = async (campaignId: string) => {
     if (!confirm('Are you sure you want to delete this campaign?')) return;
+
+    automationLogger.info('campaign', 'Deleting campaign', {}, campaignId);
 
     try {
       const { error } = await supabase
@@ -245,9 +256,10 @@ export default function Automation() {
       if (error) throw error;
 
       setCampaigns(prev => prev.filter(c => c.id !== campaignId));
+      automationLogger.info('campaign', 'Campaign deleted successfully', {}, campaignId);
       toast.success('Campaign deleted');
     } catch (error) {
-      console.error('Error deleting campaign:', error);
+      automationLogger.error('campaign', 'Failed to delete campaign', {}, campaignId, error as Error);
       toast.error('Failed to delete campaign');
     }
   };
