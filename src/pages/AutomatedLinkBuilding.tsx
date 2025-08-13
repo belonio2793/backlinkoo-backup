@@ -327,8 +327,14 @@ export default function AutomatedLinkBuilding() {
     } catch (error) {
       console.error('Generation error:', error);
 
-      // Fallback: Generate content locally if API fails
-      if (error instanceof Error && (error.message.includes('Failed to fetch') || error.message.includes('Content generation failed'))) {
+      // Fallback: Generate content locally if API fails (including 404, network errors, etc.)
+      if (error instanceof Error && (
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('Content generation failed') ||
+        error.message.includes('404') ||
+        error.message.includes('500') ||
+        error.message.includes('Network Error')
+      )) {
         console.log('API failed, generating content locally...');
         try {
           const fallbackContent = generateFallbackContent(formData.keyword, formData.anchor_text, formData.target_url, template.name);
