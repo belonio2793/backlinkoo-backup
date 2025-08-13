@@ -278,6 +278,109 @@ function Blog() {
     return cleaned;
   };
 
+  // Function to generate clean excerpt from content
+  const generateExcerpt = (post: any): string => {
+    // Try to use meta_description first, but only if it's not the same as title
+    if (post.meta_description) {
+      const cleanMeta = cleanDescription(post.meta_description);
+      const cleanedTitle = cleanTitle(post.title);
+
+      // Only use meta if it's different from title and meaningful
+      if (cleanMeta.length > 20 && cleanMeta.toLowerCase() !== cleanedTitle.toLowerCase()) {
+        return cleanMeta.length > 150 ? cleanMeta.substring(0, 150) + '...' : cleanMeta;
+      }
+    }
+
+    // Fallback to content if available
+    if (post.content) {
+      let excerpt = post.content;
+
+      // Remove HTML tags and markdown
+      excerpt = excerpt
+        .replace(/<[^>]*>/g, '') // Remove HTML tags
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+        .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
+        .replace(/#+\s*/g, '') // Remove markdown headers
+        .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove markdown links
+        .replace(/`([^`]*)`/g, '$1') // Remove code markdown
+        .replace(/\n+/g, ' ') // Replace line breaks with spaces
+        .replace(/\s+/g, ' ') // Clean up multiple spaces
+        .trim();
+
+      // Get the cleaned title to remove it from content
+      const cleanedTitle = cleanTitle(post.title);
+
+      // Remove the title if it appears at the beginning of content
+      if (cleanedTitle && excerpt.toLowerCase().startsWith(cleanedTitle.toLowerCase())) {
+        excerpt = excerpt.substring(cleanedTitle.length).trim();
+      }
+
+      // Remove common section headers and prefixes more aggressively
+      excerpt = excerpt
+        .replace(/^(?:H[1-6]|Title|Heading|Header):\s*/gi, '')
+        .replace(/^(?:Introduction|Overview|Summary|Conclusion|Abstract|Preface):\s*/gi, '')
+        .replace(/^(?:Blog post|Article|Post|Content|Text|Document):\s*/gi, '')
+        .replace(/^(?:In this|This is|Here is|Welcome to|Let's|Today we|In today's)\s+.*?[.,]\s*/gi, '')
+        .replace(/^[.:;,-]\s*/g, '') // Remove leading punctuation
+        .trim();
+
+      // Split into sentences and find the first meaningful one
+      const sentences = excerpt.split(/[.!?]+/);
+      let result = '';
+
+      for (const sentence of sentences) {
+        const cleanSentence = sentence.trim();
+
+        // Skip sentences that are likely titles or headers
+        if (
+          cleanSentence.length > 15 &&
+          !cleanSentence.toLowerCase().startsWith('h1') &&
+          !cleanSentence.toLowerCase().startsWith('title') &&
+          !cleanSentence.toLowerCase().startsWith('introduction') &&
+          !cleanSentence.toLowerCase().startsWith('overview') &&
+          !cleanSentence.toLowerCase().includes('definitive guide') &&
+          !cleanSentence.toLowerCase().includes('ultimate guide') &&
+          !/^(the|a|an)\s+(ultimate|definitive|complete|comprehensive|guide|tutorial)/i.test(cleanSentence)
+        ) {
+          result = cleanSentence;
+          break;
+        }
+      }
+
+      // If no good sentence found, take the cleaned excerpt but skip obvious title parts
+      if (!result && excerpt.length > 0) {
+        result = excerpt;
+
+        // Remove common title patterns at the start
+        result = result
+          .replace(/^(the|a|an)\s+(ultimate|definitive|complete|comprehensive)\s+(guide|tutorial|handbook)\s+to\s+[^.!?]*[.!?]\s*/gi, '')
+          .replace(/^[^.!?]*:\s*/, '') // Remove anything before a colon
+          .trim();
+      }
+
+      // Ensure proper capitalization and ellipsis
+      if (result) {
+        // Capitalize first letter
+        result = result.charAt(0).toUpperCase() + result.slice(1);
+
+        // Ensure it ends with ellipsis
+        if (result.length > 150) {
+          result = result.substring(0, 150).trim();
+          result = result.replace(/[.!?,:;-]*$/, '') + '...';
+        } else if (!result.match(/[.!?]$/)) {
+          result = result.trim().replace(/[,:;-]*$/, '') + '...';
+        }
+
+        return result;
+      }
+
+      return 'Expert content covering important topics in digital marketing and SEO.';
+    }
+
+    // Fallback if no content
+    return 'Expert content covering important topics in digital marketing and SEO...';
+  };
+
   const filteredPosts = blogPosts.filter(post => {
     const cleanedTitle = cleanTitle(post.title).toLowerCase();
     const cleanedDescription = cleanDescription(post.meta_description || '').toLowerCase();
@@ -312,7 +415,7 @@ function Blog() {
         console.warn('❌ Database unavailable, trying fallback:', dbError);
         try {
           posts = await ClaimableBlogService.getClaimablePosts(50);
-          console.log('✅ Fallback posts loaded:', posts.length);
+          console.log('��� Fallback posts loaded:', posts.length);
         } catch (fallbackError) {
           console.warn('❌ Fallback also failed, using localStorage:', fallbackError);
         }
@@ -696,6 +799,7 @@ function Blog() {
                     onLoginRequired={() => setLoginModalOpen(true)}
                     cleanTitle={cleanTitle}
                     cleanDescription={cleanDescription}
+                    generateExcerpt={generateExcerpt}
                   />
                 ) : (
                   <BlogPostListItem
@@ -705,6 +809,7 @@ function Blog() {
                     onLoginRequired={() => setLoginModalOpen(true)}
                     cleanTitle={cleanTitle}
                     cleanDescription={cleanDescription}
+                    generateExcerpt={generateExcerpt}
                   />
                 )}
               </div>
@@ -824,7 +929,7 @@ function Blog() {
 }
 
 // Blog Post Card Component
-function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle, cleanDescription }: any) {
+function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle, cleanDescription, generateExcerpt }: any) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [claiming, setClaiming] = useState(false);
@@ -971,11 +1076,9 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
           {cleanTitle(post.title)}
         </CardTitle>
 
-        {post.meta_description && (
-          <p className="text-gray-600 line-clamp-3 leading-relaxed text-sm font-light">
-            {cleanDescription(post.meta_description)}
-          </p>
-        )}
+        <p className="text-gray-600 line-clamp-3 leading-relaxed text-sm font-light">
+          {generateExcerpt(post)}
+        </p>
       </CardHeader>
       
       <CardContent className="pt-0 space-y-4 p-6">
@@ -1038,10 +1141,9 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
         {/* Action Footer */}
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <User className="h-4 w-4" />
-            <span>{post.author_name === 'AI Writer' ? 'Backlink AI' : (post.author_name || 'Backlink ∞')}</span>
             {isOwnedByUser && (
-              <Badge className="bg-green-50 text-green-700 border-green-200 text-xs ml-2">
+              <Badge className="bg-green-50 text-green-700 border-green-200 text-xs">
+                <User className="h-3 w-3 mr-1" />
                 Yours
               </Badge>
             )}
@@ -1071,7 +1173,7 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
 }
 
 // Blog Post List Item Component
-function BlogPostListItem({ post, navigate, formatDate, onLoginRequired, cleanTitle, cleanDescription }: any) {
+function BlogPostListItem({ post, navigate, formatDate, onLoginRequired, cleanTitle, cleanDescription, generateExcerpt }: any) {
   return (
     <Card 
       className="group hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-200 hover:border-blue-300"
@@ -1108,20 +1210,12 @@ function BlogPostListItem({ post, navigate, formatDate, onLoginRequired, cleanTi
               {cleanTitle(post.title)}
             </h3>
 
-            {post.meta_description && (
-              <p className="text-gray-600 leading-relaxed line-clamp-2">
-                {cleanDescription(post.meta_description)}
-              </p>
-            )}
+            <p className="text-gray-600 leading-relaxed line-clamp-2">
+              {generateExcerpt(post)}
+            </p>
             
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <User className="h-4 w-4 text-white" />
-            </div>
-            <span className="font-medium">{post.author_name === 'AI Writer' ? 'Backlink ∞ ' : (post.author_name || 'Backlink ∞ ')}</span>
-                </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
                   <span>{formatDate(post.published_at || post.created_at)}</span>
