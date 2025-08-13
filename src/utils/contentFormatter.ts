@@ -39,6 +39,12 @@ export class ContentFormatter {
       .replace(/\b([A-Z][A-Za-z\s]+)\s+(https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, '[$1]($2)')
       .replace(/\b(Go High Level Stars)\s*([a-zA-Z0-9.-]+\.com)/gi, '[Go High Level Stars](https://$2)')
 
+      // CRITICAL: Fix malformed link HTML that might already exist
+      .replace(/<a\s+hrefhttps\s*=""\s*:\s*=""\s*([a-zA-Z0-9.-]+)\s*=""\s*stylecolor:[^>]*>/gi,
+        '<a href="https://$1" target="_blank" rel="noopener" style="color:#2563eb;font-weight:500;text-decoration:underline;">')
+      .replace(/<a\s+hrefhttps[^>]*gohighlevelstars\.com[^>]*>/gi,
+        '<a href="https://gohighlevelstars.com" target="_blank" rel="noopener" style="color:#2563eb;font-weight:500;text-decoration:underline;">')
+
       // Fix the specific issue: ## &lt; h2&gt;Pro Tip pattern
       .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*&lt;\s*\/\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
