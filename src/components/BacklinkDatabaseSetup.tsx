@@ -9,13 +9,16 @@ import {
   AlertTriangle,
   Copy,
   ExternalLink,
-  Loader2
+  Loader2,
+  Bug
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { diagnoseDatabaseTables, formatDiagnosticReport } from '@/utils/backlinkDatabaseDiagnostic';
 
 export function BacklinkDatabaseSetup() {
   const [isChecking, setIsChecking] = useState(false);
+  const [isDiagnosing, setIsDiagnosing] = useState(false);
   const [tableStatus, setTableStatus] = useState<{
     backlink_campaigns: boolean;
     backlink_posts: boolean;
@@ -23,15 +26,16 @@ export function BacklinkDatabaseSetup() {
     backlink_campaigns: false,
     backlink_posts: false
   });
+  const [diagnosticReport, setDiagnosticReport] = useState<string>('');
 
   const checkDatabaseTables = async () => {
     setIsChecking(true);
-    
+
     try {
-      // Check backlink_campaigns table
+      // Check backlink_campaigns table with schema validation
       const { error: campaignsError } = await supabase
         .from('backlink_campaigns')
-        .select('count')
+        .select('id, name, target_url, keyword, anchor_text, target_platform, status')
         .limit(1);
 
       // Check backlink_posts table
@@ -46,11 +50,15 @@ export function BacklinkDatabaseSetup() {
       });
 
       const allTablesExist = !campaignsError && !postsError;
-      
+
       if (allTablesExist) {
         toast.success('All database tables are properly set up!');
       } else {
-        toast.error('Some database tables are missing. Please run the SQL setup.');
+        if (campaignsError?.message?.includes('boolean')) {
+          toast.error('Database schema conflict detected! Please run diagnostic for details.');
+        } else {
+          toast.error('Some database tables are missing. Please run the SQL setup.');
+        }
       }
 
     } catch (error) {
@@ -61,11 +69,42 @@ export function BacklinkDatabaseSetup() {
     }
   };
 
+  const runDatabaseDiagnostic = async () => {
+    setIsDiagnosing(true);
+    setDiagnosticReport('');
+
+    try {
+      const diagnostic = await diagnoseDatabaseTables();
+      const report = formatDiagnosticReport(diagnostic);
+      setDiagnosticReport(report);
+
+      if (diagnostic.hasConflicts) {
+        toast.error('Database conflicts detected! Check the diagnostic report.');
+      } else if (!diagnostic.backlink_campaigns.exists) {
+        toast.warning('Backlink campaigns table missing. Run the SQL setup.');
+      } else {
+        toast.success('Database diagnostic completed successfully.');
+      }
+
+    } catch (error) {
+      console.error('Error running diagnostic:', error);
+      toast.error('Failed to run database diagnostic');
+    } finally {
+      setIsDiagnosing(false);
+    }
+  };
+
   const setupSQL = `-- Backlink Automation Database Setup
+-- IMPORTANT: This will resolve conflicts with existing automation_campaigns table
 -- Run this in your Supabase SQL Editor
 
--- Backlink Campaigns Table
-CREATE TABLE IF NOT EXISTS backlink_campaigns (
+-- First, drop any conflicting policies if they exist
+DROP POLICY IF EXISTS "Users can manage their own campaigns" ON backlink_campaigns;
+DROP POLICY IF EXISTS "Users can manage their own posts" ON backlink_posts;
+
+-- Recreate backlink_campaigns table with proper schema
+DROP TABLE IF EXISTS backlink_campaigns CASCADE;
+CREATE TABLE backlink_campaigns (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users(id) on delete cascade,
   name text not null,
@@ -80,8 +119,9 @@ CREATE TABLE IF NOT EXISTS backlink_campaigns (
   updated_at timestamptz default now()
 );
 
--- Backlink Posts Table
-CREATE TABLE IF NOT EXISTS backlink_posts (
+-- Recreate backlink_posts table
+DROP TABLE IF EXISTS backlink_posts CASCADE;
+CREATE TABLE backlink_posts (
   id uuid default gen_random_uuid() primary key,
   user_id uuid references auth.users(id) on delete cascade,
   campaign_id uuid references backlink_campaigns(id) on delete cascade,
@@ -104,7 +144,7 @@ ALTER TABLE backlink_posts ENABLE ROW LEVEL SECURITY;
 -- Create RLS Policies
 CREATE POLICY "Users can manage their own campaigns" ON backlink_campaigns
   FOR ALL USING (auth.uid() = user_id);
-  
+
 CREATE POLICY "Users can manage their own posts" ON backlink_posts
   FOR ALL USING (auth.uid() = user_id);
 
@@ -141,7 +181,7 @@ CREATE INDEX IF NOT EXISTS idx_backlink_posts_status ON backlink_posts(status);`
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Status Check */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <Button onClick={checkDatabaseTables} disabled={isChecking} variant="outline">
             {isChecking ? (
               <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -150,7 +190,16 @@ CREATE INDEX IF NOT EXISTS idx_backlink_posts_status ON backlink_posts(status);`
             )}
             Check Database Status
           </Button>
-          
+
+          <Button onClick={runDatabaseDiagnostic} disabled={isDiagnosing} variant="outline">
+            {isDiagnosing ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : (
+              <Bug className="h-4 w-4 mr-2" />
+            )}
+            Run Diagnostic
+          </Button>
+
           {(tableStatus.backlink_campaigns || tableStatus.backlink_posts) && (
             <div className="flex items-center gap-2">
               <Badge variant={allTablesExist ? 'default' : 'secondary'} className="bg-green-100 text-green-800">
@@ -215,6 +264,23 @@ CREATE INDEX IF NOT EXISTS idx_backlink_posts_status ON backlink_posts(status);`
               </Button>
             </div>
           </>
+        )}
+
+        {/* Diagnostic Report */}
+        {diagnosticReport && (
+          <Alert className="border-blue-200 bg-blue-50">
+            <Bug className="h-4 w-4 text-blue-600" />
+            <AlertDescription>
+              <details>
+                <summary className="cursor-pointer font-medium text-blue-900 mb-2">
+                  🔍 Database Diagnostic Report (Click to expand)
+                </summary>
+                <pre className="text-xs bg-white p-3 rounded border overflow-auto max-h-64 whitespace-pre-wrap">
+                  {diagnosticReport}
+                </pre>
+              </details>
+            </AlertDescription>
+          </Alert>
         )}
 
         {allTablesExist && (
