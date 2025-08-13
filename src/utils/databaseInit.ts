@@ -14,17 +14,24 @@ export class DatabaseInit {
         .select('id')
         .limit(1);
 
-      // Check if automation_campaigns table exists  
+      // Check if automation_campaigns table exists with detailed structure check
       const { data: campaignsData, error: campaignsError } = await supabase
         .from('automation_campaigns')
+        .select('id, user_id, name, keywords, anchor_texts, target_url, status')
+        .limit(1);
+
+      // Check target_sites table
+      const { data: sitesData, error: sitesError } = await supabase
+        .from('target_sites')
         .select('id')
         .limit(1);
 
       const tablesExist = !submissionsError && !campaignsError;
-      
+
       console.log('🗄️ Database tables check:', {
         article_submissions: !submissionsError,
         automation_campaigns: !campaignsError,
+        target_sites: !sitesError,
         allTablesExist: tablesExist
       });
 
@@ -34,6 +41,11 @@ export class DatabaseInit {
 
       if (campaignsError) {
         console.warn('⚠️ automation_campaigns table issue:', campaignsError.message);
+        console.log('💡 Expected columns: id, user_id, name, keywords, anchor_texts, target_url, status, links_built, available_sites, target_sites_used');
+      }
+
+      if (sitesError) {
+        console.warn('⚠️ target_sites table issue:', sitesError.message);
       }
 
       return tablesExist;
