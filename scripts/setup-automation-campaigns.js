@@ -86,13 +86,19 @@ async function setupDatabase() {
     console.log('✅ automation_campaigns table is accessible');
     
     // Show success message
-    console.log('\n🎉 Database setup completed successfully!');
-    console.log('\nThe automation_campaigns table has been created with:');
-    console.log('   ✓ User campaign storage');
-    console.log('   ✓ Row Level Security (RLS)');
-    console.log('   ✓ Proper indexes for performance');
+    console.log('\n🎉 Enhanced automation database setup completed successfully!');
+    console.log('\nThe following tables have been created:');
+    console.log('   ✓ automation_campaigns - User campaign storage');
+    console.log('   ✓ target_sites - Target publishing sites management');
+    console.log('   ✓ automation_logs - Development and error logging');
+    console.log('   ✓ article_submissions - Article submission tracking');
+    console.log('\nFeatures configured:');
+    console.log('   ✓ Row Level Security (RLS) for all tables');
+    console.log('   ✓ Performance indexes');
     console.log('   ✓ Automatic timestamp updates');
-    console.log('\nYou can now use the /automation page to create campaigns!');
+    console.log('   ✓ Default target sites loaded');
+    console.log('   ✓ Comprehensive logging system');
+    console.log('\nYou can now use the /automation page with full logging and site rotation!');
     
   } catch (error) {
     console.error('❌ Database setup failed:', error.message);
