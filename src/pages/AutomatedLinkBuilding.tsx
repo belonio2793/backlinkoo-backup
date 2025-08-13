@@ -331,14 +331,14 @@ export default function AutomatedLinkBuilding() {
       if (error instanceof Error && (error.message.includes('Failed to fetch') || error.message.includes('Content generation failed'))) {
         console.log('API failed, generating content locally...');
         try {
-          const fallbackContent = generateFallbackContent(formData.keyword, formData.anchor_text, formData.target_url, template?.name || 'Blog Post');
+          const fallbackContent = generateFallbackContent(formData.keyword, formData.anchor_text, formData.target_url, template.name);
 
           const newPost: GeneratedPost = {
             id: `fallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
             keyword: formData.keyword,
             anchor_text: formData.anchor_text,
             target_url: formData.target_url,
-            prompt_template: template?.name || 'Blog Post',
+            prompt_template: template.name,
             generated_content: fallbackContent,
             platform: formData.platform,
             status: 'completed',
