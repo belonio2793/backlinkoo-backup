@@ -537,6 +537,10 @@ export function BeautifulBlogPost() {
       .replace(/^\*\*H1\*\*:\s*/i, '')
       .replace(/^\*\*Title\*\*:\s*/i, '') // Remove **Title**: prefix
       .replace(/^Title:\s*/gi, '') // Remove Title: prefix (global + case insensitive)
+      .replace(/^H[1-6]:\s*/gi, '') // Remove H1:, H2:, etc. prefixes
+      .replace(/Hook Introduction:\s*["=]*\s*H[1-6]:\s*/gi, '') // Remove "Hook Introduction: "="H1: " pattern
+      .replace(/["=]+\s*H[1-6]:\s*/gi, '') // Remove "="H1: " pattern
+      .replace(/Hook Introduction:\s*/gi, '') // Remove standalone Hook Introduction:
       .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
       .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
       .replace(/\*\*/g, '') // Remove any remaining ** symbols
