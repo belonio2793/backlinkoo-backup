@@ -35,6 +35,10 @@ export class ContentFormatter {
 
     // VERY EARLY preprocessing to fix critical issues before any HTML processing
     content = content
+      // Preserve user anchor text by converting common patterns to markdown format first
+      .replace(/\b([A-Z][A-Za-z\s]+)\s+(https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g, '[$1]($2)')
+      .replace(/\b(Go High Level Stars)\s*([a-zA-Z0-9.-]+\.com)/gi, '[Go High Level Stars](https://$2)')
+
       // Fix the specific issue: ## &lt; h2&gt;Pro Tip pattern
       .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*&lt;\s*\/\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
