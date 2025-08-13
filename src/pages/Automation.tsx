@@ -326,7 +326,7 @@ export default function Automation() {
                   </p>
                 </div>
 
-                <Button 
+                <Button
                   onClick={createCampaign}
                   disabled={creating}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
@@ -336,10 +336,15 @@ export default function Automation() {
                       <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
                       Creating Campaign...
                     </>
-                  ) : (
+                  ) : user ? (
                     <>
                       <Plus className="h-4 w-4 mr-2" />
                       Create Campaign
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Sign In to Create Campaign
                     </>
                   )}
                 </Button>
