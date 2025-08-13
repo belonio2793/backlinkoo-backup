@@ -53,7 +53,7 @@ class AutomationLogger {
       level,
       category,
       message,
-      data: data ? JSON.stringify(data) : undefined,
+      data: data ? this.safeStringify(data) : undefined,
       campaign_id: campaignId,
       user_id: this.userId,
       error_stack: error?.stack,
