@@ -1,741 +1,848 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
-  MessageSquare,
-  Globe,
-  Users,
-  Share2,
-  BarChart3,
   Play,
   Pause,
-  Target,
-  Crown,
-  AlertTriangle,
+  ExternalLink,
+  Loader2,
+  Link2,
+  BarChart3,
   Plus,
-  Zap,
-  TrendingUp,
-  Shield
+  CheckCircle,
+  Globe,
+  Target,
+  Settings,
+  Zap
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
-import { useDatabaseCampaignManager } from '@/hooks/useDatabaseCampaignManager';
-import { useLinkTracker } from '@/hooks/useLinkTracker';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { DatabaseHealthCheck } from '@/utils/databaseHealthCheck';
-import { AutomationTablesMissingNotice } from '@/components/AutomationTablesMissingNotice';
-import { MissingColumnsFix } from '@/components/system/MissingColumnsFix';
-import { initializeAutomationTables } from '@/utils/createAutomationTables';
-import { testAutomationTablesAccess, testDatabaseConnectivity } from '@/utils/simpleDatabaseTest';
-import { RoutePreservingAuth } from '@/components/RoutePreservingAuth';
-import { RuntimeStatus } from '@/components/automation/RuntimeStatus';
-import { LiveAutomationEngine } from '@/services/liveAutomationEngine';
-import { CampaignErrorHandler } from '@/utils/campaignErrorHandler';
-import { debugLog } from '@/services/activeErrorLogger';
+import { BacklinkDatabaseSetup } from '@/components/BacklinkDatabaseSetup';
 
-const engines = [
+interface Campaign {
+  id: string;
+  name: string;
+  target_url: string;
+  keyword: string;
+  anchor_text: string;
+  target_platform: string;
+  status: 'active' | 'paused' | 'completed';
+  links_found: number;
+  links_posted: number;
+  created_at: string;
+}
+
+interface PostingResult {
+  id: string;
+  target_platform: string;
+  post_url: string;
+  live_url: string;
+  comment_content: string;
+  domain: string;
+  posted_at: string;
+  status: 'posted' | 'failed';
+}
+
+interface Platform {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  is_available: boolean;
+  success_rate: number;
+}
+
+const AVAILABLE_PLATFORMS: Platform[] = [
   {
-    id: 'blog-comments',
-    name: 'Blog Comments',
-    icon: MessageSquare,
-    description: 'Post contextual comments on relevant blogs',
-    color: 'bg-blue-100 text-blue-700 border-blue-200'
+    id: 'substack',
+    name: 'Substack',
+    icon: '📰',
+    description: 'Newsletter platform with comment sections',
+    is_available: true,
+    success_rate: 85
+  },
+  {
+    id: 'medium',
+    name: 'Medium',
+    icon: '✍️',
+    description: 'Publishing platform with responses',
+    is_available: false,
+    success_rate: 0
+  },
+  {
+    id: 'reddit',
+    name: 'Reddit',
+    icon: '🔴',
+    description: 'Forum discussions and comments',
+    is_available: false,
+    success_rate: 0
+  },
+  {
+    id: 'dev_to',
+    name: 'Dev.to',
+    icon: '👨‍💻',
+    description: 'Developer community discussions',
+    is_available: false,
+    success_rate: 0
+  },
+  {
+    id: 'hashnode',
+    name: 'Hashnode',
+    icon: '🔗',
+    description: 'Developer blogging platform',
+    is_available: false,
+    success_rate: 0
   }
 ];
 
 export default function BacklinkAutomation() {
-  const [selectedEngine, setSelectedEngine] = useState('blog-comments');
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [automationTablesExist, setAutomationTablesExist] = useState(true);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const { user, isAuthenticated } = useAuth();
+  
+  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [activeCampaign, setActiveCampaign] = useState<Campaign | null>(null);
+  const [postingResults, setPostingResults] = useState<PostingResult[]>([]);
+  const [isRunning, setIsRunning] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [currentStep, setCurrentStep] = useState('');
+  const [showDatabaseSetup, setShowDatabaseSetup] = useState(false);
+
+  // Form state
   const [formData, setFormData] = useState({
     name: '',
-    targetUrl: '',
-    keywords: '',
-    anchorTexts: '',
-    dailyLimit: 10,
-    autoStart: false
+    target_url: '',
+    keyword: '',
+    anchor_text: '',
+    target_platform: 'substack'
   });
 
-  const { isPremium, user, isAuthenticated } = useAuth();
-  const {
-    campaigns,
-    createCampaign,
-    toggleCampaign,
-    deleteCampaign,
-    getActiveCampaignCount,
-    loadCampaigns
-  } = useDatabaseCampaignManager();
-
-  const {
-    totalLinksBuilt,
-    canCreateLinks,
-    addLinks,
-    canCreateMoreLinks,
-    hasReachedLimit
-  } = useLinkTracker();
-
-  const activeCampaignCount = getActiveCampaignCount();
-  const selectedEngineData = engines.find(e => e.id === selectedEngine);
-
-  // Enhanced toggle campaign with live monitoring
-  const handleToggleCampaign = async (campaignId: string) => {
-    const metricId = debugLog.startOperation('campaign_management', 'toggle_campaign', { campaignId });
-
-    const campaign = campaigns.find(c => c.id === campaignId);
-    if (!campaign) {
-      debugLog.error('campaign_management', 'toggle_campaign', new Error('Campaign not found'), { campaignId });
-      debugLog.endOperation(metricId, false, { error: 'campaign_not_found' });
-      return;
-    }
-
-    // Use campaign error handler to prevent unhandled promise rejections
-    const success = await CampaignErrorHandler.safeToggleCampaign(campaignId, async (id) => {
-      await toggleCampaign(id);
-
-      // Clear stable metrics cache to force refresh
-      const { stableCampaignMetrics } = await import('@/services/stableCampaignMetrics');
-      stableCampaignMetrics.clearCache();
-
-      // If activating, start live monitoring
-      if (campaign.status !== 'active') {
-        console.log(`🚀 Starting live monitoring for campaign: ${campaign.name}`);
-        await CampaignErrorHandler.safeStartLiveMonitoring(id, LiveAutomationEngine.startLiveMonitoring);
-
-        toast.success('Campaign activated!', {
-          description: `${campaign.name} is now running with live monitoring.`
-        });
-      } else {
-        toast.success('Campaign paused!', {
-          description: `${campaign.name} has been paused.`
-        });
-      }
-
-      // Force a full page refresh to sync all data
-      setTimeout(() => {
-        window.location.reload();
-      }, 1000);
-    });
-
-    if (!success) {
-      console.warn(`Campaign toggle failed for campaign: ${campaignId}`);
-    }
-  };
-
-  const handleCreateCampaign = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    const metricId = debugLog.startOperation('campaign_management', 'create_campaign', {
-      engineType: selectedEngine,
-      formData: { ...formData, keywords: undefined, anchorTexts: undefined } // Don't log sensitive data
-    });
-
-    // Check authentication first
-    if (!isAuthenticated) {
-      debugLog.warn('campaign_management', 'create_campaign', 'User not authenticated', { userId: user?.id });
-      setShowAuthModal(true);
-      debugLog.endOperation(metricId, false, { error: 'not_authenticated' });
-      return;
-    }
-
-    if (!canCreateMoreLinks(1)) {
-      toast.error('Cannot Create Campaign', {
-        description: 'You\'ve reached your link building limit. Upgrade to Premium for unlimited campaigns.'
-      });
-      return;
-    }
-
-    const keywordsArray = formData.keywords.split(',').map(k => k.trim()).filter(k => k);
-    const anchorTextsArray = formData.anchorTexts.split(',').map(a => a.trim()).filter(a => a);
-
-    if (!formData.name || !formData.targetUrl || keywordsArray.length === 0 || anchorTextsArray.length === 0) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
-    // Import the enhanced campaign creation helper
-    const { CampaignCreationHelper } = await import('@/utils/campaignCreationHelper');
-
-    // Use enhanced campaign creation with unique identifier
-    const result = await CampaignCreationHelper.createCampaignWithUniqueId(user.id, {
-      name: formData.name,
-      engine_type: selectedEngine.replace('-', '_'),
-      target_url: formData.targetUrl,
-      keywords: keywordsArray,
-      anchor_texts: anchorTextsArray,
-      status: formData.autoStart ? 'active' : 'draft',
-      daily_limit: formData.dailyLimit,
-      auto_start: formData.autoStart
-    });
-
-    if (result.success && result.data) {
-      // Verify the campaign was saved correctly
-      const verification = await CampaignCreationHelper.verifyCampaignSaved(result.campaignId!);
-
-      if (verification.isValid) {
-        toast.success('Campaign Created Successfully!', {
-          description: `"${result.data.name}" is ready with ${result.data.keywords.length} keywords and ${result.data.anchor_texts.length} anchor texts.`
-        });
-
-        console.log('✅ Campaign successfully created and verified:', {
-          id: result.data.id,
-          name: result.data.name,
-          target_url: result.data.target_url,
-          keywords: result.data.keywords,
-          anchor_texts: result.data.anchor_texts,
-          unique_identifier: result.data.name
-        });
-
-        // Reset form
-        setFormData({
-          name: '',
-          targetUrl: '',
-          keywords: '',
-          anchorTexts: '',
-          dailyLimit: 10,
-          autoStart: false
-        });
-        setShowCreateForm(false);
-
-        if (formData.autoStart) {
-          setTimeout(() => {
-            if (canCreateMoreLinks(1)) {
-              addLinks(1);
-            }
-          }, 2000);
-        }
-
-        // Refresh campaigns list to ensure sync
-        loadCampaigns();
-        debugLog.endOperation(metricId, true, { campaignId: result.data.id, campaignName: result.data.name });
-      } else {
-        debugLog.error('campaign_management', 'create_campaign', new Error('Campaign verification failed'), {
-          verificationErrors: verification.errors
-        });
-        toast.error('Campaign Verification Failed', {
-          description: `Campaign was created but has issues: ${verification.errors?.join(', ')}`
-        });
-        debugLog.endOperation(metricId, false, { error: 'verification_failed', errors: verification.errors });
-      }
-    } else {
-      debugLog.error('campaign_management', 'create_campaign', new Error(result.error || 'Campaign creation failed'), {
-        resultError: result.error
-      });
-      toast.error('Campaign Creation Failed', {
-        description: result.error || 'Unknown error occurred'
-      });
-      debugLog.endOperation(metricId, false, { error: 'creation_failed', resultError: result.error });
-    }
-  };
-
-  const currentEngineCampaigns = campaigns.filter(c =>
-    c.engine_type?.replace('_', '-') === selectedEngine ||
-    (c.engine === selectedEngineData?.name)
-  );
-
-  const getUserPlan = () => {
-    if (isPremium) return { plan: 'Premium', limit: Infinity };
-    return { plan: 'Free', limit: 20 };
-  };
-
-  const { plan, limit } = getUserPlan();
-
-  // Check automation tables status
-  const checkAutomationTables = useCallback(async () => {
+  // Load campaigns
+  const loadCampaigns = async () => {
+    if (!isAuthenticated) return;
+    
     try {
-      // First test basic connectivity
-      console.log('🔗 Testing database connectivity...');
-      const connectivity = await testDatabaseConnectivity();
-      console.log('Database connectivity:', JSON.stringify(connectivity, null, 2));
+      const { data, error } = await supabase
+        .from('backlink_campaigns')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false });
 
-      // Then test automation tables
-      console.log('🔧 Testing automation tables...');
-      const tablesStatus = await testAutomationTablesAccess();
-      console.log('Automation tables status:', JSON.stringify(tablesStatus, null, 2));
-
-      const tablesExist = tablesStatus.allTablesAccessible;
-      setAutomationTablesExist(tablesExist);
-
-      if (!tablesExist) {
-        console.warn('⚠️ Some automation tables are not accessible:', tablesStatus.errors);
+      if (data && !error) {
+        setCampaigns(data);
+        const active = data.find(c => c.status === 'active');
+        if (active) {
+          setActiveCampaign(active);
+          setFormData({
+            name: active.name,
+            target_url: active.target_url,
+            keyword: active.keyword,
+            anchor_text: active.anchor_text || '',
+            target_platform: active.target_platform
+          });
+        }
       }
-
-      return tablesExist;
     } catch (error: any) {
-      console.error('❌ Error checking automation tables:', error.message);
-      setAutomationTablesExist(false);
-      return false;
+      console.error('Error loading campaigns:', error);
+      if (error?.message?.includes('relation') || error?.message?.includes('does not exist')) {
+        setShowDatabaseSetup(true);
+        toast.error('Database tables not set up. Please run the database migration.');
+      }
     }
-  }, []);
-
-  // Handle authentication success
-  const handleAuthSuccess = (user: any) => {
-    setShowAuthModal(false);
-    toast.success('Welcome! You can now create automation campaigns.');
   };
 
-  // Run health check on mount for debugging
-  useEffect(() => {
-    // Run the improved automation tables check
-    checkAutomationTables();
+  // Load posting results
+  const loadPostingResults = async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('backlink_posts')
+        .select('*')
+        .eq('user_id', user?.id)
+        .eq('status', 'posted')
+        .order('posted_at', { ascending: false });
 
-    // Optionally run full health check in development
-    if (import.meta.env.DEV) {
-      DatabaseHealthCheck.logHealthCheck();
+      if (data && !error) {
+        setPostingResults(data);
+      }
+    } catch (error: any) {
+      console.error('Error loading results:', error);
     }
-  }, [checkAutomationTables]);
+  };
 
-  // Initialize debug logging for this component
+  // Save campaign
+  const saveCampaign = async () => {
+    if (!formData.name || !formData.target_url || !formData.keyword || !formData.anchor_text) {
+      toast.error('Please fill in all fields');
+      return;
+    }
+
+    // Validate URL format
+    try {
+      new URL(formData.target_url);
+    } catch {
+      toast.error('Please enter a valid URL (e.g., https://example.com)');
+      return;
+    }
+
+    // Check if user is authenticated
+    if (!user?.id) {
+      toast.error('You must be signed in to save campaigns');
+      return;
+    }
+
+    // Check if database tables exist and have correct schema
+    try {
+      // First check if the table exists and can be queried
+      const { error: tableCheckError } = await supabase
+        .from('backlink_campaigns')
+        .select('id, name, target_url, keyword, anchor_text, target_platform, status')
+        .limit(1);
+
+      if (tableCheckError) {
+        console.error('Table check error:', tableCheckError);
+        if (tableCheckError.message.includes('does not exist')) {
+          setShowDatabaseSetup(true);
+          toast.error('Database tables not set up. Please run the database setup first.');
+          return;
+        }
+        if (tableCheckError.message.includes('column') && tableCheckError.message.includes('does not exist')) {
+          setShowDatabaseSetup(true);
+          toast.error('Database schema mismatch. Please run the latest database setup to fix column issues.');
+          return;
+        }
+        // Any other table error should trigger setup
+        setShowDatabaseSetup(true);
+        toast.error('Cannot access database properly. Please run the database setup.');
+        return;
+      }
+    } catch (tableError) {
+      console.error('Table validation error:', tableError);
+      setShowDatabaseSetup(true);
+      toast.error('Cannot validate database tables. Please set up the database first.');
+      return;
+    }
+
+    try {
+      // Test Supabase connection
+      console.log('Testing Supabase connection...');
+      const { data: testData, error: testError } = await supabase.auth.getUser();
+      console.log('Supabase test result:', { testData, testError });
+
+      const campaignData = {
+        user_id: user?.id,
+        name: formData.name.toString(),
+        target_url: formData.target_url.toString(),
+        keyword: formData.keyword.toString(),
+        anchor_text: formData.anchor_text.toString(),
+        target_platform: formData.target_platform.toString(),
+        status: 'paused',
+        links_found: 0,
+        links_posted: 0
+      };
+
+      // Validate each field type to catch any issues
+      console.log('Field types validation:');
+      console.log('user_id:', typeof campaignData.user_id, campaignData.user_id);
+      console.log('name:', typeof campaignData.name, campaignData.name);
+      console.log('target_url:', typeof campaignData.target_url, campaignData.target_url);
+      console.log('keyword:', typeof campaignData.keyword, campaignData.keyword);
+      console.log('anchor_text:', typeof campaignData.anchor_text, campaignData.anchor_text);
+      console.log('target_platform:', typeof campaignData.target_platform, campaignData.target_platform);
+      console.log('status:', typeof campaignData.status, campaignData.status);
+      console.log('links_found:', typeof campaignData.links_found, campaignData.links_found);
+      console.log('links_posted:', typeof campaignData.links_posted, campaignData.links_posted);
+
+      console.log('Saving campaign with data:', campaignData);
+      console.log('User ID:', user?.id);
+      console.log('Is authenticated:', isAuthenticated);
+
+      console.log('Proceeding with campaign save...');
+
+      let campaign;
+      if (activeCampaign) {
+        // Update existing
+        const { data, error } = await supabase
+          .from('backlink_campaigns')
+          .update(campaignData)
+          .eq('id', activeCampaign.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        campaign = data;
+      } else {
+        // Create new
+        const { data, error } = await supabase
+          .from('backlink_campaigns')
+          .insert([campaignData])
+          .select()
+          .single();
+
+        if (error) throw error;
+        campaign = data;
+      }
+
+      setActiveCampaign(campaign);
+      toast.success('Campaign saved successfully!');
+      await loadCampaigns();
+    } catch (error: any) {
+      console.error('Error saving campaign:', error);
+
+      // Handle specific error cases
+      if (error?.message?.includes('does not exist')) {
+        setShowDatabaseSetup(true);
+        toast.error('Database table does not exist. Please set up the database first using the setup instructions above.');
+        return;
+      }
+
+      if (error?.message?.includes('boolean') || error?.message?.includes('invalid input syntax for type boolean')) {
+        console.error('Boolean field error detected:', error);
+        setShowDatabaseSetup(true);
+        toast.error('Database schema conflict detected. This may be caused by conflicting table schemas. Please run the database setup to recreate the backlink_campaigns table with the correct schema.');
+        return;
+      }
+
+      if (error?.message?.includes('automation_campaigns')) {
+        console.error('Wrong table being used:', error);
+        setShowDatabaseSetup(true);
+        toast.error('Table name conflict detected. Please ensure you are using the backlink_campaigns table, not automation_campaigns.');
+        return;
+      }
+
+      // Extract meaningful error message from Supabase error object
+      let errorMessage = 'Unknown error';
+
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.details) {
+        errorMessage = error.details;
+      } else if (error?.hint) {
+        errorMessage = error.hint;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else {
+        // If it's still an object, try to stringify it meaningfully
+        try {
+          errorMessage = JSON.stringify(error, null, 2);
+        } catch {
+          errorMessage = 'Complex error object - check console';
+        }
+      }
+
+      toast.error(`Failed to save campaign: ${errorMessage}`);
+    }
+  };
+
+  // Start automation
+  const startAutomation = async () => {
+    if (!activeCampaign) {
+      toast.error('Please save your campaign first');
+      return;
+    }
+
+    const selectedPlatform = AVAILABLE_PLATFORMS.find(p => p.id === activeCampaign.target_platform);
+    if (!selectedPlatform?.is_available) {
+      toast.error(`${selectedPlatform?.name || 'Platform'} automation is not available yet`);
+      return;
+    }
+
+    setIsRunning(true);
+    setProgress(0);
+    setCurrentStep('Initializing automation...');
+
+    try {
+      // Update campaign status
+      await supabase
+        .from('backlink_campaigns')
+        .update({ status: 'active' })
+        .eq('id', activeCampaign.id);
+
+      setActiveCampaign({ ...activeCampaign, status: 'active' });
+
+      // Start the automation based on platform
+      const response = await fetch('/.netlify/functions/backlink-automation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'start',
+          campaignId: activeCampaign.id,
+          platform: activeCampaign.target_platform,
+          keyword: activeCampaign.keyword,
+          targetUrl: activeCampaign.target_url,
+          anchorText: activeCampaign.anchor_text
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success) {
+        toast.success(`${selectedPlatform.name} automation started!`);
+        monitorProgress(data.sessionId);
+      } else {
+        throw new Error(data.error || 'Failed to start automation');
+      }
+
+    } catch (error: any) {
+      console.error('Error starting automation:', error);
+      toast.error(`Failed to start: ${error.message}`);
+      setIsRunning(false);
+    }
+  };
+
+  // Pause automation
+  const pauseAutomation = async () => {
+    if (!activeCampaign) return;
+
+    try {
+      await supabase
+        .from('backlink_campaigns')
+        .update({ status: 'paused' })
+        .eq('id', activeCampaign.id);
+
+      setActiveCampaign({ ...activeCampaign, status: 'paused' });
+      setIsRunning(false);
+      setProgress(0);
+      setCurrentStep('');
+      toast.success('Automation paused');
+    } catch (error: any) {
+      toast.error('Failed to pause automation');
+    }
+  };
+
+  // Monitor progress
+  const monitorProgress = (sessionId: string) => {
+    const steps = [
+      'Generating AI comment content...',
+      'Searching for target posts...',
+      'Analyzing post relevance...',
+      'Posting comment with backlink...',
+      'Capturing live URL...',
+      'Saving results...'
+    ];
+
+    let currentStepIndex = 0;
+    const interval = setInterval(() => {
+      if (currentStepIndex < steps.length) {
+        setCurrentStep(steps[currentStepIndex]);
+        setProgress(((currentStepIndex + 1) / steps.length) * 100);
+        currentStepIndex++;
+      } else {
+        clearInterval(interval);
+        setIsRunning(false);
+        setProgress(100);
+        setCurrentStep('Completed!');
+        toast.success('Backlink posted successfully! Check your results.');
+        
+        // Refresh data
+        loadPostingResults();
+        loadCampaigns();
+      }
+    }, 3000);
+
+    // Cleanup after 30 seconds
+    setTimeout(() => clearInterval(interval), 30000);
+  };
+
+  // Initialize
   useEffect(() => {
-    debugLog.info('backlink_automation', 'component_mounted', 'BacklinkAutomation component mounted', {
-      isAuthenticated,
-      isPremium,
-      campaignCount: campaigns.length,
-      selectedEngine
-    });
-  }, [isAuthenticated, isPremium, campaigns.length, selectedEngine]);
+    if (isAuthenticated) {
+      loadCampaigns();
+      loadPostingResults();
+    }
+  }, [isAuthenticated]);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <Header />
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-md mx-auto text-center">
+            <Link2 className="h-16 w-16 text-blue-600 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-4">Sign In Required</h2>
+            <p className="text-gray-600">Please sign in to access backlink automation.</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
-    <AutomationWithDebugging enabledInProduction={isPremium}>
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Header />
-
-      <div className="container mx-auto px-4 py-8 max-w-6xl">
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl mb-6">
-            <Zap className="h-8 w-8 text-white" />
+      
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <Link2 className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Backlink Automation
-          </h1>
-          <p className="text-xl text-gray-600 mb-6 max-w-2xl mx-auto">
-            Build high-quality backlinks automatically across multiple platforms.
-            Choose your strategy and let our AI do the work.
-          </p>
-
-          {/* Authentication Section */}
-          {!isAuthenticated && (
-            <div className="mb-8">
-              <RoutePreservingAuth
-                buttonVariant="default"
-                buttonSize="lg"
-                className="justify-center"
-              />
-              <p className="text-sm text-gray-500 mt-3">
-                Sign in to create and manage your automation campaigns
-              </p>
-            </div>
-          )}
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
-            <Card className="border-0 shadow-lg">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-blue-600">
-                    {isAuthenticated ? activeCampaignCount : '—'}
-                  </div>
-                  <div className="text-sm text-gray-600">Active Campaigns</div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-green-600">
-                    {isAuthenticated ? (
-                      limit === Infinity ? totalLinksBuilt : `${totalLinksBuilt}/${limit}`
-                    ) : '—'}
-                  </div>
-                  <div className="text-sm text-gray-600">Links Built</div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-lg">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-2">
-                    {isAuthenticated ? (
-                      <>
-                        {isPremium ? (
-                          <Crown className="h-5 w-5 text-purple-600" />
-                        ) : (
-                          <Shield className="h-5 w-5 text-blue-600" />
-                        )}
-                        <span className="text-lg font-semibold text-gray-900">{plan}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Shield className="h-5 w-5 text-gray-400" />
-                        <span className="text-lg font-semibold text-gray-400">Guest</span>
-                      </>
-                    )}
-                  </div>
-                  <div className="text-sm text-gray-600">Current Plan</div>
-                </div>
-              </CardContent>
-            </Card>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Backlink Automation</h1>
+          <p className="text-gray-600 text-lg">Generate AI-powered comments and post backlinks across multiple platforms</p>
+          
+          <div className="flex items-center justify-center gap-4 mt-4">
+            <Badge variant="outline" className="bg-blue-50 text-blue-700">
+              <Zap className="h-3 w-3 mr-1" />
+              AI-Powered
+            </Badge>
+            <Badge variant="outline" className="bg-green-50 text-green-700">
+              <Globe className="h-3 w-3 mr-1" />
+              Multi-Platform
+            </Badge>
+            <Badge variant="outline" className="bg-purple-50 text-purple-700">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Live Tracking
+            </Badge>
           </div>
-
-          {/* Upgrade Banner for Free Users */}
-          {!isPremium && hasReachedLimit && (
-            <Card className="mt-6 bg-gradient-to-r from-purple-50 to-pink-50 border-purple-200">
-              <CardContent className="pt-6">
-                <div className="flex items-center justify-center gap-3">
-                  <AlertTriangle className="h-5 w-5 text-purple-600" />
-                  <span className="text-purple-700 font-medium">
-                    You've reached your free limit. Upgrade to Premium for unlimited campaigns.
-                  </span>
-                  <Button size="sm" className="bg-purple-600 hover:bg-purple-700">
-                    <Crown className="h-4 w-4 mr-1" />
-                    Upgrade Now
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
 
-        {/* Runtime Status Widget - Always visible for authenticated users */}
-        {isAuthenticated && (
-          <RuntimeStatus
-            campaignsCount={campaigns.length}
-            activeCampaigns={activeCampaignCount}
-            systemStatus={automationTablesExist ? 'online' : 'maintenance'}
-            onRefresh={checkAutomationTables}
-          />
-        )}
-
-        {/* Show notice if automation tables are missing */}
-        {!automationTablesExist && (
-          <AutomationTablesMissingNotice
-            onRetry={checkAutomationTables}
-          />
-        )}
-
-        {/* Database Column Fix Component */}
-        <div className="mb-8">
-          <MissingColumnsFix />
-        </div>
-
-        {/* Blog Comments Campaign Management */}
-        <Card className="mb-8 shadow-lg border-0">
-          <CardHeader>
-            <CardTitle className="text-2xl flex items-center gap-3">
-              <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-blue-100 text-blue-700 border-blue-200">
-                <MessageSquare className="h-6 w-6" />
-              </div>
-              Blog Comments Automation
-            </CardTitle>
-            <CardDescription>
-              Create and manage automated blog commenting campaigns to build high-quality backlinks
-            </CardDescription>
-          </CardHeader>
-        </Card>
-
-        {/* Runtime Status */}
-        {isAuthenticated && activeCampaignCount > 0 && (
-          <Card className="mb-8 bg-blue-50 border-blue-200">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <span className="font-medium text-blue-900">
-                    {activeCampaignCount} active campaign{activeCampaignCount !== 1 ? 's' : ''} running
-                  </span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => window.location.reload()}
-                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                >
-                  Refresh Status
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Campaign Management */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Current Campaigns */}
-          <div className="lg:col-span-2">
-            <Card className="shadow-lg border-0">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      {selectedEngineData && <selectedEngineData.icon className="h-5 w-5" />}
-                      {selectedEngineData?.name} Campaigns
-                    </CardTitle>
-                    <CardDescription>
-                      {currentEngineCampaigns.length} active campaigns
-                    </CardDescription>
-                  </div>
-                  <Button
-                    onClick={() => {
-                      if (!isAuthenticated) {
-                        setShowAuthModal(true);
-                        return;
-                      }
-                      setShowCreateForm(!showCreateForm);
-                    }}
-                    disabled={isAuthenticated && !canCreateLinks}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    {isAuthenticated ? 'New Campaign' : 'Sign In to Create Campaign'}
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {!isAuthenticated ? (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      {selectedEngineData && <selectedEngineData.icon className="h-8 w-8 text-gray-400" />}
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      Sign In Required
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      Create an account to view and manage your {selectedEngineData?.name.toLowerCase()} campaigns
-                    </p>
-                    <Button
-                      onClick={() => setShowAuthModal(true)}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Sign In to Get Started
-                    </Button>
-                  </div>
-                ) : currentEngineCampaigns.length > 0 ? (
-                  <div className="space-y-4">
-                    {currentEngineCampaigns.map((campaign) => (
-                      <Card key={campaign.id} className="border border-gray-200">
-                        <CardContent className="pt-4">
-                          <div className="flex items-center justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <h4 className="font-medium text-gray-900">{campaign.name}</h4>
-                                <Badge
-                                  variant={campaign.status === 'active' ? 'default' : 'secondary'}
-                                  className={campaign.status === 'active' ? 'bg-green-100 text-green-700' : ''}
-                                >
-                                  {campaign.status}
-                                </Badge>
-                              </div>
-                              <div className="text-sm text-gray-600 space-y-1">
-                                <div className="flex items-center gap-2">
-                                  <Target className="h-3 w-3" />
-                                  {campaign.target_url}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <TrendingUp className="h-3 w-3" />
-                                  {campaign.links_built || 0} links built • {campaign.daily_limit} daily limit
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleToggleCampaign(campaign.id)}
-                              >
-                                {campaign.status === 'active' ? (
-                                  <>
-                                    <Pause className="h-4 w-4 mr-1" />
-                                    Pause
-                                  </>
-                                ) : (
-                                  <>
-                                    <Play className="h-4 w-4 mr-1" />
-                                    Start Live
-                                  </>
-                                )}
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      {selectedEngineData && <selectedEngineData.icon className="h-8 w-8 text-gray-400" />}
-                    </div>
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">
-                      No campaigns yet
-                    </h3>
-                    <p className="text-gray-600 mb-4">
-                      Create your first {selectedEngineData?.name.toLowerCase()} campaign to get started
-                    </p>
-                    <Button
-                      onClick={() => {
-                        if (!isAuthenticated) {
-                          setShowAuthModal(true);
-                          return;
-                        }
-                        setShowCreateForm(true);
-                      }}
-                      disabled={isAuthenticated && !canCreateLinks}
-                      className="bg-blue-600 hover:bg-blue-700"
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      {isAuthenticated ? 'Create Campaign' : 'Sign In to Create Campaign'}
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+        {/* Database Setup */}
+        {showDatabaseSetup && (
+          <div className="mb-6">
+            <BacklinkDatabaseSetup />
           </div>
+        )}
 
-          {/* Campaign Creation Form */}
-          <div>
-            {showCreateForm && isAuthenticated && (
-              <Card className="shadow-lg border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Plus className="h-5 w-5" />
-                    New Campaign
-                  </CardTitle>
-                  <CardDescription>
-                    Create a {selectedEngineData?.name.toLowerCase()} campaign
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <form onSubmit={handleCreateCampaign} className="space-y-4">
+        <Tabs defaultValue="campaign" className="max-w-6xl mx-auto">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="campaign">Campaign</TabsTrigger>
+            <TabsTrigger value="results">Live Results ({postingResults.length})</TabsTrigger>
+            <TabsTrigger value="platforms">Platforms ({AVAILABLE_PLATFORMS.filter(p => p.is_available).length} available)</TabsTrigger>
+          </TabsList>
+
+          {/* Campaign Tab */}
+          <TabsContent value="campaign" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              
+              {/* Campaign Form */}
+              <div className="lg:col-span-2">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Campaign Setup</CardTitle>
+                    <CardDescription>Configure your backlink automation campaign</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
                     <div>
-                      <Label htmlFor="name">Campaign Name</Label>
+                      <Label htmlFor="campaign-name">Campaign Name</Label>
                       <Input
-                        id="name"
-                        placeholder="My Website Campaign"
+                        id="campaign-name"
                         value={formData.name}
-                        onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                        required
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        placeholder="My Backlink Campaign"
+                        disabled={isRunning}
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="url">Target Website</Label>
-                      <Input
-                        id="url"
-                        placeholder="yourwebsite.com"
-                        value={formData.targetUrl}
-                        onChange={(e) => setFormData(prev => ({ ...prev, targetUrl: e.target.value }))}
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <Label htmlFor="keywords">Keywords</Label>
-                      <Textarea
-                        id="keywords"
-                        placeholder="SEO, digital marketing, backlinks"
-                        value={formData.keywords}
-                        onChange={(e) => setFormData(prev => ({ ...prev, keywords: e.target.value }))}
-                        rows={3}
-                        required
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Separate with commas</p>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="anchors">Anchor Texts</Label>
-                      <Textarea
-                        id="anchors"
-                        placeholder="best SEO tool, learn digital marketing, get backlinks"
-                        value={formData.anchorTexts}
-                        onChange={(e) => setFormData(prev => ({ ...prev, anchorTexts: e.target.value }))}
-                        rows={3}
-                        required
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Separate with commas</p>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="limit">Daily Link Limit</Label>
-                      <Select
-                        value={formData.dailyLimit.toString()}
-                        onValueChange={(value) => setFormData(prev => ({ ...prev, dailyLimit: parseInt(value) }))}
+                      <Label htmlFor="target-platform">Target Platform</Label>
+                      <Select 
+                        value={formData.target_platform} 
+                        onValueChange={(value) => setFormData({ ...formData, target_platform: value })}
+                        disabled={isRunning}
                       >
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue placeholder="Select platform" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="5">5 links/day</SelectItem>
-                          <SelectItem value="10">10 links/day</SelectItem>
-                          <SelectItem value="20">20 links/day</SelectItem>
-                          <SelectItem value="50">50 links/day</SelectItem>
+                          {AVAILABLE_PLATFORMS.map((platform) => (
+                            <SelectItem 
+                              key={platform.id} 
+                              value={platform.id}
+                              disabled={!platform.is_available}
+                            >
+                              <div className="flex items-center gap-2">
+                                <span>{platform.icon}</span>
+                                <span>{platform.name}</span>
+                                {!platform.is_available && <Badge variant="secondary" className="text-xs">Coming Soon</Badge>}
+                              </div>
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
 
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        id="autostart"
-                        checked={formData.autoStart}
-                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, autoStart: checked }))}
+                    <div>
+                      <Label htmlFor="website">Your Website URL</Label>
+                      <Input
+                        id="website"
+                        type="url"
+                        value={formData.target_url}
+                        onChange={(e) => {
+                          let url = e.target.value.trim();
+                          // Auto-format URL if it doesn't start with http:// or https://
+                          if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+                            url = 'https://' + url;
+                          }
+                          setFormData({ ...formData, target_url: url });
+                        }}
+                        onBlur={(e) => {
+                          let url = e.target.value.trim();
+                          if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+                            url = 'https://' + url;
+                            setFormData({ ...formData, target_url: url });
+                          }
+                        }}
+                        placeholder="https://yourwebsite.com"
+                        disabled={isRunning}
                       />
-                      <Label htmlFor="autostart" className="text-sm">Start immediately</Label>
                     </div>
 
-                    <div className="flex gap-2">
-                      <Button type="submit" className="flex-1 bg-blue-600 hover:bg-blue-700">
-                        Create Campaign
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setShowCreateForm(false)}
-                      >
-                        Cancel
-                      </Button>
+                    <div>
+                      <Label htmlFor="keyword">Content Keyword</Label>
+                      <Input
+                        id="keyword"
+                        value={formData.keyword}
+                        onChange={(e) => setFormData({ ...formData, keyword: e.target.value })}
+                        placeholder="marketing, productivity, tech"
+                        disabled={isRunning}
+                      />
                     </div>
-                  </form>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
-      </div>
 
-      <Footer />
+                    <div>
+                      <Label htmlFor="anchor-text">Anchor Text</Label>
+                      <Input
+                        id="anchor-text"
+                        value={formData.anchor_text}
+                        onChange={(e) => setFormData({ ...formData, anchor_text: e.target.value })}
+                        placeholder="best marketing tools"
+                        disabled={isRunning}
+                      />
+                      <p className="text-xs text-gray-500 mt-1">
+                        This text will be hyperlinked to your website
+                      </p>
+                    </div>
 
-      {/* Authentication Modal - only render invisible one when not showing modal */}
-      {!showAuthModal && <RoutePreservingAuth showAuthButtons={false} />}
+                    {/* AI Prompt Preview */}
+                    {formData.keyword && formData.anchor_text && formData.target_url && (
+                      <div className="p-3 bg-gray-50 rounded-lg">
+                        <p className="text-xs text-gray-600 mb-1">AI Prompt Preview:</p>
+                        <p className="text-sm text-gray-800">
+                          "Generate a short blog comment on <strong>{formData.keyword}</strong> including the <strong>{formData.anchor_text}</strong> hyperlinked to <strong>{formData.target_url}</strong>"
+                        </p>
+                      </div>
+                    )}
 
-      {showAuthModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-2">Authentication Required</h3>
-            <p className="text-gray-600 mb-4">
-              You need to sign in to create and manage automation campaigns.
-            </p>
-            <div className="flex gap-3">
-              <RoutePreservingAuth className="flex-1" />
-              <Button
-                variant="outline"
-                onClick={() => setShowAuthModal(false)}
-              >
-                Cancel
-              </Button>
+                    {/* Progress */}
+                    {isRunning && (
+                      <div className="space-y-3 p-4 bg-blue-50 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">Automation Progress</span>
+                          <span className="text-sm text-gray-600">{Math.round(progress)}%</span>
+                        </div>
+                        <Progress value={progress} className="w-full" />
+                        <p className="text-sm text-gray-600 flex items-center gap-2">
+                          <Loader2 className="h-3 w-3 animate-spin" />
+                          {currentStep}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 pt-4">
+                      <Button onClick={saveCampaign} disabled={isRunning} variant="outline">
+                        Save Campaign
+                      </Button>
+                      
+                      {!isRunning ? (
+                        <Button 
+                          onClick={startAutomation} 
+                          disabled={!activeCampaign}
+                          className="flex-1"
+                        >
+                          <Play className="h-4 w-4 mr-2" />
+                          Start Automation
+                        </Button>
+                      ) : (
+                        <Button 
+                          onClick={pauseAutomation} 
+                          variant="outline" 
+                          className="flex-1"
+                        >
+                          <Pause className="h-4 w-4 mr-2" />
+                          Pause
+                        </Button>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Status Card */}
+              <div>
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <BarChart3 className="h-5 w-5" />
+                      Campaign Status
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {activeCampaign ? (
+                      <div className="space-y-4">
+                        <div>
+                          <p className="font-medium">{activeCampaign.name}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant={activeCampaign.status === 'active' ? 'default' : 'secondary'}>
+                              {activeCampaign.status}
+                            </Badge>
+                            <Badge variant="outline">
+                              {AVAILABLE_PLATFORMS.find(p => p.id === activeCampaign.target_platform)?.icon}
+                              {AVAILABLE_PLATFORMS.find(p => p.id === activeCampaign.target_platform)?.name}
+                            </Badge>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span>Posts Found:</span>
+                            <span className="font-medium">{activeCampaign.links_found}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Backlinks Posted:</span>
+                            <span className="font-medium">{activeCampaign.links_posted}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span>Success Rate:</span>
+                            <span className="font-medium">
+                              {activeCampaign.links_found > 0 
+                                ? Math.round((activeCampaign.links_posted / activeCampaign.links_found) * 100)
+                                : 0}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Plus className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-gray-500">No active campaign</p>
+                        <p className="text-xs text-gray-400">Fill in the form and save</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </TabsContent>
+
+          {/* Results Tab */}
+          <TabsContent value="results" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <ExternalLink className="h-5 w-5" />
+                  Live Posted Backlinks
+                </CardTitle>
+                <CardDescription>
+                  Real links posted across various platforms with AI-generated content
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {postingResults.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Link2 className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No backlinks yet</h3>
+                    <p className="text-gray-600">Start a campaign to see your live backlinks</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {postingResults.map((result) => (
+                      <div key={result.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-lg">
+                                {AVAILABLE_PLATFORMS.find(p => p.id === result.target_platform)?.icon}
+                              </span>
+                              <p className="font-medium text-sm">
+                                {AVAILABLE_PLATFORMS.find(p => p.id === result.target_platform)?.name} - {result.domain}
+                              </p>
+                            </div>
+                            <p className="text-xs text-gray-600 mb-2">
+                              Posted: {new Date(result.posted_at).toLocaleDateString()} at {new Date(result.posted_at).toLocaleTimeString()}
+                            </p>
+                            <p className="text-xs text-gray-700 bg-gray-50 p-2 rounded line-clamp-3">
+                              "{result.comment_content}"
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 ml-4">
+                            <Badge variant="default" className="bg-green-600">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Live
+                            </Badge>
+                            <Button size="sm" variant="outline" asChild>
+                              <a 
+                                href={result.live_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                              >
+                                <ExternalLink className="h-3 w-3 mr-1" />
+                                View
+                              </a>
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Platforms Tab */}
+          <TabsContent value="platforms" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Available Platforms
+                </CardTitle>
+                <CardDescription>
+                  Platforms where we can automatically post backlinks
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {AVAILABLE_PLATFORMS.map((platform) => (
+                    <div key={platform.id} className={`border rounded-lg p-4 ${platform.is_available ? 'bg-green-50' : 'bg-gray-50'}`}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-2xl">{platform.icon}</span>
+                          <h3 className="font-medium">{platform.name}</h3>
+                        </div>
+                        <Badge variant={platform.is_available ? 'default' : 'secondary'}>
+                          {platform.is_available ? 'Available' : 'Coming Soon'}
+                        </Badge>
+                      </div>
+                      <p className="text-sm text-gray-600 mb-2">{platform.description}</p>
+                      {platform.is_available && (
+                        <p className="text-xs text-green-600">
+                          Success Rate: {platform.success_rate}%
+                        </p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
-    </AutomationWithDebugging>
+      
+      <Footer />
+    </div>
   );
 }

@@ -16,7 +16,6 @@ import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
 // import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
 import Index from "./pages/Index";
 
-const LazyBacklinkAutomation = lazy(() => import("./pages/NewBacklinkAutomation"));
 const LazyNewAutomationPage = lazy(() => import("./pages/NewAutomationPage"));
 const LazyBlogCommentAutomation = lazy(() => import("./pages/BlogCommentAutomation"));
 const LazyBlogCommentsSystem = lazy(() => import("./pages/BlogCommentsSystem"));
@@ -48,6 +47,7 @@ const LazyAuthErrorDebug = lazy(() => import("./pages/AuthErrorDebug"));
 const LazyTextCleanerDebug = lazy(() => import("./pages/TextCleanerDebug"));
 const LazyDatabaseColumnsFix = lazy(() => import("./pages/DatabaseColumnsFix"));
 const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
+const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -125,13 +125,13 @@ const App = () => (
                     <div className="text-center">
                       <LoadingSpinner />
                       <div className="mt-4">
-                        <h2 className="text-xl font-semibold text-gray-900">Loading Automation Platform</h2>
-                        <p className="text-gray-600 mt-2">Preparing your enterprise-grade link building tools...</p>
+                        <h2 className="text-xl font-semibold text-gray-900">Loading Working Automation</h2>
+                        <p className="text-gray-600 mt-2">Preparing backlink automation...</p>
                       </div>
                     </div>
                   </div>
                 }>
-                  <LazyBlogCommentsSystem />
+                  <LazyBacklinkAutomation />
                 </Suspense>
               }
             />
@@ -139,7 +139,7 @@ const App = () => (
               path="/automation/legacy"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
-                  <LazyBacklinkAutomation />
+                  <LazyBlogCommentsSystem />
                 </Suspense>
               }
             />

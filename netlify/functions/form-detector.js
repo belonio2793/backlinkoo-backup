@@ -1,323 +1,327 @@
-// Form Detector Function - Uses Playwright to detect and map form structures
 const { createClient } = require('@supabase/supabase-js');
+const { chromium } = require('playwright');
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-// Note: In a full production environment, you would install Playwright here
-// For now, we'll simulate the detection process
-// const { chromium } = require('playwright');
-
 exports.handler = async (event, context) => {
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS'
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Content-Type': 'application/json'
   };
 
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers };
   }
 
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: 'Method not allowed' })
-    };
-  }
-
   try {
-    const { url, formId } = JSON.parse(event.body || '{}');
-    console.log('Form detection request:', { url, formId });
-
-    if (!url && !formId) {
+    const { targetUrls, campaignId } = JSON.parse(event.body || '{}');
+    
+    if (!targetUrls || !Array.isArray(targetUrls)) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'URL or formId parameter required' })
+        body: JSON.stringify({ error: 'targetUrls array is required' })
       };
     }
 
-    let targetUrl = url;
-    if (formId) {
-      // Get URL from database
-      const { data: formData, error } = await supabase
-        .from('discovered_forms')
-        .select('url')
-        .eq('id', formId)
-        .single();
-      
-      if (error || !formData) {
-        return {
-          statusCode: 404,
-          headers,
-          body: JSON.stringify({ error: 'Form not found' })
-        };
-      }
-      targetUrl = formData.url;
-    }
+    console.log(`Detecting forms on ${targetUrls.length} URLs`);
 
-    // Detect forms on the page
-    const detectionResult = await detectFormsOnPage(targetUrl);
+    const browser = await chromium.launch({ headless: true });
+    const context = await browser.newContext({
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+    });
 
-    // Store results in database
-    if (detectionResult.forms.length > 0) {
-      for (const form of detectionResult.forms) {
-        try {
-          await supabase
-            .from('form_mappings')
-            .upsert([{
-              url: targetUrl,
-              domain: new URL(targetUrl).hostname,
-              form_selector: form.formSelector,
-              action_url: form.action,
-              method: form.method,
-              fields_mapping: form.fields,
-              hidden_fields: form.hidden,
-              submit_selector: form.submitSelector,
-              confidence_score: form.confidence,
-              platform: identifyPlatform(targetUrl, form),
-              status: 'detected',
-              detected_at: new Date().toISOString()
-            }], { onConflict: 'url,form_selector' });
-        } catch (dbError) {
-          console.error('Database storage error:', dbError);
-        }
+    const results = [];
+
+    for (const url of targetUrls) {
+      try {
+        const detection = await detectCommentForm(url, context, campaignId);
+        results.push(detection);
+        
+        // Rate limiting
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+      } catch (error) {
+        console.error(`Form detection error for ${url}:`, error.message);
+        results.push({
+          url,
+          success: false,
+          error: error.message
+        });
       }
     }
+
+    await browser.close();
+
+    const successfulDetections = results.filter(r => r.success);
+    const formsFound = successfulDetections.filter(r => r.hasCommentForm);
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         success: true,
-        url: targetUrl,
-        forms: detectionResult.forms,
-        detectionTime: detectionResult.detectionTime,
-        screenshot: detectionResult.screenshot,
-        message: `Detected ${detectionResult.forms.length} comment forms`
+        urlsProcessed: targetUrls.length,
+        successfulDetections: successfulDetections.length,
+        formsFound: formsFound.length,
+        results
       })
     };
 
   } catch (error) {
-    console.error('Form detection error:', error);
-    
+    console.error('Form detector error:', error);
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({
+      body: JSON.stringify({ 
         error: error.message,
-        success: false
+        success: false 
       })
     };
   }
 };
 
-// Simulated form detection (replace with actual Playwright implementation)
-async function detectFormsOnPage(url) {
-  console.log(`Detecting forms on: ${url}`);
+async function detectCommentForm(url, context, campaignId) {
+  console.log(`Detecting comment form on: ${url}`);
   
-  // Simulate processing time
-  await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 3000));
-
-  const domain = new URL(url).hostname;
-  const forms = [];
-
-  // Simulate different types of forms based on domain patterns
-  if (domain.includes('wordpress') || domain.includes('blog')) {
-    // WordPress-style form
-    forms.push({
-      id: generateFormId(),
-      formSelector: 'form#commentform',
-      action: '/wp-comments-post.php',
-      method: 'POST',
-      fields: {
-        comment: 'textarea#comment',
-        name: 'input#author',
-        email: 'input#email',
-        website: 'input#url'
-      },
-      hidden: {
-        'comment_post_ID': '123',
-        'comment_parent': '0',
-        '_wp_unfiltered_html_comment': '1'
-      },
-      submitSelector: 'input#submit',
-      confidence: 92
-    });
-  } else if (domain.includes('medium') || domain.includes('substack')) {
-    // Modern platform form
-    forms.push({
-      id: generateFormId(),
-      formSelector: 'form[data-testid="comment-form"]',
-      action: '/api/comments',
-      method: 'POST',
-      fields: {
-        comment: 'textarea[placeholder*="comment"]',
-        name: 'input[placeholder*="name"]',
-        email: 'input[type="email"]'
-      },
-      hidden: {
-        '_token': 'csrf_token_value',
-        'post_id': '456'
-      },
-      submitSelector: 'button[type="submit"]',
-      confidence: 85
-    });
-  } else {
-    // Generic form
-    forms.push({
-      id: generateFormId(),
-      formSelector: 'form.comment-form',
-      action: '/comments',
-      method: 'POST',
-      fields: {
-        comment: 'textarea[name="message"]',
-        name: 'input[name="name"]',
-        email: 'input[name="email"]',
-        website: 'input[name="website"]'
-      },
-      hidden: {
-        '_token': 'security_token'
-      },
-      submitSelector: 'button.submit-comment',
-      confidence: 78
-    });
-  }
-
-  return {
-    forms,
-    detectionTime: 2.5 + Math.random() * 2,
-    screenshot: null, // Would contain base64 screenshot in real implementation
-    pageTitle: `Sample Blog Post - ${domain}`,
-    pageUrl: url
-  };
-}
-
-function generateFormId() {
-  return 'form_' + Math.random().toString(36).substr(2, 9);
-}
-
-function identifyPlatform(url, formMap) {
-  const domain = new URL(url).hostname.toLowerCase();
-  
-  if (formMap.action?.includes('wp-comments-post.php') || 
-      formMap.fields?.comment?.includes('#comment') ||
-      domain.includes('wordpress')) {
-    return 'wordpress';
-  }
-  
-  if (domain.includes('substack.com')) {
-    return 'substack';
-  }
-  
-  if (domain.includes('medium.com')) {
-    return 'medium';
-  }
-  
-  if (domain.includes('ghost') || formMap.action?.includes('/ghost/')) {
-    return 'ghost';
-  }
-  
-  if (domain.includes('blogger.com') || domain.includes('blogspot.com')) {
-    return 'blogger';
-  }
-  
-  return 'generic';
-}
-
-/* 
-PRODUCTION PLAYWRIGHT IMPLEMENTATION:
-This is how the actual Playwright detection would work:
-
-const { chromium } = require('playwright');
-
-async function detectFormsOnPage(url) {
-  const browser = await chromium.launch({ headless: true });
-  const page = await browser.newPage();
+  const page = await context.newPage();
   
   try {
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 30000 });
-    await page.waitForTimeout(1000);
+    await page.goto(url, { 
+      waitUntil: 'domcontentloaded', 
+      timeout: 15000 
+    });
 
-    const forms = await page.evaluate(() => {
-      const formElements = document.querySelectorAll('form');
+    // Wait a moment for dynamic content
+    await page.waitForTimeout(3000);
+
+    const formAnalysis = await page.evaluate(() => {
+      // Comprehensive comment form detection
+      const commentFormSelectors = [
+        // WordPress common selectors
+        'form#commentform',
+        'form[id*="comment"]',
+        'form[class*="comment"]',
+        'form[name="commentform"]',
+        
+        // Generic blog platforms
+        '.comment-form form',
+        '#comment-form form',
+        '.comments form',
+        '#comments form',
+        '.comment-section form',
+        
+        // Medium, Substack patterns
+        'form[action*="comment"]',
+        'form[data-testid*="comment"]',
+        
+        // Catch-all for forms with comment textarea
+        'form:has(textarea[name*="comment"])',
+        'form:has(textarea[placeholder*="comment"])',
+        'form:has(textarea[id*="comment"])',
+        'form:has(input[name*="comment"])'
+      ];
+
       const detectedForms = [];
 
-      formElements.forEach((form, index) => {
-        const inputs = form.querySelectorAll('input, textarea, select');
-        const fields = {};
-        const hidden = {};
-        let confidence = 0;
-
-        inputs.forEach(input => {
-          const type = input.type?.toLowerCase() || '';
-          const name = input.name || '';
-          const id = input.id || '';
-          const placeholder = input.placeholder || '';
+      for (const selector of commentFormSelectors) {
+        try {
+          const forms = document.querySelectorAll(selector);
           
-          // Get associated label text
-          let labelText = '';
-          if (id) {
-            const label = document.querySelector(`label[for="${id}"]`);
-            if (label) labelText = label.textContent?.trim() || '';
-          }
-
-          const combined = (labelText + ' ' + placeholder + ' ' + name + ' ' + id).toLowerCase();
-
-          if (type === 'hidden') {
-            hidden[name || `hidden_${Object.keys(hidden).length}`] = input.value || '';
-          } else if (combined.includes('comment') || input.tagName.toLowerCase() === 'textarea') {
-            fields.comment = `${input.tagName.toLowerCase()}${id ? '#' + id : ''}${name ? '[name="' + name + '"]' : ''}`;
-            confidence += 20;
-          } else if (combined.includes('name') || combined.includes('author')) {
-            fields.name = `input${id ? '#' + id : ''}${name ? '[name="' + name + '"]' : ''}`;
-            confidence += 10;
-          } else if (combined.includes('email')) {
-            fields.email = `input${id ? '#' + id : ''}${name ? '[name="' + name + '"]' : ''}`;
-            confidence += 15;
-          } else if (combined.includes('website') || combined.includes('url')) {
-            fields.website = `input${id ? '#' + id : ''}${name ? '[name="' + name + '"]' : ''}`;
-            confidence += 5;
-          }
-        });
-
-        // Look for submit button
-        const submitButton = form.querySelector('button[type="submit"], input[type="submit"]') || 
-                           form.querySelector('button:not([type])');
-        
-        if (confidence >= 15 && fields.comment) { // Minimum threshold
-          detectedForms.push({
-            formSelector: `form:nth-of-type(${index + 1})`,
-            action: form.action || null,
-            method: (form.method || 'GET').toUpperCase(),
-            fields,
-            hidden,
-            submitSelector: submitButton ? getSelector(submitButton) : undefined,
-            confidence: Math.min(confidence, 100)
+          forms.forEach((form, index) => {
+            const formData = analyzeForm(form, `${selector}${index > 0 ? `:nth-of-type(${index + 1})` : ''}`);
+            if (formData.score > 30) { // Minimum threshold
+              detectedForms.push(formData);
+            }
           });
+        } catch (e) {
+          // Some selectors might not be supported in all browsers
+          continue;
+        }
+      }
+
+      // Also check for forms that might not match our selectors but have comment-like fields
+      const allForms = document.querySelectorAll('form');
+      allForms.forEach((form, index) => {
+        const hasCommentField = form.querySelector('textarea[name*="comment"], textarea[placeholder*="comment"], textarea[id*="comment"], input[name*="comment"]');
+        if (hasCommentField) {
+          const selector = `form:nth-of-type(${index + 1})`;
+          const formData = analyzeForm(form, selector);
+          if (formData.score > 30 && !detectedForms.some(f => f.selector === selector)) {
+            detectedForms.push(formData);
+          }
         }
       });
 
-      return detectedForms;
+      // Sort by score and return best form
+      detectedForms.sort((a, b) => b.score - a.score);
+
+      return {
+        hasCommentForm: detectedForms.length > 0,
+        bestForm: detectedForms[0] || null,
+        allForms: detectedForms,
+        pageTitle: document.title,
+        pageDescription: document.querySelector('meta[name="description"]')?.content || '',
+        platform: detectBlogPlatform()
+      };
     });
 
-    const screenshot = await page.screenshot({ fullPage: false });
-    const title = await page.title();
+    // Store the best form if found
+    if (formAnalysis.hasCommentForm && formAnalysis.bestForm) {
+      const formData = formAnalysis.bestForm;
+      
+      await supabase.from('comment_forms').upsert({
+        campaign_id: campaignId,
+        url,
+        domain: new URL(url).hostname,
+        platform: formAnalysis.platform,
+        form_selector: formData.selector,
+        form_action: formData.action,
+        form_method: formData.method,
+        field_mappings: formData.fields,
+        hidden_fields: formData.hiddenFields,
+        submit_selector: formData.submitSelector,
+        confidence_score: formData.score,
+        requires_captcha: formData.hasCaptcha,
+        page_title: formAnalysis.pageTitle,
+        detected_at: new Date().toISOString(),
+        status: formData.score > 70 ? 'validated' : 'needs_review'
+      });
+    }
 
     return {
-      forms: forms.map(form => ({ ...form, id: generateFormId() })),
-      detectionTime: Date.now() / 1000,
-      screenshot: screenshot.toString('base64'),
-      pageTitle: title,
-      pageUrl: url
+      url,
+      success: true,
+      hasCommentForm: formAnalysis.hasCommentForm,
+      formsDetected: formAnalysis.allForms.length,
+      bestForm: formAnalysis.bestForm,
+      pageTitle: formAnalysis.pageTitle,
+      platform: formAnalysis.platform
     };
 
   } finally {
-    await browser.close();
+    await page.close();
   }
 }
-*/
+
+// Analyze individual form element
+function analyzeForm(form, selector) {
+  const formData = {
+    selector,
+    action: form.action || window.location.href,
+    method: (form.method || 'POST').toUpperCase(),
+    fields: {},
+    hiddenFields: {},
+    score: 0,
+    hasCaptcha: false,
+    submitSelector: null
+  };
+
+  // Analyze all inputs
+  const inputs = form.querySelectorAll('input, textarea, select');
+  
+  inputs.forEach(input => {
+    const name = input.name || input.id || '';
+    const type = input.type || input.tagName.toLowerCase();
+    const placeholder = input.placeholder || '';
+    const nameAndPlaceholder = (name + ' ' + placeholder).toLowerCase();
+
+    if (input.type === 'hidden') {
+      formData.hiddenFields[name] = input.value || '';
+      return;
+    }
+
+    // Comment field detection
+    if (type === 'textarea' || nameAndPlaceholder.includes('comment') || nameAndPlaceholder.includes('message')) {
+      if (!formData.fields.comment) {
+        formData.fields.comment = name || input.id || 'textarea';
+        formData.score += 40; // High priority for comment field
+      }
+    }
+    
+    // Email field detection
+    else if (type === 'email' || nameAndPlaceholder.includes('email')) {
+      if (!formData.fields.email) {
+        formData.fields.email = name || input.id;
+        formData.score += 25;
+      }
+    }
+    
+    // Name field detection
+    else if (nameAndPlaceholder.includes('name') || nameAndPlaceholder.includes('author')) {
+      if (!formData.fields.name) {
+        formData.fields.name = name || input.id;
+        formData.score += 20;
+      }
+    }
+    
+    // Website field detection
+    else if (nameAndPlaceholder.includes('website') || nameAndPlaceholder.includes('url') || type === 'url') {
+      if (!formData.fields.website) {
+        formData.fields.website = name || input.id;
+        formData.score += 10;
+      }
+    }
+
+    // CAPTCHA detection
+    if (nameAndPlaceholder.includes('captcha') || nameAndPlaceholder.includes('recaptcha')) {
+      formData.hasCaptcha = true;
+      formData.score -= 20; // Penalize forms with CAPTCHA
+    }
+  });
+
+  // Find submit button
+  const submitButton = form.querySelector('input[type="submit"], button[type="submit"], button:not([type="button"])');
+  if (submitButton) {
+    const submitId = submitButton.id;
+    const submitClass = submitButton.className;
+    const submitName = submitButton.name;
+    
+    if (submitId) {
+      formData.submitSelector = `#${submitId}`;
+    } else if (submitClass) {
+      formData.submitSelector = `.${submitClass.split(' ').filter(c => c).join('.')}`;
+    } else if (submitName) {
+      formData.submitSelector = `[name="${submitName}"]`;
+    } else {
+      formData.submitSelector = 'input[type="submit"], button[type="submit"]';
+    }
+    formData.score += 15;
+  }
+
+  // Bonus points for having essential fields
+  if (formData.fields.comment && formData.fields.email) {
+    formData.score += 15;
+  }
+  if (formData.fields.comment && formData.fields.name) {
+    formData.score += 10;
+  }
+
+  // Penalty for missing comment field (essential)
+  if (!formData.fields.comment) {
+    formData.score = Math.max(0, formData.score - 50);
+  }
+
+  return formData;
+}
+
+// Detect blog platform from page content
+function detectBlogPlatform() {
+  const html = document.documentElement.outerHTML.toLowerCase();
+  const metaGenerator = document.querySelector('meta[name="generator"]')?.content?.toLowerCase() || '';
+  
+  if (html.includes('wp-content') || metaGenerator.includes('wordpress')) return 'wordpress';
+  if (window.location.hostname.includes('medium.com')) return 'medium';
+  if (window.location.hostname.includes('substack.com')) return 'substack';
+  if (html.includes('blogspot') || window.location.hostname.includes('blogspot')) return 'blogspot';
+  if (metaGenerator.includes('ghost')) return 'ghost';
+  if (html.includes('squarespace')) return 'squarespace';
+  if (html.includes('wix')) return 'wix';
+  
+  return 'unknown';
+}
