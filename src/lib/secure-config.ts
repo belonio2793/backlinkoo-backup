@@ -8,42 +8,42 @@
  * Production systems should use proper secret management (env vars, vaults, etc.)
  */
 
-// Base64 encoded configuration store
+// Environment-based configuration store
 const SECURE_STORE = {
-  // Database credentials
-  db_host: 'ZGZoYW5hY3Ntc3Z2a3B1bnVybnAuc3VwYWJhc2UuY28=', // dfhanacsmsvvkpunurnp.supabase.co
-  db_password: 'c2JwXzY1ZjEzZDNlZjg0ZmFlMDkzZGJiMmIyZDUzNjg1NzRmNjliM2NlYTI=', // sbp_65f13d3ef84fae093dbb2b2d5368574f69b3cea2
-  db_project_ref: 'ZGZoYW5hY3Ntc3Z2a3B1bnVybnA=', // dfhanacsmsvvkpunurnp
-  
-  // Supabase configuration
-  supabase_url: 'aHR0cHM6Ly9kZmhhbmFjc21zdnZrcHVudXJucC5zdXBhYmFzZS5jbw==', // https://dfhanacsmsvvkpunurnp.supabase.co
-  supabase_anon_key: 'ZXlKaGJHY2lPaUpJVXpJMU5pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnBjM01pT2lKemRYQmhZbUZ6WlNJc0luSmxaaUk2SW1SbWFHRnVZV056YlhOMmRtdHdkVzUxY201d0lpd2ljbTlzWlNJNkltRnViMjRpTENKcFlYUWlPakUzTlRJNU5UWTJORGNzSW1WNGNDSTZNakEyT0RVek1qWTBOMzAuTVpjQjRQX1RBT09Ua3RYU0c3Yk5LNUJzSU1BZjFiS1hWZ1Q4N1pxYTVSWQ==', // JWT token
-  
-  // Access tokens
-  supabase_access_token: 'c2JwXzY1ZjEzZDNlZjg0ZmFlMDkzZGJiMmIyZDUzNjg1NzRmNjliM2NlYTI=', // sbp_65f13d3ef84fae093dbb2b2d5368574f69b3cea2
-  
-  // Email service credentials (populated for production use)
-  resend_api_key: 'cmVfZjJpeHlSQXdfRUExZHRRQ285S25BTmZKZ3JncWZYRkVx', // re_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq
+  // Database credentials - use environment variables only
+  db_host: '',
+  db_password: '',
+  db_project_ref: '',
+
+  // Supabase configuration - use environment variables only
+  supabase_url: '',
+  supabase_anon_key: '',
+
+  // Access tokens - use environment variables only
+  supabase_access_token: '',
+
+  // Email service credentials - use environment variables only
+  resend_api_key: '',
   smtp_host: '',
   smtp_password: '',
-  
-  // Payment service credentials (placeholder for future use)
+
+  // Payment service credentials - use environment variables only
   stripe_secret_key: '',
   stripe_webhook_secret: '',
   paypal_client_id: '',
   paypal_client_secret: '',
-  
-  // API keys removed for security - OpenAI calls now handled server-side only
-  openai_api_key: '', // Removed - use Netlify functions for OpenAI calls
-  anthropic_api_key: '', // VITE_ANTHROPIC_API_KEY - Set in Netlify if needed
-  
-  // Application secrets
+
+  // API keys - use environment variables only
+  openai_api_key: '',
+  anthropic_api_key: '',
+
+  // Application secrets - use environment variables only
   jwt_secret: '',
   encryption_key: '',
-  
-  // Domain configuration
-  domain: 'YmFja2xpbmtvby5jb20=', // backlinkoo.com
-  app_url: 'aHR0cHM6Ly9iYWNrbGlua29vLmNvbQ==', // https://backlinkoo.com
+
+  // Domain configuration - use environment variables only
+  domain: '',
+  app_url: '',
 };
 
 /**
@@ -75,44 +75,44 @@ function encode(value: string): string {
  */
 export class SecureConfig {
   
-  // Database credentials
+  // Database credentials - from environment variables
   static get DATABASE_PASSWORD(): string {
-    return decode(SECURE_STORE.db_password);
+    return import.meta.env.SUPABASE_SERVICE_ROLE_KEY || '';
   }
-  
+
   static get DATABASE_HOST(): string {
-    return decode(SECURE_STORE.db_host);
+    return import.meta.env.VITE_SUPABASE_URL?.replace('https://', '').replace('.supabase.co', '') || 'dfhanacsmsvvkpunurnp';
   }
-  
+
   static get DATABASE_PROJECT_REF(): string {
-    return decode(SECURE_STORE.db_project_ref);
+    return import.meta.env.VITE_SUPABASE_URL?.split('.')[0]?.split('//')[1] || 'dfhanacsmsvvkpunurnp';
   }
-  
-  // Supabase credentials
+
+  // Supabase credentials - from environment variables
   static get SUPABASE_URL(): string {
-    return decode(SECURE_STORE.supabase_url);
+    return import.meta.env.VITE_SUPABASE_URL || 'https://dfhanacsmsvvkpunurnp.supabase.co';
   }
-  
+
   static get SUPABASE_ANON_KEY(): string {
-    return decode(SECURE_STORE.supabase_anon_key);
+    return import.meta.env.VITE_SUPABASE_ANON_KEY || '';
   }
-  
+
   static get SUPABASE_ACCESS_TOKEN(): string {
-    return decode(SECURE_STORE.supabase_access_token);
+    return import.meta.env.SUPABASE_ACCESS_TOKEN || import.meta.env.SUPABASE_SERVICE_ROLE_KEY || '';
   }
-  
-  // Domain configuration
+
+  // Domain configuration - from environment variables
   static get DOMAIN(): string {
-    return decode(SECURE_STORE.domain);
+    return import.meta.env.VITE_APP_DOMAIN || 'backlinkoo.com';
   }
-  
+
   static get APP_URL(): string {
-    return decode(SECURE_STORE.app_url);
+    return import.meta.env.VITE_APP_URL || 'https://backlinkoo.com';
   }
-  
-  // Email service credentials
+
+  // Email service credentials - from environment variables
   static get RESEND_API_KEY(): string {
-    return decode(SECURE_STORE.resend_api_key);
+    return import.meta.env.RESEND_API_KEY || '';
   }
   
   static get SMTP_HOST(): string {
