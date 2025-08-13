@@ -91,6 +91,30 @@ class TargetSitesManager {
   private getDefaultSites(): TargetSite[] {
     return [
       {
+        id: 'telegraph',
+        domain: 'telegra.ph',
+        url: 'https://telegra.ph',
+        type: 'blog',
+        status: 'active',
+        domain_rating: 85,
+        success_rate: 95,
+        total_attempts: 0,
+        successful_submissions: 0,
+        requirements: {
+          min_word_count: 200,
+          topics: ['any'],
+          approval_process: false,
+          registration_required: false
+        },
+        metadata: {
+          submission_guidelines: 'Anonymous instant publishing platform',
+          response_time_hours: 0,
+          notes: 'Instant publishing via API - perfect for automation'
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
         id: 'default-1',
         domain: 'medium.com',
         url: 'https://medium.com',
