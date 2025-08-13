@@ -66,6 +66,7 @@ import {
   LazyClaimSystemDebug,
   LazySEOOptimizedBlogGenerator,
   LazyScrapePage,
+  LazyAutomation,
   LazyAdminCampaignManager,
   LazyOpenAITest,
   LazySystemTest,
