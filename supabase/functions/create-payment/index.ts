@@ -53,9 +53,17 @@ serve(async (req) => {
   );
 
   try {
+    console.log("=== Payment Request Started ===");
+    console.log("Method:", req.method);
+    console.log("URL:", req.url);
+    console.log("Headers:", Object.fromEntries(req.headers.entries()));
+
     // Rate limiting check
     const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    console.log("Client IP:", clientIP);
+
     if (!checkRateLimit(clientIP)) {
+      console.log("Rate limit exceeded for IP:", clientIP);
       return new Response(
         JSON.stringify({ error: 'Rate limit exceeded' }),
         { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -63,6 +71,7 @@ serve(async (req) => {
     }
 
     const body: PaymentRequest = await req.json();
+    console.log("Request body:", { ...body, guestEmail: body.guestEmail ? '[REDACTED]' : undefined });
     
     // Input validation
     if (!body.amount || body.amount <= 0 || body.amount > 1000000) {
