@@ -103,6 +103,17 @@ export default function AutomatedLinkBuilding() {
     positiveResponses: 0,
     linkPlacements: 0
   });
+  const [analyticsStats, setAnalyticsStats] = useState({
+    totalLinksBuilt: 0,
+    referringDomains: 0,
+    avgDomainRating: 0,
+    trafficImpact: 0,
+    monthlyGrowth: {
+      links: 0,
+      domains: 0,
+      dr: 0
+    }
+  });
   const [loading, setLoading] = useState(true);
 
   // Form states
@@ -1335,8 +1346,8 @@ export default function AutomatedLinkBuilding() {
                     <Link2 className="h-5 w-5 text-blue-600" />
                     <span className="text-sm font-medium">Total Links Built</span>
                   </div>
-                  <p className="text-2xl font-bold">1,247</p>
-                  <p className="text-xs text-green-600">+23% this month</p>
+                  <p className="text-2xl font-bold">{loading ? '-' : analyticsStats.totalLinksBuilt.toLocaleString()}</p>
+                  <p className="text-xs text-green-600">{loading ? '-' : `+${analyticsStats.monthlyGrowth.links}% this month`}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -1345,8 +1356,8 @@ export default function AutomatedLinkBuilding() {
                     <Globe className="h-5 w-5 text-green-600" />
                     <span className="text-sm font-medium">Referring Domains</span>
                   </div>
-                  <p className="text-2xl font-bold">534</p>
-                  <p className="text-xs text-green-600">+18% this month</p>
+                  <p className="text-2xl font-bold">{loading ? '-' : analyticsStats.referringDomains.toLocaleString()}</p>
+                  <p className="text-xs text-green-600">{loading ? '-' : `+${analyticsStats.monthlyGrowth.domains}% this month`}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -1355,8 +1366,8 @@ export default function AutomatedLinkBuilding() {
                     <TrendingUp className="h-5 w-5 text-purple-600" />
                     <span className="text-sm font-medium">Avg. Domain Rating</span>
                   </div>
-                  <p className="text-2xl font-bold">67</p>
-                  <p className="text-xs text-blue-600">+5 this month</p>
+                  <p className="text-2xl font-bold">{loading ? '-' : analyticsStats.avgDomainRating}</p>
+                  <p className="text-xs text-blue-600">{loading ? '-' : `+${analyticsStats.monthlyGrowth.dr} this month`}</p>
                 </CardContent>
               </Card>
               <Card>
@@ -1365,7 +1376,7 @@ export default function AutomatedLinkBuilding() {
                     <BarChart3 className="h-5 w-5 text-orange-600" />
                     <span className="text-sm font-medium">Traffic Impact</span>
                   </div>
-                  <p className="text-2xl font-bold">+34.2k</p>
+                  <p className="text-2xl font-bold">{loading ? '-' : `+${(analyticsStats.trafficImpact / 1000).toFixed(1)}k`}</p>
                   <p className="text-xs text-green-600">Monthly organic</p>
                 </CardContent>
               </Card>
