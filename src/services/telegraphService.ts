@@ -1,6 +1,6 @@
 /**
  * Telegraph Posting Service
- * Handles article submission to Telegraph platform
+ * Handles article submission via Netlify functions
  */
 
 import { automationLogger } from './automationLogger';
@@ -34,7 +34,6 @@ class TelegraphService {
   constructor() {
     automationLogger.info('system', 'Telegraph service initialized (using Netlify functions)');
   }
-
 
   async postArticle(request: TelegraphPostRequest): Promise<TelegraphPostResult> {
     const { title, content, campaignId, authorName = 'SEO Content Bot' } = request;
@@ -109,141 +108,10 @@ class TelegraphService {
     return undefined;
   }
 
-  private convertMarkdownToTelegraph(markdown: string): any[] {
-    // Convert markdown to Telegraph's DOM format
-    const lines = markdown.split('\n').filter(line => line.trim());
-    const telegraphContent: any[] = [];
-
-    for (const line of lines) {
-      const trimmedLine = line.trim();
-      
-      if (!trimmedLine) continue;
-
-      // Headers
-      if (trimmedLine.startsWith('##')) {
-        telegraphContent.push({
-          tag: 'h3',
-          children: [this.parseInlineMarkdown(trimmedLine.replace(/^#+\s*/, ''))]
-        });
-      } else if (trimmedLine.startsWith('#')) {
-        telegraphContent.push({
-          tag: 'h3',
-          children: [this.parseInlineMarkdown(trimmedLine.replace(/^#+\s*/, ''))]
-        });
-      }
-      // Lists
-      else if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ')) {
-        telegraphContent.push({
-          tag: 'p',
-          children: ['• ' + this.parseInlineMarkdown(trimmedLine.replace(/^[-*]\s*/, ''))]
-        });
-      }
-      // Regular paragraphs
-      else {
-        const parsedContent = this.parseInlineMarkdown(trimmedLine);
-        telegraphContent.push({
-          tag: 'p',
-          children: Array.isArray(parsedContent) ? parsedContent : [parsedContent]
-        });
-      }
-    }
-
-    return telegraphContent;
-  }
-
-  private parseInlineMarkdown(text: string): any {
-    // Handle links [text](url)
-    const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-    
-    if (linkRegex.test(text)) {
-      const parts: any[] = [];
-      let lastIndex = 0;
-      
-      text.replace(linkRegex, (match, linkText, url, index) => {
-        // Add text before link
-        if (index > lastIndex) {
-          const beforeText = text.substring(lastIndex, index);
-          if (beforeText) {
-            parts.push(this.parseTextFormatting(beforeText));
-          }
-        }
-        
-        // Add link
-        parts.push({
-          tag: 'a',
-          attrs: { href: url },
-          children: [linkText]
-        });
-        
-        lastIndex = index + match.length;
-        return match;
-      });
-      
-      // Add remaining text
-      if (lastIndex < text.length) {
-        const remainingText = text.substring(lastIndex);
-        if (remainingText) {
-          parts.push(this.parseTextFormatting(remainingText));
-        }
-      }
-      
-      return parts.length === 1 ? parts[0] : parts;
-    }
-    
-    return this.parseTextFormatting(text);
-  }
-
-  private parseTextFormatting(text: string): any {
-    // Handle bold **text**
-    if (text.includes('**')) {
-      const parts: any[] = [];
-      const boldRegex = /\*\*([^*]+)\*\*/g;
-      let lastIndex = 0;
-      
-      text.replace(boldRegex, (match, boldText, index) => {
-        // Add text before bold
-        if (index > lastIndex) {
-          parts.push(text.substring(lastIndex, index));
-        }
-        
-        // Add bold text
-        parts.push({
-          tag: 'strong',
-          children: [boldText]
-        });
-        
-        lastIndex = index + match.length;
-        return match;
-      });
-      
-      // Add remaining text
-      if (lastIndex < text.length) {
-        parts.push(text.substring(lastIndex));
-      }
-      
-      return parts.length === 1 ? parts[0] : parts;
-    }
-    
-    // Handle italic *text*
-    if (text.includes('*')) {
-      const italicRegex = /\*([^*]+)\*/g;
-      if (italicRegex.test(text)) {
-        return text.replace(italicRegex, (match, italicText) => {
-          return {
-            tag: 'em',
-            children: [italicText]
-          };
-        });
-      }
-    }
-    
-    return text;
-  }
-
   // Test method for development
   async testPost(campaignId: string): Promise<TelegraphPostResult> {
     automationLogger.info('api', 'Running test Telegraph post via Netlify', {}, campaignId);
-
+    
     return this.postArticle({
       title: 'Test Article - SEO Tools Guide',
       content: `# SEO Tools Guide
@@ -255,7 +123,7 @@ This is a test article about **SEO tools** and digital marketing.
 Digital marketing requires the right tools to succeed. Here are some key points:
 
 - Search engine optimization
-- Content marketing strategies
+- Content marketing strategies  
 - [Link building techniques](https://example.com)
 
 ## Conclusion
