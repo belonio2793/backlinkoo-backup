@@ -170,7 +170,7 @@ export default function BacklinkAutomation() {
       if (data && !error) {
         setPostingResults(data);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading results:', error);
     }
   };
