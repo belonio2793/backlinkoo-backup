@@ -315,6 +315,43 @@ export default function AutomatedLinkBuilding() {
 
     } catch (error) {
       console.error('Generation error:', error);
+
+      // Fallback: Generate content locally if API fails
+      if (error instanceof Error && (error.message.includes('Failed to fetch') || error.message.includes('Content generation failed'))) {
+        console.log('API failed, generating content locally...');
+        try {
+          const fallbackContent = generateFallbackContent(formData.keyword, formData.anchor_text, formData.target_url, template?.name || 'Blog Post');
+
+          const newPost: GeneratedPost = {
+            id: `fallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            keyword: formData.keyword,
+            anchor_text: formData.anchor_text,
+            target_url: formData.target_url,
+            prompt_template: template?.name || 'Blog Post',
+            generated_content: fallbackContent,
+            platform: formData.platform,
+            status: 'completed',
+            created_at: new Date().toISOString()
+          };
+
+          setGeneratedPosts(prev => [newPost, ...prev]);
+
+          // Reset form
+          setFormData({
+            target_url: '',
+            keyword: '',
+            anchor_text: '',
+            prompt_template: 'blog_post',
+            platform: 'telegra_ph'
+          });
+
+          toast.success('Content generated using fallback method!');
+          return;
+        } catch (fallbackError) {
+          console.error('Fallback generation failed:', fallbackError);
+        }
+      }
+
       toast.error(error instanceof Error ? error.message : 'Failed to generate content');
     } finally {
       setIsGenerating(false);
