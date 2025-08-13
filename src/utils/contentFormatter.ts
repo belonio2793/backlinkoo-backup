@@ -40,6 +40,12 @@ export class ContentFormatter {
       .replace(/##\s*&lt;\s*\/\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
       .replace(/##\s*&lt;\s*$/gm, '') // Remove lines that are just ## &lt;
 
+      // Fix HTML syntax artifacts that shouldn't be displayed
+      .replace(/Hook Introduction:\s*["=]+\s*H1:\s*/gi, '')
+      .replace(/["=]+\s*H[1-6]:\s*/gi, '')
+      .replace(/^\s*H[1-6]:\s*/gmi, '') // Remove H1:, H2:, etc. at line start
+      .replace(/Hook Introduction:\s*/gi, '') // Remove standalone "Hook Introduction:" text
+
       // Remove empty heading lines (just ##)
       .replace(/^\s*##\s*$/gm, '')
       .replace(/^\s*###\s*$/gm, '')
@@ -59,7 +65,11 @@ export class ContentFormatter {
 
       // Clean up malformed sentences and links
       .replace(/([A-Za-z])\s*&lt;[^&]*&gt;\s*([A-Za-z])/g, '$1 $2') // Remove HTML entities between words
-      .replace(/\.\s*&lt;[^&]*&gt;\s*([A-Z])/g, '. $1'); // Clean sentence breaks
+      .replace(/\.\s*&lt;[^&]*&gt;\s*([A-Z])/g, '. $1') // Clean sentence breaks
+
+      // Remove any displayed HTML tag syntax that shouldn't be visible
+      .replace(/\s*&lt;\/?[a-zA-Z][^&]*&gt;\s*/g, ' ') // Remove any remaining HTML entity tags
+      .replace(/\s*<\/?[a-zA-Z][^>]*>\s*/g, ' '); // Remove actual HTML tags that shouldn't be displayed
 
     // Split content into lines and clean up - MINIMAL PROCESSING
     let formattedContent = content
