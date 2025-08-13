@@ -13,6 +13,7 @@ import { Footer } from "@/components/Footer";
 import { PremiumService } from "@/services/premiumService";
 import { PremiumCheckoutModal } from "@/components/PremiumCheckoutModal";
 import { PricingModal } from "@/components/PricingModal";
+import { UniversalPaymentComponent, QuickCreditButton, PremiumUpgradeButton } from "@/components/UniversalPaymentComponent";
 import { setPremiumStatus } from "@/utils/setPremiumStatus";
 import {
   DropdownMenu,
@@ -1167,12 +1168,23 @@ const Dashboard = () => {
                     <span className="xs:hidden">{credits}</span>
                     <span className="hidden sm:inline">Credits</span>
                   </Badge>
-                  <Button variant="outline" size="sm" onClick={() => {
-                    setIsPaymentModalOpen(true);
-                  }} className="px-2 sm:px-4">
-                    <Plus className="h-4 w-4 sm:mr-1" />
-                    <span className="hidden sm:inline">Buy Credits</span>
-                  </Button>
+                  <UniversalPaymentComponent
+                    trigger={
+                      <Button variant="outline" size="sm" className="px-2 sm:px-4">
+                        <Plus className="h-4 w-4 sm:mr-1" />
+                        <span className="hidden sm:inline">Buy Credits</span>
+                      </Button>
+                    }
+                    defaultType="credits"
+                    showTrigger={false}
+                    onPaymentSuccess={() => {
+                      fetchDashboardData();
+                      toast({
+                        title: "Payment Successful!",
+                        description: "Your credits have been added to your account."
+                      });
+                    }}
+                  />
 
                   {/* Premium subscription status - separate from credits */}
                   {isPremiumSubscriber && (
@@ -1352,12 +1364,23 @@ const Dashboard = () => {
                         className="min-h-[3rem]"
                       />
                     </div>
-                    <Button onClick={() => {
-                      setIsPaymentModalOpen(true);
-                    }}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Buy Your First Credits
-                    </Button>
+                    <UniversalPaymentComponent
+                      trigger={
+                        <Button>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Buy Your First Credits
+                        </Button>
+                      }
+                      defaultType="credits"
+                      showTrigger={false}
+                      onPaymentSuccess={() => {
+                        fetchDashboardData();
+                        toast({
+                          title: "Payment Successful!",
+                          description: "Your credits have been added to your account."
+                        });
+                      }}
+                    />
                   </CardContent>
                 </Card>
               )}
