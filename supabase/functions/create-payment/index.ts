@@ -115,7 +115,14 @@ serve(async (req) => {
     }
 
     if (paymentMethod === 'stripe') {
-      const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+      const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+      console.log("Stripe key available:", !!stripeKey, "Length:", stripeKey?.length || 0);
+
+      if (!stripeKey || stripeKey.length < 10) {
+        throw new Error("Stripe secret key not configured. Please set STRIPE_SECRET_KEY environment variable.");
+      }
+
+      const stripe = new Stripe(stripeKey, {
         apiVersion: "2023-10-16",
       });
 
