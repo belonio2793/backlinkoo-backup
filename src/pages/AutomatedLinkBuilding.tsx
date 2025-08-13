@@ -383,7 +383,14 @@ export default function AutomatedLinkBuilding() {
                         id="target-url"
                         type="url"
                         value={formData.target_url}
-                        onChange={(e) => setFormData({ ...formData, target_url: e.target.value })}
+                        onChange={(e) => {
+                          let url = e.target.value;
+                          // Auto-format URL if it doesn't start with http:// or https://
+                          if (url && !url.match(/^https?:\/\//)) {
+                            url = `https://${url}`;
+                          }
+                          setFormData({ ...formData, target_url: url });
+                        }}
                         placeholder="https://yourwebsite.com/page"
                         required
                       />
