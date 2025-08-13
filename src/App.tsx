@@ -48,6 +48,7 @@ const LazyTextCleanerDebug = lazy(() => import("./pages/TextCleanerDebug"));
 const LazyDatabaseColumnsFix = lazy(() => import("./pages/DatabaseColumnsFix"));
 const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
+const LazyAutomatedLinkBuilding = lazy(() => import("./pages/AutomatedLinkBuilding"));
 const LazyMarkdownTest = lazy(() => import("./pages/MarkdownTest"));
 const LazyPremiumSEOAnalysisTest = lazy(() => import("./pages/PremiumSEOAnalysisTest"));
 const LazyBlogPostChecker = lazy(() => import("./components/BlogPostChecker").then(module => ({ default: module.BlogPostChecker })));
@@ -128,18 +129,26 @@ const App = () => (
                     <div className="text-center">
                       <LoadingSpinner />
                       <div className="mt-4">
-                        <h2 className="text-xl font-semibold text-gray-900">Loading Working Automation</h2>
-                        <p className="text-gray-600 mt-2">Preparing backlink automation...</p>
+                        <h2 className="text-xl font-semibold text-gray-900">Loading AI Link Building Engine</h2>
+                        <p className="text-gray-600 mt-2">Preparing automated link building platform...</p>
                       </div>
                     </div>
                   </div>
                 }>
-                  <LazyBacklinkAutomation />
+                  <LazyAutomatedLinkBuilding />
                 </Suspense>
               }
             />
             <Route
               path="/automation/legacy"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyBacklinkAutomation />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/automation/old"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazyBlogCommentsSystem />
