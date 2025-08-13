@@ -202,7 +202,7 @@ export default function AutomatedLinkBuilding() {
         keywords: [formData.keyword]
       });
 
-      const response = await fetch('/.netlify/functions/ai-content-generator', {
+      const response = await fetch('/.netlify/functions/simple-ai-generator', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
