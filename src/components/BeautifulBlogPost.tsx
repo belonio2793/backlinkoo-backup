@@ -1023,19 +1023,10 @@ export function BeautifulBlogPost() {
                     overflowWrap: 'break-word'
                   }}
                   dangerouslySetInnerHTML={{
-                    __html: (() => {
-                      try {
-                        const cleanedContent = BlogContentCleaner.cleanBlogContent(blogPost.content || '');
-                        return BlogContentCleaner.removeDuplicateTitle(cleanedContent, blogPost.title || '');
-                      } catch (error) {
-                        console.error('Content processing error:', error);
-                        // Fallback to basic cleaning if BlogContentCleaner fails
-                        return (blogPost.content || '')
-                          .replace(/\*\*(Introduction|Section \d+[^*]*|Conclusion|Call-to-Action):\*\*/gi, '')
-                          .replace(/---\s*This \d+-word blog post[^.]*\./gi, '')
-                          .trim();
-                      }
-                    })()
+                    __html: BlogContentCleaner.removeDuplicateTitle(
+                      BlogContentCleaner.cleanBlogContent(blogPost.content || ''),
+                      blogPost.title || ''
+                    )
                   }}
                 />
               </div>
