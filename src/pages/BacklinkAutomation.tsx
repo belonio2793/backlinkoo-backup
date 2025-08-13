@@ -284,6 +284,19 @@ export default function BacklinkAutomation() {
     } catch (error: any) {
       console.error('Error saving campaign:', error);
 
+      // Handle specific error cases
+      if (error?.message?.includes('does not exist')) {
+        setShowDatabaseSetup(true);
+        toast.error('Database table does not exist. Please set up the database first using the setup instructions above.');
+        return;
+      }
+
+      if (error?.message?.includes('boolean')) {
+        setShowDatabaseSetup(true);
+        toast.error('Database schema mismatch. The backlink_campaigns table may need to be recreated. Please run the database setup above to fix this issue.');
+        return;
+      }
+
       // Extract meaningful error message from Supabase error object
       let errorMessage = 'Unknown error';
 
