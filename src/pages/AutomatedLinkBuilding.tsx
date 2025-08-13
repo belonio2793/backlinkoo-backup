@@ -47,6 +47,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { logError } from '@/services/productionErrorHandler';
+import { scalableDataService, rateLimiter } from '@/services/scalabilityOptimizations';
 
 interface Campaign {
   id: string;
@@ -163,56 +164,15 @@ export default function AutomatedLinkBuilding() {
       try {
         setLoading(true);
 
-        // Fetch real campaign statistics
-        const { data: campaignStats, error: statsError } = await supabase
-          .from('automation_campaigns')
-          .select(`
-            id,
-            status,
-            links_built_today,
-            domains_reached,
-            avg_domain_rating,
-            success_rate,
-            traffic_gained
-          `)
-          .eq('user_id', user.id)
-          .eq('status', 'active');
+        // Use scalable data service for optimized fetching
+        const { campaigns, stats: aggregatedStats } = await scalableDataService.getCampaignStats(
+          user.id,
+          20, // Limit for pagination
+          0   // Offset
+        );
 
-        if (statsError) throw statsError;
-
-        // Calculate aggregate stats
-        let totalLinksToday = 0;
-        let totalDomains = 0;
-        let avgDR = 0;
-        let avgSuccessRate = 0;
-        let totalTraffic = 0;
-
-        if (campaignStats && campaignStats.length > 0) {
-          totalLinksToday = campaignStats.reduce((sum, campaign) => sum + (campaign.links_built_today || 0), 0);
-          totalDomains = campaignStats.reduce((sum, campaign) => sum + (campaign.domains_reached || 0), 0);
-          avgDR = Math.round(campaignStats.reduce((sum, campaign) => sum + (campaign.avg_domain_rating || 0), 0) / campaignStats.length);
-          avgSuccessRate = Math.round(campaignStats.reduce((sum, campaign) => sum + (campaign.success_rate || 0), 0) / campaignStats.length);
-          totalTraffic = campaignStats.reduce((sum, campaign) => sum + (campaign.traffic_gained || 0), 0);
-        }
-
-        setStats({
-          linksBuiltToday: totalLinksToday,
-          domainsReached: totalDomains,
-          avgDomainRating: avgDR,
-          successRate: avgSuccessRate,
-          trafficGained: totalTraffic
-        });
-
-        // Fetch campaigns
-        const { data: campaigns, error: campaignsError } = await supabase
-          .from('automation_campaigns')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false });
-
-        if (campaignsError) throw campaignsError;
-
-        setCampaigns(campaigns || []);
+        setStats(aggregatedStats);
+        setCampaigns(campaigns);
 
         // Fetch outreach statistics
         const { data: outreachData, error: outreachError } = await supabase
@@ -274,19 +234,9 @@ export default function AutomatedLinkBuilding() {
           });
         }
 
-        // Fetch recent activity
-        const { data: activityData, error: activityError } = await supabase
-          .from('automation_activity')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(10);
-
-        if (activityError) {
-          console.error('Error loading activity data:', activityError);
-        } else {
-          setRecentActivity(activityData || []);
-        }
+        // Fetch recent activity with optimization
+        const activityData = await scalableDataService.getActivityFeed(user.id, undefined, 10);
+        setRecentActivity(activityData);
 
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
@@ -366,10 +316,17 @@ export default function AutomatedLinkBuilding() {
     }
   };
 
-  // Production automation start function
+  // Production automation start function with rate limiting
   const handleStartAutomation = async () => {
     if (!user || !campaignForm.name || !campaignForm.target_url || !campaignForm.keywords) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    // Check rate limits for automation operations
+    const canProceed = await rateLimiter.checkLimit(user.id, 'automation');
+    if (!canProceed) {
+      toast.error('Rate limit exceeded. Please wait before starting another automation.');
       return;
     }
 
