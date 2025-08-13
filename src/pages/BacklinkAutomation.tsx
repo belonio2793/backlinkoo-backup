@@ -199,22 +199,35 @@ export default function BacklinkAutomation() {
       return;
     }
 
-    // Check if database tables exist first
+    // Check if database tables exist and have correct schema
     try {
+      // First check if the table exists and can be queried
       const { error: tableCheckError } = await supabase
         .from('backlink_campaigns')
-        .select('id')
+        .select('id, name, target_url, keyword, anchor_text, target_platform, status')
         .limit(1);
 
-      if (tableCheckError && tableCheckError.message.includes('does not exist')) {
+      if (tableCheckError) {
+        console.error('Table check error:', tableCheckError);
+        if (tableCheckError.message.includes('does not exist')) {
+          setShowDatabaseSetup(true);
+          toast.error('Database tables not set up. Please run the database setup first.');
+          return;
+        }
+        if (tableCheckError.message.includes('column') && tableCheckError.message.includes('does not exist')) {
+          setShowDatabaseSetup(true);
+          toast.error('Database schema mismatch. Please run the latest database setup to fix column issues.');
+          return;
+        }
+        // Any other table error should trigger setup
         setShowDatabaseSetup(true);
-        toast.error('Database tables not set up. Please run the database setup first.');
+        toast.error('Cannot access database properly. Please run the database setup.');
         return;
       }
     } catch (tableError) {
-      console.error('Table check error:', tableError);
+      console.error('Table validation error:', tableError);
       setShowDatabaseSetup(true);
-      toast.error('Cannot access database tables. Please set up the database first.');
+      toast.error('Cannot validate database tables. Please set up the database first.');
       return;
     }
 
@@ -291,9 +304,17 @@ export default function BacklinkAutomation() {
         return;
       }
 
-      if (error?.message?.includes('boolean')) {
+      if (error?.message?.includes('boolean') || error?.message?.includes('invalid input syntax for type boolean')) {
+        console.error('Boolean field error detected:', error);
         setShowDatabaseSetup(true);
-        toast.error('Database schema mismatch. The backlink_campaigns table may need to be recreated. Please run the database setup above to fix this issue.');
+        toast.error('Database schema conflict detected. This may be caused by conflicting table schemas. Please run the database setup to recreate the backlink_campaigns table with the correct schema.');
+        return;
+      }
+
+      if (error?.message?.includes('automation_campaigns')) {
+        console.error('Wrong table being used:', error);
+        setShowDatabaseSetup(true);
+        toast.error('Table name conflict detected. Please ensure you are using the backlink_campaigns table, not automation_campaigns.');
         return;
       }
 
