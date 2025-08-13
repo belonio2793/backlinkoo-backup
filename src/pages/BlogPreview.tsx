@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { liveBlogPublisher } from '@/services/liveBlogPublisher';
 import { BlogClaimButton } from '@/components/BlogClaimButton';
 import { format } from 'date-fns';
+import { processBlogContent } from '@/utils/markdownProcessor';
 
 export function BlogPreview() {
   const { slug } = useParams();
@@ -295,7 +296,7 @@ export function BlogPreview() {
           {/* Blog Post Content */}
           <article className="prose prose-lg max-w-none">
             <div
-              dangerouslySetInnerHTML={{ __html: blogPost.content }}
+              dangerouslySetInnerHTML={{ __html: processBlogContent(blogPost.content) }}
               className="blog-content prose-headings:text-foreground prose-p:text-foreground prose-a:text-blue-600 prose-strong:font-bold prose-strong:text-foreground prose-em:text-foreground prose-li:text-foreground [&_strong]:font-bold"
             />
           </article>

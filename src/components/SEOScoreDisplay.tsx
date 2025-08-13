@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { SEOAnalyzer, type SEOAnalysisResult } from '@/services/seoAnalyzer';
 import { EnhancedPremiumCheckoutModal } from '@/components/EnhancedPremiumCheckoutModal';
+import { PremiumSEOAnalysisModal } from '@/components/PremiumSEOAnalysisModal';
 import { userService } from '@/services/userService';
 import { useToast } from '@/hooks/use-toast';
 
@@ -53,6 +54,7 @@ export function SEOScoreDisplay({
   isPremiumScore = false
 }: SEOScoreDisplayProps) {
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const [showPremiumAnalysis, setShowPremiumAnalysis] = useState(false);
   const [analysis, setAnalysis] = useState<SEOAnalysisResult | null>(null);
   const [premiumCheckoutOpen, setPremiumCheckoutOpen] = useState(false);
   const { toast } = useToast();
@@ -72,7 +74,11 @@ export function SEOScoreDisplay({
   };
 
   const runAnalysis = () => {
-    if (title && content) {
+    if (isPremiumScore) {
+      // Show premium analysis modal for premium content
+      setShowPremiumAnalysis(true);
+    } else if (title && content) {
+      // Show regular analysis for non-premium content
       const result = SEOAnalyzer.analyzeBlogPost(title, content, metaDescription, targetKeyword);
       setAnalysis(result);
       setShowAnalysis(true);
@@ -83,6 +89,12 @@ export function SEOScoreDisplay({
     if (score >= 80) return <CheckCircle className="h-4 w-4 text-green-600" />;
     if (score >= 60) return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
     return <XCircle className="h-4 w-4 text-red-600" />;
+  };
+
+  const extractTargetUrlFromContent = (content: string): string => {
+    // Extract URL from HTML links in content
+    const linkMatch = content.match(/<a[^>]+href=["']([^"']+)["'][^>]*>/);
+    return linkMatch ? linkMatch[1] : '';
   };
 
   return (
@@ -185,10 +197,19 @@ export function SEOScoreDisplay({
                 variant="outline"
                 size="sm"
                 onClick={runAnalysis}
-                className="h-8 px-3 text-xs"
+                className={`h-8 px-3 text-xs ${isPremiumScore ? 'bg-gradient-to-r from-purple-100 to-blue-100 hover:from-purple-200 hover:to-blue-200 border-purple-300 text-purple-800' : ''}`}
               >
-                <BarChart3 className="mr-1 h-3 w-3" />
-                Analyze
+                {isPremiumScore ? (
+                  <>
+                    <Crown className="mr-1 h-3 w-3" />
+                    Premium Analysis
+                  </>
+                ) : (
+                  <>
+                    <BarChart3 className="mr-1 h-3 w-3" />
+                    Analyze
+                  </>
+                )}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
@@ -453,6 +474,15 @@ export function SEOScoreDisplay({
             </DialogContent>
           </Dialog>
         )}
+
+        {/* Premium SEO Analysis Modal */}
+        <PremiumSEOAnalysisModal
+          isOpen={showPremiumAnalysis}
+          onClose={() => setShowPremiumAnalysis(false)}
+          title={title}
+          content={content}
+          targetUrl={content ? extractTargetUrlFromContent(content) : ''}
+        />
       </div>
 
       {/* Enhanced Premium Checkout Modal */}

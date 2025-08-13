@@ -9,9 +9,29 @@
 .beautiful-prose strong,
 .article-content strong,
 .enhanced-blog-content strong,
+.list-content strong,
+.bullet-content strong,
+.content-area strong,
 strong {
   font-weight: 700 !important;
-  color: inherit;
+  color: inherit !important;
+}
+
+/* Specific fix for list items with bold text */
+li strong,
+ul li strong,
+ol li strong,
+.list-item strong,
+[class*="list"] strong {
+  font-weight: 700 !important;
+  color: rgb(17, 24, 39) !important;
+}
+
+/* Fix for content rendered with dangerouslySetInnerHTML */
+[dangerouslySetInnerHTML] strong,
+div[dangerouslySetInnerHTML] strong {
+  font-weight: 700 !important;
+  color: inherit !important;
 }
 
 /* Specific fixes for prose areas */
