@@ -564,7 +564,12 @@ export default function AutomatedLinkBuilding() {
                     <FileText className="h-5 w-5 text-blue-600" />
                     <span className="text-sm font-medium">Total Generated</span>
                   </div>
-                  <p className="text-2xl font-bold">{generatedPosts.length}</p>
+                  <p className="text-2xl font-bold">
+                    {!isAuthenticated ? '-' : generatedPosts.length}
+                  </p>
+                  {!isAuthenticated && (
+                    <p className="text-xs text-gray-500">Sign in to view</p>
+                  )}
                 </CardContent>
               </Card>
 
