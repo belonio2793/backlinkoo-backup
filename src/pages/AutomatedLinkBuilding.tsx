@@ -236,7 +236,15 @@ export default function AutomatedLinkBuilding() {
         });
 
       if (saveError) {
-        console.error('Error saving post:', saveError);
+        // Handle database save errors gracefully
+        if (saveError.message?.includes('relation') && saveError.message?.includes('does not exist')) {
+          console.warn('automation_posts table does not exist - content generated but not saved to database');
+          toast.warning('Content generated successfully! Note: Database table needs to be created to save posts.');
+        } else {
+          const errorMessage = saveError.message || saveError.details || JSON.stringify(saveError);
+          console.error('Error saving post:', errorMessage);
+          toast.warning(`Content generated but failed to save: ${errorMessage}`);
+        }
       }
 
       // Attempt to publish to platform
