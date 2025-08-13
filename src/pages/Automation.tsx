@@ -29,6 +29,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { automationLogger } from '@/services/automationLogger';
 import { targetSitesManager } from '@/services/targetSitesManager';
+import { automationOrchestrator } from '@/services/automationOrchestrator';
 
 interface Campaign {
   id: string;
@@ -106,6 +107,11 @@ export default function Automation() {
   // Available sites info
   const [availableSites, setAvailableSites] = useState(0);
   const [sitesStats, setSitesStats] = useState<any>(null);
+
+  // Submissions and reporting
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [loadingSubmissions, setLoadingSubmissions] = useState(false);
+  const [processing, setProcessing] = useState<Record<string, boolean>>({});
 
   // Load user campaigns or demo data
   useEffect(() => {
@@ -328,7 +334,7 @@ export default function Automation() {
         </div>
 
         <Tabs defaultValue="create" className="max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-2 mb-8">
+          <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="create" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Create Campaign
@@ -336,6 +342,10 @@ export default function Automation() {
             <TabsTrigger value="manage" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               Manage Campaigns
+            </TabsTrigger>
+            <TabsTrigger value="reporting" className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4" />
+              Reporting
             </TabsTrigger>
           </TabsList>
 
