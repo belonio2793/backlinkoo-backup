@@ -202,19 +202,25 @@ export function BeautifulBlogPost() {
   };
 
   const loadBlogPost = async (slug: string) => {
+    console.log('🔄 Starting loadBlogPost for slug:', slug);
     try {
       setLoading(true);
 
       // First try database, if that fails, try localStorage fallback
       let post = null;
       try {
+        console.log('📊 Trying database lookup...');
         post = await blogService.getBlogPostBySlug(slug);
+        console.log('✅ Database post found:', post ? 'YES' : 'NO');
       } catch (dbError) {
-        console.warn('Database lookup failed, trying localStorage fallback:', dbError);
+        console.warn('❌ Database lookup failed, trying localStorage fallback:', dbError);
         // Try to load from localStorage as fallback
         const localStoragePost = localStorage.getItem(`blog_post_${slug}`);
         if (localStoragePost) {
           post = JSON.parse(localStoragePost);
+          console.log('✅ localStorage post found');
+        } else {
+          console.log('❌ No localStorage post found');
         }
       }
 
