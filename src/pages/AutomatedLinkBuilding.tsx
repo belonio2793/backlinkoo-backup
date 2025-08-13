@@ -595,8 +595,11 @@ export default function AutomatedLinkBuilding() {
                     <span className="text-sm font-medium">Active Links</span>
                   </div>
                   <p className="text-2xl font-bold">
-                    {generatedPosts.filter(p => p.platform_url).length}
+                    {!isAuthenticated ? '-' : generatedPosts.filter(p => p.platform_url).length}
                   </p>
+                  {!isAuthenticated && (
+                    <p className="text-xs text-gray-500">Sign in to view</p>
+                  )}
                 </CardContent>
               </Card>
 
