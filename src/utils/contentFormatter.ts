@@ -141,14 +141,14 @@ export class ContentFormatter {
       .replace(/\n---+$/gm, '')
       // Remove malformed headings that are just single letters or abbreviations
       .replace(/^##?\s+[A-Z]\.\s*(Assessment|needed|required|evaluation)\s*$/gmi, '')
-      // Fix common markdown formatting issues
-      .replace(/^\s*\*\*([A-Z])\.\s*([A-Za-z\s]*)\*\*\s*$/gmi, (match, letter, rest) => {
-        // Convert malformed bold patterns to regular text
-        if (rest.trim().length < 5) {
-          return `**${letter}.** ${rest}`;
-        }
-        return match;
-      })
+      // Fix common markdown formatting issues - DISABLED to prevent interference with legitimate bold text
+      // .replace(/^\s*\*\*([A-Z])\.\s*([A-Za-z\s]*)\*\*\s*$/gmi, (match, letter, rest) => {
+      //   // Convert malformed bold patterns to regular text
+      //   if (rest.trim().length < 5) {
+      //     return `**${letter}.** ${rest}`;
+      //   }
+      //   return match;
+      // })
       // Remove empty markdown headings
       .replace(/^#{1,6}\s*$$/gm, '')
       // Clean up excessive markdown symbols
