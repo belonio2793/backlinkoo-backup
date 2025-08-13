@@ -767,6 +767,24 @@ export default function AutomatedLinkBuilding() {
       </div>
       
       <Footer />
+
+      {/* Seamless Sign-In Modal */}
+      <SeamlessSignInModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        onAuthSuccess={(user) => {
+          console.log('Authentication successful:', user);
+          toast.success('Welcome! You can now generate content.');
+          // The auth context will automatically update, so we don't need to manually refresh
+          setTimeout(() => {
+            // Small delay to let the auth context update
+            setShowSignInModal(false);
+          }, 500);
+        }}
+        preservedAction="generate content with your settings"
+        title="Continue Your Workflow"
+        description="Sign in to generate content"
+      />
     </div>
   );
 }
