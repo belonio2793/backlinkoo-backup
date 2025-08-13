@@ -45,6 +45,10 @@ export class ContentFormatter {
       .replace(/["=]+\s*H[1-6]:\s*/gi, '')
       .replace(/^\s*H[1-6]:\s*/gmi, '') // Remove H1:, H2:, etc. at line start
       .replace(/Hook Introduction:\s*/gi, '') // Remove standalone "Hook Introduction:" text
+      .replace(/Conclusion:\s*/gi, '') // Remove "Conclusion:" prefix
+      .replace(/Call-to-Action:\s*/gi, '') // Remove "Call-to-Action:" prefix
+      .replace(/^\s*Conclusion:\s*/gmi, '') // Remove "Conclusion:" at line start
+      .replace(/^\s*Call-to-Action:\s*/gmi, '') // Remove "Call-to-Action:" at line start
 
       // Remove empty heading lines (just ##)
       .replace(/^\s*##\s*$/gm, '')
