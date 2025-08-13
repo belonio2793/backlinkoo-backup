@@ -224,30 +224,40 @@ export default function AutomatedLinkBuilding() {
 
       console.log('Response status:', response.status, response.statusText);
 
-      if (!response.ok) {
-        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-        try {
-          const errorBody = await response.text();
-          console.error('Error response body:', errorBody);
+      let result;
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
 
-          // Try to parse as JSON to get more details
+      try {
+        // Read response body only once
+        const responseText = await response.text();
+        console.log('Response body:', responseText);
+
+        if (!response.ok) {
+          // Try to parse error response as JSON
           try {
-            const errorJson = JSON.parse(errorBody);
+            const errorJson = JSON.parse(responseText);
             errorMessage = errorJson.error || errorJson.message || errorMessage;
           } catch {
             // If not JSON, use the text response
-            if (errorBody) {
-              errorMessage = errorBody.substring(0, 200); // Limit length
+            if (responseText) {
+              errorMessage = responseText.substring(0, 200); // Limit length
             }
           }
-        } catch (bodyError) {
-          console.error('Could not read error response body:', bodyError);
+          throw new Error(`Content generation failed: ${errorMessage}`);
         }
 
-        throw new Error(`Content generation failed: ${errorMessage}`);
+        // Parse successful response
+        try {
+          result = JSON.parse(responseText);
+        } catch (parseError) {
+          throw new Error('Invalid JSON response from content generator');
+        }
+      } catch (readError) {
+        if (readError.message.includes('Content generation failed')) {
+          throw readError; // Re-throw our custom errors
+        }
+        throw new Error(`Failed to read response: ${readError.message}`);
       }
-
-      const result = await response.json();
       console.log('Content generation result:', result);
 
       if (!result.success) {
