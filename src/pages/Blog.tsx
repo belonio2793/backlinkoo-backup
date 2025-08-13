@@ -1127,7 +1127,7 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
 }
 
 // Blog Post List Item Component
-function BlogPostListItem({ post, navigate, formatDate, onLoginRequired, cleanTitle, cleanDescription }: any) {
+function BlogPostListItem({ post, navigate, formatDate, onLoginRequired, cleanTitle, cleanDescription, generateExcerpt }: any) {
   return (
     <Card 
       className="group hover:shadow-lg transition-all duration-200 cursor-pointer border border-gray-200 hover:border-blue-300"
