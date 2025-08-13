@@ -217,10 +217,6 @@ export function CheckoutAuthForm({
         {/* Left Side - Auth Form */}
         <div className="lg:col-span-2 space-y-6">
           <div className="text-center space-y-3">
-            <div className="flex items-center justify-center gap-2">
-              <Sparkles className="h-8 w-8 text-primary" />
-              <h2 className="text-3xl font-bold">Almost There!</h2>
-            </div>
             <p className="text-muted-foreground text-lg">
               Sign in to your account or create a new one to complete your purchase
             </p>
