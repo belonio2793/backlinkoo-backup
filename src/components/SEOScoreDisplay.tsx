@@ -74,7 +74,11 @@ export function SEOScoreDisplay({
   };
 
   const runAnalysis = () => {
-    if (title && content) {
+    if (isPremiumScore) {
+      // Show premium analysis modal for premium content
+      setShowPremiumAnalysis(true);
+    } else if (title && content) {
+      // Show regular analysis for non-premium content
       const result = SEOAnalyzer.analyzeBlogPost(title, content, metaDescription, targetKeyword);
       setAnalysis(result);
       setShowAnalysis(true);
