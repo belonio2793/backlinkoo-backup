@@ -284,14 +284,14 @@ export class ContentFormatter {
       .replace(/\n---$/gm, '')
       // Remove any "Title:" patterns at the very beginning of content (most aggressive)
       .replace(/^[\s\n]*Title:\s*[^\n]*\n?/i, '')
-      // Convert markdown links [text](url) to <a> tags with proper styling - preserve user anchor text
-      .replace(/\[([^\]]+?)\]\(([^)]+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$1</a>')
+      // Convert markdown links [text](url) to simple <a> tags - preserve user anchor text
+      .replace(/\[([^\]]+?)\]\(([^)]+?)\)/g, '<a href="$2">$1</a>')
 
-      // Convert plain URLs to clickable links
-      .replace(/(^|[^<"'])(https?:\/\/[^\s<>"']+)/gi, '$1<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$2</a>')
+      // Convert plain URLs to simple clickable links
+      .replace(/(^|[^<"'])(https?:\/\/[^\s<>"']+)/gi, '$1<a href="$2">$2</a>')
 
       // Handle specific case: "Play now at Runescape.com" pattern
-      .replace(/(Play now at\s+)([a-zA-Z0-9.-]+\.com)/gi, '$1<a href="https://$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$2</a>')
+      .replace(/(Play now at\s+)([a-zA-Z0-9.-]+\.com)/gi, '$1<a href="https://$2">$2</a>')
 
       // Handle malformed "Claim your place" patterns that may be broken by HTML entities
       .replace(/Claim\s+your\s+place\s+among\s+the\s+legends[^.]*\.\s*Play\s+now\s+at\s+([a-zA-Z0-9.-]+\.com)/gi,
