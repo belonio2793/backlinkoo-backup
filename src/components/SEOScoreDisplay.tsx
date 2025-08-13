@@ -91,6 +91,12 @@ export function SEOScoreDisplay({
     return <XCircle className="h-4 w-4 text-red-600" />;
   };
 
+  const extractTargetUrlFromContent = (content: string): string => {
+    // Extract URL from HTML links in content
+    const linkMatch = content.match(/<a[^>]+href=["']([^"']+)["'][^>]*>/);
+    return linkMatch ? linkMatch[1] : '';
+  };
+
   return (
     <TooltipProvider>
       <div className="flex items-center gap-2">
