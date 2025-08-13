@@ -1039,6 +1039,14 @@ export class ContentFormatter {
 
       // FINAL LINK RESTORATION: Fix any malformed link attributes
       .replace(/<a\s+([^>]*?)>/gi, (match, attrs) => {
+        // Handle severely broken patterns like: hrefhttps="" :="" domain.com="" target_blank="" etc.
+        if (attrs.includes('hrefhttps') || attrs.includes('target_blank') || attrs.includes('relnoopene')) {
+          // Extract domain if possible
+          const domainMatch = attrs.match(/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/)
+          const domain = domainMatch ? domainMatch[1] : 'example.com';
+          return `<a href="https://${domain}" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">`;
+        }
+
         // Fix common malformed patterns
         const fixedAttrs = attrs
           .replace(/href([^\s=]+?)=""\s+([^"]+?)"=""/g, 'href="$1://$2"')
