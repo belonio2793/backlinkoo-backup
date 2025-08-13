@@ -541,6 +541,10 @@ export function BeautifulBlogPost() {
       .replace(/Hook Introduction:\s*["=]*\s*H[1-6]:\s*/gi, '') // Remove "Hook Introduction: "="H1: " pattern
       .replace(/["=]+\s*H[1-6]:\s*/gi, '') // Remove "="H1: " pattern
       .replace(/Hook Introduction:\s*/gi, '') // Remove standalone Hook Introduction:
+      .replace(/^Conclusion:\s*/gi, '') // Remove Conclusion: prefix
+      .replace(/^Call-to-Action:\s*/gi, '') // Remove Call-to-Action: prefix
+      .replace(/Conclusion:\s*/gi, '') // Remove Conclusion: anywhere
+      .replace(/Call-to-Action:\s*/gi, '') // Remove Call-to-Action: anywhere
       .replace(/^\*\*([^*]+?)\*\*:\s*/i, '$1')
       .replace(/^\*\*(.+?)\*\*$/i, '$1') // Handle **title** format
       .replace(/\*\*/g, '') // Remove any remaining ** symbols
