@@ -100,6 +100,7 @@ export default function AutomatedLinkBuilding() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [operationLoading, setOperationLoading] = useState<Record<string, boolean>>({});
+  const [dbStatus, setDbStatus] = useState<{ healthy: boolean; missingTables: string[] }>({ healthy: true, missingTables: [] });
   const [recentActivity, setRecentActivity] = useState<Array<{
     id: string;
     type: 'link_published' | 'outreach_sent' | 'content_generated';
