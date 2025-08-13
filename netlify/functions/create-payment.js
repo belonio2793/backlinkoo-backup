@@ -129,9 +129,16 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    console.log("=== Payment Request Started ===");
+    console.log("Method:", event.httpMethod);
+    console.log("Headers:", event.headers);
+
     // Rate limiting based on IP
     const clientIP = await getClientIP(event);
+    console.log("Client IP:", clientIP);
+
     if (!checkRateLimit(clientIP)) {
+      console.log("Rate limit exceeded for IP:", clientIP);
       return {
         statusCode: 429,
         headers,
@@ -140,6 +147,7 @@ exports.handler = async (event, context) => {
     }
 
     const body = JSON.parse(event.body || '{}');
+    console.log("Request body:", { ...body, guestEmail: body.guestEmail ? '[REDACTED]' : undefined });
     const { amount, productName, isGuest, guestEmail, paymentMethod, credits } = body;
 
     // Input validation
