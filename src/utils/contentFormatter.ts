@@ -646,6 +646,10 @@ export class ContentFormatter {
    */
   static preProcessMalformedHtml(content: string): string {
     return content
+      // CRITICAL: Fix bold text that got malformed into first-letter-only patterns
+      // Pattern: **E**nhanced SEO Performance: -> **Enhanced SEO Performance:**
+      .replace(/\*\*([A-Z])\*\*([a-z][^:]*:)/g, '**$1$2**')
+
       // CRITICAL: Fix malformed markdown headings that will cause DOM issues
       // Pattern: ## <strong>Title</strong> or ## &lt;strong&gt;Title&lt;/strong&gt;
       .replace(/^##\s*&lt;strong[^&>]*&gt;([^&<]+)&lt;\/strong&gt;\s*$/gm, '## $1')
