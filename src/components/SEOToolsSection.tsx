@@ -459,21 +459,11 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="keyword-research">Keyword Research</TabsTrigger>
           <TabsTrigger value="rank-tracker">Rankings</TabsTrigger>
-          <TabsTrigger value="automation-link-building">Backlink ∞ Automation Link Building (beta)</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="automation-link-building" className="space-y-6">
-          <FeatureAccessGuard
-            feature="automatedCampaigns"
-            featureName="Automated Link Building"
-            fallbackMessage="Upgrade to Premium to access our automated link building system with unlimited campaigns and 24/7 automation."
-          >
-            <NoHandsSEODashboard />
-          </FeatureAccessGuard>
-        </TabsContent>
 
         <TabsContent value="keyword-research" className="space-y-6">
           <FeatureAccessGuard
