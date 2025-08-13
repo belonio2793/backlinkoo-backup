@@ -73,7 +73,12 @@ export function SEOScoreDisplay({
     return 'bg-red-100 text-red-800 border-red-200';
   };
 
-  const runAnalysis = () => {
+  const runAnalysis = (e?: React.MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
     if (isPremiumScore) {
       // Show premium analysis modal for premium content
       setShowPremiumAnalysis(true);
