@@ -3,6 +3,8 @@
  * Ensures proper paragraph, headline, and spacing structure
  */
 
+import { LinkAttributeFixer } from './linkAttributeFixer';
+
 export class ContentFormatter {
   /**
    * Format blog content with proper paragraph and headline structure
