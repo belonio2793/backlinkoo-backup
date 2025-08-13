@@ -893,7 +893,7 @@ export class ContentFormatter {
       .replace(/<a\s+([^>]*?)\s*>/gi, (match, attrs) => {
         // Handle severely malformed attributes
         if (attrs.includes('hrefhttps') && attrs.includes('gohighlevelstars.com')) {
-          return '<a href="https://gohighlevelstars.com" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">';
+          return '<a href="https://gohighlevelstars.com">';
         }
 
         // Fix malformed attributes by ensuring proper key="value" format
@@ -1048,7 +1048,7 @@ export class ContentFormatter {
           // Extract domain if possible
           const domainMatch = attrs.match(/([a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/)
           const domain = domainMatch ? domainMatch[1] : 'example.com';
-          return `<a href="https://${domain}" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">`;
+          return `<a href="https://${domain}">`;
         }
 
         // Fix common malformed patterns
