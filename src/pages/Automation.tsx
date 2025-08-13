@@ -848,6 +848,11 @@ export default function Automation() {
               </div>
             )}
           </TabsContent>
+
+          {/* System Testing Tab */}
+          <TabsContent value="testing" className="space-y-6">
+            <AutomationTestDashboard />
+          </TabsContent>
         </Tabs>
       </div>
 
