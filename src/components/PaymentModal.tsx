@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CreditCard, Repeat, Wallet } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import MobilePaymentHandler from "@/utils/mobilePaymentHandler";
 
 interface PaymentModalProps {
   isOpen: boolean;
