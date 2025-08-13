@@ -1024,51 +1024,26 @@ export function BeautifulBlogPost() {
                   }}
                   dangerouslySetInnerHTML={{
                     __html: (() => {
-                      try {
-                        let content = blogPost.content || '';
-                        const postTitle = blogPost.title || '';
+                      let content = blogPost.content || '';
 
-                        // Step 1: Direct cleanup of the problematic patterns
-                        content = content
-                          // Remove bold section markers
-                          .replace(/\*\*(Introduction|Section \d+[^*]*|Conclusion|Call-to-Action):\*\*/gi, '')
-                          // Remove the specific footer pattern
-                          .replace(/---\s*This \d+-word blog post[^.]*\.\s*By integrating[^.]*level\./gi, '')
-                          .replace(/---\s*This blog post[^.]*provides[^.]*\./gi, '')
-                          // Clean up extra whitespace
-                          .replace(/\n{3,}/g, '\n\n')
-                          .trim();
+                      // Basic cleanup - remove problematic patterns and duplicate titles
+                      content = content
+                        // Remove section markers
+                        .replace(/\*\*(Introduction|Section \d+[^*]*|Conclusion|Call-to-Action):\*\*/gi, '')
+                        // Remove footer pattern
+                        .replace(/---\s*This \d+-word blog post[^.]*\./gi, '')
+                        // Remove duplicate title lines (simple approach)
+                        .split('\n')
+                        .filter(line => {
+                          const cleanLine = line.replace(/[#*]/g, '').trim().toLowerCase();
+                          const cleanTitle = (blogPost.title || '').toLowerCase();
+                          return !cleanLine.includes('ultimate guide') || cleanLine.length < 20;
+                        })
+                        .join('\n')
+                        .replace(/\n{3,}/g, '\n\n')
+                        .trim();
 
-                        // Step 2: Remove duplicate titles from content (simplified)
-                        if (postTitle && postTitle.length > 5) {
-                          const titleWords = postTitle.toLowerCase().split(' ').filter(word => word.length > 3);
-
-                          // Remove lines that contain most of the title words
-                          const lines = content.split('\n');
-                          const filteredLines = lines.filter(line => {
-                            const lineWords = line.toLowerCase().split(' ');
-                            const matchingWords = titleWords.filter(titleWord =>
-                              lineWords.some(lineWord => lineWord.includes(titleWord))
-                            );
-
-                            // If more than half the title words match, remove the line
-                            return matchingWords.length < titleWords.length / 2;
-                          });
-
-                          content = filteredLines.join('\n');
-                        }
-
-                        // Step 3: Final cleanup
-                        content = content
-                          .replace(/\n{3,}/g, '\n\n')
-                          .trim();
-
-                        return content;
-                      } catch (error) {
-                        console.error('Content processing error:', error);
-                        // Fallback to basic content if processing fails
-                        return (blogPost.content || '').replace(/\n{3,}/g, '\n\n').trim();
-                      }
+                      return content;
                     })()
                   }}
                 />
