@@ -345,7 +345,7 @@ export default function Automation() {
                   Create New Campaign
                 </CardTitle>
                 <CardDescription>
-                  Set up your automated link building campaign with target keywords and URLs
+                  Set up your automated link building campaign. Campaign names are automatically generated based on your keywords and target URL.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
