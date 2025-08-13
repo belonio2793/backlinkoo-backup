@@ -583,7 +583,21 @@ export function BeautifulBlogPost() {
       }
     });
 
-    return tempDiv.innerHTML;
+    // CRITICAL FIX: Handle malformed bold patterns in list items
+    // Fix patterns where only first letter is bold: <strong>E</strong>nhanced -> <strong>Enhanced SEO Performance:</strong>
+    let finalHtml = tempDiv.innerHTML;
+
+    finalHtml = finalHtml
+      // Fix Enhanced SEO Performance pattern
+      .replace(/<strong[^>]*>E<\/strong>nhanced SEO Performance:/gi, '<strong class="font-bold text-inherit">Enhanced SEO Performance:</strong>')
+      // Fix Targeted Traffic Generation pattern
+      .replace(/<strong[^>]*>T<\/strong>argeted Traffic Generation:/gi, '<strong class="font-bold text-inherit">Targeted Traffic Generation:</strong>')
+      // Fix Building Authority and Credibility pattern
+      .replace(/<strong[^>]*>B<\/strong>uilding Authority and Credibility:/gi, '<strong class="font-bold text-inherit">Building Authority and Credibility:</strong>')
+      // Generic fix for any similar pattern: <strong>X</strong>word Something: -> <strong>Xword Something:</strong>
+      .replace(/<strong[^>]*>([A-Z])<\/strong>([a-z][A-Za-z\s]*:)/gi, '<strong class="font-bold text-inherit">$1$2</strong>');
+
+    return finalHtml;
   };
 
   const getTimeRemaining = (expiresAt: string) => {
