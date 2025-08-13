@@ -192,6 +192,16 @@ export default function AutomatedLinkBuilding() {
       console.log('Generated prompt:', prompt);
 
       // Call our content generation function
+      console.log('Calling AI content generator with:', {
+        action: 'generate_content',
+        user_id: user?.id,
+        content_type: formData.prompt_template,
+        platform: formData.platform,
+        target_url: formData.target_url,
+        anchor_text: formData.anchor_text,
+        keywords: [formData.keyword]
+      });
+
       const response = await fetch('/.netlify/functions/ai-content-generator', {
         method: 'POST',
         headers: {
@@ -212,14 +222,36 @@ export default function AutomatedLinkBuilding() {
         })
       });
 
+      console.log('Response status:', response.status, response.statusText);
+
       if (!response.ok) {
-        throw new Error('Failed to generate content');
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        try {
+          const errorBody = await response.text();
+          console.error('Error response body:', errorBody);
+
+          // Try to parse as JSON to get more details
+          try {
+            const errorJson = JSON.parse(errorBody);
+            errorMessage = errorJson.error || errorJson.message || errorMessage;
+          } catch {
+            // If not JSON, use the text response
+            if (errorBody) {
+              errorMessage = errorBody.substring(0, 200); // Limit length
+            }
+          }
+        } catch (bodyError) {
+          console.error('Could not read error response body:', bodyError);
+        }
+
+        throw new Error(`Content generation failed: ${errorMessage}`);
       }
 
       const result = await response.json();
-      
+      console.log('Content generation result:', result);
+
       if (!result.success) {
-        throw new Error(result.error || 'Content generation failed');
+        throw new Error(result.error || 'Content generation failed - no success flag');
       }
 
       // Create a new post record
