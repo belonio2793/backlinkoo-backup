@@ -228,7 +228,7 @@ export function BeautifulBlogPost() {
 
       // If no post found, create a sample post to test the template
       if (!post) {
-        console.log('No post found, creating sample post for template testing');
+        console.log('🆘 No post found, creating sample post for template testing');
         post = {
           id: 'sample',
           slug: slug,
@@ -253,6 +253,7 @@ This is the main content that should be displayed properly formatted without the
         };
       }
 
+      console.log('📝 Setting blog post:', post ? 'SUCCESS' : 'FAILED');
       setBlogPost(post);
 
       // If post is claimed, fetch the author's email
