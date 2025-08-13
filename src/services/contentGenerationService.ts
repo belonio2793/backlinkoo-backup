@@ -25,18 +25,10 @@ export interface GeneratedContent {
 }
 
 class ContentGenerationService {
-  private apiKey: string | null = null;
-  private baseUrl = 'https://api.openai.com/v1/chat/completions';
+  private netlifyFunctionUrl = '/.netlify/functions/generate-content';
 
   constructor() {
-    // Get API key from environment variables
-    this.apiKey = import.meta.env.VITE_OPENAI_API_KEY || null;
-    
-    if (!this.apiKey) {
-      automationLogger.warn('api', 'OpenAI API key not found in environment variables');
-    } else {
-      automationLogger.info('api', 'OpenAI content generation service initialized');
-    }
+    automationLogger.info('api', 'Content generation service initialized (using Netlify functions)');
   }
 
   async generateBlogPost(request: ContentGenerationRequest): Promise<GeneratedContent> {
