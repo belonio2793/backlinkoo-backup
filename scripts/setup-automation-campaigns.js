@@ -30,8 +30,8 @@ async function setupDatabase() {
   console.log('🚀 Setting up automation campaigns database...');
   
   try {
-    // Read the SQL schema file
-    const schemaPath = join(__dirname, '../src/database/automation-campaigns-schema.sql');
+    // Read the enhanced SQL schema file
+    const schemaPath = join(__dirname, '../src/database/automation-enhanced-schema.sql');
     const schema = readFileSync(schemaPath, 'utf8');
     
     console.log('📄 Executing schema SQL...');
