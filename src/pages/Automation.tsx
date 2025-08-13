@@ -492,8 +492,12 @@ export default function Automation() {
                     type="url"
                     placeholder="https://yourwebsite.com/target-page"
                     value={formData.target_url}
-                    onChange={(e) => setFormData({ ...formData, target_url: e.target.value })}
+                    onChange={handleUrlChange}
+                    onBlur={handleUrlBlur}
                   />
+                  <p className="text-xs text-gray-500">
+                    URL will automatically be formatted with https:// if needed
+                  </p>
                 </div>
 
                 <div className="space-y-2">
