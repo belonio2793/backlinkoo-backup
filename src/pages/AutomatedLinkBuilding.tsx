@@ -345,7 +345,7 @@ export default function AutomatedLinkBuilding() {
     };
     
     loadAutomationData();
-  }, [user, isAuthenticated]);
+  }, [user, isAuthenticated]); // Keep dependencies but handle unauthenticated case inside
 
   // Production campaign creation function
   const handleSaveCampaign = async () => {
