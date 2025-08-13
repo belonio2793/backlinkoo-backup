@@ -74,7 +74,15 @@ export default function Automation() {
     loadSitesInfo();
 
     // Check database tables exist
-    DatabaseInit.ensureTablesExist().catch(error => {
+    DatabaseInit.ensureTablesExist().then(async (tablesExist) => {
+      if (tablesExist && user) {
+        // Test campaign insertion capability
+        const canInsert = await DatabaseInit.testCampaignInsertion(user.id);
+        if (!canInsert) {
+          console.warn('⚠️ Campaign insertion test failed - there may be database permission or structure issues');
+        }
+      }
+    }).catch(error => {
       console.warn('Database check failed:', error);
     });
   }, [user]);
