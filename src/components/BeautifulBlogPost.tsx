@@ -1024,70 +1024,51 @@ export function BeautifulBlogPost() {
                   }}
                   dangerouslySetInnerHTML={{
                     __html: (() => {
-                      let content = blogPost.content || '';
-                      const postTitle = blogPost.title || '';
+                      try {
+                        let content = blogPost.content || '';
+                        const postTitle = blogPost.title || '';
 
-                      // Step 1: Direct cleanup of the problematic patterns mentioned by user
-                      content = content
-                        // Remove bold section markers - main user complaint
-                        .replace(/\*\*(Introduction|Section \d+[^*]*|Conclusion|Call-to-Action):\*\*/gi, '')
-                        // Remove the specific footer pattern
-                        .replace(/---\s*This \d+-word blog post[^.]*\.\s*By integrating[^.]*level\./gi, '')
-                        .replace(/---\s*This blog post[^.]*provides[^.]*\./gi, '')
-                        // Clean up extra whitespace
-                        .replace(/\n{3,}/g, '\n\n')
-                        .trim();
-
-                      // Step 2: Remove duplicate titles from content
-                      if (postTitle) {
-                        // Create a cleaned version of the title for comparison
-                        const cleanTitle = postTitle
-                          .replace(/[^\w\s]/g, '') // Remove special characters
-                          .replace(/\s+/g, ' ')     // Normalize whitespace
-                          .toLowerCase()
+                        // Step 1: Direct cleanup of the problematic patterns
+                        content = content
+                          // Remove bold section markers
+                          .replace(/\*\*(Introduction|Section \d+[^*]*|Conclusion|Call-to-Action):\*\*/gi, '')
+                          // Remove the specific footer pattern
+                          .replace(/---\s*This \d+-word blog post[^.]*\.\s*By integrating[^.]*level\./gi, '')
+                          .replace(/---\s*This blog post[^.]*provides[^.]*\./gi, '')
+                          // Clean up extra whitespace
+                          .replace(/\n{3,}/g, '\n\n')
                           .trim();
 
-                        // Remove HTML headings that match the title
-                        content = content.replace(/<h[1-6][^>]*>([^<]*)<\/h[1-6]>/gi, (match, headingText) => {
-                          const cleanHeading = headingText
-                            .replace(/[^\w\s]/g, '')
-                            .replace(/\s+/g, ' ')
-                            .toLowerCase()
-                            .trim();
+                        // Step 2: Remove duplicate titles from content (simplified)
+                        if (postTitle && postTitle.length > 5) {
+                          const titleWords = postTitle.toLowerCase().split(' ').filter(word => word.length > 3);
 
-                          // If heading closely matches title, remove it
-                          if (cleanHeading === cleanTitle ||
-                              cleanTitle.includes(cleanHeading) ||
-                              cleanHeading.includes(cleanTitle)) {
-                            return '';
-                          }
-                          return match;
-                        });
+                          // Remove lines that contain most of the title words
+                          const lines = content.split('\n');
+                          const filteredLines = lines.filter(line => {
+                            const lineWords = line.toLowerCase().split(' ');
+                            const matchingWords = titleWords.filter(titleWord =>
+                              lineWords.some(lineWord => lineWord.includes(titleWord))
+                            );
 
-                        // Remove markdown headings that match the title
-                        content = content.replace(/^#{1,6}\s+(.*)$/gm, (match, headingText) => {
-                          const cleanHeading = headingText
-                            .replace(/[^\w\s]/g, '')
-                            .replace(/\s+/g, ' ')
-                            .toLowerCase()
-                            .trim();
+                            // If more than half the title words match, remove the line
+                            return matchingWords.length < titleWords.length / 2;
+                          });
 
-                          // If heading closely matches title, remove it
-                          if (cleanHeading === cleanTitle ||
-                              cleanTitle.includes(cleanHeading) ||
-                              cleanHeading.includes(cleanTitle)) {
-                            return '';
-                          }
-                          return match;
-                        });
+                          content = filteredLines.join('\n');
+                        }
+
+                        // Step 3: Final cleanup
+                        content = content
+                          .replace(/\n{3,}/g, '\n\n')
+                          .trim();
+
+                        return content;
+                      } catch (error) {
+                        console.error('Content processing error:', error);
+                        // Fallback to basic content if processing fails
+                        return (blogPost.content || '').replace(/\n{3,}/g, '\n\n').trim();
                       }
-
-                      // Step 3: Clean up any empty lines created by title removal
-                      content = content
-                        .replace(/\n{3,}/g, '\n\n')
-                        .trim();
-
-                      return content;
                     })()
                   }}
                 />
