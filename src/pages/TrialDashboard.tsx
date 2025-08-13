@@ -156,7 +156,7 @@ export function TrialDashboard() {
             <Card>
               <CardContent className="pt-6">
                 <div className="text-2xl font-bold text-purple-600">{availablePosts.length}</div>
-                <p className="text-sm text-gray-600">Available to Claim</p>
+                <p className="text-sm text-gray-600">Unclaimed</p>
                 <p className="text-xs text-gray-500">Unclaimed trial posts</p>
               </CardContent>
             </Card>
@@ -324,7 +324,7 @@ export function TrialDashboard() {
                   <Card>
                     <CardContent className="pt-6 text-center">
                       <Clock className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-600 mb-2">No posts available to claim</p>
+                      <p className="text-gray-600 mb-2">No unclaimed posts</p>
                       <p className="text-sm text-gray-500">
                         Check back later or create new trial posts
                       </p>

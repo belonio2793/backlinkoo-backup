@@ -861,12 +861,12 @@ export function BeautifulBlogPost() {
                       <TooltipTrigger asChild>
                         <Badge className="px-4 py-2 text-sm font-medium rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300 cursor-help">
                           <Timer className="mr-2 h-4 w-4" />
-                          Available to Claim
+                          Unclaimed
                         </Badge>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" className="max-w-xs">
                         <div className="space-y-1">
-                          <p className="font-semibold">Available to Claim</p>
+                          <p className="font-semibold">Unclaimed</p>
                           <p className="text-sm">This post is unclaimed and anyone can take ownership of it.</p>
                           <p className="text-xs text-gray-400">�� May be deleted if not claimed soon</p>
                         </div>
