@@ -16,7 +16,6 @@ import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
 // import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
 import Index from "./pages/Index";
 
-const LazyBacklinkAutomation = lazy(() => import("./pages/NewBacklinkAutomation"));
 const LazyNewAutomationPage = lazy(() => import("./pages/NewAutomationPage"));
 const LazyBlogCommentAutomation = lazy(() => import("./pages/BlogCommentAutomation"));
 const LazyBlogCommentsSystem = lazy(() => import("./pages/BlogCommentsSystem"));
