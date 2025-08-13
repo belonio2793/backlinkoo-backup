@@ -19,6 +19,8 @@ import './utils/testCampaignFixes'
 // import './utils/directDatabaseFix' // Disabled - using new blog comment system
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
+// Protect Vite client from FullStory interference in development
+import './utils/viteClientProtection'
 
 // Clear previous console errors in development
 if (import.meta.env.DEV) {
