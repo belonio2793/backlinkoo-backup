@@ -116,12 +116,30 @@ export function PaymentDebugger() {
         <p className="text-gray-600">Diagnose and fix Stripe payment issues on backlinkoo.com</p>
       </div>
 
-      {/* Quick Status */}
-      {quickResults.length > 0 && (
+      {/* Health Check Status */}
+      {!healthCheck.isHealthy && (
         <Alert className="border-red-200 bg-red-50">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            <strong>Critical Issues Detected:</strong>
+            <strong>Payment System Issues:</strong> {healthCheck.summary}
+            <ul className="mt-2 space-y-1">
+              {healthCheck.issues.slice(0, 3).map((issue, index) => (
+                <li key={index} className="text-sm">• {issue.description}</li>
+              ))}
+            </ul>
+            {healthCheck.issues.length > 3 && (
+              <p className="text-sm mt-2">...and {healthCheck.issues.length - 3} more issues</p>
+            )}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Quick Status */}
+      {quickResults.length > 0 && (
+        <Alert className="border-yellow-200 bg-yellow-50">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription>
+            <strong>Quick Check Results:</strong>
             <ul className="mt-2 space-y-1">
               {quickResults.map((result, index) => (
                 <li key={index} className="text-sm">• {result.message}</li>
