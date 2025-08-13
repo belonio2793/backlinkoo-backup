@@ -41,6 +41,9 @@ export class DatabaseHealthCheck {
         if (error.message.includes('relation') && error.message.includes('does not exist')) {
           status.exists = false;
           status.error = 'Table does not exist';
+        } else if (error.message.includes('column') && error.message.includes('does not exist')) {
+          status.exists = true;
+          status.error = `Table exists but has column schema issues: ${error.message}`;
         } else {
           status.exists = true; // Table exists but might have other issues
           status.error = error.message;
