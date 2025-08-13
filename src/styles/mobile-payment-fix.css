@@ -41,13 +41,36 @@
   input[type="email"],
   input[type="text"],
   input[type="number"],
-  select {
+  input[type="password"],
+  input[type="tel"],
+  select,
+  textarea {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    border-radius: 8px;
-    font-size: 16px; /* Prevents zoom on iOS */
-    min-height: 44px;
+    border-radius: var(--mobile-border-radius);
+    font-size: var(--mobile-font-size); /* Prevents zoom on iOS */
+    min-height: var(--mobile-touch-target);
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Premium payment form specific styles */
+  .premium-payment-form input,
+  .subscription-form input,
+  .checkout-form input {
+    background-color: #ffffff;
+    transition: border-color 0.2s ease;
+  }
+
+  .premium-payment-form input:focus,
+  .subscription-form input:focus,
+  .checkout-form input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 
   /* Payment modal optimizations */
