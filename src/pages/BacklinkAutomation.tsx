@@ -232,6 +232,8 @@ export default function BacklinkAutomation() {
       };
 
       console.log('Saving campaign with data:', campaignData);
+      console.log('User ID:', user?.id);
+      console.log('Is authenticated:', isAuthenticated);
 
       let campaign;
       if (activeCampaign) {
