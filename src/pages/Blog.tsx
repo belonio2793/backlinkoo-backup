@@ -358,11 +358,23 @@ function Blog() {
           .trim();
       }
 
-      if (result.length > 150) {
-        result = result.substring(0, 150) + '...';
+      // Ensure proper capitalization and ellipsis
+      if (result) {
+        // Capitalize first letter
+        result = result.charAt(0).toUpperCase() + result.slice(1);
+
+        // Ensure it ends with ellipsis
+        if (result.length > 150) {
+          result = result.substring(0, 150).trim();
+          result = result.replace(/[.!?,:;-]*$/, '') + '...';
+        } else if (!result.match(/[.!?]$/)) {
+          result = result.trim().replace(/[,:;-]*$/, '') + '...';
+        }
+
+        return result;
       }
 
-      return result || 'Expert content covering important topics in digital marketing and SEO.';
+      return 'Expert content covering important topics in digital marketing and SEO.';
     }
 
     // Fallback if no content
@@ -460,7 +472,7 @@ function Blog() {
         description: `Loaded ${allPosts.length} blog posts.`,
       });
 
-      console.log('✅ Blog posts refreshed:', {
+      console.log('��� Blog posts refreshed:', {
         databasePosts: posts.length,
         localBlogPosts: localBlogPosts.length,
         totalPosts: allPosts.length,
