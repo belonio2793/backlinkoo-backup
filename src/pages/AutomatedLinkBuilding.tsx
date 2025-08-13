@@ -125,8 +125,8 @@ export default function AutomatedLinkBuilding() {
 
   // Load automation data from database
   useEffect(() => {
-    if (!isAuthenticated || !user) return;
-    
+    // Allow loading data even for unauthenticated users with demo data
+
     const loadAutomationData = async () => {
       try {
         setLoading(true);
