@@ -10,6 +10,7 @@ import { UnifiedModalManager } from "@/components/UnifiedModalManager";
 import { GlobalErrorHandler } from "@/components/GlobalErrorHandler";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PremiumUpgradeProvider } from "@/components/PremiumUpgradeProvider";
+import { EnhancedErrorBoundary } from "@/components/EnhancedErrorBoundary";
 import { useSymbolCleaner } from "@/utils/symbolCleaner";
 import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
@@ -99,21 +100,25 @@ const App = () => (
               }
             />
             <Route
-              path="/blog"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyBlog />
-                </Suspense>
-              }
-            />
+          path="/blog"
+          element={
+            <EnhancedErrorBoundary>
+              <Suspense fallback={<LoadingSpinner />}>
+                <LazyBlog />
+              </Suspense>
+            </EnhancedErrorBoundary>
+          }
+        />
             <Route
-              path="/blog/:slug"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyBeautifulBlogPost />
-                </Suspense>
-              }
-            />
+          path="/blog/:slug"
+          element={
+            <EnhancedErrorBoundary>
+              <Suspense fallback={<LoadingSpinner />}>
+                <LazyBeautifulBlogPost />
+              </Suspense>
+            </EnhancedErrorBoundary>
+          }
+        />
             <Route
               path="/dashboard"
               element={

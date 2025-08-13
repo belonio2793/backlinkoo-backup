@@ -53,6 +53,8 @@ import { maskEmail } from '@/utils/emailMasker';
 import { SEOScoreDisplay } from '@/components/SEOScoreDisplay';
 import { KillerDeletionWarning } from '@/components/KillerDeletionWarning';
 import { ExitIntentPopup } from '@/components/ExitIntentPopup';
+import { BlogContentCleaner } from '@/utils/blogContentCleaner';
+import { processBlogContent } from '@/utils/markdownProcessor';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -245,7 +247,14 @@ export function BeautifulBlogPost() {
     } catch (error: any) {
       console.error('Failed to load blog post:', error);
 
-      if (!post) {
+      if (!isMounted) return; // Prevent error handling after unmount
+
+      // Check if this was a loading error vs a post not found error
+      const isNotFoundError = error.message?.includes('not found') ||
+                             error.status === 404 ||
+                             !blogPost;
+
+      if (isNotFoundError) {
         toast({
           title: "Blog Post Not Found",
           description: "This blog post may have expired or been removed.",
@@ -253,20 +262,22 @@ export function BeautifulBlogPost() {
         });
       } else {
         toast({
-          title: "Error",
-          description: "Failed to load blog post",
+          title: "Loading Error",
+          description: "Failed to load blog post. Please try refreshing the page.",
           variant: "destructive"
         });
       }
     } finally {
-      setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+      }
     }
   };
 
   const handleClaimPost = async () => {
     if (!user) {
       // Store claim intent and show modal instead of navigating
-      EnhancedBlogClaimService.handleClaimIntent(slug!, cleanTitle(blogPost?.title || ''));
+      EnhancedBlogClaimService.handleClaimIntent(slug!, BlogContentCleaner.cleanTitle(blogPost?.title || ''));
       setShowClaimModal(true);
       return;
     }
@@ -349,7 +360,7 @@ export function BeautifulBlogPost() {
         .eq('slug', slug!);
 
       if (error) {
-        console.error('❌ Direct delete failed:', error);
+        console.error('�� Direct delete failed:', error);
 
         // If RLS blocks the delete, try using a serverless function as fallback
         try {
@@ -557,109 +568,52 @@ export function BeautifulBlogPost() {
   };
 
   const autoRemoveTitlesFromContent = (content: string, pageTitle: string) => {
-    if (!content) return content;
+    if (!content) return '';
 
-    // Always process content through the formatter to ensure proper HTML formatting
-    let processedContent = ContentFormatter.formatBlogContent(content, pageTitle);
+    let cleaned = content;
 
-    // Apply additional post-processing to fix any remaining issues
-    processedContent = ContentFormatter.preProcessMalformedHtml(processedContent);
-    processedContent = ContentFormatter.fixDisplayedHtmlAsText(processedContent);
-    processedContent = ContentFormatter.fixDOMDisplayIssues(processedContent);
-    processedContent = ContentFormatter.postProcessCleanup(processedContent);
+    // Remove problematic section headers and artifacts that cause poor formatting
+    cleaned = cleaned
+      // Remove section markers that create poor structure
+      .replace(/^(Introduction|Section \d+|Conclusion|Call-to-Action):\s*/gim, '')
+      .replace(/^(Hook Introduction|Summary|Overview):\s*/gim, '')
 
-    // Now remove duplicate titles if pageTitle is provided
-    if (!pageTitle) return processedContent;
+      // Remove HTML artifacts that appear as text
+      .replace(/\bH[1-6]:\s*/gi, '')
+      .replace(/Title:\s*/gi, '')
+      .replace(/Hook Introduction:\s*/gi, '')
 
-    const cleanedPageTitle = cleanTitle(pageTitle).toLowerCase().trim();
-    if (!cleanedPageTitle) return processedContent;
+      // Remove markdown artifacts that don't render properly
+      .replace(/^#+\s*/gm, '')
+      .replace(/^>\s*/gm, '')
 
-    // Create a temporary div to parse HTML
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = processedContent;
+      // Remove repeated symbols that clutter content
+      .replace(/["=]{2,}/g, '')
 
-    // CRITICAL: Fix malformed links after HTML parsing (this is where corruption happens)
-    const malformedLinks = tempDiv.querySelectorAll('a[hrefhttps], a[stylecolor]');
-    malformedLinks.forEach(link => {
-      // Extract domain from malformed attributes
-      const attrs = Array.from(link.attributes);
-      let domain = '';
+      // Clean up excessive whitespace
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
 
-      // Look for domain in various malformed attribute patterns
-      for (const attr of attrs) {
-        if (attr.name.includes('.com') || attr.name.includes('.net') || attr.name.includes('.org')) {
-          domain = attr.name;
-          break;
+    // Remove duplicate title if provided
+    if (pageTitle) {
+      const cleanedPageTitle = cleanTitle(pageTitle).toLowerCase().trim();
+      if (cleanedPageTitle) {
+        // Simple title removal at the beginning of content
+        const lines = cleaned.split('\n');
+        if (lines.length > 0) {
+          const firstLine = cleanTitle(lines[0]).toLowerCase().trim();
+          if (firstLine === cleanedPageTitle ||
+              cleanedPageTitle.includes(firstLine) ||
+              firstLine.includes(cleanedPageTitle)) {
+            lines.shift(); // Remove first line if it matches title
+            cleaned = lines.join('\n').trim();
+          }
         }
       }
+    }
 
-      // Special case for Go High Level Stars
-      if (link.textContent?.includes('Go High Level Stars') || domain.includes('gohighlevelstars')) {
-        domain = 'gohighlevelstars.com';
-      }
-
-      if (domain) {
-        console.log('🔧 Fixing malformed link for:', domain);
-        // Clear all malformed attributes
-        Array.from(link.attributes).forEach(attr => {
-          link.removeAttribute(attr.name);
-        });
-
-        // Set proper attributes
-        link.setAttribute('href', `https://${domain}`);
-        link.setAttribute('target', '_blank');
-        link.setAttribute('rel', 'noopener');
-        link.setAttribute('style', 'color:#2563eb;font-weight:500;text-decoration:underline;');
-      }
-    });
-
-    // Find and remove duplicate title headings (h1, h2, h3)
-    const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
-
-    headings.forEach(heading => {
-      const headingText = cleanTitle(heading.textContent || '').toLowerCase().trim();
-
-      // Remove if heading matches the page title or is very similar
-      if (headingText === cleanedPageTitle ||
-          cleanedPageTitle.includes(headingText) ||
-          headingText.includes(cleanedPageTitle)) {
-        heading.remove();
-      }
-    });
-
-    // CRITICAL FIX: Handle malformed bold patterns in list items
-    // Fix patterns where only first letter is bold: <strong>E</strong>nhanced -> <strong>Enhanced SEO Performance:</strong>
-    let finalHtml = tempDiv.innerHTML;
-
-    finalHtml = finalHtml
-      // Fix Enhanced SEO Performance pattern
-      .replace(/<strong[^>]*>E<\/strong>nhanced SEO Performance:/gi, '<strong class="font-bold text-inherit">Enhanced SEO Performance:</strong>')
-      // Fix Targeted Traffic Generation pattern
-      .replace(/<strong[^>]*>T<\/strong>argeted Traffic Generation:/gi, '<strong class="font-bold text-inherit">Targeted Traffic Generation:</strong>')
-      // Fix Building Authority and Credibility pattern
-      .replace(/<strong[^>]*>B<\/strong>uilding Authority and Credibility:/gi, '<strong class="font-bold text-inherit">Building Authority and Credibility:</strong>')
-      // Fix Data-Driven Decision-Making pattern
-      .replace(/<strong[^>]*>D<\/strong>ata-Driven Decision-Making:/gi, '<strong class="font-bold text-inherit">Data-Driven Decision-Making:</strong>')
-      // Generic fix for any similar pattern: <strong>X</strong>word Something: -> <strong>Xword Something:</strong>
-      .replace(/<strong[^>]*>([A-Z])<\/strong>([a-z][A-Za-z\s-]*:)/gi, '<strong class="font-bold text-inherit">$1$2</strong>')
-
-      // Remove HTML syntax artifacts that shouldn't be displayed
-      .replace(/Hook Introduction:\s*["=]*\s*H[1-6]:\s*/gi, '')
-      .replace(/["=]+\s*H[1-6]:\s*/gi, '')
-      .replace(/\bH[1-6]:\s*/gi, '') // Remove H1:, H2:, etc. anywhere in text
-      .replace(/Hook Introduction:\s*/gi, '') // Remove standalone Hook Introduction: text
-      .replace(/Conclusion:\s*/gi, '') // Remove "Conclusion:" text
-      .replace(/Call-to-Action:\s*/gi, '') // Remove "Call-to-Action:" text
-
-      // Clean up any remaining HTML entity artifacts
-      .replace(/&lt;[^&]*&gt;/g, '') // Remove any &lt;tag&gt; patterns
-      .replace(/["=]{2,}/g, '') // Remove multiple quotes/equals signs;
-
-    // FINAL: Apply link attribute fixer to the processed HTML
-    finalHtml = LinkAttributeFixer.fixMalformedLinks(finalHtml);
-    finalHtml = LinkAttributeFixer.ensureLinkStyling(finalHtml);
-
-    return finalHtml;
+    // Process through the clean markdown processor instead of complex DOM manipulation
+    return processBlogContent(cleaned);
   };
 
   const getTimeRemaining = (expiresAt: string) => {
@@ -1014,7 +968,7 @@ export function BeautifulBlogPost() {
 
               {/* Title */}
               <h1 className="beautiful-blog-title text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight break-words">
-                {cleanTitle(blogPost.title)}
+                {BlogContentCleaner.cleanTitle(blogPost.title)}
               </h1>
 
               {/* Meta Description */}
@@ -1069,7 +1023,28 @@ export function BeautifulBlogPost() {
                     overflowWrap: 'break-word'
                   }}
                   dangerouslySetInnerHTML={{
-                    __html: autoRemoveTitlesFromContent(blogPost.content || '', blogPost.title || '')
+                    __html: (() => {
+                      let content = blogPost.content || '';
+
+                      // Basic cleanup - remove problematic patterns and duplicate titles
+                      content = content
+                        // Remove section markers
+                        .replace(/\*\*(Introduction|Section \d+[^*]*|Conclusion|Call-to-Action):\*\*/gi, '')
+                        // Remove footer pattern
+                        .replace(/---\s*This \d+-word blog post[^.]*\./gi, '')
+                        // Remove duplicate title lines (simple approach)
+                        .split('\n')
+                        .filter(line => {
+                          const cleanLine = line.replace(/[#*]/g, '').trim().toLowerCase();
+                          const cleanTitle = (blogPost.title || '').toLowerCase();
+                          return !cleanLine.includes('ultimate guide') || cleanLine.length < 20;
+                        })
+                        .join('\n')
+                        .replace(/\n{3,}/g, '\n\n')
+                        .trim();
+
+                      return content;
+                    })()
                   }}
                 />
               </div>
@@ -1191,7 +1166,7 @@ export function BeautifulBlogPost() {
                       return (
                         <div className="max-w-2xl mx-auto bg-red-600 text-white p-4 rounded-lg animate-pulse border-4 border-yellow-400">
                           <div className="text-center font-black text-lg">
-                            💀 CRITICAL: LESS THAN 1 HOUR REMAINING! ⚠️⚠️⚠️
+                            💀 CRITICAL: LESS THAN 1 HOUR REMAINING! ⚠️⚠️���️
                           </div>
                           <div className="text-center text-sm mt-2">
                             Your content is entering the DEATH ZONE!
@@ -1317,7 +1292,7 @@ export function BeautifulBlogPost() {
         isOpen={showClaimModal}
         onClose={() => setShowClaimModal(false)}
         onAuthSuccess={handleAuthSuccess}
-        postTitle={cleanTitle(blogPost?.title || '')}
+        postTitle={BlogContentCleaner.cleanTitle(blogPost?.title || '')}
         postSlug={slug || ''}
       />
 
@@ -1343,7 +1318,7 @@ export function BeautifulBlogPost() {
       <ExitIntentPopup
         isVisible={showExitPopup}
         onClose={() => setShowExitPopup(false)}
-        postTitle={cleanTitle(blogPost?.title || '')}
+        postTitle={BlogContentCleaner.cleanTitle(blogPost?.title || '')}
         timeRemaining={blogPost?.expires_at ? getTimeRemaining(blogPost.expires_at) : '24 hours'}
       />
 

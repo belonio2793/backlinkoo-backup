@@ -4,807 +4,775 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import {
-  Search,
+  Brain,
   Zap,
-  Mail,
   Globe,
   BarChart3,
-  Calendar,
-  Shield,
   Target,
-  Brain,
-  TrendingUp,
-  Users,
   Link2,
   FileText,
-  Settings,
   Play,
-  Pause,
   ExternalLink,
   Loader2,
   CheckCircle,
   AlertTriangle,
   Eye,
-  Download,
-  Upload,
-  Briefcase,
-  Clock,
-  Award,
-  Filter,
-  MoreVertical,
-  XCircle,
+  Copy,
   RefreshCw,
-  Activity
+  Clock,
+  ArrowRight
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { logError } from '@/services/productionErrorHandler';
-import { scalableDataService, rateLimiter } from '@/services/scalabilityOptimizations';
-import { dbHealthCheck } from '@/services/databaseHealthCheck';
-import { UniversalPaymentComponent, QuickCreditButton, PremiumUpgradeButton } from '@/components/UniversalPaymentComponent';
+import { SeamlessSignInModal } from '@/components/SeamlessSignInModal';
+import { AutomationTableSetup } from '@/components/AutomationTableSetup';
+import { checkAutomationPostsTable } from '@/utils/automationTableSetup';
 
-interface Campaign {
+interface GeneratedPost {
   id: string;
-  name: string;
-  status: 'active' | 'paused' | 'scheduled' | 'completed';
-  keywords: string[];
+  keyword: string;
+  anchor_text: string;
   target_url: string;
-  strategy: 'fast_boost' | 'natural_growth' | 'competitive' | 'branded';
+  prompt_template: string;
+  generated_content: string;
+  platform_url?: string;
+  platform: string;
+  status: 'generating' | 'completed' | 'failed' | 'published';
   created_at: string;
-  metrics: {
-    links_built: number;
-    domains_reached: number;
-    dr_average: number;
-    traffic_gained: number;
-  };
 }
+
+const PROMPT_TEMPLATES = [
+  {
+    id: 'blog_post',
+    name: 'Blog Post',
+    template: 'Generate a blog post on {{keyword}} including the {{anchor_text}} hyperlinked to {{url}}',
+    description: 'Creates a comprehensive blog post with natural link integration'
+  },
+  {
+    id: 'article',
+    name: 'Article',
+    template: 'Write a article about {{keyword}} with a hyperlinked {{anchor_text}} linked to {{url}}',
+    description: 'Writes an informative article with embedded links'
+  },
+  {
+    id: 'comment',
+    name: 'Comment',
+    template: 'Produce a comment on {{keyword}} that links {{anchor_text}} to {{url}}',
+    description: 'Creates engaging comments for community platforms'
+  }
+];
+
+const SUPPORTED_PLATFORMS = [
+  { id: 'telegra_ph', name: 'Telegraph', url: 'https://telegra.ph/', description: 'Anonymous publishing platform' },
+  { id: 'medium', name: 'Medium', url: 'https://medium.com/', description: 'Professional writing platform' },
+  { id: 'dev_to', name: 'Dev.to', url: 'https://dev.to/', description: 'Developer community' },
+  { id: 'reddit', name: 'Reddit', url: 'https://reddit.com/', description: 'Community discussions' }
+];
 
 export default function AutomatedLinkBuilding() {
   const { user, isAuthenticated } = useAuth();
   
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [isRunning, setIsRunning] = useState(false);
-  const [currentStep, setCurrentStep] = useState('');
-  const [stats, setStats] = useState({
-    linksBuiltToday: 0,
-    domainsReached: 0,
-    avgDomainRating: 0,
-    successRate: 0,
-    trafficGained: 0
-  });
-  const [outreachStats, setOutreachStats] = useState({
-    emailsSent: 0,
-    responseRate: 0,
-    positiveResponses: 0,
-    linkPlacements: 0
-  });
-  const [analyticsStats, setAnalyticsStats] = useState({
-    totalLinksBuilt: 0,
-    referringDomains: 0,
-    avgDomainRating: 0,
-    trafficImpact: 0,
-    monthlyGrowth: {
-      links: 0,
-      domains: 0,
-      dr: 0
-    }
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [operationLoading, setOperationLoading] = useState<Record<string, boolean>>({});
-  const [dbStatus, setDbStatus] = useState<{ healthy: boolean; missingTables: string[] }>({ healthy: true, missingTables: [] });
-  const [recentActivity, setRecentActivity] = useState<Array<{
-    id: string;
-    type: 'link_published' | 'outreach_sent' | 'content_generated';
-    title: string;
-    description: string;
-    status: string;
-    created_at: string;
-  }>>([]);
-
   // Form states
-  const [campaignForm, setCampaignForm] = useState({
-    name: '',
-    keywords: '',
+  const [formData, setFormData] = useState({
     target_url: '',
-    strategy: 'natural_growth',
-    competitor_urls: '',
-    content_tone: 'professional',
-    auto_publish: false,
-    drip_speed: 'medium'
+    keyword: '',
+    anchor_text: '',
+    prompt_template: 'blog_post',
+    platform: 'telegra_ph'
   });
 
-  // Load automation data from database
+  // Generation states
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generatedPosts, setGeneratedPosts] = useState<GeneratedPost[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // Modal states
+  const [showSignInModal, setShowSignInModal] = useState(false);
+
+  // Database table status
+  const [tableExists, setTableExists] = useState<boolean | null>(null);
+
+  // Check table status and load generated posts
   useEffect(() => {
-    if (!isAuthenticated || !user) return;
-    
-    const loadAutomationData = async () => {
-      try {
-        setLoading(true);
+    const checkTableAndLoadPosts = async () => {
+      // Check if table exists
+      const tableCheck = await checkAutomationPostsTable();
+      setTableExists(tableCheck.exists);
 
-        // Check database health first
-        const { allTablesExist, missingTables } = await dbHealthCheck.checkRequiredTables();
-        setDbStatus({ healthy: allTablesExist, missingTables });
-        if (!allTablesExist) {
-          console.warn('Some database tables are missing:', missingTables);
-          // Continue anyway but with limited functionality
-        }
-
-        // Use scalable data service for optimized fetching
-        const { campaigns, stats: aggregatedStats } = await scalableDataService.getCampaignStats(
-          user.id,
-          20, // Limit for pagination
-          0   // Offset
-        );
-        
-        setStats(aggregatedStats);
-        setCampaigns(campaigns);
-        
-        // Fetch outreach statistics (handle missing table gracefully)
-        try {
-          const { data: outreachData, error: outreachError } = await supabase
-            .from('outreach_campaigns')
-            .select(`
-              emails_sent,
-              response_rate,
-              positive_responses,
-              link_placements
-            `)
-            .eq('user_id', user.id);
-
-          if (outreachError) {
-            if (outreachError.message.includes('relation') && outreachError.message.includes('does not exist')) {
-              console.info('Outreach campaigns table does not exist yet');
-            } else {
-              console.error('Error loading outreach data:', outreachError);
-            }
-          } else if (outreachData && outreachData.length > 0) {
-            const totalEmailsSent = outreachData.reduce((sum, campaign) => sum + (campaign.emails_sent || 0), 0);
-            const avgResponseRate = Math.round(outreachData.reduce((sum, campaign) => sum + (campaign.response_rate || 0), 0) / outreachData.length);
-            const totalPositiveResponses = outreachData.reduce((sum, campaign) => sum + (campaign.positive_responses || 0), 0);
-            const totalLinkPlacements = outreachData.reduce((sum, campaign) => sum + (campaign.link_placements || 0), 0);
-
-            setOutreachStats({
-              emailsSent: totalEmailsSent,
-              responseRate: avgResponseRate,
-              positiveResponses: totalPositiveResponses,
-              linkPlacements: totalLinkPlacements
-            });
-          }
-        } catch (error) {
-          console.warn('Outreach stats query failed:', error);
-        }
-
-        // Fetch analytics data from automation_analytics table (handle missing table/columns gracefully)
-        try {
-          // First, try to check if table exists by selecting all columns
-          const { data: analyticsData, error: analyticsError } = await supabase
-            .from('automation_analytics')
-            .select('*')
-            .eq('user_id', user.id)
-            .order('created_at', { ascending: false })
-            .limit(1)
-            .single();
-
-          if (analyticsError) {
-            if (analyticsError.message.includes('relation') && analyticsError.message.includes('does not exist')) {
-              console.info('Analytics table does not exist yet');
-            } else if (analyticsError.message.includes('column') && analyticsError.message.includes('does not exist')) {
-              console.info('Analytics table exists but missing expected columns');
-            } else {
-              console.error('Error loading analytics data:', analyticsError);
-            }
-          } else if (analyticsData) {
-            // Use whatever columns are available, with fallbacks
-            setAnalyticsStats({
-              totalLinksBuilt: analyticsData.total_links_built || analyticsData.links_built || 0,
-              referringDomains: analyticsData.referring_domains || analyticsData.domains || 0,
-              avgDomainRating: analyticsData.avg_domain_rating || analyticsData.domain_rating || 0,
-              trafficImpact: analyticsData.traffic_impact || analyticsData.traffic || 0,
-              monthlyGrowth: {
-                links: analyticsData.monthly_growth_links || analyticsData.growth_links || 0,
-                domains: analyticsData.monthly_growth_domains || analyticsData.growth_domains || 0,
-                dr: analyticsData.monthly_growth_dr || analyticsData.growth_dr || 0
-              }
-            });
-          }
-        } catch (error) {
-          console.warn('Analytics stats query failed:', error);
-          // If analytics table has issues, try to calculate basic stats from campaigns
-          try {
-            const { data: campaignData } = await supabase
-              .from('automation_campaigns')
-              .select('id, status')
-              .eq('user_id', user.id);
-
-            if (campaignData) {
-              setAnalyticsStats({
-                totalLinksBuilt: 0,
-                referringDomains: 0,
-                avgDomainRating: 0,
-                trafficImpact: 0,
-                monthlyGrowth: {
-                  links: 0,
-                  domains: 0,
-                  dr: 0
-                }
-              });
-            }
-          } catch (fallbackError) {
-            console.warn('Fallback analytics calculation failed:', fallbackError);
-          }
-        }
-
-        // Fetch recent activity with optimization
-        const activityData = await scalableDataService.getActivityFeed(user.id, undefined, 10);
-        setRecentActivity(activityData);
-
-      } catch (error) {
-        let errorMessage = 'Unknown error occurred';
-        if (error instanceof Error) {
-          errorMessage = error.message;
-        } else if (typeof error === 'string') {
-          errorMessage = error;
-        } else if (error && typeof error === 'object') {
-          errorMessage = JSON.stringify(error);
-        }
-
-        console.error('Error loading automation data:', error);
-
-        // Try to log error but don't fail if logging fails
-        try {
-          await logError(error instanceof Error ? error : new Error(errorMessage), {
-            component: 'automation',
-            operation: 'load_data',
-            userId: user?.id
-          }, 'high');
-        } catch (logError) {
-          console.warn('Failed to log error:', logError);
-        }
-
-        setError('Failed to load automation data. Please refresh the page.');
-        toast.error('Failed to load automation data');
-      } finally {
-        setLoading(false);
+      // Load posts only if authenticated and table exists
+      if (isAuthenticated && user && tableCheck.exists) {
+        loadGeneratedPosts();
       }
     };
-    
-    loadAutomationData();
+
+    checkTableAndLoadPosts();
   }, [user, isAuthenticated]);
 
-  // Production campaign creation function
-  const handleSaveCampaign = async () => {
-    if (!user || !campaignForm.name || !campaignForm.target_url || !campaignForm.keywords) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
+  const loadGeneratedPosts = async () => {
     try {
-      const keywordsArray = campaignForm.keywords.split(',').map(k => k.trim()).filter(k => k);
-      
+      setLoading(true);
+
       const { data, error } = await supabase
-        .from('automation_campaigns')
-        .insert({
-          user_id: user.id,
-          name: campaignForm.name,
-          target_url: campaignForm.target_url,
-          keywords: keywordsArray,
-          strategy: campaignForm.strategy,
-          competitor_urls: campaignForm.competitor_urls.split(',').map(u => u.trim()).filter(u => u),
-          content_tone: campaignForm.content_tone,
-          auto_publish: campaignForm.auto_publish,
-          drip_speed: campaignForm.drip_speed,
-          status: 'paused'
-        })
-        .select()
-        .single();
+        .from('automation_posts')
+        .select('*')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific database errors gracefully
+        if (error.message?.includes('relation') && error.message?.includes('does not exist')) {
+          console.info('automation_posts table does not exist yet - this is normal on first run');
+          setGeneratedPosts([]);
+          return;
+        }
 
-      toast.success('Campaign saved successfully');
-      setCampaigns(prev => [data, ...prev]);
-      
-      // Reset form
-      setCampaignForm({
-        name: '',
-        keywords: '',
-        target_url: '',
-        strategy: 'natural_growth',
-        competitor_urls: '',
-        content_tone: 'professional',
-        auto_publish: false,
-        drip_speed: 'medium'
-      });
+        // Handle other errors with proper error message extraction
+        const errorMessage = error.message || error.details || JSON.stringify(error);
+        console.error('Error loading posts:', errorMessage);
+        toast.error(`Failed to load posts: ${errorMessage}`);
+        return;
+      }
+
+      setGeneratedPosts(data || []);
     } catch (error) {
-      let errorMessage = 'Unknown error occurred';
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error && typeof error === 'object') {
-        errorMessage = JSON.stringify(error);
-      }
-
-      console.error('Error saving campaign:', error);
-
-      // Try to log error but don't fail if logging fails
-      try {
-        await logError(error instanceof Error ? error : new Error(errorMessage), {
-          component: 'automation',
-          operation: 'save_campaign',
-          userId: user?.id,
-          metadata: { campaignName: campaignForm.name }
-        }, 'medium');
-      } catch (logError) {
-        console.warn('Failed to log error:', logError);
-      }
-
-      toast.error('Failed to save campaign');
+      // Handle unexpected errors with better error message extraction
+      const errorMessage = error instanceof Error ? error.message :
+                          error && typeof error === 'object' ? JSON.stringify(error) :
+                          String(error);
+      console.error('Unexpected error loading posts:', errorMessage);
+      toast.error(`Failed to load posts: ${errorMessage}`);
+      setGeneratedPosts([]); // Set empty array as fallback
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Production automation start function with rate limiting
-  const handleStartAutomation = async () => {
-    if (!user || !campaignForm.name || !campaignForm.target_url || !campaignForm.keywords) {
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!formData.target_url || !formData.keyword || !formData.anchor_text) {
       toast.error('Please fill in all required fields');
       return;
     }
 
-    // Check rate limits for automation operations
-    const canProceed = await rateLimiter.checkLimit(user.id, 'automation');
-    if (!canProceed) {
-      toast.error('Rate limit exceeded. Please wait before starting another automation.');
+    if (!isValidUrl(formData.target_url)) {
+      toast.error('Please enter a valid URL');
+      return;
+    }
+
+    // Check authentication for content generation
+    if (!isAuthenticated) {
+      setShowSignInModal(true);
+      return;
+    }
+
+    // Get the selected template first (outside try block for fallback access)
+    const template = PROMPT_TEMPLATES.find(t => t.id === formData.prompt_template);
+    if (!template) {
+      toast.error('Invalid template selected');
       return;
     }
 
     try {
-      setIsRunning(true);
-      setCurrentStep('Creating campaign...');
+      setIsGenerating(true);
 
-      // Save campaign first
-      await handleSaveCampaign();
+      // Create the prompt by replacing placeholders
+      const prompt = template.template
+        .replace('{{keyword}}', formData.keyword)
+        .replace('{{anchor_text}}', formData.anchor_text)
+        .replace('{{url}}', formData.target_url);
 
-      setCurrentStep('Starting automation engines...');
+      console.log('Generated prompt:', prompt);
 
-      // Start automation via Netlify function
-      const response = await fetch('/.netlify/functions/automation-control', {
+      // Call our content generation function
+      console.log('Calling AI content generator with:', {
+        action: 'generate_content',
+        user_id: user?.id,
+        content_type: formData.prompt_template,
+        platform: formData.platform,
+        target_url: formData.target_url,
+        anchor_text: formData.anchor_text,
+        keywords: [formData.keyword]
+      });
+
+      const response = await fetch('/.netlify/functions/simple-ai-generator', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
         },
         body: JSON.stringify({
-          action: 'start',
-          campaign: {
-            name: campaignForm.name,
-            target_url: campaignForm.target_url,
-            keywords: campaignForm.keywords.split(',').map(k => k.trim()).filter(k => k),
-            strategy: campaignForm.strategy,
-            drip_speed: campaignForm.drip_speed
-          }
+          action: 'generate_content',
+          user_id: user?.id,
+          content_type: formData.prompt_template,
+          platform: formData.platform,
+          target_url: formData.target_url,
+          anchor_text: formData.anchor_text,
+          keywords: [formData.keyword],
+          tone: 'professional',
+          style: 'educational',
+          word_count: 'medium'
         })
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to start automation');
+      console.log('Response status:', response.status, response.statusText);
+
+      let result;
+      let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+
+      try {
+        // Read response body only once
+        const responseText = await response.text();
+        console.log('Response body:', responseText);
+
+        if (!response.ok) {
+          // Try to parse error response as JSON
+          try {
+            const errorJson = JSON.parse(responseText);
+            errorMessage = errorJson.error || errorJson.message || errorMessage;
+          } catch {
+            // If not JSON, use the text response
+            if (responseText) {
+              errorMessage = responseText.substring(0, 200); // Limit length
+            }
+          }
+          throw new Error(`Content generation failed: ${errorMessage}`);
+        }
+
+        // Parse successful response
+        try {
+          result = JSON.parse(responseText);
+        } catch (parseError) {
+          throw new Error('Invalid JSON response from content generator');
+        }
+      } catch (readError) {
+        if (readError.message.includes('Content generation failed')) {
+          throw readError; // Re-throw our custom errors
+        }
+        throw new Error(`Failed to read response: ${readError.message}`);
+      }
+      console.log('Content generation result:', result);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Content generation failed - no success flag');
       }
 
-      const result = await response.json();
+      // Create a new post record
+      const newPost: GeneratedPost = {
+        id: result.content.id,
+        keyword: formData.keyword,
+        anchor_text: formData.anchor_text,
+        target_url: formData.target_url,
+        prompt_template: template.name,
+        generated_content: result.content.content,
+        platform: formData.platform,
+        status: 'completed',
+        created_at: new Date().toISOString()
+      };
+
+      // Save to database
+      const { error: saveError } = await supabase
+        .from('automation_posts')
+        .insert({
+          id: newPost.id,
+          user_id: user?.id,
+          keyword: newPost.keyword,
+          anchor_text: newPost.anchor_text,
+          target_url: newPost.target_url,
+          prompt_template: newPost.prompt_template,
+          generated_content: newPost.generated_content,
+          platform: newPost.platform,
+          status: newPost.status
+        });
+
+      if (saveError) {
+        // Handle database save errors gracefully
+        if (saveError.message?.includes('relation') && saveError.message?.includes('does not exist')) {
+          console.warn('automation_posts table does not exist - content generated but not saved to database');
+          toast.warning('Content generated successfully! Note: Database table needs to be created to save posts.');
+        } else {
+          const errorMessage = saveError.message || saveError.details || JSON.stringify(saveError);
+          console.error('Error saving post:', errorMessage);
+          toast.warning(`Content generated but failed to save: ${errorMessage}`);
+        }
+      }
+
+      // Attempt to publish to platform
+      if (formData.platform === 'telegra_ph') {
+        await publishToTelegraph(newPost);
+      }
+
+      // Update local state
+      setGeneratedPosts(prev => [newPost, ...prev]);
       
-      setCurrentStep('Automation started successfully');
-      toast.success('Automation campaign started!');
-      
-      // Refresh data
-      window.location.reload();
+      // Reset form
+      setFormData({
+        target_url: '',
+        keyword: '',
+        anchor_text: '',
+        prompt_template: 'blog_post',
+        platform: 'telegra_ph'
+      });
+
+      toast.success('Content generated successfully!');
 
     } catch (error) {
-      let errorMessage = 'Unknown error occurred';
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error && typeof error === 'object') {
-        errorMessage = JSON.stringify(error);
+      console.error('Generation error:', error);
+
+      // Fallback: Generate content locally if API fails (including 404, network errors, etc.)
+      if (error instanceof Error && (
+        error.message.includes('Failed to fetch') ||
+        error.message.includes('Content generation failed') ||
+        error.message.includes('404') ||
+        error.message.includes('500') ||
+        error.message.includes('Network Error')
+      )) {
+        console.log('API failed, generating content locally...');
+        try {
+          const fallbackContent = generateFallbackContent(formData.keyword, formData.anchor_text, formData.target_url, template.name);
+
+          const newPost: GeneratedPost = {
+            id: `fallback_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            keyword: formData.keyword,
+            anchor_text: formData.anchor_text,
+            target_url: formData.target_url,
+            prompt_template: template.name,
+            generated_content: fallbackContent,
+            platform: formData.platform,
+            status: 'completed',
+            created_at: new Date().toISOString()
+          };
+
+          setGeneratedPosts(prev => [newPost, ...prev]);
+
+          // Reset form
+          setFormData({
+            target_url: '',
+            keyword: '',
+            anchor_text: '',
+            prompt_template: 'blog_post',
+            platform: 'telegra_ph'
+          });
+
+          toast.success('Content generated using fallback method!');
+          return;
+        } catch (fallbackError) {
+          console.error('Fallback generation failed:', fallbackError);
+        }
       }
 
-      console.error('Error starting automation:', error);
-
-      // Try to log error but don't fail if logging fails
-      try {
-        await logError(error instanceof Error ? error : new Error(errorMessage), {
-          component: 'automation',
-          operation: 'start_automation',
-          userId: user?.id,
-          metadata: { campaignName: campaignForm.name }
-        }, 'critical');
-      } catch (logError) {
-        console.warn('Failed to log error:', logError);
-      }
-
-      toast.error('Failed to start automation');
-      setCurrentStep('Error starting automation');
+      toast.error(error instanceof Error ? error.message : 'Failed to generate content');
     } finally {
-      setIsRunning(false);
+      setIsGenerating(false);
     }
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <Header />
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-md mx-auto text-center">
-            <Brain className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-4">Sign In Required</h2>
-            <p className="text-gray-600">Please sign in to access the automated link building platform.</p>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+  const publishToTelegraph = async (post: GeneratedPost) => {
+    try {
+      // Call Telegraph API to publish content
+      const response = await fetch('/.netlify/functions/telegraph-publisher', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: `${post.keyword} - Complete Guide`,
+          content: post.generated_content,
+          author_name: 'Content Automation',
+          return_content: false
+        })
+      });
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <Header />
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-md mx-auto text-center">
-            <XCircle className="h-16 w-16 text-red-600 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-4">System Error</h2>
-            <p className="text-gray-600 mb-6">{error}</p>
-            <Button onClick={() => window.location.reload()} className="w-full">
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Reload Page
-            </Button>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success && result.url) {
+          // Update the post with the published URL
+          await supabase
+            .from('automation_posts')
+            .update({ 
+              platform_url: result.url,
+              status: 'published'
+            })
+            .eq('id', post.id);
+
+          // Update local state
+          setGeneratedPosts(prev => 
+            prev.map(p => 
+              p.id === post.id 
+                ? { ...p, platform_url: result.url, status: 'published' }
+                : p
+            )
+          );
+
+          toast.success('Content published to Telegraph!');
+        }
+      }
+    } catch (error) {
+      console.error('Telegraph publishing error:', error);
+      // Don't show error to user as this is a bonus feature
+    }
+  };
+
+  const isValidUrl = (string: string) => {
+    try {
+      new URL(string);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  };
+
+  const generateFallbackContent = (keyword: string, anchorText: string, targetUrl: string, templateName: string): string => {
+    const templates = {
+      'Blog Post': `# The Complete Guide to ${keyword}
+
+${keyword} has become increasingly important in today's digital landscape. Understanding the fundamentals and best practices can significantly impact your success.
+
+## Key Benefits
+
+When implementing effective ${keyword} strategies, businesses typically see:
+
+- Improved performance metrics
+- Better audience engagement
+- Enhanced brand visibility
+- Stronger competitive positioning
+
+## Getting Started
+
+The first step in mastering ${keyword} is to understand your target audience. Research their needs, preferences, and pain points to create more targeted approaches.
+
+For comprehensive insights and advanced strategies, you can explore [${anchorText}](${targetUrl}) which provides detailed guidance on implementation.
+
+## Best Practices
+
+Here are some proven strategies for ${keyword}:
+
+1. **Focus on Quality**: Always prioritize quality over quantity in your efforts.
+2. **Stay Consistent**: Regular, consistent efforts yield better long-term results.
+3. **Monitor Performance**: Track key metrics to understand what's working.
+4. **Adapt and Improve**: Be ready to adjust your approach based on data.
+
+## Conclusion
+
+Success with ${keyword} requires patience, consistency, and continuous learning. By following these guidelines and staying up-to-date with industry trends, you'll be well-positioned to achieve your goals.`,
+
+      'Article': `# Understanding ${keyword}: Key Insights
+
+${keyword} is essential for anyone looking to improve their results in this area. This article explores the key concepts and practical applications.
+
+## Overview
+
+${keyword} encompasses various strategies and techniques that can drive meaningful outcomes. The key is to approach it systematically and with clear objectives.
+
+## Implementation Strategy
+
+To get started with ${keyword}, consider these steps:
+
+- Research current trends and best practices
+- Define your specific goals and metrics
+- Develop a structured plan of action
+- Execute consistently and monitor results
+
+For additional resources and expert guidance, check out [${anchorText}](${targetUrl}).
+
+## Expected Outcomes
+
+When done correctly, ${keyword} can lead to significant improvements in performance and results. Many professionals report positive changes within the first few months of implementation.`,
+
+      'Comment': `Great insights on ${keyword}! I've been working in this space for a while and can definitely confirm that the strategies mentioned here are effective.
+
+One thing I'd add is the importance of staying consistent with your efforts. ${keyword} isn't something where you see results overnight, but with patience and the right approach, the results can be impressive.
+
+For those looking for more detailed guidance, I've found [${anchorText}](${targetUrl}) to be a valuable resource with practical tips and strategies.
+
+Has anyone else here tried implementing these techniques? I'd love to hear about your experiences!`
+    };
+
+    return templates[templateName as keyof typeof templates] || templates['Blog Post'];
+  };
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success('Copied to clipboard!');
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'generating': return 'bg-yellow-100 text-yellow-800';
+      case 'completed': return 'bg-blue-100 text-blue-800';
+      case 'published': return 'bg-green-100 text-green-800';
+      case 'failed': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="w-16 h-16 bg-gradient-to-br from-purple-600 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <Brain className="h-8 w-8 text-white" />
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">AI Link Building Engine</h1>
-          <p className="text-gray-600 text-lg">Complete automated link building with AI-powered content generation</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">AI Content Automation</h1>
+          <p className="text-gray-600 text-lg">Generate and publish content with ChatGPT 3.5 Turbo</p>
 
-          {/* Quick Payment Actions */}
-          <div className="flex flex-wrap justify-center gap-4 mt-6">
-            <QuickCreditButton
-              credits={100}
-              variant="outline"
-              className="border-green-500 text-green-600 hover:bg-green-50"
-            />
-            <QuickCreditButton
-              credits={250}
-              variant="outline"
-              className="border-blue-500 text-blue-600 hover:bg-blue-50"
-            />
-            <PremiumUpgradeButton
-              plan="monthly"
-              variant="outline"
-              className="border-purple-500 text-purple-600 hover:bg-purple-50"
-            />
-            <UniversalPaymentComponent
-              trigger={
-                <Button variant="default" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
-                  <Zap className="h-4 w-4 mr-2" />
-                  Get Credits & Premium
-                </Button>
-              }
-              defaultType="credits"
-              showTrigger={false}
-            />
-          </div>
-        </div>
-
-        {/* Database Health Alert */}
-        {!dbStatus.healthy && dbStatus.missingTables.length > 0 && (
-          <div className="mb-6">
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="flex items-center gap-2">
+          {/* User State Info */}
+          {!isAuthenticated && (
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg max-w-2xl mx-auto">
+              <div className="flex items-center justify-center gap-2 mb-2">
                 <AlertTriangle className="h-5 w-5 text-yellow-600" />
-                <h3 className="font-medium text-yellow-800">Database Setup Incomplete</h3>
+                <span className="font-medium text-yellow-800">Limited Access Mode</span>
               </div>
-              <p className="text-yellow-700 text-sm mt-1">
-                Some database tables are missing: {dbStatus.missingTables.join(', ')}.
-                Some features may not work until the database is properly configured.
+              <p className="text-sm text-yellow-700">
+                You can explore all features, but content generation requires sign-in.
+                <button
+                  onClick={() => setShowSignInModal(true)}
+                  className="font-medium underline hover:text-yellow-800 transition-colors"
+                >
+                  Sign in to generate unlimited content and save your posts.
+                </button>
               </p>
             </div>
+          )}
+
+          {isAuthenticated && (
+            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg max-w-2xl mx-auto">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <span className="font-medium text-green-800">Full Access Active</span>
+              </div>
+              <p className="text-sm text-green-700">
+                Welcome back! You have access to all automation features including content generation,
+                publishing, and post management.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Database Table Setup - Show if authenticated but table doesn't exist */}
+        {isAuthenticated && tableExists === false && (
+          <div className="max-w-4xl mx-auto mb-6">
+            <AutomationTableSetup
+              onTableReady={() => {
+                setTableExists(true);
+                loadGeneratedPosts();
+              }}
+            />
           </div>
         )}
 
-        <Tabs defaultValue="dashboard" className="max-w-7xl mx-auto">
+        <Tabs defaultValue="generator" className="max-w-6xl mx-auto">
           <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
-            <TabsTrigger value="reporting">Reporting</TabsTrigger>
+            <TabsTrigger value="generator">Content Generator</TabsTrigger>
+            <TabsTrigger value="reporting">Generated Posts</TabsTrigger>
           </TabsList>
 
-          {/* Dashboard Tab */}
-          <TabsContent value="dashboard" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Content Generator Tab */}
+          <TabsContent value="generator" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
-              {/* Campaign Setup */}
-              <div className="lg:col-span-2">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Target className="h-5 w-5" />
-                      Campaign Setup
-                    </CardTitle>
-                    <CardDescription>Configure your automated link building campaign</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="campaign-name">Campaign Name</Label>
-                        <Input
-                          id="campaign-name"
-                          value={campaignForm.name}
-                          onChange={(e) => setCampaignForm({ ...campaignForm, name: e.target.value })}
-                          placeholder="My Link Building Campaign"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="strategy">Strategy</Label>
-                        <Select 
-                          value={campaignForm.strategy} 
-                          onValueChange={(value) => setCampaignForm({ ...campaignForm, strategy: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="fast_boost">🚀 Fast Rank Boost</SelectItem>
-                            <SelectItem value="natural_growth">🌱 Natural Growth</SelectItem>
-                            <SelectItem value="competitive">⚔️ Competitive Attack</SelectItem>
-                            <SelectItem value="branded">🏢 Branded Campaign</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
+              {/* Generation Form */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Target className="h-5 w-5" />
+                    Content Generation Setup
+                  </CardTitle>
+                  <CardDescription>Configure your automated content generation</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleFormSubmit} className="space-y-4">
                     <div>
-                      <Label htmlFor="target-url">Target URL</Label>
+                      <Label htmlFor="target-url">Target Destination URL *</Label>
                       <Input
                         id="target-url"
                         type="url"
-                        value={campaignForm.target_url}
-                        onChange={(e) => setCampaignForm({ ...campaignForm, target_url: e.target.value })}
-                        placeholder="https://yourwebsite.com"
+                        value={formData.target_url}
+                        onChange={(e) => {
+                          let url = e.target.value;
+                          // Auto-format URL if it doesn't start with http:// or https://
+                          if (url && !url.match(/^https?:\/\//)) {
+                            url = `https://${url}`;
+                          }
+                          setFormData({ ...formData, target_url: url });
+                        }}
+                        placeholder="https://yourwebsite.com/page"
+                        required
                       />
                     </div>
 
                     <div>
-                      <Label htmlFor="keywords">Keywords (comma-separated)</Label>
-                      <Textarea
-                        id="keywords"
-                        value={campaignForm.keywords}
-                        onChange={(e) => setCampaignForm({ ...campaignForm, keywords: e.target.value })}
-                        placeholder="SEO tools, link building, digital marketing"
-                        rows={3}
+                      <Label htmlFor="keyword">Keyword *</Label>
+                      <Input
+                        id="keyword"
+                        value={formData.keyword}
+                        onChange={(e) => setFormData({ ...formData, keyword: e.target.value })}
+                        placeholder="digital marketing"
+                        required
                       />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="content-tone">Content Tone</Label>
-                        <Select 
-                          value={campaignForm.content_tone} 
-                          onValueChange={(value) => setCampaignForm({ ...campaignForm, content_tone: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="professional">Professional</SelectItem>
-                            <SelectItem value="casual">Casual</SelectItem>
-                            <SelectItem value="technical">Technical</SelectItem>
-                            <SelectItem value="friendly">Friendly</SelectItem>
-                            <SelectItem value="authoritative">Authoritative</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div>
-                        <Label htmlFor="drip-speed">Drip Speed</Label>
-                        <Select 
-                          value={campaignForm.drip_speed} 
-                          onValueChange={(value) => setCampaignForm({ ...campaignForm, drip_speed: value })}
-                        >
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="slow">🐌 Slow (1-2 links/day)</SelectItem>
-                            <SelectItem value="medium">⚡ Medium (3-5 links/day)</SelectItem>
-                            <SelectItem value="fast">🚀 Fast (5-10 links/day)</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center space-x-2">
-                      <Switch 
-                        id="auto-publish"
-                        checked={campaignForm.auto_publish}
-                        onCheckedChange={(checked) => setCampaignForm({ ...campaignForm, auto_publish: checked })}
+                    <div>
+                      <Label htmlFor="anchor-text">Anchor Text *</Label>
+                      <Input
+                        id="anchor-text"
+                        value={formData.anchor_text}
+                        onChange={(e) => setFormData({ ...formData, anchor_text: e.target.value })}
+                        placeholder="best SEO tools"
+                        required
                       />
-                      <Label htmlFor="auto-publish">Enable Auto-Publish</Label>
                     </div>
 
-                    <div className="flex gap-3 pt-4">
-                      <Button onClick={handleSaveCampaign} variant="outline" disabled={isRunning}>
-                        Save Campaign
-                      </Button>
-                      <Button onClick={handleStartAutomation} className="flex-1" disabled={isRunning}>
-                        {isRunning ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            {currentStep}
-                          </>
-                        ) : (
-                          <>
-                            <Play className="h-4 w-4 mr-2" />
-                            Start Automation
-                          </>
-                        )}
-                      </Button>
+                    <div>
+                      <Label htmlFor="prompt-template">Content Type</Label>
+                      <Select 
+                        value={formData.prompt_template} 
+                        onValueChange={(value) => setFormData({ ...formData, prompt_template: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {PROMPT_TEMPLATES.map((template) => (
+                            <SelectItem key={template.id} value={template.id}>
+                              {template.name} - {template.description}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
 
-              {/* Campaign Stats */}
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <TrendingUp className="h-5 w-5" />
-                      Live Stats
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Links Built Today</span>
-                        <span className="font-medium">{loading ? '-' : stats.linksBuiltToday}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Domains Reached</span>
-                        <span className="font-medium">{loading ? '-' : stats.domainsReached}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Success Rate</span>
-                        <span className="font-medium text-green-600">{loading ? '-' : `${stats.successRate}%`}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Traffic Gained</span>
-                        <span className="font-medium">{loading ? '-' : `+${stats.trafficGained.toLocaleString()}`}</span>
-                      </div>
+                    <div>
+                      <Label htmlFor="platform">Target Platform</Label>
+                      <Select 
+                        value={formData.platform} 
+                        onValueChange={(value) => setFormData({ ...formData, platform: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SUPPORTED_PLATFORMS.map((platform) => (
+                            <SelectItem key={platform.id} value={platform.id}>
+                              {platform.name} - {platform.description}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </CardContent>
-                </Card>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Activity className="h-5 w-5" />
-                      System Status
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Link Discovery</span>
-                        <Badge variant="default" className="bg-green-600">Active</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Content Generation</span>
-                        <Badge variant="default" className="bg-blue-600">Running</Badge>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Outreach Engine</span>
-                        <Badge variant="default" className="bg-purple-600">Active</Badge>
+                    <Button
+                      type={isAuthenticated ? "submit" : "button"}
+                      onClick={!isAuthenticated ? () => setShowSignInModal(true) : undefined}
+                      className="w-full"
+                      disabled={isGenerating}
+                      variant={!isAuthenticated ? "outline" : "default"}
+                    >
+                      {isGenerating ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Generating Content...
+                        </>
+                      ) : !isAuthenticated ? (
+                        <>
+                          <AlertTriangle className="h-4 w-4 mr-2" />
+                          Sign In to Generate Content
+                        </>
+                      ) : (
+                        <>
+                          <Play className="h-4 w-4 mr-2" />
+                          Generate Content
+                        </>
+                      )}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+
+              {/* Preview Panel */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Eye className="h-5 w-5" />
+                    Prompt Preview
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div>
+                      <Label className="text-sm font-medium">Generated Prompt:</Label>
+                      <div className="mt-2 p-3 bg-gray-50 rounded-lg border">
+                        <p className="text-sm text-gray-700">
+                          {formData.keyword && formData.anchor_text && formData.target_url
+                            ? PROMPT_TEMPLATES
+                                .find(t => t.id === formData.prompt_template)
+                                ?.template
+                                .replace('{{keyword}}', formData.keyword)
+                                .replace('{{anchor_text}}', formData.anchor_text)
+                                .replace('{{url}}', formData.target_url)
+                            : 'Fill in the form to see the generated prompt'
+                          }
+                        </p>
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
-              </div>
+
+                    <div>
+                      <Label className="text-sm font-medium">Platform Info:</Label>
+                      <div className="mt-2">
+                        {SUPPORTED_PLATFORMS
+                          .filter(p => p.id === formData.platform)
+                          .map(platform => (
+                            <div key={platform.id} className="flex items-center gap-2">
+                              <Globe className="h-4 w-4 text-blue-600" />
+                              <span className="text-sm">{platform.name}</span>
+                              <a 
+                                href={platform.url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800"
+                              >
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            </div>
+                          ))
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
 
-            {/* Campaign Management */}
+            {/* Template Information */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Settings className="h-5 w-5" />
-                  Campaign Management
+                  <FileText className="h-5 w-5" />
+                  Available Templates
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {campaigns.length === 0 ? (
-                  <div className="text-center p-8 text-gray-500">
-                    No campaigns yet. Create your first campaign above.
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {campaigns.slice(0, 5).map((campaign) => (
-                      <div key={campaign.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                        <div className="flex-1">
-                          <h3 className="font-medium">{campaign.name}</h3>
-                          <p className="text-sm text-gray-600">{campaign.target_url}</p>
-                        </div>
-                        <Badge variant={campaign.status === 'active' ? 'default' : 'secondary'}>
-                          {campaign.status}
-                        </Badge>
-                        <Button size="sm" variant="outline">
-                          Manage
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Activity Monitor */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Zap className="h-5 w-5" />
-                  Activity Monitor
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {loading ? (
-                    <div className="flex items-center justify-center p-8">
-                      <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
-                      <span className="ml-2 text-gray-500">Loading activity...</span>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {PROMPT_TEMPLATES.map((template) => (
+                    <div key={template.id} className="p-4 border rounded-lg hover:bg-gray-50">
+                      <h3 className="font-medium mb-2">{template.name}</h3>
+                      <p className="text-sm text-gray-600 mb-3">{template.description}</p>
+                      <code className="text-xs bg-gray-100 p-2 rounded block">
+                        {template.template}
+                      </code>
                     </div>
-                  ) : recentActivity.length === 0 ? (
-                    <div className="text-center p-8 text-gray-500">
-                      No recent activity. Start a campaign to see activity here.
-                    </div>
-                  ) : (
-                    recentActivity.map((activity) => (
-                      <div key={activity.id} className={`flex items-center gap-3 p-3 rounded-lg ${
-                        activity.type === 'link_published' ? 'bg-green-50' :
-                        activity.type === 'outreach_sent' ? 'bg-blue-50' :
-                        'bg-purple-50'
-                      }`}>
-                        {activity.type === 'link_published' && <CheckCircle className="h-5 w-5 text-green-600" />}
-                        {activity.type === 'outreach_sent' && <Mail className="h-5 w-5 text-blue-600" />}
-                        {activity.type === 'content_generated' && <Brain className="h-5 w-5 text-purple-600" />}
-                        <div className="flex-1">
-                          <p className="text-sm font-medium">{activity.title}</p>
-                          <p className="text-xs text-gray-600">{activity.description}</p>
-                        </div>
-                        <Badge variant="outline" className={`${
-                          activity.status === 'Live' ? 'text-green-700' :
-                          activity.status === 'Active' ? 'text-blue-700' :
-                          'text-purple-700'
-                        }`}>{activity.status}</Badge>
-                      </div>
-                    ))
-                  )}
+                  ))}
                 </div>
               </CardContent>
             </Card>
@@ -812,132 +780,203 @@ export default function AutomatedLinkBuilding() {
 
           {/* Reporting Tab */}
           <TabsContent value="reporting" className="space-y-6">
-            {/* Key Metrics Overview */}
+            {/* Stats Overview */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-2">
-                    <Link2 className="h-5 w-5 text-blue-600" />
-                    <span className="text-sm font-medium">Total Links Built</span>
+                    <FileText className="h-5 w-5 text-blue-600" />
+                    <span className="text-sm font-medium">Total Generated</span>
                   </div>
-                  <p className="text-2xl font-bold">{loading ? '-' : analyticsStats.totalLinksBuilt.toLocaleString()}</p>
-                  <p className="text-xs text-green-600">{loading ? '-' : `+${analyticsStats.monthlyGrowth.links}% this month`}</p>
+                  <p className="text-2xl font-bold">
+                    {!isAuthenticated ? '-' : generatedPosts.length}
+                  </p>
+                  {!isAuthenticated && (
+                    <p className="text-xs text-gray-500">Sign in to view</p>
+                  )}
                 </CardContent>
               </Card>
 
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-2">
-                    <Globe className="h-5 w-5 text-green-600" />
-                    <span className="text-sm font-medium">Referring Domains</span>
+                    <CheckCircle className="h-5 w-5 text-green-600" />
+                    <span className="text-sm font-medium">Published</span>
                   </div>
-                  <p className="text-2xl font-bold">{loading ? '-' : analyticsStats.referringDomains.toLocaleString()}</p>
-                  <p className="text-xs text-green-600">{loading ? '-' : `+${analyticsStats.monthlyGrowth.domains}% this month`}</p>
+                  <p className="text-2xl font-bold">
+                    {!isAuthenticated ? '-' : generatedPosts.filter(p => p.status === 'published').length}
+                  </p>
+                  {!isAuthenticated && (
+                    <p className="text-xs text-gray-500">Sign in to view</p>
+                  )}
                 </CardContent>
               </Card>
 
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="h-5 w-5 text-purple-600" />
-                    <span className="text-sm font-medium">Avg. Domain Rating</span>
+                    <Link2 className="h-5 w-5 text-purple-600" />
+                    <span className="text-sm font-medium">Active Links</span>
                   </div>
-                  <p className="text-2xl font-bold">{loading ? '-' : analyticsStats.avgDomainRating}</p>
-                  <p className="text-xs text-blue-600">{loading ? '-' : `+${analyticsStats.monthlyGrowth.dr} this month`}</p>
+                  <p className="text-2xl font-bold">
+                    {!isAuthenticated ? '-' : generatedPosts.filter(p => p.platform_url).length}
+                  </p>
+                  {!isAuthenticated && (
+                    <p className="text-xs text-gray-500">Sign in to view</p>
+                  )}
                 </CardContent>
               </Card>
 
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-2">
-                    <BarChart3 className="h-5 w-5 text-orange-600" />
-                    <span className="text-sm font-medium">Traffic Impact</span>
+                    <Clock className="h-5 w-5 text-orange-600" />
+                    <span className="text-sm font-medium">Today</span>
                   </div>
-                  <p className="text-2xl font-bold">{loading ? '-' : `+${(analyticsStats.trafficImpact / 1000).toFixed(1)}k`}</p>
-                  <p className="text-xs text-green-600">Monthly organic</p>
+                  <p className="text-2xl font-bold">
+                    {!isAuthenticated ? '-' : generatedPosts.filter(p =>
+                      new Date(p.created_at).toDateString() === new Date().toDateString()
+                    ).length}
+                  </p>
+                  {!isAuthenticated && (
+                    <p className="text-xs text-gray-500">Sign in to view</p>
+                  )}
                 </CardContent>
               </Card>
             </div>
 
-            {/* Outreach Performance */}
+            {/* Generated Posts List */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Mail className="h-5 w-5" />
-                  Outreach Performance
-                </CardTitle>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Generated Posts</CardTitle>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={loadGeneratedPosts}
+                  disabled={loading}
+                >
+                  <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600">{loading ? '-' : outreachStats.emailsSent}</p>
-                    <p className="text-sm text-gray-600">Emails Sent</p>
+                {loading ? (
+                  <div className="flex items-center justify-center p-8">
+                    <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                    <span className="ml-2 text-gray-500">Loading posts...</span>
                   </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">{loading ? '-' : `${outreachStats.responseRate}%`}</p>
-                    <p className="text-sm text-gray-600">Response Rate</p>
+                ) : !isAuthenticated ? (
+                  <div className="text-center p-8">
+                    <div className="mb-4">
+                      <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-3" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">Sign In to View Your Posts</h3>
+                      <p className="text-gray-600 mb-4">
+                        Your generated content and post history will appear here after you sign in.
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-6 max-w-md mx-auto">
+                      <h4 className="font-medium mb-3">Features Available After Sign In:</h4>
+                      <ul className="text-sm text-gray-600 space-y-2 text-left">
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          Generate unlimited content with ChatGPT 3.5 Turbo
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          Automatic publishing to Telegraph and other platforms
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          Track all your generated posts and URLs
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          Copy content and URLs with one click
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          Performance analytics and reporting
+                        </li>
+                      </ul>
+                      <Button
+                        onClick={() => setShowSignInModal(true)}
+                        className="w-full mt-4"
+                      >
+                        <ArrowRight className="h-4 w-4 mr-2" />
+                        Sign In to Get Started
+                      </Button>
+                    </div>
                   </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <p className="text-2xl font-bold text-purple-600">{loading ? '-' : outreachStats.positiveResponses}</p>
-                    <p className="text-sm text-gray-600">Positive Responses</p>
-                  </div>
-                  <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <p className="text-2xl font-bold text-orange-600">{loading ? '-' : outreachStats.linkPlacements}</p>
-                    <p className="text-sm text-gray-600">Link Placements</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Campaign Performance Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Campaign Performance</CardTitle>
-              </CardHeader>
-              <CardContent>
-                {campaigns.length === 0 ? (
+                ) : generatedPosts.length === 0 ? (
                   <div className="text-center p-8 text-gray-500">
-                    No campaigns to report on yet.
+                    No posts generated yet. Use the Content Generator to create your first post.
                   </div>
                 ) : (
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left p-2">Campaign</th>
-                          <th className="text-left p-2">Status</th>
-                          <th className="text-left p-2">Links Built</th>
-                          <th className="text-left p-2">Success Rate</th>
-                          <th className="text-left p-2">Created</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {campaigns.map((campaign) => (
-                          <tr key={campaign.id} className="border-b">
-                            <td className="p-2">
-                              <div>
-                                <p className="font-medium">{campaign.name}</p>
-                                <p className="text-xs text-gray-500">{campaign.target_url}</p>
-                              </div>
-                            </td>
-                            <td className="p-2">
-                              <Badge variant={campaign.status === 'active' ? 'default' : 'secondary'}>
-                                {campaign.status}
-                              </Badge>
-                            </td>
-                            <td className="p-2">{campaign.metrics?.links_built || 0}</td>
-                            <td className="p-2">
-                              <span className="text-green-600">
-                                {campaign.metrics ? `${Math.round((campaign.metrics.links_built / (campaign.metrics.links_built + 1)) * 100)}%` : '0%'}
-                              </span>
-                            </td>
-                            <td className="p-2">
-                              {new Date(campaign.created_at).toLocaleDateString()}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="space-y-4">
+                    {generatedPosts.map((post) => (
+                      <div key={post.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1">
+                            <h3 className="font-medium text-lg mb-1">{post.keyword}</h3>
+                            <p className="text-sm text-gray-600">
+                              <strong>Anchor:</strong> {post.anchor_text} → {post.target_url}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              <strong>Template:</strong> {post.prompt_template} | 
+                              <strong> Platform:</strong> {post.platform}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge className={getStatusColor(post.status)}>
+                              {post.status}
+                            </Badge>
+                            {post.platform_url && (
+                              <a 
+                                href={post.platform_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="bg-gray-50 rounded p-3 mb-3">
+                          <p className="text-sm text-gray-700 line-clamp-3">
+                            {post.generated_content.substring(0, 200)}...
+                          </p>
+                        </div>
+
+                        <div className="flex items-center justify-between text-sm text-gray-500">
+                          <span>
+                            {new Date(post.created_at).toLocaleDateString()} at{' '}
+                            {new Date(post.created_at).toLocaleTimeString()}
+                          </span>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => copyToClipboard(post.generated_content)}
+                            >
+                              <Copy className="h-3 w-3 mr-1" />
+                              Copy Content
+                            </Button>
+                            {post.platform_url && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => copyToClipboard(post.platform_url!)}
+                              >
+                                <Link2 className="h-3 w-3 mr-1" />
+                                Copy URL
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
               </CardContent>
@@ -947,6 +986,24 @@ export default function AutomatedLinkBuilding() {
       </div>
       
       <Footer />
+
+      {/* Seamless Sign-In Modal */}
+      <SeamlessSignInModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        onAuthSuccess={(user) => {
+          console.log('Authentication successful:', user);
+          toast.success('Welcome! You can now generate content.');
+          // The auth context will automatically update, so we don't need to manually refresh
+          setTimeout(() => {
+            // Small delay to let the auth context update
+            setShowSignInModal(false);
+          }, 500);
+        }}
+        preservedAction="generate content with your settings"
+        title="Continue Your Workflow"
+        description="Sign in to generate content"
+      />
     </div>
   );
 }
