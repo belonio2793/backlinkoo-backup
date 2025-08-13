@@ -90,6 +90,9 @@ export default function AutomatedLinkBuilding() {
   const [generatedPosts, setGeneratedPosts] = useState<GeneratedPost[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Modal states
+  const [showSignInModal, setShowSignInModal] = useState(false);
+
   // Load generated posts
   useEffect(() => {
     if (!isAuthenticated || !user) return;
