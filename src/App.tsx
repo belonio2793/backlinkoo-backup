@@ -115,7 +115,7 @@ const App = () => (
           element={
             <EnhancedErrorBoundary>
               <Suspense fallback={<LoadingSpinner />}>
-                <LazySimpleBlogPost />
+                <LazyBeautifulBlogPost />
               </Suspense>
             </EnhancedErrorBoundary>
           }
