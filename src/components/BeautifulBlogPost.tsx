@@ -1025,8 +1025,9 @@ export function BeautifulBlogPost() {
                   dangerouslySetInnerHTML={{
                     __html: (() => {
                       let content = blogPost.content || '';
+                      const postTitle = blogPost.title || '';
 
-                      // Direct cleanup of the problematic patterns mentioned by user
+                      // Step 1: Direct cleanup of the problematic patterns mentioned by user
                       content = content
                         // Remove bold section markers - main user complaint
                         .replace(/\*\*(Introduction|Section \d+[^*]*|Conclusion|Call-to-Action):\*\*/gi, '')
@@ -1034,6 +1035,55 @@ export function BeautifulBlogPost() {
                         .replace(/---\s*This \d+-word blog post[^.]*\.\s*By integrating[^.]*level\./gi, '')
                         .replace(/---\s*This blog post[^.]*provides[^.]*\./gi, '')
                         // Clean up extra whitespace
+                        .replace(/\n{3,}/g, '\n\n')
+                        .trim();
+
+                      // Step 2: Remove duplicate titles from content
+                      if (postTitle) {
+                        // Create a cleaned version of the title for comparison
+                        const cleanTitle = postTitle
+                          .replace(/[^\w\s]/g, '') // Remove special characters
+                          .replace(/\s+/g, ' ')     // Normalize whitespace
+                          .toLowerCase()
+                          .trim();
+
+                        // Remove HTML headings that match the title
+                        content = content.replace(/<h[1-6][^>]*>([^<]*)<\/h[1-6]>/gi, (match, headingText) => {
+                          const cleanHeading = headingText
+                            .replace(/[^\w\s]/g, '')
+                            .replace(/\s+/g, ' ')
+                            .toLowerCase()
+                            .trim();
+
+                          // If heading closely matches title, remove it
+                          if (cleanHeading === cleanTitle ||
+                              cleanTitle.includes(cleanHeading) ||
+                              cleanHeading.includes(cleanTitle)) {
+                            return '';
+                          }
+                          return match;
+                        });
+
+                        // Remove markdown headings that match the title
+                        content = content.replace(/^#{1,6}\s+(.*)$/gm, (match, headingText) => {
+                          const cleanHeading = headingText
+                            .replace(/[^\w\s]/g, '')
+                            .replace(/\s+/g, ' ')
+                            .toLowerCase()
+                            .trim();
+
+                          // If heading closely matches title, remove it
+                          if (cleanHeading === cleanTitle ||
+                              cleanTitle.includes(cleanHeading) ||
+                              cleanHeading.includes(cleanTitle)) {
+                            return '';
+                          }
+                          return match;
+                        });
+                      }
+
+                      // Step 3: Clean up any empty lines created by title removal
+                      content = content
                         .replace(/\n{3,}/g, '\n\n')
                         .trim();
 
