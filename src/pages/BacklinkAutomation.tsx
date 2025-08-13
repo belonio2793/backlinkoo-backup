@@ -113,6 +113,7 @@ export default function BacklinkAutomation() {
   const [isRunning, setIsRunning] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
+  const [showDatabaseSetup, setShowDatabaseSetup] = useState(false);
 
   // Form state
   const [formData, setFormData] = useState({
