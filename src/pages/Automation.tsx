@@ -350,16 +350,6 @@ export default function Automation() {
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
-                  <Label htmlFor="campaign-name">Campaign Name</Label>
-                  <Input
-                    id="campaign-name"
-                    placeholder="e.g., Main Product Keywords"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="target-url">Target URL</Label>
                   <Input
                     id="target-url"
