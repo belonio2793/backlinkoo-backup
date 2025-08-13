@@ -105,6 +105,8 @@ async function createStripePayment(paymentData, email, originUrl) {
     }
   });
 
+  console.log("✅ Stripe session created:", { sessionId: session.id, url: !!session.url });
+
   return { url: session.url, sessionId: session.id };
 }
 
