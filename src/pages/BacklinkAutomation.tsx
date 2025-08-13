@@ -26,6 +26,7 @@ import { Footer } from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { BacklinkDatabaseSetup } from '@/components/BacklinkDatabaseSetup';
 
 interface Campaign {
   id: string;
