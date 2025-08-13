@@ -39,43 +39,78 @@ class AutomationOrchestrator {
     const { id: campaignId, keywords, anchor_texts, target_url, user_id } = campaign;
 
     automationLogger.campaignStarted(campaignId);
-    automationLogger.info('campaign', 'Starting campaign processing', {
+    automationLogger.info('campaign', 'Starting campaign processing via Netlify functions', {
       keywords: keywords.slice(0, 3),
-      targetUrl: target_url
+      targetUrl: target_url,
+      userId: user_id
     }, campaignId);
 
     try {
-      // Step 1: Check service configurations
-      const contentStatus = contentGenerationService.getStatus();
-      if (!contentStatus.configured) {
-        throw new Error(contentStatus.message);
+      // Step 1: Generate content using Netlify function with rotating prompts
+      automationLogger.info('article_submission', 'Generating content via Netlify function', {}, campaignId);
+
+      // Call content generation Netlify function directly
+      const contentResponse = await fetch('/.netlify/functions/generate-content', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          keyword: keywords[0] || 'technology',
+          anchor_text: anchor_texts[Math.floor(Math.random() * anchor_texts.length)] || 'learn more',
+          url: target_url,
+          campaign_id: campaignId,
+          word_count: 800,
+          tone: 'professional',
+          user_id: user_id
+        }),
+      });
+
+      if (!contentResponse.ok) {
+        const errorData = await contentResponse.json().catch(() => ({}));
+        throw new Error(`Content generation failed: ${contentResponse.status} - ${errorData.error || 'Unknown error'}`);
       }
 
-      // Step 2: Generate content using OpenAI
-      automationLogger.info('article_submission', 'Generating content with OpenAI', {}, campaignId);
-      
-      const generatedContent = await contentGenerationService.generateBlogPost({
-        keywords,
-        anchorTexts: anchor_texts,
-        targetUrl: target_url,
-        campaignId,
-        targetSite: 'Telegraph',
-        wordCount: 800,
-        tone: 'professional'
-      });
+      const contentData = await contentResponse.json();
+      if (!contentData.success) {
+        throw new Error(contentData.error || 'Content generation failed');
+      }
 
-      // Step 3: Post to Telegraph
-      automationLogger.info('article_submission', 'Posting to Telegraph', {
+      const generatedContent = contentData.data;
+
+      // Step 2: Post to Telegraph using Netlify function
+      automationLogger.info('article_submission', 'Publishing article via Netlify function', {
         title: generatedContent.title.substring(0, 50),
-        hasAnchorLink: generatedContent.hasAnchorLink
+        hasAnchorLink: generatedContent.hasAnchorLink,
+        promptTemplate: generatedContent.promptIndex
       }, campaignId);
 
-      const postResult = await telegraphService.postArticle({
-        title: generatedContent.title,
-        content: generatedContent.content,
-        campaignId,
-        authorName: 'SEO Content Bot'
+      const publishResponse = await fetch('/.netlify/functions/publish-article', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          title: generatedContent.title,
+          content: generatedContent.content,
+          campaign_id: campaignId,
+          target_site: 'telegraph',
+          user_id: user_id,
+          author_name: 'SEO Content Bot'
+        }),
       });
+
+      if (!publishResponse.ok) {
+        const errorData = await publishResponse.json().catch(() => ({}));
+        throw new Error(`Article publishing failed: ${publishResponse.status} - ${errorData.error || 'Unknown error'}`);
+      }
+
+      const publishData = await publishResponse.json();
+      if (!publishData.success) {
+        throw new Error(publishData.error || 'Article publishing failed');
+      }
+
+      const publishResult = publishData.data;
 
       if (!postResult.success) {
         throw new Error(postResult.error || 'Failed to post to Telegraph');
