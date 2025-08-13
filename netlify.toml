@@ -17,19 +17,13 @@
 # using the schedule() function from @netlify/functions
 # For manual testing, use: /.netlify/functions/cleanup-expired
 
-# Redirects for blog posts
-[[redirects]]
-  from = "/blog/:slug"
-  to = "/blog/index.html?slug=:slug"
-  status = 200
-
 # API redirects
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
-# SPA fallback
+# SPA fallback - this handles all routes including blog posts
 [[redirects]]
   from = "/*"
   to = "/index.html"
