@@ -881,8 +881,17 @@ export class ContentFormatter {
       .replace(/&amp;gt;/g, '>')
       .replace(/&amp;amp;/g, '&')
 
+      // Fix specific malformed link patterns from DOM
+      .replace(/<a\s+hrefhttps\s*=""\s*:\s*=""\s*([a-zA-Z0-9.-]+)\s*=""\s*target_blank\s*=""\s*rel([^\s]+?)\s*=""\s*([^>]*?)>/gi,
+        '<a href="https://$1" target="_blank" rel="$2" style="color:#2563eb;font-weight:500;">')
+
       // Fix corrupted link attributes before other processing
       .replace(/<a\s+([^>]*?)\s*>/gi, (match, attrs) => {
+        // Handle severely malformed attributes
+        if (attrs.includes('hrefhttps') && attrs.includes('gohighlevelstars.com')) {
+          return '<a href="https://gohighlevelstars.com" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">';
+        }
+
         // Fix malformed attributes by ensuring proper key="value" format
         const fixedAttrs = attrs
           .replace(/\s*([a-zA-Z-]+)([^\s=]*?)="/g, ' $1="')  // Fix missing = signs
