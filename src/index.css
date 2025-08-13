@@ -5,6 +5,7 @@
 @import './styles/modal-layout-fix.css';
 @import './styles/strong-fix.css';
 @import './styles/text-spacing-fix.css';
+@import './styles/markdown-fix.css';
 
 @tailwind base;
 @tailwind components;
