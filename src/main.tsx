@@ -21,6 +21,8 @@ import './utils/testCampaignFixes'
 import './utils/fullstoryProtection'
 // Protect Vite client from FullStory interference in development
 import './utils/viteClientProtection'
+// Fix malformed links at runtime
+import './utils/domLinkFixer'
 
 // Clear previous console errors in development
 if (import.meta.env.DEV) {
