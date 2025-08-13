@@ -54,6 +54,7 @@ export function SEOScoreDisplay({
   isPremiumScore = false
 }: SEOScoreDisplayProps) {
   const [showAnalysis, setShowAnalysis] = useState(false);
+  const [showPremiumAnalysis, setShowPremiumAnalysis] = useState(false);
   const [analysis, setAnalysis] = useState<SEOAnalysisResult | null>(null);
   const [premiumCheckoutOpen, setPremiumCheckoutOpen] = useState(false);
   const { toast } = useToast();
