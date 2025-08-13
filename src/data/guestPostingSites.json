@@ -377,12 +377,110 @@
         "features": ["Markdown", "Anonymous posting", "Simple interface"]
       },
       {
-        "url": "https://0x0.st",
-        "name": "0x0.st",
+        "url": "https://publish0x.com",
+        "name": "Publish0x",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Crypto blogging", "Monetization", "Tech audience"]
+      },
+      {
+        "url": "https://hashnode.com",
+        "name": "Hashnode",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Developer blogs", "Custom domains", "Community"]
+      }
+    ]
+  },
+  "web2Platforms": {
+    "description": "Web 2.0 platforms for content publishing",
+    "sites": [
+      {
+        "url": "https://www.tumblr.com",
+        "name": "Tumblr",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Microblogging", "Rich media", "Social network"]
+      },
+      {
+        "url": "https://www.blogger.com",
+        "name": "Blogger",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Google integration", "Custom domains", "Ad revenue"]
+      },
+      {
+        "url": "https://wordpress.com",
+        "name": "WordPress.com",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Blog hosting", "Themes", "SEO friendly"]
+      },
+      {
+        "url": "https://www.wix.com/blog",
+        "name": "Wix Blog",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Website builder", "Templates", "SEO tools"]
+      },
+      {
+        "url": "https://www.weebly.com/blog",
+        "name": "Weebly Blog",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Drag and drop", "E-commerce", "Mobile responsive"]
+      }
+    ]
+  },
+  "communityPlatforms": {
+    "description": "Community-driven platforms accepting guest content",
+    "sites": [
+      {
+        "url": "https://www.reddit.com",
+        "name": "Reddit",
         "htmlSupport": false,
-        "linksAllowed": false,
-        "accountRequired": false,
-        "features": ["File hosting", "Temporary", "Command line friendly"]
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Community discussions", "Upvoting system", "Multiple niches"]
+      },
+      {
+        "url": "https://www.quora.com",
+        "name": "Quora",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Q&A platform", "Expert answers", "High authority"]
+      },
+      {
+        "url": "https://steemit.com",
+        "name": "Steemit",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Blockchain blogging", "Cryptocurrency rewards", "Decentralized"]
+      },
+      {
+        "url": "https://vocal.media",
+        "name": "Vocal Media",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Creator platform", "Monetization", "Multiple topics"]
+      },
+      {
+        "url": "https://www.minds.com",
+        "name": "Minds",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Open source", "Free speech", "Token rewards"]
       }
     ]
   }
