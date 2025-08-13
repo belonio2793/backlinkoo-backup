@@ -303,10 +303,19 @@ This is the main content that should be displayed properly formatted without the
         });
       }
     } finally {
+      console.log('🏁 Finished loading, setting loading to false');
       if (isMounted) {
         setLoading(false);
       }
     }
+
+    // Add timeout fallback to prevent infinite loading
+    setTimeout(() => {
+      console.log('⏰ Timeout reached, ensuring loading is false');
+      if (isMounted) {
+        setLoading(false);
+      }
+    }, 5000);
   };
 
   const handleClaimPost = async () => {
