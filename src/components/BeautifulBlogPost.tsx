@@ -202,61 +202,23 @@ export function BeautifulBlogPost() {
   };
 
   const loadBlogPost = async (slug: string) => {
-    console.log('🔄 Starting loadBlogPost for slug:', slug);
     try {
       setLoading(true);
 
-      // For testing: Skip database/localStorage and go directly to fallback
+      // First try database, if that fails, try localStorage fallback
       let post = null;
-      console.log('🧪 Using fallback content for testing blog template');
-
-      // Commented out for testing - uncomment to restore normal functionality
-      // try {
-      //   console.log('📊 Trying database lookup...');
-      //   post = await blogService.getBlogPostBySlug(slug);
-      //   console.log('✅ Database post found:', post ? 'YES' : 'NO');
-      // } catch (dbError) {
-      //   console.warn('❌ Database lookup failed, trying localStorage fallback:', dbError);
-      //   // Try to load from localStorage as fallback
-      //   const localStoragePost = localStorage.getItem(`blog_post_${slug}`);
-      //   if (localStoragePost) {
-      //     post = JSON.parse(localStoragePost);
-      //     console.log('✅ localStorage post found');
-      //   } else {
-      //     console.log('❌ No localStorage post found');
-      //   }
-      // }
-
-      if (!isMounted) return; // Prevent state update after unmount
-
-      // If no post found, create a sample post to test the template
-      if (!post) {
-        console.log('🆘 No post found, creating sample post for template testing');
-        post = {
-          id: 'sample',
-          slug: slug,
-          title: 'The Ultimate Guide to Digital Marketing SEO: Unleashing the Power of Online Visibility',
-          content: `**Introduction:**
-Digital Marketing SEO is the cornerstone of online success in today's competitive digital landscape.
-
-**Section 1: Understanding the Essence of Digital Marketing SEO**
-Search Engine Optimization (SEO) forms the backbone of digital marketing strategies.
-
-**Call-to-Action:**
-Start implementing these strategies today for better search rankings.
-
---- This 1000-word blog post on Digital Marketing SEO combines expert insights, actionable tips, and real-world examples to provide readers with a comprehensive guide to mastering SEO in the digital age. By integrating strategic backlinks to Backlinko, the content not only educates but also empowers readers to take their SEO efforts to the next level.
-
-This is the main content that should be displayed properly formatted without the unwanted section headers and footer text.`,
-          category: 'Digital Marketing',
-          keywords: ['SEO', 'Digital Marketing', 'Search Engine Optimization'],
-          created_at: new Date().toISOString(),
-          published_at: new Date().toISOString(),
-          view_count: 150
-        };
+      try {
+        post = await blogService.getBlogPostBySlug(slug);
+      } catch (dbError) {
+        console.warn('Database lookup failed, trying localStorage fallback:', dbError);
+        // Try to load from localStorage as fallback
+        const localStoragePost = localStorage.getItem(`blog_post_${slug}`);
+        if (localStoragePost) {
+          post = JSON.parse(localStoragePost);
+        }
       }
 
-      console.log('📝 Setting blog post:', post ? 'SUCCESS' : 'FAILED');
+      if (!isMounted) return; // Prevent state update after unmount
       setBlogPost(post);
 
       // If post is claimed, fetch the author's email
@@ -306,19 +268,10 @@ This is the main content that should be displayed properly formatted without the
         });
       }
     } finally {
-      console.log('🏁 Finished loading, setting loading to false');
       if (isMounted) {
         setLoading(false);
       }
     }
-
-    // Add timeout fallback to prevent infinite loading
-    setTimeout(() => {
-      console.log('⏰ Timeout reached, ensuring loading is false');
-      if (isMounted) {
-        setLoading(false);
-      }
-    }, 5000);
   };
 
   const handleClaimPost = async () => {
@@ -1073,41 +1026,16 @@ This is the main content that should be displayed properly formatted without the
                     __html: (() => {
                       let content = blogPost.content || '';
 
-                      // Step 1: Remove unwanted patterns (user requirements)
+                      // Direct cleanup of the problematic patterns mentioned by user
                       content = content
                         // Remove bold section markers - main user complaint
                         .replace(/\*\*(Introduction|Section \d+[^*]*|Conclusion|Call-to-Action):\*\*/gi, '')
-                        .replace(/\*\*(Hook Introduction|Summary|Overview|Abstract):\*\*/gi, '')
-                        // Remove plain section markers
-                        .replace(/^(Introduction|Section \d+[^:]*|Conclusion|Call-to-Action):\s*/gim, '')
                         // Remove the specific footer pattern
                         .replace(/---\s*This \d+-word blog post[^.]*\.\s*By integrating[^.]*level\./gi, '')
                         .replace(/---\s*This blog post[^.]*provides[^.]*\./gi, '')
-                        // Remove title repetition at start
-                        .replace(/^\*\*Title:[^*]*\*\*/gi, '')
                         // Clean up extra whitespace
                         .replace(/\n{3,}/g, '\n\n')
                         .trim();
-
-                      // Step 2: Convert markdown to HTML for proper display
-                      content = content
-                        // Convert bold text
-                        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
-                        // Convert links
-                        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-800 font-medium underline">$1</a>')
-                        // Convert headings
-                        .replace(/^### (.*$)/gm, '<h3 class="text-xl font-bold text-gray-900 mb-3 mt-6">$1</h3>')
-                        .replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold text-gray-900 mb-4 mt-8">$1</h2>')
-                        .replace(/^# (.*$)/gm, '<h1 class="text-3xl font-bold text-gray-900 mb-6 mt-10">$1</h1>')
-                        // Convert line breaks to paragraphs
-                        .split('\n\n')
-                        .filter(p => p.trim())
-                        .map(p => {
-                          // Don't wrap headings in paragraphs
-                          if (p.trim().startsWith('<h')) return p.trim();
-                          return `<p class="text-gray-700 leading-relaxed mb-6">${p.trim()}</p>`;
-                        })
-                        .join('');
 
                       return content;
                     })()
