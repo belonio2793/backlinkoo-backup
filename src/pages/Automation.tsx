@@ -706,6 +706,133 @@ export default function Automation() {
               </div>
             )}
           </TabsContent>
+
+          {/* Reporting Tab */}
+          <TabsContent value="reporting" className="space-y-6">
+            {!user && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="flex items-center gap-2 text-blue-800">
+                  <AlertCircle className="h-5 w-5" />
+                  <span className="font-medium">Demo Reporting</span>
+                </div>
+                <p className="text-blue-700 text-sm mt-1">
+                  You're viewing demo submission reports. Sign in to see your actual campaign results and published articles.
+                </p>
+              </div>
+            )}
+
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-bold">{user ? 'Your Published Articles' : 'Demo Article Reports'}</h2>
+              <Button
+                onClick={loadSubmissions}
+                variant="outline"
+                disabled={loadingSubmissions || !user}
+              >
+                {loadingSubmissions ? (
+                  <div className="animate-spin mr-2 h-4 w-4 border-2 border-gray-600 border-t-transparent rounded-full" />
+                ) : (
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                )}
+                Refresh Reports
+              </Button>
+            </div>
+
+            {loadingSubmissions ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full" />
+              </div>
+            ) : submissions.length === 0 ? (
+              <Card>
+                <CardContent className="text-center py-12">
+                  <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No articles published yet</h3>
+                  <p className="text-gray-500 mb-4">Start a campaign to begin generating and publishing articles</p>
+                  <Button
+                    onClick={() => document.querySelector('[value="create"]')?.click()}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Create Your First Campaign
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {submissions.map((submission) => (
+                  <Card key={submission.id} className="hover:shadow-md transition-shadow">
+                    <CardContent className="p-6">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3 mb-2">
+                            <h3 className="text-lg font-semibold">{submission.article_title}</h3>
+                            <Badge className="bg-green-500 text-white">
+                              <CheckCircle className="h-3 w-3 mr-1" />
+                              Published
+                            </Badge>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                            <div>
+                              <p className="text-sm text-gray-500">Campaign</p>
+                              <p className="text-sm font-medium truncate">
+                                {submission.automation_campaigns?.name || 'Unknown Campaign'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-500">Target URL</p>
+                              <p className="text-sm font-medium truncate">
+                                {submission.automation_campaigns?.target_url || 'Unknown URL'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-sm text-gray-500">Article Stats</p>
+                              <p className="text-sm font-medium">
+                                {submission.metadata?.word_count || 0} words
+                              </p>
+                              <p className="text-xs text-gray-400">
+                                {submission.metadata?.views || 0} views
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-4 text-sm text-gray-500">
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-4 w-4" />
+                              {new Date(submission.published_date).toLocaleDateString()}
+                            </div>
+                            {submission.anchor_text && (
+                              <div className="flex items-center gap-1">
+                                <Link className="h-4 w-4" />
+                                Anchor: "{submission.anchor_text}"
+                              </div>
+                            )}
+                            <div className="flex items-center gap-1">
+                              <Target className="h-4 w-4" />
+                              telegra.ph
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 ml-4">
+                          {submission.article_url && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(submission.article_url, '_blank')}
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                            >
+                              <ExternalLink className="h-4 w-4 mr-1" />
+                              View Article
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
         </Tabs>
       </div>
 
