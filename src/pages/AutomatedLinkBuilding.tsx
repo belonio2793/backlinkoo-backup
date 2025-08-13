@@ -103,7 +103,7 @@ export default function AutomatedLinkBuilding() {
   const loadGeneratedPosts = async () => {
     try {
       setLoading(true);
-      
+
       const { data, error } = await supabase
         .from('automation_posts')
         .select('*')
@@ -112,13 +112,29 @@ export default function AutomatedLinkBuilding() {
         .limit(50);
 
       if (error) {
-        console.error('Error loading posts:', error);
+        // Handle specific database errors gracefully
+        if (error.message?.includes('relation') && error.message?.includes('does not exist')) {
+          console.info('automation_posts table does not exist yet - this is normal on first run');
+          setGeneratedPosts([]);
+          return;
+        }
+
+        // Handle other errors with proper error message extraction
+        const errorMessage = error.message || error.details || JSON.stringify(error);
+        console.error('Error loading posts:', errorMessage);
+        toast.error(`Failed to load posts: ${errorMessage}`);
         return;
       }
 
       setGeneratedPosts(data || []);
     } catch (error) {
-      console.error('Error loading posts:', error);
+      // Handle unexpected errors with better error message extraction
+      const errorMessage = error instanceof Error ? error.message :
+                          error && typeof error === 'object' ? JSON.stringify(error) :
+                          String(error);
+      console.error('Unexpected error loading posts:', errorMessage);
+      toast.error(`Failed to load posts: ${errorMessage}`);
+      setGeneratedPosts([]); // Set empty array as fallback
     } finally {
       setLoading(false);
     }
