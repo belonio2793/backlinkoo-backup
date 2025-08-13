@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import PaymentDiagnostics, { type PaymentDiagnosticResult } from '@/utils/paymentDiagnostics';
+import PaymentQuickFix from '@/utils/paymentQuickFix';
 
 interface DiagnosticResults {
   environment: PaymentDiagnosticResult[];
