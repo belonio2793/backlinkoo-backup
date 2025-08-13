@@ -257,28 +257,57 @@ export default function Automation() {
       const anchorTextsArray = formData.anchor_texts.split(',').map(a => a.trim()).filter(a => a);
 
       // Get available sites for this campaign
-      const availableSites = await targetSitesManager.getAvailableSites({
-        domain_rating_min: 50,
-        min_success_rate: 60
-      }, 100);
+      let availableSites = [];
+      try {
+        availableSites = await targetSitesManager.getAvailableSites({
+          domain_rating_min: 50,
+          min_success_rate: 60
+        }, 100);
+        automationLogger.debug('campaign', `Found ${availableSites.length} available sites for campaign`);
+      } catch (sitesError) {
+        automationLogger.warn('campaign', 'Failed to load target sites, using fallback', {}, undefined, sitesError as Error);
+        availableSites = []; // Fallback to empty array
+      }
+
+      // Prepare campaign data
+      const campaignData = {
+        user_id: user.id,
+        name: generatedName,
+        keywords: keywordsArray,
+        anchor_texts: anchorTextsArray,
+        target_url: formData.target_url,
+        status: 'draft' as const,
+        links_built: 0,
+        available_sites: availableSites.length,
+        target_sites_used: []
+      };
+
+      automationLogger.debug('campaign', 'Inserting campaign data', {
+        userId: user.id,
+        name: generatedName,
+        keywordCount: keywordsArray.length,
+        anchorTextCount: anchorTextsArray.length
+      });
 
       const { data, error } = await supabase
         .from('automation_campaigns')
-        .insert({
-          user_id: user.id,
-          name: generatedName,
-          keywords: keywordsArray,
-          anchor_texts: anchorTextsArray,
-          target_url: formData.target_url,
-          status: 'draft',
-          links_built: 0,
-          available_sites: availableSites.length,
-          target_sites_used: []
-        })
+        .insert(campaignData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        automationLogger.error('campaign', 'Database insert failed', {
+          campaignData,
+          errorMessage: error.message,
+          errorCode: error.code,
+          errorDetails: error.details
+        }, undefined, error);
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error('Campaign created but no data returned from database');
+      }
 
       automationLogger.campaignCreated(data.id, {
         name: data.name,
@@ -296,8 +325,26 @@ export default function Automation() {
 
       toast.success(`Campaign '${data.name}' created with ${availableSites.length} target sites available!`);
     } catch (error) {
-      automationLogger.error('campaign', 'Failed to create campaign', { ...formData, generatedName }, undefined, error as Error);
-      toast.error('Failed to create campaign');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorDetails = {
+        formData,
+        generatedName,
+        userId: user?.id,
+        errorType: typeof error,
+        errorMessage
+      };
+
+      automationLogger.error('campaign', 'Failed to create campaign', errorDetails, undefined, error as Error);
+
+      console.error('🎯 Campaign creation error details:', {
+        error,
+        formData,
+        user: user?.id,
+        errorMessage
+      });
+
+      // Show user-friendly error message
+      toast.error(`Failed to create campaign: ${errorMessage}`);
     } finally {
       setCreating(false);
     }
