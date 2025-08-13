@@ -185,6 +185,25 @@ export default function BacklinkAutomation() {
       return;
     }
 
+    // Check if database tables exist first
+    try {
+      const { error: tableCheckError } = await supabase
+        .from('backlink_campaigns')
+        .select('id')
+        .limit(1);
+
+      if (tableCheckError && tableCheckError.message.includes('does not exist')) {
+        setShowDatabaseSetup(true);
+        toast.error('Database tables not set up. Please run the database setup first.');
+        return;
+      }
+    } catch (tableError) {
+      console.error('Table check error:', tableError);
+      setShowDatabaseSetup(true);
+      toast.error('Cannot access database tables. Please set up the database first.');
+      return;
+    }
+
     try {
       const campaignData = {
         user_id: user?.id,
