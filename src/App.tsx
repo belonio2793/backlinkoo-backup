@@ -389,6 +389,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/markdown-test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyMarkdownTest />
+                </Suspense>
+              }
+            />
 
             {/* 404 Catch-all route */}
             <Route
