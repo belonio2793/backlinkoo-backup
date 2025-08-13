@@ -252,6 +252,30 @@ export default function BacklinkAutomation() {
       console.log('User ID:', user?.id);
       console.log('Is authenticated:', isAuthenticated);
 
+      // Test insert with minimal data first to isolate the issue
+      console.log('Testing minimal insert...');
+      const minimalData = {
+        user_id: user?.id,
+        name: 'Test Campaign',
+        target_url: 'https://example.com',
+        keyword: 'test',
+        anchor_text: 'test link',
+        target_platform: 'substack'
+      };
+
+      const { data: testInsert, error: testError } = await supabase
+        .from('backlink_campaigns')
+        .insert([minimalData])
+        .select()
+        .single();
+
+      if (testError) {
+        console.error('Test insert failed:', testError);
+        throw new Error(`Test insert failed: ${testError.message}`);
+      }
+
+      console.log('Test insert successful, proceeding with full data...');
+
       let campaign;
       if (activeCampaign) {
         // Update existing
