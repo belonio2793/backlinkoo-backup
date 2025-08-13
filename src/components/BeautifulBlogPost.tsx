@@ -549,14 +549,14 @@ export function BeautifulBlogPost() {
   const autoRemoveTitlesFromContent = (content: string, pageTitle: string) => {
     if (!content) return content;
 
-    // First, check if content is markdown or already HTML
-    const isMarkdown = content.includes('**') || content.includes('##') || content.includes('*') && !content.includes('<');
+    // Always process content through the formatter to ensure proper HTML formatting
+    let processedContent = ContentFormatter.formatBlogContent(content, pageTitle);
 
-    // If it's markdown, convert it to HTML first
-    let processedContent = content;
-    if (isMarkdown) {
-      processedContent = ContentFormatter.formatBlogContent(content, pageTitle);
-    }
+    // Apply additional post-processing to fix any remaining issues
+    processedContent = ContentFormatter.preProcessMalformedHtml(processedContent);
+    processedContent = ContentFormatter.fixDisplayedHtmlAsText(processedContent);
+    processedContent = ContentFormatter.fixDOMDisplayIssues(processedContent);
+    processedContent = ContentFormatter.postProcessCleanup(processedContent);
 
     // Now remove duplicate titles if pageTitle is provided
     if (!pageTitle) return processedContent;
