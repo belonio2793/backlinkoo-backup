@@ -277,7 +277,7 @@ export function BeautifulBlogPost() {
   const handleClaimPost = async () => {
     if (!user) {
       // Store claim intent and show modal instead of navigating
-      EnhancedBlogClaimService.handleClaimIntent(slug!, cleanTitle(blogPost?.title || ''));
+      EnhancedBlogClaimService.handleClaimIntent(slug!, BlogContentCleaner.cleanTitle(blogPost?.title || ''));
       setShowClaimModal(true);
       return;
     }
@@ -1274,7 +1274,7 @@ export function BeautifulBlogPost() {
         isOpen={showClaimModal}
         onClose={() => setShowClaimModal(false)}
         onAuthSuccess={handleAuthSuccess}
-        postTitle={cleanTitle(blogPost?.title || '')}
+        postTitle={BlogContentCleaner.cleanTitle(blogPost?.title || '')}
         postSlug={slug || ''}
       />
 
@@ -1300,7 +1300,7 @@ export function BeautifulBlogPost() {
       <ExitIntentPopup
         isVisible={showExitPopup}
         onClose={() => setShowExitPopup(false)}
-        postTitle={cleanTitle(blogPost?.title || '')}
+        postTitle={BlogContentCleaner.cleanTitle(blogPost?.title || '')}
         timeRemaining={blogPost?.expires_at ? getTimeRemaining(blogPost.expires_at) : '24 hours'}
       />
 
