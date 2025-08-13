@@ -278,6 +278,63 @@ function Blog() {
     return cleaned;
   };
 
+  // Function to generate clean excerpt from content
+  const generateExcerpt = (post: any): string => {
+    // Try to use meta_description first
+    if (post.meta_description) {
+      const cleanMeta = cleanDescription(post.meta_description);
+      if (cleanMeta.length > 20) {
+        return cleanMeta.length > 150 ? cleanMeta.substring(0, 150) + '...' : cleanMeta;
+      }
+    }
+
+    // Fallback to content if available
+    if (post.content) {
+      let excerpt = post.content;
+
+      // Remove HTML tags and markdown
+      excerpt = excerpt
+        .replace(/<[^>]*>/g, '') // Remove HTML tags
+        .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold markdown
+        .replace(/\*(.*?)\*/g, '$1') // Remove italic markdown
+        .replace(/#+\s*/g, '') // Remove markdown headers
+        .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove markdown links
+        .replace(/`([^`]*)`/g, '$1') // Remove code markdown
+        .replace(/\n+/g, ' ') // Replace line breaks with spaces
+        .replace(/\s+/g, ' ') // Clean up multiple spaces
+        .trim();
+
+      // Remove common prefixes that might be titles
+      excerpt = excerpt
+        .replace(/^(?:H[1-6]|Title|Heading|Header):\s*/gi, '')
+        .replace(/^(?:Introduction|Overview|Summary):\s*/gi, '')
+        .replace(/^(?:Blog post|Article|Post):\s*/gi, '')
+        .trim();
+
+      // Take first meaningful sentence or paragraph
+      const sentences = excerpt.split(/[.!?]+/);
+      let result = '';
+
+      for (const sentence of sentences) {
+        const cleanSentence = sentence.trim();
+        if (cleanSentence.length > 10 && !cleanSentence.toLowerCase().startsWith('h1') && !cleanSentence.toLowerCase().startsWith('title')) {
+          result = cleanSentence;
+          break;
+        }
+      }
+
+      if (result.length > 150) {
+        result = result.substring(0, 150) + '...';
+      }
+
+      return result || excerpt.substring(0, 150) + '...';
+    }
+
+    // Fallback to cleaned title if no content
+    const cleanedTitle = cleanTitle(post.title);
+    return cleanedTitle.length > 150 ? cleanedTitle.substring(0, 150) + '...' : cleanedTitle;
+  };
+
   const filteredPosts = blogPosts.filter(post => {
     const cleanedTitle = cleanTitle(post.title).toLowerCase();
     const cleanedDescription = cleanDescription(post.meta_description || '').toLowerCase();
@@ -971,11 +1028,9 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
           {cleanTitle(post.title)}
         </CardTitle>
 
-        {post.meta_description && (
-          <p className="text-gray-600 line-clamp-3 leading-relaxed text-sm font-light">
-            {cleanDescription(post.meta_description)}
-          </p>
-        )}
+        <p className="text-gray-600 line-clamp-3 leading-relaxed text-sm font-light">
+          {generateExcerpt(post)}
+        </p>
       </CardHeader>
       
       <CardContent className="pt-0 space-y-4 p-6">
@@ -1038,10 +1093,9 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
         {/* Action Footer */}
         <div className="flex items-center justify-between pt-2 border-t border-gray-100">
           <div className="flex items-center gap-2 text-sm text-gray-600">
-            <User className="h-4 w-4" />
-            <span>{post.author_name === 'AI Writer' ? 'Backlink AI' : (post.author_name || 'Backlink ∞')}</span>
             {isOwnedByUser && (
-              <Badge className="bg-green-50 text-green-700 border-green-200 text-xs ml-2">
+              <Badge className="bg-green-50 text-green-700 border-green-200 text-xs">
+                <User className="h-3 w-3 mr-1" />
                 Yours
               </Badge>
             )}
@@ -1108,20 +1162,12 @@ function BlogPostListItem({ post, navigate, formatDate, onLoginRequired, cleanTi
               {cleanTitle(post.title)}
             </h3>
 
-            {post.meta_description && (
-              <p className="text-gray-600 leading-relaxed line-clamp-2">
-                {cleanDescription(post.meta_description)}
-              </p>
-            )}
+            <p className="text-gray-600 leading-relaxed line-clamp-2">
+              {generateExcerpt(post)}
+            </p>
             
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-6 text-sm text-gray-500">
-                <div className="flex items-center gap-1">
-                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-              <User className="h-4 w-4 text-white" />
-            </div>
-            <span className="font-medium">{post.author_name === 'AI Writer' ? 'Backlink ∞ ' : (post.author_name || 'Backlink ∞ ')}</span>
-                </div>
                 <div className="flex items-center gap-1">
                   <Calendar className="h-4 w-4" />
                   <span>{formatDate(post.published_at || post.created_at)}</span>
