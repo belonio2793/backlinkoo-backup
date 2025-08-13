@@ -753,6 +753,7 @@ function Blog() {
                     onLoginRequired={() => setLoginModalOpen(true)}
                     cleanTitle={cleanTitle}
                     cleanDescription={cleanDescription}
+                    generateExcerpt={generateExcerpt}
                   />
                 ) : (
                   <BlogPostListItem
