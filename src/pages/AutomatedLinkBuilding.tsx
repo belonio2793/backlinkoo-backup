@@ -174,14 +174,15 @@ export default function AutomatedLinkBuilding() {
       return;
     }
 
+    // Get the selected template first (outside try block for fallback access)
+    const template = PROMPT_TEMPLATES.find(t => t.id === formData.prompt_template);
+    if (!template) {
+      toast.error('Invalid template selected');
+      return;
+    }
+
     try {
       setIsGenerating(true);
-      
-      // Get the selected template
-      const template = PROMPT_TEMPLATES.find(t => t.id === formData.prompt_template);
-      if (!template) {
-        throw new Error('Invalid template selected');
-      }
 
       // Create the prompt by replacing placeholders
       const prompt = template.template
