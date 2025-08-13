@@ -1026,16 +1026,41 @@ export function BeautifulBlogPost() {
                     __html: (() => {
                       let content = blogPost.content || '';
 
-                      // Direct cleanup of the problematic patterns mentioned by user
+                      // Step 1: Remove unwanted patterns (user requirements)
                       content = content
                         // Remove bold section markers - main user complaint
                         .replace(/\*\*(Introduction|Section \d+[^*]*|Conclusion|Call-to-Action):\*\*/gi, '')
+                        .replace(/\*\*(Hook Introduction|Summary|Overview|Abstract):\*\*/gi, '')
+                        // Remove plain section markers
+                        .replace(/^(Introduction|Section \d+[^:]*|Conclusion|Call-to-Action):\s*/gim, '')
                         // Remove the specific footer pattern
                         .replace(/---\s*This \d+-word blog post[^.]*\.\s*By integrating[^.]*level\./gi, '')
                         .replace(/---\s*This blog post[^.]*provides[^.]*\./gi, '')
+                        // Remove title repetition at start
+                        .replace(/^\*\*Title:[^*]*\*\*/gi, '')
                         // Clean up extra whitespace
                         .replace(/\n{3,}/g, '\n\n')
                         .trim();
+
+                      // Step 2: Convert markdown to HTML for proper display
+                      content = content
+                        // Convert bold text
+                        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>')
+                        // Convert links
+                        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" class="text-blue-600 hover:text-blue-800 font-medium underline">$1</a>')
+                        // Convert headings
+                        .replace(/^### (.*$)/gm, '<h3 class="text-xl font-bold text-gray-900 mb-3 mt-6">$1</h3>')
+                        .replace(/^## (.*$)/gm, '<h2 class="text-2xl font-bold text-gray-900 mb-4 mt-8">$1</h2>')
+                        .replace(/^# (.*$)/gm, '<h1 class="text-3xl font-bold text-gray-900 mb-6 mt-10">$1</h1>')
+                        // Convert line breaks to paragraphs
+                        .split('\n\n')
+                        .filter(p => p.trim())
+                        .map(p => {
+                          // Don't wrap headings in paragraphs
+                          if (p.trim().startsWith('<h')) return p.trim();
+                          return `<p class="text-gray-700 leading-relaxed mb-6">${p.trim()}</p>`;
+                        })
+                        .join('');
 
                       return content;
                     })()
