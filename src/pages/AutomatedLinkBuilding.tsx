@@ -691,6 +691,13 @@ export default function AutomatedLinkBuilding() {
                           Performance analytics and reporting
                         </li>
                       </ul>
+                      <Button
+                        onClick={() => setShowSignInModal(true)}
+                        className="w-full mt-4"
+                      >
+                        <ArrowRight className="h-4 w-4 mr-2" />
+                        Sign In to Get Started
+                      </Button>
                     </div>
                   </div>
                 ) : generatedPosts.length === 0 ? (
