@@ -309,26 +309,10 @@ export default function AutomatedLinkBuilding() {
     }
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <Header />
-        <div className="container mx-auto px-4 py-16">
-          <div className="max-w-md mx-auto text-center">
-            <Brain className="h-16 w-16 text-blue-600 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-4">Sign In Required</h2>
-            <p className="text-gray-600">Please sign in to access the automated content generation platform.</p>
-          </div>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -337,6 +321,33 @@ export default function AutomatedLinkBuilding() {
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">AI Content Automation</h1>
           <p className="text-gray-600 text-lg">Generate and publish content with ChatGPT 3.5 Turbo</p>
+
+          {/* User State Info */}
+          {!isAuthenticated && (
+            <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg max-w-2xl mx-auto">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                <span className="font-medium text-yellow-800">Limited Access Mode</span>
+              </div>
+              <p className="text-sm text-yellow-700">
+                You can explore all features, but content generation requires sign-in.
+                <span className="font-medium"> Sign in to generate unlimited content and save your posts.</span>
+              </p>
+            </div>
+          )}
+
+          {isAuthenticated && (
+            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg max-w-2xl mx-auto">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <CheckCircle className="h-5 w-5 text-green-600" />
+                <span className="font-medium text-green-800">Full Access Active</span>
+              </div>
+              <p className="text-sm text-green-700">
+                Welcome back! You have access to all automation features including content generation,
+                publishing, and post management.
+              </p>
+            </div>
+          )}
         </div>
 
         <Tabs defaultValue="generator" className="max-w-6xl mx-auto">
