@@ -53,9 +53,17 @@ serve(async (req) => {
   );
 
   try {
+    console.log("=== Payment Request Started ===");
+    console.log("Method:", req.method);
+    console.log("URL:", req.url);
+    console.log("Headers:", Object.fromEntries(req.headers.entries()));
+
     // Rate limiting check
     const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    console.log("Client IP:", clientIP);
+
     if (!checkRateLimit(clientIP)) {
+      console.log("Rate limit exceeded for IP:", clientIP);
       return new Response(
         JSON.stringify({ error: 'Rate limit exceeded' }),
         { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -63,6 +71,7 @@ serve(async (req) => {
     }
 
     const body: PaymentRequest = await req.json();
+    console.log("Request body:", { ...body, guestEmail: body.guestEmail ? '[REDACTED]' : undefined });
     
     // Input validation
     if (!body.amount || body.amount <= 0 || body.amount > 1000000) {
@@ -82,16 +91,28 @@ serve(async (req) => {
 
     if (!isGuest) {
       const authHeader = req.headers.get("Authorization");
-      if (!authHeader) throw new Error("No authorization header provided");
-      
-      const token = authHeader.replace("Bearer ", "");
-      const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
-      if (userError || !userData.user?.email) {
-        throw new Error("User not authenticated");
+      if (authHeader) {
+        try {
+          const token = authHeader.replace("Bearer ", "");
+          const { data: userData, error: userError } = await supabaseClient.auth.getUser(token);
+          if (!userError && userData.user?.email) {
+            user = userData.user;
+            email = userData.user.email;
+          } else {
+            console.warn("Auth failed, treating as guest:", userError?.message);
+            isGuest = true;
+          }
+        } catch (authError) {
+          console.warn("Auth error, treating as guest:", authError);
+          isGuest = true;
+        }
+      } else {
+        console.warn("No auth header, treating as guest");
+        isGuest = true;
       }
-      user = userData.user;
-      email = user.email;
-    } else {
+    }
+
+    if (isGuest) {
       if (!guestEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail)) {
         throw new Error('Valid guest email is required for guest checkout');
       }
@@ -103,7 +124,14 @@ serve(async (req) => {
     }
 
     if (paymentMethod === 'stripe') {
-      const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
+      const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+      console.log("Stripe key available:", !!stripeKey, "Length:", stripeKey?.length || 0);
+
+      if (!stripeKey || stripeKey.length < 10) {
+        throw new Error("Stripe secret key not configured. Please set STRIPE_SECRET_KEY environment variable.");
+      }
+
+      const stripe = new Stripe(stripeKey, {
         apiVersion: "2023-10-16",
       });
 
@@ -218,7 +246,28 @@ serve(async (req) => {
 
   } catch (error) {
     console.error("Error in create-payment:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("Error details:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      cause: error.cause
+    });
+
+    // Provide more specific error messages
+    let errorMessage = error.message;
+    if (error.message?.includes("STRIPE_SECRET_KEY")) {
+      errorMessage = "Payment system configuration error. Please contact support.";
+    } else if (error.message?.includes("rate limit")) {
+      errorMessage = "Too many requests. Please wait a moment and try again.";
+    } else if (error.message?.includes("network") || error.message?.includes("fetch")) {
+      errorMessage = "Network error. Please check your connection and try again.";
+    }
+
+    return new Response(JSON.stringify({
+      error: errorMessage,
+      code: error.code || 'PAYMENT_ERROR',
+      timestamp: new Date().toISOString()
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });

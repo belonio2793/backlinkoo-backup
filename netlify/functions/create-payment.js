@@ -53,9 +53,12 @@ async function getClientIP(request) {
 async function createStripePayment(paymentData, email, originUrl) {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
-  if (!stripeSecretKey || stripeSecretKey.includes('placeholder')) {
-    throw new Error("Stripe is not configured for this environment. Please set up your Stripe API keys or use demo mode.");
+  if (!stripeSecretKey || stripeSecretKey.includes('placeholder') || stripeSecretKey === 'your-stripe-secret-key') {
+    console.error("❌ Stripe configuration missing:", { hasKey: !!stripeSecretKey, keyLength: stripeSecretKey?.length });
+    throw new Error("Payment system not configured. Please contact support.");
   }
+
+  console.log("✅ Stripe configuration found, creating payment session...");
 
   const stripe = new Stripe(stripeSecretKey, {
     apiVersion: "2023-10-16",
@@ -68,6 +71,8 @@ async function createStripePayment(paymentData, email, originUrl) {
       customerId = customers.data[0].id;
     }
   }
+
+  console.log("🔄 Creating Stripe checkout session...");
 
   // Create checkout session with dynamic product
   const session = await stripe.checkout.sessions.create({
@@ -100,6 +105,8 @@ async function createStripePayment(paymentData, email, originUrl) {
     }
   });
 
+  console.log("✅ Stripe session created:", { sessionId: session.id, url: !!session.url });
+
   return { url: session.url, sessionId: session.id };
 }
 
@@ -126,9 +133,16 @@ exports.handler = async (event, context) => {
   }
 
   try {
+    console.log("=== Payment Request Started ===");
+    console.log("Method:", event.httpMethod);
+    console.log("Headers:", event.headers);
+
     // Rate limiting based on IP
     const clientIP = await getClientIP(event);
+    console.log("Client IP:", clientIP);
+
     if (!checkRateLimit(clientIP)) {
+      console.log("Rate limit exceeded for IP:", clientIP);
       return {
         statusCode: 429,
         headers,
@@ -137,6 +151,7 @@ exports.handler = async (event, context) => {
     }
 
     const body = JSON.parse(event.body || '{}');
+    console.log("Request body:", { ...body, guestEmail: body.guestEmail ? '[REDACTED]' : undefined });
     const { amount, productName, isGuest, guestEmail, paymentMethod, credits } = body;
 
     // Input validation

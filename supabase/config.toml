@@ -1,10 +1,10 @@
 project_id = "dfhanacsmsvvkpunurnp"
 
 [functions.create-payment]
-verify_jwt = true
+verify_jwt = false
 
 [functions.create-subscription]
-verify_jwt = true
+verify_jwt = false
 
 [functions.verify-payment]
-verify_jwt = true
+verify_jwt = false

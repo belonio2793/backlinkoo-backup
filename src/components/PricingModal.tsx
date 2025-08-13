@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { CheckoutAuthForm } from "@/components/CheckoutAuthForm";
+import MobilePaymentHandler from "@/utils/mobilePaymentHandler";
 
 interface PricingModalProps {
   isOpen: boolean;
@@ -216,21 +217,49 @@ export const PricingModal = ({
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {
+      const response = await fetch('/.netlify/functions/create-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           amount: price,
           productName: `${credits} Backlink Credits`,
+          credits,
           isGuest,
           guestEmail: isGuest ? guestEmail : undefined,
           paymentMethod
-        }
+        })
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
 
       if (data.url) {
-        window.open(data.url, '_blank');
-        onClose();
+        // Use mobile-optimized payment handler
+        await MobilePaymentHandler.handlePaymentRedirect({
+          url: data.url,
+          onSuccess: () => {
+            console.log('✅ Payment redirect successful');
+            onClose();
+          },
+          onError: (error) => {
+            console.error('❌ Payment redirect failed:', error);
+            toast({
+              title: "Redirect Failed",
+              description: "Trying alternative redirect method...",
+              variant: "destructive",
+            });
+            // Fallback to basic redirect
+            window.location.href = data.url;
+          }
+        });
+      } else {
+        throw new Error('No payment URL received');
       }
     } catch (error) {
       console.error('Payment error:', error);
@@ -258,21 +287,48 @@ export const PricingModal = ({
 
     try {
       const plan = subscriptionPlans["premium-seo-tools"];
-      
-      const { data, error } = await supabase.functions.invoke('create-subscription', {
-        body: {
+
+      const response = await fetch('/.netlify/functions/create-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           priceId: plan.priceId,
           tier: "premium-seo-tools",
           isGuest,
           guestEmail: isGuest ? guestEmail : undefined
-        }
+        })
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
 
       if (data.url) {
-        window.open(data.url, '_blank');
-        onClose();
+        // Use mobile-optimized payment handler
+        await MobilePaymentHandler.handlePaymentRedirect({
+          url: data.url,
+          onSuccess: () => {
+            console.log('✅ Subscription redirect successful');
+            onClose();
+          },
+          onError: (error) => {
+            console.error('❌ Subscription redirect failed:', error);
+            toast({
+              title: "Redirect Failed",
+              description: "Trying alternative redirect method...",
+              variant: "destructive",
+            });
+            // Fallback to basic redirect
+            window.location.href = data.url;
+          }
+        });
+      } else {
+        throw new Error('No subscription URL received');
       }
     } catch (error) {
       console.error('Subscription error:', error);

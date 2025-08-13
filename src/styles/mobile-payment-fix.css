@@ -1,0 +1,197 @@
+/**
+ * Mobile Payment Optimizations
+ * Fixes for mobile payment interactions and touch handling
+ */
+
+/* Mobile-specific touch optimizations */
+@media (max-width: 768px) {
+  /* Ensure proper touch targets for payment buttons */
+  [role="button"], 
+  button, 
+  .payment-button,
+  [data-payment-trigger] {
+    min-height: 44px;
+    min-width: 44px;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+  }
+
+  /* Fix iOS Safari payment form styling */
+  input[type="email"],
+  input[type="text"],
+  input[type="number"],
+  select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    border-radius: 8px;
+    font-size: 16px; /* Prevents zoom on iOS */
+    min-height: 44px;
+  }
+
+  /* Payment modal optimizations */
+  .payment-modal,
+  [data-payment-modal] {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+  }
+
+  /* Loading overlay for payment redirects */
+  #payment-loading-overlay {
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+
+  /* Prevent double-tap zoom on payment buttons */
+  .payment-submit-button,
+  [data-payment-submit] {
+    touch-action: manipulation;
+    -ms-touch-action: manipulation;
+  }
+}
+
+/* iOS Safari specific fixes */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari payment form fixes */
+  .payment-form input {
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+  }
+
+  /* Fix for iOS Safari payment redirect issues */
+  .payment-redirect-trigger {
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Ensure proper z-index stacking for payment modals */
+  .payment-modal {
+    -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Android Chrome specific fixes */
+@media screen and (-webkit-min-device-pixel-ratio: 1) and (max-width: 768px) {
+  /* Android Chrome payment optimizations */
+  .payment-form {
+    will-change: transform;
+  }
+
+  /* Fix for Android Chrome payment button alignment */
+  .payment-button-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 56px;
+  }
+}
+
+/* High-DPI mobile screens */
+@media only screen and (min-device-pixel-ratio: 2) and (max-width: 768px) {
+  /* Crisp rendering for payment icons and buttons */
+  .payment-icon,
+  .payment-logo {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+  }
+}
+
+/* Landscape mobile orientation fixes */
+@media (max-width: 768px) and (orientation: landscape) {
+  /* Optimize payment modal height for landscape */
+  .payment-modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Dark mode mobile payment adjustments */
+@media (prefers-color-scheme: dark) and (max-width: 768px) {
+  .payment-loading-overlay {
+    background: rgba(0, 0, 0, 0.9);
+  }
+  
+  .payment-form input {
+    color-scheme: dark;
+  }
+}
+
+/* Accessibility improvements for mobile payments */
+@media (max-width: 768px) {
+  /* Larger touch targets for accessibility */
+  .payment-form label {
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  /* High contrast mode support */
+  @media (prefers-contrast: high) {
+    .payment-button {
+      border: 2px solid;
+    }
+  }
+
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .payment-loading-spinner {
+      animation: none;
+    }
+    
+    .payment-modal {
+      transition: none;
+    }
+  }
+}
+
+/* Network-aware optimizations */
+@media (max-width: 768px) {
+  /* Optimize for slow connections */
+  .payment-form {
+    contain: layout style paint;
+  }
+  
+  /* Reduce animations on 2G connections */
+  @media (max-width: 768px) and (connection: slow-2g) {
+    * {
+      animation-duration: 0.1s !important;
+      animation-delay: 0s !important;
+      transition-duration: 0.1s !important;
+    }
+  }
+}
+
+/* Safe area support for devices with notches */
+@supports (padding: max(0px)) {
+  .payment-modal-safe {
+    padding-left: max(16px, env(safe-area-inset-left));
+    padding-right: max(16px, env(safe-area-inset-right));
+    padding-top: max(16px, env(safe-area-inset-top));
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+}
+
+/* Prevent zoom on input focus for iOS */
+@media (max-width: 768px) {
+  input[type="email"]:focus,
+  input[type="number"]:focus,
+  input[type="text"]:focus,
+  select:focus {
+    font-size: 16px;
+    transform: scale(1);
+  }
+}

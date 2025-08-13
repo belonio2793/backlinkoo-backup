@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Mobile Payment Test - Backlink ∞</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: white;
+        }
+        
+        .container {
+            max-width: 400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.37);
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 24px;
+            font-size: 24px;
+        }
+        
+        .device-info {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .test-section {
+            margin-bottom: 20px;
+        }
+        
+        .test-section h3 {
+            margin-bottom: 12px;
+            font-size: 18px;
+        }
+        
+        button {
+            width: 100%;
+            min-height: 48px;
+            background: linear-gradient(45deg, #00d4ff, #0099cc);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            touch-action: manipulation;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        button:active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            font-size: 14px;
+        }
+        
+        .status.success {
+            background: rgba(34, 197, 94, 0.2);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .status.info {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        
+        .logs {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏻 Mobile Payment Test</h1>
+        
+        <div class="device-info" id="deviceInfo">
+            <strong>Loading device info...</strong>
+        </div>
+        
+        <div class="test-section">
+            <h3>Compatibility Tests</h3>
+            <button onclick="runCompatibilityTests()">Run Compatibility Check</button>
+            <div id="compatibilityResults"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Payment Redirect Tests</h3>
+            <button onclick="testStandardRedirect()">Test Standard Redirect</button>
+            <button onclick="testMobileOptimizedRedirect()">Test Mobile Optimized</button>
+            <button onclick="testStripeRedirect()">Test Stripe Demo</button>
+            <div id="redirectResults"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Touch & Gesture Tests</h3>
+            <button onclick="testTouchEvents()">Test Touch Events</button>
+            <button onclick="testPopupBlocking()">Test Popup Blocking</button>
+            <div id="touchResults"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>Console Logs</h3>
+            <button onclick="clearLogs()">Clear Logs</button>
+            <div class="logs" id="logs"></div>
+        </div>
+    </div>
+
+    <script>
+        // Enhanced logging
+        const logs = [];
+        const originalLog = console.log;
+        const originalError = console.error;
+        const originalWarn = console.warn;
+        
+        function addLog(level, ...args) {
+            const timestamp = new Date().toLocaleTimeString();
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            
+            logs.push(`[${timestamp}] ${level.toUpperCase()}: ${message}`);
+            updateLogsDisplay();
+            
+            // Call original function
+            if (level === 'error') originalError(...args);
+            else if (level === 'warn') originalWarn(...args);
+            else originalLog(...args);
+        }
+        
+        console.log = (...args) => addLog('log', ...args);
+        console.error = (...args) => addLog('error', ...args);
+        console.warn = (...args) => addLog('warn', ...args);
+        
+        function updateLogsDisplay() {
+            document.getElementById('logs').textContent = logs.slice(-50).join('\n');
+        }
+        
+        function clearLogs() {
+            logs.length = 0;
+            updateLogsDisplay();
+        }
+        
+        // Device detection
+        function getDeviceInfo() {
+            const userAgent = navigator.userAgent.toLowerCase();
+            const info = {
+                isMobile: /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent),
+                isIOS: /ipad|iphone|ipod/.test(userAgent),
+                isAndroid: /android/.test(userAgent),
+                isSafari: /safari/.test(userAgent) && !/chrome/.test(userAgent),
+                isChrome: /chrome/.test(userAgent),
+                hasTouch: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+                screenWidth: screen.width,
+                screenHeight: screen.height,
+                viewportWidth: window.innerWidth,
+                viewportHeight: window.innerHeight,
+                pixelRatio: window.devicePixelRatio || 1,
+                connection: navigator.connection?.effectiveType || 'unknown'
+            };
+            
+            return info;
+        }
+        
+        function displayDeviceInfo() {
+            const info = getDeviceInfo();
+            const html = `
+                <strong>Device:</strong> ${info.isMobile ? 'Mobile' : 'Desktop'}<br>
+                <strong>Platform:</strong> ${info.isIOS ? 'iOS' : info.isAndroid ? 'Android' : 'Other'}<br>
+                <strong>Browser:</strong> ${info.isSafari ? 'Safari' : info.isChrome ? 'Chrome' : 'Other'}<br>
+                <strong>Touch:</strong> ${info.hasTouch ? 'Yes' : 'No'}<br>
+                <strong>Screen:</strong> ${info.screenWidth}x${info.screenHeight}<br>
+                <strong>Viewport:</strong> ${info.viewportWidth}x${info.viewportHeight}<br>
+                <strong>Pixel Ratio:</strong> ${info.pixelRatio}<br>
+                <strong>Connection:</strong> ${info.connection}
+            `;
+            document.getElementById('deviceInfo').innerHTML = html;
+        }
+        
+        function showResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = message;
+            container.appendChild(div);
+            
+            // Auto-remove after 10 seconds
+            setTimeout(() => {
+                if (div.parentNode) {
+                    div.parentNode.removeChild(div);
+                }
+            }, 10000);
+        }
+        
+        // Compatibility tests
+        function runCompatibilityTests() {
+            console.log('🔍 Running compatibility tests...');
+            
+            const tests = [
+                {
+                    name: 'Local Storage',
+                    test: () => {
+                        try {
+                            localStorage.setItem('test', 'test');
+                            localStorage.removeItem('test');
+                            return { success: true, message: 'Available' };
+                        } catch (e) {
+                            return { success: false, message: 'Blocked' };
+                        }
+                    }
+                },
+                {
+                    name: 'Cookies',
+                    test: () => {
+                        try {
+                            document.cookie = 'test=test';
+                            const enabled = document.cookie.indexOf('test=test') !== -1;
+                            document.cookie = 'test=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                            return { success: enabled, message: enabled ? 'Enabled' : 'Disabled' };
+                        } catch (e) {
+                            return { success: false, message: 'Error' };
+                        }
+                    }
+                },
+                {
+                    name: 'Popup Support',
+                    test: () => {
+                        try {
+                            const popup = window.open('', 'test', 'width=1,height=1');
+                            if (popup) {
+                                popup.close();
+                                return { success: true, message: 'Supported' };
+                            } else {
+                                return { success: false, message: 'Blocked' };
+                            }
+                        } catch (e) {
+                            return { success: false, message: 'Error' };
+                        }
+                    }
+                },
+                {
+                    name: 'Fetch API',
+                    test: () => {
+                        return { 
+                            success: typeof fetch !== 'undefined', 
+                            message: typeof fetch !== 'undefined' ? 'Available' : 'Not Available' 
+                        };
+                    }
+                }
+            ];
+            
+            let html = '<h4>Test Results:</h4>';
+            tests.forEach(test => {
+                const result = test.test();
+                const icon = result.success ? '✅' : '❌';
+                html += `<div>${icon} ${test.name}: ${result.message}</div>`;
+                console.log(`${icon} ${test.name}: ${result.message}`);
+            });
+            
+            showResult('compatibilityResults', html, 'info');
+        }
+        
+        // Redirect tests
+        function testStandardRedirect() {
+            console.log('🔗 Testing standard redirect...');
+            showResult('redirectResults', '🔗 Standard redirect: window.location.href', 'info');
+            
+            setTimeout(() => {
+                window.location.href = 'https://httpbin.org/status/200';
+            }, 2000);
+        }
+        
+        function testMobileOptimizedRedirect() {
+            console.log('📱 Testing mobile optimized redirect...');
+            
+            const info = getDeviceInfo();
+            let method = 'Standard redirect';
+            
+            if (info.isIOS && info.isSafari) {
+                method = 'iOS Safari form submission';
+                const form = document.createElement('form');
+                form.method = 'GET';
+                form.action = 'https://httpbin.org/status/200';
+                form.style.display = 'none';
+                document.body.appendChild(form);
+                
+                showResult('redirectResults', `📱 Using ${method}`, 'info');
+                setTimeout(() => {
+                    form.submit();
+                }, 2000);
+                
+            } else if (info.isAndroid && info.isChrome) {
+                method = 'Android Chrome optimized';
+                showResult('redirectResults', `📱 Using ${method}`, 'info');
+                setTimeout(() => {
+                    window.location.href = 'https://httpbin.org/status/200';
+                }, 2000);
+                
+            } else {
+                method = 'General mobile redirect';
+                showResult('redirectResults', `📱 Using ${method}`, 'info');
+                setTimeout(() => {
+                    window.location.href = 'https://httpbin.org/status/200';
+                }, 2000);
+            }
+            
+            console.log(`📱 Using mobile optimization: ${method}`);
+        }
+        
+        function testStripeRedirect() {
+            console.log('💳 Testing Stripe demo redirect...');
+            showResult('redirectResults', '💳 Redirecting to Stripe demo...', 'info');
+            
+            setTimeout(() => {
+                window.location.href = 'https://checkout.stripe.com/pay/cs_test_demo';
+            }, 2000);
+        }
+        
+        // Touch and gesture tests
+        function testTouchEvents() {
+            console.log('👆 Testing touch events...');
+            
+            const info = getDeviceInfo();
+            const results = [];
+            
+            if (info.hasTouch) {
+                results.push('✅ Touch events supported');
+                results.push(`📱 Max touch points: ${navigator.maxTouchPoints}`);
+                
+                // Test touch event listeners
+                const testElement = document.createElement('div');
+                let touchStartSupported = false;
+                let touchEndSupported = false;
+                
+                testElement.addEventListener('touchstart', () => touchStartSupported = true);
+                testElement.addEventListener('touchend', () => touchEndSupported = true);
+                
+                // Simulate touch events
+                const touchEvent = new TouchEvent('touchstart', {
+                    bubbles: true,
+                    cancelable: true,
+                });
+                
+                testElement.dispatchEvent(touchEvent);
+                
+                if (touchStartSupported) results.push('✅ Touch event listeners working');
+                else results.push('❌ Touch event listeners not working');
+                
+            } else {
+                results.push('❌ No touch support detected');
+            }
+            
+            showResult('touchResults', results.join('<br>'), info.hasTouch ? 'success' : 'error');
+        }
+        
+        function testPopupBlocking() {
+            console.log('🚫 Testing popup blocking...');
+            
+            try {
+                const popup = window.open('about:blank', 'test-popup', 'width=300,height=200');
+                
+                if (popup) {
+                    console.log('✅ Popup opened successfully');
+                    showResult('touchResults', '✅ Popups are allowed', 'success');
+                    
+                    setTimeout(() => {
+                        popup.close();
+                        console.log('🔒 Test popup closed');
+                    }, 3000);
+                } else {
+                    console.log('❌ Popup was blocked');
+                    showResult('touchResults', '❌ Popups are blocked', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Popup test error:', error);
+                showResult('touchResults', '❌ Popup test failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Mobile payment test page loaded');
+            displayDeviceInfo();
+        });
+        
+        // Auto-run compatibility tests on load
+        setTimeout(runCompatibilityTests, 1000);
+    </script>
+</body>
+</html>
