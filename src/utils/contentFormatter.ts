@@ -13,6 +13,13 @@ export class ContentFormatter {
     // CRITICAL: Add debug logging for production issues
     console.log('ContentFormatter: Original content length:', content.length);
 
+    // ULTRA-EARLY FIX: Prevent malformed bold patterns before any other processing
+    content = content
+      // Fix patterns like **E**nhanced SEO Performance: -> **Enhanced SEO Performance:**
+      .replace(/\*\*([A-Z])\*\*([a-z][^:*\n]*:)/g, '**$1$2**')
+      // Fix any double-malformed patterns
+      .replace(/\*\*([A-Z])\*\*([a-z][^:*\n]*)\*\*([^*]*:)/g, '**$1$2$3**');
+
     // VERY EARLY preprocessing to fix critical issues before any HTML processing
     content = content
       // Fix the specific issue: ## &lt; h2&gt;Pro Tip pattern
