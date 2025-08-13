@@ -654,6 +654,10 @@ export function BeautifulBlogPost() {
       .replace(/&lt;[^&]*&gt;/g, '') // Remove any &lt;tag&gt; patterns
       .replace(/["=]{2,}/g, '') // Remove multiple quotes/equals signs;
 
+    // FINAL: Apply link attribute fixer to the processed HTML
+    finalHtml = LinkAttributeFixer.fixMalformedLinks(finalHtml);
+    finalHtml = LinkAttributeFixer.ensureLinkStyling(finalHtml);
+
     return finalHtml;
   };
 
