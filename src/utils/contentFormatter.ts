@@ -469,8 +469,8 @@ export class ContentFormatter {
         const items = match.trim().split('\n')
           .map(line => {
             let cleanLine = line.replace(/^[\*\-\+]\s/, '').trim();
-            // Convert markdown bold to HTML strong tags
-            cleanLine = cleanLine.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            // Convert markdown bold to HTML strong tags with proper styling
+            cleanLine = cleanLine.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-inherit">$1</strong>');
             return `  <li>${cleanLine}</li>`;
           })
           .join('\n');
@@ -488,8 +488,8 @@ export class ContentFormatter {
         const items = match.trim().split('\n')
           .map(line => {
             let cleanLine = line.replace(/^\d+\.\s/, '').trim();
-            // Convert markdown bold to HTML strong tags
-            cleanLine = cleanLine.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            // Convert markdown bold to HTML strong tags with proper styling
+            cleanLine = cleanLine.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-inherit">$1</strong>');
             return `  <li>${cleanLine}</li>`;
           })
           .join('\n');
