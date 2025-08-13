@@ -6,12 +6,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Plus, 
-  Play, 
-  Pause, 
-  Settings, 
-  BarChart3, 
+import {
+  Plus,
+  Play,
+  Pause,
+  Settings,
+  BarChart3,
   Target,
   Link,
   Zap,
@@ -20,7 +20,8 @@ import {
   CheckCircle,
   AlertCircle,
   Trash2,
-  Edit
+  Edit,
+  ExternalLink
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
