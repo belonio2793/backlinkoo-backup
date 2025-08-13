@@ -31,6 +31,7 @@ import { toast } from 'sonner';
 import { automationLogger } from '@/services/automationLogger';
 import { targetSitesManager } from '@/services/targetSitesManager';
 import { automationOrchestrator } from '@/services/automationOrchestrator';
+import AutomationTestDashboard from '@/components/automation/AutomationTestDashboard';
 
 interface Campaign {
   id: string;
