@@ -66,7 +66,7 @@ import {
   LazyClaimSystemDebug,
   LazySEOOptimizedBlogGenerator,
   LazyScrapePage,
-  LazyBacklinkAutomation,
+  LazyAutomation,
   LazyAdminCampaignManager,
   LazyOpenAITest,
   LazySystemTest,
@@ -252,7 +252,11 @@ export const OptimizedAppWrapper = () => {
 
           {/* Feature routes - lazy loaded */}
           <Route path="/scrape" element={<LazyScrapePage />} />
-          <Route path="/automation" element={<LazyBacklinkAutomation />} />
+          <Route path="/automation" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyAutomation />
+            </Suspense>
+          } />
           <Route path="/campaign/:campaignId" element={
             <InstantEmailVerificationGuard>
               <LazyCampaignDeliverables />

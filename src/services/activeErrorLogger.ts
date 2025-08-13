@@ -4,7 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
-import { ErrorHandlingEngine } from './automationEngine/ErrorHandlingEngine';
+// Note: ErrorHandlingEngine removed with automation cleanup
 
 export interface DebugLog {
   id: string;

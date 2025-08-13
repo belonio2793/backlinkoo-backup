@@ -9,8 +9,6 @@ import './utils/unifiedErrorHandler'
 import './utils/campaignErrorHandler'
 // Test error formatting in development (no promise rejections)
 import './utils/silentErrorTest'
-// Test campaign error fixes
-import './utils/testCampaignFixes'
 // Check if database schema is properly configured
 // import './utils/checkSchemaExecution' // Disabled - using new blog comment system
 // Auto-fix missing columns

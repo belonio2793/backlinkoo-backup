@@ -2,11 +2,10 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Zap, 
-  Settings, 
-  BarChart3, 
-  Home, 
+import {
+  Zap,
+  BarChart3,
+  Home,
   FileText,
   Menu,
   X
@@ -20,8 +19,7 @@ export function NavigationHeader() {
   const navigationItems = [
     { path: '/', label: 'Home', icon: Home },
     { path: '/dashboard', label: 'Dashboard', icon: BarChart3 },
-    { path: '/automation', label: 'Automation', icon: Settings },
-    { path: '/automation/system', label: 'System Control', icon: Zap, badge: 'New' },
+    { path: '/automation', label: 'Automation', icon: Zap },
     { path: '/blog', label: 'Blog', icon: FileText }
   ];
 
@@ -68,9 +66,6 @@ export function NavigationHeader() {
                     <Badge variant="secondary" className="ml-1 text-xs">
                       {item.badge}
                     </Badge>
-                  )}
-                  {item.path === '/automation/system' && (
-                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                   )}
                 </Link>
               );
