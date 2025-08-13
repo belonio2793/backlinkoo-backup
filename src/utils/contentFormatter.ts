@@ -280,7 +280,7 @@ export class ContentFormatter {
       .replace(/\n---$/gm, '')
       // Remove any "Title:" patterns at the very beginning of content (most aggressive)
       .replace(/^[\s\n]*Title:\s*[^\n]*\n?/i, '')
-      // Convert markdown links [text](url) to <a> tags with proper styling
+      // Convert markdown links [text](url) to <a> tags with proper styling - preserve user anchor text
       .replace(/\[([^\]]+?)\]\(([^)]+?)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$1</a>')
 
       // Convert plain URLs to clickable links
