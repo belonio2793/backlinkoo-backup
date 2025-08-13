@@ -219,29 +219,71 @@ class AutomationOrchestrator {
 
   async getUserSubmissions(userId: string, limit: number = 50): Promise<any[]> {
     try {
+      // First check if article_submissions table exists by trying a simple query
+      const { data: testData, error: testError } = await supabase
+        .from('article_submissions')
+        .select('id')
+        .limit(1);
+
+      if (testError) {
+        // Table might not exist - log and return empty array
+        automationLogger.warn('database', 'article_submissions table not accessible', {
+          userId,
+          limit,
+          error: testError.message
+        });
+        return [];
+      }
+
+      // Now try the full query with join
       const { data, error } = await supabase
         .from('article_submissions')
         .select(`
           *,
-          automation_campaigns!inner(
+          automation_campaigns(
             name,
             keywords,
             target_url,
             user_id
           )
         `)
-        .eq('automation_campaigns.user_id', userId)
-        .order('submission_date', { ascending: false })
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
         .limit(limit);
 
       if (error) {
-        automationLogger.error('database', 'Failed to fetch user submissions', { userId, limit }, undefined, error);
-        return [];
+        // Try a simpler query without join if the complex one fails
+        const { data: simpleData, error: simpleError } = await supabase
+          .from('article_submissions')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(limit);
+
+        if (simpleError) {
+          automationLogger.error('database', 'Failed to fetch user submissions', {
+            userId,
+            limit,
+            originalError: error.message,
+            simpleError: simpleError.message
+          }, undefined, simpleError);
+          return [];
+        }
+
+        automationLogger.warn('database', 'Using simplified query due to join error', {
+          userId,
+          joinError: error.message
+        });
+        return simpleData || [];
       }
 
       return data || [];
     } catch (error) {
-      automationLogger.error('database', 'Error fetching user submissions', { userId }, undefined, error as Error);
+      automationLogger.error('database', 'Error fetching user submissions', {
+        userId,
+        errorMessage: error instanceof Error ? error.message : String(error),
+        errorType: typeof error
+      }, undefined, error as Error);
       return [];
     }
   }
