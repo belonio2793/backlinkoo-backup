@@ -26,12 +26,14 @@ import {
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserFlow, useAuthWithProgress } from '@/contexts/UserFlowContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { automationLogger } from '@/services/automationLogger';
 import { targetSitesManager } from '@/services/targetSitesManager';
 import { automationOrchestrator } from '@/services/automationOrchestrator';
 import AutomationTestDashboard from '@/components/automation/AutomationTestDashboard';
+import { LoginModal } from '@/components/LoginModal';
 
 interface Campaign {
   id: string;
@@ -49,6 +51,15 @@ interface Campaign {
 
 export default function Automation() {
   const { user } = useAuth();
+  const { requireAuth, restoreFormData, shouldRestoreProgress } = useAuthWithProgress();
+  const {
+    showSignInModal,
+    setShowSignInModal,
+    defaultAuthTab,
+    pendingAction,
+    clearSavedFormData
+  } = useUserFlow();
+
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -73,12 +84,25 @@ export default function Automation() {
     }
   };
   
-  // Form state
+  // Form state with restoration capability
   const [formData, setFormData] = useState({
     keywords: '',
     anchor_texts: '',
     target_url: ''
   });
+
+  // Restore form data when component mounts if user was previously working on something
+  useEffect(() => {
+    if (shouldRestoreProgress && user) {
+      const restoredData = restoreFormData();
+      if (restoredData) {
+        console.log('🎯 Automation: Restoring form data after auth:', restoredData);
+        setFormData(restoredData);
+        clearSavedFormData();
+        toast.success('Welcome back! Your progress has been restored.');
+      }
+    }
+  }, [shouldRestoreProgress, user, restoreFormData, clearSavedFormData]);
 
   // Auto-format URL to add https:// if missing
   const formatUrl = (url: string): string => {
@@ -199,10 +223,15 @@ export default function Automation() {
   };
 
   const createCampaign = async () => {
-    if (!user) {
-      automationLogger.warn('campaign', 'Campaign creation attempted without authentication');
-      toast.error('Please sign in to create campaigns');
-      return;
+    // Check if user needs to authenticate and save progress
+    const hasAuth = requireAuth(
+      'campaign creation',
+      formData.keywords || formData.anchor_texts || formData.target_url ? formData : undefined,
+      false // Prefer login over signup for returning users
+    );
+
+    if (!hasAuth) {
+      return; // User will be prompted to sign in, progress is saved
     }
 
     if (!formData.keywords || !formData.anchor_texts || !formData.target_url) {
@@ -438,6 +467,13 @@ export default function Automation() {
   };
 
 
+  // Handle auth success from modal
+  const handleAuthSuccess = (user: any) => {
+    console.log('🎯 Automation: Auth success, user:', user?.email);
+    setShowSignInModal(false);
+    // Form restoration will happen via useEffect above
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Header />
@@ -574,7 +610,10 @@ export default function Automation() {
                   ) : (
                     <>
                       <Plus className="h-4 w-4 mr-2" />
-                      Sign In to Create Campaign
+                      {formData.keywords || formData.anchor_texts || formData.target_url
+                        ? 'Save Progress & Sign In'
+                        : 'Sign In to Create Campaign'
+                      }
                     </>
                   )}
                 </Button>
@@ -880,6 +919,15 @@ export default function Automation() {
       </div>
 
       <Footer />
+
+      {/* Auth Modal */}
+      <LoginModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        onAuthSuccess={handleAuthSuccess}
+        defaultTab={defaultAuthTab}
+        pendingAction={pendingAction}
+      />
     </div>
   );
 }
