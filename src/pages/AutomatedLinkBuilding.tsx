@@ -272,6 +272,111 @@ export default function AutomatedLinkBuilding() {
     loadAutomationData();
   }, [user, isAuthenticated]);
 
+  // Production campaign creation function
+  const handleSaveCampaign = async () => {
+    if (!user || !campaignForm.name || !campaignForm.target_url || !campaignForm.keywords) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      const keywordsArray = campaignForm.keywords.split(',').map(k => k.trim()).filter(k => k);
+
+      const { data, error } = await supabase
+        .from('automation_campaigns')
+        .insert({
+          user_id: user.id,
+          name: campaignForm.name,
+          target_url: campaignForm.target_url,
+          keywords: keywordsArray,
+          strategy: campaignForm.strategy,
+          competitor_urls: campaignForm.competitor_urls.split(',').map(u => u.trim()).filter(u => u),
+          content_tone: campaignForm.content_tone,
+          auto_publish: campaignForm.auto_publish,
+          drip_speed: campaignForm.drip_speed,
+          status: 'paused'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast.success('Campaign saved successfully');
+      setCampaigns(prev => [data, ...prev]);
+
+      // Reset form
+      setCampaignForm({
+        name: '',
+        keywords: '',
+        target_url: '',
+        strategy: 'natural_growth',
+        competitor_urls: '',
+        content_tone: 'professional',
+        auto_publish: false,
+        drip_speed: 'medium'
+      });
+    } catch (error) {
+      console.error('Error saving campaign:', error);
+      toast.error('Failed to save campaign');
+    }
+  };
+
+  // Production automation start function
+  const handleStartAutomation = async () => {
+    if (!user || !campaignForm.name || !campaignForm.target_url || !campaignForm.keywords) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      setIsRunning(true);
+      setCurrentStep('Creating campaign...');
+
+      // Save campaign first
+      await handleSaveCampaign();
+
+      setCurrentStep('Starting automation engines...');
+
+      // Start automation via Netlify function
+      const response = await fetch('/.netlify/functions/automation-control', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        },
+        body: JSON.stringify({
+          action: 'start',
+          campaign: {
+            name: campaignForm.name,
+            target_url: campaignForm.target_url,
+            keywords: campaignForm.keywords.split(',').map(k => k.trim()).filter(k => k),
+            strategy: campaignForm.strategy,
+            drip_speed: campaignForm.drip_speed
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to start automation');
+      }
+
+      const result = await response.json();
+
+      setCurrentStep('Automation started successfully');
+      toast.success('Automation campaign started!');
+
+      // Refresh data
+      window.location.reload();
+
+    } catch (error) {
+      console.error('Error starting automation:', error);
+      toast.error('Failed to start automation');
+      setCurrentStep('Error starting automation');
+    } finally {
+      setIsRunning(false);
+    }
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
