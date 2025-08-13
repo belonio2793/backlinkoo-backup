@@ -190,6 +190,33 @@ export default function AutomatedLinkBuilding() {
 
         setCampaigns(campaigns || []);
 
+        // Fetch outreach statistics
+        const { data: outreachData, error: outreachError } = await supabase
+          .from('outreach_campaigns')
+          .select(`
+            emails_sent,
+            response_rate,
+            positive_responses,
+            link_placements
+          `)
+          .eq('user_id', user.id);
+
+        if (outreachError) {
+          console.error('Error loading outreach data:', outreachError);
+        } else if (outreachData && outreachData.length > 0) {
+          const totalEmailsSent = outreachData.reduce((sum, campaign) => sum + (campaign.emails_sent || 0), 0);
+          const avgResponseRate = Math.round(outreachData.reduce((sum, campaign) => sum + (campaign.response_rate || 0), 0) / outreachData.length);
+          const totalPositiveResponses = outreachData.reduce((sum, campaign) => sum + (campaign.positive_responses || 0), 0);
+          const totalLinkPlacements = outreachData.reduce((sum, campaign) => sum + (campaign.link_placements || 0), 0);
+
+          setOutreachStats({
+            emailsSent: totalEmailsSent,
+            responseRate: avgResponseRate,
+            positiveResponses: totalPositiveResponses,
+            linkPlacements: totalLinkPlacements
+          });
+        }
+
       } catch (error) {
         console.error('Error loading automation data:', error);
         toast.error('Failed to load automation data');
