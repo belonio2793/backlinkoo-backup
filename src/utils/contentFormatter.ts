@@ -69,8 +69,13 @@ export class ContentFormatter {
 
     // Process the content in correct order - add comprehensive cleanup first
     formattedContent = this.removeSpecificMalformedPatterns(formattedContent);
+    console.log('After removeSpecificMalformedPatterns:', formattedContent.includes('**Enhanced') ? 'Has Enhanced' : 'No Enhanced');
+
     formattedContent = this.cleanupMarkdownArtifacts(formattedContent);
+    console.log('After cleanupMarkdownArtifacts:', formattedContent.includes('**Enhanced') ? 'Has Enhanced' : formattedContent.includes('**E**') ? 'Has **E**' : 'No Enhanced');
+
     formattedContent = this.convertMarkdownToHtml(formattedContent);
+    console.log('After convertMarkdownToHtml:', formattedContent.includes('<strong') ? 'Has strong tags' : 'No strong tags');
     formattedContent = this.removeDuplicateTitle(formattedContent, title);
     formattedContent = this.fixContentIssues(formattedContent);
     formattedContent = this.cleanMalformedLinks(formattedContent);
