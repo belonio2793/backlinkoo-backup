@@ -577,6 +577,41 @@ export function BeautifulBlogPost() {
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = processedContent;
 
+    // CRITICAL: Fix malformed links after HTML parsing (this is where corruption happens)
+    const malformedLinks = tempDiv.querySelectorAll('a[hrefhttps], a[stylecolor]');
+    malformedLinks.forEach(link => {
+      // Extract domain from malformed attributes
+      const attrs = Array.from(link.attributes);
+      let domain = '';
+
+      // Look for domain in various malformed attribute patterns
+      for (const attr of attrs) {
+        if (attr.name.includes('.com') || attr.name.includes('.net') || attr.name.includes('.org')) {
+          domain = attr.name;
+          break;
+        }
+      }
+
+      // Special case for Go High Level Stars
+      if (link.textContent?.includes('Go High Level Stars') || domain.includes('gohighlevelstars')) {
+        domain = 'gohighlevelstars.com';
+      }
+
+      if (domain) {
+        console.log('🔧 Fixing malformed link for:', domain);
+        // Clear all malformed attributes
+        Array.from(link.attributes).forEach(attr => {
+          link.removeAttribute(attr.name);
+        });
+
+        // Set proper attributes
+        link.setAttribute('href', `https://${domain}`);
+        link.setAttribute('target', '_blank');
+        link.setAttribute('rel', 'noopener');
+        link.setAttribute('style', 'color:#2563eb;font-weight:500;text-decoration:underline;');
+      }
+    });
+
     // Find and remove duplicate title headings (h1, h2, h3)
     const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
 
