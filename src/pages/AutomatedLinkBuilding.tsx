@@ -115,6 +115,14 @@ export default function AutomatedLinkBuilding() {
     }
   });
   const [loading, setLoading] = useState(true);
+  const [recentActivity, setRecentActivity] = useState<Array<{
+    id: string;
+    type: 'link_published' | 'outreach_sent' | 'content_generated';
+    title: string;
+    description: string;
+    status: string;
+    created_at: string;
+  }>>([]);
 
   // Form states
   const [campaignForm, setCampaignForm] = useState({
@@ -663,30 +671,37 @@ export default function AutomatedLinkBuilding() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">Link published on TechCrunch</p>
-                      <p className="text-xs text-gray-600">Domain Rating: 93 • Guest post about AI tools</p>
+                  {loading ? (
+                    <div className="flex items-center justify-center p-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                      <span className="ml-2 text-gray-500">Loading activity...</span>
                     </div>
-                    <Badge variant="outline" className="text-green-700">Live</Badge>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                    <Mail className="h-5 w-5 text-blue-600" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">Outreach sent to 12 prospects</p>
-                      <p className="text-xs text-gray-600">2 positive responses received</p>
+                  ) : recentActivity.length === 0 ? (
+                    <div className="text-center p-8 text-gray-500">
+                      No recent activity. Start a campaign to see activity here.
                     </div>
-                    <Badge variant="outline" className="text-blue-700">Active</Badge>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
-                    <Brain className="h-5 w-5 text-purple-600" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">AI generated 5 unique articles</p>
-                      <p className="text-xs text-gray-600">Ready for Web 2.0 publication</p>
-                    </div>
-                    <Badge variant="outline" className="text-purple-700">Ready</Badge>
-                  </div>
+                  ) : (
+                    recentActivity.map((activity) => (
+                      <div key={activity.id} className={`flex items-center gap-3 p-3 rounded-lg ${
+                        activity.type === 'link_published' ? 'bg-green-50' :
+                        activity.type === 'outreach_sent' ? 'bg-blue-50' :
+                        'bg-purple-50'
+                      }`}>
+                        {activity.type === 'link_published' && <CheckCircle className="h-5 w-5 text-green-600" />}
+                        {activity.type === 'outreach_sent' && <Mail className="h-5 w-5 text-blue-600" />}
+                        {activity.type === 'content_generated' && <Brain className="h-5 w-5 text-purple-600" />}
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{activity.title}</p>
+                          <p className="text-xs text-gray-600">{activity.description}</p>
+                        </div>
+                        <Badge variant="outline" className={`${
+                          activity.status === 'Live' ? 'text-green-700' :
+                          activity.status === 'Active' ? 'text-blue-700' :
+                          'text-purple-700'
+                        }`}>{activity.status}</Badge>
+                      </div>
+                    ))
+                  )}
                 </div>
               </CardContent>
             </Card>
