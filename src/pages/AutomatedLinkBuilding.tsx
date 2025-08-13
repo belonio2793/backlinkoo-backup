@@ -99,10 +99,20 @@ export default function AutomatedLinkBuilding() {
   // Database table status
   const [tableExists, setTableExists] = useState<boolean | null>(null);
 
-  // Load generated posts
+  // Check table status and load generated posts
   useEffect(() => {
-    if (!isAuthenticated || !user) return;
-    loadGeneratedPosts();
+    const checkTableAndLoadPosts = async () => {
+      // Check if table exists
+      const tableCheck = await checkAutomationPostsTable();
+      setTableExists(tableCheck.exists);
+
+      // Load posts only if authenticated and table exists
+      if (isAuthenticated && user && tableCheck.exists) {
+        loadGeneratedPosts();
+      }
+    };
+
+    checkTableAndLoadPosts();
   }, [user, isAuthenticated]);
 
   const loadGeneratedPosts = async () => {
