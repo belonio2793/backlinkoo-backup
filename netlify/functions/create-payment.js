@@ -53,9 +53,12 @@ async function getClientIP(request) {
 async function createStripePayment(paymentData, email, originUrl) {
   const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
-  if (!stripeSecretKey || stripeSecretKey.includes('placeholder')) {
-    throw new Error("Stripe is not configured for this environment. Please set up your Stripe API keys or use demo mode.");
+  if (!stripeSecretKey || stripeSecretKey.includes('placeholder') || stripeSecretKey === 'your-stripe-secret-key') {
+    console.error("❌ Stripe configuration missing:", { hasKey: !!stripeSecretKey, keyLength: stripeSecretKey?.length });
+    throw new Error("Payment system not configured. Please contact support.");
   }
+
+  console.log("✅ Stripe configuration found, creating payment session...");
 
   const stripe = new Stripe(stripeSecretKey, {
     apiVersion: "2023-10-16",
