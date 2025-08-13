@@ -76,15 +76,16 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ModalProvider>
-        <SymbolCleanerProvider>
-          <TextCleanerProvider>
-            <Toaster />
-          <Sonner />
-          <GlobalErrorHandler />
-          <UnifiedModalManager />
-          <BrowserRouter>
-            <PremiumUpgradeProvider>
-              <ReportSyncProvider>
+        <UserFlowProvider>
+          <SymbolCleanerProvider>
+            <TextCleanerProvider>
+              <Toaster />
+            <Sonner />
+            <GlobalErrorHandler />
+            <UnifiedModalManager />
+            <BrowserRouter>
+              <PremiumUpgradeProvider>
+                <ReportSyncProvider>
             <Routes>
             <Route path="/" element={<Index />} />
             <Route
@@ -366,11 +367,12 @@ const App = () => (
               }
             />
             </Routes>
-              </ReportSyncProvider>
-            </PremiumUpgradeProvider>
-          </BrowserRouter>
-          </TextCleanerProvider>
-        </SymbolCleanerProvider>
+                </ReportSyncProvider>
+              </PremiumUpgradeProvider>
+            </BrowserRouter>
+            </TextCleanerProvider>
+          </SymbolCleanerProvider>
+        </UserFlowProvider>
       </ModalProvider>
     </TooltipProvider>
   </QueryClientProvider>
