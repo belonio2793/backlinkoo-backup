@@ -62,6 +62,7 @@ function Blog() {
   useEffect(() => {
     const loadBlogPosts = async () => {
       console.log('🔄 Loading blog posts...');
+      setLoading(true);
 
       // Set a timeout to prevent infinite loading
       const timeoutId = setTimeout(() => {
@@ -83,41 +84,61 @@ function Blog() {
             console.log('✅ Fallback posts loaded:', posts.length);
           } catch (fallbackError) {
             console.warn('❌ Fallback also failed, using localStorage:', fallbackError);
+            // Continue with empty posts array - don't throw error
+            posts = [];
           }
         }
 
         // Also load from localStorage (traditional blog posts)
         const localBlogPosts: BlogPost[] = [];
         try {
-          const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
+          const allBlogPostsStr = localStorage.getItem('all_blog_posts');
+          if (!allBlogPostsStr) {
+            console.log('No blog posts in localStorage');
+          } else {
+            const allBlogPosts = JSON.parse(allBlogPostsStr);
 
-          for (const blogMeta of allBlogPosts) {
-            const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
-            if (blogData) {
-              const blogPost = JSON.parse(blogData);
+            if (Array.isArray(allBlogPosts)) {
+              for (const blogMeta of allBlogPosts) {
+                try {
+                  const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
+                  if (blogData) {
+                    const blogPost = JSON.parse(blogData);
 
-              // Check if trial post is expired
-              if (blogPost.is_trial_post && blogPost.expires_at) {
-                const isExpired = new Date() > new Date(blogPost.expires_at);
-                if (isExpired) {
-                  // Remove expired trial post
+                    // Check if trial post is expired
+                    if (blogPost.is_trial_post && blogPost.expires_at) {
+                      const isExpired = new Date() > new Date(blogPost.expires_at);
+                      if (isExpired) {
+                        // Remove expired trial post
+                        localStorage.removeItem(`blog_post_${blogMeta.slug}`);
+                        continue;
+                      }
+                    }
+
+                    localBlogPosts.push(blogPost);
+                  }
+                } catch (blogParseError) {
+                  console.warn(`Failed to parse blog post ${blogMeta.slug}:`, blogParseError);
+                  // Remove corrupted blog post
                   localStorage.removeItem(`blog_post_${blogMeta.slug}`);
-                  continue;
                 }
               }
 
-              localBlogPosts.push(blogPost);
+              // Update the all_blog_posts list to remove expired/corrupted ones
+              const validBlogMetas = allBlogPosts.filter((meta: any) => {
+                return localBlogPosts.some(post => post.slug === meta.slug);
+              });
+              localStorage.setItem('all_blog_posts', JSON.stringify(validBlogMetas));
             }
           }
-
-          // Update the all_blog_posts list to remove expired ones
-          const validBlogMetas = allBlogPosts.filter((meta: any) => {
-            return localBlogPosts.some(post => post.slug === meta.slug);
-          });
-          localStorage.setItem('all_blog_posts', JSON.stringify(validBlogMetas));
-
         } catch (storageError) {
-          console.warn('Failed to load from localStorage:', storageError);
+          console.warn('Failed to load from localStorage, clearing corrupted data:', storageError);
+          // Clear corrupted localStorage data
+          try {
+            localStorage.removeItem('all_blog_posts');
+          } catch (clearError) {
+            console.warn('Could not clear localStorage:', clearError);
+          }
         }
 
         // Combine database and localStorage posts, removing duplicates
