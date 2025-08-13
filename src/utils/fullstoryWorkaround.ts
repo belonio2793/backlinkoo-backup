@@ -40,7 +40,11 @@ export function isFullStoryError(error: any): boolean {
          stack.includes('fs.js') ||
          stack.includes('edge.fullstory.com') ||
          // Common FullStory interference patterns
-         (message.includes('TypeError') && stack.includes('messageHandler'));
+         (message.includes('TypeError') && stack.includes('messageHandler')) ||
+         // Vite client specific patterns when FullStory interferes
+         (message.includes('TypeError') && stack.includes('@vite/client')) ||
+         (message.includes('Failed to fetch') && stack.includes('ping')) ||
+         (message.includes('Failed to fetch') && stack.includes('waitForSuccessfulPing'));
 }
 
 /**
