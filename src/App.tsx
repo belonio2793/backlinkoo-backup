@@ -139,7 +139,7 @@ const App = () => (
               path="/automation/legacy"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
-                  <LazyBacklinkAutomation />
+                  <LazyBlogCommentsSystem />
                 </Suspense>
               }
             />
