@@ -341,7 +341,12 @@ export default function AutomatedLinkBuilding() {
               </div>
               <p className="text-sm text-yellow-700">
                 You can explore all features, but content generation requires sign-in.
-                <span className="font-medium"> Sign in to generate unlimited content and save your posts.</span>
+                <button
+                  onClick={() => setShowSignInModal(true)}
+                  className="font-medium underline hover:text-yellow-800 transition-colors"
+                >
+                  Sign in to generate unlimited content and save your posts.
+                </button>
               </p>
             </div>
           )}
