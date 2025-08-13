@@ -226,15 +226,27 @@ export default function BacklinkAutomation() {
 
       const campaignData = {
         user_id: user?.id,
-        name: formData.name,
-        target_url: formData.target_url,
-        keyword: formData.keyword,
-        anchor_text: formData.anchor_text,
-        target_platform: formData.target_platform,
+        name: formData.name.toString(),
+        target_url: formData.target_url.toString(),
+        keyword: formData.keyword.toString(),
+        anchor_text: formData.anchor_text.toString(),
+        target_platform: formData.target_platform.toString(),
         status: 'paused',
         links_found: 0,
         links_posted: 0
       };
+
+      // Validate each field type to catch any issues
+      console.log('Field types validation:');
+      console.log('user_id:', typeof campaignData.user_id, campaignData.user_id);
+      console.log('name:', typeof campaignData.name, campaignData.name);
+      console.log('target_url:', typeof campaignData.target_url, campaignData.target_url);
+      console.log('keyword:', typeof campaignData.keyword, campaignData.keyword);
+      console.log('anchor_text:', typeof campaignData.anchor_text, campaignData.anchor_text);
+      console.log('target_platform:', typeof campaignData.target_platform, campaignData.target_platform);
+      console.log('status:', typeof campaignData.status, campaignData.status);
+      console.log('links_found:', typeof campaignData.links_found, campaignData.links_found);
+      console.log('links_posted:', typeof campaignData.links_posted, campaignData.links_posted);
 
       console.log('Saving campaign with data:', campaignData);
       console.log('User ID:', user?.id);
