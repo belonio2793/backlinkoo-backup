@@ -14,23 +14,32 @@ export class BlogContentCleaner {
 
     // Remove problematic section headers that make content look unprofessional
     cleaned = cleaned
-      // Remove section markers
-      .replace(/^(Introduction|Section \d+|Conclusion|Call-to-Action):\s*/gim, '')
+      // PRIORITY: Remove bold section markers (main user complaint)
+      .replace(/\*\*(Introduction|Section \d+[^*]*|Conclusion|Call-to-Action):\*\*/gim, '')
+      .replace(/\*\*(Hook Introduction|Summary|Overview|Abstract):\*\*/gim, '')
+
+      // Remove plain section markers
+      .replace(/^(Introduction|Section \d+[^:]*|Conclusion|Call-to-Action):\s*/gim, '')
       .replace(/^(Hook Introduction|Summary|Overview|Abstract):\s*/gim, '')
-      
+
+      // PRIORITY: Remove the specific footer pattern mentioned by user
+      .replace(/---\s*This \d+-word blog post[^.]*\.\s*By integrating[^.]*level\./gim, '')
+      .replace(/---\s*This blog post[^.]*provides[^.]*\./gim, '')
+
       // Remove HTML syntax artifacts that appear as text
       .replace(/\bH[1-6]:\s*/gi, '')
       .replace(/^Title:\s*/gim, '')
       .replace(/^Hook Introduction:\s*/gim, '')
-      
+
       // Remove markdown artifacts that don't render properly
       .replace(/^#{1,6}\s+/gm, '')
       .replace(/^>\s+/gm, '')
-      
+
       // Remove repeated symbols and formatting artifacts
       .replace(/["=]{2,}/g, '')
       .replace(/\*{3,}/g, '')
-      
+      .replace(/---+/g, '') // Remove multiple dashes
+
       // Clean up excessive whitespace
       .replace(/\n{3,}/g, '\n\n')
       .replace(/^\s+/gm, '') // Remove leading whitespace from lines
