@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { blogPublisher } from '@/services/blogPublisher';
+import { processBlogContent } from '@/utils/markdownProcessor';
 import {
   Eye,
   Code,
