@@ -29,8 +29,10 @@ type ScanJob = any;
 type DiscoveryTarget = any;
 type PlacementAttempt = any;
 type LinkIntelligenceNode = any;
-import AcceleratedPropagationSystem, { type PropagationSeed, type ExpansionJob } from '@/services/recursiveEngine/AcceleratedPropagationSystem';
-import URLCleaningFilterEngine from '@/services/recursiveEngine/URLCleaningFilterEngine';
+// import AcceleratedPropagationSystem, { type PropagationSeed, type ExpansionJob } from '@/services/recursiveEngine/AcceleratedPropagationSystem';
+// import URLCleaningFilterEngine from '@/services/recursiveEngine/URLCleaningFilterEngine';
+type PropagationSeed = any;
+type ExpansionJob = any;
 
 interface SystemMetrics {
   discovery: {
