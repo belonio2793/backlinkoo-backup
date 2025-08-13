@@ -529,7 +529,7 @@ export class ContentFormatter {
       // Merge consecutive <ol> elements that might have been separated
       .replace(/<\/ol>\s*<ol>/g, '')
       // Fix any remaining markdown bold syntax in HTML
-      .replace(/\*\*([^*<>]+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*\*([^*<>]+?)\*\*/g, '<strong class="font-bold text-inherit">$1</strong>')
       // Clean up any double-encoded strong tags
       .replace(/<strong>\s*<strong>([^<]+?)<\/strong>\s*<\/strong>/g, '<strong>$1</strong>');
   }
