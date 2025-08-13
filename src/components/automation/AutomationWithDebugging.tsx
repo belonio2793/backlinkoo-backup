@@ -46,25 +46,11 @@ export function AutomationWithDebugging({
         environment: import.meta.env.MODE
       });
 
-      // Test the error categorization system
-      setTimeout(() => {
-        debugLog.info('automation_debugging', 'test_categorization', 'Testing error categorization system');
-        
-        // Simulate some test errors for demonstration
-        if (import.meta.env.DEV) {
-          const testErrors = [
-            { error: new Error('Database connection timeout'), component: 'database', operation: 'query' },
-            { error: new Error('OpenAI API rate limit exceeded'), component: 'content_generation', operation: 'generate' },
-            { error: new Error('Campaign validation failed'), component: 'campaign_management', operation: 'create' }
-          ];
-
-          testErrors.forEach(({ error, component, operation }, index) => {
-            setTimeout(() => {
-              debugLog.error(component, operation, error, { testError: true });
-            }, (index + 1) * 1000);
-          });
-        }
-      }, 2000);
+      // Initialize error categorization system for production monitoring
+      debugLog.info('automation_debugging', 'system_initialization', 'Production error monitoring initialized', {
+        environment: import.meta.env.MODE,
+        userId: user?.id
+      });
     }
   }, [shouldShowDebugPanel, user?.id, isPremium]);
 
