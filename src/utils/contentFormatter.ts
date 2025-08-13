@@ -713,11 +713,11 @@ export class ContentFormatter {
 
       // Fix specific gaming site patterns like "Play now at Runescape.com"
       .replace(/(Play\s+now\s+at)\s*&lt;[^&]*&gt;\s*([a-zA-Z0-9.-]+\.com)/gi,
-        '$1 <a href="https://$2" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$2</a>')
+        '$1 <a href="https://$2">$2</a>')
 
       // Fix "Claim your place among the legends" patterns
       .replace(/Claim\s+your\s+place\s+among\s+the\s+legends[^.]*\.\s*Play\s+now\s+at\s+([a-zA-Z0-9.-]+\.com)/gi,
-        'Claim your place among the legends. Play now at <a href="https://$1" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;">$1</a>.')
+        'Claim your place among the legends. Play now at <a href="https://$1">$1</a>.')
 
       // General cleanup of malformed HTML entities in text
       .replace(/&lt;\s*\/\s*[a-zA-Z]+\s*&gt;/g, '') // Remove &lt;/tag&gt; patterns
