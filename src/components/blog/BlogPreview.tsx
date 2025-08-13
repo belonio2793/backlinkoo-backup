@@ -305,7 +305,7 @@ export function BlogPreview({ content }: BlogPreviewProps) {
           {viewMode === 'preview' ? (
             <div
               className="prose max-w-none blog-content prose-strong:font-bold prose-strong:text-foreground [&_strong]:font-bold"
-              dangerouslySetInnerHTML={{ __html: content.content }}
+              dangerouslySetInnerHTML={{ __html: processBlogContent(content.content) }}
             />
           ) : (
             <pre className="bg-gray-50 p-4 rounded text-sm overflow-x-auto whitespace-pre-wrap">
