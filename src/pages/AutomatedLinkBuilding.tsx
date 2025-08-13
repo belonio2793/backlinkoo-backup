@@ -413,6 +413,75 @@ export default function AutomatedLinkBuilding() {
     }
   };
 
+  const generateFallbackContent = (keyword: string, anchorText: string, targetUrl: string, templateName: string): string => {
+    const templates = {
+      'Blog Post': `# The Complete Guide to ${keyword}
+
+${keyword} has become increasingly important in today's digital landscape. Understanding the fundamentals and best practices can significantly impact your success.
+
+## Key Benefits
+
+When implementing effective ${keyword} strategies, businesses typically see:
+
+- Improved performance metrics
+- Better audience engagement
+- Enhanced brand visibility
+- Stronger competitive positioning
+
+## Getting Started
+
+The first step in mastering ${keyword} is to understand your target audience. Research their needs, preferences, and pain points to create more targeted approaches.
+
+For comprehensive insights and advanced strategies, you can explore [${anchorText}](${targetUrl}) which provides detailed guidance on implementation.
+
+## Best Practices
+
+Here are some proven strategies for ${keyword}:
+
+1. **Focus on Quality**: Always prioritize quality over quantity in your efforts.
+2. **Stay Consistent**: Regular, consistent efforts yield better long-term results.
+3. **Monitor Performance**: Track key metrics to understand what's working.
+4. **Adapt and Improve**: Be ready to adjust your approach based on data.
+
+## Conclusion
+
+Success with ${keyword} requires patience, consistency, and continuous learning. By following these guidelines and staying up-to-date with industry trends, you'll be well-positioned to achieve your goals.`,
+
+      'Article': `# Understanding ${keyword}: Key Insights
+
+${keyword} is essential for anyone looking to improve their results in this area. This article explores the key concepts and practical applications.
+
+## Overview
+
+${keyword} encompasses various strategies and techniques that can drive meaningful outcomes. The key is to approach it systematically and with clear objectives.
+
+## Implementation Strategy
+
+To get started with ${keyword}, consider these steps:
+
+- Research current trends and best practices
+- Define your specific goals and metrics
+- Develop a structured plan of action
+- Execute consistently and monitor results
+
+For additional resources and expert guidance, check out [${anchorText}](${targetUrl}).
+
+## Expected Outcomes
+
+When done correctly, ${keyword} can lead to significant improvements in performance and results. Many professionals report positive changes within the first few months of implementation.`,
+
+      'Comment': `Great insights on ${keyword}! I've been working in this space for a while and can definitely confirm that the strategies mentioned here are effective.
+
+One thing I'd add is the importance of staying consistent with your efforts. ${keyword} isn't something where you see results overnight, but with patience and the right approach, the results can be impressive.
+
+For those looking for more detailed guidance, I've found [${anchorText}](${targetUrl}) to be a valuable resource with practical tips and strategies.
+
+Has anyone else here tried implementing these techniques? I'd love to hear about your experiences!`
+    };
+
+    return templates[templateName as keyof typeof templates] || templates['Blog Post'];
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success('Copied to clipboard!');
