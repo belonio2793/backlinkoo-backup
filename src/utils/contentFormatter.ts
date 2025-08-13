@@ -520,6 +520,21 @@ export class ContentFormatter {
   }
 
   /**
+   * Post-process lists to fix merging and markdown issues
+   */
+  private static postProcessLists(content: string): string {
+    return content
+      // Merge consecutive <ul> elements that might have been separated
+      .replace(/<\/ul>\s*<ul>/g, '')
+      // Merge consecutive <ol> elements that might have been separated
+      .replace(/<\/ol>\s*<ol>/g, '')
+      // Fix any remaining markdown bold syntax in HTML
+      .replace(/\*\*([^*<>]+?)\*\*/g, '<strong>$1</strong>')
+      // Clean up any double-encoded strong tags
+      .replace(/<strong>\s*<strong>([^<]+?)<\/strong>\s*<\/strong>/g, '<strong>$1</strong>');
+  }
+
+  /**
    * Fix spacing throughout the content - DISABLED to prevent formatting issues
    */
   private static fixSpacing(content: string): string {
