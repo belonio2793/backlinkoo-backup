@@ -137,50 +137,6 @@ const App = () => (
               }
             />
             <Route
-              path="/automation/1"
-              element={
-                <Suspense fallback={
-                  <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center">
-                    <div className="text-center">
-                      <LoadingSpinner />
-                      <div className="mt-4">
-                        <h2 className="text-xl font-semibold text-gray-900">Loading Advanced Form Automation v1.0</h2>
-                        <p className="text-gray-600 mt-2">Initializing Playwright-powered form detection engine...</p>
-                      </div>
-                    </div>
-                  </div>
-                }>
-                  <LazyAdvancedFormAutomation />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/automation/2"
-              element={
-                <Suspense fallback={
-                  <div className="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 flex items-center justify-center">
-                    <div className="text-center">
-                      <LoadingSpinner />
-                      <div className="mt-4">
-                        <h2 className="text-xl font-semibold text-gray-900">Loading Enhanced Blog Automation v2.0</h2>
-                        <p className="text-gray-600 mt-2">Initializing comprehensive crawler/detector/poster pipeline...</p>
-                      </div>
-                    </div>
-                  </div>
-                }>
-                  <LazyBlogCommentsSystem />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/view"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyBacklinkAutomation />
-                </Suspense>
-              }
-            />
-            <Route
               path="/backlink-report"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
