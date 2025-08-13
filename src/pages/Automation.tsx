@@ -121,8 +121,10 @@ export default function Automation() {
 
   const loadCampaigns = async () => {
     if (!user) return;
-    
+
     setLoading(true);
+    automationLogger.debug('database', 'Loading user campaigns', { userId: user.id });
+
     try {
       const { data, error } = await supabase
         .from('automation_campaigns')
@@ -132,8 +134,9 @@ export default function Automation() {
 
       if (error) throw error;
       setCampaigns(data || []);
+      automationLogger.info('database', `Loaded ${data?.length || 0} campaigns`);
     } catch (error) {
-      console.error('Error loading campaigns:', error);
+      automationLogger.error('database', 'Failed to load campaigns', {}, undefined, error as Error);
       toast.error('Failed to load campaigns');
     } finally {
       setLoading(false);
@@ -142,19 +145,29 @@ export default function Automation() {
 
   const createCampaign = async () => {
     if (!user) {
+      automationLogger.warn('campaign', 'Campaign creation attempted without authentication');
       toast.error('Please sign in to create campaigns');
       return;
     }
 
     if (!formData.name || !formData.keywords || !formData.anchor_texts || !formData.target_url) {
+      automationLogger.warn('campaign', 'Campaign creation attempted with missing fields', formData);
       toast.error('Please fill in all required fields');
       return;
     }
 
     setCreating(true);
+    automationLogger.info('campaign', 'Creating new campaign', { name: formData.name });
+
     try {
       const keywordsArray = formData.keywords.split(',').map(k => k.trim()).filter(k => k);
       const anchorTextsArray = formData.anchor_texts.split(',').map(a => a.trim()).filter(a => a);
+
+      // Get available sites for this campaign
+      const availableSites = await targetSitesManager.getAvailableSites({
+        domain_rating_min: 50,
+        min_success_rate: 60
+      }, 100);
 
       const { data, error } = await supabase
         .from('automation_campaigns')
@@ -164,27 +177,34 @@ export default function Automation() {
           keywords: keywordsArray,
           anchor_texts: anchorTextsArray,
           target_url: formData.target_url,
-          target_links: formData.target_links,
           status: 'draft',
-          links_built: 0
+          links_built: 0,
+          available_sites: availableSites.length,
+          target_sites_used: []
         })
         .select()
         .single();
 
       if (error) throw error;
 
+      automationLogger.campaignCreated(data.id, {
+        name: data.name,
+        keywords: keywordsArray.length,
+        anchor_texts: anchorTextsArray.length,
+        available_sites: availableSites.length
+      });
+
       setCampaigns(prev => [data, ...prev]);
       setFormData({
         name: '',
         keywords: '',
         anchor_texts: '',
-        target_url: '',
-        target_links: 10
+        target_url: ''
       });
-      
-      toast.success('Campaign created successfully!');
+
+      toast.success(`Campaign created with ${availableSites.length} target sites available!`);
     } catch (error) {
-      console.error('Error creating campaign:', error);
+      automationLogger.error('campaign', 'Failed to create campaign', formData, undefined, error as Error);
       toast.error('Failed to create campaign');
     } finally {
       setCreating(false);
