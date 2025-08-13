@@ -185,6 +185,20 @@ export default function BacklinkAutomation() {
       return;
     }
 
+    // Validate URL format
+    try {
+      new URL(formData.target_url);
+    } catch {
+      toast.error('Please enter a valid URL (e.g., https://example.com)');
+      return;
+    }
+
+    // Check if user is authenticated
+    if (!user?.id) {
+      toast.error('You must be signed in to save campaigns');
+      return;
+    }
+
     // Check if database tables exist first
     try {
       const { error: tableCheckError } = await supabase
