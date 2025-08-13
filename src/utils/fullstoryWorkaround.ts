@@ -20,8 +20,37 @@ export function isFullStoryPresent(): boolean {
     // Check if fetch has been modified by looking at its string representation
     window.fetch.toString().includes('fullstory') ||
     window.fetch.toString().includes('FS') ||
-    window.fetch.toString().length < 50 // Native fetch is usually longer
+    window.fetch.toString().length < 50 || // Native fetch is usually longer
+    // Additional detection for development environment interference
+    (import.meta.env.DEV && isLikelyThirdPartyFetchInterference())
   );
+}
+
+/**
+ * Detect if fetch has been modified by third-party scripts (development helper)
+ */
+function isLikelyThirdPartyFetchInterference(): boolean {
+  if (typeof window === 'undefined') return false;
+
+  try {
+    const fetchStr = window.fetch.toString();
+
+    // Native fetch usually contains specific browser signatures
+    const nativePatterns = ['[native code]', 'function fetch()'];
+    const isNative = nativePatterns.some(pattern => fetchStr.includes(pattern));
+
+    if (isNative) return false;
+
+    // If it's not native and very short, it's likely been wrapped
+    if (fetchStr.length < 100) {
+      console.warn('🔍 Fetch appears to be wrapped by third-party script (length:', fetchStr.length, ')');
+      return true;
+    }
+
+    return false;
+  } catch (error) {
+    return false;
+  }
 }
 
 /**
