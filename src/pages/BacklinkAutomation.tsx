@@ -559,7 +559,21 @@ export default function BacklinkAutomation() {
                         id="website"
                         type="url"
                         value={formData.target_url}
-                        onChange={(e) => setFormData({ ...formData, target_url: e.target.value })}
+                        onChange={(e) => {
+                          let url = e.target.value.trim();
+                          // Auto-format URL if it doesn't start with http:// or https://
+                          if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+                            url = 'https://' + url;
+                          }
+                          setFormData({ ...formData, target_url: url });
+                        }}
+                        onBlur={(e) => {
+                          let url = e.target.value.trim();
+                          if (url && !url.startsWith('http://') && !url.startsWith('https://')) {
+                            url = 'https://' + url;
+                            setFormData({ ...formData, target_url: url });
+                          }
+                        }}
                         placeholder="https://yourwebsite.com"
                         disabled={isRunning}
                       />
