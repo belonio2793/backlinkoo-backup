@@ -371,19 +371,32 @@ export default function Automation() {
                   </p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="target-links">Target Number of Links</Label>
-                  <Input
-                    id="target-links"
-                    type="number"
-                    min="1"
-                    max="100"
-                    value={formData.target_links}
-                    onChange={(e) => setFormData({ ...formData, target_links: parseInt(e.target.value) || 10 })}
-                  />
-                  <p className="text-sm text-gray-500">
-                    How many backlinks do you want to build for this campaign?
-                  </p>
+                {/* Available Sites Info */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <BarChart3 className="h-5 w-5 text-blue-600" />
+                    <span className="font-medium text-blue-800">Target Sites Available</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <p className="text-blue-700">
+                        <span className="font-semibold">{availableSites}</span> active publishing sites
+                      </p>
+                      <p className="text-blue-600">
+                        High-quality domains ready for articles
+                      </p>
+                    </div>
+                    {sitesStats && (
+                      <div>
+                        <p className="text-blue-700">
+                          <span className="font-semibold">{sitesStats.average_success_rate}%</span> average success rate
+                        </p>
+                        <p className="text-blue-600">
+                          Rotating through top-performing sites
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <Button
