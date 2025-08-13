@@ -116,8 +116,8 @@ export default function RecursiveDiscoveryDashboard() {
   const discoveryEngine = { getInstance: () => ({}) };
   const infiltrationEngine = { getInstance: () => ({}) };
   const intelligenceSystem = { getInstance: () => ({}) };
-  const propagationSystem = AcceleratedPropagationSystem.getInstance();
-  const cleaningEngine = URLCleaningFilterEngine.getInstance();
+  const propagationSystem = { getInstance: () => ({}) };
+  const cleaningEngine = { getInstance: () => ({}) };
 
   // Load metrics and setup real-time updates
   useEffect(() => {
