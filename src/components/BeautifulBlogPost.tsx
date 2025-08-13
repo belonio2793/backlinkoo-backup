@@ -599,7 +599,17 @@ export function BeautifulBlogPost() {
       // Fix Building Authority and Credibility pattern
       .replace(/<strong[^>]*>B<\/strong>uilding Authority and Credibility:/gi, '<strong class="font-bold text-inherit">Building Authority and Credibility:</strong>')
       // Generic fix for any similar pattern: <strong>X</strong>word Something: -> <strong>Xword Something:</strong>
-      .replace(/<strong[^>]*>([A-Z])<\/strong>([a-z][A-Za-z\s]*:)/gi, '<strong class="font-bold text-inherit">$1$2</strong>');
+      .replace(/<strong[^>]*>([A-Z])<\/strong>([a-z][A-Za-z\s]*:)/gi, '<strong class="font-bold text-inherit">$1$2</strong>')
+
+      // Remove HTML syntax artifacts that shouldn't be displayed
+      .replace(/Hook Introduction:\s*["=]*\s*H[1-6]:\s*/gi, '')
+      .replace(/["=]+\s*H[1-6]:\s*/gi, '')
+      .replace(/\bH[1-6]:\s*/gi, '') // Remove H1:, H2:, etc. anywhere in text
+      .replace(/Hook Introduction:\s*/gi, '') // Remove standalone Hook Introduction: text
+
+      // Clean up any remaining HTML entity artifacts
+      .replace(/&lt;[^&]*&gt;/g, '') // Remove any &lt;tag&gt; patterns
+      .replace(/["=]{2,}/g, '') // Remove multiple quotes/equals signs;
 
     return finalHtml;
   };
