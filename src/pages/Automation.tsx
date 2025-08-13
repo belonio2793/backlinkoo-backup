@@ -660,10 +660,10 @@ export default function Automation() {
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => toast.info('Sign in to manage your campaigns')}
+                              onClick={() => toast.info('Sign in to start real automation campaigns with OpenAI content generation and Telegraph posting')}
                               className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                             >
-                              Sign In to Control
+                              Sign In to Start Automation
                             </Button>
                           ) : (
                             // Authenticated mode - show normal controls
