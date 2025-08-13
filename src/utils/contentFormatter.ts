@@ -794,6 +794,12 @@ export class ContentFormatter {
       .replace(/&amp;gt;/g, '>')
       .replace(/&amp;amp;/g, '&')
 
+      // Remove HTML syntax artifacts that shouldn't be displayed
+      .replace(/Hook Introduction:\s*["=]*\s*H[1-6]:\s*/gi, '')
+      .replace(/["=]+\s*H[1-6]:\s*/gi, '')
+      .replace(/\bH[1-6]:\s*/gi, '') // Remove H1:, H2:, etc. anywhere in text
+      .replace(/Hook Introduction:\s*/gi, '') // Remove standalone Hook Introduction: text
+
       // CRITICAL: Fix the broken heading pattern we see in DOM
       // Pattern: <h2>&lt;</h2><p> strong&gt;Hook Introduction...</p>
       .replace(/<h([1-6])[^>]*>&lt;<\/h[1-6]>\s*<p[^>]*>\s*strong&gt;([^<]+?)<\/p>/gi, '<h$1><strong>$2</strong></h$1>')
