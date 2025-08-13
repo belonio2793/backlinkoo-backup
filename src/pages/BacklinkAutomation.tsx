@@ -198,6 +198,8 @@ export default function BacklinkAutomation() {
         links_posted: 0
       };
 
+      console.log('Saving campaign with data:', campaignData);
+
       let campaign;
       if (activeCampaign) {
         // Update existing
