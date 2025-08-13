@@ -23,7 +23,8 @@ import {
   Eye,
   Copy,
   RefreshCw,
-  Clock
+  Clock,
+  ArrowRight
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
