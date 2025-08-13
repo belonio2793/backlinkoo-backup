@@ -116,8 +116,8 @@ class ContentGenerationService {
 
   // Test method for development
   async testGeneration(campaignId: string): Promise<GeneratedContent> {
-    automationLogger.info('api', 'Running test content generation', {}, campaignId);
-    
+    automationLogger.info('api', 'Running test content generation via Netlify', {}, campaignId);
+
     return this.generateBlogPost({
       keywords: ['SEO tools', 'digital marketing', 'link building'],
       anchorTexts: ['best SEO tools', 'powerful marketing platform', 'learn more'],
@@ -131,22 +131,15 @@ class ContentGenerationService {
 
   // Check if service is properly configured
   isConfigured(): boolean {
-    return this.apiKey !== null;
+    return true; // Always configured since we use Netlify functions
   }
 
   // Get configuration status
   getStatus(): { configured: boolean; message: string } {
-    if (this.apiKey) {
-      return {
-        configured: true,
-        message: 'OpenAI API key configured and ready'
-      };
-    } else {
-      return {
-        configured: false,
-        message: 'OpenAI API key not found. Please set VITE_OPENAI_API_KEY environment variable.'
-      };
-    }
+    return {
+      configured: true,
+      message: 'Content generation ready via Netlify functions with rotating prompts'
+    };
   }
 }
 
