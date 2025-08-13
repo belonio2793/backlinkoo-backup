@@ -349,8 +349,20 @@ export default function Automation() {
 
           {/* Manage Campaigns Tab */}
           <TabsContent value="manage" className="space-y-6">
+            {!user && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <div className="flex items-center gap-2 text-blue-800">
+                  <AlertCircle className="h-5 w-5" />
+                  <span className="font-medium">Demo Mode</span>
+                </div>
+                <p className="text-blue-700 text-sm mt-1">
+                  You're viewing demo campaigns. Sign in to create and manage your own automated link building campaigns.
+                </p>
+              </div>
+            )}
+
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">Your Campaigns</h2>
+              <h2 className="text-2xl font-bold">{user ? 'Your Campaigns' : 'Demo Campaigns'}</h2>
               <Button 
                 onClick={loadCampaigns}
                 variant="outline"
