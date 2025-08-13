@@ -87,9 +87,47 @@
   }
 
   /* Loading overlay for payment redirects */
-  #payment-loading-overlay {
+  #payment-loading-overlay,
+  .payment-loading-overlay {
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+  }
+
+  /* Premium payment loading states */
+  .premium-button[data-loading="true"],
+  .payment-button[data-loading="true"] {
+    opacity: 0.7;
+    cursor: not-allowed;
+    position: relative;
+  }
+
+  .premium-button[data-loading="true"]::after,
+  .payment-button[data-loading="true"]::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
 
   /* Prevent double-tap zoom on payment buttons */
