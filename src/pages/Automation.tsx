@@ -99,7 +99,8 @@ export default function Automation() {
           created_at: new Date().toISOString(),
           user_id: 'demo',
           links_built: 15,
-          target_links: 25
+          available_sites: 47,
+          target_sites_used: ['medium.com', 'dev.to', 'hashnode.com']
         },
         {
           id: 'demo-2',
@@ -111,7 +112,8 @@ export default function Automation() {
           created_at: new Date(Date.now() - 86400000).toISOString(),
           user_id: 'demo',
           links_built: 8,
-          target_links: 20
+          available_sites: 32,
+          target_sites_used: ['substack.com', 'hackernoon.com']
         }
       ]);
     }
