@@ -112,75 +112,28 @@ class AutomationOrchestrator {
 
       const publishResult = publishData.data;
 
-      if (!postResult.success) {
-        throw new Error(postResult.error || 'Failed to post to Telegraph');
-      }
-
-      // Step 4: Save submission to database
-      const submissionData = {
-        campaign_id: campaignId,
-        target_site_id: 'telegraph',
-        article_title: generatedContent.title,
-        article_content: generatedContent.content,
-        article_url: postResult.url,
-        status: 'published',
-        published_date: new Date().toISOString(),
-        backlink_url: generatedContent.hasAnchorLink ? target_url : null,
-        anchor_text: generatedContent.anchorText,
-        notes: `Auto-generated and posted via automation. Word count: ${generatedContent.wordCount}`,
-        metadata: {
-          telegraph_path: postResult.path,
-          views: postResult.views || 0,
-          generation_model: 'gpt-3.5-turbo',
-          content_stats: {
-            word_count: generatedContent.wordCount,
-            has_anchor_link: generatedContent.hasAnchorLink,
-            keywords_used: keywords.slice(0, 5)
-          }
-        }
-      };
-
-      automationLogger.debug('database', 'Saving submission to database', {
-        articleUrl: postResult.url,
-        title: generatedContent.title.substring(0, 30)
-      }, campaignId);
-
-      const { data: submission, error: submissionError } = await supabase
-        .from('article_submissions')
-        .insert(submissionData)
-        .select()
-        .single();
-
-      if (submissionError) {
-        automationLogger.error('database', 'Failed to save submission', submissionData, campaignId, submissionError);
-        // Continue anyway - we still posted successfully
-      } else {
-        automationLogger.info('database', 'Submission saved successfully', {
-          submissionId: submission.id
-        }, campaignId);
-      }
-
-      // Step 5: Update campaign stats
+      // Step 3: Update campaign stats (submission was already saved by Netlify function)
       await this.updateCampaignStats(campaignId, true);
 
-      // Step 6: Mark target site as used (Telegraph)
+      // Step 4: Mark target site as used (Telegraph)
       await targetSitesManager.markSiteUsed('telegraph', campaignId);
       await targetSitesManager.markSubmissionResult('telegraph', true, campaignId);
 
-      automationLogger.info('campaign', 'Campaign processing completed successfully', {
-        articleUrl: postResult.url,
+      automationLogger.info('campaign', 'Campaign processing completed successfully via Netlify functions', {
+        articleUrl: publishResult.url,
         title: generatedContent.title.substring(0, 50),
-        hasBacklink: generatedContent.hasAnchorLink
+        hasBacklink: generatedContent.hasAnchorLink,
+        promptUsed: generatedContent.promptIndex
       }, campaignId);
 
       return {
         success: true,
-        articleUrl: postResult.url!,
+        articleUrl: publishResult.url,
         articleTitle: generatedContent.title,
         targetSite: 'Telegraph',
         linkPlaced: generatedContent.hasAnchorLink,
         anchorText: generatedContent.anchorText,
-        submissionId: submission?.id
+        submissionId: publishResult.submission_id
       };
 
     } catch (error) {
