@@ -4,7 +4,7 @@
 
 ### 1. **RESEND_API_KEY Configuration** ✅ FIXED
 - **Issue**: API key not properly set in environment variables
-- **Fix**: Configured `RESEND_API_KEY=re_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq` in dev server environment
+- **Fix**: Configured `RESEND_API_KEY` environment variable in dev server environment
 - **Action Required**: Set the same key in Supabase project environment variables
 
 ### 2. **Email Service Testing** ✅ IMPLEMENTED
@@ -83,7 +83,7 @@
 ### 1. **Supabase Configuration**
 ```bash
 # In Supabase Dashboard > Project Settings > Environment Variables
-RESEND_API_KEY=re_f2ixyRAw_EA1dtQCo9KnANfJgrgqfXFEq
+RESEND_API_KEY=your_resend_api_key_here
 ```
 
 ### 2. **Email Templates**

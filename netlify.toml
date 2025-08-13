@@ -31,6 +31,11 @@
 
 [build.environment]
   NODE_VERSION = "18"
+  # Configure secrets scanning
+  SECRETS_SCAN_ENABLED = "true"
+  SECRETS_SCAN_SMART_DETECTION_ENABLED = "true"
+  # Skip scanning specific files that contain example/demo secrets
+  SECRETS_SCAN_SMART_DETECTION_OMIT_PATHS = "*.md,EMERGENCY_FIX_NOW.md,EMAIL_CONFIGURATION_COMPLETE.md,OPENAI_API_KEY_SETUP.md,test-*.html,test-*.js"
 
 # Environment variable settings
 [context.production.environment]
