@@ -138,7 +138,7 @@ export default function AutomatedLinkBuilding() {
 
     // Check authentication for content generation
     if (!isAuthenticated) {
-      toast.error('Please sign in to generate content. You can explore the interface without signing in.');
+      setShowSignInModal(true);
       return;
     }
 
