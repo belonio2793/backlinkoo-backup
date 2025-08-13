@@ -668,7 +668,16 @@ export default function Automation() {
                           ) : (
                             // Authenticated mode - show normal controls
                             <>
-                              {campaign.status === 'active' ? (
+                              {processing[campaign.id] ? (
+                                <Button
+                                  size="sm"
+                                  disabled
+                                  className="bg-blue-600"
+                                >
+                                  <div className="animate-spin mr-2 h-3 w-3 border-2 border-white border-t-transparent rounded-full" />
+                                  Processing...
+                                </Button>
+                              ) : campaign.status === 'active' ? (
                                 <Button
                                   size="sm"
                                   variant="outline"
@@ -684,7 +693,7 @@ export default function Automation() {
                                   className="bg-green-600 hover:bg-green-700"
                                 >
                                   <Play className="h-4 w-4 mr-1" />
-                                  Start
+                                  Start Automation
                                 </Button>
                               ) : null}
 
