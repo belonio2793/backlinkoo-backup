@@ -48,6 +48,7 @@ const LazyTextCleanerDebug = lazy(() => import("./pages/TextCleanerDebug"));
 const LazyDatabaseColumnsFix = lazy(() => import("./pages/DatabaseColumnsFix"));
 const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
+const LazyMarkdownTest = lazy(() => import("./pages/MarkdownTest"));
 const LazyBlogPostChecker = lazy(() => import("./components/BlogPostChecker").then(module => ({ default: module.BlogPostChecker })));
 
 const queryClient = new QueryClient({
