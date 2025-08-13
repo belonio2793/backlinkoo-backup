@@ -245,7 +245,14 @@ export function BeautifulBlogPost() {
     } catch (error: any) {
       console.error('Failed to load blog post:', error);
 
-      if (!post) {
+      if (!isMounted) return; // Prevent error handling after unmount
+
+      // Check if this was a loading error vs a post not found error
+      const isNotFoundError = error.message?.includes('not found') ||
+                             error.status === 404 ||
+                             !blogPost;
+
+      if (isNotFoundError) {
         toast({
           title: "Blog Post Not Found",
           description: "This blog post may have expired or been removed.",
@@ -253,13 +260,15 @@ export function BeautifulBlogPost() {
         });
       } else {
         toast({
-          title: "Error",
-          description: "Failed to load blog post",
+          title: "Loading Error",
+          description: "Failed to load blog post. Please try refreshing the page.",
           variant: "destructive"
         });
       }
     } finally {
-      setLoading(false);
+      if (isMounted) {
+        setLoading(false);
+      }
     }
   };
 
