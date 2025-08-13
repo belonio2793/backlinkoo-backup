@@ -65,13 +65,18 @@ export default function Automation() {
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  // Initialize logging
+  // Initialize logging and database check
   useEffect(() => {
     automationLogger.info('system', 'Automation page loaded');
     if (user) {
       automationLogger.setUserId(user.id);
     }
     loadSitesInfo();
+
+    // Check database tables exist
+    DatabaseInit.ensureTablesExist().catch(error => {
+      console.warn('Database check failed:', error);
+    });
   }, [user]);
 
   const loadSitesInfo = async () => {
