@@ -57,16 +57,65 @@ export class DatabaseInit {
 
   static async createMissingTables(): Promise<void> {
     console.log('🚧 Creating missing database tables...');
-    
+
     try {
       // This would typically be done via Supabase migrations
       // For now, we'll just log what needs to be created
       console.log('📝 Required tables:');
       console.log('   - automation_campaigns');
       console.log('   - article_submissions');
+      console.log('   - target_sites');
       console.log('💡 Please run database migrations to create these tables');
     } catch (error) {
       console.error('❌ Failed to create tables:', error);
+    }
+  }
+
+  static async testCampaignInsertion(userId: string): Promise<boolean> {
+    try {
+      console.log('🧪 Testing campaign insertion with minimal data...');
+
+      const testData = {
+        user_id: userId,
+        name: 'Test Campaign',
+        keywords: ['test'],
+        anchor_texts: ['test link'],
+        target_url: 'https://example.com',
+        status: 'draft' as const,
+        links_built: 0,
+        available_sites: 0,
+        target_sites_used: []
+      };
+
+      const { data, error } = await supabase
+        .from('automation_campaigns')
+        .insert(testData)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('❌ Test campaign insertion failed:', {
+          message: error.message,
+          code: error.code,
+          details: error.details,
+          hint: error.hint
+        });
+        return false;
+      }
+
+      // Clean up test data
+      if (data?.id) {
+        await supabase
+          .from('automation_campaigns')
+          .delete()
+          .eq('id', data.id);
+        console.log('✅ Test campaign created and cleaned up successfully');
+      }
+
+      return true;
+    } catch (error) {
+      console.error('❌ Test campaign insertion error:', error);
+      return false;
     }
   }
 }
