@@ -1,36 +1,76 @@
 /**
  * Mobile Payment Optimizations
  * Fixes for mobile payment interactions and touch handling
+ * Enhanced for premium plan payments and mobile compatibility
  */
+
+/* Global mobile optimization variables */
+:root {
+  --mobile-touch-target: 44px;
+  --mobile-font-size: 16px;
+  --mobile-border-radius: 8px;
+  --mobile-spacing: 16px;
+  --mobile-optimized: true;
+}
 
 /* Mobile-specific touch optimizations */
 @media (max-width: 768px) {
-  /* Ensure proper touch targets for payment buttons */
-  [role="button"], 
-  button, 
+  /* Ensure proper touch targets for ALL interactive elements */
+  [role="button"],
+  button,
   .payment-button,
-  [data-payment-trigger] {
-    min-height: 44px;
-    min-width: 44px;
+  [data-payment-trigger],
+  .premium-button,
+  .credits-button,
+  input[type="submit"],
+  .checkout-button {
+    min-height: var(--mobile-touch-target);
+    min-width: var(--mobile-touch-target);
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+    font-size: var(--mobile-font-size);
+    padding: 12px 16px;
+    border-radius: var(--mobile-border-radius);
   }
 
   /* Fix iOS Safari payment form styling */
   input[type="email"],
   input[type="text"],
   input[type="number"],
-  select {
+  input[type="password"],
+  input[type="tel"],
+  select,
+  textarea {
     appearance: none;
     -webkit-appearance: none;
     -moz-appearance: none;
-    border-radius: 8px;
-    font-size: 16px; /* Prevents zoom on iOS */
-    min-height: 44px;
+    border-radius: var(--mobile-border-radius);
+    font-size: var(--mobile-font-size); /* Prevents zoom on iOS */
+    min-height: var(--mobile-touch-target);
+    padding: 12px 16px;
+    border: 1px solid #d1d5db;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  /* Premium payment form specific styles */
+  .premium-payment-form input,
+  .subscription-form input,
+  .checkout-form input {
+    background-color: #ffffff;
+    transition: border-color 0.2s ease;
+  }
+
+  .premium-payment-form input:focus,
+  .subscription-form input:focus,
+  .checkout-form input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
   }
 
   /* Payment modal optimizations */
@@ -47,9 +87,47 @@
   }
 
   /* Loading overlay for payment redirects */
-  #payment-loading-overlay {
+  #payment-loading-overlay,
+  .payment-loading-overlay {
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+  }
+
+  /* Premium payment loading states */
+  .premium-button[data-loading="true"],
+  .payment-button[data-loading="true"] {
+    opacity: 0.7;
+    cursor: not-allowed;
+    position: relative;
+  }
+
+  .premium-button[data-loading="true"]::after,
+  .payment-button[data-loading="true"]::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
   }
 
   /* Prevent double-tap zoom on payment buttons */
@@ -108,13 +186,62 @@
   }
 }
 
+/* Mobile payment layout optimizations */
+@media (max-width: 768px) {
+  /* Premium payment grid responsive layout */
+  .premium-payment-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--mobile-spacing);
+    padding: var(--mobile-spacing);
+  }
+
+  .premium-plan-card {
+    padding: var(--mobile-spacing);
+    border-radius: var(--mobile-border-radius);
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+  }
+
+  .premium-plan-card.selected {
+    border-color: #3b82f6;
+    background: #eff6ff;
+  }
+
+  /* Payment button groups for mobile */
+  .payment-button-group {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: var(--mobile-spacing);
+  }
+
+  .payment-button-group.two-column {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Credits selection mobile layout */
+  .credits-selection-mobile {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+}
+
 /* Landscape mobile orientation fixes */
 @media (max-width: 768px) and (orientation: landscape) {
   /* Optimize payment modal height for landscape */
-  .payment-modal-content {
+  .payment-modal-content,
+  .premium-payment-modal {
     max-height: 90vh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+  }
+
+  /* Adjust premium plan layout for landscape */
+  .premium-payment-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
   }
 }
 
