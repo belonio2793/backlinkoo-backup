@@ -610,10 +610,13 @@ export default function AutomatedLinkBuilding() {
                     <span className="text-sm font-medium">Today</span>
                   </div>
                   <p className="text-2xl font-bold">
-                    {generatedPosts.filter(p => 
+                    {!isAuthenticated ? '-' : generatedPosts.filter(p =>
                       new Date(p.created_at).toDateString() === new Date().toDateString()
                     ).length}
                   </p>
+                  {!isAuthenticated && (
+                    <p className="text-xs text-gray-500">Sign in to view</p>
+                  )}
                 </CardContent>
               </Card>
             </div>
