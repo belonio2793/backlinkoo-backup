@@ -1023,10 +1023,22 @@ export function BeautifulBlogPost() {
                     overflowWrap: 'break-word'
                   }}
                   dangerouslySetInnerHTML={{
-                    __html: BlogContentCleaner.removeDuplicateTitle(
-                      BlogContentCleaner.cleanBlogContent(blogPost.content || ''),
-                      blogPost.title || ''
-                    )
+                    __html: (() => {
+                      let content = blogPost.content || '';
+
+                      // Direct cleanup of the problematic patterns mentioned by user
+                      content = content
+                        // Remove bold section markers - main user complaint
+                        .replace(/\*\*(Introduction|Section \d+[^*]*|Conclusion|Call-to-Action):\*\*/gi, '')
+                        // Remove the specific footer pattern
+                        .replace(/---\s*This \d+-word blog post[^.]*\.\s*By integrating[^.]*level\./gi, '')
+                        .replace(/---\s*This blog post[^.]*provides[^.]*\./gi, '')
+                        // Clean up extra whitespace
+                        .replace(/\n{3,}/g, '\n\n')
+                        .trim();
+
+                      return content;
+                    })()
                   }}
                 />
               </div>
