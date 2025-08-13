@@ -1019,6 +1019,17 @@ export class ContentFormatter {
           return match;
         }
         return `<strong class="font-bold text-inherit"${attrs}>`;
+      })
+
+      // FINAL LINK RESTORATION: Fix any malformed link attributes
+      .replace(/<a\s+([^>]*?)>/gi, (match, attrs) => {
+        // Fix common malformed patterns
+        const fixedAttrs = attrs
+          .replace(/href([^\s=]+?)=""\s+([^"]+?)"=""/g, 'href="$1://$2"')
+          .replace(/target([^\s=]+?)=""/g, 'target="_$1"')
+          .replace(/rel([^\s=]+?)=""/g, 'rel="$1"')
+          .replace(/style([^"]*?)"=""/g, 'style="color:#2563eb;font-weight:500;"');
+        return `<a ${fixedAttrs}>`;
       });
   }
 }
