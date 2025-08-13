@@ -252,38 +252,14 @@ export default function BacklinkAutomation() {
       console.log('User ID:', user?.id);
       console.log('Is authenticated:', isAuthenticated);
 
-      // Ensure the backlink_campaigns table exists with correct schema
-      console.log('Ensuring backlink_campaigns table exists...');
+      // Check if the exact error indicates table doesn't exist or wrong schema
+      if (error?.message?.includes('does not exist')) {
+        setShowDatabaseSetup(true);
+        throw new Error('Database table does not exist. Please set up the database first using the setup instructions above.');
+      }
 
-      const createTableSQL = `
-        CREATE TABLE IF NOT EXISTS backlink_campaigns (
-          id uuid default gen_random_uuid() primary key,
-          user_id uuid references auth.users(id) on delete cascade,
-          name text not null,
-          target_url text not null,
-          keyword text not null,
-          anchor_text text not null,
-          target_platform text not null,
-          status text not null default 'paused' check (status in ('active', 'paused', 'completed')),
-          links_found integer default 0,
-          links_posted integer default 0,
-          created_at timestamptz default now(),
-          updated_at timestamptz default now()
-        );
-
-        ALTER TABLE backlink_campaigns ENABLE ROW LEVEL SECURITY;
-
-        CREATE POLICY IF NOT EXISTS "Users can manage their own campaigns" ON backlink_campaigns
-          FOR ALL USING (auth.uid() = user_id);
-      `;
-
-      try {
-        const { error: createError } = await supabase.rpc('exec', { sql: createTableSQL });
-        if (createError) {
-          console.log('Table creation via RPC failed, table may already exist:', createError);
-        }
-      } catch (rpcError) {
-        console.log('RPC not available, continuing with insert...');
+      if (error?.message?.includes('boolean')) {
+        throw new Error('Database schema mismatch. You may need to drop existing tables and recreate them with the correct schema. The error suggests a column is expecting a boolean but received text.');
       }
 
       let campaign;
