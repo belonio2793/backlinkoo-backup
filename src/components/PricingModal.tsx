@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { CheckoutAuthForm } from "@/components/CheckoutAuthForm";
+import MobilePaymentHandler from "@/utils/mobilePaymentHandler";
 
 interface PricingModalProps {
   isOpen: boolean;
