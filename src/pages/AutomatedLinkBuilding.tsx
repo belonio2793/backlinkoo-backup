@@ -203,15 +203,28 @@ export default function AutomatedLinkBuilding() {
         setRecentActivity(activityData);
 
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+        let errorMessage = 'Unknown error occurred';
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else if (error && typeof error === 'object') {
+          errorMessage = JSON.stringify(error);
+        }
+
         console.error('Error loading automation data:', error);
-        
-        await logError(error instanceof Error ? error : new Error(errorMessage), {
-          component: 'automation',
-          operation: 'load_data',
-          userId: user?.id
-        }, 'high');
-        
+
+        // Try to log error but don't fail if logging fails
+        try {
+          await logError(error instanceof Error ? error : new Error(errorMessage), {
+            component: 'automation',
+            operation: 'load_data',
+            userId: user?.id
+          }, 'high');
+        } catch (logError) {
+          console.warn('Failed to log error:', logError);
+        }
+
         setError('Failed to load automation data. Please refresh the page.');
         toast.error('Failed to load automation data');
       } finally {
@@ -266,16 +279,29 @@ export default function AutomatedLinkBuilding() {
         drip_speed: 'medium'
       });
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      let errorMessage = 'Unknown error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        errorMessage = JSON.stringify(error);
+      }
+
       console.error('Error saving campaign:', error);
-      
-      await logError(error instanceof Error ? error : new Error(errorMessage), {
-        component: 'automation',
-        operation: 'save_campaign',
-        userId: user?.id,
-        metadata: { campaignName: campaignForm.name }
-      }, 'medium');
-      
+
+      // Try to log error but don't fail if logging fails
+      try {
+        await logError(error instanceof Error ? error : new Error(errorMessage), {
+          component: 'automation',
+          operation: 'save_campaign',
+          userId: user?.id,
+          metadata: { campaignName: campaignForm.name }
+        }, 'medium');
+      } catch (logError) {
+        console.warn('Failed to log error:', logError);
+      }
+
       toast.error('Failed to save campaign');
     }
   };
@@ -335,16 +361,29 @@ export default function AutomatedLinkBuilding() {
       window.location.reload();
 
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      let errorMessage = 'Unknown error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        errorMessage = JSON.stringify(error);
+      }
+
       console.error('Error starting automation:', error);
-      
-      await logError(error instanceof Error ? error : new Error(errorMessage), {
-        component: 'automation',
-        operation: 'start_automation',
-        userId: user?.id,
-        metadata: { campaignName: campaignForm.name }
-      }, 'critical');
-      
+
+      // Try to log error but don't fail if logging fails
+      try {
+        await logError(error instanceof Error ? error : new Error(errorMessage), {
+          component: 'automation',
+          operation: 'start_automation',
+          userId: user?.id,
+          metadata: { campaignName: campaignForm.name }
+        }, 'critical');
+      } catch (logError) {
+        console.warn('Failed to log error:', logError);
+      }
+
       toast.error('Failed to start automation');
       setCurrentStep('Error starting automation');
     } finally {
