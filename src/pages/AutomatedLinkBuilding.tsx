@@ -50,6 +50,7 @@ import { toast } from 'sonner';
 import { logError } from '@/services/productionErrorHandler';
 import { scalableDataService, rateLimiter } from '@/services/scalabilityOptimizations';
 import { dbHealthCheck } from '@/services/databaseHealthCheck';
+import { UniversalPaymentComponent, QuickCreditButton, PremiumUpgradeButton } from '@/components/UniversalPaymentComponent';
 
 interface Campaign {
   id: string;
@@ -484,6 +485,35 @@ export default function AutomatedLinkBuilding() {
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">AI Link Building Engine</h1>
           <p className="text-gray-600 text-lg">Complete automated link building with AI-powered content generation</p>
+
+          {/* Quick Payment Actions */}
+          <div className="flex flex-wrap justify-center gap-4 mt-6">
+            <QuickCreditButton
+              credits={100}
+              variant="outline"
+              className="border-green-500 text-green-600 hover:bg-green-50"
+            />
+            <QuickCreditButton
+              credits={250}
+              variant="outline"
+              className="border-blue-500 text-blue-600 hover:bg-blue-50"
+            />
+            <PremiumUpgradeButton
+              plan="monthly"
+              variant="outline"
+              className="border-purple-500 text-purple-600 hover:bg-purple-50"
+            />
+            <UniversalPaymentComponent
+              trigger={
+                <Button variant="default" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
+                  <Zap className="h-4 w-4 mr-2" />
+                  Get Credits & Premium
+                </Button>
+              }
+              defaultType="credits"
+              showTrigger={false}
+            />
+          </div>
         </div>
 
         {/* Database Health Alert */}
