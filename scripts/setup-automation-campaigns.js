@@ -106,7 +106,7 @@ async function setupDatabase() {
     console.log('\n💡 Manual setup instructions:');
     console.log('1. Go to your Supabase dashboard');
     console.log('2. Navigate to SQL Editor');
-    console.log('3. Run the SQL from: src/database/automation-campaigns-schema.sql');
+    console.log('3. Run the SQL from: src/database/automation-enhanced-schema.sql');
     
     process.exit(1);
   }
