@@ -461,7 +461,8 @@ export default function AutomatedLinkBuilding() {
                     </div>
 
                     <Button
-                      type="submit"
+                      type={isAuthenticated ? "submit" : "button"}
+                      onClick={!isAuthenticated ? () => setShowSignInModal(true) : undefined}
                       className="w-full"
                       disabled={isGenerating}
                       variant={!isAuthenticated ? "outline" : "default"}
