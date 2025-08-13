@@ -29,13 +29,10 @@ export interface TelegraphPostResult {
 }
 
 class TelegraphService {
-  private baseUrl = 'https://api.telegra.ph';
-  private accessToken: string | null = null;
-  private accountName = 'AutoSEO';
-  private authorName = 'SEO Automation';
+  private netlifyFunctionUrl = '/.netlify/functions/publish-article';
 
   constructor() {
-    automationLogger.info('system', 'Telegraph service initialized');
+    automationLogger.info('system', 'Telegraph service initialized (using Netlify functions)');
   }
 
   async createAccount(): Promise<string> {
