@@ -183,19 +183,12 @@ export default function AutomatedLinkBuilding() {
           console.warn('Outreach stats query failed:', error);
         }
 
-        // Fetch analytics data from automation_analytics table (handle missing table gracefully)
+        // Fetch analytics data from automation_analytics table (handle missing table/columns gracefully)
         try {
+          // First, try to check if table exists by selecting all columns
           const { data: analyticsData, error: analyticsError } = await supabase
             .from('automation_analytics')
-            .select(`
-              total_links_built,
-              referring_domains,
-              avg_domain_rating,
-              traffic_impact,
-              monthly_growth_links,
-              monthly_growth_domains,
-              monthly_growth_dr
-            `)
+            .select('*')
             .eq('user_id', user.id)
             .order('created_at', { ascending: false })
             .limit(1)
@@ -204,24 +197,50 @@ export default function AutomatedLinkBuilding() {
           if (analyticsError) {
             if (analyticsError.message.includes('relation') && analyticsError.message.includes('does not exist')) {
               console.info('Analytics table does not exist yet');
+            } else if (analyticsError.message.includes('column') && analyticsError.message.includes('does not exist')) {
+              console.info('Analytics table exists but missing expected columns');
             } else {
               console.error('Error loading analytics data:', analyticsError);
             }
           } else if (analyticsData) {
+            // Use whatever columns are available, with fallbacks
             setAnalyticsStats({
-              totalLinksBuilt: analyticsData.total_links_built || 0,
-              referringDomains: analyticsData.referring_domains || 0,
-              avgDomainRating: analyticsData.avg_domain_rating || 0,
-              trafficImpact: analyticsData.traffic_impact || 0,
+              totalLinksBuilt: analyticsData.total_links_built || analyticsData.links_built || 0,
+              referringDomains: analyticsData.referring_domains || analyticsData.domains || 0,
+              avgDomainRating: analyticsData.avg_domain_rating || analyticsData.domain_rating || 0,
+              trafficImpact: analyticsData.traffic_impact || analyticsData.traffic || 0,
               monthlyGrowth: {
-                links: analyticsData.monthly_growth_links || 0,
-                domains: analyticsData.monthly_growth_domains || 0,
-                dr: analyticsData.monthly_growth_dr || 0
+                links: analyticsData.monthly_growth_links || analyticsData.growth_links || 0,
+                domains: analyticsData.monthly_growth_domains || analyticsData.growth_domains || 0,
+                dr: analyticsData.monthly_growth_dr || analyticsData.growth_dr || 0
               }
             });
           }
         } catch (error) {
           console.warn('Analytics stats query failed:', error);
+          // If analytics table has issues, try to calculate basic stats from campaigns
+          try {
+            const { data: campaignData } = await supabase
+              .from('automation_campaigns')
+              .select('id, status')
+              .eq('user_id', user.id);
+
+            if (campaignData) {
+              setAnalyticsStats({
+                totalLinksBuilt: 0,
+                referringDomains: 0,
+                avgDomainRating: 0,
+                trafficImpact: 0,
+                monthlyGrowth: {
+                  links: 0,
+                  domains: 0,
+                  dr: 0
+                }
+              });
+            }
+          } catch (fallbackError) {
+            console.warn('Fallback analytics calculation failed:', fallbackError);
+          }
         }
 
         // Fetch recent activity with optimization
