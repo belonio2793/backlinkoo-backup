@@ -462,15 +462,9 @@ export default function AutomatedLinkBuilding() {
         </div>
 
         <Tabs defaultValue="dashboard" className="max-w-7xl mx-auto">
-          <TabsList className="grid w-full grid-cols-8 mb-6">
-            <TabsTrigger value="dashboard" className="text-xs">Dashboard</TabsTrigger>
-            <TabsTrigger value="scanner" className="text-xs">Scanner</TabsTrigger>
-            <TabsTrigger value="content" className="text-xs">AI Content</TabsTrigger>
-            <TabsTrigger value="outreach" className="text-xs">Outreach</TabsTrigger>
-            <TabsTrigger value="auto-publish" className="text-xs">Auto-Publish</TabsTrigger>
-            <TabsTrigger value="diversification" className="text-xs">Diversify</TabsTrigger>
-            <TabsTrigger value="analytics" className="text-xs">Analytics</TabsTrigger>
-            <TabsTrigger value="compliance" className="text-xs">Compliance</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="reporting">Reporting</TabsTrigger>
           </TabsList>
 
           {/* Dashboard Tab */}
@@ -511,7 +505,7 @@ export default function AutomatedLinkBuilding() {
                             <SelectItem value="fast_boost">🚀 Fast Rank Boost</SelectItem>
                             <SelectItem value="natural_growth">🌱 Natural Growth</SelectItem>
                             <SelectItem value="competitive">⚔️ Competitive Attack</SelectItem>
-                            <SelectItem value="branded">🏢 Branded Campaign</SelectItem>
+                            <SelectItem value="branded">�� Branded Campaign</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
