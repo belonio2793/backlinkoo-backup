@@ -237,7 +237,28 @@ serve(async (req) => {
 
   } catch (error) {
     console.error("Error in create-payment:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("Error details:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+      cause: error.cause
+    });
+
+    // Provide more specific error messages
+    let errorMessage = error.message;
+    if (error.message?.includes("STRIPE_SECRET_KEY")) {
+      errorMessage = "Payment system configuration error. Please contact support.";
+    } else if (error.message?.includes("rate limit")) {
+      errorMessage = "Too many requests. Please wait a moment and try again.";
+    } else if (error.message?.includes("network") || error.message?.includes("fetch")) {
+      errorMessage = "Network error. Please check your connection and try again.";
+    }
+
+    return new Response(JSON.stringify({
+      error: errorMessage,
+      code: error.code || 'PAYMENT_ERROR',
+      timestamp: new Date().toISOString()
+    }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 500,
     });
