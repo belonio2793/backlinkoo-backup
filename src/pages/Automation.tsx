@@ -72,11 +72,36 @@ export default function Automation() {
   
   // Form state
   const [formData, setFormData] = useState({
-    name: '',
     keywords: '',
     anchor_texts: '',
     target_url: ''
   });
+
+  // Auto-generate campaign name based on keywords, URL, and timestamp
+  const generateCampaignName = (keywords: string, targetUrl: string): string => {
+    const now = new Date();
+    const timestamp = now.toISOString().slice(0, 16).replace('T', ' ');
+
+    // Extract main domain from URL
+    let domain = '';
+    try {
+      const url = new URL(targetUrl.startsWith('http') ? targetUrl : `https://${targetUrl}`);
+      domain = url.hostname.replace('www.', '');
+    } catch {
+      domain = targetUrl.split('/')[0].replace('www.', '');
+    }
+
+    // Get first 2-3 keywords and clean them
+    const keywordsList = keywords.split(',').map(k => k.trim()).filter(k => k);
+    const primaryKeywords = keywordsList.slice(0, 3).join(' & ');
+
+    // Generate name: "Keywords → Domain (YYYY-MM-DD HH:MM)"
+    const shortKeywords = primaryKeywords.length > 30
+      ? primaryKeywords.substring(0, 27) + '...'
+      : primaryKeywords;
+
+    return `${shortKeywords} → ${domain} (${timestamp})`;
+  };
 
   // Available sites info
   const [availableSites, setAvailableSites] = useState(0);
@@ -150,14 +175,17 @@ export default function Automation() {
       return;
     }
 
-    if (!formData.name || !formData.keywords || !formData.anchor_texts || !formData.target_url) {
+    if (!formData.keywords || !formData.anchor_texts || !formData.target_url) {
       automationLogger.warn('campaign', 'Campaign creation attempted with missing fields', formData);
       toast.error('Please fill in all required fields');
       return;
     }
 
     setCreating(true);
-    automationLogger.info('campaign', 'Creating new campaign', { name: formData.name });
+
+    // Auto-generate campaign name
+    const generatedName = generateCampaignName(formData.keywords, formData.target_url);
+    automationLogger.info('campaign', 'Creating new campaign', { generatedName });
 
     try {
       const keywordsArray = formData.keywords.split(',').map(k => k.trim()).filter(k => k);
@@ -173,7 +201,7 @@ export default function Automation() {
         .from('automation_campaigns')
         .insert({
           user_id: user.id,
-          name: formData.name,
+          name: generatedName,
           keywords: keywordsArray,
           anchor_texts: anchorTextsArray,
           target_url: formData.target_url,
@@ -196,15 +224,14 @@ export default function Automation() {
 
       setCampaigns(prev => [data, ...prev]);
       setFormData({
-        name: '',
         keywords: '',
         anchor_texts: '',
         target_url: ''
       });
 
-      toast.success(`Campaign created with ${availableSites.length} target sites available!`);
+      toast.success(`Campaign '${data.name}' created with ${availableSites.length} target sites available!`);
     } catch (error) {
-      automationLogger.error('campaign', 'Failed to create campaign', formData, undefined, error as Error);
+      automationLogger.error('campaign', 'Failed to create campaign', { ...formData, generatedName }, undefined, error as Error);
       toast.error('Failed to create campaign');
     } finally {
       setCreating(false);
