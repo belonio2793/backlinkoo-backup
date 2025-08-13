@@ -11,6 +11,7 @@ import { GlobalErrorHandler } from "@/components/GlobalErrorHandler";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PremiumUpgradeProvider } from "@/components/PremiumUpgradeProvider";
 import { EnhancedErrorBoundary } from "@/components/EnhancedErrorBoundary";
+import { UserFlowProvider } from "@/contexts/UserFlowContext";
 import { useSymbolCleaner } from "@/utils/symbolCleaner";
 import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
