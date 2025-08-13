@@ -198,23 +198,22 @@ export default function AdvancedFormAutomation() {
   };
 
   const loadPostingAccounts = async () => {
-    const mockAccounts: PostingAccount[] = [
-      {
-        id: '1',
-        name: 'John Marketer',
-        email: 'john@marketingpro.com',
-        website: 'https://marketingpro.com',
-        isActive: true
-      },
-      {
-        id: '2',
-        name: 'Sarah Tech',
-        email: 'sarah@techinsights.com',
-        website: 'https://techinsights.com',
-        isActive: true
-      }
-    ];
-    setPostingAccounts(mockAccounts);
+    if (!user) return;
+
+    try {
+      const { data: accounts, error } = await supabase
+        .from('posting_accounts')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_active', true);
+
+      if (error) throw error;
+
+      setPostingAccounts(accounts || []);
+    } catch (error) {
+      console.error('Error loading posting accounts:', error);
+      toast.error('Failed to load posting accounts');
+    }
   };
 
   const updateStats = () => {

@@ -37,13 +37,20 @@ import {
   Clock,
   Award,
   Filter,
-  MoreVertical
+  MoreVertical,
+  XCircle,
+  RefreshCw,
+  Activity
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logError } from '@/services/productionErrorHandler';
+import { scalableDataService, rateLimiter } from '@/services/scalabilityOptimizations';
+import { dbHealthCheck } from '@/services/databaseHealthCheck';
+import { UniversalPaymentComponent, QuickCreditButton, PremiumUpgradeButton } from '@/components/UniversalPaymentComponent';
 
 interface Campaign {
   id: string;
@@ -61,35 +68,48 @@ interface Campaign {
   };
 }
 
-interface CompetitorData {
-  domain: string;
-  backlinks: number;
-  referring_domains: number;
-  dr: number;
-  opportunities: number;
-}
-
-interface LinkOpportunity {
-  id: string;
-  domain: string;
-  url: string;
-  type: 'guest_post' | 'web2' | 'forum' | 'directory' | 'social' | 'niche';
-  dr: number;
-  da: number;
-  relevance_score: number;
-  success_rate: number;
-  status: 'discovered' | 'contacted' | 'approved' | 'published' | 'failed';
-}
-
 export default function AutomatedLinkBuilding() {
   const { user, isAuthenticated } = useAuth();
   
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [activeCampaign, setActiveCampaign] = useState<Campaign | null>(null);
-  const [competitors, setCompetitors] = useState<CompetitorData[]>([]);
-  const [opportunities, setOpportunities] = useState<LinkOpportunity[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [currentStep, setCurrentStep] = useState('');
+  const [stats, setStats] = useState({
+    linksBuiltToday: 0,
+    domainsReached: 0,
+    avgDomainRating: 0,
+    successRate: 0,
+    trafficGained: 0
+  });
+  const [outreachStats, setOutreachStats] = useState({
+    emailsSent: 0,
+    responseRate: 0,
+    positiveResponses: 0,
+    linkPlacements: 0
+  });
+  const [analyticsStats, setAnalyticsStats] = useState({
+    totalLinksBuilt: 0,
+    referringDomains: 0,
+    avgDomainRating: 0,
+    trafficImpact: 0,
+    monthlyGrowth: {
+      links: 0,
+      domains: 0,
+      dr: 0
+    }
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [operationLoading, setOperationLoading] = useState<Record<string, boolean>>({});
+  const [dbStatus, setDbStatus] = useState<{ healthy: boolean; missingTables: string[] }>({ healthy: true, missingTables: [] });
+  const [recentActivity, setRecentActivity] = useState<Array<{
+    id: string;
+    type: 'link_published' | 'outreach_sent' | 'content_generated';
+    title: string;
+    description: string;
+    status: string;
+    created_at: string;
+  }>>([]);
 
   // Form states
   const [campaignForm, setCampaignForm] = useState({
@@ -103,19 +123,319 @@ export default function AutomatedLinkBuilding() {
     drip_speed: 'medium'
   });
 
-  const [scanForm, setScanForm] = useState({
-    keyword: '',
-    competitor_domain: '',
-    location: 'US',
-    depth: 'medium'
-  });
+  // Load automation data from database
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+    
+    const loadAutomationData = async () => {
+      try {
+        setLoading(true);
 
-  const [outreachSettings, setOutreachSettings] = useState({
-    template_style: 'friendly',
-    follow_up_enabled: true,
-    follow_up_delay: 7,
-    personalization_level: 'high'
-  });
+        // Check database health first
+        const { allTablesExist, missingTables } = await dbHealthCheck.checkRequiredTables();
+        setDbStatus({ healthy: allTablesExist, missingTables });
+        if (!allTablesExist) {
+          console.warn('Some database tables are missing:', missingTables);
+          // Continue anyway but with limited functionality
+        }
+
+        // Use scalable data service for optimized fetching
+        const { campaigns, stats: aggregatedStats } = await scalableDataService.getCampaignStats(
+          user.id,
+          20, // Limit for pagination
+          0   // Offset
+        );
+        
+        setStats(aggregatedStats);
+        setCampaigns(campaigns);
+        
+        // Fetch outreach statistics (handle missing table gracefully)
+        try {
+          const { data: outreachData, error: outreachError } = await supabase
+            .from('outreach_campaigns')
+            .select(`
+              emails_sent,
+              response_rate,
+              positive_responses,
+              link_placements
+            `)
+            .eq('user_id', user.id);
+
+          if (outreachError) {
+            if (outreachError.message.includes('relation') && outreachError.message.includes('does not exist')) {
+              console.info('Outreach campaigns table does not exist yet');
+            } else {
+              console.error('Error loading outreach data:', outreachError);
+            }
+          } else if (outreachData && outreachData.length > 0) {
+            const totalEmailsSent = outreachData.reduce((sum, campaign) => sum + (campaign.emails_sent || 0), 0);
+            const avgResponseRate = Math.round(outreachData.reduce((sum, campaign) => sum + (campaign.response_rate || 0), 0) / outreachData.length);
+            const totalPositiveResponses = outreachData.reduce((sum, campaign) => sum + (campaign.positive_responses || 0), 0);
+            const totalLinkPlacements = outreachData.reduce((sum, campaign) => sum + (campaign.link_placements || 0), 0);
+
+            setOutreachStats({
+              emailsSent: totalEmailsSent,
+              responseRate: avgResponseRate,
+              positiveResponses: totalPositiveResponses,
+              linkPlacements: totalLinkPlacements
+            });
+          }
+        } catch (error) {
+          console.warn('Outreach stats query failed:', error);
+        }
+
+        // Fetch analytics data from automation_analytics table (handle missing table/columns gracefully)
+        try {
+          // First, try to check if table exists by selecting all columns
+          const { data: analyticsData, error: analyticsError } = await supabase
+            .from('automation_analytics')
+            .select('*')
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+          if (analyticsError) {
+            if (analyticsError.message.includes('relation') && analyticsError.message.includes('does not exist')) {
+              console.info('Analytics table does not exist yet');
+            } else if (analyticsError.message.includes('column') && analyticsError.message.includes('does not exist')) {
+              console.info('Analytics table exists but missing expected columns');
+            } else {
+              console.error('Error loading analytics data:', analyticsError);
+            }
+          } else if (analyticsData) {
+            // Use whatever columns are available, with fallbacks
+            setAnalyticsStats({
+              totalLinksBuilt: analyticsData.total_links_built || analyticsData.links_built || 0,
+              referringDomains: analyticsData.referring_domains || analyticsData.domains || 0,
+              avgDomainRating: analyticsData.avg_domain_rating || analyticsData.domain_rating || 0,
+              trafficImpact: analyticsData.traffic_impact || analyticsData.traffic || 0,
+              monthlyGrowth: {
+                links: analyticsData.monthly_growth_links || analyticsData.growth_links || 0,
+                domains: analyticsData.monthly_growth_domains || analyticsData.growth_domains || 0,
+                dr: analyticsData.monthly_growth_dr || analyticsData.growth_dr || 0
+              }
+            });
+          }
+        } catch (error) {
+          console.warn('Analytics stats query failed:', error);
+          // If analytics table has issues, try to calculate basic stats from campaigns
+          try {
+            const { data: campaignData } = await supabase
+              .from('automation_campaigns')
+              .select('id, status')
+              .eq('user_id', user.id);
+
+            if (campaignData) {
+              setAnalyticsStats({
+                totalLinksBuilt: 0,
+                referringDomains: 0,
+                avgDomainRating: 0,
+                trafficImpact: 0,
+                monthlyGrowth: {
+                  links: 0,
+                  domains: 0,
+                  dr: 0
+                }
+              });
+            }
+          } catch (fallbackError) {
+            console.warn('Fallback analytics calculation failed:', fallbackError);
+          }
+        }
+
+        // Fetch recent activity with optimization
+        const activityData = await scalableDataService.getActivityFeed(user.id, undefined, 10);
+        setRecentActivity(activityData);
+
+      } catch (error) {
+        let errorMessage = 'Unknown error occurred';
+        if (error instanceof Error) {
+          errorMessage = error.message;
+        } else if (typeof error === 'string') {
+          errorMessage = error;
+        } else if (error && typeof error === 'object') {
+          errorMessage = JSON.stringify(error);
+        }
+
+        console.error('Error loading automation data:', error);
+
+        // Try to log error but don't fail if logging fails
+        try {
+          await logError(error instanceof Error ? error : new Error(errorMessage), {
+            component: 'automation',
+            operation: 'load_data',
+            userId: user?.id
+          }, 'high');
+        } catch (logError) {
+          console.warn('Failed to log error:', logError);
+        }
+
+        setError('Failed to load automation data. Please refresh the page.');
+        toast.error('Failed to load automation data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadAutomationData();
+  }, [user, isAuthenticated]);
+
+  // Production campaign creation function
+  const handleSaveCampaign = async () => {
+    if (!user || !campaignForm.name || !campaignForm.target_url || !campaignForm.keywords) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      const keywordsArray = campaignForm.keywords.split(',').map(k => k.trim()).filter(k => k);
+      
+      const { data, error } = await supabase
+        .from('automation_campaigns')
+        .insert({
+          user_id: user.id,
+          name: campaignForm.name,
+          target_url: campaignForm.target_url,
+          keywords: keywordsArray,
+          strategy: campaignForm.strategy,
+          competitor_urls: campaignForm.competitor_urls.split(',').map(u => u.trim()).filter(u => u),
+          content_tone: campaignForm.content_tone,
+          auto_publish: campaignForm.auto_publish,
+          drip_speed: campaignForm.drip_speed,
+          status: 'paused'
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      toast.success('Campaign saved successfully');
+      setCampaigns(prev => [data, ...prev]);
+      
+      // Reset form
+      setCampaignForm({
+        name: '',
+        keywords: '',
+        target_url: '',
+        strategy: 'natural_growth',
+        competitor_urls: '',
+        content_tone: 'professional',
+        auto_publish: false,
+        drip_speed: 'medium'
+      });
+    } catch (error) {
+      let errorMessage = 'Unknown error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        errorMessage = JSON.stringify(error);
+      }
+
+      console.error('Error saving campaign:', error);
+
+      // Try to log error but don't fail if logging fails
+      try {
+        await logError(error instanceof Error ? error : new Error(errorMessage), {
+          component: 'automation',
+          operation: 'save_campaign',
+          userId: user?.id,
+          metadata: { campaignName: campaignForm.name }
+        }, 'medium');
+      } catch (logError) {
+        console.warn('Failed to log error:', logError);
+      }
+
+      toast.error('Failed to save campaign');
+    }
+  };
+
+  // Production automation start function with rate limiting
+  const handleStartAutomation = async () => {
+    if (!user || !campaignForm.name || !campaignForm.target_url || !campaignForm.keywords) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    // Check rate limits for automation operations
+    const canProceed = await rateLimiter.checkLimit(user.id, 'automation');
+    if (!canProceed) {
+      toast.error('Rate limit exceeded. Please wait before starting another automation.');
+      return;
+    }
+
+    try {
+      setIsRunning(true);
+      setCurrentStep('Creating campaign...');
+
+      // Save campaign first
+      await handleSaveCampaign();
+
+      setCurrentStep('Starting automation engines...');
+
+      // Start automation via Netlify function
+      const response = await fetch('/.netlify/functions/automation-control', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        },
+        body: JSON.stringify({
+          action: 'start',
+          campaign: {
+            name: campaignForm.name,
+            target_url: campaignForm.target_url,
+            keywords: campaignForm.keywords.split(',').map(k => k.trim()).filter(k => k),
+            strategy: campaignForm.strategy,
+            drip_speed: campaignForm.drip_speed
+          }
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to start automation');
+      }
+
+      const result = await response.json();
+      
+      setCurrentStep('Automation started successfully');
+      toast.success('Automation campaign started!');
+      
+      // Refresh data
+      window.location.reload();
+
+    } catch (error) {
+      let errorMessage = 'Unknown error occurred';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        errorMessage = JSON.stringify(error);
+      }
+
+      console.error('Error starting automation:', error);
+
+      // Try to log error but don't fail if logging fails
+      try {
+        await logError(error instanceof Error ? error : new Error(errorMessage), {
+          component: 'automation',
+          operation: 'start_automation',
+          userId: user?.id,
+          metadata: { campaignName: campaignForm.name }
+        }, 'critical');
+      } catch (logError) {
+        console.warn('Failed to log error:', logError);
+      }
+
+      toast.error('Failed to start automation');
+      setCurrentStep('Error starting automation');
+    } finally {
+      setIsRunning(false);
+    }
+  };
 
   if (!isAuthenticated) {
     return (
@@ -126,6 +446,26 @@ export default function AutomatedLinkBuilding() {
             <Brain className="h-16 w-16 text-blue-600 mx-auto mb-4" />
             <h2 className="text-2xl font-bold mb-4">Sign In Required</h2>
             <p className="text-gray-600">Please sign in to access the automated link building platform.</p>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+        <Header />
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-md mx-auto text-center">
+            <XCircle className="h-16 w-16 text-red-600 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold mb-4">System Error</h2>
+            <p className="text-gray-600 mb-6">{error}</p>
+            <Button onClick={() => window.location.reload()} className="w-full">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Reload Page
+            </Button>
           </div>
         </div>
         <Footer />
@@ -145,41 +485,57 @@ export default function AutomatedLinkBuilding() {
           </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">AI Link Building Engine</h1>
           <p className="text-gray-600 text-lg">Complete automated link building with AI-powered content generation</p>
-          
-          <div className="flex items-center justify-center gap-4 mt-4 flex-wrap">
-            <Badge variant="outline" className="bg-purple-50 text-purple-700">
-              <Brain className="h-3 w-3 mr-1" />
-              AI-Powered
-            </Badge>
-            <Badge variant="outline" className="bg-blue-50 text-blue-700">
-              <Search className="h-3 w-3 mr-1" />
-              SERP Scanner
-            </Badge>
-            <Badge variant="outline" className="bg-green-50 text-green-700">
-              <Mail className="h-3 w-3 mr-1" />
-              Smart Outreach
-            </Badge>
-            <Badge variant="outline" className="bg-orange-50 text-orange-700">
-              <Globe className="h-3 w-3 mr-1" />
-              Auto-Publish
-            </Badge>
-            <Badge variant="outline" className="bg-indigo-50 text-indigo-700">
-              <BarChart3 className="h-3 w-3 mr-1" />
-              Real-Time Analytics
-            </Badge>
+
+          {/* Quick Payment Actions */}
+          <div className="flex flex-wrap justify-center gap-4 mt-6">
+            <QuickCreditButton
+              credits={100}
+              variant="outline"
+              className="border-green-500 text-green-600 hover:bg-green-50"
+            />
+            <QuickCreditButton
+              credits={250}
+              variant="outline"
+              className="border-blue-500 text-blue-600 hover:bg-blue-50"
+            />
+            <PremiumUpgradeButton
+              plan="monthly"
+              variant="outline"
+              className="border-purple-500 text-purple-600 hover:bg-purple-50"
+            />
+            <UniversalPaymentComponent
+              trigger={
+                <Button variant="default" className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white">
+                  <Zap className="h-4 w-4 mr-2" />
+                  Get Credits & Premium
+                </Button>
+              }
+              defaultType="credits"
+              showTrigger={false}
+            />
           </div>
         </div>
 
+        {/* Database Health Alert */}
+        {!dbStatus.healthy && dbStatus.missingTables.length > 0 && (
+          <div className="mb-6">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-yellow-600" />
+                <h3 className="font-medium text-yellow-800">Database Setup Incomplete</h3>
+              </div>
+              <p className="text-yellow-700 text-sm mt-1">
+                Some database tables are missing: {dbStatus.missingTables.join(', ')}.
+                Some features may not work until the database is properly configured.
+              </p>
+            </div>
+          </div>
+        )}
+
         <Tabs defaultValue="dashboard" className="max-w-7xl mx-auto">
-          <TabsList className="grid w-full grid-cols-8 mb-6">
-            <TabsTrigger value="dashboard" className="text-xs">Dashboard</TabsTrigger>
-            <TabsTrigger value="scanner" className="text-xs">Scanner</TabsTrigger>
-            <TabsTrigger value="content" className="text-xs">AI Content</TabsTrigger>
-            <TabsTrigger value="outreach" className="text-xs">Outreach</TabsTrigger>
-            <TabsTrigger value="auto-publish" className="text-xs">Auto-Publish</TabsTrigger>
-            <TabsTrigger value="diversification" className="text-xs">Diversify</TabsTrigger>
-            <TabsTrigger value="analytics" className="text-xs">Analytics</TabsTrigger>
-            <TabsTrigger value="compliance" className="text-xs">Compliance</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
+            <TabsTrigger value="reporting">Reporting</TabsTrigger>
           </TabsList>
 
           {/* Dashboard Tab */}
@@ -248,17 +604,6 @@ export default function AutomatedLinkBuilding() {
                       />
                     </div>
 
-                    <div>
-                      <Label htmlFor="competitors">Competitor URLs (optional)</Label>
-                      <Textarea
-                        id="competitors"
-                        value={campaignForm.competitor_urls}
-                        onChange={(e) => setCampaignForm({ ...campaignForm, competitor_urls: e.target.value })}
-                        placeholder="competitor1.com, competitor2.com"
-                        rows={2}
-                      />
-                    </div>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="content-tone">Content Tone</Label>
@@ -302,16 +647,25 @@ export default function AutomatedLinkBuilding() {
                         checked={campaignForm.auto_publish}
                         onCheckedChange={(checked) => setCampaignForm({ ...campaignForm, auto_publish: checked })}
                       />
-                      <Label htmlFor="auto-publish">Enable Auto-Publish to Partner Network</Label>
+                      <Label htmlFor="auto-publish">Enable Auto-Publish</Label>
                     </div>
 
                     <div className="flex gap-3 pt-4">
-                      <Button onClick={() => {}} variant="outline">
+                      <Button onClick={handleSaveCampaign} variant="outline" disabled={isRunning}>
                         Save Campaign
                       </Button>
-                      <Button onClick={() => {}} className="flex-1">
-                        <Play className="h-4 w-4 mr-2" />
-                        Start Automation
+                      <Button onClick={handleStartAutomation} className="flex-1" disabled={isRunning}>
+                        {isRunning ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            {currentStep}
+                          </>
+                        ) : (
+                          <>
+                            <Play className="h-4 w-4 mr-2" />
+                            Start Automation
+                          </>
+                        )}
                       </Button>
                     </div>
                   </CardContent>
@@ -324,30 +678,26 @@ export default function AutomatedLinkBuilding() {
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <TrendingUp className="h-5 w-5" />
-                      Live Campaign Stats
+                      Live Stats
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Links Built Today</span>
-                        <span className="font-medium">12</span>
+                        <span className="font-medium">{loading ? '-' : stats.linksBuiltToday}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Domains Reached</span>
-                        <span className="font-medium">47</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Avg. Domain Rating</span>
-                        <span className="font-medium">65</span>
+                        <span className="font-medium">{loading ? '-' : stats.domainsReached}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Success Rate</span>
-                        <span className="font-medium text-green-600">73%</span>
+                        <span className="font-medium text-green-600">{loading ? '-' : `${stats.successRate}%`}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Traffic Gained</span>
-                        <span className="font-medium">+2,341</span>
+                        <span className="font-medium">{loading ? '-' : `+${stats.trafficGained.toLocaleString()}`}</span>
                       </div>
                     </div>
                   </CardContent>
@@ -356,8 +706,8 @@ export default function AutomatedLinkBuilding() {
                 <Card>
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Clock className="h-5 w-5" />
-                      Automation Status
+                      <Activity className="h-5 w-5" />
+                      System Status
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -374,849 +724,95 @@ export default function AutomatedLinkBuilding() {
                         <span className="text-sm">Outreach Engine</span>
                         <Badge variant="default" className="bg-purple-600">Active</Badge>
                       </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">Auto-Publisher</span>
-                        <Badge variant="secondary">Paused</Badge>
-                      </div>
                     </div>
                   </CardContent>
                 </Card>
               </div>
             </div>
 
-            {/* Recent Activity */}
+            {/* Campaign Management */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Settings className="h-5 w-5" />
+                  Campaign Management
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {campaigns.length === 0 ? (
+                  <div className="text-center p-8 text-gray-500">
+                    No campaigns yet. Create your first campaign above.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {campaigns.slice(0, 5).map((campaign) => (
+                      <div key={campaign.id} className="flex items-center gap-4 p-4 border rounded-lg">
+                        <div className="flex-1">
+                          <h3 className="font-medium">{campaign.name}</h3>
+                          <p className="text-sm text-gray-600">{campaign.target_url}</p>
+                        </div>
+                        <Badge variant={campaign.status === 'active' ? 'default' : 'secondary'}>
+                          {campaign.status}
+                        </Badge>
+                        <Button size="sm" variant="outline">
+                          Manage
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Activity Monitor */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Zap className="h-5 w-5" />
-                  Recent Link Building Activity
+                  Activity Monitor
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                    <CheckCircle className="h-5 w-5 text-green-600" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">Link published on TechCrunch</p>
-                      <p className="text-xs text-gray-600">Domain Rating: 93 • Guest post about AI tools</p>
+                  {loading ? (
+                    <div className="flex items-center justify-center p-8">
+                      <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+                      <span className="ml-2 text-gray-500">Loading activity...</span>
                     </div>
-                    <Badge variant="outline" className="text-green-700">Live</Badge>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                    <Mail className="h-5 w-5 text-blue-600" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">Outreach sent to 12 prospects</p>
-                      <p className="text-xs text-gray-600">2 positive responses received</p>
+                  ) : recentActivity.length === 0 ? (
+                    <div className="text-center p-8 text-gray-500">
+                      No recent activity. Start a campaign to see activity here.
                     </div>
-                    <Badge variant="outline" className="text-blue-700">Active</Badge>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">
-                    <Brain className="h-5 w-5 text-purple-600" />
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">AI generated 5 unique articles</p>
-                      <p className="text-xs text-gray-600">Ready for Web 2.0 publication</p>
-                    </div>
-                    <Badge variant="outline" className="text-purple-700">Ready</Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Scanner Tab */}
-          <TabsContent value="scanner" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Search className="h-5 w-5" />
-                    Keyword & Competitor Scanner
-                  </CardTitle>
-                  <CardDescription>Discover link opportunities from SERPs and competitor analysis</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="scan-keyword">Keyword or Phrase</Label>
-                    <Input
-                      id="scan-keyword"
-                      value={scanForm.keyword}
-                      onChange={(e) => setScanForm({ ...scanForm, keyword: e.target.value })}
-                      placeholder="AI tools for marketing"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="competitor-domain">Competitor Domain (optional)</Label>
-                    <Input
-                      id="competitor-domain"
-                      value={scanForm.competitor_domain}
-                      onChange={(e) => setScanForm({ ...scanForm, competitor_domain: e.target.value })}
-                      placeholder="competitor.com"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="location">Location</Label>
-                      <Select value={scanForm.location} onValueChange={(value) => setScanForm({ ...scanForm, location: value })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="US">United States</SelectItem>
-                          <SelectItem value="UK">United Kingdom</SelectItem>
-                          <SelectItem value="CA">Canada</SelectItem>
-                          <SelectItem value="AU">Australia</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label htmlFor="depth">Scan Depth</Label>
-                      <Select value={scanForm.depth} onValueChange={(value) => setScanForm({ ...scanForm, depth: value })}>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="light">Light (Top 10)</SelectItem>
-                          <SelectItem value="medium">Medium (Top 50)</SelectItem>
-                          <SelectItem value="deep">Deep (Top 100)</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                  <Button onClick={() => {}} className="w-full">
-                    <Search className="h-4 w-4 mr-2" />
-                    Start SERP Scan
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Scan Results</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="p-3 border rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
-                        <p className="font-medium text-sm">techcrunch.com/guest-posts</p>
-                        <Badge variant="outline" className="bg-green-50 text-green-700">DR: 93</Badge>
+                  ) : (
+                    recentActivity.map((activity) => (
+                      <div key={activity.id} className={`flex items-center gap-3 p-3 rounded-lg ${
+                        activity.type === 'link_published' ? 'bg-green-50' :
+                        activity.type === 'outreach_sent' ? 'bg-blue-50' :
+                        'bg-purple-50'
+                      }`}>
+                        {activity.type === 'link_published' && <CheckCircle className="h-5 w-5 text-green-600" />}
+                        {activity.type === 'outreach_sent' && <Mail className="h-5 w-5 text-blue-600" />}
+                        {activity.type === 'content_generated' && <Brain className="h-5 w-5 text-purple-600" />}
+                        <div className="flex-1">
+                          <p className="text-sm font-medium">{activity.title}</p>
+                          <p className="text-xs text-gray-600">{activity.description}</p>
+                        </div>
+                        <Badge variant="outline" className={`${
+                          activity.status === 'Live' ? 'text-green-700' :
+                          activity.status === 'Active' ? 'text-blue-700' :
+                          'text-purple-700'
+                        }`}>{activity.status}</Badge>
                       </div>
-                      <p className="text-xs text-gray-600 mb-2">Guest posting opportunity for tech content</p>
-                      <div className="flex gap-2">
-                        <Badge variant="secondary" className="text-xs">Guest Post</Badge>
-                        <Badge variant="secondary" className="text-xs">High Authority</Badge>
-                      </div>
-                    </div>
-                    <div className="p-3 border rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
-                        <p className="font-medium text-sm">medium.com/@publications</p>
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700">DR: 78</Badge>
-                      </div>
-                      <p className="text-xs text-gray-600 mb-2">Web 2.0 platform accepting submissions</p>
-                      <div className="flex gap-2">
-                        <Badge variant="secondary" className="text-xs">Web 2.0</Badge>
-                        <Badge variant="secondary" className="text-xs">Easy Approval</Badge>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Competitor Analysis */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
-                  Competitor Backlink Analysis
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 border rounded-lg">
-                    <h3 className="font-medium">competitor1.com</h3>
-                    <p className="text-sm text-gray-600">DR: 67 • 2,341 backlinks</p>
-                    <p className="text-xs text-gray-500 mt-1">156 opportunities found</p>
-                  </div>
-                  <div className="p-4 border rounded-lg">
-                    <h3 className="font-medium">competitor2.com</h3>
-                    <p className="text-sm text-gray-600">DR: 72 • 1,892 backlinks</p>
-                    <p className="text-xs text-gray-500 mt-1">203 opportunities found</p>
-                  </div>
-                  <div className="p-4 border rounded-lg">
-                    <h3 className="font-medium">competitor3.com</h3>
-                    <p className="text-sm text-gray-600">DR: 59 • 1,156 backlinks</p>
-                    <p className="text-xs text-gray-500 mt-1">89 opportunities found</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Content Tab */}
-          <TabsContent value="content" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Brain className="h-5 w-5" />
-                    AI Content Generation
-                  </CardTitle>
-                  <CardDescription>Generate contextual content for different platforms</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="content-type">Content Type</Label>
-                    <Select defaultValue="guest_post">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="guest_post">Guest Post Article</SelectItem>
-                        <SelectItem value="blog_comment">Blog Comment</SelectItem>
-                        <SelectItem value="forum_post">Forum Post</SelectItem>
-                        <SelectItem value="social_post">Social Media Post</SelectItem>
-                        <SelectItem value="email_outreach">Email Outreach</SelectItem>
-                        <SelectItem value="resource_submission">Resource Submission</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="target-platform">Target Platform</Label>
-                    <Input placeholder="e.g., TechCrunch, Medium, Dev.to" />
-                  </div>
-                  <div>
-                    <Label htmlFor="content-angle">Content Angle</Label>
-                    <Select defaultValue="educational">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="educational">Educational Guide</SelectItem>
-                        <SelectItem value="case_study">Case Study</SelectItem>
-                        <SelectItem value="opinion">Opinion Piece</SelectItem>
-                        <SelectItem value="list">List Article</SelectItem>
-                        <SelectItem value="comparison">Tool Comparison</SelectItem>
-                        <SelectItem value="news">Industry News</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="word-count">Word Count</Label>
-                    <Select defaultValue="1000">
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="500">500-800 words</SelectItem>
-                        <SelectItem value="1000">1000-1500 words</SelectItem>
-                        <SelectItem value="2000">2000+ words</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button className="w-full">
-                    <Brain className="h-4 w-4 mr-2" />
-                    Generate Content
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Generated Content Preview</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="p-4 bg-gray-50 rounded-lg">
-                      <h3 className="font-medium mb-2">Title: "The Ultimate Guide to AI-Powered Marketing Tools in 2024"</h3>
-                      <p className="text-sm text-gray-600 mb-3">Marketing automation has evolved significantly with the introduction of artificial intelligence...</p>
-                      <div className="flex gap-2 mb-3">
-                        <Badge variant="secondary" className="text-xs">1,247 words</Badge>
-                        <Badge variant="secondary" className="text-xs">Professional tone</Badge>
-                        <Badge variant="secondary" className="text-xs">Educational</Badge>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline">
-                          <Eye className="h-3 w-3 mr-1" />
-                          Preview
-                        </Button>
-                        <Button size="sm" variant="outline">
-                          <Download className="h-3 w-3 mr-1" />
-                          Export
-                        </Button>
-                        <Button size="sm">
-                          Use Content
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Content Library */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Content Library
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="p-4 border rounded-lg">
-                    <h3 className="font-medium text-sm mb-1">AI Marketing Tools Guide</h3>
-                    <p className="text-xs text-gray-600 mb-2">Guest post • 1,500 words</p>
-                    <div className="flex gap-2 mb-2">
-                      <Badge variant="secondary" className="text-xs">Ready</Badge>
-                      <Badge variant="secondary" className="text-xs">Professional</Badge>
-                    </div>
-                    <Button size="sm" variant="outline" className="w-full">Use Content</Button>
-                  </div>
-                  <div className="p-4 border rounded-lg">
-                    <h3 className="font-medium text-sm mb-1">SEO Automation Strategies</h3>
-                    <p className="text-xs text-gray-600 mb-2">Forum post • 800 words</p>
-                    <div className="flex gap-2 mb-2">
-                      <Badge variant="secondary" className="text-xs">Published</Badge>
-                      <Badge variant="secondary" className="text-xs">Technical</Badge>
-                    </div>
-                    <Button size="sm" variant="outline" className="w-full">View Results</Button>
-                  </div>
-                  <div className="p-4 border rounded-lg">
-                    <h3 className="font-medium text-sm mb-1">Digital Marketing Trends</h3>
-                    <p className="text-xs text-gray-600 mb-2">Blog comment • 200 words</p>
-                    <div className="flex gap-2 mb-2">
-                      <Badge variant="secondary" className="text-xs">Generating</Badge>
-                      <Badge variant="secondary" className="text-xs">Casual</Badge>
-                    </div>
-                    <Button size="sm" variant="outline" className="w-full" disabled>
-                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-                      Processing
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Outreach Tab */}
-          <TabsContent value="outreach" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Mail className="h-5 w-5" />
-                    Smart Outreach Engine
-                  </CardTitle>
-                  <CardDescription>AI-powered personalized email outreach</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="email-template">Email Template Style</Label>
-                    <Select 
-                      value={outreachSettings.template_style} 
-                      onValueChange={(value) => setOutreachSettings({ ...outreachSettings, template_style: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="friendly">Friendly & Casual</SelectItem>
-                        <SelectItem value="professional">Professional</SelectItem>
-                        <SelectItem value="authoritative">Authoritative</SelectItem>
-                        <SelectItem value="collaborative">Collaborative</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div>
-                    <Label htmlFor="personalization">Personalization Level</Label>
-                    <Select 
-                      value={outreachSettings.personalization_level} 
-                      onValueChange={(value) => setOutreachSettings({ ...outreachSettings, personalization_level: value })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="basic">Basic (Name + Company)</SelectItem>
-                        <SelectItem value="medium">Medium (+ Recent Content)</SelectItem>
-                        <SelectItem value="high">High (+ Social Research)</SelectItem>
-                        <SelectItem value="ai_deep">AI Deep Research</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Switch 
-                      id="follow-up"
-                      checked={outreachSettings.follow_up_enabled}
-                      onCheckedChange={(checked) => setOutreachSettings({ ...outreachSettings, follow_up_enabled: checked })}
-                    />
-                    <Label htmlFor="follow-up">Enable automatic follow-ups</Label>
-                  </div>
-                  {outreachSettings.follow_up_enabled && (
-                    <div>
-                      <Label htmlFor="follow-up-delay">Follow-up delay (days)</Label>
-                      <Select 
-                        value={outreachSettings.follow_up_delay.toString()} 
-                        onValueChange={(value) => setOutreachSettings({ ...outreachSettings, follow_up_delay: parseInt(value) })}
-                      >
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="3">3 days</SelectItem>
-                          <SelectItem value="7">7 days</SelectItem>
-                          <SelectItem value="14">14 days</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
+                    ))
                   )}
-                  <Button className="w-full">
-                    <Mail className="h-4 w-4 mr-2" />
-                    Start Outreach Campaign
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Outreach Performance</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <p className="text-2xl font-bold text-blue-600">156</p>
-                        <p className="text-xs text-gray-600">Emails Sent</p>
-                      </div>
-                      <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <p className="text-2xl font-bold text-green-600">23%</p>
-                        <p className="text-xs text-gray-600">Response Rate</p>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="text-center p-3 bg-purple-50 rounded-lg">
-                        <p className="text-2xl font-bold text-purple-600">18</p>
-                        <p className="text-xs text-gray-600">Positive Responses</p>
-                      </div>
-                      <div className="text-center p-3 bg-orange-50 rounded-lg">
-                        <p className="text-2xl font-bold text-orange-600">12</p>
-                        <p className="text-xs text-gray-600">Link Placements</p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Recent Outreach */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Outreach Activity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center gap-3 p-3 border rounded-lg">
-                    <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">john@techblog.com</p>
-                      <p className="text-xs text-gray-600">Positive response • Ready to publish guest post</p>
-                    </div>
-                    <Badge variant="outline" className="bg-green-50 text-green-700">Accepted</Badge>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 border rounded-lg">
-                    <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                      <Mail className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">sarah@digitalmarketing.com</p>
-                      <p className="text-xs text-gray-600">Initial outreach sent • Awaiting response</p>
-                    </div>
-                    <Badge variant="outline" className="bg-blue-50 text-blue-700">Pending</Badge>
-                  </div>
-                  <div className="flex items-center gap-3 p-3 border rounded-lg">
-                    <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-                      <Clock className="h-4 w-4 text-purple-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">mike@seoblog.net</p>
-                      <p className="text-xs text-gray-600">Follow-up scheduled for tomorrow</p>
-                    </div>
-                    <Badge variant="outline" className="bg-purple-50 text-purple-700">Follow-up</Badge>
-                  </div>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Auto-Publish Tab */}
-          <TabsContent value="auto-publish" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Globe className="h-5 w-5" />
-                    Partner Network Auto-Publisher
-                  </CardTitle>
-                  <CardDescription>Instantly publish to pre-approved partner sites</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-1 gap-3">
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <Globe className="h-4 w-4 text-blue-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-sm">Medium Publications</p>
-                          <p className="text-xs text-gray-600">24 partner publications</p>
-                        </div>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center">
-                          <FileText className="h-4 w-4 text-green-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-sm">Dev.to Community</p>
-                          <p className="text-xs text-gray-600">8 approved accounts</p>
-                        </div>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-                          <Users className="h-4 w-4 text-purple-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-sm">Industry Forums</p>
-                          <p className="text-xs text-gray-600">15 forum accounts</p>
-                        </div>
-                      </div>
-                      <Switch />
-                    </div>
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 bg-orange-100 rounded-full flex items-center justify-center">
-                          <Briefcase className="h-4 w-4 text-orange-600" />
-                        </div>
-                        <div>
-                          <p className="font-medium text-sm">WordPress Network</p>
-                          <p className="text-xs text-gray-600">12 partner sites</p>
-                        </div>
-                      </div>
-                      <Switch defaultChecked />
-                    </div>
-                  </div>
-                  <Button className="w-full">
-                    <Upload className="h-4 w-4 mr-2" />
-                    Configure API Connections
-                  </Button>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Publishing Queue</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    <div className="p-3 border rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
-                        <p className="font-medium text-sm">AI Marketing Tools Guide</p>
-                        <Badge variant="outline" className="bg-green-50 text-green-700">Ready</Badge>
-                      </div>
-                      <p className="text-xs text-gray-600 mb-2">Scheduled for: Medium Tech Publication</p>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline">Edit</Button>
-                        <Button size="sm">Publish Now</Button>
-                      </div>
-                    </div>
-                    <div className="p-3 border rounded-lg">
-                      <div className="flex justify-between items-start mb-2">
-                        <p className="font-medium text-sm">SEO Automation Strategies</p>
-                        <Badge variant="outline" className="bg-blue-50 text-blue-700">Scheduled</Badge>
-                      </div>
-                      <p className="text-xs text-gray-600 mb-2">Publishing in: 2 hours to Dev.to</p>
-                      <div className="flex gap-2">
-                        <Button size="sm" variant="outline">Reschedule</Button>
-                        <Button size="sm" variant="outline">Cancel</Button>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Publishing Stats */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BarChart3 className="h-5 w-5" />
-                  Auto-Publishing Performance
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600">47</p>
-                    <p className="text-sm text-gray-600">Articles Published</p>
-                    <p className="text-xs text-gray-500">This month</p>
-                  </div>
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">94%</p>
-                    <p className="text-sm text-gray-600">Success Rate</p>
-                    <p className="text-xs text-gray-500">Auto-approval</p>
-                  </div>
-                  <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <p className="text-2xl font-bold text-purple-600">68</p>
-                    <p className="text-sm text-gray-600">Avg. Domain Rating</p>
-                    <p className="text-xs text-gray-500">Partner network</p>
-                  </div>
-                  <div className="text-center p-4 bg-orange-50 rounded-lg">
-                    <p className="text-2xl font-bold text-orange-600">12.3k</p>
-                    <p className="text-sm text-gray-600">Traffic Generated</p>
-                    <p className="text-xs text-gray-500">Monthly estimate</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Diversification Tab */}
-          <TabsContent value="diversification" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="h-5 w-5" />
-                  Link Diversification Engine
-                </CardTitle>
-                <CardDescription>Maintain a healthy, natural backlink profile</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="p-4 border rounded-lg">
-                    <div className="flex items-center gap-2 mb-3">
-                      <FileText className="h-5 w-5 text-blue-600" />
-                      <h3 className="font-medium">Guest Posts</h3>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Current %</span>
-                        <span className="font-medium">35%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Target %</span>
-                        <span className="font-medium">30-40%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">This Month</span>
-                        <span className="font-medium">12 links</span>
-                      </div>
-                      <Progress value={35} className="h-2" />
-                    </div>
-                  </div>
-
-                  <div className="p-4 border rounded-lg">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Globe className="h-5 w-5 text-green-600" />
-                      <h3 className="font-medium">Web 2.0</h3>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Current %</span>
-                        <span className="font-medium">25%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Target %</span>
-                        <span className="font-medium">20-30%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">This Month</span>
-                        <span className="font-medium">8 links</span>
-                      </div>
-                      <Progress value={25} className="h-2" />
-                    </div>
-                  </div>
-
-                  <div className="p-4 border rounded-lg">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Users className="h-5 w-5 text-purple-600" />
-                      <h3 className="font-medium">Forum Profiles</h3>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Current %</span>
-                        <span className="font-medium">20%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Target %</span>
-                        <span className="font-medium">15-25%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">This Month</span>
-                        <span className="font-medium">6 links</span>
-                      </div>
-                      <Progress value={20} className="h-2" />
-                    </div>
-                  </div>
-
-                  <div className="p-4 border rounded-lg">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Briefcase className="h-5 w-5 text-orange-600" />
-                      <h3 className="font-medium">Directories</h3>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Current %</span>
-                        <span className="font-medium">10%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Target %</span>
-                        <span className="font-medium">5-15%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">This Month</span>
-                        <span className="font-medium">3 links</span>
-                      </div>
-                      <Progress value={10} className="h-2" />
-                    </div>
-                  </div>
-
-                  <div className="p-4 border rounded-lg">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Users className="h-5 w-5 text-indigo-600" />
-                      <h3 className="font-medium">Social Profiles</h3>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Current %</span>
-                        <span className="font-medium">8%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Target %</span>
-                        <span className="font-medium">5-10%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">This Month</span>
-                        <span className="font-medium">2 links</span>
-                      </div>
-                      <Progress value={8} className="h-2" />
-                    </div>
-                  </div>
-
-                  <div className="p-4 border rounded-lg">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Award className="h-5 w-5 text-red-600" />
-                      <h3 className="font-medium">Other</h3>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Current %</span>
-                        <span className="font-medium">2%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Target %</span>
-                        <span className="font-medium">5-10%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">This Month</span>
-                        <span className="font-medium">1 link</span>
-                      </div>
-                      <Progress value={2} className="h-2" />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Anchor Text Diversification */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Link2 className="h-5 w-5" />
-                  Anchor Text Distribution
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="font-medium mb-3">Current Distribution</h3>
-                    <div className="space-y-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Exact Match</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={15} className="w-20 h-2" />
-                          <span className="text-sm font-medium">15%</span>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Partial Match</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={25} className="w-20 h-2" />
-                          <span className="text-sm font-medium">25%</span>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Branded</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={30} className="w-20 h-2" />
-                          <span className="text-sm font-medium">30%</span>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Generic</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={20} className="w-20 h-2" />
-                          <span className="text-sm font-medium">20%</span>
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm">Naked URL</span>
-                        <div className="flex items-center gap-2">
-                          <Progress value={10} className="w-20 h-2" />
-                          <span className="text-sm font-medium">10%</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-medium mb-3">Health Status</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                        <div>
-                          <p className="text-sm font-medium">Natural Distribution</p>
-                          <p className="text-xs text-gray-600">Anchor text ratios look natural</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                        <TrendingUp className="h-5 w-5 text-blue-600" />
-                        <div>
-                          <p className="text-sm font-medium">Balanced Growth</p>
-                          <p className="text-xs text-gray-600">Link velocity is appropriate</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
-                        <AlertTriangle className="h-5 w-5 text-orange-600" />
-                        <div>
-                          <p className="text-sm font-medium">Monitor Exact Match</p>
-                          <p className="text-xs text-gray-600">Keep below 20% for safety</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6">
+          {/* Reporting Tab */}
+          <TabsContent value="reporting" className="space-y-6">
+            {/* Key Metrics Overview */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Card>
                 <CardContent className="p-6">
@@ -1224,267 +820,126 @@ export default function AutomatedLinkBuilding() {
                     <Link2 className="h-5 w-5 text-blue-600" />
                     <span className="text-sm font-medium">Total Links Built</span>
                   </div>
-                  <p className="text-2xl font-bold">1,247</p>
-                  <p className="text-xs text-green-600">+23% this month</p>
+                  <p className="text-2xl font-bold">{loading ? '-' : analyticsStats.totalLinksBuilt.toLocaleString()}</p>
+                  <p className="text-xs text-green-600">{loading ? '-' : `+${analyticsStats.monthlyGrowth.links}% this month`}</p>
                 </CardContent>
               </Card>
+
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-2">
                     <Globe className="h-5 w-5 text-green-600" />
                     <span className="text-sm font-medium">Referring Domains</span>
                   </div>
-                  <p className="text-2xl font-bold">534</p>
-                  <p className="text-xs text-green-600">+18% this month</p>
+                  <p className="text-2xl font-bold">{loading ? '-' : analyticsStats.referringDomains.toLocaleString()}</p>
+                  <p className="text-xs text-green-600">{loading ? '-' : `+${analyticsStats.monthlyGrowth.domains}% this month`}</p>
                 </CardContent>
               </Card>
+
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-2">
                     <TrendingUp className="h-5 w-5 text-purple-600" />
                     <span className="text-sm font-medium">Avg. Domain Rating</span>
                   </div>
-                  <p className="text-2xl font-bold">67</p>
-                  <p className="text-xs text-blue-600">+5 this month</p>
+                  <p className="text-2xl font-bold">{loading ? '-' : analyticsStats.avgDomainRating}</p>
+                  <p className="text-xs text-blue-600">{loading ? '-' : `+${analyticsStats.monthlyGrowth.dr} this month`}</p>
                 </CardContent>
               </Card>
+
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-2">
                     <BarChart3 className="h-5 w-5 text-orange-600" />
                     <span className="text-sm font-medium">Traffic Impact</span>
                   </div>
-                  <p className="text-2xl font-bold">+34.2k</p>
+                  <p className="text-2xl font-bold">{loading ? '-' : `+${(analyticsStats.trafficImpact / 1000).toFixed(1)}k`}</p>
                   <p className="text-xs text-green-600">Monthly organic</p>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Detailed Analytics */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Link Building Progress</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-                      <p className="text-gray-500">Chart: Links built over time</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Domain Rating Distribution</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="h-64 bg-gray-50 rounded-lg flex items-center justify-center">
-                      <p className="text-gray-500">Chart: DR distribution of acquired links</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Performance by Platform */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Performance by Platform</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b">
-                        <th className="text-left p-2">Platform Type</th>
-                        <th className="text-left p-2">Links Built</th>
-                        <th className="text-left p-2">Avg. DR</th>
-                        <th className="text-left p-2">Success Rate</th>
-                        <th className="text-left p-2">Traffic Impact</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-b">
-                        <td className="p-2">Guest Posts</td>
-                        <td className="p-2">47</td>
-                        <td className="p-2">72</td>
-                        <td className="p-2">68%</td>
-                        <td className="p-2">+12.3k</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Web 2.0</td>
-                        <td className="p-2">89</td>
-                        <td className="p-2">58</td>
-                        <td className="p-2">94%</td>
-                        <td className="p-2">+8.7k</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Forums</td>
-                        <td className="p-2">156</td>
-                        <td className="p-2">45</td>
-                        <td className="p-2">78%</td>
-                        <td className="p-2">+5.2k</td>
-                      </tr>
-                      <tr className="border-b">
-                        <td className="p-2">Directories</td>
-                        <td className="p-2">23</td>
-                        <td className="p-2">38</td>
-                        <td className="p-2">85%</td>
-                        <td className="p-2">+1.8k</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Compliance Tab */}
-          <TabsContent value="compliance" className="space-y-6">
+            {/* Outreach Performance */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Built-in Compliance Checks
+                  <Mail className="h-5 w-5" />
+                  Outreach Performance
                 </CardTitle>
-                <CardDescription>Ensure your link building follows best practices and guidelines</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h3 className="font-medium mb-3">Safety Checks</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                        <div>
-                          <p className="text-sm font-medium">PBN Detection</p>
-                          <p className="text-xs text-gray-600">Automatically avoids PBN-looking sites</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                        <div>
-                          <p className="text-sm font-medium">Content Variation</p>
-                          <p className="text-xs text-gray-600">AI varies content structure and style</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                        <div>
-                          <p className="text-sm font-medium">Natural Timing</p>
-                          <p className="text-xs text-gray-600">Randomized publishing schedules</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
-                        <CheckCircle className="h-5 w-5 text-green-600" />
-                        <div>
-                          <p className="text-sm font-medium">Footprint Avoidance</p>
-                          <p className="text-xs text-gray-600">Different IP addresses and patterns</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div>
-                    <h3 className="font-medium mb-3">Quality Standards</h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                        <Filter className="h-5 w-5 text-blue-600" />
-                        <div>
-                          <p className="text-sm font-medium">Domain Authority Filter</p>
-                          <p className="text-xs text-gray-600">Minimum DA: 30, Maximum Spam Score: 20</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                        <Eye className="h-5 w-5 text-blue-600" />
-                        <div>
-                          <p className="text-sm font-medium">Content Relevance</p>
-                          <p className="text-xs text-gray-600">Minimum relevance score: 70%</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                        <TrendingUp className="h-5 w-5 text-blue-600" />
-                        <div>
-                          <p className="text-sm font-medium">Traffic Validation</p>
-                          <p className="text-xs text-gray-600">Sites must have organic traffic</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                        <Globe className="h-5 w-5 text-blue-600" />
-                        <div>
-                          <p className="text-sm font-medium">Geographic Diversity</p>
-                          <p className="text-xs text-gray-600">Balanced across regions</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Risk Assessment */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Campaign Risk Assessment</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center p-4 bg-green-50 rounded-lg">
-                    <div className="h-8 w-8 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <CheckCircle className="h-4 w-4 text-green-600" />
-                    </div>
-                    <p className="font-medium text-green-800">Low Risk</p>
-                    <p className="text-sm text-green-600">Current campaign profile</p>
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="text-center p-4 bg-blue-50 rounded-lg">
-                    <div className="h-8 w-8 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <Shield className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <p className="font-medium text-blue-800">Protected</p>
-                    <p className="text-sm text-blue-600">All safety measures active</p>
+                    <p className="text-2xl font-bold text-blue-600">{loading ? '-' : outreachStats.emailsSent}</p>
+                    <p className="text-sm text-gray-600">Emails Sent</p>
+                  </div>
+                  <div className="text-center p-4 bg-green-50 rounded-lg">
+                    <p className="text-2xl font-bold text-green-600">{loading ? '-' : `${outreachStats.responseRate}%`}</p>
+                    <p className="text-sm text-gray-600">Response Rate</p>
                   </div>
                   <div className="text-center p-4 bg-purple-50 rounded-lg">
-                    <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-2">
-                      <TrendingUp className="h-4 w-4 text-purple-600" />
-                    </div>
-                    <p className="font-medium text-purple-800">Optimized</p>
-                    <p className="text-sm text-purple-600">Following best practices</p>
+                    <p className="text-2xl font-bold text-purple-600">{loading ? '-' : outreachStats.positiveResponses}</p>
+                    <p className="text-sm text-gray-600">Positive Responses</p>
+                  </div>
+                  <div className="text-center p-4 bg-orange-50 rounded-lg">
+                    <p className="text-2xl font-bold text-orange-600">{loading ? '-' : outreachStats.linkPlacements}</p>
+                    <p className="text-sm text-gray-600">Link Placements</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Guidelines */}
+            {/* Campaign Performance Table */}
             <Card>
               <CardHeader>
-                <CardTitle>Platform Guidelines Compliance</CardTitle>
+                <CardTitle>Campaign Performance</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium text-sm">Google Guidelines</p>
-                      <p className="text-xs text-gray-600">Natural link patterns, quality content</p>
-                    </div>
-                    <Badge variant="outline" className="bg-green-50 text-green-700">Compliant</Badge>
+                {campaigns.length === 0 ? (
+                  <div className="text-center p-8 text-gray-500">
+                    No campaigns to report on yet.
                   </div>
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium text-sm">Medium Terms of Service</p>
-                      <p className="text-xs text-gray-600">Original content, proper attribution</p>
-                    </div>
-                    <Badge variant="outline" className="bg-green-50 text-green-700">Compliant</Badge>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left p-2">Campaign</th>
+                          <th className="text-left p-2">Status</th>
+                          <th className="text-left p-2">Links Built</th>
+                          <th className="text-left p-2">Success Rate</th>
+                          <th className="text-left p-2">Created</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {campaigns.map((campaign) => (
+                          <tr key={campaign.id} className="border-b">
+                            <td className="p-2">
+                              <div>
+                                <p className="font-medium">{campaign.name}</p>
+                                <p className="text-xs text-gray-500">{campaign.target_url}</p>
+                              </div>
+                            </td>
+                            <td className="p-2">
+                              <Badge variant={campaign.status === 'active' ? 'default' : 'secondary'}>
+                                {campaign.status}
+                              </Badge>
+                            </td>
+                            <td className="p-2">{campaign.metrics?.links_built || 0}</td>
+                            <td className="p-2">
+                              <span className="text-green-600">
+                                {campaign.metrics ? `${Math.round((campaign.metrics.links_built / (campaign.metrics.links_built + 1)) * 100)}%` : '0%'}
+                              </span>
+                            </td>
+                            <td className="p-2">
+                              {new Date(campaign.created_at).toLocaleDateString()}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                   </div>
-                  <div className="flex items-center justify-between p-3 border rounded-lg">
-                    <div>
-                      <p className="font-medium text-sm">Forum Community Rules</p>
-                      <p className="text-xs text-gray-600">Helpful contributions, no spam</p>
-                    </div>
-                    <Badge variant="outline" className="bg-green-50 text-green-700">Compliant</Badge>
-                  </div>
-                </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
