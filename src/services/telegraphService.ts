@@ -35,41 +35,6 @@ class TelegraphService {
     automationLogger.info('system', 'Telegraph service initialized (using Netlify functions)');
   }
 
-  async createAccount(): Promise<string> {
-    try {
-      automationLogger.debug('api', 'Creating Telegraph account');
-      
-      const response = await fetch(`${this.baseUrl}/createAccount`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          short_name: this.accountName,
-          author_name: this.authorName,
-          author_url: 'https://autoseo.app'
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Telegraph API error: ${response.status}`);
-      }
-
-      const data = await response.json();
-      
-      if (!data.ok) {
-        throw new Error(`Telegraph error: ${data.error || 'Unknown error'}`);
-      }
-
-      this.accessToken = data.result.access_token;
-      automationLogger.info('api', 'Telegraph account created successfully');
-      
-      return this.accessToken;
-    } catch (error) {
-      automationLogger.error('api', 'Failed to create Telegraph account', {}, undefined, error as Error);
-      throw error;
-    }
-  }
 
   async postArticle(request: TelegraphPostRequest): Promise<TelegraphPostResult> {
     const { title, content, campaignId, authorName = 'SEO Content Bot' } = request;
