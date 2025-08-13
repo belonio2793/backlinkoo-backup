@@ -13,6 +13,26 @@ export class ContentFormatter {
     // CRITICAL: Add debug logging for production issues
     console.log('ContentFormatter: Original content length:', content.length);
 
+    // ULTRA-EARLY FIX: Prevent malformed bold patterns before any other processing
+    console.log('ContentFormatter: Before bold fix, content contains:',
+      content.includes('**Enhanced SEO Performance:**') ? '**Enhanced SEO Performance:**' :
+      content.includes('**E**nhanced') ? '**E**nhanced (malformed)' : 'unknown pattern');
+
+    content = content
+      // Fix patterns like **E**nhanced SEO Performance: -> **Enhanced SEO Performance:**
+      .replace(/\*\*([A-Z])\*\*([a-z][^:*\n]*:)/g, '**$1$2**')
+      // Fix any double-malformed patterns
+      .replace(/\*\*([A-Z])\*\*([a-z][^:*\n]*)\*\*([^*]*:)/g, '**$1$2$3**')
+      // More comprehensive patterns
+      .replace(/\*\*([A-Z])\*\*([a-z][A-Za-z\s]+:)/g, '**$1$2**')
+      .replace(/\*\*([A-Z])\*\*([a-z][A-Za-z\s]+ Performance:)/g, '**$1$2**')
+      .replace(/\*\*([A-Z])\*\*([a-z][A-Za-z\s]+ Generation:)/g, '**$1$2**')
+      .replace(/\*\*([A-Z])\*\*([a-z][A-Za-z\s]+ Credibility:)/g, '**$1$2**');
+
+    console.log('ContentFormatter: After bold fix, content contains:',
+      content.includes('**Enhanced SEO Performance:**') ? '**Enhanced SEO Performance:**' :
+      content.includes('**E**nhanced') ? '**E**nhanced (still malformed)' : 'unknown pattern');
+
     // VERY EARLY preprocessing to fix critical issues before any HTML processing
     content = content
       // Fix the specific issue: ## &lt; h2&gt;Pro Tip pattern
@@ -49,8 +69,13 @@ export class ContentFormatter {
 
     // Process the content in correct order - add comprehensive cleanup first
     formattedContent = this.removeSpecificMalformedPatterns(formattedContent);
+    console.log('After removeSpecificMalformedPatterns:', formattedContent.includes('**Enhanced') ? 'Has Enhanced' : 'No Enhanced');
+
     formattedContent = this.cleanupMarkdownArtifacts(formattedContent);
+    console.log('After cleanupMarkdownArtifacts:', formattedContent.includes('**Enhanced') ? 'Has Enhanced' : formattedContent.includes('**E**') ? 'Has **E**' : 'No Enhanced');
+
     formattedContent = this.convertMarkdownToHtml(formattedContent);
+    console.log('After convertMarkdownToHtml:', formattedContent.includes('<strong') ? 'Has strong tags' : 'No strong tags');
     formattedContent = this.removeDuplicateTitle(formattedContent, title);
     formattedContent = this.fixContentIssues(formattedContent);
     formattedContent = this.cleanMalformedLinks(formattedContent);
@@ -116,14 +141,14 @@ export class ContentFormatter {
       .replace(/\n---+$/gm, '')
       // Remove malformed headings that are just single letters or abbreviations
       .replace(/^##?\s+[A-Z]\.\s*(Assessment|needed|required|evaluation)\s*$/gmi, '')
-      // Fix common markdown formatting issues
-      .replace(/^\s*\*\*([A-Z])\.\s*([A-Za-z\s]*)\*\*\s*$/gmi, (match, letter, rest) => {
-        // Convert malformed bold patterns to regular text
-        if (rest.trim().length < 5) {
-          return `**${letter}.** ${rest}`;
-        }
-        return match;
-      })
+      // Fix common markdown formatting issues - DISABLED to prevent interference with legitimate bold text
+      // .replace(/^\s*\*\*([A-Z])\.\s*([A-Za-z\s]*)\*\*\s*$/gmi, (match, letter, rest) => {
+      //   // Convert malformed bold patterns to regular text
+      //   if (rest.trim().length < 5) {
+      //     return `**${letter}.** ${rest}`;
+      //   }
+      //   return match;
+      // })
       // Remove empty markdown headings
       .replace(/^#{1,6}\s*$$/gm, '')
       // Clean up excessive markdown symbols
@@ -285,8 +310,15 @@ export class ContentFormatter {
       })
       // Convert **text** patterns at start of line to <h2> tags (standalone bold headings)
       .replace(/^\*\*([^*]+?)\*\*(?=\s*\n|$)/gmi, '<h2>$1</h2>')
+      // CRITICAL: Fix malformed bold patterns before conversion
+      // Pattern: **E**nhanced SEO Performance: -> **Enhanced SEO Performance:**
+      .replace(/\*\*([A-Z])\*\*([a-z][^:]*:)/g, '**$1$2**')
+
       // Convert remaining **text** to <strong> tags (inline bold) - use simpler markup initially
-      .replace(/\*\*([^*]+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*\*([^*]+?)\*\*/g, (match, content) => {
+        console.log('Converting bold text:', match, '->', content);
+        return `<strong class="font-bold text-inherit">${content}</strong>`;
+      })
       // Convert *text* to <em> tags (italic)
       .replace(/\*([^*]+?)\*/g, '<em>$1</em>')
       // Convert ### headings to h3
@@ -646,6 +678,10 @@ export class ContentFormatter {
    */
   static preProcessMalformedHtml(content: string): string {
     return content
+      // CRITICAL: Fix bold text that got malformed into first-letter-only patterns
+      // Pattern: **E**nhanced SEO Performance: -> **Enhanced SEO Performance:**
+      .replace(/\*\*([A-Z])\*\*([a-z][^:]*:)/g, '**$1$2**')
+
       // CRITICAL: Fix malformed markdown headings that will cause DOM issues
       // Pattern: ## <strong>Title</strong> or ## &lt;strong&gt;Title&lt;/strong&gt;
       .replace(/^##\s*&lt;strong[^&>]*&gt;([^&<]+)&lt;\/strong&gt;\s*$/gm, '## $1')
