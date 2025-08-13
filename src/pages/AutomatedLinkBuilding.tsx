@@ -627,6 +627,41 @@ export default function AutomatedLinkBuilding() {
                     <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
                     <span className="ml-2 text-gray-500">Loading posts...</span>
                   </div>
+                ) : !isAuthenticated ? (
+                  <div className="text-center p-8">
+                    <div className="mb-4">
+                      <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-3" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">Sign In to View Your Posts</h3>
+                      <p className="text-gray-600 mb-4">
+                        Your generated content and post history will appear here after you sign in.
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 rounded-lg p-6 max-w-md mx-auto">
+                      <h4 className="font-medium mb-3">Features Available After Sign In:</h4>
+                      <ul className="text-sm text-gray-600 space-y-2 text-left">
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          Generate unlimited content with ChatGPT 3.5 Turbo
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          Automatic publishing to Telegraph and other platforms
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          Track all your generated posts and URLs
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          Copy content and URLs with one click
+                        </li>
+                        <li className="flex items-center gap-2">
+                          <CheckCircle className="h-4 w-4 text-green-500" />
+                          Performance analytics and reporting
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
                 ) : generatedPosts.length === 0 ? (
                   <div className="text-center p-8 text-gray-500">
                     No posts generated yet. Use the Content Generator to create your first post.
