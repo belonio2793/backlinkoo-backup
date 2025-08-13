@@ -252,15 +252,7 @@ export default function BacklinkAutomation() {
       console.log('User ID:', user?.id);
       console.log('Is authenticated:', isAuthenticated);
 
-      // Check if the exact error indicates table doesn't exist or wrong schema
-      if (error?.message?.includes('does not exist')) {
-        setShowDatabaseSetup(true);
-        throw new Error('Database table does not exist. Please set up the database first using the setup instructions above.');
-      }
-
-      if (error?.message?.includes('boolean')) {
-        throw new Error('Database schema mismatch. You may need to drop existing tables and recreate them with the correct schema. The error suggests a column is expecting a boolean but received text.');
-      }
+      console.log('Proceeding with campaign save...');
 
       let campaign;
       if (activeCampaign) {
