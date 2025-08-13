@@ -1,5 +1,6 @@
 /**
  * Immediate cache clearing utility for API keys
+ * SECURITY: This file has been cleaned of hardcoded API keys
  */
 
 export function clearAllApiKeyCaches(): void {
@@ -42,45 +43,15 @@ export function clearAllApiKeyCaches(): void {
 }
 
 export function setCorrectApiKey(): void {
-  const CORRECT_KEY = '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';
+  // SECURITY: API keys should NEVER be hardcoded in client-side code
+  console.warn('⚠️ This function has been disabled for security reasons');
+  console.warn('🔒 API keys should be configured through secure environment variables only');
   
-  console.log('🔑 Setting correct API key ending with:', CORRECT_KEY.slice(-4));
+  // Clear any existing cached API keys instead of setting hardcoded ones
+  clearAllApiKeyCaches();
   
-  // Set in localStorage for the admin configuration
-  const adminConfig = [{
-    service: 'OpenAI',
-    apiKey: CORRECT_KEY,
-    isActive: true,
-    lastTested: new Date().toISOString(),
-    isValid: true
-  }];
-  
-  localStorage.setItem('admin_api_configurations', JSON.stringify(adminConfig));
-  
-  // Set as permanent config
-  const permanentConfig = [{
-    service: 'OpenAI',
-    apiKey: CORRECT_KEY,
-    isActive: true,
-    lastUpdated: new Date().toISOString()
-  }];
-  
-  localStorage.setItem('permanent_api_configs', JSON.stringify(permanentConfig));
-  
-  // Set in admin environment variables format
-  const envVars = [{
-    key: 'OPENAI_API_KEY',
-    value: CORRECT_KEY,
-    description: 'OpenAI API key for AI content generation (Netlify)',
-    is_secret: true,
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString()
-  }];
-
-  localStorage.setItem('admin_env_vars', JSON.stringify(envVars));
-  
-  console.log('✅ Correct API key set in all storage locations');
+  throw new Error('API keys must be provided through secure environment variables, not hardcoded');
 }
 
 // Functions available for manual execution - don't auto-run to prevent side effects
-// Call clearAllApiKeyCaches() and setCorrectApiKey() manually when needed
+// Call clearAllApiKeyCaches() manually when needed to clear caches

@@ -70,11 +70,12 @@ export async function setupAdminTableAndAPIKey() {
       console.log('✅ Table creation SQL executed successfully');
     }
 
-    // Step 2: Insert the API keys directly
+    // Step 2: Setup API key configuration (without hardcoded values)
+    // SECURITY: API keys should NEVER be hardcoded in client-side code
     const apiKeysData = [
       {
         key: 'VITE_OPENAI_API_KEY',
-        value: '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',
+        value: '', // Should be set through secure environment variables
         description: 'OpenAI API key for AI content generation and backlink creation',
         is_secret: true
       },

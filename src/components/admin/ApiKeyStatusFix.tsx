@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { clearAllApiKeyCaches, setCorrectApiKey } from '@/utils/clearApiKeyCache';
+import { clearAllApiKeyCaches } from '@/utils/clearApiKeyCache';
 import { Key, AlertTriangle, CheckCircle, RefreshCw, Zap } from 'lucide-react';
 
 export function ApiKeyStatusFix() {
@@ -13,7 +13,7 @@ export function ApiKeyStatusFix() {
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const { toast } = useToast();
 
-  const CORRECT_KEY = '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';
+  // API key should be retrieved from secure environment variables only
 
   const checkCurrentKey = () => {
     // Check various sources for the current key
@@ -44,7 +44,7 @@ export function ApiKeyStatusFix() {
     return detectedKey;
   };
 
-  const isCorrectKey = currentKey === CORRECT_KEY;
+  // API key validation removed for security
 
   const forceFixApiKey = async () => {
     setIsFixing(true);
@@ -57,8 +57,8 @@ export function ApiKeyStatusFix() {
       // Wait a moment
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Set correct key
-      setCorrectApiKey();
+      // Clear caches only - no hardcoded keys
+      clearAllApiKeyCaches();
       
       // Wait another moment
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -67,7 +67,7 @@ export function ApiKeyStatusFix() {
       const newKey = checkCurrentKey();
       setLastUpdate(new Date());
       
-      if (newKey === CORRECT_KEY) {
+      if (newKey && newKey.startsWith('sk-')) {
         toast({
           title: 'API Key Fixed!',
           description: 'The correct API key is now in use across all systems.',
@@ -77,7 +77,7 @@ export function ApiKeyStatusFix() {
         setTimeout(async () => {
           try {
             const response = await fetch('https://api.openai.com/v1/models', {
-              headers: { 'Authorization': `Bearer ${CORRECT_KEY}` },
+              headers: { 'Authorization': `Bearer ${newKey}` },
               method: 'GET'
             });
             

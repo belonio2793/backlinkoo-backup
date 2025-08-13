@@ -1,5 +1,5 @@
--- Create admin_environment_variables table and add OpenAI API key
--- This script will setup the missing table and configure the API key
+-- Create admin_environment_variables table
+-- SECURITY: This script has been cleaned of hardcoded API keys
 
 -- Step 1: Create the table if it doesn't exist
 CREATE TABLE IF NOT EXISTS admin_environment_variables (
@@ -48,35 +48,16 @@ CREATE TRIGGER update_admin_environment_variables_updated_at
     FOR EACH ROW 
     EXECUTE FUNCTION update_updated_at_column();
 
--- Step 7: Insert/Update the OpenAI API key
-INSERT INTO admin_environment_variables (key, value, description, is_secret)
-VALUES
-    (
-        'VITE_OPENAI_API_KEY',
-        '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',
-        'OpenAI API key for AI content generation and backlink creation',
-        true
-    ),
-    (
-        'SUPABASE_ACCESS_TOKEN',
-        'sbp_65f13d3ef84fae093dbb2b2d5368574f69b3cea2',
-        'Supabase account access token for database operations and deployments',
-        true
-    )
-ON CONFLICT (key) DO UPDATE SET
-    value = EXCLUDED.value,
-    description = EXCLUDED.description,
-    updated_at = timezone('utc'::text, now());
+-- SECURITY NOTICE:
+-- API keys should be inserted manually through the admin interface or
+-- secure deployment scripts that use environment variables, NOT hardcoded values.
 
--- Verification: Check if the data was inserted correctly
+-- Verification: Check the table structure
 SELECT 
-    key, 
-    CASE 
-        WHEN is_secret THEN LEFT(value, 10) || '...' 
-        ELSE value 
-    END as masked_value,
-    description,
-    created_at,
-    updated_at
-FROM admin_environment_variables 
-ORDER BY created_at DESC;
+    column_name,
+    data_type,
+    is_nullable,
+    column_default
+FROM information_schema.columns 
+WHERE table_name = 'admin_environment_variables'
+ORDER BY ordinal_position;

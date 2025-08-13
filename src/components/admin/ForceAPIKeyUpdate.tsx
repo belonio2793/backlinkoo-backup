@@ -11,7 +11,7 @@ export function ForceAPIKeyUpdate() {
   const [currentKey, setCurrentKey] = useState<string>('');
   const { toast } = useToast();
 
-  const CORRECT_API_KEY = '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';
+  // API key should be retrieved from secure environment variables only
 
   const checkCurrentKey = async () => {
     try {
@@ -20,7 +20,6 @@ export function ForceAPIKeyUpdate() {
       
       console.log('🔍 Current key check:');
       console.log('Database key ends with:', key ? key.slice(-4) : 'NONE');
-      console.log('Should end with: 1PsA');
       console.log('Environment key:', import.meta.env.VITE_OPENAI_API_KEY?.slice(-4) || 'NONE');
     } catch (error) {
       console.error('Error checking current key:', error);
