@@ -405,16 +405,7 @@ html {
     margin: 0.05em 0.05em 0 0;
   }
   
-  .article-content .prose h2::before,
-  .modern-blog-content h2::before {
-    left: -16px;
-    width: 3px;
-  }
-  
-  .article-content .prose h3::before,
-  .modern-blog-content h3::before {
-    left: -16px;
-  }
+  /* Removed responsive styling for heading pseudo-elements */
   
   .enhanced-paragraph[data-reading-progress]::after {
     display: none;

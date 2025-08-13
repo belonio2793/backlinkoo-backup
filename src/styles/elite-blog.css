@@ -391,14 +391,7 @@
     font-size: 1.5rem;
   }
   
-  .elite-blog-content h2::before {
-    left: -20px;
-    width: 4px;
-  }
-  
-  .elite-blog-content h3::before {
-    left: -20px;
-  }
+  /* Removed responsive styling for heading pseudo-elements */
 }
 
 @media (max-width: 768px) {
