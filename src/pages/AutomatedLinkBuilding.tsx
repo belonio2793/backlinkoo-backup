@@ -125,6 +125,76 @@ export default function AutomatedLinkBuilding() {
     personalization_level: 'high'
   });
 
+  // Load automation data from database
+  useEffect(() => {
+    if (!isAuthenticated || !user) return;
+
+    const loadAutomationData = async () => {
+      try {
+        setLoading(true);
+
+        // Fetch real campaign statistics
+        const { data: campaignStats, error: statsError } = await supabase
+          .from('automation_campaigns')
+          .select(`
+            id,
+            status,
+            links_built_today,
+            domains_reached,
+            avg_domain_rating,
+            success_rate,
+            traffic_gained
+          `)
+          .eq('user_id', user.id)
+          .eq('status', 'active');
+
+        if (statsError) throw statsError;
+
+        // Calculate aggregate stats
+        let totalLinksToday = 0;
+        let totalDomains = 0;
+        let avgDR = 0;
+        let avgSuccessRate = 0;
+        let totalTraffic = 0;
+
+        if (campaignStats && campaignStats.length > 0) {
+          totalLinksToday = campaignStats.reduce((sum, campaign) => sum + (campaign.links_built_today || 0), 0);
+          totalDomains = campaignStats.reduce((sum, campaign) => sum + (campaign.domains_reached || 0), 0);
+          avgDR = Math.round(campaignStats.reduce((sum, campaign) => sum + (campaign.avg_domain_rating || 0), 0) / campaignStats.length);
+          avgSuccessRate = Math.round(campaignStats.reduce((sum, campaign) => sum + (campaign.success_rate || 0), 0) / campaignStats.length);
+          totalTraffic = campaignStats.reduce((sum, campaign) => sum + (campaign.traffic_gained || 0), 0);
+        }
+
+        setStats({
+          linksBuiltToday: totalLinksToday,
+          domainsReached: totalDomains,
+          avgDomainRating: avgDR,
+          successRate: avgSuccessRate,
+          trafficGained: totalTraffic
+        });
+
+        // Fetch campaigns
+        const { data: campaigns, error: campaignsError } = await supabase
+          .from('automation_campaigns')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+
+        if (campaignsError) throw campaignsError;
+
+        setCampaigns(campaigns || []);
+
+      } catch (error) {
+        console.error('Error loading automation data:', error);
+        toast.error('Failed to load automation data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAutomationData();
+  }, [user, isAuthenticated]);
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
