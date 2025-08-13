@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { liveBlogPublisher } from '@/services/liveBlogPublisher';
 import { BlogClaimButton } from '@/components/BlogClaimButton';
 import { format } from 'date-fns';
+import { processBlogContent } from '@/utils/markdownProcessor';
 
 export function BlogPreview() {
   const { slug } = useParams();
