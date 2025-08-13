@@ -42,6 +42,35 @@ class AutomationLogger {
     return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
+  private safeStringify(obj: any): string {
+    try {
+      return JSON.stringify(obj, (key, value) => {
+        // Handle Error objects
+        if (value instanceof Error) {
+          return {
+            name: value.name,
+            message: value.message,
+            stack: value.stack,
+            code: (value as any).code
+          };
+        }
+        // Handle functions
+        if (typeof value === 'function') {
+          return '[Function]';
+        }
+        // Handle circular references
+        return value;
+      });
+    } catch (error) {
+      try {
+        // Fallback: convert to string
+        return String(obj);
+      } catch {
+        return '[Unserializable Object]';
+      }
+    }
+  }
+
   setUserId(userId: string) {
     this.userId = userId;
     this.info('system', 'User authenticated', { userId });
