@@ -602,8 +602,10 @@ export function BeautifulBlogPost() {
       .replace(/<strong[^>]*>T<\/strong>argeted Traffic Generation:/gi, '<strong class="font-bold text-inherit">Targeted Traffic Generation:</strong>')
       // Fix Building Authority and Credibility pattern
       .replace(/<strong[^>]*>B<\/strong>uilding Authority and Credibility:/gi, '<strong class="font-bold text-inherit">Building Authority and Credibility:</strong>')
+      // Fix Data-Driven Decision-Making pattern
+      .replace(/<strong[^>]*>D<\/strong>ata-Driven Decision-Making:/gi, '<strong class="font-bold text-inherit">Data-Driven Decision-Making:</strong>')
       // Generic fix for any similar pattern: <strong>X</strong>word Something: -> <strong>Xword Something:</strong>
-      .replace(/<strong[^>]*>([A-Z])<\/strong>([a-z][A-Za-z\s]*:)/gi, '<strong class="font-bold text-inherit">$1$2</strong>')
+      .replace(/<strong[^>]*>([A-Z])<\/strong>([a-z][A-Za-z\s-]*:)/gi, '<strong class="font-bold text-inherit">$1$2</strong>')
 
       // Remove HTML syntax artifacts that shouldn't be displayed
       .replace(/Hook Introduction:\s*["=]*\s*H[1-6]:\s*/gi, '')
