@@ -138,64 +138,80 @@ export default function AutomatedLinkBuilding() {
         setStats(aggregatedStats);
         setCampaigns(campaigns);
         
-        // Fetch outreach statistics
-        const { data: outreachData, error: outreachError } = await supabase
-          .from('outreach_campaigns')
-          .select(`
-            emails_sent,
-            response_rate,
-            positive_responses,
-            link_placements
-          `)
-          .eq('user_id', user.id);
-          
-        if (outreachError) {
-          console.error('Error loading outreach data:', outreachError);
-        } else if (outreachData && outreachData.length > 0) {
-          const totalEmailsSent = outreachData.reduce((sum, campaign) => sum + (campaign.emails_sent || 0), 0);
-          const avgResponseRate = Math.round(outreachData.reduce((sum, campaign) => sum + (campaign.response_rate || 0), 0) / outreachData.length);
-          const totalPositiveResponses = outreachData.reduce((sum, campaign) => sum + (campaign.positive_responses || 0), 0);
-          const totalLinkPlacements = outreachData.reduce((sum, campaign) => sum + (campaign.link_placements || 0), 0);
-          
-          setOutreachStats({
-            emailsSent: totalEmailsSent,
-            responseRate: avgResponseRate,
-            positiveResponses: totalPositiveResponses,
-            linkPlacements: totalLinkPlacements
-          });
+        // Fetch outreach statistics (handle missing table gracefully)
+        try {
+          const { data: outreachData, error: outreachError } = await supabase
+            .from('outreach_campaigns')
+            .select(`
+              emails_sent,
+              response_rate,
+              positive_responses,
+              link_placements
+            `)
+            .eq('user_id', user.id);
+
+          if (outreachError) {
+            if (outreachError.message.includes('relation') && outreachError.message.includes('does not exist')) {
+              console.info('Outreach campaigns table does not exist yet');
+            } else {
+              console.error('Error loading outreach data:', outreachError);
+            }
+          } else if (outreachData && outreachData.length > 0) {
+            const totalEmailsSent = outreachData.reduce((sum, campaign) => sum + (campaign.emails_sent || 0), 0);
+            const avgResponseRate = Math.round(outreachData.reduce((sum, campaign) => sum + (campaign.response_rate || 0), 0) / outreachData.length);
+            const totalPositiveResponses = outreachData.reduce((sum, campaign) => sum + (campaign.positive_responses || 0), 0);
+            const totalLinkPlacements = outreachData.reduce((sum, campaign) => sum + (campaign.link_placements || 0), 0);
+
+            setOutreachStats({
+              emailsSent: totalEmailsSent,
+              responseRate: avgResponseRate,
+              positiveResponses: totalPositiveResponses,
+              linkPlacements: totalLinkPlacements
+            });
+          }
+        } catch (error) {
+          console.warn('Outreach stats query failed:', error);
         }
 
-        // Fetch analytics data from automation_analytics table
-        const { data: analyticsData, error: analyticsError } = await supabase
-          .from('automation_analytics')
-          .select(`
-            total_links_built,
-            referring_domains,
-            avg_domain_rating,
-            traffic_impact,
-            monthly_growth_links,
-            monthly_growth_domains,
-            monthly_growth_dr
-          `)
-          .eq('user_id', user.id)
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
+        // Fetch analytics data from automation_analytics table (handle missing table gracefully)
+        try {
+          const { data: analyticsData, error: analyticsError } = await supabase
+            .from('automation_analytics')
+            .select(`
+              total_links_built,
+              referring_domains,
+              avg_domain_rating,
+              traffic_impact,
+              monthly_growth_links,
+              monthly_growth_domains,
+              monthly_growth_dr
+            `)
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
 
-        if (analyticsError) {
-          console.error('Error loading analytics data:', analyticsError);
-        } else if (analyticsData) {
-          setAnalyticsStats({
-            totalLinksBuilt: analyticsData.total_links_built || 0,
-            referringDomains: analyticsData.referring_domains || 0,
-            avgDomainRating: analyticsData.avg_domain_rating || 0,
-            trafficImpact: analyticsData.traffic_impact || 0,
-            monthlyGrowth: {
-              links: analyticsData.monthly_growth_links || 0,
-              domains: analyticsData.monthly_growth_domains || 0,
-              dr: analyticsData.monthly_growth_dr || 0
+          if (analyticsError) {
+            if (analyticsError.message.includes('relation') && analyticsError.message.includes('does not exist')) {
+              console.info('Analytics table does not exist yet');
+            } else {
+              console.error('Error loading analytics data:', analyticsError);
             }
-          });
+          } else if (analyticsData) {
+            setAnalyticsStats({
+              totalLinksBuilt: analyticsData.total_links_built || 0,
+              referringDomains: analyticsData.referring_domains || 0,
+              avgDomainRating: analyticsData.avg_domain_rating || 0,
+              trafficImpact: analyticsData.traffic_impact || 0,
+              monthlyGrowth: {
+                links: analyticsData.monthly_growth_links || 0,
+                domains: analyticsData.monthly_growth_domains || 0,
+                dr: analyticsData.monthly_growth_dr || 0
+              }
+            });
+          }
+        } catch (error) {
+          console.warn('Analytics stats query failed:', error);
         }
 
         // Fetch recent activity with optimization
