@@ -37,7 +37,9 @@ import {
   Clock,
   Award,
   Filter,
-  MoreVertical
+  MoreVertical,
+  XCircle,
+  RefreshCw
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
