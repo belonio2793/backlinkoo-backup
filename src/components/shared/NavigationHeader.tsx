@@ -67,9 +67,6 @@ export function NavigationHeader() {
                       {item.badge}
                     </Badge>
                   )}
-                  {item.path === '/automation/system' && (
-                    <div className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-                  )}
                 </Link>
               );
             })}
