@@ -44,6 +44,9 @@ export const LazySEOOptimizedBlogGenerator = lazy(() => import('@/pages/SEOBlogG
 // Email scraping component
 export const LazyScrapePage = lazy(() => import('@/pages/ScrapePage'));
 
+// Automation component
+export const LazyAutomation = lazy(() => import('@/pages/Automation'));
+
 
 // Admin campaign management component
 export const LazyAdminCampaignManager = lazy(() => import('@/pages/AdminCampaignManager'));
