@@ -167,6 +167,10 @@ export function PaymentDebugger() {
           <CreditCard className="h-4 w-4 mr-2" />
           Test Payment
         </Button>
+        <Button onClick={generateReport} variant="outline">
+          <Copy className="h-4 w-4 mr-2" />
+          Copy Report
+        </Button>
       </div>
 
       {/* Environment Variables Check */}
