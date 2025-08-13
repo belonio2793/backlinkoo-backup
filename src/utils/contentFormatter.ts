@@ -14,11 +14,24 @@ export class ContentFormatter {
     console.log('ContentFormatter: Original content length:', content.length);
 
     // ULTRA-EARLY FIX: Prevent malformed bold patterns before any other processing
+    console.log('ContentFormatter: Before bold fix, content contains:',
+      content.includes('**Enhanced SEO Performance:**') ? '**Enhanced SEO Performance:**' :
+      content.includes('**E**nhanced') ? '**E**nhanced (malformed)' : 'unknown pattern');
+
     content = content
       // Fix patterns like **E**nhanced SEO Performance: -> **Enhanced SEO Performance:**
       .replace(/\*\*([A-Z])\*\*([a-z][^:*\n]*:)/g, '**$1$2**')
       // Fix any double-malformed patterns
-      .replace(/\*\*([A-Z])\*\*([a-z][^:*\n]*)\*\*([^*]*:)/g, '**$1$2$3**');
+      .replace(/\*\*([A-Z])\*\*([a-z][^:*\n]*)\*\*([^*]*:)/g, '**$1$2$3**')
+      // More comprehensive patterns
+      .replace(/\*\*([A-Z])\*\*([a-z][A-Za-z\s]+:)/g, '**$1$2**')
+      .replace(/\*\*([A-Z])\*\*([a-z][A-Za-z\s]+ Performance:)/g, '**$1$2**')
+      .replace(/\*\*([A-Z])\*\*([a-z][A-Za-z\s]+ Generation:)/g, '**$1$2**')
+      .replace(/\*\*([A-Z])\*\*([a-z][A-Za-z\s]+ Credibility:)/g, '**$1$2**');
+
+    console.log('ContentFormatter: After bold fix, content contains:',
+      content.includes('**Enhanced SEO Performance:**') ? '**Enhanced SEO Performance:**' :
+      content.includes('**E**nhanced') ? '**E**nhanced (still malformed)' : 'unknown pattern');
 
     // VERY EARLY preprocessing to fix critical issues before any HTML processing
     content = content
