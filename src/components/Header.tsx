@@ -58,7 +58,7 @@ export function Header({ showHomeLink = true }: HeaderProps) {
     setShowLoginModal(false);
 
     // Don't navigate away from certain pages that should preserve user flow
-    const preserveRoutePages = ['/automation', '/blog', '/ranking'];
+    const preserveRoutePages = ['/blog', '/ranking'];
     const shouldPreserveRoute = preserveRoutePages.some(page =>
       location.pathname.startsWith(page)
     );
