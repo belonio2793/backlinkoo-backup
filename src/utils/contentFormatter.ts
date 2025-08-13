@@ -404,6 +404,15 @@ export class ContentFormatter {
    * Process lists with proper formatting
    */
   private static processLists(content: string): string {
+    // First, fix any malformed list items with broken strong tags
+    content = content
+      // Fix broken strong tags in list items like: * **E**nhanced -> * **Enhanced
+      .replace(/^(\s*[\*\-\+]\s+)\*\*([A-Z])\*\*([a-z][^:\n]*:)/gm, '$1**$2$3**')
+      // Fix list items with HTML artifacts
+      .replace(/^(\s*[\*\-\+]\s+)([^\n]*?)H[1-6]:[^\n]*/gm, '$1$2')
+      // Clean up any remaining HTML syntax in list items
+      .replace(/^(\s*[\*\-\+]\s+)([^\n]*?)["=]+H[1-6]:[^\n]*/gm, '$1$2');
+
     // Process unordered lists
     content = content.replace(
       /((^[\*\-\+]\s.+\n?)+)/gm,
