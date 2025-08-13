@@ -98,6 +98,7 @@ export class ContentFormatter {
     formattedContent = this.processLists(formattedContent);
     formattedContent = this.processBlockquotes(formattedContent);
     formattedContent = this.fixSpacing(formattedContent);
+    formattedContent = this.postProcessLists(formattedContent);
 
     // CRITICAL: Ensure we have proper HTML structure for production
     if (!formattedContent.includes('<p>') && !formattedContent.includes('<h')) {
