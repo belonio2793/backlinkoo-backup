@@ -433,7 +433,7 @@ export default function Automation() {
         </div>
 
         <Tabs defaultValue="create" className="max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-3 mb-8">
+          <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="create" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Create Campaign
@@ -445,6 +445,10 @@ export default function Automation() {
             <TabsTrigger value="reporting" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
               Reporting
+            </TabsTrigger>
+            <TabsTrigger value="testing" className="flex items-center gap-2">
+              <Zap className="h-4 w-4" />
+              System Testing
             </TabsTrigger>
           </TabsList>
 
