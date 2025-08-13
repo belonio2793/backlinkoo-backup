@@ -216,21 +216,33 @@ export const PricingModal = ({
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {
+      const response = await fetch('/.netlify/functions/create-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
           amount: price,
           productName: `${credits} Backlink Credits`,
+          credits,
           isGuest,
           guestEmail: isGuest ? guestEmail : undefined,
           paymentMethod
-        }
+        })
       });
 
-      if (error) throw error;
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
 
       if (data.url) {
-        window.open(data.url, '_blank');
+        window.location.href = data.url; // Use location.href instead of window.open for better compatibility
         onClose();
+      } else {
+        throw new Error('No payment URL received');
       }
     } catch (error) {
       console.error('Payment error:', error);
