@@ -97,6 +97,12 @@ export default function AutomatedLinkBuilding() {
     successRate: 0,
     trafficGained: 0
   });
+  const [outreachStats, setOutreachStats] = useState({
+    emailsSent: 0,
+    responseRate: 0,
+    positiveResponses: 0,
+    linkPlacements: 0
+  });
   const [loading, setLoading] = useState(true);
 
   // Form states
@@ -863,21 +869,21 @@ export default function AutomatedLinkBuilding() {
                   <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-3 bg-blue-50 rounded-lg">
-                        <p className="text-2xl font-bold text-blue-600">156</p>
+                        <p className="text-2xl font-bold text-blue-600">{loading ? '-' : outreachStats.emailsSent}</p>
                         <p className="text-xs text-gray-600">Emails Sent</p>
                       </div>
                       <div className="text-center p-3 bg-green-50 rounded-lg">
-                        <p className="text-2xl font-bold text-green-600">23%</p>
+                        <p className="text-2xl font-bold text-green-600">{loading ? '-' : `${outreachStats.responseRate}%`}</p>
                         <p className="text-xs text-gray-600">Response Rate</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="text-center p-3 bg-purple-50 rounded-lg">
-                        <p className="text-2xl font-bold text-purple-600">18</p>
+                        <p className="text-2xl font-bold text-purple-600">{loading ? '-' : outreachStats.positiveResponses}</p>
                         <p className="text-xs text-gray-600">Positive Responses</p>
                       </div>
                       <div className="text-center p-3 bg-orange-50 rounded-lg">
-                        <p className="text-2xl font-bold text-orange-600">12</p>
+                        <p className="text-2xl font-bold text-orange-600">{loading ? '-' : outreachStats.linkPlacements}</p>
                         <p className="text-xs text-gray-600">Link Placements</p>
                       </div>
                     </div>
