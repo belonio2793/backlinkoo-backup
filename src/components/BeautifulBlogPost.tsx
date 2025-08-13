@@ -206,23 +206,26 @@ export function BeautifulBlogPost() {
     try {
       setLoading(true);
 
-      // First try database, if that fails, try localStorage fallback
+      // For testing: Skip database/localStorage and go directly to fallback
       let post = null;
-      try {
-        console.log('📊 Trying database lookup...');
-        post = await blogService.getBlogPostBySlug(slug);
-        console.log('✅ Database post found:', post ? 'YES' : 'NO');
-      } catch (dbError) {
-        console.warn('❌ Database lookup failed, trying localStorage fallback:', dbError);
-        // Try to load from localStorage as fallback
-        const localStoragePost = localStorage.getItem(`blog_post_${slug}`);
-        if (localStoragePost) {
-          post = JSON.parse(localStoragePost);
-          console.log('✅ localStorage post found');
-        } else {
-          console.log('❌ No localStorage post found');
-        }
-      }
+      console.log('🧪 Using fallback content for testing blog template');
+
+      // Commented out for testing - uncomment to restore normal functionality
+      // try {
+      //   console.log('📊 Trying database lookup...');
+      //   post = await blogService.getBlogPostBySlug(slug);
+      //   console.log('✅ Database post found:', post ? 'YES' : 'NO');
+      // } catch (dbError) {
+      //   console.warn('❌ Database lookup failed, trying localStorage fallback:', dbError);
+      //   // Try to load from localStorage as fallback
+      //   const localStoragePost = localStorage.getItem(`blog_post_${slug}`);
+      //   if (localStoragePost) {
+      //     post = JSON.parse(localStoragePost);
+      //     console.log('✅ localStorage post found');
+      //   } else {
+      //     console.log('❌ No localStorage post found');
+      //   }
+      // }
 
       if (!isMounted) return; // Prevent state update after unmount
 
