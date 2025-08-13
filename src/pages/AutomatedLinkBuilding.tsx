@@ -90,6 +90,14 @@ export default function AutomatedLinkBuilding() {
   const [opportunities, setOpportunities] = useState<LinkOpportunity[]>([]);
   const [isRunning, setIsRunning] = useState(false);
   const [currentStep, setCurrentStep] = useState('');
+  const [stats, setStats] = useState({
+    linksBuiltToday: 0,
+    domainsReached: 0,
+    avgDomainRating: 0,
+    successRate: 0,
+    trafficGained: 0
+  });
+  const [loading, setLoading] = useState(true);
 
   // Form states
   const [campaignForm, setCampaignForm] = useState({
@@ -331,23 +339,23 @@ export default function AutomatedLinkBuilding() {
                     <div className="space-y-4">
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Links Built Today</span>
-                        <span className="font-medium">12</span>
+                        <span className="font-medium">{loading ? '-' : stats.linksBuiltToday}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Domains Reached</span>
-                        <span className="font-medium">47</span>
+                        <span className="font-medium">{loading ? '-' : stats.domainsReached}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Avg. Domain Rating</span>
-                        <span className="font-medium">65</span>
+                        <span className="font-medium">{loading ? '-' : stats.avgDomainRating}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Success Rate</span>
-                        <span className="font-medium text-green-600">73%</span>
+                        <span className="font-medium text-green-600">{loading ? '-' : `${stats.successRate}%`}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-sm text-gray-600">Traffic Gained</span>
-                        <span className="font-medium">+2,341</span>
+                        <span className="font-medium">{loading ? '-' : `+${stats.trafficGained.toLocaleString()}`}</span>
                       </div>
                     </div>
                   </CardContent>
