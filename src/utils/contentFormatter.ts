@@ -1021,7 +1021,7 @@ export class ContentFormatter {
         return `<strong class="font-bold text-inherit"${attrs}>`;
       })
 
-      // Fix broken strong tags where only first letter is bold
+      // Fix broken strong tags where only first letter is bold (includes hyphens)
       .replace(/<strong\s+class([^=]*)=""\s+([^"]+?)"="">([A-Z])<\/strong>([a-z][A-Za-z\s-]*:)/gi,
         '<strong class="font-bold text-inherit">$3$4</strong>')
 
