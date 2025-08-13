@@ -269,6 +269,20 @@ export default function AutomatedLinkBuilding() {
           });
         }
 
+        // Fetch recent activity
+        const { data: activityData, error: activityError } = await supabase
+          .from('automation_activity')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (activityError) {
+          console.error('Error loading activity data:', activityError);
+        } else {
+          setRecentActivity(activityData || []);
+        }
+
       } catch (error) {
         console.error('Error loading automation data:', error);
         toast.error('Failed to load automation data');
