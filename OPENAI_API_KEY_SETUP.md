@@ -4,7 +4,7 @@
 ❌ **OpenAI API Error 401**: The current OpenAI API key in your `.env` file is invalid and returning authentication errors.
 
 ## Root Cause
-The API key `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` in your `.env` file is invalid (returns HTTP 401).
+The OpenAI API key in your environment configuration is invalid (returns HTTP 401).
 
 ## Solutions (Choose One)
 
