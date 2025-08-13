@@ -566,12 +566,21 @@ export default function AutomatedLinkBuilding() {
                     </div>
 
                     <div className="flex gap-3 pt-4">
-                      <Button onClick={() => {}} variant="outline">
+                      <Button onClick={handleSaveCampaign} variant="outline" disabled={isRunning}>
                         Save Campaign
                       </Button>
-                      <Button onClick={() => {}} className="flex-1">
-                        <Play className="h-4 w-4 mr-2" />
-                        Start Automation
+                      <Button onClick={handleStartAutomation} className="flex-1" disabled={isRunning}>
+                        {isRunning ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            {currentStep}
+                          </>
+                        ) : (
+                          <>
+                            <Play className="h-4 w-4 mr-2" />
+                            Start Automation
+                          </>
+                        )}
                       </Button>
                     </div>
                   </CardContent>
