@@ -300,6 +300,99 @@ export default function Automation() {
     }
   };
 
+  const processCampaignAutomation = async (campaignId: string) => {
+    if (!user) {
+      toast.error('Please sign in to process campaigns');
+      return;
+    }
+
+    const campaign = campaigns.find(c => c.id === campaignId);
+    if (!campaign) {
+      toast.error('Campaign not found');
+      return;
+    }
+
+    setProcessing(prev => ({ ...prev, [campaignId]: true }));
+    automationLogger.info('campaign', 'Starting automation processing', {}, campaignId);
+
+    try {
+      toast.info('Starting automation workflow...', { duration: 3000 });
+
+      const result = await automationOrchestrator.processCampaign({
+        id: campaign.id,
+        name: campaign.name,
+        keywords: campaign.keywords,
+        anchor_texts: campaign.anchor_texts,
+        target_url: campaign.target_url,
+        user_id: campaign.user_id,
+        status: campaign.status
+      });
+
+      if (result.success) {
+        toast.success(`Article published successfully! View at: ${result.articleUrl?.substring(0, 50)}...`);
+
+        // Refresh campaigns and submissions
+        await loadCampaigns();
+        await loadSubmissions();
+      } else {
+        toast.error(`Automation failed: ${result.error}`);
+      }
+
+    } catch (error) {
+      automationLogger.error('campaign', 'Automation processing error', {}, campaignId, error as Error);
+      toast.error('Failed to process automation');
+    } finally {
+      setProcessing(prev => ({ ...prev, [campaignId]: false }));
+    }
+  };
+
+  const loadSubmissions = async () => {
+    if (!user) return;
+
+    setLoadingSubmissions(true);
+    try {
+      const userSubmissions = await automationOrchestrator.getUserSubmissions(user.id, 20);
+      setSubmissions(userSubmissions);
+      automationLogger.debug('database', `Loaded ${userSubmissions.length} submissions`);
+    } catch (error) {
+      automationLogger.error('database', 'Failed to load submissions', {}, undefined, error as Error);
+      toast.error('Failed to load submissions');
+    } finally {
+      setLoadingSubmissions(false);
+    }
+  };
+
+  // Load submissions when user changes
+  useEffect(() => {
+    if (user) {
+      loadSubmissions();
+    } else {
+      // Show demo submissions for unauthenticated users
+      setSubmissions([
+        {
+          id: 'demo-sub-1',
+          article_title: 'Complete Guide to SEO Tools & Digital Marketing',
+          article_url: 'https://telegra.ph/demo-article-1',
+          status: 'published',
+          published_date: new Date().toISOString(),
+          anchor_text: 'best SEO tools',
+          metadata: { word_count: 847, views: 156 },
+          automation_campaigns: { name: 'SEO tools & digital marketing → example.com', target_url: 'https://example.com' }
+        },
+        {
+          id: 'demo-sub-2',
+          article_title: 'Content Marketing Strategies for Growth',
+          article_url: 'https://telegra.ph/demo-article-2',
+          status: 'published',
+          published_date: new Date(Date.now() - 3600000).toISOString(),
+          anchor_text: 'learn more',
+          metadata: { word_count: 692, views: 89 },
+          automation_campaigns: { name: 'content marketing → example.com', target_url: 'https://example.com/blog' }
+        }
+      ]);
+    }
+  }, [user]);
+
   const getStatusColor = (status: Campaign['status']) => {
     switch (status) {
       case 'active': return 'bg-green-500';
