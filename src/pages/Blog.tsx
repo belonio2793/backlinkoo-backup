@@ -162,6 +162,15 @@ function Blog() {
         console.error('❌ Failed to load blog posts:', error);
         // Even if there's an error, still try to show any local posts that were loaded
         setBlogPosts([]);
+
+        // Show user-friendly error message only in development
+        if (import.meta.env.DEV) {
+          toast({
+            title: "Blog loading issue",
+            description: "Some blog posts may not be visible. Please refresh the page.",
+            variant: "destructive"
+          });
+        }
       } finally {
         clearTimeout(timeoutId);
         console.log('📊 Setting loading to false');
