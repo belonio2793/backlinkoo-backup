@@ -2,11 +2,10 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Zap, 
-  Settings, 
-  BarChart3, 
-  Home, 
+import {
+  Zap,
+  BarChart3,
+  Home,
   FileText,
   Menu,
   X
