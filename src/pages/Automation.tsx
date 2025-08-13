@@ -265,11 +265,16 @@ export default function Automation() {
 
       if (status === 'active') {
         automationLogger.campaignStarted(campaignId);
+        toast.success('Campaign started - Beginning automation process...');
+
+        // Automatically start processing when campaign is activated
+        setTimeout(() => {
+          processCampaignAutomation(campaignId);
+        }, 1000);
       } else if (status === 'paused') {
         automationLogger.campaignPaused(campaignId);
+        toast.success('Campaign paused');
       }
-
-      toast.success(`Campaign ${status === 'active' ? 'started' : 'paused'}`);
     } catch (error) {
       automationLogger.error('campaign', 'Failed to update campaign status',
         { status }, campaignId, error as Error);
