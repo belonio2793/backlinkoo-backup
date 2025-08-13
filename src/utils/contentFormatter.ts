@@ -872,7 +872,11 @@ export class ContentFormatter {
    */
   static postProcessCleanup(content: string): string {
     return content
-      // ULTIMATE FIX: Handle double-encoded HTML entities first
+      // Fix malformed link attributes FIRST before any other processing
+      .replace(/<a\s+href([^=\s]+?)=""\s+([^"]+?)"=""\s+target([^=\s]+?)"=""\s+rel([^=\s]+?)"=""\s+style([^>]*?)"=""([^>]*)>/gi,
+        '<a href="$1://$2" target="_$3" rel="$4" style="color:#2563eb;font-weight:500;">$6')
+
+      // ULTIMATE FIX: Handle double-encoded HTML entities
       .replace(/&amp;lt;/g, '<')
       .replace(/&amp;gt;/g, '>')
       .replace(/&amp;amp;/g, '&')
