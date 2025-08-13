@@ -121,7 +121,7 @@ export default function AutomatedLinkBuilding() {
 
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.target_url || !formData.keyword || !formData.anchor_text) {
       toast.error('Please fill in all required fields');
       return;
@@ -129,6 +129,12 @@ export default function AutomatedLinkBuilding() {
 
     if (!isValidUrl(formData.target_url)) {
       toast.error('Please enter a valid URL');
+      return;
+    }
+
+    // Check authentication for content generation
+    if (!isAuthenticated) {
+      toast.error('Please sign in to generate content. You can explore the interface without signing in.');
       return;
     }
 
