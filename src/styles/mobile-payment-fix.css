@@ -1,23 +1,40 @@
 /**
  * Mobile Payment Optimizations
  * Fixes for mobile payment interactions and touch handling
+ * Enhanced for premium plan payments and mobile compatibility
  */
+
+/* Global mobile optimization variables */
+:root {
+  --mobile-touch-target: 44px;
+  --mobile-font-size: 16px;
+  --mobile-border-radius: 8px;
+  --mobile-spacing: 16px;
+  --mobile-optimized: true;
+}
 
 /* Mobile-specific touch optimizations */
 @media (max-width: 768px) {
-  /* Ensure proper touch targets for payment buttons */
-  [role="button"], 
-  button, 
+  /* Ensure proper touch targets for ALL interactive elements */
+  [role="button"],
+  button,
   .payment-button,
-  [data-payment-trigger] {
-    min-height: 44px;
-    min-width: 44px;
+  [data-payment-trigger],
+  .premium-button,
+  .credits-button,
+  input[type="submit"],
+  .checkout-button {
+    min-height: var(--mobile-touch-target);
+    min-width: var(--mobile-touch-target);
     touch-action: manipulation;
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
+    font-size: var(--mobile-font-size);
+    padding: 12px 16px;
+    border-radius: var(--mobile-border-radius);
   }
 
   /* Fix iOS Safari payment form styling */
