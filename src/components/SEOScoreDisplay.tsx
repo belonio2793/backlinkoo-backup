@@ -197,10 +197,19 @@ export function SEOScoreDisplay({
                 variant="outline"
                 size="sm"
                 onClick={runAnalysis}
-                className="h-8 px-3 text-xs"
+                className={`h-8 px-3 text-xs ${isPremiumScore ? 'bg-gradient-to-r from-purple-100 to-blue-100 hover:from-purple-200 hover:to-blue-200 border-purple-300 text-purple-800' : ''}`}
               >
-                <BarChart3 className="mr-1 h-3 w-3" />
-                Analyze
+                {isPremiumScore ? (
+                  <>
+                    <Crown className="mr-1 h-3 w-3" />
+                    Premium Analysis
+                  </>
+                ) : (
+                  <>
+                    <BarChart3 className="mr-1 h-3 w-3" />
+                    Analyze
+                  </>
+                )}
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
