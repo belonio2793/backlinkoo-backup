@@ -378,7 +378,7 @@ function Blog() {
     }
 
     // Fallback if no content
-    return 'Expert content covering important topics in digital marketing and SEO.';
+    return 'Expert content covering important topics in digital marketing and SEO...';
   };
 
   const filteredPosts = blogPosts.filter(post => {
@@ -415,7 +415,7 @@ function Blog() {
         console.warn('❌ Database unavailable, trying fallback:', dbError);
         try {
           posts = await ClaimableBlogService.getClaimablePosts(50);
-          console.log('✅ Fallback posts loaded:', posts.length);
+          console.log('��� Fallback posts loaded:', posts.length);
         } catch (fallbackError) {
           console.warn('❌ Fallback also failed, using localStorage:', fallbackError);
         }
@@ -472,7 +472,7 @@ function Blog() {
         description: `Loaded ${allPosts.length} blog posts.`,
       });
 
-      console.log('��� Blog posts refreshed:', {
+      console.log('✅ Blog posts refreshed:', {
         databasePosts: posts.length,
         localBlogPosts: localBlogPosts.length,
         totalPosts: allPosts.length,
