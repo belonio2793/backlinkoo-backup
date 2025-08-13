@@ -229,7 +229,28 @@ export default function BacklinkAutomation() {
       await loadCampaigns();
     } catch (error: any) {
       console.error('Error saving campaign:', error);
-      toast.error(`Failed to save campaign: ${error?.message || error}`);
+
+      // Extract meaningful error message from Supabase error object
+      let errorMessage = 'Unknown error';
+
+      if (error?.message) {
+        errorMessage = error.message;
+      } else if (error?.details) {
+        errorMessage = error.details;
+      } else if (error?.hint) {
+        errorMessage = error.hint;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else {
+        // If it's still an object, try to stringify it meaningfully
+        try {
+          errorMessage = JSON.stringify(error, null, 2);
+        } catch {
+          errorMessage = 'Complex error object - check console';
+        }
+      }
+
+      toast.error(`Failed to save campaign: ${errorMessage}`);
     }
   };
 
