@@ -371,10 +371,51 @@ export class ContentFormatter {
    */
   private static processHeadings(content: string): string {
     return content
-      // Only normalize H3 to H2, NO SPACING CHANGES
-      .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, '<h2$1>$2</h2>')
+      // Only normalize H3 to H2, NO SPACING CHANGES, but limit length
+      .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, (match, attrs, heading) => {
+        const cleanHeading = this.limitHeadingLength(heading.trim());
+        return `<h2${attrs}>${cleanHeading}</h2>`;
+      })
+      .replace(/<h2([^>]*)>(.*?)<\/h2>/gi, (match, attrs, heading) => {
+        const cleanHeading = this.limitHeadingLength(heading.trim());
+        return `<h2${attrs}>${cleanHeading}</h2>`;
+      })
+      .replace(/<h1([^>]*)>(.*?)<\/h1>/gi, (match, attrs, heading) => {
+        const cleanHeading = this.limitHeadingLength(heading.trim());
+        return `<h1${attrs}>${cleanHeading}</h1>`;
+      })
       // Fix heading hierarchy - normalize H3+ to H2
       .replace(/#{3,6}/g, '##');
+  }
+
+  /**
+   * Limit heading length to one sentence maximum
+   */
+  private static limitHeadingLength(heading: string): string {
+    // Remove any remaining prefixes
+    heading = heading
+      .replace(/^(Conclusion|Call-to-Action):\s*/gi, '')
+      .replace(/^H[1-6]:\s*/gi, '')
+      .trim();
+
+    // If heading contains multiple sentences, take only the first one
+    const sentences = heading.split(/[.!?]+/);
+    if (sentences.length > 1 && sentences[0].trim().length > 0) {
+      return sentences[0].trim();
+    }
+
+    // If single sentence is too long (over 80 characters), truncate at logical break
+    if (heading.length > 80) {
+      const words = heading.split(' ');
+      let truncated = '';
+      for (const word of words) {
+        if ((truncated + ' ' + word).length > 80) break;
+        truncated += (truncated ? ' ' : '') + word;
+      }
+      return truncated || heading.substring(0, 80);
+    }
+
+    return heading;
   }
 
   /**
@@ -420,13 +461,15 @@ export class ContentFormatter {
       // Clean up any remaining HTML syntax in list items
       .replace(/^(\s*[\*\-\+]\s+)([^\n]*?)["=]+H[1-6]:[^\n]*/gm, '$1$2');
 
-    // Process unordered lists
+    // Process unordered lists - improved to handle markdown bold
     content = content.replace(
       /((^[\*\-\+]\s.+\n?)+)/gm,
       (match) => {
         const items = match.trim().split('\n')
           .map(line => {
-            const cleanLine = line.replace(/^[\*\-\+]\s/, '').trim();
+            let cleanLine = line.replace(/^[\*\-\+]\s/, '').trim();
+            // Convert markdown bold to HTML strong tags
+            cleanLine = cleanLine.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
             return `  <li>${cleanLine}</li>`;
           })
           .join('\n');
@@ -434,19 +477,27 @@ export class ContentFormatter {
       }
     );
 
-    // Process ordered lists
+    // Merge consecutive <ul> elements that got separated
+    content = content.replace(/<\/ul>\s*<ul>/g, '');
+
+    // Process ordered lists - improved to handle markdown bold
     content = content.replace(
       /((^\d+\.\s.+\n?)+)/gm,
       (match) => {
         const items = match.trim().split('\n')
           .map(line => {
-            const cleanLine = line.replace(/^\d+\.\s/, '').trim();
+            let cleanLine = line.replace(/^\d+\.\s/, '').trim();
+            // Convert markdown bold to HTML strong tags
+            cleanLine = cleanLine.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
             return `  <li>${cleanLine}</li>`;
           })
           .join('\n');
         return `\n<ol>\n${items}\n</ol>\n\n`;
       }
     );
+
+    // Merge consecutive <ol> elements that got separated
+    content = content.replace(/<\/ol>\s*<ol>/g, '');
 
     return content;
   }
