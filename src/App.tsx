@@ -28,6 +28,7 @@ const LazyBlog = lazy(() => import("./pages/Blog"));
 const LazyDashboard = lazy(() => import("./pages/Dashboard"));
 const LazyLogin = lazy(() => import("./pages/Login"));
 const LazyBeautifulBlogPost = lazy(() => import("./components/BeautifulBlogPost").then(module => ({ default: module.BeautifulBlogPost })));
+const LazySimpleBlogPost = lazy(() => import("./components/SimpleBlogPost").then(module => ({ default: module.SimpleBlogPost })));
 const LazyAuthCallback = lazy(() => import("./pages/AuthCallback"));
 const LazyEmailConfirmation = lazy(() => import("./pages/EmailConfirmation"));
 const LazyPasswordReset = lazy(() => import("./pages/PasswordReset"));
@@ -49,6 +50,7 @@ const LazyAuthErrorDebug = lazy(() => import("./pages/AuthErrorDebug"));
 const LazyTextCleanerDebug = lazy(() => import("./pages/TextCleanerDebug"));
 const LazyDatabaseColumnsFix = lazy(() => import("./pages/DatabaseColumnsFix"));
 const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
+const LazyContentCleaningDemo = lazy(() => import("./components/ContentCleaningDemo").then(module => ({ default: module.ContentCleaningDemo })));
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
 const LazyAutomatedLinkBuilding = lazy(() => import("./pages/AutomatedLinkBuilding"));
 const LazyMarkdownTest = lazy(() => import("./pages/MarkdownTest"));
@@ -114,7 +116,7 @@ const App = () => (
           element={
             <EnhancedErrorBoundary>
               <Suspense fallback={<LoadingSpinner />}>
-                <LazyBeautifulBlogPost />
+                <LazySimpleBlogPost />
               </Suspense>
             </EnhancedErrorBoundary>
           }
