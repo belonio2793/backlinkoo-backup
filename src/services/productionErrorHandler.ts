@@ -100,19 +100,38 @@ class ProductionErrorHandler {
     this.errorQueue = [];
 
     try {
+      // First check if the table exists
+      const { data: tableCheck, error: tableError } = await supabase
+        .from('error_logs')
+        .select('id')
+        .limit(1);
+
+      // If table doesn't exist, just log to console instead of failing
+      if (tableError && tableError.message.includes('relation') && tableError.message.includes('does not exist')) {
+        console.warn('Error logs table does not exist, logging to console instead:');
+        errorsToProcess.forEach(error => {
+          console.error(`[${error.severity.toUpperCase()}] ${error.component}.${error.operation}: ${error.error_message}`);
+        });
+        return;
+      }
+
       const { error } = await supabase
         .from('error_logs')
         .insert(errorsToProcess);
 
       if (error) {
         console.error('Failed to log errors to database:', error);
-        // Put errors back in queue to retry later
-        this.errorQueue.unshift(...errorsToProcess);
+        // Log to console as fallback
+        errorsToProcess.forEach(errorLog => {
+          console.error(`[${errorLog.severity.toUpperCase()}] ${errorLog.component}.${errorLog.operation}: ${errorLog.error_message}`);
+        });
       }
     } catch (error) {
       console.error('Error processing error queue:', error);
-      // Put errors back in queue to retry later
-      this.errorQueue.unshift(...errorsToProcess);
+      // Log to console as fallback
+      errorsToProcess.forEach(errorLog => {
+        console.error(`[${errorLog.severity.toUpperCase()}] ${errorLog.component}.${errorLog.operation}: ${errorLog.error_message}`);
+      });
     } finally {
       this.isProcessingQueue = false;
     }
@@ -149,6 +168,22 @@ class ProductionErrorHandler {
     errorTrend: Array<{ time: string; count: number }>;
   }> {
     try {
+      // Check if table exists first
+      const { data: tableCheck, error: tableError } = await supabase
+        .from('error_logs')
+        .select('id')
+        .limit(1);
+
+      // If table doesn't exist, return empty stats
+      if (tableError && tableError.message.includes('relation') && tableError.message.includes('does not exist')) {
+        return {
+          totalErrors: 0,
+          criticalErrors: 0,
+          errorsByComponent: {},
+          errorTrend: []
+        };
+      }
+
       const startTime = new Date();
       switch (timeRange) {
         case 'hour':
@@ -168,11 +203,19 @@ class ProductionErrorHandler {
         .eq('user_id', userId)
         .gte('created_at', startTime.toISOString());
 
-      if (error) throw error;
+      if (error) {
+        console.warn('Error fetching error stats:', error);
+        return {
+          totalErrors: 0,
+          criticalErrors: 0,
+          errorsByComponent: {},
+          errorTrend: []
+        };
+      }
 
       const totalErrors = errors?.length || 0;
       const criticalErrors = errors?.filter(e => e.severity === 'critical').length || 0;
-      
+
       const errorsByComponent = errors?.reduce((acc, error) => {
         acc[error.component] = (acc[error.component] || 0) + 1;
         return acc;
