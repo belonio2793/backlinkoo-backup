@@ -2,6 +2,7 @@ import { useState, useEffect, startTransition } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/beautiful-blog.css';
 import '../styles/blog-template.css';
+import { LinkAttributeFixer } from '@/utils/linkAttributeFixer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
