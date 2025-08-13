@@ -44,6 +44,7 @@ import { Footer } from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { logError } from '@/services/productionErrorHandler';
 
 interface Campaign {
   id: string;
@@ -115,6 +116,8 @@ export default function AutomatedLinkBuilding() {
     }
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [operationLoading, setOperationLoading] = useState<Record<string, boolean>>({});
   const [recentActivity, setRecentActivity] = useState<Array<{
     id: string;
     type: 'link_published' | 'outreach_sent' | 'content_generated';
@@ -284,7 +287,16 @@ export default function AutomatedLinkBuilding() {
         }
 
       } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
         console.error('Error loading automation data:', error);
+
+        await logError(error instanceof Error ? error : new Error(errorMessage), {
+          component: 'automation',
+          operation: 'load_data',
+          userId: user?.id
+        }, 'high');
+
+        setError('Failed to load automation data. Please refresh the page.');
         toast.error('Failed to load automation data');
       } finally {
         setLoading(false);
@@ -338,7 +350,16 @@ export default function AutomatedLinkBuilding() {
         drip_speed: 'medium'
       });
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Error saving campaign:', error);
+
+      await logError(error instanceof Error ? error : new Error(errorMessage), {
+        component: 'automation',
+        operation: 'save_campaign',
+        userId: user?.id,
+        metadata: { campaignName: campaignForm.name }
+      }, 'medium');
+
       toast.error('Failed to save campaign');
     }
   };
@@ -391,7 +412,16 @@ export default function AutomatedLinkBuilding() {
       window.location.reload();
 
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       console.error('Error starting automation:', error);
+
+      await logError(error instanceof Error ? error : new Error(errorMessage), {
+        component: 'automation',
+        operation: 'start_automation',
+        userId: user?.id,
+        metadata: { campaignName: campaignForm.name }
+      }, 'critical');
+
       toast.error('Failed to start automation');
       setCurrentStep('Error starting automation');
     } finally {
