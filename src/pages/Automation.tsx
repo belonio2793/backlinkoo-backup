@@ -112,11 +112,14 @@ export default function Automation() {
     if (user) {
       loadCampaigns();
     } else {
-      // Show demo campaigns for unauthenticated users
+      // Show demo campaigns for unauthenticated users with auto-generated names
+      const demoTimestamp1 = new Date().toISOString().slice(0, 16).replace('T', ' ');
+      const demoTimestamp2 = new Date(Date.now() - 86400000).toISOString().slice(0, 16).replace('T', ' ');
+
       setCampaigns([
         {
           id: 'demo-1',
-          name: 'Demo SEO Campaign',
+          name: `SEO tools & digital marketing & link building → example.com (${demoTimestamp1})`,
           keywords: ['SEO tools', 'digital marketing', 'link building'],
           anchor_texts: ['best SEO tools', 'click here', 'learn more'],
           target_url: 'https://example.com',
@@ -129,7 +132,7 @@ export default function Automation() {
         },
         {
           id: 'demo-2',
-          name: 'Content Marketing Links',
+          name: `content marketing & blog promotion → example.com (${demoTimestamp2})`,
           keywords: ['content marketing', 'blog promotion'],
           anchor_texts: ['great content', 'read more', 'check this out'],
           target_url: 'https://example.com/blog',
