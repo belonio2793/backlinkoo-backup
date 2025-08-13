@@ -115,6 +115,9 @@ export class ContentFormatter {
     formattedContent = this.fixSpacing(formattedContent);
     formattedContent = this.postProcessLists(formattedContent);
 
+    // FINAL: Ensure all links have proper styling and attributes
+    formattedContent = LinkAttributeFixer.ensureLinkStyling(formattedContent);
+
     // CRITICAL: Ensure we have proper HTML structure for production
     if (!formattedContent.includes('<p>') && !formattedContent.includes('<h')) {
       // If no HTML tags detected, force paragraph formatting
