@@ -72,78 +72,61 @@ class TelegraphService {
   }
 
   async postArticle(request: TelegraphPostRequest): Promise<TelegraphPostResult> {
-    const { title, content, campaignId, authorName = this.authorName, authorUrl } = request;
+    const { title, content, campaignId, authorName = 'SEO Content Bot' } = request;
 
-    automationLogger.info('article_submission', 'Posting article to Telegraph', {
+    automationLogger.info('article_submission', 'Posting article via Netlify function', {
       title: title.substring(0, 50),
       contentLength: content.length
     }, campaignId);
 
     try {
-      // Ensure we have an access token
-      if (!this.accessToken) {
-        await this.createAccount();
-      }
-
-      // Convert markdown content to Telegraph format
-      const telegraphContent = this.convertMarkdownToTelegraph(content);
-
-      const response = await fetch(`${this.baseUrl}/createPage`, {
+      // Call Netlify function for publishing
+      const response = await fetch(this.netlifyFunctionUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          access_token: this.accessToken,
           title: title,
+          content: content,
+          campaign_id: campaignId,
+          target_site: 'telegraph',
           author_name: authorName,
-          author_url: authorUrl,
-          content: telegraphContent,
-          return_content: true
+          user_id: this.getCurrentUserId() // Helper to get current user ID
         }),
       });
 
       if (!response.ok) {
-        throw new Error(`Telegraph API error: ${response.status}`);
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`Netlify function error: ${response.status} - ${errorData.error || 'Unknown error'}`);
       }
 
       const data = await response.json();
 
-      if (!data.ok) {
-        // Try to recreate account if token is invalid
-        if (data.error === 'ACCESS_TOKEN_INVALID') {
-          automationLogger.warn('api', 'Telegraph token invalid, recreating account', {}, campaignId);
-          await this.createAccount();
-          return this.postArticle(request); // Retry once
-        }
-        throw new Error(`Telegraph error: ${data.error || 'Unknown error'}`);
+      if (!data.success) {
+        throw new Error(data.error || 'Article publishing failed');
       }
 
-      const result = data.result;
-      const telegraphUrl = `https://telegra.ph/${result.path}`;
+      const result = data.data;
 
-      automationLogger.info('article_submission', 'Article posted successfully to Telegraph', {
-        url: telegraphUrl,
-        path: result.path,
-        title: result.title
+      automationLogger.info('article_submission', 'Article posted successfully via Netlify', {
+        url: result.url,
+        title: result.title,
+        target_site: result.target_site
       }, campaignId);
 
       return {
         success: true,
-        url: telegraphUrl,
-        path: result.path,
+        url: result.url,
         title: result.title,
-        description: result.description,
-        authorName: result.author_name,
-        authorUrl: result.author_url,
-        imageUrl: result.image_url,
-        content: result.content,
-        views: result.views,
-        canEdit: result.can_edit
+        description: result.metadata?.description,
+        authorName: result.metadata?.author_name,
+        views: result.metadata?.views || 0,
+        canEdit: result.metadata?.can_edit || false
       };
 
     } catch (error) {
-      automationLogger.error('article_submission', 'Failed to post article to Telegraph', {
+      automationLogger.error('article_submission', 'Failed to post article via Netlify function', {
         title: title.substring(0, 50),
         error: error instanceof Error ? error.message : String(error)
       }, campaignId, error as Error);
@@ -153,6 +136,12 @@ class TelegraphService {
         error: error instanceof Error ? error.message : 'Unknown error occurred'
       };
     }
+  }
+
+  private getCurrentUserId(): string | undefined {
+    // Helper to get current user ID from auth context
+    // This will be passed from the calling component
+    return undefined;
   }
 
   private convertMarkdownToTelegraph(markdown: string): any[] {
