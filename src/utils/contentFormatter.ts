@@ -408,8 +408,11 @@ export class ContentFormatter {
    * Process lists with proper formatting
    */
   private static processLists(content: string): string {
-    // First, fix any malformed list items with broken strong tags
+    // First, convert content that should be bullet points but is formatted as headings
+    // Look for patterns like: "## Short Title\nLonger description" and convert to bullet format
     content = content
+      .replace(/^##\s+([A-Z][^\n]{5,50})\n([A-Z][^\n#*]{20,})/gm, '* **$1:** $2')
+      .replace(/^###\s+([A-Z][^\n]{5,40})\n([A-Z][^\n#*]{20,})/gm, '* **$1:** $2')
       // Fix broken strong tags in list items like: * **E**nhanced -> * **Enhanced
       .replace(/^(\s*[\*\-\+]\s+)\*\*([A-Z])\*\*([a-z][^:\n]*:)/gm, '$1**$2$3**')
       // Fix list items with HTML artifacts
