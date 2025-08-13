@@ -49,7 +49,6 @@ const LazyAuthErrorDebug = lazy(() => import("./pages/AuthErrorDebug"));
 const LazyTextCleanerDebug = lazy(() => import("./pages/TextCleanerDebug"));
 const LazyDatabaseColumnsFix = lazy(() => import("./pages/DatabaseColumnsFix"));
 const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
-const LazyContentCleaningDemo = lazy(() => import("./components/ContentCleaningDemo").then(module => ({ default: module.ContentCleaningDemo })));
 const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
 const LazyAutomatedLinkBuilding = lazy(() => import("./pages/AutomatedLinkBuilding"));
 const LazyMarkdownTest = lazy(() => import("./pages/MarkdownTest"));
