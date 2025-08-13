@@ -44,7 +44,7 @@ export function ApiKeyStatusFix() {
     return detectedKey;
   };
 
-  const isCorrectKey = currentKey === CORRECT_KEY;
+  // API key validation removed for security
 
   const forceFixApiKey = async () => {
     setIsFixing(true);
@@ -57,8 +57,8 @@ export function ApiKeyStatusFix() {
       // Wait a moment
       await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Set correct key
-      setCorrectApiKey();
+      // Clear caches only - no hardcoded keys
+      clearAllApiKeyCaches();
       
       // Wait another moment
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -67,7 +67,7 @@ export function ApiKeyStatusFix() {
       const newKey = checkCurrentKey();
       setLastUpdate(new Date());
       
-      if (newKey === CORRECT_KEY) {
+      if (newKey && newKey.startsWith('sk-')) {
         toast({
           title: 'API Key Fixed!',
           description: 'The correct API key is now in use across all systems.',
@@ -77,7 +77,7 @@ export function ApiKeyStatusFix() {
         setTimeout(async () => {
           try {
             const response = await fetch('https://api.openai.com/v1/models', {
-              headers: { 'Authorization': `Bearer ${CORRECT_KEY}` },
+              headers: { 'Authorization': `Bearer ${newKey}` },
               method: 'GET'
             });
             
