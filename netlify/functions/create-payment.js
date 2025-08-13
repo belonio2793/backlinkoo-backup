@@ -72,6 +72,8 @@ async function createStripePayment(paymentData, email, originUrl) {
     }
   }
 
+  console.log("🔄 Creating Stripe checkout session...");
+
   // Create checkout session with dynamic product
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
