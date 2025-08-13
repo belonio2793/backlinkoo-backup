@@ -128,7 +128,14 @@ export default function AutomatedLinkBuilding() {
     const loadAutomationData = async () => {
       try {
         setLoading(true);
-        
+
+        // Check database health first
+        const { allTablesExist, missingTables } = await dbHealthCheck.checkRequiredTables();
+        if (!allTablesExist) {
+          console.warn('Some database tables are missing:', missingTables);
+          // Continue anyway but with limited functionality
+        }
+
         // Use scalable data service for optimized fetching
         const { campaigns, stats: aggregatedStats } = await scalableDataService.getCampaignStats(
           user.id,
