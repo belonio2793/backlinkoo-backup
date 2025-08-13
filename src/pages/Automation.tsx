@@ -449,34 +449,49 @@ export default function Automation() {
                         </div>
 
                         <div className="flex items-center gap-2 ml-4">
-                          {campaign.status === 'active' ? (
+                          {!user ? (
+                            // Demo mode - show sign in prompt
                             <Button
                               size="sm"
                               variant="outline"
-                              onClick={() => updateCampaignStatus(campaign.id, 'paused')}
+                              onClick={() => toast.info('Sign in to manage your campaigns')}
+                              className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
                             >
-                              <Pause className="h-4 w-4 mr-1" />
-                              Pause
+                              Sign In to Control
                             </Button>
-                          ) : campaign.status === 'paused' || campaign.status === 'draft' ? (
-                            <Button
-                              size="sm"
-                              onClick={() => updateCampaignStatus(campaign.id, 'active')}
-                              className="bg-green-600 hover:bg-green-700"
-                            >
-                              <Play className="h-4 w-4 mr-1" />
-                              Start
-                            </Button>
-                          ) : null}
-                          
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => deleteCampaign(campaign.id)}
-                            className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          ) : (
+                            // Authenticated mode - show normal controls
+                            <>
+                              {campaign.status === 'active' ? (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => updateCampaignStatus(campaign.id, 'paused')}
+                                >
+                                  <Pause className="h-4 w-4 mr-1" />
+                                  Pause
+                                </Button>
+                              ) : campaign.status === 'paused' || campaign.status === 'draft' ? (
+                                <Button
+                                  size="sm"
+                                  onClick={() => updateCampaignStatus(campaign.id, 'active')}
+                                  className="bg-green-600 hover:bg-green-700"
+                                >
+                                  <Play className="h-4 w-4 mr-1" />
+                                  Start
+                                </Button>
+                              ) : null}
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => deleteCampaign(campaign.id)}
+                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </div>
                     </CardContent>
