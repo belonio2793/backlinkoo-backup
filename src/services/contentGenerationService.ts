@@ -34,97 +34,83 @@ class ContentGenerationService {
   async generateBlogPost(request: ContentGenerationRequest): Promise<GeneratedContent> {
     const { keywords, anchorTexts, targetUrl, campaignId, targetSite = 'Telegraph', wordCount = 800, tone = 'professional' } = request;
 
-    automationLogger.info('article_submission', 'Starting content generation', {
+    automationLogger.info('article_submission', 'Starting content generation via Netlify function', {
       keywords: keywords.slice(0, 3),
       targetSite,
       wordCount
     }, campaignId);
 
-    if (!this.apiKey) {
-      throw new Error('OpenAI API key not configured. Please set VITE_OPENAI_API_KEY environment variable.');
-    }
-
     try {
       // Select random anchor text and primary keyword
       const primaryKeyword = keywords[0] || 'technology';
       const selectedAnchor = anchorTexts[Math.floor(Math.random() * anchorTexts.length)] || 'learn more';
-      
-      // Create content generation prompt
-      const prompt = this.createContentPrompt({
-        keywords,
-        anchorText: selectedAnchor,
-        targetUrl,
-        targetSite,
-        wordCount,
-        tone
-      });
 
-      automationLogger.debug('api', 'Sending request to OpenAI', { 
-        model: 'gpt-3.5-turbo',
-        wordCount,
-        primaryKeyword 
+      automationLogger.debug('api', 'Calling Netlify function for content generation', {
+        keyword: primaryKeyword,
+        anchorText: selectedAnchor,
+        wordCount
       }, campaignId);
 
-      const response = await fetch(this.baseUrl, {
+      // Call Netlify function instead of OpenAI directly
+      const response = await fetch(this.netlifyFunctionUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${this.apiKey}`,
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a professional content writer specializing in SEO-optimized blog posts. Create engaging, informative content that naturally incorporates provided keywords and anchor text links.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          max_tokens: Math.min(4000, Math.ceil(wordCount * 1.5)), // Account for formatting
-          temperature: 0.7,
-          top_p: 1,
-          frequency_penalty: 0.2,
-          presence_penalty: 0.1
+          keyword: primaryKeyword,
+          anchor_text: selectedAnchor,
+          url: targetUrl,
+          campaign_id: campaignId,
+          word_count: wordCount,
+          tone: tone,
+          user_id: this.getCurrentUserId() // Helper to get current user ID
         }),
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(`OpenAI API error: ${response.status} - ${errorData.error?.message || 'Unknown error'}`);
+        throw new Error(`Netlify function error: ${response.status} - ${errorData.error || 'Unknown error'}`);
       }
 
       const data = await response.json();
-      const generatedText = data.choices[0]?.message?.content;
 
-      if (!generatedText) {
-        throw new Error('No content generated from OpenAI');
+      if (!data.success) {
+        throw new Error(data.error || 'Content generation failed');
       }
 
-      // Parse the generated content
-      const parsedContent = this.parseGeneratedContent(generatedText, selectedAnchor, targetUrl);
-      
-      automationLogger.info('article_submission', 'Content generated successfully', {
-        title: parsedContent.title.substring(0, 50),
-        wordCount: parsedContent.wordCount,
-        hasAnchorLink: parsedContent.hasAnchorLink
+      const result = data.data;
+
+      automationLogger.info('article_submission', 'Content generated successfully via Netlify', {
+        title: result.title.substring(0, 50),
+        wordCount: result.wordCount,
+        hasAnchorLink: result.hasAnchorLink,
+        promptTemplate: result.promptIndex
       }, campaignId);
 
       return {
-        ...parsedContent,
-        targetUrl
+        title: result.title,
+        content: result.content,
+        hasAnchorLink: result.hasAnchorLink,
+        anchorText: result.anchorText,
+        wordCount: result.wordCount,
+        targetUrl: result.targetUrl
       };
 
     } catch (error) {
-      automationLogger.error('api', 'Content generation failed', {
+      automationLogger.error('api', 'Content generation failed via Netlify function', {
         keywords: keywords.slice(0, 3),
         targetSite
       }, campaignId, error as Error);
-      
+
       throw error;
     }
+  }
+
+  private getCurrentUserId(): string | undefined {
+    // Helper to get current user ID from auth context
+    // This will be passed from the calling component
+    return undefined;
   }
 
   private createContentPrompt({
