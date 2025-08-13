@@ -1,0 +1,389 @@
+{
+  "instantPublishSites": {
+    "description": "Sites that allow immediate posting without account creation",
+    "sites": [
+      {
+        "url": "https://telegra.ph",
+        "name": "Telegraph",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": false,
+        "features": ["Rich text editor", "Instant publish", "Anonymous posting"]
+      },
+      {
+        "url": "https://write.as",
+        "name": "Write.as",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": false,
+        "features": ["Markdown support", "Custom domains", "Anonymous posting"]
+      },
+      {
+        "url": "https://rentry.co",
+        "name": "Rentry",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": false,
+        "features": ["Markdown", "Password protection", "Edit codes"]
+      },
+      {
+        "url": "https://notepin.co",
+        "name": "NotePIN",
+        "htmlSupport": false,
+        "linksAllowed": true,
+        "accountRequired": false,
+        "features": ["Simple text", "Link sharing", "Pin notes"]
+      },
+      {
+        "url": "https://pen.io",
+        "name": "Pen.io",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": false,
+        "features": ["WYSIWYG editor", "Custom URLs", "Anonymous publishing"]
+      }
+    ]
+  },
+  "pastebinWithFormatting": {
+    "description": "Pastebin-style sites that support HTML and links",
+    "sites": [
+      {
+        "url": "https://pastelink.net",
+        "name": "PasteLink",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": false,
+        "features": ["HTML support", "Syntax highlighting", "Expiration dates"]
+      },
+      {
+        "url": "https://justpaste.it",
+        "name": "JustPaste.it",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": false,
+        "features": ["Rich formatting", "Image uploads", "Password protection"]
+      },
+      {
+        "url": "https://ghostbin.com",
+        "name": "GhostBin",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": false,
+        "features": ["Markdown", "Syntax highlighting", "Encrypted pastes"]
+      },
+      {
+        "url": "https://paste.ee",
+        "name": "Paste.ee",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": false,
+        "features": ["Multiple formats", "API access", "Download options"]
+      },
+      {
+        "url": "https://privatebin.net",
+        "name": "PrivateBin",
+        "htmlSupport": false,
+        "linksAllowed": true,
+        "accountRequired": false,
+        "features": ["End-to-end encryption", "Self-destructing", "Open source"]
+      }
+    ]
+  },
+  "devPlatforms": {
+    "description": "Developer and tech platforms accepting guest content",
+    "sites": [
+      {
+        "url": "https://dev.to",
+        "name": "Dev.to",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "signupMethod": "github/twitter",
+        "features": ["Markdown", "Code blocks", "Large tech audience"]
+      },
+      {
+        "url": "https://hackernoon.com/submit",
+        "name": "HackerNoon",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Tech focus", "High DA", "Editor review"]
+      },
+      {
+        "url": "https://dzone.com/submit",
+        "name": "DZone",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Developer community", "Multiple zones", "High authority"]
+      },
+      {
+        "url": "https://www.freecodecamp.org/news/contribute",
+        "name": "freeCodeCamp",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Coding tutorials", "Massive audience", "High DA"]
+      },
+      {
+        "url": "https://www.codeproject.com/Articles/Submit.aspx",
+        "name": "CodeProject",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Programming articles", "Code samples", "Developer community"]
+      }
+    ]
+  },
+  "contentPlatforms": {
+    "description": "General content platforms with guest posting",
+    "sites": [
+      {
+        "url": "https://medium.com/creators",
+        "name": "Medium",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Large audience", "Publications", "Partner program"]
+      },
+      {
+        "url": "https://substack.com",
+        "name": "Substack",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Newsletter platform", "Monetization", "Audience building"]
+      },
+      {
+        "url": "https://hubpages.com",
+        "name": "HubPages",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Revenue sharing", "Various topics", "SEO friendly"]
+      },
+      {
+        "url": "https://www.linkedin.com/pulse",
+        "name": "LinkedIn Pulse",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Professional network", "Business content", "High visibility"]
+      }
+    ]
+  },
+  "articleDirectories": {
+    "description": "Article submission directories",
+    "sites": [
+      {
+        "url": "https://www.articlebiz.com",
+        "name": "ArticleBiz",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Business focus", "Free submission", "SEO friendly"]
+      },
+      {
+        "url": "https://www.articlealley.com",
+        "name": "Article Alley",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Multiple categories", "Author bio", "Social sharing"]
+      },
+      {
+        "url": "https://www.sooperarticles.com",
+        "name": "SooperArticles",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Free directory", "Author profiles", "Category based"]
+      },
+      {
+        "url": "https://selfgrowth.com/articlesubmit",
+        "name": "SelfGrowth",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Self-improvement focus", "Large readership", "Author bio"]
+      }
+    ]
+  },
+  "techBlogs": {
+    "description": "Technology blogs accepting guest posts",
+    "sites": [
+      {
+        "url": "https://www.sitepoint.com/write-for-us",
+        "name": "SitePoint",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Web development", "High DA", "Payment for articles"]
+      },
+      {
+        "url": "https://css-tricks.com/contact",
+        "name": "CSS-Tricks",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["CSS/JS focus", "Code examples", "High authority"]
+      },
+      {
+        "url": "https://www.geeksforgeeks.org/write-for-us",
+        "name": "GeeksforGeeks",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Programming tutorials", "Large audience", "Multiple languages"]
+      },
+      {
+        "url": "https://www.analyticsvidhya.com/write-for-us",
+        "name": "Analytics Vidhya",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Data science", "AI/ML focus", "Technical audience"]
+      }
+    ]
+  },
+  "marketingBlogs": {
+    "description": "Marketing and business blogs",
+    "sites": [
+      {
+        "url": "https://blog.hubspot.com/marketing/write-for-hubspot",
+        "name": "HubSpot Blog",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Marketing focus", "High DA", "Large audience"]
+      },
+      {
+        "url": "https://buffer.com/resources/guest-contributors",
+        "name": "Buffer",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Social media", "Marketing tips", "High engagement"]
+      },
+      {
+        "url": "https://moz.com/community/write",
+        "name": "Moz",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["SEO focus", "High authority", "Industry respect"]
+      },
+      {
+        "url": "https://www.searchenginejournal.com/contribute",
+        "name": "Search Engine Journal",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["SEO/PPC", "Industry news", "High DA"]
+      }
+    ]
+  },
+  "codeHosting": {
+    "description": "Code hosting platforms that allow content",
+    "sites": [
+      {
+        "url": "https://gist.github.com",
+        "name": "GitHub Gist",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Code snippets", "Markdown support", "Embeddable"]
+      },
+      {
+        "url": "https://codepen.io",
+        "name": "CodePen",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Live code demos", "Frontend showcase", "Community"]
+      },
+      {
+        "url": "https://codesandbox.io",
+        "name": "CodeSandbox",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Online IDE", "Shareable projects", "Collaboration"]
+      },
+      {
+        "url": "https://repl.it",
+        "name": "Replit",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Multiple languages", "Collaborative coding", "Hosting"]
+      }
+    ]
+  },
+  "forumsPlatforms": {
+    "description": "Forum and discussion platforms",
+    "sites": [
+      {
+        "url": "https://www.reddit.com",
+        "name": "Reddit",
+        "htmlSupport": false,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Multiple subreddits", "Markdown", "Large audience"]
+      },
+      {
+        "url": "https://news.ycombinator.com",
+        "name": "Hacker News",
+        "htmlSupport": false,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Tech community", "High engagement", "Quality discussions"]
+      },
+      {
+        "url": "https://stackoverflow.com",
+        "name": "Stack Overflow",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "features": ["Q&A format", "Code examples", "Developer community"]
+      }
+    ]
+  },
+  "anonymousPlatforms": {
+    "description": "Additional anonymous publishing platforms",
+    "sites": [
+      {
+        "url": "https://txt.fyi",
+        "name": "TXT.fyi",
+        "htmlSupport": false,
+        "linksAllowed": true,
+        "accountRequired": false,
+        "features": ["Simple text", "No tracking", "Anonymous"]
+      },
+      {
+        "url": "https://txti.es",
+        "name": "Txti",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": false,
+        "features": ["Simple HTML", "Custom styling", "Fast publishing"]
+      },
+      {
+        "url": "https://lyfster.com",
+        "name": "Lyfster",
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": false,
+        "features": ["Markdown", "Anonymous posting", "Simple interface"]
+      },
+      {
+        "url": "https://0x0.st",
+        "name": "0x0.st",
+        "htmlSupport": false,
+        "linksAllowed": false,
+        "accountRequired": false,
+        "features": ["File hosting", "Temporary", "Command line friendly"]
+      }
+    ]
+  }
+}
