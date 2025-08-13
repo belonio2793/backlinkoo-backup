@@ -252,29 +252,39 @@ export default function BacklinkAutomation() {
       console.log('User ID:', user?.id);
       console.log('Is authenticated:', isAuthenticated);
 
-      // Test insert with minimal data first to isolate the issue
-      console.log('Testing minimal insert...');
-      const minimalData = {
-        user_id: user?.id,
-        name: 'Test Campaign',
-        target_url: 'https://example.com',
-        keyword: 'test',
-        anchor_text: 'test link',
-        target_platform: 'substack'
-      };
+      // Ensure the backlink_campaigns table exists with correct schema
+      console.log('Ensuring backlink_campaigns table exists...');
 
-      const { data: testInsert, error: testError } = await supabase
-        .from('backlink_campaigns')
-        .insert([minimalData])
-        .select()
-        .single();
+      const createTableSQL = `
+        CREATE TABLE IF NOT EXISTS backlink_campaigns (
+          id uuid default gen_random_uuid() primary key,
+          user_id uuid references auth.users(id) on delete cascade,
+          name text not null,
+          target_url text not null,
+          keyword text not null,
+          anchor_text text not null,
+          target_platform text not null,
+          status text not null default 'paused' check (status in ('active', 'paused', 'completed')),
+          links_found integer default 0,
+          links_posted integer default 0,
+          created_at timestamptz default now(),
+          updated_at timestamptz default now()
+        );
 
-      if (testError) {
-        console.error('Test insert failed:', testError);
-        throw new Error(`Test insert failed: ${testError.message}`);
+        ALTER TABLE backlink_campaigns ENABLE ROW LEVEL SECURITY;
+
+        CREATE POLICY IF NOT EXISTS "Users can manage their own campaigns" ON backlink_campaigns
+          FOR ALL USING (auth.uid() = user_id);
+      `;
+
+      try {
+        const { error: createError } = await supabase.rpc('exec', { sql: createTableSQL });
+        if (createError) {
+          console.log('Table creation via RPC failed, table may already exist:', createError);
+        }
+      } catch (rpcError) {
+        console.log('RPC not available, continuing with insert...');
       }
-
-      console.log('Test insert successful, proceeding with full data...');
 
       let campaign;
       if (activeCampaign) {
