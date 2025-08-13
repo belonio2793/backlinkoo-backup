@@ -16,8 +16,6 @@ import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
 // import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
 import Index from "./pages/Index";
 
-const LazyNewAutomationPage = lazy(() => import("./pages/NewAutomationPage"));
-const LazyBlogCommentAutomation = lazy(() => import("./pages/BlogCommentAutomation"));
 const LazyBlogCommentsSystem = lazy(() => import("./pages/BlogCommentsSystem"));
 const LazyAdvancedFormAutomation = lazy(() => import("./pages/AdvancedFormAutomation"));
 const LazyBacklinkReport = lazy(() => import("./pages/BacklinkReport"));
@@ -43,13 +41,10 @@ const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
 const LazySymbolCleanerDebug = lazy(() => import("./components/SymbolCleanerDebug"));
 const LazyCampaignMetricsDBVerifier = lazy(() => import("./components/CampaignMetricsDBVerifier"));
 const LazyPremiumUpgradeTest = lazy(() => import("./components/PremiumUpgradeTest"));
-const LazyAutomationSystem = lazy(() => import("./pages/AutomationSystem"));
 const LazyAuthErrorDebug = lazy(() => import("./pages/AuthErrorDebug"));
 const LazyTextCleanerDebug = lazy(() => import("./pages/TextCleanerDebug"));
 const LazyDatabaseColumnsFix = lazy(() => import("./pages/DatabaseColumnsFix"));
 const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
-const LazyBacklinkAutomation = lazy(() => import("./pages/BacklinkAutomation"));
-const LazyAutomatedLinkBuilding = lazy(() => import("./pages/AutomatedLinkBuilding"));
 const LazyMarkdownTest = lazy(() => import("./pages/MarkdownTest"));
 const LazyPremiumSEOAnalysisTest = lazy(() => import("./pages/PremiumSEOAnalysisTest"));
 const LazyBlogPostChecker = lazy(() => import("./components/BlogPostChecker").then(module => ({ default: module.BlogPostChecker })));
@@ -125,27 +120,12 @@ const App = () => (
             <Route
               path="/automation"
               element={
-                <Suspense fallback={
-                  <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-                    <div className="text-center">
-                      <LoadingSpinner />
-                      <div className="mt-4">
-                        <h2 className="text-xl font-semibold text-gray-900">Loading AI Link Building Engine</h2>
-                        <p className="text-gray-600 mt-2">Preparing automated link building platform...</p>
-                      </div>
-                    </div>
+                <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+                  <div className="text-center">
+                    <h2 className="text-xl font-semibold text-gray-900">Coming Soon</h2>
+                    <p className="text-gray-600 mt-2">This page is being rebuilt from scratch.</p>
                   </div>
-                }>
-                  <LazyAutomatedLinkBuilding />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/automation/legacy"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyBacklinkAutomation />
-                </Suspense>
+                </div>
               }
             />
             <Route
@@ -153,24 +133,6 @@ const App = () => (
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazyBlogCommentsSystem />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/automation/system"
-              element={
-                <Suspense fallback={
-                  <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 flex items-center justify-center">
-                    <div className="text-center">
-                      <LoadingSpinner />
-                      <div className="mt-4">
-                        <h2 className="text-xl font-semibold text-gray-900">Loading Automation System</h2>
-                        <p className="text-gray-600 mt-2">Initializing advanced automation engines...</p>
-                      </div>
-                    </div>
-                  </div>
-                }>
-                  <LazyAutomationSystem />
                 </Suspense>
               }
             />
