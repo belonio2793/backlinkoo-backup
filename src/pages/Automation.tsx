@@ -517,9 +517,11 @@ export default function Automation() {
                               {new Date(campaign.created_at).toLocaleDateString()}
                             </div>
                             <div className="flex items-center gap-1">
-                              <Link className="h-4 w-4" />
-                              {campaign.keywords?.join(', ').substring(0, 50)}
-                              {campaign.keywords?.join(', ').length > 50 ? '...' : ''}
+                              <Target className="h-4 w-4" />
+                              {campaign.target_sites_used?.length ?
+                                `Sites used: ${campaign.target_sites_used.join(', ').substring(0, 40)}${campaign.target_sites_used.join(', ').length > 40 ? '...' : ''}` :
+                                'No sites used yet'
+                              }
                             </div>
                           </div>
                         </div>
