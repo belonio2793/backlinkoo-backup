@@ -1021,6 +1021,13 @@ export class ContentFormatter {
         return `<strong class="font-bold text-inherit"${attrs}>`;
       })
 
+      // Fix broken strong tags where only first letter is bold
+      .replace(/<strong\s+class([^=]*)=""\s+([^"]+?)"="">([A-Z])<\/strong>([a-z][A-Za-z\s-]*:)/gi,
+        '<strong class="font-bold text-inherit">$3$4</strong>')
+
+      // Fix general malformed class attributes in strong tags
+      .replace(/<strong\s+class([^=]*)=""\s+([^>]*?)>/gi, '<strong class="font-bold text-inherit">')
+
       // FINAL LINK RESTORATION: Fix any malformed link attributes
       .replace(/<a\s+([^>]*?)>/gi, (match, attrs) => {
         // Fix common malformed patterns
