@@ -15,6 +15,9 @@ export class ContentFormatter {
     // CRITICAL: Add debug logging for production issues
     console.log('ContentFormatter: Original content length:', content.length);
 
+    // FIRST: Fix malformed links before any other processing
+    content = LinkAttributeFixer.fixMalformedLinks(content);
+
     // ULTRA-EARLY FIX: Prevent malformed bold patterns before any other processing
     console.log('ContentFormatter: Before bold fix, content contains:',
       content.includes('**Enhanced SEO Performance:**') ? '**Enhanced SEO Performance:**' :
