@@ -143,21 +143,15 @@
 .article-content a,
 .beautiful-blog-content a,
 .prose a {
-  color: rgb(59, 130, 246) !important;
-  text-decoration: none !important;
-  font-weight: 600 !important;
-  position: relative !important;
-  border-radius: 4px !important;
-  padding: 0.125rem 0.25rem !important;
-  transition: all 0.3s ease !important;
+  color: inherit !important;
+  text-decoration: underline !important;
+  cursor: pointer !important;
 }
 
 .article-content a:hover,
 .beautiful-blog-content a:hover,
 .prose a:hover {
-  color: rgb(147, 51, 234) !important;
-  background: rgba(59, 130, 246, 0.05) !important;
-  transform: translateY(-1px) !important;
+  text-decoration: underline !important;
 }
 
 /* Force proper blockquote styling */
