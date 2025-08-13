@@ -1023,7 +1023,10 @@ export function BeautifulBlogPost() {
                     overflowWrap: 'break-word'
                   }}
                   dangerouslySetInnerHTML={{
-                    __html: autoRemoveTitlesFromContent(blogPost.content || '', blogPost.title || '')
+                    __html: BlogContentCleaner.removeDuplicateTitle(
+                      BlogContentCleaner.cleanBlogContent(blogPost.content || ''),
+                      blogPost.title || ''
+                    )
                   }}
                 />
               </div>
