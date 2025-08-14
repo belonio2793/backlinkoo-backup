@@ -70,6 +70,11 @@ export default function Automation() {
 
   // Unified execution results
   const [directResults, setDirectResults] = useState<DirectExecutionResult[]>([]);
+  const [platformStatus, setPlatformStatus] = useState<{
+    workingPlatforms: string[];
+    totalPlatforms: number;
+    lastCheck: string;
+  } | null>(null);
 
   // Initialize logging and database check
   useEffect(() => {
