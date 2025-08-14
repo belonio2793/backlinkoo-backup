@@ -1049,6 +1049,35 @@ export default function Automation() {
                     </>
                   )}
                 </Button>
+
+                {campaignProgress?.isRunning && (
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      onClick={() => {
+                        setCampaignProgress(prev => prev ? { ...prev, isRunning: false, status: 'paused' } : null);
+                        setCreating(false);
+                        toast.info('Campaign paused by user');
+                      }}
+                      variant="outline"
+                      className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                    >
+                      <Pause className="h-4 w-4 mr-2" />
+                      Pause Campaign
+                    </Button>
+                  </div>
+                )}
+
+                {campaignProgress && !campaignProgress.isRunning && campaignProgress.status === 'paused' && (
+                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center gap-2 text-yellow-800">
+                      <AlertCircle className="h-4 w-4" />
+                      <span className="text-sm font-medium">Campaign paused</span>
+                    </div>
+                    <p className="text-xs text-yellow-700 mt-1">
+                      Campaign has been {campaignProgress.currentPlatform.includes('Auto-paused') ? 'automatically' : 'manually'} paused after completing platform rotation.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
