@@ -125,15 +125,17 @@ class DirectAutomationExecutor {
       });
 
       // Step 2: Generate content (check if Netlify functions are available)
-      let useMockServices = false;
-
-      // Quick check if Netlify functions are available
+      console.log('🔍 Checking Netlify functions availability...');
       const isNetlifyAvailable = await this.checkNetlifyFunctionsAvailable();
 
+      let useMockServices = !isNetlifyAvailable;
+
       if (!isNetlifyAvailable) {
-        console.log('🔧 Netlify functions not available, using client-side generation');
+        console.log('⚠️ Netlify functions not available (404 errors) - using client-side services');
         useMockServices = true;
       } else {
+        console.log('✅ Netlify functions are available');
+
         // Check production mode override
         const { ProductionModeForcer } = await import('../utils/forceProductionMode');
         const shouldForceLive = ProductionModeForcer.shouldUseLiveTelegraph();
