@@ -38,6 +38,7 @@ import { LoginModal } from '@/components/LoginModal';
 import { DatabaseInit } from '@/utils/databaseInit';
 import { CampaignDebugger } from '@/components/CampaignDebugger';
 import { ApiHealthChecker } from '@/components/ApiHealthChecker';
+import { CampaignSchemaCheck } from '@/components/debug/CampaignSchemaCheck';
 import guestPostingSites from '@/data/guestPostingSites.json';
 import { PLATFORM_CONFIGS, getImplementedPlatforms, getPlannedPlatforms, type PlatformConfig } from '@/services/platformConfigs';
 
