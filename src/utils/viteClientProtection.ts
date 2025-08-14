@@ -32,32 +32,26 @@ export function protectViteClient(): void {
     // Override window.fetch with FullStory-aware version for Vite client
     const protectedFetch = async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
       const url = input.toString();
-      
+
       // Check if this is a Vite client request that needs protection
       if (isViteClientRequest(url, init)) {
         console.log('🔧 Protecting Vite client request from FullStory:', url);
-        
-        // If FullStory is detected, use bypass immediately
-        if (isFullStoryPresent()) {
-          const bypassFetch = createBypassFetch();
-          return await bypassFetch(input, init);
-        }
-        
-        // Try original fetch with error handling
+
+        // Try original fetch first
         try {
           return await originalFetch(input, init);
         } catch (error: any) {
-          // If it fails with FullStory patterns, retry with bypass
-          if (isViteClientError(error)) {
-            console.log('🔄 Vite client fetch failed, retrying with bypass:', error.message);
+          // Only use bypass if we're very sure it's a FullStory issue
+          if (isViteClientError(error) && isFullStoryPresent()) {
+            console.log('🔄 Vite client fetch failed due to FullStory, retrying with bypass:', error.message);
             const bypassFetch = createBypassFetch();
             return await bypassFetch(input, init);
           }
           throw error;
         }
       }
-      
-      // For non-Vite requests, use original fetch
+
+      // For non-Vite requests, use original fetch directly
       return originalFetch(input, init);
     };
 
