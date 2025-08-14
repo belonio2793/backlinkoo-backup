@@ -1,154 +1,297 @@
-/**
- * Telegraph Posting Service
- * Handles article submission via Netlify functions
- */
+export interface TelegraphAccount {
+  access_token: string;
+  auth_url: string;
+  short_name: string;
+  author_name: string;
+  author_url?: string;
+}
 
-import { automationLogger } from './automationLogger';
-
-export interface TelegraphPostRequest {
+export interface TelegraphPage {
+  path: string;
+  url: string;
   title: string;
+  description: string;
+  author_name?: string;
+  author_url?: string;
+  image_url?: string;
+  content: any[];
+  views: number;
+  can_edit: boolean;
+}
+
+export interface CreatePageParams {
+  title: string;
+  author_name?: string;
+  author_url?: string;
   content: string;
-  campaignId: string;
-  authorName?: string;
-  authorUrl?: string;
+  return_content?: boolean;
 }
 
-export interface TelegraphPostResult {
-  success: boolean;
-  url?: string;
-  path?: string;
-  title?: string;
-  description?: string;
-  authorName?: string;
-  authorUrl?: string;
-  imageUrl?: string;
-  content?: any[];
-  views?: number;
-  canEdit?: boolean;
-  error?: string;
-}
+export class TelegraphService {
+  private readonly baseUrl = 'https://api.telegra.ph';
+  private account: TelegraphAccount | null = null;
 
-class TelegraphService {
-  private netlifyFunctionUrl = '/.netlify/functions/publish-article';
-
-  constructor() {
-    automationLogger.info('system', 'Telegraph service initialized (using Netlify functions)');
-  }
-
-  async postArticle(request: TelegraphPostRequest): Promise<TelegraphPostResult> {
-    const { title, content, campaignId, authorName = 'SEO Content Bot' } = request;
-
-    automationLogger.info('article_submission', 'Posting article via Netlify function', {
-      title: title.substring(0, 50),
-      contentLength: content.length
-    }, campaignId);
-
+  /**
+   * Create a Telegraph account for publishing
+   */
+  async createAccount(): Promise<TelegraphAccount> {
     try {
-      // Call Netlify function for publishing
-      const response = await fetch(this.netlifyFunctionUrl, {
+      const response = await fetch(`${this.baseUrl}/createAccount`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          title: title,
-          content: content,
-          campaign_id: campaignId,
-          target_site: 'telegraph',
-          author_name: authorName,
-          user_id: this.getCurrentUserId() // Helper to get current user ID
-        }),
+          short_name: 'LinkBuilder',
+          author_name: 'Automated Content',
+          author_url: ''
+        })
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`Netlify function error: ${response.status} - ${errorData.error || 'Unknown error'}`);
+        throw new Error(`Telegraph API error: ${response.status} ${response.statusText}`);
       }
 
       const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.error || 'Article publishing failed');
+      
+      if (!data.ok) {
+        throw new Error(`Telegraph API error: ${data.error || 'Unknown error'}`);
       }
 
-      const result = data.data;
-
-      automationLogger.info('article_submission', 'Article posted successfully via Netlify', {
-        url: result.url,
-        title: result.title,
-        target_site: result.target_site
-      }, campaignId);
-
-      return {
-        success: true,
-        url: result.url,
-        title: result.title,
-        description: result.metadata?.description,
-        authorName: result.metadata?.author_name,
-        views: result.metadata?.views || 0,
-        canEdit: result.metadata?.can_edit || false
-      };
-
+      this.account = data.result;
+      return this.account;
     } catch (error) {
-      automationLogger.error('article_submission', 'Failed to post article via Netlify function', {
-        title: title.substring(0, 50),
-        error: error instanceof Error ? error.message : String(error)
-      }, campaignId, error as Error);
-
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
-      };
+      console.error('Error creating Telegraph account:', error);
+      throw new Error(`Failed to create Telegraph account: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 
-  private getCurrentUserId(): string | undefined {
-    // Helper to get current user ID from auth context
-    // This will be passed from the calling component
-    return undefined;
+  /**
+   * Publish content to Telegraph
+   */
+  async publishContent(params: CreatePageParams): Promise<TelegraphPage> {
+    // Ensure we have an account
+    if (!this.account) {
+      await this.createAccount();
+    }
+
+    if (!this.account) {
+      throw new Error('Failed to create Telegraph account');
+    }
+
+    try {
+      // Convert HTML content to Telegraph format
+      const telegraphContent = this.convertHtmlToTelegraphFormat(params.content);
+
+      const response = await fetch(`${this.baseUrl}/createPage`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          access_token: this.account.access_token,
+          title: params.title,
+          author_name: params.author_name || this.account.author_name,
+          author_url: params.author_url || this.account.author_url,
+          content: telegraphContent,
+          return_content: params.return_content || false
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Telegraph API error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (!data.ok) {
+        throw new Error(`Telegraph API error: ${data.error || 'Unknown error'}`);
+      }
+
+      const page = data.result;
+      // Add full URL to the page object
+      page.url = `https://telegra.ph/${page.path}`;
+      
+      return page;
+    } catch (error) {
+      console.error('Error publishing to Telegraph:', error);
+      throw new Error(`Failed to publish to Telegraph: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
   }
 
-  // Test method for development
-  async testPost(campaignId: string): Promise<TelegraphPostResult> {
-    automationLogger.info('api', 'Running test Telegraph post via Netlify', {}, campaignId);
+  /**
+   * Convert HTML content to Telegraph format
+   * Telegraph uses a specific DOM structure
+   */
+  private convertHtmlToTelegraphFormat(htmlContent: string): any[] {
+    try {
+      // Create a temporary DOM element to parse HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlContent;
+
+      const telegraphNodes: any[] = [];
+
+      // Process each child node
+      Array.from(tempDiv.children).forEach(element => {
+        const node = this.convertElementToTelegraphNode(element);
+        if (node) {
+          telegraphNodes.push(node);
+        }
+      });
+
+      return telegraphNodes;
+    } catch (error) {
+      console.error('Error converting HTML to Telegraph format:', error);
+      // Fallback: create simple text nodes
+      return [{ tag: 'p', children: [htmlContent.replace(/<[^>]*>/g, '')] }];
+    }
+  }
+
+  /**
+   * Convert HTML element to Telegraph node format
+   */
+  private convertElementToTelegraphNode(element: Element): any {
+    const tagName = element.tagName.toLowerCase();
     
-    return this.postArticle({
-      title: 'Test Article - SEO Tools Guide',
-      content: `# SEO Tools Guide
+    switch (tagName) {
+      case 'h1':
+      case 'h2':
+      case 'h3':
+      case 'h4':
+      case 'h5':
+      case 'h6':
+        return {
+          tag: 'h3', // Telegraph only supports h3 and h4
+          children: this.getTextContent(element)
+        };
+      
+      case 'p':
+        const children = this.processChildNodes(element);
+        return children.length > 0 ? { tag: 'p', children } : null;
+      
+      case 'a':
+        return {
+          tag: 'a',
+          attrs: {
+            href: element.getAttribute('href') || '',
+            target: '_blank'
+          },
+          children: this.getTextContent(element)
+        };
+      
+      case 'strong':
+      case 'b':
+        return {
+          tag: 'strong',
+          children: this.getTextContent(element)
+        };
+      
+      case 'em':
+      case 'i':
+        return {
+          tag: 'em',
+          children: this.getTextContent(element)
+        };
+      
+      case 'br':
+        return { tag: 'br' };
+      
+      default:
+        // For unsupported tags, just get text content
+        const textContent = element.textContent?.trim();
+        return textContent ? { tag: 'p', children: [textContent] } : null;
+    }
+  }
 
-This is a test article about **SEO tools** and digital marketing.
-
-## Introduction
-
-Digital marketing requires the right tools to succeed. Here are some key points:
-
-- Search engine optimization
-- Content marketing strategies  
-- [Link building techniques](https://example.com)
-
-## Conclusion
-
-Using the right SEO tools can significantly improve your online presence.`,
-      campaignId,
-      authorName: 'SEO Test Bot'
+  /**
+   * Process child nodes of an element
+   */
+  private processChildNodes(element: Element): any[] {
+    const children: any[] = [];
+    
+    Array.from(element.childNodes).forEach(node => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        const text = node.textContent?.trim();
+        if (text) {
+          children.push(text);
+        }
+      } else if (node.nodeType === Node.ELEMENT_NODE) {
+        const childElement = node as Element;
+        
+        if (childElement.tagName.toLowerCase() === 'a') {
+          children.push({
+            tag: 'a',
+            attrs: {
+              href: childElement.getAttribute('href') || '',
+              target: '_blank'
+            },
+            children: [childElement.textContent || '']
+          });
+        } else if (childElement.tagName.toLowerCase() === 'strong' || childElement.tagName.toLowerCase() === 'b') {
+          children.push({
+            tag: 'strong',
+            children: [childElement.textContent || '']
+          });
+        } else if (childElement.tagName.toLowerCase() === 'em' || childElement.tagName.toLowerCase() === 'i') {
+          children.push({
+            tag: 'em',
+            children: [childElement.textContent || '']
+          });
+        } else {
+          const text = childElement.textContent?.trim();
+          if (text) {
+            children.push(text);
+          }
+        }
+      }
     });
+    
+    return children;
   }
 
-  // Get service status
-  getStatus(): { configured: boolean; message: string } {
-    return {
-      configured: true,
-      message: 'Telegraph publishing ready via Netlify functions'
-    };
+  /**
+   * Get text content from element, preserving inline formatting
+   */
+  private getTextContent(element: Element): string[] {
+    const text = element.textContent?.trim();
+    return text ? [text] : [];
+  }
+
+  /**
+   * Generate a title from content
+   */
+  generateTitleFromContent(keyword: string): string {
+    const titles = [
+      `The Ultimate Guide to ${keyword}`,
+      `Everything You Need to Know About ${keyword}`,
+      `Mastering ${keyword}: A Comprehensive Guide`,
+      `${keyword}: Tips, Tricks, and Best Practices`,
+      `Understanding ${keyword}: A Complete Overview`
+    ];
+    
+    return titles[Math.floor(Math.random() * titles.length)];
+  }
+
+  /**
+   * Test Telegraph API connection
+   */
+  async testConnection(): Promise<boolean> {
+    try {
+      await this.createAccount();
+      return true;
+    } catch (error) {
+      console.error('Telegraph connection test failed:', error);
+      return false;
+    }
   }
 }
 
-export const telegraphService = new TelegraphService();
+// Singleton instance
+let telegraphService: TelegraphService | null = null;
 
-// Export for window debugging in development
-if (typeof window !== 'undefined' && import.meta.env.MODE === 'development') {
-  (window as any).telegraphService = telegraphService;
-  console.log('🔧 Telegraph service available at window.telegraphService');
-}
-
-export default telegraphService;
+export const getTelegraphService = (): TelegraphService => {
+  if (!telegraphService) {
+    telegraphService = new TelegraphService();
+  }
+  return telegraphService;
+};

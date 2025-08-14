@@ -1,333 +1,362 @@
-/**
- * Automation Orchestrator
- * Coordinates the entire automation workflow: content generation → posting → reporting
- */
-
 import { supabase } from '@/integrations/supabase/client';
-import { automationLogger } from './automationLogger';
-import { contentGenerationService } from './contentGenerationService';
-import { telegraphService } from './telegraphService';
-import { targetSitesManager } from './targetSitesManager';
+import { getContentService, type ContentGenerationParams } from './automationContentService';
+import { getTelegraphService } from './telegraphService';
 
-export interface CampaignData {
+export interface Campaign {
   id: string;
-  name: string;
-  keywords: string[];
-  anchor_texts: string[];
-  target_url: string;
   user_id: string;
-  status: 'active' | 'paused' | 'completed' | 'draft';
+  target_url: string;
+  keyword: string;
+  anchor_text: string;
+  status: 'pending' | 'generating' | 'publishing' | 'completed' | 'paused' | 'failed';
+  created_at: string;
+  updated_at: string;
+  completed_at?: string;
+  error_message?: string;
 }
 
-export interface AutomationResult {
-  success: boolean;
-  articleUrl?: string;
-  articleTitle?: string;
-  targetSite?: string;
-  linkPlaced?: boolean;
-  anchorText?: string;
+export interface CampaignProgress {
+  campaign_id: string;
+  current_step: string;
+  total_steps: number;
+  completed_steps: number;
+  status: string;
   error?: string;
-  submissionId?: string;
 }
 
-class AutomationOrchestrator {
-  constructor() {
-    automationLogger.info('system', 'Automation orchestrator initialized');
-  }
-
-  async processCampaign(campaign: CampaignData): Promise<AutomationResult> {
-    const { id: campaignId, keywords, anchor_texts, target_url, user_id } = campaign;
-
-    automationLogger.campaignStarted(campaignId);
-    automationLogger.info('campaign', 'Starting campaign processing via Netlify functions', {
-      keywords: keywords.slice(0, 3),
-      targetUrl: target_url,
-      userId: user_id
-    }, campaignId);
-
+export class AutomationOrchestrator {
+  private contentService = getContentService();
+  private telegraphService = getTelegraphService();
+  
+  /**
+   * Create a new campaign
+   */
+  async createCampaign(params: {
+    target_url: string;
+    keyword: string;
+    anchor_text: string;
+  }): Promise<Campaign> {
     try {
-      // Step 1: Generate content using Netlify function with rotating prompts
-      automationLogger.info('article_submission', 'Generating content via Netlify function', {}, campaignId);
-
-      // Call content generation Netlify function directly
-      const contentResponse = await fetch('/.netlify/functions/generate-content', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          keyword: keywords[0] || 'technology',
-          anchor_text: anchor_texts[Math.floor(Math.random() * anchor_texts.length)] || 'learn more',
-          url: target_url,
-          campaign_id: campaignId,
-          word_count: 800,
-          tone: 'professional',
-          user_id: user_id
-        }),
-      });
-
-      if (!contentResponse.ok) {
-        const errorData = await contentResponse.json().catch(() => ({}));
-        throw new Error(`Content generation failed: ${contentResponse.status} - ${errorData.error || 'Unknown error'}`);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        throw new Error('User not authenticated');
       }
 
-      const contentData = await contentResponse.json();
-      if (!contentData.success) {
-        throw new Error(contentData.error || 'Content generation failed');
-      }
-
-      const generatedContent = contentData.data;
-
-      // Step 2: Post to Telegraph using Netlify function
-      automationLogger.info('article_submission', 'Publishing article via Netlify function', {
-        title: generatedContent.title.substring(0, 50),
-        hasAnchorLink: generatedContent.hasAnchorLink,
-        promptTemplate: generatedContent.promptIndex
-      }, campaignId);
-
-      const publishResponse = await fetch('/.netlify/functions/publish-article', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          title: generatedContent.title,
-          content: generatedContent.content,
-          campaign_id: campaignId,
-          target_site: 'telegraph',
-          user_id: user_id,
-          author_name: 'SEO Content Bot'
-        }),
-      });
-
-      if (!publishResponse.ok) {
-        const errorData = await publishResponse.json().catch(() => ({}));
-        throw new Error(`Article publishing failed: ${publishResponse.status} - ${errorData.error || 'Unknown error'}`);
-      }
-
-      const publishData = await publishResponse.json();
-      if (!publishData.success) {
-        throw new Error(publishData.error || 'Article publishing failed');
-      }
-
-      const publishResult = publishData.data;
-
-      // Step 3: Update campaign stats (submission was already saved by Netlify function)
-      await this.updateCampaignStats(campaignId, true);
-
-      // Step 4: Mark target site as used (Telegraph)
-      await targetSitesManager.markSiteUsed('telegraph', campaignId);
-      await targetSitesManager.markSubmissionResult('telegraph', true, campaignId);
-
-      automationLogger.info('campaign', 'Campaign processing completed successfully via Netlify functions', {
-        articleUrl: publishResult.url,
-        title: generatedContent.title.substring(0, 50),
-        hasBacklink: generatedContent.hasAnchorLink,
-        promptUsed: generatedContent.promptIndex
-      }, campaignId);
-
-      return {
-        success: true,
-        articleUrl: publishResult.url,
-        articleTitle: generatedContent.title,
-        targetSite: 'Telegraph',
-        linkPlaced: generatedContent.hasAnchorLink,
-        anchorText: generatedContent.anchorText,
-        submissionId: publishResult.submission_id
-      };
-
-    } catch (error) {
-      automationLogger.error('campaign', 'Campaign processing failed', {
-        keywords: keywords.slice(0, 3),
-        targetUrl: target_url
-      }, campaignId, error as Error);
-
-      // Update campaign stats for failure
-      await this.updateCampaignStats(campaignId, false);
-
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
-      };
-    }
-  }
-
-  private async updateCampaignStats(campaignId: string, success: boolean): Promise<void> {
-    try {
-      // Get current campaign data
-      const { data: campaign, error: fetchError } = await supabase
+      const { data, error } = await supabase
         .from('automation_campaigns')
-        .select('links_built, target_sites_used')
-        .eq('id', campaignId)
+        .insert({
+          user_id: user.id,
+          target_url: params.target_url,
+          keyword: params.keyword,
+          anchor_text: params.anchor_text,
+          status: 'pending'
+        })
+        .select()
         .single();
 
-      if (fetchError) {
-        automationLogger.error('database', 'Failed to fetch campaign for stats update', {}, campaignId, fetchError);
-        return;
+      if (error) {
+        console.error('Error creating campaign:', error);
+        throw new Error(`Failed to create campaign: ${error.message}`);
       }
 
-      const updates: any = {};
+      await this.logActivity(data.id, 'info', 'Campaign created successfully');
+      
+      // Start processing the campaign asynchronously
+      this.processCampaign(data.id).catch(error => {
+        console.error('Campaign processing error:', error);
+        this.updateCampaignStatus(data.id, 'failed', error.message);
+      });
 
-      if (success) {
-        // Increment links built
-        updates.links_built = (campaign.links_built || 0) + 1;
-        
-        // Add telegraph to sites used if not already there
-        const sitesUsed = campaign.target_sites_used || [];
-        if (!sitesUsed.includes('telegra.ph')) {
-          updates.target_sites_used = [...sitesUsed, 'telegra.ph'];
+      return data;
+    } catch (error) {
+      console.error('Campaign creation error:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Process a campaign through all steps
+   */
+  async processCampaign(campaignId: string): Promise<void> {
+    try {
+      await this.logActivity(campaignId, 'info', 'Starting campaign processing');
+      
+      // Step 1: Get campaign details
+      const campaign = await this.getCampaign(campaignId);
+      if (!campaign) {
+        throw new Error('Campaign not found');
+      }
+
+      // Step 2: Update status to generating
+      await this.updateCampaignStatus(campaignId, 'generating');
+      await this.logActivity(campaignId, 'info', 'Starting content generation');
+
+      // Step 3: Generate content
+      const generatedContent = await this.contentService.generateAllContent({
+        keyword: campaign.keyword,
+        anchorText: campaign.anchor_text,
+        targetUrl: campaign.target_url
+      });
+
+      await this.logActivity(campaignId, 'info', `Generated ${generatedContent.length} piece(s) of content`);
+
+      // Step 4: Save generated content to database
+      const contentRecords = [];
+      for (const content of generatedContent) {
+        const { data, error } = await supabase
+          .from('automation_content')
+          .insert({
+            campaign_id: campaignId,
+            prompt_type: content.type,
+            content: content.content,
+            word_count: content.wordCount
+          })
+          .select()
+          .single();
+
+        if (error) {
+          throw new Error(`Failed to save content: ${error.message}`);
+        }
+
+        contentRecords.push(data);
+      }
+
+      // Step 5: Update status to publishing
+      await this.updateCampaignStatus(campaignId, 'publishing');
+      await this.logActivity(campaignId, 'info', 'Starting content publication');
+
+      // Step 6: Publish content to Telegraph
+      const publishedLinks = [];
+      for (const contentRecord of contentRecords) {
+        try {
+          const title = this.telegraphService.generateTitleFromContent(campaign.keyword);
+
+          const publishedPage = await this.telegraphService.publishContent({
+            title,
+            content: contentRecord.content,
+            author_name: 'Link Builder'
+          });
+
+          // Save published link
+          const { error: linkError } = await supabase
+            .from('automation_published_links')
+            .insert({
+              campaign_id: campaignId,
+              content_id: contentRecord.id,
+              platform: 'telegraph',
+              published_url: publishedPage.url
+            });
+
+          if (linkError) {
+            console.error('Error saving published link:', linkError);
+          } else {
+            publishedLinks.push(publishedPage.url);
+            await this.logActivity(campaignId, 'info', `Published content to ${publishedPage.url}`);
+          }
+
+          // No delay needed since we're only publishing one piece of content
+
+        } catch (error) {
+          console.error('Error publishing content:', error);
+          await this.logActivity(campaignId, 'error', `Failed to publish content: ${error}`);
         }
       }
 
-      updates.updated_at = new Date().toISOString();
-
-      const { error: updateError } = await supabase
-        .from('automation_campaigns')
-        .update(updates)
-        .eq('id', campaignId);
-
-      if (updateError) {
-        automationLogger.error('database', 'Failed to update campaign stats', updates, campaignId, updateError);
+      // Step 7: Complete campaign
+      if (publishedLinks.length > 0) {
+        await this.updateCampaignStatus(campaignId, 'completed');
+        await this.logActivity(campaignId, 'info', `Campaign completed successfully. Published ${publishedLinks.length} links.`);
       } else {
-        automationLogger.debug('database', 'Campaign stats updated', updates, campaignId);
+        await this.updateCampaignStatus(campaignId, 'failed', 'No content was successfully published');
+        await this.logActivity(campaignId, 'error', 'Campaign failed: No content was successfully published');
       }
 
     } catch (error) {
-      automationLogger.error('database', 'Error updating campaign stats', {}, campaignId, error as Error);
+      console.error('Campaign processing error:', error);
+      await this.updateCampaignStatus(campaignId, 'failed', error instanceof Error ? error.message : 'Unknown error');
+      await this.logActivity(campaignId, 'error', `Campaign failed: ${error}`);
+      throw error;
     }
   }
 
-  async getCampaignSubmissions(campaignId: string): Promise<any[]> {
-    try {
-      const { data, error } = await supabase
-        .from('article_submissions')
-        .select('*')
-        .eq('campaign_id', campaignId)
-        .order('submission_date', { ascending: false });
+  /**
+   * Get campaign by ID
+   */
+  async getCampaign(campaignId: string): Promise<Campaign | null> {
+    const { data, error } = await supabase
+      .from('automation_campaigns')
+      .select('*')
+      .eq('id', campaignId)
+      .single();
 
-      if (error) {
-        automationLogger.error('database', 'Failed to fetch campaign submissions', {}, campaignId, error);
-        return [];
-      }
+    if (error) {
+      console.error('Error fetching campaign:', error);
+      return null;
+    }
 
-      return data || [];
-    } catch (error) {
-      automationLogger.error('database', 'Error fetching campaign submissions', {}, campaignId, error as Error);
+    return data;
+  }
+
+  /**
+   * Get user campaigns
+   */
+  async getUserCampaigns(): Promise<Campaign[]> {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
       return [];
     }
+
+    const { data, error } = await supabase
+      .from('automation_campaigns')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching user campaigns:', error);
+      return [];
+    }
+
+    return data || [];
   }
 
-  async getUserSubmissions(userId: string, limit: number = 50): Promise<any[]> {
-    try {
-      // First check if article_submissions table exists by trying a simple query
-      const { data: testData, error: testError } = await supabase
-        .from('article_submissions')
-        .select('id')
-        .limit(1);
+  /**
+   * Get campaign with published links
+   */
+  async getCampaignWithLinks(campaignId: string) {
+    const { data, error } = await supabase
+      .from('automation_campaigns')
+      .select(`
+        *,
+        automation_published_links(*)
+      `)
+      .eq('id', campaignId)
+      .single();
 
-      if (testError) {
-        // Table might not exist - log and return empty array
-        automationLogger.warn('database', 'article_submissions table not accessible', {
-          userId,
-          limit,
-          error: testError.message
-        });
-        return [];
-      }
+    if (error) {
+      console.error('Error fetching campaign with links:', error);
+      return null;
+    }
 
-      // Now try the full query with join
-      const { data, error } = await supabase
-        .from('article_submissions')
-        .select(`
-          *,
-          automation_campaigns(
-            name,
-            keywords,
-            target_url,
-            user_id
-          )
-        `)
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false })
-        .limit(limit);
+    return data;
+  }
 
-      if (error) {
-        // Try a simpler query without join if the complex one fails
-        const { data: simpleData, error: simpleError } = await supabase
-          .from('article_submissions')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false })
-          .limit(limit);
+  /**
+   * Update campaign status
+   */
+  async updateCampaignStatus(
+    campaignId: string, 
+    status: Campaign['status'], 
+    errorMessage?: string
+  ): Promise<void> {
+    const updateData: any = {
+      status,
+      updated_at: new Date().toISOString()
+    };
 
-        if (simpleError) {
-          automationLogger.error('database', 'Failed to fetch user submissions', {
-            userId,
-            limit,
-            originalError: error.message,
-            simpleError: simpleError.message
-          }, undefined, simpleError);
-          return [];
-        }
+    if (status === 'completed') {
+      updateData.completed_at = new Date().toISOString();
+    }
 
-        automationLogger.warn('database', 'Using simplified query due to join error', {
-          userId,
-          joinError: error.message
-        });
-        return simpleData || [];
-      }
+    if (errorMessage) {
+      updateData.error_message = errorMessage;
+    }
 
-      return data || [];
-    } catch (error) {
-      automationLogger.error('database', 'Error fetching user submissions', {
-        userId,
-        errorMessage: error instanceof Error ? error.message : String(error),
-        errorType: typeof error
-      }, undefined, error as Error);
-      return [];
+    const { error } = await supabase
+      .from('automation_campaigns')
+      .update(updateData)
+      .eq('id', campaignId);
+
+    if (error) {
+      console.error('Error updating campaign status:', error);
     }
   }
 
-  // Test the full automation workflow
-  async testAutomation(campaignId: string): Promise<AutomationResult> {
-    automationLogger.info('system', 'Running test automation workflow', {}, campaignId);
+  /**
+   * Log campaign activity
+   */
+  async logActivity(
+    campaignId: string,
+    level: 'info' | 'warning' | 'error',
+    message: string,
+    details?: any
+  ): Promise<void> {
+    const { error } = await supabase
+      .from('automation_logs')
+      .insert({
+        campaign_id: campaignId,
+        log_level: level,
+        message,
+        details
+      });
 
-    const testCampaign: CampaignData = {
-      id: campaignId,
-      name: 'Test Campaign',
-      keywords: ['SEO tools', 'digital marketing', 'automation'],
-      anchor_texts: ['powerful SEO platform', 'learn more', 'advanced tools'],
-      target_url: 'https://example.com',
-      user_id: 'test-user',
-      status: 'active'
-    };
-
-    return this.processCampaign(testCampaign);
+    if (error) {
+      console.error('Error logging activity:', error);
+    }
   }
 
-  // Get service status
-  getStatus(): {
-    contentGeneration: any;
-    telegraph: any;
-    overall: boolean;
-  } {
-    const contentStatus = contentGenerationService.getStatus();
-    const telegraphStatus = telegraphService.getStatus();
+  /**
+   * Get campaign logs
+   */
+  async getCampaignLogs(campaignId: string) {
+    const { data, error } = await supabase
+      .from('automation_logs')
+      .select('*')
+      .eq('campaign_id', campaignId)
+      .order('created_at', { ascending: false });
 
-    return {
-      contentGeneration: contentStatus,
-      telegraph: telegraphStatus,
-      overall: contentStatus.configured && telegraphStatus.configured
-    };
+    if (error) {
+      console.error('Error fetching campaign logs:', error);
+      return [];
+    }
+
+    return data || [];
+  }
+
+  /**
+   * Pause campaign
+   */
+  async pauseCampaign(campaignId: string): Promise<void> {
+    await this.updateCampaignStatus(campaignId, 'paused');
+    await this.logActivity(campaignId, 'info', 'Campaign paused by user');
+  }
+
+  /**
+   * Resume campaign
+   */
+  async resumeCampaign(campaignId: string): Promise<void> {
+    await this.updateCampaignStatus(campaignId, 'pending');
+    await this.logActivity(campaignId, 'info', 'Campaign resumed by user');
+    
+    // Restart processing
+    this.processCampaign(campaignId).catch(error => {
+      console.error('Campaign processing error:', error);
+      this.updateCampaignStatus(campaignId, 'failed', error.message);
+    });
+  }
+
+  /**
+   * Delete campaign
+   */
+  async deleteCampaign(campaignId: string): Promise<void> {
+    const { error } = await supabase
+      .from('automation_campaigns')
+      .delete()
+      .eq('id', campaignId);
+
+    if (error) {
+      console.error('Error deleting campaign:', error);
+      throw new Error(`Failed to delete campaign: ${error.message}`);
+    }
   }
 }
 
-export const automationOrchestrator = new AutomationOrchestrator();
+// Singleton instance
+let orchestrator: AutomationOrchestrator | null = null;
 
-// Export for window debugging in development
-if (typeof window !== 'undefined' && import.meta.env.MODE === 'development') {
-  (window as any).automationOrchestrator = automationOrchestrator;
-  console.log('🔧 Automation orchestrator available at window.automationOrchestrator');
-}
-
-export default automationOrchestrator;
+export const getOrchestrator = (): AutomationOrchestrator => {
+  if (!orchestrator) {
+    orchestrator = new AutomationOrchestrator();
+  }
+  return orchestrator;
+};
