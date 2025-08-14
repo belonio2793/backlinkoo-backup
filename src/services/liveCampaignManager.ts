@@ -181,8 +181,8 @@ class LiveCampaignManager {
       // Base campaign data that should exist in all schema versions
       let campaignData: any = {
         name: params.name,
-        keywords: JSON.stringify(params.keywords), // Ensure JSON format
-        anchor_texts: JSON.stringify(params.anchor_texts), // Ensure JSON format
+        keywords: params.keywords,
+        anchor_texts: params.anchor_texts,
         target_url: params.target_url,
         user_id: params.user_id,
         status: params.auto_start ? 'active' : 'draft',
