@@ -95,10 +95,13 @@ class DirectAutomationExecutor {
 
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorMessage = error instanceof Error ? error.message : String(error);
 
+      // Improved error logging with safe serialization
       console.error('❌ Direct automation execution failed:', {
-        error: errorMessage,
+        errorMessage,
+        errorType: typeof error,
+        errorName: error instanceof Error ? error.name : 'Unknown',
         execution_time_ms: executionTime,
         input_summary: {
           keywords_count: input.keywords.length,
@@ -107,13 +110,20 @@ class DirectAutomationExecutor {
         }
       });
 
+      // Also log the stack trace separately for debugging
+      if (error instanceof Error && error.stack) {
+        console.error('Error stack:', error.stack);
+      }
+
       return {
         success: false,
         error: errorMessage,
         execution_time_ms: executionTime,
         debug_info: {
           error_type: typeof error,
-          error_stack: error instanceof Error ? error.stack : undefined
+          error_name: error instanceof Error ? error.name : 'Unknown',
+          error_stack: error instanceof Error ? error.stack : undefined,
+          error_code: error instanceof Error ? (error as any).code : undefined
         }
       };
     }
