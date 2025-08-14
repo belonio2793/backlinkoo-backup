@@ -98,7 +98,7 @@ export class AutomationOrchestrator {
         targetUrl: campaign.target_url
       });
 
-      await this.logActivity(campaignId, 'info', `Generated ${generatedContent.length} pieces of content`);
+      await this.logActivity(campaignId, 'info', `Generated ${generatedContent.length} piece(s) of content`);
 
       // Step 4: Save generated content to database
       const contentRecords = [];
@@ -117,7 +117,7 @@ export class AutomationOrchestrator {
         if (error) {
           throw new Error(`Failed to save content: ${error.message}`);
         }
-        
+
         contentRecords.push(data);
       }
 
@@ -130,7 +130,7 @@ export class AutomationOrchestrator {
       for (const contentRecord of contentRecords) {
         try {
           const title = this.telegraphService.generateTitleFromContent(campaign.keyword);
-          
+
           const publishedPage = await this.telegraphService.publishContent({
             title,
             content: contentRecord.content,
@@ -154,8 +154,7 @@ export class AutomationOrchestrator {
             await this.logActivity(campaignId, 'info', `Published content to ${publishedPage.url}`);
           }
 
-          // Add delay between publications
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          // No delay needed since we're only publishing one piece of content
 
         } catch (error) {
           console.error('Error publishing content:', error);
