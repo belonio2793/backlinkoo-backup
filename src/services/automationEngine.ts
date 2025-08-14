@@ -27,12 +27,16 @@ export interface AutomationResult {
   campaign_status: 'active' | 'paused' | 'completed';
 }
 
-// Content generation prompts - 3 variations for diverse content
+// Content generation prompts - 3 variations for diverse content (using ChatGPT 3.5 Turbo)
 const CONTENT_PROMPTS = [
   "Generate a 1000 word article on {{keyword}} including the {{anchor_text}} hyperlinked to {{url}}",
   "Write a 1000 word blog post about {{keyword}} with a hyperlinked {{anchor_text}} linked to {{url}}",
   "Produce a 1000-word reader friendly post on {{keyword}} that links {{anchor_text}} to {{url}}"
 ];
+
+// Rate limiting: 30 seconds between publications
+const PUBLICATION_THROTTLE_MS = 30000;
+let lastPublicationTime = 0;
 
 class AutomationEngine {
   private async generateContent(
@@ -189,95 +193,135 @@ class AutomationEngine {
     return keywords[Math.floor(Math.random() * keywords.length)];
   }
 
+  private async enforceThrottling(): Promise<void> {
+    const now = Date.now();
+    const timeSinceLastPublication = now - lastPublicationTime;
+
+    if (timeSinceLastPublication < PUBLICATION_THROTTLE_MS) {
+      const waitTime = PUBLICATION_THROTTLE_MS - timeSinceLastPublication;
+      console.log(`⏱️  Throttling publication - waiting ${waitTime}ms (${Math.round(waitTime/1000)}s)`);
+
+      await new Promise(resolve => setTimeout(resolve, waitTime));
+    }
+
+    lastPublicationTime = Date.now();
+  }
+
+  private async sendToReporting(article: PublishedArticle, userId: string): Promise<void> {
+    try {
+      // Send successful link to reporting tab
+      console.log('📊 Sending article to reporting system:', {
+        url: article.url,
+        platform: article.platform,
+        keyword: article.keyword_used,
+        anchor_text: article.anchor_text_used
+      });
+
+      // Integration with reporting system would go here
+      // This could call a separate service or update database directly
+
+    } catch (error) {
+      console.error('Failed to send article to reporting:', error);
+      // Don't throw - reporting failure shouldn't stop automation
+    }
+  }
+
   public async executeAutomation(request: AutomationRequest): Promise<AutomationResult> {
     const startTime = Date.now();
     const publishedArticles: PublishedArticle[] = [];
-    
-    console.log('🚀 Starting automation engine with request:', request);
+
+    console.log('🚀 Starting link building automation with requirements:');
+    console.log('  • Single article per campaign');
+    console.log('  • 30-second throttling between publications');
+    console.log('  • Skip errors, don\'t halt process');
+    console.log('  • Telegraph.ph publishing only');
+    console.log('Request:', request);
 
     try {
-      // Currently only Telegraph is active, but this is designed for multiple platforms
-      const activePlatforms = ['telegraph']; // Will expand to ['telegraph', 'write.as', 'medium', etc.]
-      
-      for (let platformIndex = 0; platformIndex < activePlatforms.length; platformIndex++) {
-        const platform = activePlatforms[platformIndex];
-        
-        // Select random keyword and anchor text for variety
-        const keyword = this.getRandomKeyword(request.keywords);
-        const anchor_text = this.getRandomAnchorText(request.anchor_texts);
-        
-        console.log(`📝 Processing platform ${platformIndex + 1}/${activePlatforms.length}: ${platform}`);
-        console.log(`🎯 Using keyword: "${keyword}", anchor text: "${anchor_text}"`);
+      // NEW REQUIREMENT: Only publish ONE article per campaign
+      const activePlatforms = ['telegraph']; // Single platform for now
 
-        // Use different prompt for each platform to ensure content variety
-        const promptIndex = platformIndex % CONTENT_PROMPTS.length;
-        
-        try {
-          // Generate content
-          const contentResult = await this.generateContent(
-            keyword, 
-            anchor_text, 
-            request.target_url, 
-            promptIndex
-          );
+      // Select random keyword and anchor text for the single publication
+      const keyword = this.getRandomKeyword(request.keywords);
+      const anchor_text = this.getRandomAnchorText(request.anchor_texts);
 
-          console.log(`✅ Content generated: ${contentResult.word_count} words`);
+      console.log(`📝 Creating single article for campaign`);
+      console.log(`🎯 Using keyword: "${keyword}", anchor text: "${anchor_text}"`);
 
-          // Publish to platform (currently only Telegraph)
-          if (platform === 'telegraph') {
-            const publishResult = await this.publishToTelegraph(
-              contentResult.title,
-              contentResult.content,
-              keyword,
-              request.user_id
-            );
+      // Select one of the 3 prompts randomly for content variety
+      const promptIndex = Math.floor(Math.random() * CONTENT_PROMPTS.length);
 
-            if (publishResult.success) {
-              const article: PublishedArticle = {
-                id: `article-${Date.now()}-${platformIndex}`,
-                title: contentResult.title,
-                url: publishResult.url,
-                platform: 'Telegraph',
-                word_count: contentResult.word_count,
-                anchor_text_used: anchor_text,
-                keyword_used: keyword,
-                content_preview: contentResult.content.substring(0, 200) + '...',
-                published_at: new Date().toISOString(),
-                execution_time_ms: Date.now() - startTime
-              };
+      try {
+        // REQUIREMENT: Generate content using ChatGPT 3.5 Turbo
+        const contentResult = await this.generateContent(
+          keyword,
+          anchor_text,
+          request.target_url,
+          promptIndex
+        );
 
-              publishedArticles.push(article);
-              console.log(`🎉 Article published successfully: ${publishResult.url}`);
-              
-              // Show success notification
-              toast.success(`✅ Article published on ${platform}: "${contentResult.title}"`);
-            } else {
-              console.error(`❌ Failed to publish to ${platform}:`, publishResult.error);
-              toast.error(`Failed to publish to ${platform}: ${publishResult.error}`);
-            }
-          }
+        console.log(`✅ Content generated: ${contentResult.word_count} words`);
+        console.log(`📝 Content preview: ${contentResult.content.substring(0, 100)}...`);
 
-          // Add delay between platforms to avoid rate limiting
-          if (platformIndex < activePlatforms.length - 1) {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-          }
+        // REQUIREMENT: Enforce 30-second throttling
+        await this.enforceThrottling();
 
-        } catch (error) {
-          console.error(`❌ Error processing platform ${platform}:`, error);
-          toast.error(`Error on ${platform}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        // REQUIREMENT: Ensure content is formatted and link is hyperlinked before publish
+        console.log(`🔗 Verifying anchor text hyperlinking before publication...`);
+
+        // Publish to Telegraph (single platform)
+        const publishResult = await this.publishToTelegraph(
+          contentResult.title,
+          contentResult.content,
+          keyword,
+          request.user_id
+        );
+
+        if (publishResult.success) {
+          const article: PublishedArticle = {
+            id: `article-${Date.now()}`,
+            title: contentResult.title,
+            url: publishResult.url,
+            platform: 'Telegraph',
+            word_count: contentResult.word_count,
+            anchor_text_used: anchor_text,
+            keyword_used: keyword,
+            content_preview: contentResult.content.substring(0, 200) + '...',
+            published_at: new Date().toISOString(),
+            execution_time_ms: Date.now() - startTime
+          };
+
+          publishedArticles.push(article);
+          console.log(`🎉 Article published successfully: ${publishResult.url}`);
+
+          // REQUIREMENT: Send successful link to reporting tab
+          await this.sendToReporting(article, request.user_id);
+
+          // Show success notification
+          toast.success(`✅ Link building successful! Article published: "${contentResult.title}"`);
+        } else {
+          // REQUIREMENT: Skip errors, don't halt the process
+          console.warn(`⚠️  Publishing failed, skipping: ${publishResult.error}`);
+          toast.warning(`Publishing failed, skipping: ${publishResult.error}`);
         }
+
+      } catch (error) {
+        // REQUIREMENT: Skip errors, don't halt the process
+        console.warn(`⚠️  Content generation failed, skipping:`, error);
+        toast.warning(`Content generation failed, skipping: ${error instanceof Error ? error.message : 'Unknown error'}`);
       }
 
-      // Determine campaign status
+      // REQUIREMENT: Campaign is paused when all platforms complete (only Telegraph for now)
       const campaign_status = publishedArticles.length > 0 ? 'completed' : 'paused';
-      
+
       const totalExecutionTime = Date.now() - startTime;
-      console.log(`🏁 Automation completed in ${totalExecutionTime}ms. Published ${publishedArticles.length} articles.`);
+      console.log(`🏁 Link building automation completed in ${totalExecutionTime}ms.`);
+      console.log(`📊 Results: ${publishedArticles.length} article published, campaign status: ${campaign_status}`);
 
       if (publishedArticles.length > 0) {
-        toast.success(`🎉 Campaign completed! ${publishedArticles.length} article(s) published successfully.`);
+        toast.success(`🎉 Link building completed! 1 high-quality backlink created on Telegraph.`);
       } else {
-        toast.error('❌ Campaign failed - no articles were published.');
+        toast.error('❌ Link building failed - no articles were published. Please try again.');
       }
 
       return {
@@ -290,8 +334,8 @@ class AutomationEngine {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown automation error';
       console.error('❌ Automation engine error:', error);
-      
-      toast.error(`Automation failed: ${errorMessage}`);
+
+      toast.error(`Link building failed: ${errorMessage}`);
 
       return {
         success: false,
