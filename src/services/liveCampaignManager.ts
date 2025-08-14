@@ -87,8 +87,7 @@ class LiveCampaignManager {
    * Initialize available platform targets for rotation
    */
   private initializePlatformTargets(): void {
-    // For now, we focus on Telegraph as our primary platform
-    // This can be expanded to include more platforms later
+    // Multiple publishing platforms for campaign rotation
     this.platformTargets = [
       {
         id: 'telegraph-1',
@@ -99,16 +98,33 @@ class LiveCampaignManager {
         avg_response_time: 2000,
         is_active: true
       },
-      // Future platforms can be added here:
-      // {
-      //   id: 'medium-1',
-      //   domain: 'medium.com',
-      //   name: 'Medium',
-      //   domain_rating: 92,
-      //   success_rate: 80,
-      //   avg_response_time: 3000,
-      //   is_active: false // Not implemented yet
-      // }
+      {
+        id: 'writeas-1',
+        domain: 'write.as',
+        name: 'Write.as',
+        domain_rating: 75,
+        success_rate: 90,
+        avg_response_time: 2500,
+        is_active: true
+      },
+      {
+        id: 'rentry-1',
+        domain: 'rentry.co',
+        name: 'Rentry',
+        domain_rating: 65,
+        success_rate: 85,
+        avg_response_time: 1800,
+        is_active: true
+      },
+      {
+        id: 'justpaste-1',
+        domain: 'justpaste.it',
+        name: 'JustPaste.it',
+        domain_rating: 60,
+        success_rate: 80,
+        avg_response_time: 2200,
+        is_active: true
+      }
     ];
   }
 
