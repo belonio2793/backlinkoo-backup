@@ -124,17 +124,15 @@ class DirectAutomationExecutor {
       const errorMessage = error instanceof Error ? error.message : String(error);
 
       // Improved error logging with safe serialization
-      console.error('❌ Direct automation execution failed:', {
-        errorMessage,
-        errorType: typeof error,
-        errorName: error instanceof Error ? error.name : 'Unknown',
-        execution_time_ms: executionTime,
-        input_summary: {
-          keywords_count: input.keywords.length,
-          anchors_count: input.anchor_texts.length,
-          target_url: input.target_url
-        }
-      });
+      console.error('❌ Direct automation execution failed:',
+        `Error: ${errorMessage}, ` +
+        `Type: ${typeof error}, ` +
+        `Name: ${error instanceof Error ? error.name : 'Unknown'}, ` +
+        `Time: ${executionTime}ms, ` +
+        `Keywords: ${input.keywords.length}, ` +
+        `Anchors: ${input.anchor_texts.length}, ` +
+        `URL: ${input.target_url}`
+      );
 
       // Also log the stack trace separately for debugging
       if (error instanceof Error && error.stack) {
