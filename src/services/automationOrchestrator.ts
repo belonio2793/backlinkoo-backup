@@ -138,7 +138,7 @@ export class AutomationOrchestrator {
       const publishedLinks = [];
       for (const contentRecord of contentRecords) {
         try {
-          const title = this.telegraphService.generateTitleFromContent(campaign.keyword);
+          const title = this.telegraphService.generateTitleFromContent(campaign.keywords[0] || 'SEO');
 
           const publishedPage = await this.telegraphService.publishContent({
             title,
