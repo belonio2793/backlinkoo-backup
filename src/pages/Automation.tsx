@@ -25,6 +25,7 @@ import { useUserFlow, useAuthWithProgress } from '@/contexts/UserFlowContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { automationLogger } from '@/services/automationLogger';
+import { automationEngine, type PublishedArticle } from '@/services/automationEngine';
 import { LoginModal } from '@/components/LoginModal';
 
 interface Campaign {
