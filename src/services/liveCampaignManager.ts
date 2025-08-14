@@ -433,6 +433,29 @@ class LiveCampaignManager {
         userId: campaignData.user_id
       });
 
+      // Log exact data being sent to database
+      internalLogger.debug('campaign_creation', 'Sending data to database', {
+        campaignData: {
+          name: campaignData.name,
+          engine_type: campaignData.engine_type,
+          keywords_debug: {
+            type: Array.isArray(campaignData.keywords) ? 'array' : typeof campaignData.keywords,
+            length: Array.isArray(campaignData.keywords) ? campaignData.keywords.length : 'N/A',
+            content: Array.isArray(campaignData.keywords) ? campaignData.keywords : 'Not an array'
+          },
+          anchor_texts_debug: {
+            type: Array.isArray(campaignData.anchor_texts) ? 'array' : typeof campaignData.anchor_texts,
+            length: Array.isArray(campaignData.anchor_texts) ? campaignData.anchor_texts.length : 'N/A',
+            content: Array.isArray(campaignData.anchor_texts) ? campaignData.anchor_texts : 'Not an array'
+          },
+          other_fields: {
+            target_url: typeof campaignData.target_url,
+            user_id: typeof campaignData.user_id,
+            status: typeof campaignData.status
+          }
+        }
+      });
+
       let { data, error } = await supabase
         .from('automation_campaigns')
         .insert(campaignData)
@@ -451,7 +474,7 @@ class LiveCampaignManager {
       });
 
       if (error) {
-        // Enhanced error logging with more context
+        // Enhanced error logging with more context and serialization safety
         const errorContext = {
           error: {
             message: error.message,
@@ -465,16 +488,38 @@ class LiveCampaignManager {
             keywords_info: {
               type: Array.isArray(campaignData.keywords) ? 'array' : typeof campaignData.keywords,
               length: Array.isArray(campaignData.keywords) ? campaignData.keywords.length : 'N/A',
-              sample: Array.isArray(campaignData.keywords) ? campaignData.keywords.slice(0, 2) : 'N/A'
+              sample: Array.isArray(campaignData.keywords) ? campaignData.keywords.slice(0, 2) : 'N/A',
+              raw_value: campaignData.keywords
             },
             anchor_texts_info: {
               type: Array.isArray(campaignData.anchor_texts) ? 'array' : typeof campaignData.anchor_texts,
               length: Array.isArray(campaignData.anchor_texts) ? campaignData.anchor_texts.length : 'N/A',
-              sample: Array.isArray(campaignData.anchor_texts) ? campaignData.anchor_texts.slice(0, 2) : 'N/A'
+              sample: Array.isArray(campaignData.anchor_texts) ? campaignData.anchor_texts.slice(0, 2) : 'N/A',
+              raw_value: campaignData.anchor_texts
             },
             other_arrays: {
-              target_sites_used: Array.isArray(campaignData.target_sites_used),
-              published_articles: Array.isArray(campaignData.published_articles)
+              target_sites_used: {
+                is_array: Array.isArray(campaignData.target_sites_used),
+                type: typeof campaignData.target_sites_used,
+                value: campaignData.target_sites_used
+              },
+              published_articles: {
+                is_array: Array.isArray(campaignData.published_articles),
+                type: typeof campaignData.published_articles,
+                value: campaignData.published_articles
+              }
+            },
+            all_keys: Object.keys(campaignData)
+          },
+          error_analysis: {
+            is_json_array_error: error.message.includes('expected JSON array'),
+            is_column_error: error.message.includes('column'),
+            is_permission_error: error.message.includes('permission'),
+            error_keywords: {
+              json: error.message.includes('JSON'),
+              array: error.message.includes('array'),
+              column: error.message.includes('column'),
+              constraint: error.message.includes('constraint')
             }
           }
         };
