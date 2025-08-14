@@ -132,7 +132,7 @@ if (import.meta.env.DEV) {
 
   // Add content generation test helper
   (window as any).testContentGeneration = async () => {
-    console.log('🧪 Testing content generation functions...');
+    console.log('��� Testing content generation functions...');
     const functions = ['working-content-generator', 'ai-content-generator', 'generate-content'];
 
     for (const func of functions) {
@@ -192,6 +192,16 @@ if (import.meta.env.DEV) {
       await testClientTelegraphPublisher();
     } catch (error) {
       console.error('❌ Client Telegraph test failed:', error);
+    }
+  };
+
+  // Add full automation pipeline test
+  (window as any).testFullPipeline = async () => {
+    try {
+      const { testFullAutomationPipeline } = await import('./utils/testFullAutomationPipeline');
+      await testFullAutomationPipeline();
+    } catch (error) {
+      console.error('❌ Full pipeline test failed:', error);
     }
   };
 
