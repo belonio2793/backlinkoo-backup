@@ -24,7 +24,7 @@ const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDisc
 const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
 const LazyBlog = lazy(() => import("./pages/Blog"));
 const LazyDashboard = lazy(() => import("./pages/Dashboard"));
-const LazyAutomation = lazy(() => import("./pages/AutomationSimplified"));
+const LazyAutomation = lazy(() => import("./pages/Automation"));
 const LazyLogin = lazy(() => import("./pages/Login"));
 const LazyBeautifulBlogPost = lazy(() => import("./components/BeautifulBlogPost").then(module => ({ default: module.BeautifulBlogPost })));
 const LazyAuthCallback = lazy(() => import("./pages/AuthCallback"));
