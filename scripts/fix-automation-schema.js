@@ -10,8 +10,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configuration using secure credentials
-const SUPABASE_URL = SecureConfig.supabaseUrl;
-const SUPABASE_SERVICE_ROLE_KEY = SecureConfig.supabaseAccessToken;
+const SUPABASE_URL = SecureConfig.SUPABASE_URL;
+const SUPABASE_SERVICE_ROLE_KEY = SecureConfig.SUPABASE_ACCESS_TOKEN;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
     console.error('❌ Missing Supabase configuration:');
