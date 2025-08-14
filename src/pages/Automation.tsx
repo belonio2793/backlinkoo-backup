@@ -30,12 +30,11 @@ import { useUserFlow, useAuthWithProgress } from '@/contexts/UserFlowContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { automationLogger } from '@/services/automationLogger';
-import { targetSitesManager } from '@/services/targetSitesManager';
-import { automationOrchestrator } from '@/services/automationOrchestrator';
-import AutomationTestDashboard from '@/components/automation/AutomationTestDashboard';
+import { liveCampaignManager, type LiveCampaign } from '@/services/liveCampaignManager';
+import { campaignReportingSystem, type PublishedLink, type CampaignReport } from '@/services/campaignReportingSystem';
+import { productionContentTemplate } from '@/services/productionContentTemplate';
 import { LoginModal } from '@/components/LoginModal';
 import { DatabaseInit } from '@/utils/databaseInit';
-import { directAutomationExecutor, DirectExecutionResult } from '@/services/directAutomationExecutor';
 
 interface Campaign {
   id: string;
