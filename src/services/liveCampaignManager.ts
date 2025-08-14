@@ -321,12 +321,23 @@ class LiveCampaignManager {
         execution_progress: data.execution_progress ?? undefined
       };
 
+      internalLogger.info('campaign_creation', 'Campaign object created successfully', {
+        campaignId: campaign.id,
+        campaignName: campaign.name
+      });
+
       this.activeCampaigns.set(campaign.id, campaign);
 
       // Auto-start if requested
       if (params.auto_start) {
+        internalLogger.info('campaign_creation', 'Auto-starting campaign', { campaignId: campaign.id });
         await this.startCampaign(campaign.id);
       }
+
+      internalLogger.info('campaign_creation', 'Campaign creation completed successfully', {
+        campaignId: campaign.id,
+        autoStarted: params.auto_start
+      });
 
       return { success: true, campaign };
     } catch (error) {
@@ -342,7 +353,12 @@ class LiveCampaignManager {
                       'Campaign creation failed with no additional details';
       }
 
-      console.error('Failed to create campaign:', { originalError: error, errorMessage });
+      internalLogger.critical('campaign_creation', 'Campaign creation failed completely', {
+        originalError: error,
+        errorMessage,
+        params,
+        stackTrace: error instanceof Error ? error.stack : undefined
+      });
 
       return {
         success: false,
