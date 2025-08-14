@@ -676,7 +676,7 @@ export default function Automation() {
         toast.error(`Content test failed: ${result.error}`);
       }
     } catch (error) {
-      console.error('��� Content formatting test error:', error);
+      console.error('🧪 Content formatting test error:', error);
       toast.error(`Content test error: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
@@ -1543,9 +1543,28 @@ export default function Automation() {
                     </>
                   )}
                 </Button>
+
+                <Button
+                  onClick={testContentFormatting}
+                  disabled={creating}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {creating ? (
+                    <>
+                      <div className="animate-spin mr-2 h-4 w-4 border-2 border-gray-600 border-t-transparent rounded-full" />
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <Target className="h-4 w-4 mr-2" />
+                      Test Content Formatting
+                    </>
+                  )}
+                </Button>
+
                 <p className="text-sm text-gray-500">
-                  This will test Netlify function availability and run a complete workflow test.
-                  Check the browser console for detailed debugging information.
+                  Test Netlify function availability and run workflow tests. The formatting test specifically checks for proper link generation and Telegraph compatibility. Check the browser console for detailed debugging information.
                 </p>
               </CardContent>
             </Card>
