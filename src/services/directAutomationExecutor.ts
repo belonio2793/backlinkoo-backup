@@ -195,11 +195,11 @@ class DirectAutomationExecutor {
           errorData = { error: response.statusText };
         }
 
-        console.error('Content generation HTTP error:', {
-          status: response.status,
-          statusText: response.statusText,
-          errorData
-        });
+        console.error('Content generation HTTP error:',
+          `Status: ${response.status}, ` +
+          `StatusText: ${response.statusText}, ` +
+          `Error: ${JSON.stringify(errorData)}`
+        );
 
         throw new Error(`Content generation HTTP ${response.status}: ${errorData.error || response.statusText || 'Unknown error'}`);
       }
