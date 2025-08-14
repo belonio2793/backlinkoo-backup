@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Campaign Creation Error</title>
+</head>
+<body>
+    <h1>Campaign Creation Debug</h1>
+    <div id="results"></div>
+    <button onclick="testAPI()">Test API Status</button>
+    <button onclick="testContentGenerator()">Test Content Generator</button>
+    <button onclick="testCampaignCreation()">Test Campaign Creation</button>
+
+    <script>
+        const results = document.getElementById('results');
+        
+        function log(message) {
+            console.log(message);
+            results.innerHTML += '<p>' + JSON.stringify(message) + '</p>';
+        }
+
+        async function testAPI() {
+            try {
+                const response = await fetch('/.netlify/functions/api-status');
+                const data = await response.json();
+                log({step: 'API Status', status: response.status, data});
+            } catch (error) {
+                log({step: 'API Status', error: error.message});
+            }
+        }
+
+        async function testContentGenerator() {
+            try {
+                const response = await fetch('/.netlify/functions/working-content-generator', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        keyword: 'test',
+                        anchor_text: 'test link',
+                        target_url: 'https://example.com'
+                    })
+                });
+                const data = await response.json();
+                log({step: 'Content Generator', status: response.status, success: data.success, data});
+            } catch (error) {
+                log({step: 'Content Generator', error: error.message});
+            }
+        }
+
+        async function testCampaignCreation() {
+            try {
+                // Simulate the campaign creation that's failing
+                const testData = {
+                    keywords: ['test keyword'],
+                    anchor_texts: ['test anchor'],
+                    target_url: 'https://example.com',
+                    user_id: 'test-user-123'
+                };
+                
+                log({step: 'Starting Campaign Creation Test', data: testData});
+                
+                // This will show us the exact error
+                const { liveCampaignManager } = await import('/src/services/liveCampaignManager.ts');
+                
+                const result = await liveCampaignManager.createCampaign({
+                    name: 'Test Campaign',
+                    keywords: testData.keywords,
+                    anchor_texts: testData.anchor_texts,
+                    target_url: testData.target_url,
+                    user_id: testData.user_id,
+                    auto_start: false
+                });
+                
+                log({step: 'Campaign Creation Result', result});
+                
+            } catch (error) {
+                log({step: 'Campaign Creation Error', error: error.message, stack: error.stack});
+            }
+        }
+    </script>
+</body>
+</html>
