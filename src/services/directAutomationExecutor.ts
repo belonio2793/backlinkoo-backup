@@ -288,11 +288,10 @@ class DirectAutomationExecutor {
     }
 
     try {
-      // First, try to find a working content generation function
-      const { ContentGenerationDiagnostic } = await import('../utils/contentGenerationDiagnostic');
-      let functionToUse = ContentGenerationDiagnostic.getWorkingFunction();
+      // Use the guaranteed working content generator first
+      let functionToUse = 'working-content-generator';
 
-      console.log(`🎯 Using content function: ${functionToUse}`);
+      console.log(`🎯 Using reliable content function: ${functionToUse}`);
 
       const response = await fetch(`/.netlify/functions/${functionToUse}`, {
         method: 'POST',
