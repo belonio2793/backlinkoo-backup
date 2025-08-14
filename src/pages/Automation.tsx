@@ -614,18 +614,88 @@ export default function Automation() {
       const functionTest = await directAutomationExecutor.testNetlifyFunctions();
       console.log('🔧 Function availability test:', functionTest);
 
-      // Test with minimal data
+      // Test with minimal data including content formatting
       const result = await directAutomationExecutor.testExecution();
       console.log('🧪 Test execution result:', result);
 
       if (result.success) {
-        toast.success('Test execution successful!');
+        toast.success('Test execution successful! Check browser console for details.');
+
+        // If we have content, check for [object Object] issues
+        if (result.article_content) {
+          const hasObjectError = result.article_content.includes('[object Object]');
+          if (hasObjectError) {
+            console.error('⚠️ Content contains [object Object] - formatting fix may not be working');
+            toast.error('Content formatting issue detected - check console');
+          } else {
+            console.log('✅ Content formatting looks good - no [object Object] found');
+            toast.success('Content formatting verified successfully!');
+          }
+        }
       } else {
         toast.error(`Test failed: ${result.error}`);
       }
     } catch (error) {
       console.error('🧪 Test execution error:', error);
       toast.error(`Test error: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  };
+
+  const testContentFormatting = async () => {
+    console.log('🧪 Testing Telegraph content formatting specifically...');
+
+    try {
+      // Test content generation directly
+      const testInput = {
+        keywords: ['test content', 'link formatting'],
+        anchor_texts: ['test link', 'check this out'],
+        target_url: 'https://example.com/test',
+        user_id: 'test-user'
+      };
+
+      toast.info('Running content formatting test...', { duration: 3000 });
+
+      const result = await directAutomationExecutor.executeWorkflow(testInput);
+
+      if (result.success && result.article_content) {
+        console.log('📄 Generated content:', result.article_content);
+
+        // Check for common formatting issues
+        const hasObjectError = result.article_content.includes('[object Object]');
+        const hasLinks = result.article_content.includes('[') && result.article_content.includes('](');
+
+        console.log('✅ Content Analysis:');
+        console.log(`- Contains [object Object]: ${hasObjectError ? '❌' : '✅'}`);
+        console.log(`- Contains markdown links: ${hasLinks ? '✅' : '❌'}`);
+        console.log(`- Word count: ${result.word_count || 'unknown'}`);
+        console.log(`- Article URL: ${result.article_url || 'none'}`);
+
+        if (!hasObjectError && hasLinks) {
+          toast.success('✅ Content formatting test passed! Check console for details.');
+        } else {
+          toast.error('❌ Content formatting test revealed issues - check console');
+        }
+
+        // Additional info about the execution method
+        if (result.article_url && result.article_url.includes('telegra.ph')) {
+          if (result.debug_info && result.debug_info.execution_method === 'client_side') {
+            toast.info('ℹ️ Used client-side fallback (Netlify functions not available)');
+          } else {
+            toast.success('🌐 Used live Netlify functions');
+          }
+        }
+      } else {
+        console.error('❌ Test failed:', result.error);
+        toast.error(`Content test failed: ${result.error}`);
+
+        // Check if it's a 404 error
+        if (result.error && result.error.includes('404')) {
+          toast.info('ℹ️ 404 errors are normal in development - functions will work in production');
+        }
+      }
+    } catch (error) {
+      console.error('🧪 Content formatting test error:', error);
+      toast.error(`Content test error: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -1491,10 +1561,43 @@ export default function Automation() {
                     </>
                   )}
                 </Button>
-                <p className="text-sm text-gray-500">
-                  This will test Netlify function availability and run a complete workflow test.
-                  Check the browser console for detailed debugging information.
-                </p>
+
+                <Button
+                  onClick={testContentFormatting}
+                  disabled={creating}
+                  variant="outline"
+                  className="w-full"
+                >
+                  {creating ? (
+                    <>
+                      <div className="animate-spin mr-2 h-4 w-4 border-2 border-gray-600 border-t-transparent rounded-full" />
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <Target className="h-4 w-4 mr-2" />
+                      Test Content Formatting
+                    </>
+                  )}
+                </Button>
+
+                <div className="text-sm text-gray-500 space-y-2">
+                  <p>
+                    Test Netlify function availability and run workflow tests. The formatting test specifically checks for proper link generation and Telegraph compatibility. Check the browser console for detailed debugging information.
+                  </p>
+
+                  {typeof window !== 'undefined' && window.location.hostname === 'localhost' && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-blue-800">
+                      <div className="flex items-center gap-2 text-sm">
+                        <AlertCircle className="h-4 w-4" />
+                        <span className="font-medium">Development Mode Notice</span>
+                      </div>
+                      <p className="text-xs mt-1">
+                        404 errors for Netlify functions are normal in development. The system will automatically use client-side fallbacks. All functions work properly in production.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
 

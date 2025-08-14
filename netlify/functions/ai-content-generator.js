@@ -672,23 +672,26 @@ function integrateLinkNaturally(content, anchorText, targetUrl) {
   // Find a natural place to integrate the link
   const sentences = content.split('. ');
   const targetSentenceIndex = Math.floor(sentences.length * 0.3); // Place link in first third
-  
-  // Create natural link integration
-  const linkText = `For more detailed information, check out this comprehensive resource on ${anchorText}`;
+
+  // Create natural link integration using markdown format
+  const linkMarkdown = `[${anchorText}](${targetUrl})`;
+  const linkText = `For more detailed information, check out this comprehensive resource on ${linkMarkdown}`;
   const modifiedSentence = sentences[targetSentenceIndex] + `. ${linkText}.`;
-  
+
   sentences[targetSentenceIndex] = modifiedSentence;
   const modifiedContent = sentences.join('. ');
-  
+
   // Calculate character position
   const position = modifiedContent.indexOf(linkText);
-  
+
   return {
     content: modifiedContent,
     placement: {
       method: 'inline_mention',
       context: 'Natural reference within relevant content section',
-      position
+      position,
+      anchor_text: anchorText,
+      target_url: targetUrl
     }
   };
 }

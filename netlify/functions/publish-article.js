@@ -320,29 +320,56 @@ function convertMarkdownToTelegraph(markdown) {
 
     // Headers
     if (trimmedLine.startsWith('##')) {
+      const headerText = trimmedLine.replace(/^#+\s*/, '');
+      const parsedContent = parseInlineMarkdown(headerText);
+
       telegraphContent.push({
         tag: 'h3',
-        children: [parseInlineMarkdown(trimmedLine.replace(/^#+\s*/, ''))]
+        children: Array.isArray(parsedContent) ? parsedContent : [parsedContent]
       });
     } else if (trimmedLine.startsWith('#')) {
+      const headerText = trimmedLine.replace(/^#+\s*/, '');
+      const parsedContent = parseInlineMarkdown(headerText);
+
       telegraphContent.push({
         tag: 'h3',
-        children: [parseInlineMarkdown(trimmedLine.replace(/^#+\s*/, ''))]
+        children: Array.isArray(parsedContent) ? parsedContent : [parsedContent]
       });
     }
     // Lists
     else if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ')) {
+      const listText = trimmedLine.replace(/^[-*]\s*/, '');
+      const parsedContent = parseInlineMarkdown(listText);
+
+      let children = ['• '];
+      if (Array.isArray(parsedContent)) {
+        children.push(...parsedContent);
+      } else {
+        children.push(parsedContent);
+      }
+
       telegraphContent.push({
         tag: 'p',
-        children: ['• ' + parseInlineMarkdown(trimmedLine.replace(/^[-*]\s*/, ''))]
+        children: children
       });
     }
     // Regular paragraphs
     else {
       const parsedContent = parseInlineMarkdown(trimmedLine);
+
+      // Ensure children is always an array of valid Telegraph nodes
+      let children;
+      if (Array.isArray(parsedContent)) {
+        children = parsedContent.filter(item => item !== null && item !== undefined);
+      } else if (parsedContent !== null && parsedContent !== undefined) {
+        children = [parsedContent];
+      } else {
+        children = [trimmedLine]; // fallback to original text
+      }
+
       telegraphContent.push({
         tag: 'p',
-        children: Array.isArray(parsedContent) ? parsedContent : [parsedContent]
+        children: children
       });
     }
   }
@@ -356,78 +383,109 @@ function convertMarkdownToTelegraph(markdown) {
 function parseInlineMarkdown(text) {
   // Handle links [text](url)
   const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-  
-  if (linkRegex.test(text)) {
-    const parts = [];
-    let lastIndex = 0;
-    
-    text.replace(linkRegex, (match, linkText, url, index) => {
-      // Add text before link
-      if (index > lastIndex) {
-        const beforeText = text.substring(lastIndex, index);
-        if (beforeText) {
-          parts.push(parseTextFormatting(beforeText));
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+
+  // Use exec instead of test + replace to avoid regex position issues
+  while ((match = linkRegex.exec(text)) !== null) {
+    const [fullMatch, linkText, url] = match;
+    const index = match.index;
+
+    // Add text before link
+    if (index > lastIndex) {
+      const beforeText = text.substring(lastIndex, index);
+      if (beforeText.trim()) {
+        const formatted = parseTextFormatting(beforeText);
+        if (typeof formatted === 'string') {
+          parts.push(formatted);
+        } else if (Array.isArray(formatted)) {
+          parts.push(...formatted);
+        } else {
+          parts.push(formatted);
         }
       }
-      
-      // Add link
-      parts.push({
-        tag: 'a',
-        attrs: { href: url },
-        children: [linkText]
-      });
-      
-      lastIndex = index + match.length;
-      return match;
+    }
+
+    // Add link
+    parts.push({
+      tag: 'a',
+      attrs: { href: url },
+      children: [linkText]
     });
-    
-    // Add remaining text
-    if (lastIndex < text.length) {
-      const remainingText = text.substring(lastIndex);
-      if (remainingText) {
-        parts.push(parseTextFormatting(remainingText));
+
+    lastIndex = index + fullMatch.length;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    const remainingText = text.substring(lastIndex);
+    if (remainingText.trim()) {
+      const formatted = parseTextFormatting(remainingText);
+      if (typeof formatted === 'string') {
+        parts.push(formatted);
+      } else if (Array.isArray(formatted)) {
+        parts.push(...formatted);
+      } else {
+        parts.push(formatted);
       }
     }
-    
-    return parts.length === 1 ? parts[0] : parts;
   }
-  
-  return parseTextFormatting(text);
+
+  // If no links were found, parse for other formatting
+  if (parts.length === 0) {
+    return parseTextFormatting(text);
+  }
+
+  return parts;
 }
 
 /**
  * Parse text formatting (bold, italic)
  */
 function parseTextFormatting(text) {
+  if (!text || typeof text !== 'string') {
+    return text || '';
+  }
+
   // Handle bold **text**
   if (text.includes('**')) {
     const parts = [];
     const boldRegex = /\*\*([^*]+)\*\*/g;
     let lastIndex = 0;
-    
-    text.replace(boldRegex, (match, boldText, index) => {
+    let match;
+
+    while ((match = boldRegex.exec(text)) !== null) {
+      const [fullMatch, boldText] = match;
+      const index = match.index;
+
       // Add text before bold
       if (index > lastIndex) {
-        parts.push(text.substring(lastIndex, index));
+        const beforeText = text.substring(lastIndex, index);
+        if (beforeText) {
+          parts.push(beforeText);
+        }
       }
-      
+
       // Add bold text
       parts.push({
         tag: 'strong',
         children: [boldText]
       });
-      
-      lastIndex = index + match.length;
-      return match;
-    });
-    
+
+      lastIndex = index + fullMatch.length;
+    }
+
     // Add remaining text
     if (lastIndex < text.length) {
-      parts.push(text.substring(lastIndex));
+      const remainingText = text.substring(lastIndex);
+      if (remainingText) {
+        parts.push(remainingText);
+      }
     }
-    
-    return parts.length === 1 ? parts[0] : parts;
+
+    return parts.length === 0 ? text : (parts.length === 1 ? parts[0] : parts);
   }
-  
+
   return text;
 }

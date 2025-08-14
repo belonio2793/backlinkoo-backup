@@ -51,14 +51,23 @@ class DirectAutomationExecutor {
    */
   private async checkNetlifyFunctionsAvailable(): Promise<boolean> {
     try {
-      // Quick test of a simple function
+      // Quick test of a simple function with shorter timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+
       const response = await fetch('/.netlify/functions/api-status', {
-        method: 'GET'
+        method: 'GET',
+        signal: controller.signal
       });
 
-      return response.status !== 404;
+      clearTimeout(timeoutId);
+
+      const isAvailable = response.status !== 404;
+      console.log(`🔍 Netlify functions availability: ${isAvailable ? 'Available' : 'Not available'} (status: ${response.status})`);
+
+      return isAvailable;
     } catch (error) {
-      console.log('🔍 Netlify functions check failed:', error);
+      console.log('🔍 Netlify functions check failed - assuming not available:', error.message);
       return false;
     }
   }
@@ -116,15 +125,17 @@ class DirectAutomationExecutor {
       });
 
       // Step 2: Generate content (check if Netlify functions are available)
-      let useMockServices = false;
-
-      // Quick check if Netlify functions are available
+      console.log('🔍 Checking Netlify functions availability...');
       const isNetlifyAvailable = await this.checkNetlifyFunctionsAvailable();
 
+      let useMockServices = !isNetlifyAvailable;
+
       if (!isNetlifyAvailable) {
-        console.log('🔧 Netlify functions not available, using client-side generation');
+        console.log('⚠️ Netlify functions not available (404 errors) - using client-side services');
         useMockServices = true;
       } else {
+        console.log('✅ Netlify functions are available');
+
         // Check production mode override
         const { ProductionModeForcer } = await import('../utils/forceProductionMode');
         const shouldForceLive = ProductionModeForcer.shouldUseLiveTelegraph();
@@ -348,50 +359,9 @@ class DirectAutomationExecutor {
           `Error: ${JSON.stringify(errorData)}`
         );
 
-        // Special handling for 404 - try backup functions
+        // Special handling for 404 - functions not available, immediate fallback
         if (response.status === 404) {
-          console.log('🔄 Primary function not found, trying alternatives...');
-
-          const backupFunctions = ['ai-content-generator', 'generate-content', 'generate-openai'];
-
-          for (const backupFunc of backupFunctions) {
-            try {
-              console.log(`🎯 Trying backup function: ${backupFunc}`);
-
-              const backupResponse = await fetch(`/.netlify/functions/${backupFunc}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  keyword: params.keyword,
-                  anchor_text: params.anchor_text,
-                  target_url: params.target_url,
-                  word_count: 800,
-                  tone: 'professional',
-                  user_id: params.user_id
-                }),
-              });
-
-              if (backupResponse.ok) {
-                const backupData = await backupResponse.json();
-                if (backupData.success) {
-                  console.log(`✅ Backup function ${backupFunc} worked!`);
-                  return {
-                    success: true,
-                    title: backupData.data?.title || backupData.title || `Article about ${params.keyword}`,
-                    content: backupData.data?.content || backupData.content || 'Content generated successfully.',
-                    word_count: backupData.data?.word_count || 800,
-                    generation_time_ms: Date.now() - startTime
-                  };
-                }
-              }
-            } catch (backupError) {
-              console.warn(`Backup function ${backupFunc} failed:`, backupError.message);
-              continue;
-            }
-          }
-
-          // Final fallback: Use client-side content generation
-          console.log('🔧 All Netlify functions failed, using client-side content generation...');
+          console.log('❌ Netlify functions not available (404) - switching to client-side generation');
 
           try {
             const { ClientContentGenerator } = await import('./clientContentGenerator');
@@ -545,7 +515,7 @@ class DirectAutomationExecutor {
 
         // Special handling for 404 - function doesn't exist, use client-side fallback
         if (response.status === 404) {
-          console.log('🔄 Publishing function not found, using client-side Telegraph fallback...');
+          console.log('❌ Publishing function not available (404) - switching to client-side Telegraph...');
 
           try {
             const { ClientTelegraphPublisher } = await import('./clientTelegraphPublisher');

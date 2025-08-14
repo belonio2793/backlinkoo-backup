@@ -248,6 +248,10 @@ function convertToTelegraphFormat(content) {
 }
 
 function processLinksInText(text) {
+  if (!text || typeof text !== 'string') {
+    return [text || ''];
+  }
+
   // Simple link detection and conversion
   const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
   const parts = [];
@@ -257,9 +261,12 @@ function processLinksInText(text) {
   while ((match = linkRegex.exec(text)) !== null) {
     // Add text before the link
     if (match.index > lastIndex) {
-      parts.push(text.substring(lastIndex, match.index));
+      const beforeText = text.substring(lastIndex, match.index);
+      if (beforeText.trim()) {
+        parts.push(beforeText);
+      }
     }
-    
+
     // Add the link
     parts.push({
       tag: 'a',
@@ -269,15 +276,18 @@ function processLinksInText(text) {
       },
       children: [match[1]]
     });
-    
+
     lastIndex = match.index + match[0].length;
   }
-  
+
   // Add remaining text
   if (lastIndex < text.length) {
-    parts.push(text.substring(lastIndex));
+    const remainingText = text.substring(lastIndex);
+    if (remainingText.trim()) {
+      parts.push(remainingText);
+    }
   }
-  
-  // If no links were found, return the original text
+
+  // If no links were found, return the original text as array
   return parts.length === 0 ? [text] : parts;
 }
