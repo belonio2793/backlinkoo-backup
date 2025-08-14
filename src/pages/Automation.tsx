@@ -293,6 +293,96 @@ export default function Automation() {
     return `${shortKeywords} → ${domain} (${timestamp})`;
   };
 
+  // Execute automation - the core link building function
+  const executeAutomation = async () => {
+    const hasAuth = requireAuth(
+      'automation execution',
+      formData.keywords || formData.anchor_texts || formData.target_url ? formData : undefined,
+      false
+    );
+
+    if (!hasAuth) return;
+
+    if (!user || !user.id) {
+      toast.error('Authentication error. Please sign in again.');
+      return;
+    }
+
+    if (!formData.keywords || !formData.anchor_texts || !formData.target_url) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setExecuting(true);
+    setExecutionProgress('Starting automation...');
+
+    try {
+      const keywordsArray = formData.keywords.split(',').map(k => k.trim()).filter(k => k);
+      const anchorTextsArray = formData.anchor_texts.split(',').map(a => a.trim()).filter(a => a);
+
+      if (keywordsArray.length === 0) {
+        toast.error('Please provide at least one valid keyword');
+        return;
+      }
+
+      if (anchorTextsArray.length === 0) {
+        toast.error('Please provide at least one valid anchor text');
+        return;
+      }
+
+      const automationRequest = {
+        target_url: formData.target_url,
+        keywords: keywordsArray,
+        anchor_texts: anchorTextsArray,
+        user_id: user.id
+      };
+
+      setExecutionProgress('Generating content with ChatGPT...');
+
+      console.log('🚀 Starting automation with request:', automationRequest);
+
+      // Execute the automation engine
+      const result = await automationEngine.executeAutomation(automationRequest);
+
+      if (result.success) {
+        // Add new articles to the list
+        setPublishedArticles(prev => [...result.articles, ...prev]);
+
+        // Update analytics
+        setAnalytics(prev => ({
+          ...prev,
+          total_links: prev.total_links + result.articles.length,
+          total_word_count: prev.total_word_count + result.articles.reduce((sum, article) => sum + article.word_count, 0)
+        }));
+
+        // Clear form
+        setFormData({ keywords: '', anchor_texts: '', target_url: '' });
+
+        toast.success(`🎉 Automation completed! ${result.articles.length} article(s) published successfully.`);
+
+        setExecutionProgress('Completed successfully!');
+
+        // Switch to reporting tab to show results
+        setTimeout(() => {
+          document.querySelector('[value="reporting"]')?.click();
+        }, 2000);
+
+      } else {
+        throw new Error(result.error || 'Automation failed');
+      }
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      automationLogger.error('automation', 'Failed to execute automation', { errorMessage }, undefined, error as Error);
+      toast.error(`Automation failed: ${errorMessage}`);
+      setExecutionProgress('Failed');
+    } finally {
+      setExecuting(false);
+      // Clear progress after delay
+      setTimeout(() => setExecutionProgress(''), 3000);
+    }
+  };
+
   // Create campaign
   const createCampaign = async () => {
     const hasAuth = requireAuth(
