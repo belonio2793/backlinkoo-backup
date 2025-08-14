@@ -1247,10 +1247,10 @@ export default function Automation() {
               <CardContent className="space-y-4">
                 <Button
                   onClick={testDirectExecution}
-                  disabled={directExecuting}
+                  disabled={creating}
                   className="w-full"
                 >
-                  {directExecuting ? (
+                  {creating ? (
                     <>
                       <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
                       Testing...
