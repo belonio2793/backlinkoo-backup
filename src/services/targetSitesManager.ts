@@ -123,9 +123,10 @@ class TargetSitesManager {
     // 2. Return live URLs
     // 3. Work without complex authentication
     automationLogger.info('system', 'Loading filtered working sites only');
+    // ONLY platforms with confirmed working APIs that can post immediately and return URLs
     return [
       {
-        id: 'telegraph',
+        id: 'telegraph-verified',
         domain: 'telegra.ph',
         url: 'https://telegra.ph',
         type: 'blog',
@@ -141,133 +142,20 @@ class TargetSitesManager {
           registration_required: false
         },
         metadata: {
-          submission_guidelines: 'Anonymous instant publishing platform',
+          submission_guidelines: 'Anonymous instant publishing platform - VERIFIED WORKING API',
           response_time_hours: 0,
-          notes: 'Instant publishing via API - perfect for automation'
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: 'default-1',
-        domain: 'medium.com',
-        url: 'https://medium.com',
-        type: 'blog',
-        status: 'active',
-        domain_rating: 96,
-        success_rate: 85,
-        total_attempts: 0,
-        successful_submissions: 0,
-        requirements: {
-          min_word_count: 300,
-          topics: ['technology', 'business', 'marketing'],
-          approval_process: false,
-          registration_required: true
-        },
-        metadata: {
-          submission_guidelines: 'Submit via Medium Partner Program',
-          response_time_hours: 24,
-          notes: 'High-quality content required'
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: 'default-2',
-        domain: 'dev.to',
-        url: 'https://dev.to',
-        type: 'blog',
-        status: 'active',
-        domain_rating: 89,
-        success_rate: 90,
-        total_attempts: 0,
-        successful_submissions: 0,
-        requirements: {
-          min_word_count: 250,
-          topics: ['programming', 'web development', 'technology'],
-          approval_process: false,
-          registration_required: true
-        },
-        metadata: {
-          submission_guidelines: 'Tech-focused content only',
-          response_time_hours: 2,
-          notes: 'Developer community'
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: 'default-3',
-        domain: 'hashnode.com',
-        url: 'https://hashnode.com',
-        type: 'blog',
-        status: 'active',
-        domain_rating: 82,
-        success_rate: 88,
-        total_attempts: 0,
-        successful_submissions: 0,
-        requirements: {
-          min_word_count: 400,
-          topics: ['blockchain', 'web3', 'programming'],
-          approval_process: false,
-          registration_required: true
-        },
-        metadata: {
-          submission_guidelines: 'Developer-focused content',
-          response_time_hours: 4,
-          notes: 'Blockchain and web dev community'
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: 'default-4',
-        domain: 'substack.com',
-        url: 'https://substack.com',
-        type: 'blog',
-        status: 'active',
-        domain_rating: 91,
-        success_rate: 75,
-        total_attempts: 0,
-        successful_submissions: 0,
-        requirements: {
-          min_word_count: 500,
-          topics: ['business', 'finance', 'politics', 'culture'],
-          approval_process: true,
-          registration_required: true
-        },
-        metadata: {
-          submission_guidelines: 'Newsletter-style content',
-          response_time_hours: 72,
-          notes: 'Requires newsletter format'
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: 'default-5',
-        domain: 'hackernoon.com',
-        url: 'https://hackernoon.com',
-        type: 'blog',
-        status: 'active',
-        domain_rating: 84,
-        success_rate: 70,
-        total_attempts: 0,
-        successful_submissions: 0,
-        requirements: {
-          min_word_count: 600,
-          topics: ['technology', 'startups', 'programming'],
-          approval_process: true,
-          registration_required: true
-        },
-        metadata: {
-          submission_guidelines: 'Submit via their contributor program',
-          response_time_hours: 120,
-          notes: 'Editorial review required'
+          notes: 'Confirmed: Instant publishing via Telegraph API, returns live URLs immediately'
         },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }
+      // NOTE: All other platforms removed due to:
+      // - Medium: Requires OAuth setup and user authentication
+      // - Dev.to: Requires API key and user account setup
+      // - Hashnode: Requires GraphQL API setup and publication
+      // - Substack: No public API for external posting
+      // - HackerNoon: Manual submission only, no API
+      // Only platforms with working APIs that can post immediately are kept
     ];
   }
 
