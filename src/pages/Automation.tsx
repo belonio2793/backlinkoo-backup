@@ -1247,6 +1247,41 @@ export default function Automation() {
 
           {/* System Testing Tab */}
           <TabsContent value="testing" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Direct Execution Testing
+                </CardTitle>
+                <CardDescription>
+                  Test the direct automation workflow to debug any issues
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button
+                  onClick={testDirectExecution}
+                  disabled={directExecuting}
+                  className="w-full"
+                >
+                  {directExecuting ? (
+                    <>
+                      <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4 mr-2" />
+                      Test Direct Execution
+                    </>
+                  )}
+                </Button>
+                <p className="text-sm text-gray-500">
+                  This will test Netlify function availability and run a complete workflow test.
+                  Check the browser console for detailed debugging information.
+                </p>
+              </CardContent>
+            </Card>
+
             <AutomationTestDashboard />
           </TabsContent>
         </Tabs>
