@@ -126,9 +126,11 @@ export class AutomationOrchestrator {
           .from('automation_content')
           .insert({
             campaign_id: campaignId,
-            prompt_type: content.type,
+            title: `Generated ${content.type}`,
             content: content.content,
-            word_count: content.wordCount
+            target_keyword: campaign.keywords[0] || '',
+            anchor_text: campaign.anchor_texts[0] || '',
+            backlink_url: campaign.target_url
           })
           .select()
           .single();
