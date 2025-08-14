@@ -166,6 +166,14 @@ const App = () => (
               }
             />
             <Route
+              path="/fetch-test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <FetchTest />
+                </Suspense>
+              }
+            />
+            <Route
               path="/automation/old"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
