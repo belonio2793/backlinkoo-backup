@@ -15,17 +15,22 @@ export function protectFetch() {
   try {
     // Store original fetch immediately on page load
     originalFetch = window.fetch.bind(window);
-    
+
+    // Store backup for emergency restoration
+    (window as any).__ORIGINAL_FETCH__ = window.fetch.bind(window);
+
     // Create a clean iframe to get unmodified fetch
     const iframe = document.createElement('iframe');
     iframe.style.display = 'none';
     iframe.src = 'about:blank';
     document.body.appendChild(iframe);
-    
+
     if (iframe.contentWindow?.fetch) {
       originalFetch = iframe.contentWindow.fetch.bind(iframe.contentWindow);
+      // Update backup with clean version
+      (window as any).__ORIGINAL_FETCH__ = iframe.contentWindow.fetch.bind(iframe.contentWindow);
     }
-    
+
     document.body.removeChild(iframe);
     isProtected = true;
     

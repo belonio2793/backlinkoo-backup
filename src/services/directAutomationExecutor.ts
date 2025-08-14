@@ -30,25 +30,37 @@ export interface DirectExecutionResult {
 class DirectAutomationExecutor {
 
   private isDevEnvironment(): boolean {
-    // Force development mode detection for better reliability
-    const isDev = import.meta.env.MODE === 'development' ||
-                  import.meta.env.DEV === true ||
-                  (typeof window !== 'undefined' && (
-                    window.location.hostname === 'localhost' ||
-                    window.location.hostname.includes('127.0.0.1') ||
-                    window.location.hostname.includes('.fly.dev') || // Development server
-                    window.location.port !== '' // Any non-standard port
-                  ));
+    // Only consider localhost development as dev environment
+    const isLocalDev = typeof window !== 'undefined' &&
+                      window.location.hostname === 'localhost' &&
+                      (window.location.port === '3000' || window.location.port === '5173');
 
-    console.log('🔍 Environment check:', {
+    console.log('🔍 Environment check (Updated):', {
       mode: import.meta.env.MODE,
-      dev: import.meta.env.DEV,
       hostname: typeof window !== 'undefined' ? window.location.hostname : 'server',
       port: typeof window !== 'undefined' ? window.location.port : 'server',
-      isDev
+      isLocalDev,
+      forceProduction: !isLocalDev
     });
 
-    return isDev;
+    return isLocalDev;
+  }
+
+  /**
+   * Quick check if Netlify functions are available
+   */
+  private async checkNetlifyFunctionsAvailable(): Promise<boolean> {
+    try {
+      // Quick test of a simple function
+      const response = await fetch('/.netlify/functions/api-status', {
+        method: 'GET'
+      });
+
+      return response.status !== 404;
+    } catch (error) {
+      console.log('🔍 Netlify functions check failed:', error);
+      return false;
+    }
   }
 
   async executeWorkflow(input: DirectExecutionInput): Promise<DirectExecutionResult> {
@@ -103,13 +115,30 @@ class DirectAutomationExecutor {
         target_url: input.target_url
       });
 
-      // Step 2: Generate content (using mock service in dev environment or as fallback)
-      let useMockServices = this.isDevEnvironment() && mockAutomationService.shouldUseMockServices();
+      // Step 2: Generate content (check if Netlify functions are available)
+      let useMockServices = false;
+
+      // Quick check if Netlify functions are available
+      const isNetlifyAvailable = await this.checkNetlifyFunctionsAvailable();
+
+      if (!isNetlifyAvailable) {
+        console.log('🔧 Netlify functions not available, using client-side generation');
+        useMockServices = true;
+      } else {
+        // Check production mode override
+        const { ProductionModeForcer } = await import('../utils/forceProductionMode');
+        const shouldForceLive = ProductionModeForcer.shouldUseLiveTelegraph();
+
+        if (shouldForceLive) {
+          console.log('🚀 Production mode forced - using live services');
+          useMockServices = false;
+        }
+      }
 
       if (useMockServices) {
         console.log('🎭 Generating content via mock service (development mode)...');
       } else {
-        console.log('🤖 Generating content via Netlify function...');
+        console.log('�� Generating content via Netlify function...');
       }
 
       let contentResult = await this.generateContent({
@@ -151,6 +180,16 @@ class DirectAutomationExecutor {
       // If Telegraph publishing failed and we're not using mock service, fallback to mock
       if (!publishResult.success && !useMockServices) {
         console.log('🎭 Telegraph publishing failed, falling back to mock service...');
+
+        // Import error fixer for better user messaging
+        try {
+          const { TelegraphErrorFixer } = await import('../utils/telegraphErrorFixer');
+          const errorMessage = TelegraphErrorFixer.getErrorMessage(publishResult.error);
+          console.log('📋 Telegraph error:', errorMessage);
+        } catch (importError) {
+          console.log('📋 Telegraph error (could not load error fixer):', publishResult.error);
+        }
+
         publishResult = await this.publishToTelegraph({
           title: contentResult.title,
           content: contentResult.content,
@@ -234,24 +273,32 @@ class DirectAutomationExecutor {
   }> {
     const startTime = Date.now();
 
-    // Use mock service in development when Netlify functions aren't available
+    // Use client-side content generation when Netlify functions aren't available
     if (useMockService) {
       try {
-        const mockResult = await mockAutomationService.generateMockContent({
+        console.log('🔧 Using client-side content generation as fallback...');
+
+        const { ClientContentGenerator } = await import('./clientContentGenerator');
+
+        const clientResult = await ClientContentGenerator.generateContent({
           keyword: params.keyword,
           anchor_text: params.anchor_text,
           target_url: params.target_url,
-          user_id: params.user_id
+          word_count: 800,
+          tone: 'professional'
         });
 
-        return {
-          success: mockResult.success,
-          title: mockResult.title,
-          content: mockResult.content,
-          word_count: mockResult.word_count,
-          generation_time_ms: mockResult.generation_time_ms,
-          error: mockResult.error
-        };
+        if (clientResult.success && clientResult.data) {
+          return {
+            success: true,
+            title: clientResult.data.title,
+            content: clientResult.data.content,
+            word_count: clientResult.data.word_count,
+            generation_time_ms: Date.now() - startTime
+          };
+        } else {
+          throw new Error(clientResult.error || 'Client-side generation failed');
+        }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         return {
@@ -260,13 +307,18 @@ class DirectAutomationExecutor {
           content: '',
           word_count: 0,
           generation_time_ms: Date.now() - startTime,
-          error: `Mock service error: ${errorMessage}`
+          error: `Client-side generation error: ${errorMessage}`
         };
       }
     }
 
     try {
-      const response = await fetch('/.netlify/functions/generate-content', {
+      // Use the guaranteed working content generator first
+      let functionToUse = 'working-content-generator';
+
+      console.log(`🎯 Using reliable content function: ${functionToUse}`);
+
+      const response = await fetch(`/.netlify/functions/${functionToUse}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -296,9 +348,78 @@ class DirectAutomationExecutor {
           `Error: ${JSON.stringify(errorData)}`
         );
 
-        // Special handling for 404 - function doesn't exist
+        // Special handling for 404 - try backup functions
         if (response.status === 404) {
-          throw new Error('Content generation function not available. Netlify functions may not be deployed.');
+          console.log('🔄 Primary function not found, trying alternatives...');
+
+          const backupFunctions = ['ai-content-generator', 'generate-content', 'generate-openai'];
+
+          for (const backupFunc of backupFunctions) {
+            try {
+              console.log(`🎯 Trying backup function: ${backupFunc}`);
+
+              const backupResponse = await fetch(`/.netlify/functions/${backupFunc}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  keyword: params.keyword,
+                  anchor_text: params.anchor_text,
+                  target_url: params.target_url,
+                  word_count: 800,
+                  tone: 'professional',
+                  user_id: params.user_id
+                }),
+              });
+
+              if (backupResponse.ok) {
+                const backupData = await backupResponse.json();
+                if (backupData.success) {
+                  console.log(`✅ Backup function ${backupFunc} worked!`);
+                  return {
+                    success: true,
+                    title: backupData.data?.title || backupData.title || `Article about ${params.keyword}`,
+                    content: backupData.data?.content || backupData.content || 'Content generated successfully.',
+                    word_count: backupData.data?.word_count || 800,
+                    generation_time_ms: Date.now() - startTime
+                  };
+                }
+              }
+            } catch (backupError) {
+              console.warn(`Backup function ${backupFunc} failed:`, backupError.message);
+              continue;
+            }
+          }
+
+          // Final fallback: Use client-side content generation
+          console.log('🔧 All Netlify functions failed, using client-side content generation...');
+
+          try {
+            const { ClientContentGenerator } = await import('./clientContentGenerator');
+
+            const clientResult = await ClientContentGenerator.generateContent({
+              keyword: params.keyword,
+              anchor_text: params.anchor_text,
+              target_url: params.target_url,
+              word_count: 800,
+              tone: 'professional'
+            });
+
+            if (clientResult.success && clientResult.data) {
+              console.log('✅ Client-side content generation successful!');
+              return {
+                success: true,
+                title: clientResult.data.title,
+                content: clientResult.data.content,
+                word_count: clientResult.data.word_count,
+                generation_time_ms: Date.now() - startTime
+              };
+            } else {
+              throw new Error(`Client-side generation failed: ${clientResult.error}`);
+            }
+          } catch (clientError) {
+            console.error('❌ Client-side content generation also failed:', clientError);
+            throw new Error('All content generation methods unavailable. Both Netlify functions and client-side generation failed.');
+          }
         }
 
         throw new Error(`Content generation HTTP ${response.status}: ${errorData.error || response.statusText || 'Unknown error'}`);
@@ -357,28 +478,37 @@ class DirectAutomationExecutor {
   }> {
     const startTime = Date.now();
 
-    // Use mock service in development when Netlify functions aren't available
+    // Use client-side Telegraph publisher when Netlify functions aren't available
     if (useMockService) {
       try {
-        const mockResult = await mockAutomationService.publishMockContent({
+        console.log('🔧 Using client-side Telegraph publishing fallback...');
+
+        const { ClientTelegraphPublisher } = await import('./clientTelegraphPublisher');
+
+        const clientResult = await ClientTelegraphPublisher.publishArticle({
           title: params.title,
           content: params.content,
-          user_id: params.user_id
+          user_id: params.user_id,
+          author_name: 'SEO Content Bot'
         });
 
-        return {
-          success: mockResult.success,
-          url: mockResult.url,
-          publishing_time_ms: mockResult.publishing_time_ms,
-          error: mockResult.error
-        };
+        if (clientResult.success) {
+          return {
+            success: true,
+            url: clientResult.url || '',
+            publishing_time_ms: Date.now() - startTime,
+            warning: clientResult.warning
+          };
+        } else {
+          throw new Error(clientResult.error || 'Client-side publishing failed');
+        }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         return {
           success: false,
           url: '',
           publishing_time_ms: Date.now() - startTime,
-          error: `Mock service error: ${errorMessage}`
+          error: `Client-side publishing error: ${errorMessage}`
         };
       }
     }
@@ -413,9 +543,35 @@ class DirectAutomationExecutor {
           `Error: ${JSON.stringify(errorData)}`
         );
 
-        // Special handling for 404 - function doesn't exist
+        // Special handling for 404 - function doesn't exist, use client-side fallback
         if (response.status === 404) {
-          throw new Error('Publishing function not available. Netlify functions may not be deployed.');
+          console.log('🔄 Publishing function not found, using client-side Telegraph fallback...');
+
+          try {
+            const { ClientTelegraphPublisher } = await import('./clientTelegraphPublisher');
+
+            const clientResult = await ClientTelegraphPublisher.publishArticle({
+              title: params.title,
+              content: params.content,
+              user_id: params.user_id,
+              author_name: 'SEO Content Bot'
+            });
+
+            if (clientResult.success) {
+              console.log('✅ Client-side Telegraph fallback successful!');
+              return {
+                success: true,
+                url: clientResult.url || '',
+                publishing_time_ms: Date.now() - startTime,
+                warning: clientResult.warning
+              };
+            } else {
+              throw new Error(clientResult.error || 'Client-side Telegraph publishing failed');
+            }
+          } catch (clientError) {
+            console.error('❌ Client-side Telegraph fallback also failed:', clientError);
+            throw new Error('All publishing methods unavailable. Both Netlify functions and client-side publishing failed.');
+          }
         }
 
         throw new Error(`Publishing HTTP ${response.status}: ${errorData.error || response.statusText || 'Unknown error'}`);

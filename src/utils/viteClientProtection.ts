@@ -25,6 +25,12 @@ export function protectViteClient(): void {
     return;
   }
 
+  // Emergency disable if FullStory is not even present
+  if (!isFullStoryPresent()) {
+    console.log('🔧 Vite protection disabled - FullStory not detected');
+    return;
+  }
+
   try {
     // Store original fetch before any modifications
     originalFetch = window.fetch.bind(window);
@@ -69,40 +75,30 @@ export function protectViteClient(): void {
  * Check if a request is from Vite client
  */
 function isViteClientRequest(url: string, init?: RequestInit): boolean {
-  // Exclude Supabase and other external API requests
+  // NEVER interfere with Supabase, Netlify, or any external API requests
   if (url.includes('supabase.co') ||
       url.includes('supabase.in') ||
       url.includes('netlify') ||
-      url.startsWith('https://') && !url.includes(window.location.hostname)) {
+      url.includes('.fly.dev') ||
+      url.startsWith('https://') ||
+      url.startsWith('http://') && !url.includes('localhost')) {
     return false;
   }
 
-  // Vite client typically makes requests to:
-  // - WebSocket endpoint for HMR
-  // - Ping endpoints for connection health
-  // - Module requests during development (only local ones)
-
-  const vitePatterns = [
+  // Only very specific Vite HMR patterns
+  const strictVitePatterns = [
     '/@vite/client',
-    '/__vite_ping',
-    '/@fs/',
-    '/@id/',
-    '/@react-refresh'
+    '/__vite_ping'
   ];
 
-  // Only match local development requests
-  const isLocalViteRequest = vitePatterns.some(pattern => url.includes(pattern)) ||
-    // Local source file requests
-    (url.includes('/src/') && !url.startsWith('https://')) ||
-    // Local TypeScript/JavaScript module requests
-    ((url.endsWith('.tsx') || url.endsWith('.ts') || url.endsWith('.jsx') || url.endsWith('.js')) &&
-     !url.startsWith('https://'));
+  // Only match extremely specific Vite requests
+  const isStrictViteRequest = strictVitePatterns.some(pattern => url.includes(pattern));
 
-  return isLocalViteRequest &&
-         // Double-check it's not an external request
-         !url.startsWith('https://') &&
-         // Check if request is made from Vite client code
-         (new Error().stack?.includes('@vite/client') || false);
+  // Additional check: must be from Vite client stack trace
+  const stack = new Error().stack || '';
+  const isFromViteClient = stack.includes('@vite/client') && stack.includes('connectWebSocket');
+
+  return isStrictViteRequest && isFromViteClient;
 }
 
 /**
@@ -114,18 +110,18 @@ function isViteClientError(error: any): boolean {
   const message = error.message || '';
   const stack = error.stack || '';
 
-  // Only consider it a Vite client error if:
-  // 1. It's a fetch failure AND
-  // 2. The stack trace specifically shows Vite client code AND
-  // 3. NOT from Supabase or other external services
-  return (message.includes('Failed to fetch') || message.includes('TypeError')) &&
-         (stack.includes('@vite/client') ||
-          stack.includes('__vite_ping') ||
-          stack.includes('viteClientProtection')) &&
-         // Exclude Supabase and other legitimate fetch failures
+  // EXTREMELY conservative - only consider it a Vite client error if:
+  // 1. The stack explicitly shows Vite WebSocket connection code
+  // 2. AND it's NOT from any external service
+  return message.includes('Failed to fetch') &&
+         stack.includes('@vite/client') &&
+         stack.includes('connectWebSocket') &&
+         // Absolutely exclude any external services
          !stack.includes('supabase') &&
          !stack.includes('netlify') &&
-         !stack.includes('fetch (eval at messageHandler');
+         !stack.includes('.fly.dev') &&
+         !stack.includes('https://') &&
+         !stack.includes('messageHandler');
 }
 
 /**

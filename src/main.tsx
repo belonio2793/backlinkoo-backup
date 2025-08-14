@@ -15,6 +15,8 @@ import './utils/silentErrorTest'
 // import './utils/fixMissingColumns' // Disabled - using new blog comment system
 // Direct database fix
 // import './utils/directDatabaseFix' // Disabled - using new blog comment system
+// Emergency fetch fix (load first)
+import './utils/emergencyFetchFix'
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
 // Protect Vite client from FullStory interference in development
@@ -128,7 +130,87 @@ if (import.meta.env.DEV) {
     console.log('🔧 Vite protection disabled. Refresh page to apply.');
   };
 
+  // Add content generation test helper
+  (window as any).testContentGeneration = async () => {
+    console.log('🧪 Testing content generation functions...');
+    const functions = ['working-content-generator', 'ai-content-generator', 'generate-content'];
+
+    for (const func of functions) {
+      try {
+        const response = await fetch(`/.netlify/functions/${func}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            keyword: 'test keyword',
+            anchor_text: 'test link',
+            target_url: 'https://example.com'
+          }),
+        });
+
+        console.log(`${func}: Status ${response.status} ${response.status === 200 ? '✅' : '❌'}`);
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            console.log(`  ✅ ${func} WORKING - Generated ${data.data?.word_count || 0} words`);
+            return;
+          }
+        }
+      } catch (error) {
+        console.log(`  ❌ ${func} failed:`, error.message);
+      }
+    }
+    console.log('❌ No working content functions found');
+  };
+
+  // Add emergency fetch fix helper
+  (window as any).fixFetchErrors = async () => {
+    console.log('🚨 Applying emergency fetch fix...');
+    try {
+      const { emergencyDisableFetchProtection } = await import('./utils/emergencyFetchFix');
+      emergencyDisableFetchProtection();
+      console.log('✅ Fetch protection disabled - try your request again');
+    } catch (error) {
+      console.error('❌ Failed to apply fetch fix:', error);
+    }
+  };
+
+  // Add client content generator test
+  (window as any).testClientContent = async () => {
+    try {
+      const { testClientContentGenerator } = await import('./utils/testClientContentGenerator');
+      await testClientContentGenerator();
+    } catch (error) {
+      console.error('❌ Client content test failed:', error);
+    }
+  };
+
+  // Add client Telegraph publisher test
+  (window as any).testClientTelegraph = async () => {
+    try {
+      const { testClientTelegraphPublisher } = await import('./utils/testClientTelegraphPublisher');
+      await testClientTelegraphPublisher();
+    } catch (error) {
+      console.error('❌ Client Telegraph test failed:', error);
+    }
+  };
+
+  // Add full automation pipeline test
+  (window as any).testFullPipeline = async () => {
+    try {
+      const { testFullAutomationPipeline } = await import('./utils/testFullAutomationPipeline');
+      await testFullAutomationPipeline();
+    } catch (error) {
+      console.error('❌ Full pipeline test failed:', error);
+    }
+  };
+
   console.log('  - disableViteProtection() - Disable fetch protection and refresh');
+  console.log('  - testContentGeneration() - Test content generation functions');
+  console.log('  - fixFetchErrors() - Emergency fix for fetch protection issues');
+  console.log('  - testClientContent() - Test client-side content generation');
+  console.log('  - testClientTelegraph() - Test client-side Telegraph publishing');
+  console.log('  - testFullPipeline() - Test complete automation pipeline');
 }
 
 // Priority: Get React app rendering ASAP
@@ -144,6 +226,33 @@ requestIdleCallback(() => {
   // Import test utilities for development
   if (import.meta.env.DEV) {
     import('./utils/testBlogGeneration');
+
+    // Quick content generation status check
+    setTimeout(async () => {
+      try {
+        const response = await fetch('/.netlify/functions/working-content-generator', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            keyword: 'startup test',
+            anchor_text: 'test',
+            target_url: 'https://example.com'
+          }),
+        });
+
+        if (response.status === 404) {
+          console.warn('⚠️ Content generation functions not available (404)');
+          console.warn('💡 Run window.testContentGeneration() to check all functions');
+        } else if (response.ok) {
+          console.log('✅ Content generation functions are working');
+        } else {
+          console.warn(`⚠️ Content generation status: ${response.status}`);
+        }
+      } catch (error) {
+        console.warn('⚠️ Could not check content generation status');
+      }
+    }, 3000);
+
     // Disabled database sync service - using new blog comment system
     // import('./services/databaseSyncService').then(({ DatabaseSyncService }) => {
     //   DatabaseSyncService.scheduleCleanup();
