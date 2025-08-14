@@ -171,18 +171,34 @@ class LiveCampaignManager {
     auto_start?: boolean;
   }): Promise<{ success: boolean; campaign?: LiveCampaign; error?: string }> {
 
-    internalLogger.info('campaign_creation', 'Starting campaign creation process', { params });
+    internalLogger.info('campaign_creation', 'Starting campaign creation process', {
+      params: {
+        ...params,
+        keywords: Array.isArray(params.keywords) ? params.keywords : 'NOT_ARRAY',
+        anchor_texts: Array.isArray(params.anchor_texts) ? params.anchor_texts : 'NOT_ARRAY'
+      }
+    });
 
     try {
+      // Validate input parameters
+      if (!Array.isArray(params.keywords) || params.keywords.length === 0) {
+        throw new Error('Keywords must be a non-empty array');
+      }
+      if (!Array.isArray(params.anchor_texts) || params.anchor_texts.length === 0) {
+        throw new Error('Anchor texts must be a non-empty array');
+      }
+
       // Get available platforms for this campaign
       const availablePlatforms = this.getAvailablePlatforms();
       internalLogger.debug('campaign_creation', 'Available platforms retrieved', { count: availablePlatforms.length });
 
       // Base campaign data that should exist in all schema versions
+      // Ensure arrays are properly formatted for PostgreSQL
       let campaignData: any = {
         name: params.name,
-        keywords: params.keywords,
-        anchor_texts: params.anchor_texts,
+        engine_type: 'web2_platforms', // Required field based on schema
+        keywords: Array.isArray(params.keywords) ? params.keywords : [],
+        anchor_texts: Array.isArray(params.anchor_texts) ? params.anchor_texts : [],
         target_url: params.target_url,
         user_id: params.user_id,
         status: params.auto_start ? 'active' : 'draft',
@@ -252,9 +268,17 @@ class LiveCampaignManager {
         }
       }
 
-      internalLogger.info('campaign_creation', 'Attempting database insert', { finalCampaignData: campaignData });
+      internalLogger.info('campaign_creation', 'Attempting database insert', {
+        finalCampaignData: {
+          ...campaignData,
+          keywords_type: Array.isArray(campaignData.keywords) ? 'array' : typeof campaignData.keywords,
+          anchor_texts_type: Array.isArray(campaignData.anchor_texts) ? 'array' : typeof campaignData.anchor_texts,
+          keywords_length: Array.isArray(campaignData.keywords) ? campaignData.keywords.length : 'N/A',
+          anchor_texts_length: Array.isArray(campaignData.anchor_texts) ? campaignData.anchor_texts.length : 'N/A'
+        }
+      });
 
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('automation_campaigns')
         .insert(campaignData)
         .select()
