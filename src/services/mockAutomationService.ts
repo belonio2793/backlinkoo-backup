@@ -38,10 +38,16 @@ export interface MockPublishingResult {
 
 class MockAutomationService {
   private isDevEnvironment(): boolean {
-    return import.meta.env.MODE === 'development' || 
+    // Always use mock in development-like environments
+    if (typeof window === 'undefined') return true; // Server-side, assume dev
+
+    return import.meta.env.MODE === 'development' ||
            import.meta.env.DEV === true ||
            window.location.hostname === 'localhost' ||
-           window.location.hostname.includes('127.0.0.1');
+           window.location.hostname.includes('127.0.0.1') ||
+           window.location.hostname.includes('.fly.dev') || // Development server
+           window.location.port !== '' || // Any port suggests development
+           !window.location.hostname.includes('.com'); // Not a production domain
   }
 
   // Generate realistic mock content based on keyword and anchor text
