@@ -98,23 +98,23 @@ class DirectAutomationExecutor {
         target_url: input.target_url
       });
 
-      // Step 2: Generate content (force live services in production)
-      let useMockServices = false; // Always try live services first
+      // Step 2: Generate content (check if Netlify functions are available)
+      let useMockServices = false;
 
-      // Check production mode override
-      const { ProductionModeForcer } = await import('../utils/forceProductionMode');
-      const shouldForceLive = ProductionModeForcer.shouldUseLiveTelegraph();
+      // Quick check if Netlify functions are available
+      const isNetlifyAvailable = await this.checkNetlifyFunctionsAvailable();
 
-      if (shouldForceLive) {
-        console.log('🚀 Production mode forced - using live Telegraph API');
-        useMockServices = false;
+      if (!isNetlifyAvailable) {
+        console.log('🔧 Netlify functions not available, using client-side generation');
+        useMockServices = true;
       } else {
-        // Only use mock services if explicitly in localhost development
-        const isLocalDev = typeof window !== 'undefined' &&
-                          (window.location.hostname === 'localhost' && window.location.port !== '');
+        // Check production mode override
+        const { ProductionModeForcer } = await import('../utils/forceProductionMode');
+        const shouldForceLive = ProductionModeForcer.shouldUseLiveTelegraph();
 
-        if (isLocalDev && this.isDevEnvironment()) {
-          useMockServices = mockAutomationService.shouldUseMockServices();
+        if (shouldForceLive) {
+          console.log('🚀 Production mode forced - using live services');
+          useMockServices = false;
         }
       }
 
