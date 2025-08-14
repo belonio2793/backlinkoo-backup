@@ -1021,9 +1021,10 @@ export default function AutomationLive() {
           <TabsContent value="debug" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <CampaignCreationFix />
-              <div className="lg:col-span-2">
-                <InternalLogViewer />
-              </div>
+              <PlatformHealthMonitor />
+            </div>
+            <div className="w-full">
+              <InternalLogViewer />
             </div>
           </TabsContent>
 
