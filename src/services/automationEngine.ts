@@ -1,4 +1,5 @@
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface AutomationRequest {
   target_url: string;
@@ -325,7 +326,7 @@ class AutomationEngine {
       const keyword = this.getRandomKeyword(request.keywords);
       const anchor_text = this.getRandomAnchorText(request.anchor_texts);
 
-      console.log(`📝 Creating single article for campaign`);
+      console.log(`���� Creating single article for campaign`);
       console.log(`🎯 Using keyword: "${keyword}", anchor text: "${anchor_text}"`);
 
       // Select one of the 3 prompts randomly for content variety
