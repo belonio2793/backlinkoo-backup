@@ -1106,8 +1106,96 @@ export default function Automation() {
               </div>
             )}
 
+            {/* Direct Execution Results Section */}
+            {directResults.length > 0 && (
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold">Recent Direct Executions</h3>
+                  <Button
+                    onClick={() => setDirectResults([])}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Clear Results
+                  </Button>
+                </div>
+
+                <div className="grid gap-4">
+                  {directResults.map((result, index) => (
+                    <Card key={index} className="hover:shadow-md transition-shadow">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h4 className="text-lg font-semibold">{result.article_title}</h4>
+                              <Badge className="bg-green-500 text-white">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Published
+                              </Badge>
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                <Zap className="h-3 w-3 mr-1" />
+                                Direct
+                              </Badge>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                              <div>
+                                <p className="text-sm text-gray-500">Platform</p>
+                                <p className="text-sm font-medium">{result.target_platform}</p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-500">Word Count</p>
+                                <p className="text-sm font-medium">{result.word_count} words</p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-500">Execution Time</p>
+                                <p className="text-sm font-medium">{Math.round((result.execution_time_ms || 0) / 1000)}s</p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-500">Anchor Text</p>
+                                <p className="text-sm font-medium">{result.anchor_text_used}</p>
+                              </div>
+                            </div>
+
+                            {result.debug_info && (
+                              <div className="flex items-center gap-4 text-sm text-gray-500">
+                                <div className="flex items-center gap-1">
+                                  <Target className="h-4 w-4" />
+                                  Keyword: {result.debug_info.keyword_used}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  Generated in {Math.round((result.debug_info.content_generation_ms || 0) / 1000)}s
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2 ml-4">
+                            {result.article_url && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => window.open(result.article_url, '_blank')}
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              >
+                                <ExternalLink className="h-4 w-4 mr-1" />
+                                View Article
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Campaign Reports Section */}
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">{user ? 'Your Published Articles' : 'Demo Article Reports'}</h2>
+              <h3 className="text-xl font-semibold">{user ? 'Campaign Reports' : 'Demo Campaign Reports'}</h3>
               <Button
                 onClick={loadSubmissions}
                 variant="outline"
