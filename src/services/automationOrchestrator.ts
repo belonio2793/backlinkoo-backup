@@ -59,16 +59,19 @@ export class AutomationOrchestrator {
       if (error) {
         console.error('Error creating campaign:', error);
 
+        // Extract error message safely
+        const errorMessage = error?.message || error?.details || String(error);
+
         // Handle specific database errors
-        if (error.message.includes('violates row-level security policy')) {
+        if (errorMessage.includes('violates row-level security policy')) {
           throw new Error('Authentication required: Please log in to create campaigns');
         }
 
-        if (error.message.includes('column') && error.message.includes('does not exist')) {
+        if (errorMessage.includes('column') && errorMessage.includes('does not exist')) {
           throw new Error('Database schema error: Please contact administrator');
         }
 
-        throw new Error(`Failed to create campaign: ${error.message}`);
+        throw new Error(`Failed to create campaign: ${errorMessage}`);
       }
 
       await this.logActivity(data.id, 'info', 'Campaign created successfully');
@@ -88,7 +91,11 @@ export class AutomationOrchestrator {
       if (error instanceof Error) {
         throw new Error(`Campaign creation failed: ${error.message}`);
       } else {
-        throw new Error(`Campaign creation failed: ${String(error)}`);
+        // Handle non-Error objects (like Supabase error objects)
+        const errorMessage = error && typeof error === 'object' && 'message' in error
+          ? String(error.message)
+          : String(error);
+        throw new Error(`Campaign creation failed: ${errorMessage}`);
       }
     }
   }
