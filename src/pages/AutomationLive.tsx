@@ -41,6 +41,7 @@ import { CampaignCreationFix } from '@/components/debug/CampaignCreationFix';
 import { PlatformHealthMonitor } from '@/components/debug/PlatformHealthMonitor';
 import { PlatformErrorSimulator } from '@/components/debug/PlatformErrorSimulator';
 import { CampaignCreationDebugger } from '@/components/debug/CampaignCreationDebugger';
+import { DatabaseSchemaFixer } from '@/components/debug/DatabaseSchemaFixer';
 import { internalLogger } from '@/services/internalLogger';
 import guestPostingSites from '@/data/guestPostingSites.json';
 import { PLATFORM_CONFIGS, getImplementedPlatforms, getPlannedPlatforms, type PlatformConfig } from '@/services/platformConfigs';
@@ -1158,7 +1159,8 @@ export default function AutomationLive() {
 
           {/* Debug Tab */}
           <TabsContent value="debug" className="space-y-6">
-            <div className="w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <DatabaseSchemaFixer />
               <CampaignCreationDebugger />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
