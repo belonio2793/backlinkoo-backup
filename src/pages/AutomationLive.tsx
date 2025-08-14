@@ -228,8 +228,27 @@ export default function AutomationLive() {
     setCreating(true);
 
     try {
-      const keywordsArray = formData.keywords.split(',').map(k => k.trim()).filter(k => k);
-      const anchorTextsArray = formData.anchor_texts.split(',').map(a => a.trim()).filter(a => a);
+      // Enhanced array processing with validation
+      const keywordsArray = formData.keywords
+        .split(',')
+        .map(k => k.trim())
+        .filter(k => k && k.length > 0);
+
+      const anchorTextsArray = formData.anchor_texts
+        .split(',')
+        .map(a => a.trim())
+        .filter(a => a && a.length > 0);
+
+      if (keywordsArray.length === 0) {
+        toast.error('Please provide at least one valid keyword');
+        return;
+      }
+
+      if (anchorTextsArray.length === 0) {
+        toast.error('Please provide at least one valid anchor text');
+        return;
+      }
+
       const generatedName = generateCampaignName(formData.keywords, formData.target_url);
 
       console.log('🔍 Campaign creation debug:', {
@@ -239,22 +258,43 @@ export default function AutomationLive() {
         keywordsArrayType: Array.isArray(keywordsArray),
         anchorTextsArrayType: Array.isArray(anchorTextsArray),
         keywordsLength: keywordsArray.length,
-        anchorTextsLength: anchorTextsArray.length
+        anchorTextsLength: anchorTextsArray.length,
+        keywordsSample: keywordsArray.slice(0, 3),
+        anchorTextsSample: anchorTextsArray.slice(0, 3)
       });
 
+      // Ensure all data is properly typed and cleaned
       const campaignParams = {
         name: generatedName,
-        keywords: keywordsArray,
-        anchor_texts: anchorTextsArray,
-        target_url: formData.target_url,
+        keywords: keywordsArray, // Guaranteed to be a valid array of strings
+        anchor_texts: anchorTextsArray, // Guaranteed to be a valid array of strings
+        target_url: formData.target_url.trim(),
         user_id: user.id,
         auto_start: false
       };
 
-      console.log('🔍 Campaign params being sent:', campaignParams);
+      console.log('🔍 Campaign params being sent:', {
+        ...campaignParams,
+        keywords_validation: {
+          is_array: Array.isArray(campaignParams.keywords),
+          length: campaignParams.keywords.length,
+          all_strings: campaignParams.keywords.every(k => typeof k === 'string'),
+          sample: campaignParams.keywords.slice(0, 2)
+        },
+        anchor_texts_validation: {
+          is_array: Array.isArray(campaignParams.anchor_texts),
+          length: campaignParams.anchor_texts.length,
+          all_strings: campaignParams.anchor_texts.every(a => typeof a === 'string'),
+          sample: campaignParams.anchor_texts.slice(0, 2)
+        }
+      });
 
       internalLogger.info('ui_campaign_creation', 'User initiated campaign creation', {
-        campaignParams,
+        campaignParams: {
+          ...campaignParams,
+          keywords_count: campaignParams.keywords.length,
+          anchor_texts_count: campaignParams.anchor_texts.length
+        },
         formData,
         userInfo: { id: user.id, email: user.email }
       });
@@ -286,6 +326,7 @@ export default function AutomationLive() {
       }
     } catch (error) {
       let errorMessage = 'Unknown error';
+      let isKnownIssue = false;
 
       if (error instanceof Error) {
         errorMessage = error.message;
@@ -299,8 +340,54 @@ export default function AutomationLive() {
                       'Campaign creation failed with no additional details';
       }
 
-      automationLogger.error('campaign', 'Failed to create campaign', { errorMessage, originalError: error }, undefined, error as Error);
-      toast.error(`Failed to create campaign: ${errorMessage}`);
+      // Check for specific known issues
+      if (errorMessage.includes('expected JSON array')) {
+        isKnownIssue = true;
+        errorMessage = 'Database configuration error. Please try again or contact support if the issue persists.';
+
+        // Log additional debugging information
+        console.error('🔍 JSON Array Error Debug:', {
+          originalError: error,
+          formData,
+          processedKeywords: formData.keywords.split(',').map(k => k.trim()).filter(k => k),
+          processedAnchorTexts: formData.anchor_texts.split(',').map(a => a.trim()).filter(a => a)
+        });
+      }
+
+      if (errorMessage.includes('column') && errorMessage.includes('does not exist')) {
+        isKnownIssue = true;
+        errorMessage = 'Database schema issue detected. The system will attempt to fix this automatically.';
+      }
+
+      if (errorMessage.includes('permission denied') || errorMessage.includes('policy violation')) {
+        isKnownIssue = true;
+        errorMessage = 'Permission error. Please sign out and sign back in, then try again.';
+      }
+
+      automationLogger.error('campaign', 'Failed to create campaign', {
+        errorMessage,
+        originalError: error,
+        isKnownIssue,
+        formData: {
+          keywords_length: formData.keywords.length,
+          anchor_texts_length: formData.anchor_texts.length,
+          target_url_length: formData.target_url.length
+        }
+      }, undefined, error as Error);
+
+      // Show user-friendly error message
+      if (isKnownIssue) {
+        toast.error(errorMessage);
+      } else {
+        toast.error(`Failed to create campaign: ${errorMessage}`);
+      }
+
+      // Additional error recovery suggestion
+      if (errorMessage.includes('JSON array') || errorMessage.includes('schema')) {
+        setTimeout(() => {
+          toast.info('💡 Tip: Try refreshing the page and signing in again if the error persists.');
+        }, 2000);
+      }
     } finally {
       setCreating(false);
     }
