@@ -54,9 +54,24 @@ class AutomationLogger {
             code: (value as any).code
           };
         }
+        // Handle Response objects (which can cause "body stream already read" errors)
+        if (value && typeof value === 'object' && value.constructor && value.constructor.name === 'Response') {
+          return {
+            type: 'Response',
+            status: value.status,
+            statusText: value.statusText,
+            url: value.url,
+            headers: value.headers ? Object.fromEntries(value.headers.entries()) : {},
+            bodyUsed: value.bodyUsed
+          };
+        }
         // Handle functions
         if (typeof value === 'function') {
           return '[Function]';
+        }
+        // Handle DOM elements and other problematic objects
+        if (value && typeof value === 'object' && value.nodeType) {
+          return '[DOM Element]';
         }
         // Handle circular references
         return value;
