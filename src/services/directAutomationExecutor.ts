@@ -324,8 +324,51 @@ class DirectAutomationExecutor {
           `Error: ${JSON.stringify(errorData)}`
         );
 
-        // Special handling for 404 - function doesn't exist
+        // Special handling for 404 - try to find alternative function
         if (response.status === 404) {
+          console.log('🔄 Primary function not found, searching for alternatives...');
+
+          try {
+            const { ContentGenerationDiagnostic } = await import('../utils/contentGenerationDiagnostic');
+            const workingFunction = await ContentGenerationDiagnostic.findWorkingContentFunction();
+
+            if (workingFunction && workingFunction !== functionToUse) {
+              console.log(`🎯 Found alternative function: ${workingFunction}`);
+
+              // Retry with working function
+              const retryResponse = await fetch(`/.netlify/functions/${workingFunction}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  keyword: params.keyword,
+                  anchor_text: params.anchor_text,
+                  url: params.target_url,
+                  word_count: 800,
+                  tone: 'professional',
+                  user_id: params.user_id,
+                  campaign_id: `direct-${Date.now()}`
+                }),
+              });
+
+              if (retryResponse.ok) {
+                const retryData = await retryResponse.json();
+                if (retryData.success) {
+                  console.log(`✅ Alternative function ${workingFunction} worked!`);
+                  // Continue with successful response
+                  return {
+                    success: true,
+                    title: retryData.data?.title || retryData.title || `Article about ${params.keyword}`,
+                    content: retryData.data?.content || retryData.content || 'Content generated successfully.',
+                    word_count: retryData.data?.word_count || 800,
+                    generation_time_ms: Date.now() - startTime
+                  };
+                }
+              }
+            }
+          } catch (diagnosticError) {
+            console.warn('Diagnostic fallback failed:', diagnosticError);
+          }
+
           throw new Error('Content generation function not available. Netlify functions may not be deployed.');
         }
 
