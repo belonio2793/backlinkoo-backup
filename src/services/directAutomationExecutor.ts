@@ -309,13 +309,39 @@ class DirectAutomationExecutor {
     title: string;
     content: string;
     user_id: string;
-  }): Promise<{
+  }, useMockService: boolean = false): Promise<{
     success: boolean;
     url: string;
     publishing_time_ms: number;
     error?: string;
   }> {
     const startTime = Date.now();
+
+    // Use mock service in development when Netlify functions aren't available
+    if (useMockService) {
+      try {
+        const mockResult = await mockAutomationService.publishMockContent({
+          title: params.title,
+          content: params.content,
+          user_id: params.user_id
+        });
+
+        return {
+          success: mockResult.success,
+          url: mockResult.url,
+          publishing_time_ms: mockResult.publishing_time_ms,
+          error: mockResult.error
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return {
+          success: false,
+          url: '',
+          publishing_time_ms: Date.now() - startTime,
+          error: `Mock service error: ${errorMessage}`
+        };
+      }
+    }
 
     try {
       const response = await fetch('/.netlify/functions/publish-article', {
