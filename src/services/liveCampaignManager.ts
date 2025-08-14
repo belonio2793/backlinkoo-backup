@@ -221,32 +221,75 @@ class LiveCampaignManager {
     });
 
     try {
-      // Validate input parameters
-      if (!Array.isArray(params.keywords) || params.keywords.length === 0) {
-        internalLogger.error('campaign_creation', 'Keywords validation failed', {
+      // Enhanced input parameter validation
+      if (!Array.isArray(params.keywords)) {
+        internalLogger.error('campaign_creation', 'Keywords is not an array', {
           keywords: params.keywords,
-          isArray: Array.isArray(params.keywords),
-          length: Array.isArray(params.keywords) ? params.keywords.length : 'N/A'
+          type: typeof params.keywords,
+          value: params.keywords
         });
-        throw new Error('Keywords must be a non-empty array');
+        throw new Error('Keywords must be an array');
       }
-      if (!Array.isArray(params.anchor_texts) || params.anchor_texts.length === 0) {
-        internalLogger.error('campaign_creation', 'Anchor texts validation failed', {
+
+      if (params.keywords.length === 0) {
+        internalLogger.error('campaign_creation', 'Keywords array is empty', {
+          keywords: params.keywords
+        });
+        throw new Error('Keywords array cannot be empty');
+      }
+
+      if (!Array.isArray(params.anchor_texts)) {
+        internalLogger.error('campaign_creation', 'Anchor texts is not an array', {
           anchor_texts: params.anchor_texts,
-          isArray: Array.isArray(params.anchor_texts),
-          length: Array.isArray(params.anchor_texts) ? params.anchor_texts.length : 'N/A'
+          type: typeof params.anchor_texts,
+          value: params.anchor_texts
         });
-        throw new Error('Anchor texts must be a non-empty array');
+        throw new Error('Anchor texts must be an array');
       }
 
-      // Ensure all array elements are strings and clean them
-      const cleanKeywords = params.keywords.filter(k => k && typeof k === 'string' && k.trim().length > 0).map(k => k.trim());
-      const cleanAnchorTexts = params.anchor_texts.filter(a => a && typeof a === 'string' && a.trim().length > 0).map(a => a.trim());
+      if (params.anchor_texts.length === 0) {
+        internalLogger.error('campaign_creation', 'Anchor texts array is empty', {
+          anchor_texts: params.anchor_texts
+        });
+        throw new Error('Anchor texts array cannot be empty');
+      }
 
+      // Validate that all array elements are strings
+      const invalidKeywords = params.keywords.filter(k => typeof k !== 'string' || !k.trim());
+      if (invalidKeywords.length > 0) {
+        internalLogger.error('campaign_creation', 'Invalid keywords found', {
+          invalidKeywords,
+          totalKeywords: params.keywords.length
+        });
+        throw new Error('All keywords must be non-empty strings');
+      }
+
+      const invalidAnchorTexts = params.anchor_texts.filter(a => typeof a !== 'string' || !a.trim());
+      if (invalidAnchorTexts.length > 0) {
+        internalLogger.error('campaign_creation', 'Invalid anchor texts found', {
+          invalidAnchorTexts,
+          totalAnchorTexts: params.anchor_texts.length
+        });
+        throw new Error('All anchor texts must be non-empty strings');
+      }
+
+      // Clean and validate arrays (they're already validated above, so this is just trimming)
+      const cleanKeywords = params.keywords.map(k => k.trim()).filter(k => k.length > 0);
+      const cleanAnchorTexts = params.anchor_texts.map(a => a.trim()).filter(a => a.length > 0);
+
+      // This should never happen after the validation above, but be safe
       if (cleanKeywords.length === 0) {
+        internalLogger.error('campaign_creation', 'No valid keywords after cleaning', {
+          originalKeywords: params.keywords,
+          cleanedKeywords: cleanKeywords
+        });
         throw new Error('No valid keywords provided after cleaning');
       }
       if (cleanAnchorTexts.length === 0) {
+        internalLogger.error('campaign_creation', 'No valid anchor texts after cleaning', {
+          originalAnchorTexts: params.anchor_texts,
+          cleanedAnchorTexts: cleanAnchorTexts
+        });
         throw new Error('No valid anchor texts provided after cleaning');
       }
 
@@ -294,10 +337,24 @@ class LiveCampaignManager {
             ...campaignData,
             links_built: 0,
             available_sites: availablePlatforms.length,
-            target_sites_used: [], // PostgreSQL TEXT[] array
-            published_articles: [], // JSONB array - Supabase client handles conversion
+            target_sites_used: [], // PostgreSQL TEXT[] array - must be empty array, not null
+            published_articles: [], // JSONB array - must be empty array, not null
             started_at: params.auto_start ? new Date().toISOString() : null
           };
+
+          // Verify array types before sending to database
+          if (!Array.isArray(campaignData.keywords)) {
+            throw new Error(`Keywords is not an array: ${typeof campaignData.keywords}`);
+          }
+          if (!Array.isArray(campaignData.anchor_texts)) {
+            throw new Error(`Anchor texts is not an array: ${typeof campaignData.anchor_texts}`);
+          }
+          if (!Array.isArray(campaignData.target_sites_used)) {
+            throw new Error(`Target sites used is not an array: ${typeof campaignData.target_sites_used}`);
+          }
+          if (!Array.isArray(campaignData.published_articles)) {
+            throw new Error(`Published articles is not an array: ${typeof campaignData.published_articles}`);
+          }
 
           internalLogger.debug('campaign_creation', 'Extended campaign data prepared', { campaignData });
         } else {
@@ -313,10 +370,18 @@ class LiveCampaignManager {
               ...campaignData,
               links_built: 0,
               available_sites: availablePlatforms.length,
-              target_sites_used: [],
-              published_articles: [], // JSONB array - Supabase client handles conversion
+              target_sites_used: [], // Empty array, not null
+              published_articles: [], // Empty array, not null
               started_at: params.auto_start ? new Date().toISOString() : null
             };
+
+            // Double-check array types after resolution
+            if (!Array.isArray(campaignData.target_sites_used)) {
+              campaignData.target_sites_used = [];
+            }
+            if (!Array.isArray(campaignData.published_articles)) {
+              campaignData.published_articles = [];
+            }
           } else {
             // Old schema - add started_at if it exists
             if (params.auto_start) {
@@ -337,14 +402,35 @@ class LiveCampaignManager {
         }
       }
 
-      internalLogger.info('campaign_creation', 'Attempting database insert', {
-        finalCampaignData: {
-          ...campaignData,
-          keywords_type: Array.isArray(campaignData.keywords) ? 'array' : typeof campaignData.keywords,
-          anchor_texts_type: Array.isArray(campaignData.anchor_texts) ? 'array' : typeof campaignData.anchor_texts,
-          keywords_length: Array.isArray(campaignData.keywords) ? campaignData.keywords.length : 'N/A',
-          anchor_texts_length: Array.isArray(campaignData.anchor_texts) ? campaignData.anchor_texts.length : 'N/A'
+      // Final validation before database insert
+      const dataValidation = {
+        keywords: {
+          is_array: Array.isArray(campaignData.keywords),
+          length: Array.isArray(campaignData.keywords) ? campaignData.keywords.length : 0,
+          all_strings: Array.isArray(campaignData.keywords) ? campaignData.keywords.every(k => typeof k === 'string') : false,
+          sample: Array.isArray(campaignData.keywords) ? campaignData.keywords.slice(0, 2) : []
+        },
+        anchor_texts: {
+          is_array: Array.isArray(campaignData.anchor_texts),
+          length: Array.isArray(campaignData.anchor_texts) ? campaignData.anchor_texts.length : 0,
+          all_strings: Array.isArray(campaignData.anchor_texts) ? campaignData.anchor_texts.every(a => typeof a === 'string') : false,
+          sample: Array.isArray(campaignData.anchor_texts) ? campaignData.anchor_texts.slice(0, 2) : []
+        },
+        target_sites_used: {
+          is_array: Array.isArray(campaignData.target_sites_used),
+          length: Array.isArray(campaignData.target_sites_used) ? campaignData.target_sites_used.length : 0
+        },
+        published_articles: {
+          is_array: Array.isArray(campaignData.published_articles),
+          length: Array.isArray(campaignData.published_articles) ? campaignData.published_articles.length : 0
         }
+      };
+
+      internalLogger.info('campaign_creation', 'Attempting database insert with validation', {
+        dataValidation,
+        campaignName: campaignData.name,
+        engineType: campaignData.engine_type,
+        userId: campaignData.user_id
       });
 
       let { data, error } = await supabase
@@ -365,28 +451,76 @@ class LiveCampaignManager {
       });
 
       if (error) {
-        internalLogger.error('campaign_creation', 'Database insert failed', {
+        // Enhanced error logging with more context
+        const errorContext = {
           error: {
             message: error.message,
             details: error.details,
             hint: error.hint,
-            code: error.code,
-            fullError: error
+            code: error.code
           },
-          attemptedData: campaignData
-        });
+          attemptedData: {
+            name: campaignData.name,
+            engine_type: campaignData.engine_type,
+            keywords_info: {
+              type: Array.isArray(campaignData.keywords) ? 'array' : typeof campaignData.keywords,
+              length: Array.isArray(campaignData.keywords) ? campaignData.keywords.length : 'N/A',
+              sample: Array.isArray(campaignData.keywords) ? campaignData.keywords.slice(0, 2) : 'N/A'
+            },
+            anchor_texts_info: {
+              type: Array.isArray(campaignData.anchor_texts) ? 'array' : typeof campaignData.anchor_texts,
+              length: Array.isArray(campaignData.anchor_texts) ? campaignData.anchor_texts.length : 'N/A',
+              sample: Array.isArray(campaignData.anchor_texts) ? campaignData.anchor_texts.slice(0, 2) : 'N/A'
+            },
+            other_arrays: {
+              target_sites_used: Array.isArray(campaignData.target_sites_used),
+              published_articles: Array.isArray(campaignData.published_articles)
+            }
+          }
+        };
+
+        internalLogger.error('campaign_creation', 'Database insert failed', errorContext);
 
         // Attempt automatic error resolution
         internalLogger.info('campaign_creation', 'Attempting automatic error resolution');
-        const resolved = await errorResolver.resolveSpecificError(error.message);
+
+        // Try to resolve based on specific error types
+        let resolved = false;
+        if (error.message.includes('expected JSON array')) {
+          internalLogger.info('campaign_creation', 'JSON array error detected, attempting schema fix');
+          resolved = await errorResolver.resolveSpecificError('expected JSON array');
+        } else if (error.message.includes('column') && error.message.includes('does not exist')) {
+          internalLogger.info('campaign_creation', 'Missing column error detected, attempting schema fix');
+          resolved = await errorResolver.resolveSpecificError(error.message);
+        } else {
+          internalLogger.info('campaign_creation', 'General error resolution attempt');
+          resolved = await errorResolver.resolveSpecificError(error.message);
+        }
 
         if (resolved) {
-          internalLogger.info('campaign_creation', 'Error resolved, retrying insert');
+          internalLogger.info('campaign_creation', 'Error resolved, retrying insert with fresh data');
 
-          // Retry the insert
+          // Create a fresh copy of campaign data to ensure no corruption
+          const freshCampaignData = {
+            name: params.name,
+            engine_type: 'web2_platforms',
+            keywords: cleanKeywords,
+            anchor_texts: cleanAnchorTexts,
+            target_url: params.target_url,
+            user_id: params.user_id,
+            status: params.auto_start ? 'active' : 'draft',
+            auto_start: params.auto_start || false,
+            links_built: 0,
+            available_sites: availablePlatforms.length,
+            target_sites_used: [],
+            published_articles: [],
+            started_at: params.auto_start ? new Date().toISOString() : null
+          };
+
+          // Retry the insert with fresh data
           const { data: retryData, error: retryError } = await supabase
             .from('automation_campaigns')
-            .insert(campaignData)
+            .insert(freshCampaignData)
             .select()
             .single();
 
@@ -395,10 +529,14 @@ class LiveCampaignManager {
             data = retryData;
             error = null;
           } else {
-            internalLogger.error('campaign_creation', 'Retry failed after error resolution', { retryError });
+            internalLogger.error('campaign_creation', 'Retry failed after error resolution', {
+              retryError,
+              freshDataUsed: freshCampaignData
+            });
             throw retryError || error;
           }
         } else {
+          internalLogger.error('campaign_creation', 'Error resolution failed, throwing original error');
           throw error;
         }
       }
@@ -435,9 +573,25 @@ class LiveCampaignManager {
       return { success: true, campaign };
     } catch (error) {
       let errorMessage = 'Unknown error';
+      let errorCategory = 'unknown';
 
       if (error instanceof Error) {
         errorMessage = error.message;
+
+        // Categorize known errors
+        if (errorMessage.includes('expected JSON array')) {
+          errorCategory = 'json_array_error';
+          errorMessage = 'Database expects array format for keywords/anchor texts';
+        } else if (errorMessage.includes('column') && errorMessage.includes('does not exist')) {
+          errorCategory = 'missing_column';
+          errorMessage = 'Database schema is missing required columns';
+        } else if (errorMessage.includes('permission denied') || errorMessage.includes('policy violation')) {
+          errorCategory = 'permission_error';
+          errorMessage = 'Database permission issue';
+        } else if (errorMessage.includes('duplicate key')) {
+          errorCategory = 'duplicate_key';
+          errorMessage = 'Campaign with similar data already exists';
+        }
       } else if (typeof error === 'string') {
         errorMessage = error;
       } else if (error && typeof error === 'object') {
@@ -449,7 +603,20 @@ class LiveCampaignManager {
       internalLogger.critical('campaign_creation', 'Campaign creation failed completely', {
         originalError: error,
         errorMessage,
-        params,
+        errorCategory,
+        params: {
+          ...params,
+          keywords_validation: {
+            is_array: Array.isArray(params.keywords),
+            length: Array.isArray(params.keywords) ? params.keywords.length : 'N/A',
+            sample: Array.isArray(params.keywords) ? params.keywords.slice(0, 2) : 'N/A'
+          },
+          anchor_texts_validation: {
+            is_array: Array.isArray(params.anchor_texts),
+            length: Array.isArray(params.anchor_texts) ? params.anchor_texts.length : 'N/A',
+            sample: Array.isArray(params.anchor_texts) ? params.anchor_texts.slice(0, 2) : 'N/A'
+          }
+        },
         stackTrace: error instanceof Error ? error.stack : undefined
       });
 
@@ -1015,25 +1182,51 @@ class LiveCampaignManager {
    * Update complete campaign data in database
    */
   private async updateCampaignInDatabase(campaign: LiveCampaign): Promise<void> {
-    // Ensure published_articles is a valid array before sending to database
+    // Ensure all arrays are valid before sending to database
     const publishedArticles = Array.isArray(campaign.published_articles) ? campaign.published_articles : [];
+    const targetSitesUsed = Array.isArray(campaign.target_sites_used) ? campaign.target_sites_used : [];
+    const executionProgress = campaign.execution_progress && typeof campaign.execution_progress === 'object' ? campaign.execution_progress : {};
 
     const updateData = {
       status: campaign.status,
       links_built: campaign.links_built,
-      target_sites_used: campaign.target_sites_used || [],
+      target_sites_used: targetSitesUsed, // Ensure it's an array
       current_platform: campaign.current_platform,
-      execution_progress: campaign.execution_progress || {},
+      execution_progress: executionProgress, // Ensure it's an object
       published_articles: publishedArticles, // Ensure it's an array
       started_at: campaign.started_at,
       completed_at: campaign.completed_at
     };
 
+    // Validate data types before update
+    if (!Array.isArray(updateData.target_sites_used)) {
+      internalLogger.warn('campaign_update', 'target_sites_used is not an array, fixing', {
+        campaignId: campaign.id,
+        type: typeof updateData.target_sites_used,
+        value: updateData.target_sites_used
+      });
+      updateData.target_sites_used = [];
+    }
+
+    if (!Array.isArray(updateData.published_articles)) {
+      internalLogger.warn('campaign_update', 'published_articles is not an array, fixing', {
+        campaignId: campaign.id,
+        type: typeof updateData.published_articles,
+        value: updateData.published_articles
+      });
+      updateData.published_articles = [];
+    }
+
     internalLogger.debug('campaign_update', 'Updating campaign in database', {
       campaignId: campaign.id,
       status: campaign.status,
       publishedArticlesCount: publishedArticles.length,
-      updateData
+      targetSitesUsedCount: targetSitesUsed.length,
+      dataValidation: {
+        published_articles_is_array: Array.isArray(updateData.published_articles),
+        target_sites_used_is_array: Array.isArray(updateData.target_sites_used),
+        execution_progress_is_object: typeof updateData.execution_progress === 'object'
+      }
     });
 
     const { error } = await supabase
