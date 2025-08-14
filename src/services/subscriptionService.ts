@@ -410,7 +410,7 @@ export class SubscriptionService {
 
       if (error) {
         ErrorLogger.logError('Error cancelling subscription', error);
-        return { success: false, error: getErrorMessage(error) || 'Failed to cancel subscription' };
+        return { success: false, error: ErrorLogger.getUserFriendlyMessage(error, 'Failed to cancel subscription') };
       }
 
       return { success: true };
