@@ -184,7 +184,7 @@ class DirectAutomationExecutor {
     anchor_text: string;
     target_url: string;
     user_id: string;
-  }): Promise<{
+  }, useMockService: boolean = false): Promise<{
     success: boolean;
     title: string;
     content: string;
@@ -193,6 +193,37 @@ class DirectAutomationExecutor {
     error?: string;
   }> {
     const startTime = Date.now();
+
+    // Use mock service in development when Netlify functions aren't available
+    if (useMockService) {
+      try {
+        const mockResult = await mockAutomationService.generateMockContent({
+          keyword: params.keyword,
+          anchor_text: params.anchor_text,
+          target_url: params.target_url,
+          user_id: params.user_id
+        });
+
+        return {
+          success: mockResult.success,
+          title: mockResult.title,
+          content: mockResult.content,
+          word_count: mockResult.word_count,
+          generation_time_ms: mockResult.generation_time_ms,
+          error: mockResult.error
+        };
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        return {
+          success: false,
+          title: '',
+          content: '',
+          word_count: 0,
+          generation_time_ms: Date.now() - startTime,
+          error: `Mock service error: ${errorMessage}`
+        };
+      }
+    }
 
     try {
       const response = await fetch('/.netlify/functions/generate-content', {
