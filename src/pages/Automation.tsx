@@ -877,6 +877,80 @@ export default function Automation() {
 
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Campaign Progress Indicator */}
+                {campaignProgress && (
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`h-3 w-3 rounded-full ${
+                          campaignProgress.isRunning ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
+                        }`}></div>
+                        <span className="font-semibold text-gray-800">
+                          {campaignProgress.isRunning ? 'Campaign Running' : 'Campaign Paused'}
+                        </span>
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                          {campaignProgress.status}
+                        </Badge>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {campaignProgress.articlesPublished}/{campaignProgress.totalPlatforms} Published
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      {/* Progress Bar */}
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${(campaignProgress.articlesPublished / campaignProgress.totalPlatforms) * 100}%`
+                          }}
+                        ></div>
+                      </div>
+
+                      {/* Current Status */}
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2 text-gray-700">
+                          {campaignProgress.status === 'generating' && (
+                            <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                          )}
+                          {campaignProgress.status === 'publishing' && (
+                            <div className="animate-bounce h-4 w-4 bg-green-500 rounded-full"></div>
+                          )}
+                          {campaignProgress.status === 'rotating' && (
+                            <div className="animate-pulse h-4 w-4 bg-purple-500 rounded-full"></div>
+                          )}
+                          <span>
+                            {campaignProgress.status === 'starting' && 'Initializing campaign...'}
+                            {campaignProgress.status === 'generating' && `Generating content for ${campaignProgress.currentPlatform}...`}
+                            {campaignProgress.status === 'publishing' && `Publishing to ${campaignProgress.currentPlatform}...`}
+                            {campaignProgress.status === 'rotating' && 'Rotating to next platform...'}
+                            {campaignProgress.status === 'completed' && 'Campaign completed successfully!'}
+                            {campaignProgress.status === 'paused' && campaignProgress.currentPlatform}
+                          </span>
+                        </div>
+
+                        {campaignProgress.timeStarted && (
+                          <div className="text-gray-500">
+                            {Math.round((Date.now() - campaignProgress.timeStarted) / 1000)}s elapsed
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Platforms Used */}
+                      {campaignProgress.platformsUsed.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          <span className="text-xs text-gray-600 mr-2">Published on:</span>
+                          {campaignProgress.platformsUsed.map((platform, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs bg-green-100 text-green-700">
+                              {platform}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="target-url">Target URL</Label>
                   <Input
