@@ -1018,7 +1018,12 @@ export default function AutomationLive() {
 
           {/* Debug Tab */}
           <TabsContent value="debug" className="space-y-6">
-            <InternalLogViewer />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <CampaignCreationFix />
+              <div className="lg:col-span-2">
+                <InternalLogViewer />
+              </div>
+            </div>
           </TabsContent>
 
           {/* Analytics Tab */}
