@@ -49,13 +49,19 @@ class TargetSitesManager {
 
   constructor() {
     automationLogger.info('system', 'Target Sites Manager initialized');
+    // Ensure we always have default sites available as fallback
+    this.sites = this.getFilteredWorkingSites();
+    this.isLoaded = false; // Will be set to true after proper loading attempt
   }
 
   async loadSites(): Promise<void> {
-    if (this.isLoaded) return;
+    if (this.isLoaded) {
+      automationLogger.debug('system', `Sites already loaded: ${this.sites.length} sites available`);
+      return;
+    }
 
     try {
-      automationLogger.debug('database', 'Loading target sites from database');
+      automationLogger.debug('database', 'Attempting to load target sites from database...');
       
       const { data, error } = await supabase
         .from('target_sites')
@@ -64,34 +70,60 @@ class TargetSitesManager {
         .order('success_rate', { ascending: false });
 
       if (error) {
-        if (error.message.includes('relation') && error.message.includes('does not exist')) {
-          automationLogger.warn('database', 'Target sites table does not exist, using default sites');
-          this.sites = this.getDefaultSites();
+        const errorMessage = error.message || String(error);
+
+        if (errorMessage.includes('relation') && errorMessage.includes('does not exist')) {
+          automationLogger.warn('database', 'Target sites table does not exist, using default sites', {
+            errorMessage,
+            errorCode: error.code
+          });
+          this.sites = this.getFilteredWorkingSites();
         } else {
-          throw error;
+          automationLogger.error('database', 'Target sites query failed, using defaults', {
+            errorMessage,
+            errorCode: error.code,
+            errorDetails: error.details
+          });
+          this.sites = this.getFilteredWorkingSites();
         }
       } else {
         this.sites = data || [];
         if (this.sites.length === 0) {
           automationLogger.info('system', 'No sites in database, using defaults');
-          this.sites = this.getDefaultSites();
+          this.sites = this.getFilteredWorkingSites();
         }
       }
 
       this.isLoaded = true;
       automationLogger.info('system', `Loaded ${this.sites.length} target sites`);
     } catch (error) {
-      automationLogger.error('database', 'Failed to load target sites', {}, undefined, error as Error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      automationLogger.error('database', 'Failed to load target sites', {
+        errorMessage,
+        errorType: typeof error,
+        errorName: error instanceof Error ? error.name : 'Unknown'
+      }, undefined, error as Error);
+
+      console.error('Target sites loading error details:', {
+        error,
+        errorMessage,
+        errorType: typeof error
+      });
+
       // Use default sites as fallback
       this.sites = this.getDefaultSites();
       this.isLoaded = true;
     }
   }
 
-  private getDefaultSites(): TargetSite[] {
+  private getFilteredWorkingSites(): TargetSite[] {
+    // Telegraph only - the one platform that actually works
+    automationLogger.info('system', 'Loading Telegraph as the only platform');
+
     return [
       {
-        id: 'telegraph',
+        id: 'telegraph-only',
         domain: 'telegra.ph',
         url: 'https://telegra.ph',
         type: 'blog',
@@ -107,129 +139,9 @@ class TargetSitesManager {
           registration_required: false
         },
         metadata: {
-          submission_guidelines: 'Anonymous instant publishing platform',
+          submission_guidelines: 'Telegraph - instant anonymous publishing',
           response_time_hours: 0,
-          notes: 'Instant publishing via API - perfect for automation'
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: 'default-1',
-        domain: 'medium.com',
-        url: 'https://medium.com',
-        type: 'blog',
-        status: 'active',
-        domain_rating: 96,
-        success_rate: 85,
-        total_attempts: 0,
-        successful_submissions: 0,
-        requirements: {
-          min_word_count: 300,
-          topics: ['technology', 'business', 'marketing'],
-          approval_process: false,
-          registration_required: true
-        },
-        metadata: {
-          submission_guidelines: 'Submit via Medium Partner Program',
-          response_time_hours: 24,
-          notes: 'High-quality content required'
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: 'default-2',
-        domain: 'dev.to',
-        url: 'https://dev.to',
-        type: 'blog',
-        status: 'active',
-        domain_rating: 89,
-        success_rate: 90,
-        total_attempts: 0,
-        successful_submissions: 0,
-        requirements: {
-          min_word_count: 250,
-          topics: ['programming', 'web development', 'technology'],
-          approval_process: false,
-          registration_required: true
-        },
-        metadata: {
-          submission_guidelines: 'Tech-focused content only',
-          response_time_hours: 2,
-          notes: 'Developer community'
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: 'default-3',
-        domain: 'hashnode.com',
-        url: 'https://hashnode.com',
-        type: 'blog',
-        status: 'active',
-        domain_rating: 82,
-        success_rate: 88,
-        total_attempts: 0,
-        successful_submissions: 0,
-        requirements: {
-          min_word_count: 400,
-          topics: ['blockchain', 'web3', 'programming'],
-          approval_process: false,
-          registration_required: true
-        },
-        metadata: {
-          submission_guidelines: 'Developer-focused content',
-          response_time_hours: 4,
-          notes: 'Blockchain and web dev community'
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: 'default-4',
-        domain: 'substack.com',
-        url: 'https://substack.com',
-        type: 'blog',
-        status: 'active',
-        domain_rating: 91,
-        success_rate: 75,
-        total_attempts: 0,
-        successful_submissions: 0,
-        requirements: {
-          min_word_count: 500,
-          topics: ['business', 'finance', 'politics', 'culture'],
-          approval_process: true,
-          registration_required: true
-        },
-        metadata: {
-          submission_guidelines: 'Newsletter-style content',
-          response_time_hours: 72,
-          notes: 'Requires newsletter format'
-        },
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
-      },
-      {
-        id: 'default-5',
-        domain: 'hackernoon.com',
-        url: 'https://hackernoon.com',
-        type: 'blog',
-        status: 'active',
-        domain_rating: 84,
-        success_rate: 70,
-        total_attempts: 0,
-        successful_submissions: 0,
-        requirements: {
-          min_word_count: 600,
-          topics: ['technology', 'startups', 'programming'],
-          approval_process: true,
-          registration_required: true
-        },
-        metadata: {
-          submission_guidelines: 'Submit via their contributor program',
-          response_time_hours: 120,
-          notes: 'Editorial review required'
+          notes: 'Telegraph API for instant publishing'
         },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()

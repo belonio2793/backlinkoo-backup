@@ -11,6 +11,7 @@ import { GlobalErrorHandler } from "@/components/GlobalErrorHandler";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PremiumUpgradeProvider } from "@/components/PremiumUpgradeProvider";
 import { EnhancedErrorBoundary } from "@/components/EnhancedErrorBoundary";
+import { UserFlowProvider } from "@/contexts/UserFlowContext";
 import { useSymbolCleaner } from "@/utils/symbolCleaner";
 import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
@@ -75,15 +76,16 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ModalProvider>
-        <SymbolCleanerProvider>
-          <TextCleanerProvider>
-            <Toaster />
-          <Sonner />
-          <GlobalErrorHandler />
-          <UnifiedModalManager />
-          <BrowserRouter>
-            <PremiumUpgradeProvider>
-              <ReportSyncProvider>
+        <UserFlowProvider>
+          <SymbolCleanerProvider>
+            <TextCleanerProvider>
+              <Toaster />
+            <Sonner />
+            <GlobalErrorHandler />
+            <UnifiedModalManager />
+            <BrowserRouter>
+              <PremiumUpgradeProvider>
+                <ReportSyncProvider>
             <Routes>
             <Route path="/" element={<Index />} />
             <Route
@@ -128,12 +130,12 @@ const App = () => (
                 <Suspense fallback={
                   <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
                     <div className="text-center">
-                      <LoadingSpinner />
-                      <div className="mt-4">
-                        <h2 className="text-xl font-semibold text-gray-900">Loading Automation Platform</h2>
-                        <p className="text-gray-600 mt-2">Preparing your link building workspace...</p>
-                      </div>
+                    <LoadingSpinner />
+                    <div className="mt-4">
+                      <h2 className="text-xl font-semibold text-gray-900">Loading Link Building Automation</h2>
+                      <p className="text-gray-600 mt-2">Preparing your automated content generation and publishing system...</p>
                     </div>
+                  </div>
                   </div>
                 }>
                   <LazyAutomation />
@@ -365,11 +367,12 @@ const App = () => (
               }
             />
             </Routes>
-              </ReportSyncProvider>
-            </PremiumUpgradeProvider>
-          </BrowserRouter>
-          </TextCleanerProvider>
-        </SymbolCleanerProvider>
+                </ReportSyncProvider>
+              </PremiumUpgradeProvider>
+            </BrowserRouter>
+            </TextCleanerProvider>
+          </SymbolCleanerProvider>
+        </UserFlowProvider>
       </ModalProvider>
     </TooltipProvider>
   </QueryClientProvider>

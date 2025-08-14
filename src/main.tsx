@@ -120,6 +120,15 @@ if (import.meta.env.DEV) {
   console.log('  - forcePremium() - Force current user to premium status');
   console.log('  - forceSignOut() - Force sign out and redirect to home');
   console.log('  - checkUserSubscription() - Check user subscription status in database');
+  console.log('  - DISABLE_VITE_PROTECTION=true - Disable Vite fetch protection');
+
+  // Add helper to disable fetch protection
+  (window as any).disableViteProtection = () => {
+    (window as any).DISABLE_VITE_PROTECTION = true;
+    console.log('🔧 Vite protection disabled. Refresh page to apply.');
+  };
+
+  console.log('  - disableViteProtection() - Disable fetch protection and refresh');
 }
 
 // Priority: Get React app rendering ASAP

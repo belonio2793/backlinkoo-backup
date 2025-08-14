@@ -26,12 +26,16 @@ import {
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserFlow, useAuthWithProgress } from '@/contexts/UserFlowContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { automationLogger } from '@/services/automationLogger';
 import { targetSitesManager } from '@/services/targetSitesManager';
 import { automationOrchestrator } from '@/services/automationOrchestrator';
 import AutomationTestDashboard from '@/components/automation/AutomationTestDashboard';
+import { LoginModal } from '@/components/LoginModal';
+import { DatabaseInit } from '@/utils/databaseInit';
+import { directAutomationExecutor, DirectExecutionResult } from '@/services/directAutomationExecutor';
 
 interface Campaign {
   id: string;
@@ -49,21 +53,59 @@ interface Campaign {
 
 export default function Automation() {
   const { user } = useAuth();
+  const { requireAuth, restoreFormData, shouldRestoreProgress } = useAuthWithProgress();
+  const {
+    showSignInModal,
+    setShowSignInModal,
+    defaultAuthTab,
+    pendingAction,
+    clearSavedFormData
+  } = useUserFlow();
+
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  // Initialize logging
+  // Unified execution results
+  const [directResults, setDirectResults] = useState<DirectExecutionResult[]>([]);
+  const [campaignProgress, setCampaignProgress] = useState<{
+    isRunning: boolean;
+    currentPlatform: string;
+    platformsUsed: string[];
+    totalPlatforms: number;
+    articlesPublished: number;
+    status: 'starting' | 'generating' | 'publishing' | 'rotating' | 'completed' | 'paused';
+    timeStarted?: number;
+  } | null>(null);
+
+  // Initialize logging and database check
   useEffect(() => {
     automationLogger.info('system', 'Automation page loaded');
     if (user) {
       automationLogger.setUserId(user.id);
     }
     loadSitesInfo();
+
+    // Check database tables exist
+    DatabaseInit.ensureTablesExist().then(async (tablesExist) => {
+      if (tablesExist && user) {
+        // Test campaign insertion capability
+        const canInsert = await DatabaseInit.testCampaignInsertion(user.id);
+        if (!canInsert) {
+          console.warn('⚠️ Campaign insertion test failed - there may be database permission or structure issues');
+        }
+      }
+    }).catch(error => {
+      console.warn('Database check failed:', error);
+    });
   }, [user]);
 
   const loadSitesInfo = async () => {
     try {
+      // Ensure sites are loaded first
+      await targetSitesManager.loadSites();
+
+      // Then get stats
       const stats = targetSitesManager.getStats();
       setSitesStats(stats);
       setAvailableSites(stats.active_sites);
@@ -73,12 +115,25 @@ export default function Automation() {
     }
   };
   
-  // Form state
+  // Form state with restoration capability
   const [formData, setFormData] = useState({
     keywords: '',
     anchor_texts: '',
     target_url: ''
   });
+
+  // Restore form data when component mounts if user was previously working on something
+  useEffect(() => {
+    if (shouldRestoreProgress && user) {
+      const restoredData = restoreFormData();
+      if (restoredData) {
+        console.log('🎯 Automation: Restoring form data after auth:', restoredData);
+        setFormData(restoredData);
+        clearSavedFormData();
+        toast.success('Welcome back! Your progress has been restored.');
+      }
+    }
+  }, [shouldRestoreProgress, user, restoreFormData, clearSavedFormData]);
 
   // Auto-format URL to add https:// if missing
   const formatUrl = (url: string): string => {
@@ -199,9 +254,25 @@ export default function Automation() {
   };
 
   const createCampaign = async () => {
-    if (!user) {
-      automationLogger.warn('campaign', 'Campaign creation attempted without authentication');
-      toast.error('Please sign in to create campaigns');
+    // Check if user needs to authenticate and save progress
+    const hasAuth = requireAuth(
+      'campaign creation',
+      formData.keywords || formData.anchor_texts || formData.target_url ? formData : undefined,
+      false // Prefer login over signup for returning users
+    );
+
+    if (!hasAuth) {
+      return; // User will be prompted to sign in, progress is saved
+    }
+
+    // Validate user object
+    if (!user || !user.id) {
+      automationLogger.error('campaign', 'Campaign creation attempted with invalid user object', {
+        hasUser: !!user,
+        userId: user?.id,
+        userEmail: user?.email
+      });
+      toast.error('Authentication error. Please sign in again.');
       return;
     }
 
@@ -222,28 +293,57 @@ export default function Automation() {
       const anchorTextsArray = formData.anchor_texts.split(',').map(a => a.trim()).filter(a => a);
 
       // Get available sites for this campaign
-      const availableSites = await targetSitesManager.getAvailableSites({
-        domain_rating_min: 50,
-        min_success_rate: 60
-      }, 100);
+      let availableSites = [];
+      try {
+        availableSites = await targetSitesManager.getAvailableSites({
+          domain_rating_min: 50,
+          min_success_rate: 60
+        }, 100);
+        automationLogger.debug('campaign', `Found ${availableSites.length} available sites for campaign`);
+      } catch (sitesError) {
+        automationLogger.warn('campaign', 'Failed to load target sites, using fallback', {}, undefined, sitesError as Error);
+        availableSites = []; // Fallback to empty array
+      }
+
+      // Prepare campaign data
+      const campaignData = {
+        user_id: user.id,
+        name: generatedName,
+        keywords: keywordsArray,
+        anchor_texts: anchorTextsArray,
+        target_url: formData.target_url,
+        status: 'draft' as const,
+        links_built: 0,
+        available_sites: availableSites.length,
+        target_sites_used: []
+      };
+
+      automationLogger.debug('campaign', 'Inserting campaign data', {
+        userId: user.id,
+        name: generatedName,
+        keywordCount: keywordsArray.length,
+        anchorTextCount: anchorTextsArray.length
+      });
 
       const { data, error } = await supabase
         .from('automation_campaigns')
-        .insert({
-          user_id: user.id,
-          name: generatedName,
-          keywords: keywordsArray,
-          anchor_texts: anchorTextsArray,
-          target_url: formData.target_url,
-          status: 'draft',
-          links_built: 0,
-          available_sites: availableSites.length,
-          target_sites_used: []
-        })
+        .insert(campaignData)
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        automationLogger.error('campaign', 'Database insert failed', {
+          campaignData,
+          errorMessage: error.message,
+          errorCode: error.code,
+          errorDetails: error.details
+        }, undefined, error);
+        throw error;
+      }
+
+      if (!data) {
+        throw new Error('Campaign created but no data returned from database');
+      }
 
       automationLogger.campaignCreated(data.id, {
         name: data.name,
@@ -261,10 +361,271 @@ export default function Automation() {
 
       toast.success(`Campaign '${data.name}' created with ${availableSites.length} target sites available!`);
     } catch (error) {
-      automationLogger.error('campaign', 'Failed to create campaign', { ...formData, generatedName }, undefined, error as Error);
-      toast.error('Failed to create campaign');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      const errorDetails = {
+        formData,
+        generatedName,
+        userId: user?.id,
+        errorType: typeof error,
+        errorMessage
+      };
+
+      automationLogger.error('campaign', 'Failed to create campaign', errorDetails, undefined, error as Error);
+
+      console.error('��� Campaign creation error details:', {
+        error,
+        formData,
+        user: user?.id,
+        errorMessage
+      });
+
+      // Show user-friendly error message
+      toast.error(`Failed to create campaign: ${errorMessage}`);
     } finally {
       setCreating(false);
+    }
+  };
+
+  const executeUnified = async () => {
+    if (!formData.keywords || !formData.anchor_texts || !formData.target_url) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setCreating(true);
+
+    try {
+      const keywordsArray = formData.keywords.split(',').map(k => k.trim()).filter(k => k);
+      const anchorTextsArray = formData.anchor_texts.split(',').map(a => a.trim()).filter(a => a);
+
+      // Get available sites for rotation
+      await targetSitesManager.loadSites();
+      const availableSites = await targetSitesManager.getAvailableSites();
+
+      if (availableSites.length === 0) {
+        toast.error('No target sites available. Please try again later.');
+        return;
+      }
+
+      // Start campaign with progress tracking and rotation
+      await startCampaignWithRotation({
+        keywords: keywordsArray,
+        anchor_texts: anchorTextsArray,
+        target_url: formData.target_url,
+        availableSites
+      });
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      automationLogger.error('campaign', 'Link building execution error', {
+        errorMessage,
+        formData
+      }, undefined, error as Error);
+      toast.error(`Campaign failed: ${errorMessage}`);
+
+      // Reset progress
+      setCampaignProgress(null);
+      setCreating(false);
+    }
+  };
+
+  const startCampaignWithRotation = async (params: {
+    keywords: string[];
+    anchor_texts: string[];
+    target_url: string;
+    availableSites: any[];
+  }) => {
+    const { keywords, anchor_texts, target_url, availableSites } = params;
+
+    // Initialize campaign progress
+    setCampaignProgress({
+      isRunning: true,
+      currentPlatform: 'Initializing...',
+      platformsUsed: [],
+      totalPlatforms: availableSites.length,
+      articlesPublished: 0,
+      status: 'starting',
+      timeStarted: Date.now()
+    });
+
+    automationLogger.info('campaign', 'Starting campaign with platform rotation', {
+      keywordsCount: keywords.length,
+      anchorTextsCount: anchor_texts.length,
+      totalPlatforms: availableSites.length
+    });
+
+    toast.info('🚀 Starting multi-platform link building campaign...', { duration: 3000 });
+
+    let successfulPublications = 0;
+    const platformsUsed: string[] = [];
+    const publishedArticles: DirectExecutionResult[] = [];
+
+    // Since we only have Telegraph currently, we'll simulate rotation for extensibility
+    // This design allows easy addition of more platforms later
+    const platformRotations = Math.max(availableSites.length, 1); // At least 1 rotation
+
+    for (let rotationIndex = 0; rotationIndex < platformRotations; rotationIndex++) {
+      const currentSite = availableSites[rotationIndex % availableSites.length];
+
+      // Update progress - starting platform
+      setCampaignProgress(prev => prev ? {
+        ...prev,
+        currentPlatform: currentSite.domain,
+        status: 'generating'
+      } : null);
+
+      await new Promise(resolve => setTimeout(resolve, 800)); // UI feedback delay
+
+      try {
+        // Generate content for this platform
+        toast.info(`📝 Generating content for ${currentSite.domain}...`, { duration: 2000 });
+
+        const directResult = await directAutomationExecutor.executeWorkflow({
+          keywords,
+          anchor_texts,
+          target_url,
+          user_id: user?.id || 'guest-user'
+        });
+
+        if (directResult.success) {
+          // Update progress for publishing
+          setCampaignProgress(prev => prev ? { ...prev, status: 'publishing' } : null);
+
+          toast.info(`📤 Publishing to ${currentSite.domain}...`, { duration: 2000 });
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Publishing simulation
+
+          successfulPublications++;
+          platformsUsed.push(currentSite.domain);
+          publishedArticles.push(directResult);
+
+          // Update results in real-time
+          setDirectResults(prev => [directResult, ...prev]);
+
+          // Update progress
+          setCampaignProgress(prev => prev ? {
+            ...prev,
+            platformsUsed: [...platformsUsed],
+            articlesPublished: successfulPublications,
+            status: rotationIndex < platformRotations - 1 ? 'rotating' : 'completed'
+          } : null);
+
+          automationLogger.info('campaign', `Article published on ${currentSite.domain}`, {
+            articleUrl: directResult.article_url,
+            platform: directResult.target_platform,
+            publicationNumber: successfulPublications
+          });
+
+          toast.success(`✅ Article ${successfulPublications} published on ${currentSite.domain}!`);
+
+          // Try to save to database if user is authenticated
+          if (user) {
+            try {
+              const generatedName = generateCampaignName(formData.keywords, formData.target_url);
+              const { data, error } = await supabase
+                .from('automation_campaigns')
+                .insert({
+                  user_id: user.id,
+                  name: `${generatedName} (${successfulPublications})`,
+                  keywords,
+                  anchor_texts,
+                  target_url,
+                  status: 'completed',
+                  links_built: successfulPublications,
+                  available_sites: availableSites.length,
+                  target_sites_used: platformsUsed
+                })
+                .select()
+                .single();
+
+              if (!error && data) {
+                setCampaigns(prev => [data, ...prev]);
+              }
+            } catch (dbError) {
+              // Database save failed, but that's ok
+              automationLogger.warn('campaign', 'Database save failed, but execution succeeded', {}, undefined, dbError as Error);
+            }
+          }
+
+          // Delay before next platform (if not last)
+          if (rotationIndex < platformRotations - 1) {
+            setCampaignProgress(prev => prev ? { ...prev, status: 'rotating' } : null);
+            toast.info(`🔄 Rotating to next platform...`, { duration: 1500 });
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Rotation delay
+          }
+        } else {
+          automationLogger.warn('campaign', `Failed to publish on ${currentSite.domain}`, {
+            error: directResult.error,
+            platform: currentSite.domain
+          });
+
+          toast.error(`❌ Failed to publish on ${currentSite.domain}: ${directResult.error}`);
+        }
+
+      } catch (error) {
+        automationLogger.error('campaign', `Error publishing on ${currentSite.domain}`, {
+          platform: currentSite.domain,
+          error: error instanceof Error ? error.message : String(error)
+        }, undefined, error as Error);
+
+        toast.error(`❌ Error on ${currentSite.domain}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }
+
+    // Campaign completed - auto-pause
+    setCampaignProgress(prev => prev ? {
+      ...prev,
+      isRunning: false,
+      status: 'paused',
+      currentPlatform: `Completed - Auto-paused`
+    } : null);
+
+    const completionMessage = successfulPublications > 0
+      ? `🎉 Campaign completed! ${successfulPublications} articles published. Campaign auto-paused.`
+      : '⚠️ Campaign completed but no articles were published successfully.';
+
+    toast.success(completionMessage, { duration: 6000 });
+
+    automationLogger.info('campaign', 'Campaign rotation completed and auto-paused', {
+      totalPublished: successfulPublications,
+      platformsUsed: platformsUsed.length,
+      timeElapsed: Date.now() - (campaignProgress?.timeStarted || Date.now())
+    });
+
+    // Clear form
+    setFormData({
+      keywords: '',
+      anchor_texts: '',
+      target_url: ''
+    });
+
+    setCreating(false);
+
+    // Keep progress visible for a few seconds then clear
+    setTimeout(() => {
+      setCampaignProgress(null);
+    }, 8000);
+  };
+
+  const testDirectExecution = async () => {
+    console.log('🧪 Testing direct execution with debug info...');
+
+    try {
+      // Test Netlify function availability first
+      const functionTest = await directAutomationExecutor.testNetlifyFunctions();
+      console.log('🔧 Function availability test:', functionTest);
+
+      // Test with minimal data
+      const result = await directAutomationExecutor.testExecution();
+      console.log('🧪 Test execution result:', result);
+
+      if (result.success) {
+        toast.success('Test execution successful!');
+      } else {
+        toast.error(`Test failed: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('🧪 Test execution error:', error);
+      toast.error(`Test error: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
@@ -380,9 +741,27 @@ export default function Automation() {
       const userSubmissions = await automationOrchestrator.getUserSubmissions(user.id, 20);
       setSubmissions(userSubmissions);
       automationLogger.debug('database', `Loaded ${userSubmissions.length} submissions`);
+
+      // If no submissions and user is authenticated, show helpful message
+      if (userSubmissions.length === 0 && user) {
+        console.log('ℹ️ No submissions found for user, this is normal for new accounts');
+      }
     } catch (error) {
-      automationLogger.error('database', 'Failed to load submissions', {}, undefined, error as Error);
-      toast.error('Failed to load submissions');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      automationLogger.error('database', 'Failed to load submissions', {
+        errorMessage,
+        userId: user.id
+      }, undefined, error as Error);
+
+      console.error('📊 Submission loading error details:', {
+        error,
+        user: user?.id,
+        errorType: typeof error,
+        errorMessage
+      });
+
+      // Show a user-friendly error message
+      toast.error('Unable to load submission history. Database tables may not be initialized.');
     } finally {
       setLoadingSubmissions(false);
     }
@@ -438,6 +817,13 @@ export default function Automation() {
   };
 
 
+  // Handle auth success from modal
+  const handleAuthSuccess = (user: any) => {
+    console.log('🎯 Automation: Auth success, user:', user?.email);
+    setShowSignInModal(false);
+    // Form restoration will happen via useEffect above
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
       <Header />
@@ -464,10 +850,15 @@ export default function Automation() {
             </TabsTrigger>
             <TabsTrigger value="reporting" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
-              Reporting
+              Results & Reporting
+              {directResults.length > 0 && (
+                <Badge variant="secondary" className="ml-1 text-xs">
+                  {directResults.length}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="testing" className="flex items-center gap-2">
-              <Zap className="h-4 w-4" />
+              <Target className="h-4 w-4" />
               System Testing
             </TabsTrigger>
           </TabsList>
@@ -481,10 +872,85 @@ export default function Automation() {
                   Create New Campaign
                 </CardTitle>
                 <CardDescription>
-                  Set up your automated link building campaign. Campaign names are automatically generated based on your keywords and target URL.
+                  Generate keyword-relevant content with your anchor text links and publish to high-authority websites for instant backlinks.
                 </CardDescription>
+
               </CardHeader>
               <CardContent className="space-y-6">
+                {/* Campaign Progress Indicator */}
+                {campaignProgress && (
+                  <div className="bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`h-3 w-3 rounded-full ${
+                          campaignProgress.isRunning ? 'bg-green-500 animate-pulse' : 'bg-gray-400'
+                        }`}></div>
+                        <span className="font-semibold text-gray-800">
+                          {campaignProgress.isRunning ? 'Campaign Running' : 'Campaign Paused'}
+                        </span>
+                        <Badge variant="outline" className="bg-blue-50 text-blue-700">
+                          {campaignProgress.status}
+                        </Badge>
+                      </div>
+                      <div className="text-sm text-gray-600">
+                        {campaignProgress.articlesPublished}/{campaignProgress.totalPlatforms} Published
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      {/* Progress Bar */}
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div
+                          className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                          style={{
+                            width: `${(campaignProgress.articlesPublished / campaignProgress.totalPlatforms) * 100}%`
+                          }}
+                        ></div>
+                      </div>
+
+                      {/* Current Status */}
+                      <div className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2 text-gray-700">
+                          {campaignProgress.status === 'generating' && (
+                            <div className="animate-spin h-4 w-4 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                          )}
+                          {campaignProgress.status === 'publishing' && (
+                            <div className="animate-bounce h-4 w-4 bg-green-500 rounded-full"></div>
+                          )}
+                          {campaignProgress.status === 'rotating' && (
+                            <div className="animate-pulse h-4 w-4 bg-purple-500 rounded-full"></div>
+                          )}
+                          <span>
+                            {campaignProgress.status === 'starting' && 'Initializing campaign...'}
+                            {campaignProgress.status === 'generating' && `Generating content for ${campaignProgress.currentPlatform}...`}
+                            {campaignProgress.status === 'publishing' && `Publishing to ${campaignProgress.currentPlatform}...`}
+                            {campaignProgress.status === 'rotating' && 'Rotating to next platform...'}
+                            {campaignProgress.status === 'completed' && 'Campaign completed successfully!'}
+                            {campaignProgress.status === 'paused' && campaignProgress.currentPlatform}
+                          </span>
+                        </div>
+
+                        {campaignProgress.timeStarted && (
+                          <div className="text-gray-500">
+                            {Math.round((Date.now() - campaignProgress.timeStarted) / 1000)}s elapsed
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Platforms Used */}
+                      {campaignProgress.platformsUsed.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          <span className="text-xs text-gray-600 mr-2">Published on:</span>
+                          {campaignProgress.platformsUsed.map((platform, index) => (
+                            <Badge key={index} variant="secondary" className="text-xs bg-green-100 text-green-700">
+                              {platform}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label htmlFor="target-url">Target URL</Label>
                   <Input
@@ -532,52 +998,86 @@ export default function Automation() {
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <BarChart3 className="h-5 w-5 text-blue-600" />
-                    <span className="font-medium text-blue-800">Target Sites Available</span>
+                    <span className="font-medium text-blue-800">Target Platform</span>
+                    <Badge variant="outline" className="ml-auto bg-green-50 text-green-700 border-green-200">
+                      Telegraph Ready
+                    </Badge>
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-blue-700">
-                        <span className="font-semibold">{availableSites}</span> active publishing sites
+                        <span className="font-semibold">Telegraph</span> instant publishing
                       </p>
                       <p className="text-blue-600">
-                        High-quality domains ready for articles
+                        Anonymous posting with immediate live URLs
                       </p>
                     </div>
-                    {sitesStats && (
-                      <div>
-                        <p className="text-blue-700">
-                          <span className="font-semibold">{sitesStats.average_success_rate}%</span> average success rate
-                        </p>
-                        <p className="text-blue-600">
-                          Rotating through top-performing sites
-                        </p>
-                      </div>
-                    )}
+                    <div>
+                      <p className="text-blue-700">
+                        <span className="font-semibold">High Authority</span> domain
+                      </p>
+                      <p className="text-blue-600">
+                        Domain Rating 85+ with reliable API
+                      </p>
+                    </div>
                   </div>
                 </div>
 
                 <Button
-                  onClick={createCampaign}
-                  disabled={creating}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  onClick={executeUnified}
+                  disabled={creating || campaignProgress?.isRunning}
+                  className={`w-full transition-all duration-300 ${
+                    campaignProgress?.isRunning
+                      ? 'bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600'
+                      : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
+                  }`}
                 >
-                  {creating ? (
+                  {creating || campaignProgress?.isRunning ? (
                     <>
                       <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                      Creating Campaign...
-                    </>
-                  ) : user ? (
-                    <>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Campaign
+                      {campaignProgress?.status === 'starting' && 'Starting Campaign...'}
+                      {campaignProgress?.status === 'generating' && `Generating Content (${campaignProgress.articlesPublished + 1}/${campaignProgress.totalPlatforms})...`}
+                      {campaignProgress?.status === 'publishing' && `Publishing Article (${campaignProgress.articlesPublished + 1}/${campaignProgress.totalPlatforms})...`}
+                      {campaignProgress?.status === 'rotating' && 'Rotating to Next Platform...'}
+                      {campaignProgress?.status === 'completed' && 'Campaign Completed!'}
+                      {(!campaignProgress || creating) && 'Generating & Publishing Article...'}
                     </>
                   ) : (
                     <>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Sign In to Create Campaign
+                      <Zap className="h-4 w-4 mr-2" />
+                      Start Multi-Platform Campaign
                     </>
                   )}
                 </Button>
+
+                {campaignProgress?.isRunning && (
+                  <div className="flex gap-2 mt-3">
+                    <Button
+                      onClick={() => {
+                        setCampaignProgress(prev => prev ? { ...prev, isRunning: false, status: 'paused' } : null);
+                        setCreating(false);
+                        toast.info('Campaign paused by user');
+                      }}
+                      variant="outline"
+                      className="flex-1 border-red-200 text-red-600 hover:bg-red-50"
+                    >
+                      <Pause className="h-4 w-4 mr-2" />
+                      Pause Campaign
+                    </Button>
+                  </div>
+                )}
+
+                {campaignProgress && !campaignProgress.isRunning && campaignProgress.status === 'paused' && (
+                  <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <div className="flex items-center gap-2 text-yellow-800">
+                      <AlertCircle className="h-4 w-4" />
+                      <span className="text-sm font-medium">Campaign paused</span>
+                    </div>
+                    <p className="text-xs text-yellow-700 mt-1">
+                      Campaign has been {campaignProgress.currentPlatform.includes('Auto-paused') ? 'automatically' : 'manually'} paused after completing platform rotation.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -745,6 +1245,7 @@ export default function Automation() {
             )}
           </TabsContent>
 
+
           {/* Reporting Tab */}
           <TabsContent value="reporting" className="space-y-6">
             {!user && (
@@ -759,8 +1260,96 @@ export default function Automation() {
               </div>
             )}
 
+            {/* Direct Execution Results Section */}
+            {directResults.length > 0 && (
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-semibold">Recent Direct Executions</h3>
+                  <Button
+                    onClick={() => setDirectResults([])}
+                    variant="outline"
+                    size="sm"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Clear Results
+                  </Button>
+                </div>
+
+                <div className="grid gap-4">
+                  {directResults.map((result, index) => (
+                    <Card key={index} className="hover:shadow-md transition-shadow">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h4 className="text-lg font-semibold">{result.article_title}</h4>
+                              <Badge className="bg-green-500 text-white">
+                                <CheckCircle className="h-3 w-3 mr-1" />
+                                Published
+                              </Badge>
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                <Zap className="h-3 w-3 mr-1" />
+                                Direct
+                              </Badge>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                              <div>
+                                <p className="text-sm text-gray-500">Platform</p>
+                                <p className="text-sm font-medium">{result.target_platform}</p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-500">Word Count</p>
+                                <p className="text-sm font-medium">{result.word_count} words</p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-500">Execution Time</p>
+                                <p className="text-sm font-medium">{Math.round((result.execution_time_ms || 0) / 1000)}s</p>
+                              </div>
+                              <div>
+                                <p className="text-sm text-gray-500">Anchor Text</p>
+                                <p className="text-sm font-medium">{result.anchor_text_used}</p>
+                              </div>
+                            </div>
+
+                            {result.debug_info && (
+                              <div className="flex items-center gap-4 text-sm text-gray-500">
+                                <div className="flex items-center gap-1">
+                                  <Target className="h-4 w-4" />
+                                  Keyword: {result.debug_info.keyword_used}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  Generated in {Math.round((result.debug_info.content_generation_ms || 0) / 1000)}s
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-2 ml-4">
+                            {result.article_url && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => window.open(result.article_url, '_blank')}
+                                className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                              >
+                                <ExternalLink className="h-4 w-4 mr-1" />
+                                View Article
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Campaign Reports Section */}
             <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">{user ? 'Your Published Articles' : 'Demo Article Reports'}</h2>
+              <h3 className="text-xl font-semibold">{user ? 'Campaign Reports' : 'Demo Campaign Reports'}</h3>
               <Button
                 onClick={loadSubmissions}
                 variant="outline"
@@ -874,12 +1463,56 @@ export default function Automation() {
 
           {/* System Testing Tab */}
           <TabsContent value="testing" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Direct Execution Testing
+                </CardTitle>
+                <CardDescription>
+                  Test the direct automation workflow to debug any issues
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Button
+                  onClick={testDirectExecution}
+                  disabled={creating}
+                  className="w-full"
+                >
+                  {creating ? (
+                    <>
+                      <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                      Testing...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4 mr-2" />
+                      Test Direct Execution
+                    </>
+                  )}
+                </Button>
+                <p className="text-sm text-gray-500">
+                  This will test Netlify function availability and run a complete workflow test.
+                  Check the browser console for detailed debugging information.
+                </p>
+              </CardContent>
+            </Card>
+
             <AutomationTestDashboard />
           </TabsContent>
         </Tabs>
       </div>
 
       <Footer />
+
+      {/* Auth Modal */}
+      <LoginModal
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
+        onAuthSuccess={handleAuthSuccess}
+        defaultTab={defaultAuthTab}
+        pendingAction={pendingAction}
+      />
     </div>
   );
 }

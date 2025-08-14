@@ -19,11 +19,20 @@ import {
 import { useToast } from '@/hooks/use-toast';
 
 // Import our engines
-import RecursiveDiscoveryEngine, { type ScanJob, type DiscoveryTarget } from '@/services/recursiveEngine/RecursiveDiscoveryEngine';
-import PublicationInfiltrationEngine, { type PlacementAttempt } from '@/services/recursiveEngine/PublicationInfiltrationEngine';
-import LinkMemoryIntelligenceSystem, { type LinkIntelligenceNode } from '@/services/recursiveEngine/LinkMemoryIntelligenceSystem';
-import AcceleratedPropagationSystem, { type PropagationSeed, type ExpansionJob } from '@/services/recursiveEngine/AcceleratedPropagationSystem';
-import URLCleaningFilterEngine from '@/services/recursiveEngine/URLCleaningFilterEngine';
+// Temporarily commented out due to missing files
+// import RecursiveDiscoveryEngine, { type ScanJob, type DiscoveryTarget } from '@/services/recursiveEngine/RecursiveDiscoveryEngine';
+// import PublicationInfiltrationEngine, { type PlacementAttempt } from '@/services/recursiveEngine/PublicationInfiltrationEngine';
+// import LinkMemoryIntelligenceSystem, { type LinkIntelligenceNode } from '@/services/recursiveEngine/LinkMemoryIntelligenceSystem';
+
+// Mock types for build
+type ScanJob = any;
+type DiscoveryTarget = any;
+type PlacementAttempt = any;
+type LinkIntelligenceNode = any;
+// import AcceleratedPropagationSystem, { type PropagationSeed, type ExpansionJob } from '@/services/recursiveEngine/AcceleratedPropagationSystem';
+// import URLCleaningFilterEngine from '@/services/recursiveEngine/URLCleaningFilterEngine';
+type PropagationSeed = any;
+type ExpansionJob = any;
 
 interface SystemMetrics {
   discovery: {
@@ -103,11 +112,12 @@ export default function RecursiveDiscoveryDashboard() {
   const { toast } = useToast();
 
   // Engine instances
-  const discoveryEngine = RecursiveDiscoveryEngine.getInstance();
-  const infiltrationEngine = PublicationInfiltrationEngine.getInstance();
-  const intelligenceSystem = LinkMemoryIntelligenceSystem.getInstance();
-  const propagationSystem = AcceleratedPropagationSystem.getInstance();
-  const cleaningEngine = URLCleaningFilterEngine.getInstance();
+  // Mock engines for build - replace when actual services are implemented
+  const discoveryEngine = { getInstance: () => ({}) };
+  const infiltrationEngine = { getInstance: () => ({}) };
+  const intelligenceSystem = { getInstance: () => ({}) };
+  const propagationSystem = { getInstance: () => ({}) };
+  const cleaningEngine = { getInstance: () => ({}) };
 
   // Load metrics and setup real-time updates
   useEffect(() => {

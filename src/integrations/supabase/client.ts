@@ -59,7 +59,7 @@ const createMockSupabaseClient = () => {
       return Promise.resolve({ data: { session: null }, error: { message: 'Mock mode: Please configure real Supabase credentials' } });
     },
     getUser: () => {
-      console.warn('⚠️ Mock auth getUser called');
+      console.warn('��️ Mock auth getUser called');
       return Promise.resolve({ data: { user: null }, error: { message: 'Mock mode: Please configure real Supabase credentials' } });
     },
     onAuthStateChange: (callback: any) => {
@@ -265,13 +265,20 @@ export const supabase = hasValidCredentials ?
             throw new Error('Request timeout - please try again');
           }
 
-          // Enhanced FullStory error handling with retry
-          if (error.message?.includes('Failed to fetch') ||
-              error.message?.includes('Third-party script interference') ||
-              error.stack?.includes('fullstory') ||
-              error.stack?.includes('edge.fullstory.com')) {
+          // Enhanced FullStory error handling with retry - but be more specific
+          const isDefinitelyFullStory = (
+            error.stack?.includes('fullstory') ||
+            error.stack?.includes('edge.fullstory.com') ||
+            error.message?.includes('Third-party script interference')
+          );
 
-            console.warn('🔍 FullStory interference detected, attempting bypass retry for:', url);
+          const isPossiblyFullStory = (
+            error.message?.includes('Failed to fetch') &&
+            (error.stack?.includes('messageHandler') && error.stack?.includes('eval'))
+          );
+
+          if (isDefinitelyFullStory || isPossiblyFullStory) {
+            console.warn('🔍 Potential FullStory interference detected, attempting bypass retry for:', url);
 
             try {
               // Import the bypass fetch dynamically to avoid circular imports

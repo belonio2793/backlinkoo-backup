@@ -1,6 +1,7 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserFlow } from '@/contexts/UserFlowContext';
 import { useState } from 'react';
 import { Infinity, Trash2, Home } from 'lucide-react';
 import { LoginModal } from './LoginModal';
@@ -19,8 +20,13 @@ export function Header({ showHomeLink = true }: HeaderProps) {
   const location = useLocation();
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
-  const [showLoginModal, setShowLoginModal] = useState(false);
-  const [defaultTab, setDefaultTab] = useState<'login' | 'signup'>('login');
+  const {
+    showSignInModal,
+    setShowSignInModal,
+    defaultAuthTab,
+    setDefaultAuthTab,
+    pendingAction
+  } = useUserFlow();
 
   // Debug logging for header authentication state
   console.log('🎯 Header: User authentication state:', {
@@ -45,27 +51,27 @@ export function Header({ showHomeLink = true }: HeaderProps) {
   };
 
   const handleSignInClick = () => {
-    setDefaultTab('login');
-    setShowLoginModal(true);
+    setDefaultAuthTab('login');
+    setShowSignInModal(true);
   };
 
   const handleCreateAccountClick = () => {
-    setDefaultTab('signup');
-    setShowLoginModal(true);
+    setDefaultAuthTab('signup');
+    setShowSignInModal(true);
   };
 
   const handleAuthSuccess = (user: any) => {
-    setShowLoginModal(false);
+    setShowSignInModal(false);
 
     // Don't navigate away from certain pages that should preserve user flow
-    const preserveRoutePages = ['/blog', '/ranking'];
+    const preserveRoutePages = ['/blog', '/ranking', '/automation'];
     const shouldPreserveRoute = preserveRoutePages.some(page =>
       location.pathname.startsWith(page)
     );
 
     if (shouldPreserveRoute) {
       console.log('🎯 Header: Preserving route after auth:', location.pathname);
-      // Stay on current page
+      // Stay on current page - individual pages will handle restoration
       toast({
         title: "Welcome back!",
         description: "You can now access all features on this page.",
@@ -206,10 +212,11 @@ export function Header({ showHomeLink = true }: HeaderProps) {
 
       {/* Login Modal */}
       <LoginModal
-        isOpen={showLoginModal}
-        onClose={() => setShowLoginModal(false)}
+        isOpen={showSignInModal}
+        onClose={() => setShowSignInModal(false)}
         onAuthSuccess={handleAuthSuccess}
-        defaultTab={defaultTab}
+        defaultTab={defaultAuthTab}
+        pendingAction={pendingAction}
       />
     </header>
   );
