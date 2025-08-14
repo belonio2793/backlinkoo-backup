@@ -1,25 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Target, FileText, Link, BarChart3 } from 'lucide-react';
+import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info } from 'lucide-react';
 import { getOrchestrator } from '@/services/automationOrchestrator';
 import AutomationReporting from '@/components/AutomationReporting';
 import AutomationServiceStatus from '@/components/AutomationServiceStatus';
+import AutomationAuthModal from '@/components/AutomationAuthModal';
+import { useAuthState } from '@/hooks/useAuthState';
+import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 
 const Automation = () => {
   const { toast } = useToast();
+  const { isAuthenticated, isLoading: authLoading, user } = useAuthState();
+  const { savedFormData, saveFormData, clearFormData, hasValidSavedData } = useCampaignFormPersistence();
+  
   const [isCreating, setIsCreating] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [formData, setFormData] = useState({
     targetUrl: '',
     keyword: '',
     anchorText: ''
   });
+  
   const orchestrator = getOrchestrator();
+
+  // Load saved form data when component mounts or when saved data changes
+  useEffect(() => {
+    if (hasValidSavedData(savedFormData)) {
+      setFormData(savedFormData);
+      
+      // Show info about restored data
+      toast({
+        title: "Form Data Restored",
+        description: "Your previous campaign details have been restored. You can now start the campaign.",
+        duration: 5000
+      });
+    }
+  }, [savedFormData, hasValidSavedData, toast]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -53,6 +76,18 @@ const Automation = () => {
   const handleCreateCampaign = async () => {
     if (!validateForm()) return;
 
+    // Check authentication first
+    if (!isAuthenticated) {
+      // Save form data before showing auth modal
+      saveFormData(formData);
+      setShowAuthModal(true);
+      return;
+    }
+
+    await createCampaign();
+  };
+
+  const createCampaign = async () => {
     setIsCreating(true);
     
     try {
@@ -63,6 +98,9 @@ const Automation = () => {
         anchor_text: formData.anchorText
       });
       
+      // Clear saved form data since campaign was created successfully
+      clearFormData();
+      
       // Reset form
       setFormData({
         targetUrl: '',
@@ -71,12 +109,20 @@ const Automation = () => {
       });
 
       toast({
-        title: "Campaign Created",
-        description: "Your link building campaign has been created and will start processing shortly."
+        title: "Campaign Created Successfully!",
+        description: "Your link building campaign has been created and will start processing shortly. Check the Reports tab to monitor progress."
       });
 
     } catch (error) {
       console.error('Campaign creation error:', error);
+      
+      // Handle specific authentication errors
+      if (error instanceof Error && error.message.includes('not authenticated')) {
+        saveFormData(formData);
+        setShowAuthModal(true);
+        return;
+      }
+      
       toast({
         title: "Campaign Creation Failed",
         description: error instanceof Error ? error.message : "There was an error creating your campaign. Please try again.",
@@ -86,6 +132,29 @@ const Automation = () => {
       setIsCreating(false);
     }
   };
+
+  const handleAuthSuccess = () => {
+    // After successful authentication, create the campaign
+    if (hasValidSavedData(savedFormData)) {
+      createCampaign();
+    }
+  };
+
+  const handleAuthModalClose = () => {
+    setShowAuthModal(false);
+  };
+
+  // Show loading state while checking authentication
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading automation system...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
@@ -97,7 +166,23 @@ const Automation = () => {
           <p className="text-lg text-gray-600">
             Automatically generate and publish high-quality content with backlinks to your target URL
           </p>
+          {user && (
+            <div className="flex items-center justify-center gap-2 text-sm text-green-700">
+              <CheckCircle className="w-4 h-4" />
+              <span>Signed in as {user.email}</span>
+            </div>
+          )}
         </div>
+
+        {/* Saved form data notification */}
+        {hasValidSavedData(savedFormData) && !isAuthenticated && (
+          <Alert>
+            <Info className="h-4 w-4" />
+            <AlertDescription>
+              You have saved campaign details. Sign in to continue with your campaign for "<strong>{savedFormData.keyword}</strong>".
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Main Content */}
         <Tabs defaultValue="create" className="w-full">
@@ -167,12 +252,21 @@ const Automation = () => {
                 <div className="bg-blue-50 p-4 rounded-lg">
                   <h4 className="font-medium text-blue-900 mb-2">How it works:</h4>
                   <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-                    <li>Generate 3 unique 1000-word articles using different prompts</li>
+                    <li>Generate a unique 1000-word article using AI (randomly selected style)</li>
                     <li>Format content with your anchor text linked to your target URL</li>
                     <li>Publish to Telegraph.ph automatically</li>
                     <li>Track published links in your reporting dashboard</li>
                   </ol>
                 </div>
+
+                {!isAuthenticated && (
+                  <Alert>
+                    <Info className="h-4 w-4" />
+                    <AlertDescription>
+                      You'll need to sign in or create an account to start campaigns. Your form data will be saved automatically.
+                    </AlertDescription>
+                  </Alert>
+                )}
 
                 <Button 
                   onClick={handleCreateCampaign}
@@ -188,7 +282,7 @@ const Automation = () => {
                   ) : (
                     <>
                       <Target className="w-4 h-4 mr-2" />
-                      Start Link Building Campaign
+                      {isAuthenticated ? 'Start Link Building Campaign' : 'Continue with Campaign'}
                     </>
                   )}
                 </Button>
@@ -230,13 +324,36 @@ const Automation = () => {
           </TabsContent>
 
           <TabsContent value="reports">
-            <AutomationReporting />
+            {isAuthenticated ? (
+              <AutomationReporting />
+            ) : (
+              <Card className="max-w-2xl mx-auto">
+                <CardContent className="p-8 text-center">
+                  <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-lg font-medium mb-2">Sign In Required</h3>
+                  <p className="text-gray-600 mb-4">
+                    Sign in to view your campaign reports and analytics.
+                  </p>
+                  <Button onClick={() => setShowAuthModal(true)}>
+                    Sign In
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="status">
             <AutomationServiceStatus />
           </TabsContent>
         </Tabs>
+
+        {/* Authentication Modal */}
+        <AutomationAuthModal
+          isOpen={showAuthModal}
+          onClose={handleAuthModalClose}
+          onSuccess={handleAuthSuccess}
+          campaignData={hasValidSavedData(savedFormData) ? savedFormData : undefined}
+        />
       </div>
     </div>
   );
