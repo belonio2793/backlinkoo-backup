@@ -144,6 +144,22 @@ const App = () => (
               }
             />
             <Route
+              path="/automation/array-free"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <ArrayFreeAutomation />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/automation/test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <ArrayFreeTest />
+                </Suspense>
+              }
+            />
+            <Route
               path="/automation/old"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
