@@ -199,6 +199,7 @@ if (import.meta.env.DEV) {
   console.log('  - testContentGeneration() - Test content generation functions');
   console.log('  - fixFetchErrors() - Emergency fix for fetch protection issues');
   console.log('  - testClientContent() - Test client-side content generation');
+  console.log('  - testClientTelegraph() - Test client-side Telegraph publishing');
 }
 
 // Priority: Get React app rendering ASAP
