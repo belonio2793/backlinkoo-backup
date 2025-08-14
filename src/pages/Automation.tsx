@@ -614,18 +614,70 @@ export default function Automation() {
       const functionTest = await directAutomationExecutor.testNetlifyFunctions();
       console.log('🔧 Function availability test:', functionTest);
 
-      // Test with minimal data
+      // Test with minimal data including content formatting
       const result = await directAutomationExecutor.testExecution();
       console.log('🧪 Test execution result:', result);
 
       if (result.success) {
-        toast.success('Test execution successful!');
+        toast.success('Test execution successful! Check browser console for details.');
+
+        // If we have content, check for [object Object] issues
+        if (result.article_content) {
+          const hasObjectError = result.article_content.includes('[object Object]');
+          if (hasObjectError) {
+            console.error('⚠️ Content contains [object Object] - formatting fix may not be working');
+            toast.error('Content formatting issue detected - check console');
+          } else {
+            console.log('✅ Content formatting looks good - no [object Object] found');
+            toast.success('Content formatting verified successfully!');
+          }
+        }
       } else {
         toast.error(`Test failed: ${result.error}`);
       }
     } catch (error) {
       console.error('🧪 Test execution error:', error);
       toast.error(`Test error: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  };
+
+  const testContentFormatting = async () => {
+    console.log('🧪 Testing Telegraph content formatting specifically...');
+
+    try {
+      // Test content generation directly
+      const testInput = {
+        keywords: ['test content', 'link formatting'],
+        anchor_texts: ['test link', 'check this out'],
+        target_url: 'https://example.com/test',
+        user_id: 'test-user'
+      };
+
+      const result = await directAutomationExecutor.executeWorkflow(testInput);
+
+      if (result.success && result.article_content) {
+        console.log('📄 Generated content:', result.article_content);
+
+        // Check for common formatting issues
+        const hasObjectError = result.article_content.includes('[object Object]');
+        const hasLinks = result.article_content.includes('[') && result.article_content.includes('](');
+
+        console.log('✅ Content Analysis:');
+        console.log(`- Contains [object Object]: ${hasObjectError ? '❌' : '✅'}`);
+        console.log(`- Contains markdown links: ${hasLinks ? '✅' : '❌'}`);
+        console.log(`- Word count: ${result.word_count || 'unknown'}`);
+
+        if (!hasObjectError && hasLinks) {
+          toast.success('Content formatting test passed!');
+        } else {
+          toast.error('Content formatting test revealed issues');
+        }
+      } else {
+        toast.error(`Content test failed: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('��� Content formatting test error:', error);
+      toast.error(`Content test error: ${error instanceof Error ? error.message : String(error)}`);
     }
   };
 
