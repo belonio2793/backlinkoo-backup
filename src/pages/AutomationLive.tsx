@@ -230,6 +230,15 @@ export default function AutomationLive() {
       const anchorTextsArray = formData.anchor_texts.split(',').map(a => a.trim()).filter(a => a);
       const generatedName = generateCampaignName(formData.keywords, formData.target_url);
 
+      console.log('🔧 Creating campaign with data:', {
+        name: generatedName,
+        keywords: keywordsArray,
+        anchor_texts: anchorTextsArray,
+        target_url: formData.target_url,
+        user_id: user.id,
+        auto_start: false
+      });
+
       const result = await liveCampaignManager.createCampaign({
         name: generatedName,
         keywords: keywordsArray,
@@ -239,12 +248,15 @@ export default function AutomationLive() {
         auto_start: false
       });
 
+      console.log('��� Campaign creation result:', result);
+
       if (result.success && result.campaign) {
         setCampaigns(prev => [result.campaign!, ...prev]);
         setFormData({ keywords: '', anchor_texts: '', target_url: '' });
         toast.success(`Campaign '${result.campaign.name}' created successfully!`);
         await refreshData();
       } else {
+        console.error('🔧 Campaign creation failed:', result);
         throw new Error(result.error || 'Failed to create campaign');
       }
     } catch (error) {
