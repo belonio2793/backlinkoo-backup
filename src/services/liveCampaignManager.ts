@@ -193,10 +193,11 @@ class LiveCampaignManager {
       internalLogger.debug('campaign_creation', 'Available platforms retrieved', { count: availablePlatforms.length });
 
       // Base campaign data that should exist in all schema versions
+      // Ensure arrays are properly formatted for PostgreSQL
       let campaignData: any = {
         name: params.name,
-        keywords: params.keywords,
-        anchor_texts: params.anchor_texts,
+        keywords: Array.isArray(params.keywords) ? params.keywords : [],
+        anchor_texts: Array.isArray(params.anchor_texts) ? params.anchor_texts : [],
         target_url: params.target_url,
         user_id: params.user_id,
         status: params.auto_start ? 'active' : 'draft',
