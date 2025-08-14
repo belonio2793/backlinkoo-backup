@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { internalLogger } from './activeErrorLogger';
+import { internalLogger } from './internalLogger';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;

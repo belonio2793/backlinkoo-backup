@@ -15,6 +15,7 @@ import { UserFlowProvider } from "@/contexts/UserFlowContext";
 import { useSymbolCleaner } from "@/utils/symbolCleaner";
 import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
+import "@/utils/emergencyDisable"; // Load emergency disable utilities
 // import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
 import Index from "./pages/Index";
 
@@ -49,6 +50,11 @@ const LazyDatabaseColumnsFix = lazy(() => import("./pages/DatabaseColumnsFix"));
 const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
 const LazyMarkdownTest = lazy(() => import("./pages/MarkdownTest"));
 const LazyPremiumSEOAnalysisTest = lazy(() => import("./pages/PremiumSEOAnalysisTest"));
+
+// Array-free automation components
+import ArrayFreeAutomation from "./pages/ArrayFreeAutomation";
+import ArrayFreeTest from "./pages/ArrayFreeTest";
+import FetchTest from "./pages/FetchTest";
 const LazyDebugUserReports = lazy(() => import("./pages/DebugUserReports"));
 const LazyBlogPostChecker = lazy(() => import("./components/BlogPostChecker").then(module => ({ default: module.BlogPostChecker })));
 
@@ -140,6 +146,30 @@ const App = () => (
                   </div>
                 }>
                   <LazyAutomation />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/automation/array-free"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <ArrayFreeAutomation />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/automation/test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <ArrayFreeTest />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/fetch-test"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <FetchTest />
                 </Suspense>
               }
             />

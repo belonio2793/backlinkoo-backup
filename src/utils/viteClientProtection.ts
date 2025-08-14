@@ -25,6 +25,12 @@ export function protectViteClient(): void {
     return;
   }
 
+  // Emergency disable via environment variable
+  if (import.meta.env.VITE_DISABLE_FETCH_PROTECTION === 'true') {
+    console.log('🔧 Vite protection disabled via environment variable');
+    return;
+  }
+
   // Emergency disable if FullStory is not even present
   if (!isFullStoryPresent()) {
     console.log('🔧 Vite protection disabled - FullStory not detected');
@@ -50,8 +56,15 @@ export function protectViteClient(): void {
           // Only use bypass if we're very sure it's a FullStory issue
           if (isViteClientError(error) && isFullStoryPresent()) {
             console.log('🔄 Vite client fetch failed due to FullStory, retrying with bypass:', error.message);
-            const bypassFetch = createBypassFetch();
-            return await bypassFetch(input, init);
+            try {
+              const bypassFetch = createBypassFetch();
+              return await bypassFetch(input, init);
+            } catch (bypassError) {
+              console.error('❌ Bypass also failed, disabling protection for this session');
+              // Emergency disable if bypass also fails
+              (window as any).DISABLE_VITE_PROTECTION = true;
+              throw error; // Throw original error, not bypass error
+            }
           }
           throw error;
         }
@@ -75,13 +88,13 @@ export function protectViteClient(): void {
  * Check if a request is from Vite client
  */
 function isViteClientRequest(url: string, init?: RequestInit): boolean {
-  // NEVER interfere with Supabase, Netlify, or any external API requests
+  // NEVER interfere with any external API requests
   if (url.includes('supabase.co') ||
       url.includes('supabase.in') ||
       url.includes('netlify') ||
       url.includes('.fly.dev') ||
       url.startsWith('https://') ||
-      url.startsWith('http://') && !url.includes('localhost')) {
+      url.startsWith('http://')) {
     return false;
   }
 
@@ -92,13 +105,7 @@ function isViteClientRequest(url: string, init?: RequestInit): boolean {
   ];
 
   // Only match extremely specific Vite requests
-  const isStrictViteRequest = strictVitePatterns.some(pattern => url.includes(pattern));
-
-  // Additional check: must be from Vite client stack trace
-  const stack = new Error().stack || '';
-  const isFromViteClient = stack.includes('@vite/client') && stack.includes('connectWebSocket');
-
-  return isStrictViteRequest && isFromViteClient;
+  return strictVitePatterns.some(pattern => url.includes(pattern));
 }
 
 /**
@@ -113,9 +120,11 @@ function isViteClientError(error: any): boolean {
   // EXTREMELY conservative - only consider it a Vite client error if:
   // 1. The stack explicitly shows Vite WebSocket connection code
   // 2. AND it's NOT from any external service
+  // 3. AND the URL contains Vite-specific patterns
   return message.includes('Failed to fetch') &&
          stack.includes('@vite/client') &&
          stack.includes('connectWebSocket') &&
+         (stack.includes('/@vite/client') || stack.includes('/__vite_ping')) &&
          // Absolutely exclude any external services
          !stack.includes('supabase') &&
          !stack.includes('netlify') &&
