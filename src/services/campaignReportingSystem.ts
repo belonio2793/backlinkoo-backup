@@ -311,22 +311,65 @@ class CampaignReportingSystem {
         performance_metrics: performanceMetrics
       };
 
-      // Save report to database
+      // Save report to database - handle both old and new schema
+      let insertData: any = {
+        id: report.id,
+        campaign_id: report.campaign_id,
+        user_id: report.user_id,
+      };
+
+      // Check if new columns exist
+      try {
+        const { error: testError } = await supabase
+          .from('campaign_reports')
+          .select('report_name, report_type, generated_at, report_data')
+          .limit(1);
+
+        if (!testError) {
+          // New schema with all columns
+          insertData = {
+            ...insertData,
+            report_name: report.report_name,
+            generated_at: report.generated_at,
+            report_type: report.report_type,
+            report_data: {
+              summary: report.summary,
+              links: report.links,
+              performance_metrics: report.performance_metrics
+            }
+          };
+        } else {
+          // Fallback to old schema columns
+          insertData = {
+            ...insertData,
+            total_links: report.summary?.total_links || 0,
+            live_links: report.summary?.live_links || 0,
+            pending_links: report.summary?.pending_links || 0,
+            failed_links: report.summary?.failed_links || 0,
+            success_rate: report.performance_metrics?.success_rate || 0,
+            average_da: report.performance_metrics?.average_da || 0,
+            total_cost: report.performance_metrics?.total_cost || 0,
+            daily_velocity: report.performance_metrics?.daily_velocity || 0,
+          };
+        }
+      } catch (e) {
+        // Fallback to old schema
+        insertData = {
+          ...insertData,
+          total_links: report.summary?.total_links || 0,
+          live_links: report.summary?.live_links || 0,
+          pending_links: report.summary?.pending_links || 0,
+          failed_links: report.summary?.failed_links || 0,
+          success_rate: report.performance_metrics?.success_rate || 0,
+          average_da: report.performance_metrics?.average_da || 0,
+          total_cost: report.performance_metrics?.total_cost || 0,
+          daily_velocity: report.performance_metrics?.daily_velocity || 0,
+        };
+      }
+
       const { data: savedReport, error: saveError } = await supabase
         .from('campaign_reports')
-        .insert({
-          id: report.id,
-          campaign_id: report.campaign_id,
-          user_id: report.user_id,
-          report_name: report.report_name,
-          generated_at: report.generated_at,
-          report_type: report.report_type,
-          report_data: {
-            summary: report.summary,
-            links: report.links,
-            performance_metrics: report.performance_metrics
-          }
-        })
+        .insert(insertData)
         .select()
         .single();
 
