@@ -542,31 +542,24 @@ export default function AutomationLive() {
                   Target Platforms
                 </CardTitle>
                 <CardDescription>
-                  Select from verified publishing platforms ({Object.keys(PLATFORM_CONFIGS).length} available, growing to 100s)
+                  Publishing domains for link building rotation
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Platform Dropdown */}
-                <div className="space-y-2">
-                  <Label htmlFor="platform-select">Publishing Platform URLs</Label>
-                  <Select>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Browse verified platform URLs..." />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-60">
-                      {Object.values(PLATFORM_CONFIGS).map((platform) => (
-                        <SelectItem key={platform.id} value={platform.id}>
-                          <div className="flex items-center justify-between w-full">
-                            <div className="flex items-center gap-2">
-                              <div className={`w-2 h-2 rounded-full ${
-                                platform.implementation.status === 'implemented' ? 'bg-green-500' : 'bg-blue-500'
-                              }`}></div>
-                              <span className="font-medium">{platform.domain}</span>
-                              <span className="text-xs text-gray-500">({platform.name})</span>
-                            </div>
+              <CardContent>
+                {/* Scrollable Domain List */}
+                <div className="h-64 overflow-y-auto border rounded-lg bg-white">
+                  {Object.values(PLATFORM_CONFIGS).map((platform) => (
+                    <div key={platform.id} className="border-b border-gray-100 last:border-b-0 p-3 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <div className={`w-3 h-3 rounded-full ${
+                              platform.implementation.status === 'implemented' ? 'bg-green-500' : 'bg-blue-500'
+                            }`}></div>
+                            <span className="font-semibold text-gray-900">{platform.domain}</span>
                             <Badge
                               variant="outline"
-                              className={`text-xs ml-2 ${
+                              className={`text-xs ${
                                 platform.implementation.status === 'implemented'
                                   ? 'bg-green-50 text-green-700 border-green-200'
                                   : 'bg-blue-50 text-blue-700 border-blue-200'
@@ -575,53 +568,45 @@ export default function AutomationLive() {
                               {platform.implementation.status === 'implemented' ? 'Active' : 'Ready'}
                             </Badge>
                           </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-gray-500">
-                    Platforms are added as they're tested and verified for reliable campaign execution
-                  </p>
+                          <div className="grid grid-cols-3 gap-4 text-xs text-gray-600">
+                            <div>
+                              <span className="text-gray-500">DR:</span>
+                              <span className="ml-1 font-medium">
+                                {platform.domain === 'telegra.ph' ? '85+' :
+                                 platform.domain === 'write.as' ? '75+' :
+                                 platform.domain === 'rentry.co' ? '60+' : '55+'}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Type:</span>
+                              <span className="ml-1">
+                                {platform.features.anonymous ? 'Anonymous' : 'Account'}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Format:</span>
+                              <span className="ml-1">
+                                {platform.features.markdown ? 'Markdown' : 'HTML'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => window.open(platform.documentation, '_blank')}
+                          className="ml-2 text-gray-400 hover:text-gray-600"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
-                {/* Current Status Summary */}
-                <div className="bg-gray-50 rounded-lg p-3">
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                      <span className="text-gray-700">
-                        {Object.values(PLATFORM_CONFIGS).filter(p => p.implementation.status === 'implemented').length} Active Platforms
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                      <span className="text-gray-700">
-                        {Object.values(PLATFORM_CONFIGS).filter(p => p.implementation.status === 'planned').length} Ready for Testing
-                      </span>
-                    </div>
-                  </div>
-                  <div className="mt-2 text-xs text-gray-500">
-                    Total: {Object.keys(PLATFORM_CONFIGS).length} platforms • Growing to 100s as campaigns are verified
-                  </div>
-                </div>
-
-                {/* Quick Links to Platform APIs */}
-                <div className="space-y-2">
-                  <Label className="text-xs text-gray-600">Quick API Access:</Label>
-                  <div className="flex flex-wrap gap-1">
-                    {Object.values(PLATFORM_CONFIGS).slice(0, 4).map((platform) => (
-                      <Button
-                        key={platform.id}
-                        size="sm"
-                        variant="outline"
-                        onClick={() => window.open(platform.documentation, '_blank')}
-                        className="text-xs h-6 px-2"
-                      >
-                        {platform.domain}
-                        <ExternalLink className="h-2 w-2 ml-1" />
-                      </Button>
-                    ))}
-                  </div>
+                {/* Footer Summary */}
+                <div className="mt-3 text-xs text-gray-500 text-center">
+                  {Object.keys(PLATFORM_CONFIGS).length} domains • {Object.values(PLATFORM_CONFIGS).filter(p => p.implementation.status === 'implemented').length} active • Growing to 100s
                 </div>
               </CardContent>
             </Card>
