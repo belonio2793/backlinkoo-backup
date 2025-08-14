@@ -63,14 +63,21 @@ export class AutomationOrchestrator {
       
       // Start processing the campaign asynchronously
       this.processCampaign(data.id).catch(error => {
-        console.error('Campaign processing error:', error);
-        this.updateCampaignStatus(data.id, 'failed', error.message);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error('Campaign processing error:', errorMessage);
+        this.updateCampaignStatus(data.id, 'failed', errorMessage);
       });
 
       return data;
     } catch (error) {
       console.error('Campaign creation error:', error);
-      throw error;
+
+      // Ensure we throw a proper Error object with a clear message
+      if (error instanceof Error) {
+        throw new Error(`Campaign creation failed: ${error.message}`);
+      } else {
+        throw new Error(`Campaign creation failed: ${String(error)}`);
+      }
     }
   }
 
@@ -157,8 +164,9 @@ export class AutomationOrchestrator {
           // No delay needed since we're only publishing one piece of content
 
         } catch (error) {
-          console.error('Error publishing content:', error);
-          await this.logActivity(campaignId, 'error', `Failed to publish content: ${error}`);
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          console.error('Error publishing content:', errorMessage);
+          await this.logActivity(campaignId, 'error', `Failed to publish content: ${errorMessage}`);
         }
       }
 
@@ -173,9 +181,10 @@ export class AutomationOrchestrator {
 
     } catch (error) {
       console.error('Campaign processing error:', error);
-      await this.updateCampaignStatus(campaignId, 'failed', error instanceof Error ? error.message : 'Unknown error');
-      await this.logActivity(campaignId, 'error', `Campaign failed: ${error}`);
-      throw error;
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      await this.updateCampaignStatus(campaignId, 'failed', errorMessage);
+      await this.logActivity(campaignId, 'error', `Campaign failed: ${errorMessage}`);
+      throw new Error(`Campaign processing failed: ${errorMessage}`);
     }
   }
 
@@ -330,8 +339,9 @@ export class AutomationOrchestrator {
     
     // Restart processing
     this.processCampaign(campaignId).catch(error => {
-      console.error('Campaign processing error:', error);
-      this.updateCampaignStatus(campaignId, 'failed', error.message);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Campaign processing error:', errorMessage);
+      this.updateCampaignStatus(campaignId, 'failed', errorMessage);
     });
   }
 
