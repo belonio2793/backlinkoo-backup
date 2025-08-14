@@ -117,7 +117,12 @@ class TargetSitesManager {
     }
   }
 
-  private getDefaultSites(): TargetSite[] {
+  private getFilteredWorkingSites(): TargetSite[] {
+    // Only return platforms with confirmed working APIs that can:
+    // 1. Post content immediately
+    // 2. Return live URLs
+    // 3. Work without complex authentication
+    automationLogger.info('system', 'Loading filtered working sites only');
     return [
       {
         id: 'telegraph',
