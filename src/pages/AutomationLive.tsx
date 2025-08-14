@@ -547,19 +547,19 @@ export default function AutomationLive() {
               </CardHeader>
               <CardContent>
                 {/* Scrollable Domain List */}
-                <div className="h-64 overflow-y-auto border rounded-lg bg-white">
+                <div className="h-64 overflow-y-auto border rounded-lg bg-white text-xs">
                   {Object.values(PLATFORM_CONFIGS).map((platform) => (
-                    <div key={platform.id} className="border-b border-gray-100 last:border-b-0 p-3 hover:bg-gray-50 transition-colors">
+                    <div key={platform.id} className="border-b border-gray-100 last:border-b-0 px-2 py-1.5 hover:bg-gray-50 transition-colors">
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <div className={`w-3 h-3 rounded-full ${
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <div className={`w-1.5 h-1.5 rounded-full ${
                               platform.implementation.status === 'implemented' ? 'bg-green-500' : 'bg-blue-500'
                             }`}></div>
-                            <span className="font-semibold text-gray-900">{platform.domain}</span>
+                            <span className="font-medium text-gray-900 text-xs">{platform.domain}</span>
                             <Badge
                               variant="outline"
-                              className={`text-xs ${
+                              className={`text-[10px] px-1 py-0 h-4 ${
                                 platform.implementation.status === 'implemented'
                                   ? 'bg-green-50 text-green-700 border-green-200'
                                   : 'bg-blue-50 text-blue-700 border-blue-200'
@@ -568,10 +568,10 @@ export default function AutomationLive() {
                               {platform.implementation.status === 'implemented' ? 'Active' : 'Ready'}
                             </Badge>
                           </div>
-                          <div className="grid grid-cols-3 gap-4 text-xs text-gray-600">
+                          <div className="grid grid-cols-3 gap-2 text-[10px] text-gray-600">
                             <div>
                               <span className="text-gray-500">DR:</span>
-                              <span className="ml-1 font-medium">
+                              <span className="ml-0.5 font-medium">
                                 {platform.domain === 'telegra.ph' ? '85+' :
                                  platform.domain === 'write.as' ? '75+' :
                                  platform.domain === 'rentry.co' ? '60+' : '55+'}
@@ -579,14 +579,14 @@ export default function AutomationLive() {
                             </div>
                             <div>
                               <span className="text-gray-500">Type:</span>
-                              <span className="ml-1">
-                                {platform.features.anonymous ? 'Anonymous' : 'Account'}
+                              <span className="ml-0.5">
+                                {platform.features.anonymous ? 'Anon' : 'Acct'}
                               </span>
                             </div>
                             <div>
                               <span className="text-gray-500">Format:</span>
-                              <span className="ml-1">
-                                {platform.features.markdown ? 'Markdown' : 'HTML'}
+                              <span className="ml-0.5">
+                                {platform.features.markdown ? 'MD' : 'HTML'}
                               </span>
                             </div>
                           </div>
@@ -595,9 +595,9 @@ export default function AutomationLive() {
                           size="sm"
                           variant="ghost"
                           onClick={() => window.open(platform.documentation, '_blank')}
-                          className="ml-2 text-gray-400 hover:text-gray-600"
+                          className="ml-1 text-gray-400 hover:text-gray-600 p-0.5 h-5 w-5"
                         >
-                          <ExternalLink className="h-3 w-3" />
+                          <ExternalLink className="h-2 w-2" />
                         </Button>
                       </div>
                     </div>
@@ -605,7 +605,7 @@ export default function AutomationLive() {
                 </div>
 
                 {/* Footer Summary */}
-                <div className="mt-3 text-xs text-gray-500 text-center">
+                <div className="mt-2 text-[10px] text-gray-500 text-center">
                   {Object.keys(PLATFORM_CONFIGS).length} domains • {Object.values(PLATFORM_CONFIGS).filter(p => p.implementation.status === 'implemented').length} active • Growing to 100s
                 </div>
               </CardContent>
