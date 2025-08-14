@@ -199,7 +199,7 @@ export default function AutomationLive() {
       ? primaryKeywords.substring(0, 27) + '...'
       : primaryKeywords;
 
-    return `${shortKeywords} → ${domain} (${timestamp})`;
+    return `${shortKeywords} �� ${domain} (${timestamp})`;
   };
 
   // Create campaign
@@ -229,25 +229,28 @@ export default function AutomationLive() {
       const anchorTextsArray = formData.anchor_texts.split(',').map(a => a.trim()).filter(a => a);
       const generatedName = generateCampaignName(formData.keywords, formData.target_url);
 
-      console.log('🔧 Creating campaign with data:', {
+      const campaignParams = {
         name: generatedName,
         keywords: keywordsArray,
         anchor_texts: anchorTextsArray,
         target_url: formData.target_url,
         user_id: user.id,
         auto_start: false
+      };
+
+      internalLogger.info('ui_campaign_creation', 'User initiated campaign creation', {
+        campaignParams,
+        formData,
+        userInfo: { id: user.id, email: user.email }
       });
 
-      const result = await liveCampaignManager.createCampaign({
-        name: generatedName,
-        keywords: keywordsArray,
-        anchor_texts: anchorTextsArray,
-        target_url: formData.target_url,
-        user_id: user.id,
-        auto_start: false
-      });
+      const result = await liveCampaignManager.createCampaign(campaignParams);
 
-      console.log('🔧 Campaign creation result:', result);
+      internalLogger.info('ui_campaign_creation', 'Campaign creation result received', {
+        success: result.success,
+        hasCampaign: !!result.campaign,
+        error: result.error
+      });
 
       if (result.success && result.campaign) {
         setCampaigns(prev => [result.campaign!, ...prev]);
