@@ -103,8 +103,13 @@ class DirectAutomationExecutor {
         throw new Error(`Content generation failed: ${contentResult.error}`);
       }
 
-      // Step 3: Post to Telegraph
-      console.log('📤 Publishing to Telegraph...');
+      // Step 3: Post to Telegraph (using mock service in dev environment)
+      if (useMockServices) {
+        console.log('🎭 Publishing via mock service (development mode)...');
+      } else {
+        console.log('📤 Publishing to Telegraph...');
+      }
+
       const publishResult = await this.publishToTelegraph({
         title: contentResult.title,
         content: contentResult.content,
