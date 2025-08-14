@@ -5,6 +5,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { ErrorLogger } from '../utils/errorLogger';
 import type { LiveCampaign } from './liveCampaignManager';
 
 export interface PublishedLink {
