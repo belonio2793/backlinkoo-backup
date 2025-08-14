@@ -42,6 +42,7 @@ import { PlatformHealthMonitor } from '@/components/debug/PlatformHealthMonitor'
 import { PlatformErrorSimulator } from '@/components/debug/PlatformErrorSimulator';
 import { CampaignCreationDebugger } from '@/components/debug/CampaignCreationDebugger';
 import { DatabaseSchemaFixer } from '@/components/debug/DatabaseSchemaFixer';
+import { SchemaFixTester } from '@/components/debug/SchemaFixTester';
 import { internalLogger } from '@/services/internalLogger';
 import guestPostingSites from '@/data/guestPostingSites.json';
 import { PLATFORM_CONFIGS, getImplementedPlatforms, getPlannedPlatforms, type PlatformConfig } from '@/services/platformConfigs';
