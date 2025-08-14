@@ -178,6 +178,33 @@ requestIdleCallback(() => {
   // Import test utilities for development
   if (import.meta.env.DEV) {
     import('./utils/testBlogGeneration');
+
+    // Quick content generation status check
+    setTimeout(async () => {
+      try {
+        const response = await fetch('/.netlify/functions/working-content-generator', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            keyword: 'startup test',
+            anchor_text: 'test',
+            target_url: 'https://example.com'
+          }),
+        });
+
+        if (response.status === 404) {
+          console.warn('⚠️ Content generation functions not available (404)');
+          console.warn('💡 Run window.testContentGeneration() to check all functions');
+        } else if (response.ok) {
+          console.log('✅ Content generation functions are working');
+        } else {
+          console.warn(`⚠️ Content generation status: ${response.status}`);
+        }
+      } catch (error) {
+        console.warn('⚠️ Could not check content generation status');
+      }
+    }, 3000);
+
     // Disabled database sync service - using new blog comment system
     // import('./services/databaseSyncService').then(({ DatabaseSyncService }) => {
     //   DatabaseSyncService.scheduleCleanup();
