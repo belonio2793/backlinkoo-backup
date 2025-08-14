@@ -229,6 +229,16 @@ export default function AutomationLive() {
       const anchorTextsArray = formData.anchor_texts.split(',').map(a => a.trim()).filter(a => a);
       const generatedName = generateCampaignName(formData.keywords, formData.target_url);
 
+      console.log('🔍 Campaign creation debug:', {
+        formData,
+        keywordsArray,
+        anchorTextsArray,
+        keywordsArrayType: Array.isArray(keywordsArray),
+        anchorTextsArrayType: Array.isArray(anchorTextsArray),
+        keywordsLength: keywordsArray.length,
+        anchorTextsLength: anchorTextsArray.length
+      });
+
       const campaignParams = {
         name: generatedName,
         keywords: keywordsArray,
@@ -237,6 +247,8 @@ export default function AutomationLive() {
         user_id: user.id,
         auto_start: false
       };
+
+      console.log('🔍 Campaign params being sent:', campaignParams);
 
       internalLogger.info('ui_campaign_creation', 'User initiated campaign creation', {
         campaignParams,
