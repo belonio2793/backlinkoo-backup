@@ -25,6 +25,12 @@ export function protectViteClient(): void {
     return;
   }
 
+  // Emergency disable if FullStory is not even present
+  if (!isFullStoryPresent()) {
+    console.log('🔧 Vite protection disabled - FullStory not detected');
+    return;
+  }
+
   try {
     // Store original fetch before any modifications
     originalFetch = window.fetch.bind(window);
