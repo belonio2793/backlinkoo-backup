@@ -49,12 +49,13 @@ export default function Automation() {
     clearSavedFormData
   } = useUserFlow();
 
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [campaigns, setCampaigns] = useState<LiveCampaign[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  // Unified execution results
-  const [directResults, setDirectResults] = useState<DirectExecutionResult[]>([]);
+  // Published links and reports
+  const [publishedLinks, setPublishedLinks] = useState<PublishedLink[]>([]);
+  const [savedReports, setSavedReports] = useState<CampaignReport[]>([]);
   const [campaignProgress, setCampaignProgress] = useState<{
     isRunning: boolean;
     currentPlatform: string;
@@ -63,6 +64,7 @@ export default function Automation() {
     articlesPublished: number;
     status: 'starting' | 'generating' | 'publishing' | 'rotating' | 'completed' | 'paused';
     timeStarted?: number;
+    campaign_id?: string;
   } | null>(null);
 
   // Initialize logging and database check
