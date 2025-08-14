@@ -357,11 +357,30 @@ class CampaignReportingSystem {
     campaignId?: string
   ): Promise<CampaignReport[]> {
     try {
+      // First, try to check what columns exist
+      let orderColumn = 'created_at'; // fallback to created_at if generated_at doesn't exist
+      let selectColumns = 'id, user_id, campaign_id, created_at';
+
+      // Try to detect available columns by attempting a limited query
+      try {
+        const { error: testError } = await supabase
+          .from('campaign_reports')
+          .select('generated_at')
+          .limit(1);
+
+        if (!testError) {
+          orderColumn = 'generated_at';
+          selectColumns += ', generated_at, report_name, report_type, report_data';
+        }
+      } catch (e) {
+        console.log('Using fallback columns due to schema differences');
+      }
+
       let query = supabase
         .from('campaign_reports')
-        .select('*')
+        .select(selectColumns)
         .eq('user_id', userId)
-        .order('generated_at', { ascending: false });
+        .order(orderColumn, { ascending: false });
 
       if (campaignId) {
         query = query.eq('campaign_id', campaignId);
@@ -372,13 +391,27 @@ class CampaignReportingSystem {
       if (error) throw error;
 
       return (data || []).map(row => ({
-        ...row.report_data,
+        // Handle both old and new schema
+        ...((row as any).report_data || {}),
         id: row.id,
         campaign_id: row.campaign_id,
         user_id: row.user_id,
-        report_name: row.report_name,
-        generated_at: row.generated_at,
-        report_type: row.report_type
+        report_name: (row as any).report_name || `Report ${row.id}`,
+        generated_at: (row as any).generated_at || row.created_at,
+        report_type: (row as any).report_type || 'summary',
+        // Add default structure for missing data
+        summary: (row as any).report_data?.summary || {
+          total_links: (row as any).total_links || 0,
+          live_links: (row as any).live_links || 0,
+          pending_links: (row as any).pending_links || 0,
+          failed_links: (row as any).failed_links || 0
+        },
+        performance_metrics: (row as any).report_data?.performance_metrics || {
+          success_rate: (row as any).success_rate || 0,
+          average_da: (row as any).average_da || 0,
+          total_cost: (row as any).total_cost || 0,
+          daily_velocity: (row as any).daily_velocity || 0
+        }
       }));
     } catch (error) {
       let errorMessage = 'Unknown error getting user reports';
