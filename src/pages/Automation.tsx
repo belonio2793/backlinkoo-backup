@@ -81,7 +81,24 @@ const Automation = () => {
       return error;
     }
     if (error && typeof error === 'object') {
-      return JSON.stringify(error);
+      // Handle Supabase error objects
+      if ('message' in error && typeof error.message === 'string') {
+        return error.message;
+      }
+      // Handle error objects with details
+      if ('details' in error && typeof error.details === 'string') {
+        return error.details;
+      }
+      // Handle PostgreSQL error objects
+      if ('hint' in error && typeof error.hint === 'string') {
+        return error.hint;
+      }
+      // Try to extract meaningful information
+      try {
+        return JSON.stringify(error, null, 2);
+      } catch {
+        return Object.prototype.toString.call(error);
+      }
     }
     return 'An unknown error occurred';
   };
