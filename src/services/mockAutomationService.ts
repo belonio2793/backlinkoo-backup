@@ -38,16 +38,27 @@ export interface MockPublishingResult {
 
 class MockAutomationService {
   private isDevEnvironment(): boolean {
-    // Always use mock in development-like environments
-    if (typeof window === 'undefined') return true; // Server-side, assume dev
+    // Only use mock in actual development environments
+    if (typeof window === 'undefined') return false; // Server-side, assume production
 
-    return import.meta.env.MODE === 'development' ||
-           import.meta.env.DEV === true ||
-           window.location.hostname === 'localhost' ||
-           window.location.hostname.includes('127.0.0.1') ||
-           window.location.hostname.includes('.fly.dev') || // Development server
-           window.location.port !== '' || // Any port suggests development
-           !window.location.hostname.includes('.com'); // Not a production domain
+    // Check for explicit development environment variables
+    if (import.meta.env.MODE === 'development' || import.meta.env.DEV === true) {
+      return true;
+    }
+
+    // Check for local development only
+    const hostname = window.location.hostname;
+    const isLocalhost = hostname === 'localhost' ||
+                       hostname.includes('127.0.0.1') ||
+                       hostname.includes('::1');
+
+    const hasDevPort = window.location.port !== '' &&
+                      (window.location.port === '3000' ||
+                       window.location.port === '5173' ||
+                       window.location.port === '8080');
+
+    // Only use mock for actual localhost development
+    return isLocalhost && hasDevPort;
   }
 
   // Generate realistic mock content based on keyword and anchor text
