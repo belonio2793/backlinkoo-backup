@@ -742,7 +742,7 @@ export default function Automation() {
                   Create New Campaign
                 </CardTitle>
                 <CardDescription>
-                  Set up your automated link building campaign. Campaign names are automatically generated based on your keywords and target URL.
+                  Generate keyword-relevant content with your anchor text links and publish to high-authority websites for instant backlinks.
                 </CardDescription>
 
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
