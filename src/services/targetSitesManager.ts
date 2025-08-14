@@ -118,15 +118,12 @@ class TargetSitesManager {
   }
 
   private getFilteredWorkingSites(): TargetSite[] {
-    // Only return platforms with confirmed working APIs that can:
-    // 1. Post content immediately
-    // 2. Return live URLs
-    // 3. Work without complex authentication
-    automationLogger.info('system', 'Loading filtered working sites only');
-    // ONLY platforms with confirmed working APIs that can post immediately and return URLs
+    // Telegraph only - the one platform that actually works
+    automationLogger.info('system', 'Loading Telegraph as the only platform');
+
     return [
       {
-        id: 'telegraph-verified',
+        id: 'telegraph-only',
         domain: 'telegra.ph',
         url: 'https://telegra.ph',
         type: 'blog',
@@ -142,20 +139,13 @@ class TargetSitesManager {
           registration_required: false
         },
         metadata: {
-          submission_guidelines: 'Anonymous instant publishing platform - VERIFIED WORKING API',
+          submission_guidelines: 'Telegraph - instant anonymous publishing',
           response_time_hours: 0,
-          notes: 'Confirmed: Instant publishing via Telegraph API, returns live URLs immediately'
+          notes: 'Telegraph API for instant publishing'
         },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }
-      // NOTE: All other platforms removed due to:
-      // - Medium: Requires OAuth setup and user authentication
-      // - Dev.to: Requires API key and user account setup
-      // - Hashnode: Requires GraphQL API setup and publication
-      // - Substack: No public API for external posting
-      // - HackerNoon: Manual submission only, no API
-      // Only platforms with working APIs that can post immediately are kept
     ];
   }
 
