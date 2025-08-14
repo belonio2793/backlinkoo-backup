@@ -121,7 +121,7 @@ class DirectAutomationExecutor {
       if (useMockServices) {
         console.log('🎭 Generating content via mock service (development mode)...');
       } else {
-        console.log('🤖 Generating content via Netlify function...');
+        console.log('�� Generating content via Netlify function...');
       }
 
       let contentResult = await this.generateContent({
@@ -365,7 +365,36 @@ class DirectAutomationExecutor {
             }
           }
 
-          throw new Error('All content generation functions unavailable (404). Check Netlify deployment.');
+          // Final fallback: Use client-side content generation
+          console.log('🔧 All Netlify functions failed, using client-side content generation...');
+
+          try {
+            const { ClientContentGenerator } = await import('./clientContentGenerator');
+
+            const clientResult = await ClientContentGenerator.generateContent({
+              keyword: params.keyword,
+              anchor_text: params.anchor_text,
+              target_url: params.target_url,
+              word_count: 800,
+              tone: 'professional'
+            });
+
+            if (clientResult.success && clientResult.data) {
+              console.log('✅ Client-side content generation successful!');
+              return {
+                success: true,
+                title: clientResult.data.title,
+                content: clientResult.data.content,
+                word_count: clientResult.data.word_count,
+                generation_time_ms: Date.now() - startTime
+              };
+            } else {
+              throw new Error(`Client-side generation failed: ${clientResult.error}`);
+            }
+          } catch (clientError) {
+            console.error('❌ Client-side content generation also failed:', clientError);
+            throw new Error('All content generation methods unavailable. Both Netlify functions and client-side generation failed.');
+          }
         }
 
         throw new Error(`Content generation HTTP ${response.status}: ${errorData.error || response.statusText || 'Unknown error'}`);
