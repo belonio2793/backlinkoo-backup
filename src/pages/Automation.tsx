@@ -1025,18 +1025,27 @@ export default function Automation() {
 
                 <Button
                   onClick={executeUnified}
-                  disabled={creating}
-                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                  disabled={creating || campaignProgress?.isRunning}
+                  className={`w-full transition-all duration-300 ${
+                    campaignProgress?.isRunning
+                      ? 'bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600'
+                      : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700'
+                  }`}
                 >
-                  {creating ? (
+                  {creating || campaignProgress?.isRunning ? (
                     <>
                       <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                      Generating & Publishing Article...
+                      {campaignProgress?.status === 'starting' && 'Starting Campaign...'}
+                      {campaignProgress?.status === 'generating' && `Generating Content (${campaignProgress.articlesPublished + 1}/${campaignProgress.totalPlatforms})...`}
+                      {campaignProgress?.status === 'publishing' && `Publishing Article (${campaignProgress.articlesPublished + 1}/${campaignProgress.totalPlatforms})...`}
+                      {campaignProgress?.status === 'rotating' && 'Rotating to Next Platform...'}
+                      {campaignProgress?.status === 'completed' && 'Campaign Completed!'}
+                      {(!campaignProgress || creating) && 'Generating & Publishing Article...'}
                     </>
                   ) : (
                     <>
                       <Zap className="h-4 w-4 mr-2" />
-                      Start Link Building Campaign
+                      Start Multi-Platform Campaign
                     </>
                   )}
                 </Button>
