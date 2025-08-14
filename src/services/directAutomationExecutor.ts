@@ -543,9 +543,35 @@ class DirectAutomationExecutor {
           `Error: ${JSON.stringify(errorData)}`
         );
 
-        // Special handling for 404 - function doesn't exist
+        // Special handling for 404 - function doesn't exist, use client-side fallback
         if (response.status === 404) {
-          throw new Error('Publishing function not available. Netlify functions may not be deployed.');
+          console.log('🔄 Publishing function not found, using client-side Telegraph fallback...');
+
+          try {
+            const { ClientTelegraphPublisher } = await import('./clientTelegraphPublisher');
+
+            const clientResult = await ClientTelegraphPublisher.publishArticle({
+              title: params.title,
+              content: params.content,
+              user_id: params.user_id,
+              author_name: 'SEO Content Bot'
+            });
+
+            if (clientResult.success) {
+              console.log('✅ Client-side Telegraph fallback successful!');
+              return {
+                success: true,
+                url: clientResult.url || '',
+                publishing_time_ms: Date.now() - startTime,
+                warning: clientResult.warning
+              };
+            } else {
+              throw new Error(clientResult.error || 'Client-side Telegraph publishing failed');
+            }
+          } catch (clientError) {
+            console.error('❌ Client-side Telegraph fallback also failed:', clientError);
+            throw new Error('All publishing methods unavailable. Both Netlify functions and client-side publishing failed.');
+          }
         }
 
         throw new Error(`Publishing HTTP ${response.status}: ${errorData.error || response.statusText || 'Unknown error'}`);
