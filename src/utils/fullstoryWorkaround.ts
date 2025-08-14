@@ -11,18 +11,16 @@
 export function isFullStoryPresent(): boolean {
   if (typeof window === 'undefined') return false;
 
+  // Only check for explicit FullStory presence, not general fetch modifications
   return !!(
     (window as any).FS ||
     (window as any)._fs ||
     document.querySelector('script[src*="fullstory"]') ||
     document.querySelector('script[src*="fs.js"]') ||
     document.querySelector('script[src*="edge.fullstory.com"]') ||
-    // Check if fetch has been modified by looking at its string representation
+    // Check if fetch has been modified by FullStory specifically
     window.fetch.toString().includes('fullstory') ||
-    window.fetch.toString().includes('FS') ||
-    window.fetch.toString().length < 50 || // Native fetch is usually longer
-    // Additional detection for development environment interference
-    (import.meta.env.DEV && isLikelyThirdPartyFetchInterference())
+    window.fetch.toString().includes('FS')
   );
 }
 
@@ -62,18 +60,15 @@ export function isFullStoryError(error: any): boolean {
   const message = error.message || '';
   const stack = error.stack || '';
 
-  return message.includes('Failed to fetch') ||
-         message.includes('fetch is not defined') ||
-         message.includes('NetworkError') ||
-         stack.includes('fullstory') ||
+  // Only consider it a FullStory error if there's explicit evidence
+  return stack.includes('fullstory') ||
          stack.includes('fs.js') ||
          stack.includes('edge.fullstory.com') ||
-         // Common FullStory interference patterns
-         (message.includes('TypeError') && stack.includes('messageHandler')) ||
-         // Vite client specific patterns when FullStory interferes
-         (message.includes('TypeError') && stack.includes('@vite/client')) ||
-         (message.includes('Failed to fetch') && stack.includes('ping')) ||
-         (message.includes('Failed to fetch') && stack.includes('waitForSuccessfulPing'));
+         // Vite client specific patterns when FullStory interferes (very specific)
+         (message.includes('Failed to fetch') &&
+          stack.includes('@vite/client') &&
+          stack.includes('connectWebSocket') &&
+          (stack.includes('/@vite/client') || stack.includes('/__vite_ping')));
 }
 
 /**
@@ -221,19 +216,12 @@ export function preserveOriginalFetch(): void {
  * Safe wrapper for any fetch request that automatically handles FullStory interference
  */
 export async function safeFetch(url: string | URL, init?: RequestInit): Promise<Response> {
-  // If FullStory is detected, use bypass method immediately
-  if (isFullStoryPresent()) {
-    console.log('🔧 FullStory detected - using XMLHttpRequest bypass for:', url.toString());
-    const bypassFetch = createBypassFetch();
-    return await bypassFetch(url, init);
-  }
-
   try {
-    // Try normal fetch first only if FullStory is not present
+    // Try normal fetch first
     return await window.fetch(url, init);
   } catch (error) {
-    // If it fails, check if it could be FullStory interference and retry
-    if (isFullStoryError(error)) {
+    // Only use bypass if we have explicit evidence of FullStory interference
+    if (isFullStoryError(error) && isFullStoryPresent()) {
       console.log('🔄 Fetch failed with FullStory error - retrying with bypass for:', url.toString());
 
       try {
@@ -245,7 +233,7 @@ export async function safeFetch(url: string | URL, init?: RequestInit): Promise<
           bypassError: bypassError.message
         });
 
-        // Instead of throwing a cryptic error, provide more context
+        // Provide contextual error message
         const contextualError = new Error(
           `Network request failed. This may be due to browser extensions or third-party scripts interfering with requests. ` +
           `Try disabling browser extensions or refreshing the page. Original error: ${error.message}`
@@ -255,16 +243,7 @@ export async function safeFetch(url: string | URL, init?: RequestInit): Promise<
       }
     }
 
-    // Re-throw other types of errors with additional context if helpful
-    if (error.message?.includes('Failed to fetch')) {
-      const enhancedError = new Error(
-        `Network request failed. This could be due to connectivity issues, CORS problems, or browser extension interference. ` +
-        `Please check your internet connection and try again. Original error: ${error.message}`
-      );
-      enhancedError.name = 'NetworkError';
-      throw enhancedError;
-    }
-
+    // Re-throw the original error for most cases
     throw error;
   }
 }
