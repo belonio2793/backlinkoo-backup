@@ -309,10 +309,73 @@ class DirectAutomationExecutor {
     }
   }
 
+  // Test if Netlify functions are accessible
+  async testNetlifyFunctions(): Promise<{ contentGeneration: boolean; publishing: boolean; errors: string[] }> {
+    const errors: string[] = [];
+    let contentGeneration = false;
+    let publishing = false;
+
+    try {
+      // Test content generation endpoint
+      const contentResponse = await fetch('/.netlify/functions/generate-content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          keyword: 'test',
+          anchor_text: 'test link',
+          url: 'https://example.com',
+          word_count: 100,
+          user_id: 'test'
+        })
+      });
+      contentGeneration = contentResponse.status !== 404;
+      if (!contentGeneration) {
+        errors.push(`Content generation function not found (404)`);
+      }
+    } catch (error) {
+      errors.push(`Content generation test failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+
+    try {
+      // Test publishing endpoint
+      const publishResponse = await fetch('/.netlify/functions/publish-article', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: 'Test',
+          content: 'Test content',
+          target_site: 'telegraph',
+          user_id: 'test'
+        })
+      });
+      publishing = publishResponse.status !== 404;
+      if (!publishing) {
+        errors.push(`Publishing function not found (404)`);
+      }
+    } catch (error) {
+      errors.push(`Publishing test failed: ${error instanceof Error ? error.message : String(error)}`);
+    }
+
+    return { contentGeneration, publishing, errors };
+  }
+
   // Test the direct execution with sample data
   async testExecution(): Promise<DirectExecutionResult> {
     console.log('🧪 Running direct automation test...');
-    
+
+    // First test if functions are available
+    const functionTest = await this.testNetlifyFunctions();
+    console.log('🔧 Netlify function availability:', functionTest);
+
+    if (!functionTest.contentGeneration || !functionTest.publishing) {
+      return {
+        success: false,
+        error: `Required Netlify functions not available: ${functionTest.errors.join(', ')}`,
+        execution_time_ms: 0,
+        debug_info: { function_test: functionTest }
+      };
+    }
+
     return this.executeWorkflow({
       keywords: ['SEO tools', 'digital marketing', 'automation'],
       anchor_texts: ['powerful SEO platform', 'learn more', 'advanced tools'],
