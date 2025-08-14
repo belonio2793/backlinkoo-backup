@@ -708,19 +708,10 @@ export default function Automation() {
         </div>
 
         <Tabs defaultValue="create" className="max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-5 mb-8">
+          <TabsList className="grid w-full grid-cols-4 mb-8">
             <TabsTrigger value="create" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Create Campaign
-            </TabsTrigger>
-            <TabsTrigger value="direct-results" className="flex items-center gap-2">
-              <Zap className="h-4 w-4" />
-              Direct Results
-              {directResults.length > 0 && (
-                <Badge variant="secondary" className="ml-1 text-xs">
-                  {directResults.length}
-                </Badge>
-              )}
             </TabsTrigger>
             <TabsTrigger value="manage" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
@@ -728,7 +719,12 @@ export default function Automation() {
             </TabsTrigger>
             <TabsTrigger value="reporting" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
-              Reporting
+              Results & Reporting
+              {directResults.length > 0 && (
+                <Badge variant="secondary" className="ml-1 text-xs">
+                  {directResults.length}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="testing" className="flex items-center gap-2">
               <Target className="h-4 w-4" />
