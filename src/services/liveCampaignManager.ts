@@ -219,13 +219,26 @@ class LiveCampaignManager {
         }
       }
 
+      console.log('🔧 Attempting to insert campaign data:', campaignData);
+
       const { data, error } = await supabase
         .from('automation_campaigns')
         .insert(campaignData)
         .select()
         .single();
 
-      if (error) throw error;
+      console.log('🔧 Supabase insert result:', { data, error });
+
+      if (error) {
+        console.error('🔧 Supabase error details:', {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code,
+          fullError: error
+        });
+        throw error;
+      }
 
       const campaign: LiveCampaign = {
         ...data,
