@@ -310,17 +310,14 @@ class DirectAutomationExecutor {
       const publishingTime = Date.now() - startTime;
       const errorMessage = error instanceof Error ? error.message : String(error);
 
-      console.error('Publishing error details:', {
-        errorMessage,
-        errorType: typeof error,
-        errorName: error instanceof Error ? error.name : 'Unknown',
-        params: {
-          title: params.title.substring(0, 50),
-          content_length: params.content.length,
-          user_id: params.user_id
-        },
-        publishing_time_ms: publishingTime
-      });
+      console.error('Publishing error details:',
+        `Error: ${errorMessage}, ` +
+        `Type: ${typeof error}, ` +
+        `Name: ${error instanceof Error ? error.name : 'Unknown'}, ` +
+        `Title: ${params.title.substring(0, 50)}, ` +
+        `ContentLength: ${params.content.length}, ` +
+        `Time: ${publishingTime}ms`
+      );
 
       return {
         success: false,
