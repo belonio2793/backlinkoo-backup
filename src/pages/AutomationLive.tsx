@@ -1002,24 +1002,6 @@ export default function AutomationLive() {
             )}
           </TabsContent>
 
-          {/* Debug Tab */}
-          <TabsContent value="debug" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <SchemaFixTester />
-              <DatabaseSchemaFixer />
-              <CampaignCreationDebugger />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <CampaignCreationFix />
-              <PlatformErrorSimulator />
-            </div>
-            <div className="w-full">
-              <PlatformHealthMonitor />
-            </div>
-            <div className="w-full">
-              <InternalLogViewer />
-            </div>
-          </TabsContent>
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
