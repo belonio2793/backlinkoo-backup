@@ -4,18 +4,21 @@ import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { SecureConfig } from './secure-config.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Configuration
-const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// Configuration using secure credentials
+const SUPABASE_URL = SecureConfig.supabaseUrl;
+const SUPABASE_SERVICE_ROLE_KEY = SecureConfig.supabaseAccessToken;
 
 if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    console.error('❌ Missing environment variables:');
-    console.error('   - SUPABASE_URL (or VITE_SUPABASE_URL)');
-    console.error('   - SUPABASE_SERVICE_ROLE_KEY');
+    console.error('❌ Missing Supabase configuration:');
+    console.error('   - supabase_url:', SUPABASE_URL ? '✅' : '❌');
+    console.error('   - supabase_access_token:', SUPABASE_SERVICE_ROLE_KEY ? '✅' : '❌');
+    console.error('');
+    console.error('Run: npm run credentials:list to check configuration');
     process.exit(1);
 }
 
