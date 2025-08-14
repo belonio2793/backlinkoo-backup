@@ -93,10 +93,10 @@ export function DatabaseSchemaFixer() {
               sqlStatements.push('ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS anchor_texts TEXT[];');
               break;
             case 'target_sites_used':
-              sqlStatements.push('ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS target_sites_used TEXT[] DEFAULT \\'{}\\';');
+              sqlStatements.push('ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS target_sites_used TEXT[] DEFAULT \'{}\';');
               break;
             case 'published_articles':
-              sqlStatements.push('ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS published_articles JSONB DEFAULT \\'[]\\';');
+              sqlStatements.push('ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS published_articles JSONB DEFAULT \'[]\';');
               break;
             case 'links_built':
               sqlStatements.push('ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS links_built INTEGER DEFAULT 0;');
@@ -114,7 +114,7 @@ export function DatabaseSchemaFixer() {
               sqlStatements.push('ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS current_platform TEXT;');
               break;
             case 'execution_progress':
-              sqlStatements.push('ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS execution_progress JSONB DEFAULT \\'{}\\';');
+              sqlStatements.push('ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS execution_progress JSONB DEFAULT \'{}\';');
               break;
             case 'auto_start':
               sqlStatements.push('ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS auto_start BOOLEAN DEFAULT false;');
