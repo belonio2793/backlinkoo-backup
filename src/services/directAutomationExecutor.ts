@@ -30,12 +30,25 @@ export interface DirectExecutionResult {
 class DirectAutomationExecutor {
 
   private isDevEnvironment(): boolean {
-    return import.meta.env.MODE === 'development' ||
-           import.meta.env.DEV === true ||
-           (typeof window !== 'undefined' && (
-             window.location.hostname === 'localhost' ||
-             window.location.hostname.includes('127.0.0.1')
-           ));
+    // Force development mode detection for better reliability
+    const isDev = import.meta.env.MODE === 'development' ||
+                  import.meta.env.DEV === true ||
+                  (typeof window !== 'undefined' && (
+                    window.location.hostname === 'localhost' ||
+                    window.location.hostname.includes('127.0.0.1') ||
+                    window.location.hostname.includes('.fly.dev') || // Development server
+                    window.location.port !== '' // Any non-standard port
+                  ));
+
+    console.log('🔍 Environment check:', {
+      mode: import.meta.env.MODE,
+      dev: import.meta.env.DEV,
+      hostname: typeof window !== 'undefined' ? window.location.hostname : 'server',
+      port: typeof window !== 'undefined' ? window.location.port : 'server',
+      isDev
+    });
+
+    return isDev;
   }
 
   async executeWorkflow(input: DirectExecutionInput): Promise<DirectExecutionResult> {
