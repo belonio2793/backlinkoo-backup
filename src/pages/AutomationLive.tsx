@@ -994,10 +994,7 @@ export default function AutomationLive() {
 
           {/* Debug Tab */}
           <TabsContent value="debug" className="space-y-6">
-            <CampaignCreationTest />
-            <CampaignSchemaCheck />
-            <ApiHealthChecker />
-            <CampaignDebugger />
+            <InternalLogViewer />
           </TabsContent>
 
           {/* Analytics Tab */}
