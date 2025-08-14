@@ -162,14 +162,27 @@ class DirectAutomationExecutor {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP ${response.status}: ${errorData.error || 'Content generation failed'}`);
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = { error: response.statusText };
+        }
+
+        console.error('Content generation HTTP error:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData
+        });
+
+        throw new Error(`Content generation HTTP ${response.status}: ${errorData.error || response.statusText || 'Unknown error'}`);
       }
 
       const data = await response.json();
-      
+
       if (!data.success) {
-        throw new Error(data.error || 'Content generation returned failure');
+        console.error('Content generation service error:', data);
+        throw new Error(data.error || 'Content generation service returned failure');
       }
 
       const generationTime = Date.now() - startTime;
