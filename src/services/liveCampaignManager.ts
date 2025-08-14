@@ -306,16 +306,25 @@ class LiveCampaignManager {
 
       // Base campaign data that should exist in all schema versions
       // Use cleaned arrays that have been validated
+      // Ensure arrays are properly formatted for Supabase
       let campaignData: any = {
         name: params.name,
         engine_type: 'web2_platforms', // Required field based on schema
-        keywords: cleanKeywords, // Use cleaned keywords array
-        anchor_texts: cleanAnchorTexts, // Use cleaned anchor texts array
+        keywords: [...cleanKeywords], // Create new array instance to avoid reference issues
+        anchor_texts: [...cleanAnchorTexts], // Create new array instance to avoid reference issues
         target_url: params.target_url,
         user_id: params.user_id,
         status: params.auto_start ? 'active' : 'draft',
         auto_start: params.auto_start || false,
       };
+
+      // Additional validation to ensure Supabase compatibility
+      if (!Array.isArray(campaignData.keywords) || campaignData.keywords.some(k => typeof k !== 'string')) {
+        throw new Error('Keywords must be an array of strings');
+      }
+      if (!Array.isArray(campaignData.anchor_texts) || campaignData.anchor_texts.some(a => typeof a !== 'string')) {
+        throw new Error('Anchor texts must be an array of strings');
+      }
 
       internalLogger.debug('campaign_creation', 'Base campaign data prepared', { campaignData });
 
@@ -332,14 +341,18 @@ class LiveCampaignManager {
         if (!testError) {
           internalLogger.info('campaign_creation', 'New schema detected, adding extended fields');
 
-          // New schema with all columns - ensure proper data types
-          campaignData = {
-            ...campaignData,
+          // New schema with all columns - ensure proper data types for Supabase
+          const extendedData = {
             links_built: 0,
             available_sites: availablePlatforms.length,
             target_sites_used: [], // PostgreSQL TEXT[] array - must be empty array, not null
             published_articles: [], // JSONB array - must be empty array, not null
             started_at: params.auto_start ? new Date().toISOString() : null
+          };
+
+          campaignData = {
+            ...campaignData,
+            ...extendedData
           };
 
           // Verify array types before sending to database
@@ -433,32 +446,40 @@ class LiveCampaignManager {
         userId: campaignData.user_id
       });
 
+      // Final data preparation for Supabase insertion
+      // Create a clean copy to avoid any reference issues
+      const finalCampaignData = JSON.parse(JSON.stringify(campaignData));
+
       // Log exact data being sent to database
       internalLogger.debug('campaign_creation', 'Sending data to database', {
         campaignData: {
-          name: campaignData.name,
-          engine_type: campaignData.engine_type,
+          name: finalCampaignData.name,
+          engine_type: finalCampaignData.engine_type,
           keywords_debug: {
-            type: Array.isArray(campaignData.keywords) ? 'array' : typeof campaignData.keywords,
-            length: Array.isArray(campaignData.keywords) ? campaignData.keywords.length : 'N/A',
-            content: Array.isArray(campaignData.keywords) ? campaignData.keywords : 'Not an array'
+            type: Array.isArray(finalCampaignData.keywords) ? 'array' : typeof finalCampaignData.keywords,
+            length: Array.isArray(finalCampaignData.keywords) ? finalCampaignData.keywords.length : 'N/A',
+            content: Array.isArray(finalCampaignData.keywords) ? finalCampaignData.keywords : 'Not an array',
+            json_string: JSON.stringify(finalCampaignData.keywords)
           },
           anchor_texts_debug: {
-            type: Array.isArray(campaignData.anchor_texts) ? 'array' : typeof campaignData.anchor_texts,
-            length: Array.isArray(campaignData.anchor_texts) ? campaignData.anchor_texts.length : 'N/A',
-            content: Array.isArray(campaignData.anchor_texts) ? campaignData.anchor_texts : 'Not an array'
+            type: Array.isArray(finalCampaignData.anchor_texts) ? 'array' : typeof finalCampaignData.anchor_texts,
+            length: Array.isArray(finalCampaignData.anchor_texts) ? finalCampaignData.anchor_texts.length : 'N/A',
+            content: Array.isArray(finalCampaignData.anchor_texts) ? finalCampaignData.anchor_texts : 'Not an array',
+            json_string: JSON.stringify(finalCampaignData.anchor_texts)
           },
           other_fields: {
-            target_url: typeof campaignData.target_url,
-            user_id: typeof campaignData.user_id,
-            status: typeof campaignData.status
+            target_url: typeof finalCampaignData.target_url,
+            user_id: typeof finalCampaignData.user_id,
+            status: typeof finalCampaignData.status,
+            target_sites_used: Array.isArray(finalCampaignData.target_sites_used) ? 'array' : typeof finalCampaignData.target_sites_used,
+            published_articles: Array.isArray(finalCampaignData.published_articles) ? 'array' : typeof finalCampaignData.published_articles
           }
         }
       });
 
       let { data, error } = await supabase
         .from('automation_campaigns')
-        .insert(campaignData)
+        .insert(finalCampaignData)
         .select()
         .single();
 
@@ -546,11 +567,12 @@ class LiveCampaignManager {
           internalLogger.info('campaign_creation', 'Error resolved, retrying insert with fresh data');
 
           // Create a fresh copy of campaign data to ensure no corruption
-          const freshCampaignData = {
+          // Use JSON parse/stringify to ensure completely clean data
+          const freshCampaignData = JSON.parse(JSON.stringify({
             name: params.name,
             engine_type: 'web2_platforms',
-            keywords: cleanKeywords,
-            anchor_texts: cleanAnchorTexts,
+            keywords: [...cleanKeywords], // Ensure fresh array
+            anchor_texts: [...cleanAnchorTexts], // Ensure fresh array
             target_url: params.target_url,
             user_id: params.user_id,
             status: params.auto_start ? 'active' : 'draft',
@@ -560,7 +582,16 @@ class LiveCampaignManager {
             target_sites_used: [],
             published_articles: [],
             started_at: params.auto_start ? new Date().toISOString() : null
-          };
+          }));
+
+          internalLogger.info('campaign_creation', 'Retry with fresh data', {
+            freshData: {
+              keywords_type: Array.isArray(freshCampaignData.keywords) ? 'array' : typeof freshCampaignData.keywords,
+              anchor_texts_type: Array.isArray(freshCampaignData.anchor_texts) ? 'array' : typeof freshCampaignData.anchor_texts,
+              keywords_content: freshCampaignData.keywords,
+              anchor_texts_content: freshCampaignData.anchor_texts
+            }
+          });
 
           // Retry the insert with fresh data
           const { data: retryData, error: retryError } = await supabase
