@@ -30,26 +30,13 @@ import { useUserFlow, useAuthWithProgress } from '@/contexts/UserFlowContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { automationLogger } from '@/services/automationLogger';
-import { targetSitesManager } from '@/services/targetSitesManager';
-import { automationOrchestrator } from '@/services/automationOrchestrator';
-import AutomationTestDashboard from '@/components/automation/AutomationTestDashboard';
+import { liveCampaignManager, type LiveCampaign } from '@/services/liveCampaignManager';
+import { campaignReportingSystem, type PublishedLink, type CampaignReport } from '@/services/campaignReportingSystem';
+import { productionContentTemplate } from '@/services/productionContentTemplate';
 import { LoginModal } from '@/components/LoginModal';
 import { DatabaseInit } from '@/utils/databaseInit';
-import { directAutomationExecutor, DirectExecutionResult } from '@/services/directAutomationExecutor';
 
-interface Campaign {
-  id: string;
-  name: string;
-  keywords: string[];
-  anchor_texts: string[];
-  target_url: string;
-  status: 'active' | 'paused' | 'completed' | 'draft';
-  created_at: string;
-  user_id: string;
-  links_built?: number;
-  available_sites?: number;
-  target_sites_used?: string[];
-}
+// Using LiveCampaign interface from liveCampaignManager
 
 export default function Automation() {
   const { user } = useAuth();
@@ -62,12 +49,13 @@ export default function Automation() {
     clearSavedFormData
   } = useUserFlow();
 
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [campaigns, setCampaigns] = useState<LiveCampaign[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  // Unified execution results
-  const [directResults, setDirectResults] = useState<DirectExecutionResult[]>([]);
+  // Published links and reports
+  const [publishedLinks, setPublishedLinks] = useState<PublishedLink[]>([]);
+  const [savedReports, setSavedReports] = useState<CampaignReport[]>([]);
   const [campaignProgress, setCampaignProgress] = useState<{
     isRunning: boolean;
     currentPlatform: string;
@@ -76,6 +64,7 @@ export default function Automation() {
     articlesPublished: number;
     status: 'starting' | 'generating' | 'publishing' | 'rotating' | 'completed' | 'paused';
     timeStarted?: number;
+    campaign_id?: string;
   } | null>(null);
 
   // Initialize logging and database check
