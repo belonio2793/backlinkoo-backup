@@ -293,7 +293,7 @@ class DirectAutomationExecutor {
       const data = await response.json();
 
       if (!data.success) {
-        console.error('Publishing service error:', data);
+        console.error('Publishing service error:', JSON.stringify(data));
         throw new Error(data.error || 'Publishing service returned failure');
       }
 
