@@ -667,15 +667,6 @@ export default function Automation() {
     }
   }, [user]);
 
-  const loadPlatformStatus = async () => {
-    try {
-      const status = await platformInitializer.getPlatformStatus();
-      setPlatformStatus(status);
-    } catch (error) {
-      console.error('Failed to load platform status:', error);
-    }
-  };
-
   const getStatusColor = (status: Campaign['status']) => {
     switch (status) {
       case 'active': return 'bg-green-500';
@@ -697,7 +688,7 @@ export default function Automation() {
 
   // Handle auth success from modal
   const handleAuthSuccess = (user: any) => {
-    console.log('🎯 Automation: Auth success, user:', user?.email);
+    console.log('�� Automation: Auth success, user:', user?.email);
     setShowSignInModal(false);
     // Form restoration will happen via useEffect above
   };
