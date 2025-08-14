@@ -342,6 +342,14 @@ const App = () => (
               }
             />
             <Route
+              path="/debug/user-reports"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyDebugUserReports />
+                </Suspense>
+              }
+            />
+            <Route
               path="/markdown-test"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
