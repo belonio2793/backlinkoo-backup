@@ -417,35 +417,48 @@ function parseInlineMarkdown(text) {
  * Parse text formatting (bold, italic)
  */
 function parseTextFormatting(text) {
+  if (!text || typeof text !== 'string') {
+    return text || '';
+  }
+
   // Handle bold **text**
   if (text.includes('**')) {
     const parts = [];
     const boldRegex = /\*\*([^*]+)\*\*/g;
     let lastIndex = 0;
-    
-    text.replace(boldRegex, (match, boldText, index) => {
+    let match;
+
+    while ((match = boldRegex.exec(text)) !== null) {
+      const [fullMatch, boldText] = match;
+      const index = match.index;
+
       // Add text before bold
       if (index > lastIndex) {
-        parts.push(text.substring(lastIndex, index));
+        const beforeText = text.substring(lastIndex, index);
+        if (beforeText) {
+          parts.push(beforeText);
+        }
       }
-      
+
       // Add bold text
       parts.push({
         tag: 'strong',
         children: [boldText]
       });
-      
-      lastIndex = index + match.length;
-      return match;
-    });
-    
+
+      lastIndex = index + fullMatch.length;
+    }
+
     // Add remaining text
     if (lastIndex < text.length) {
-      parts.push(text.substring(lastIndex));
+      const remainingText = text.substring(lastIndex);
+      if (remainingText) {
+        parts.push(remainingText);
+      }
     }
-    
-    return parts.length === 1 ? parts[0] : parts;
+
+    return parts.length === 0 ? text : (parts.length === 1 ? parts[0] : parts);
   }
-  
+
   return text;
 }
