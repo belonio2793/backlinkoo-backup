@@ -48,7 +48,6 @@ export default function AutomationLive() {
   const [savedReports, setSavedReports] = useState<CampaignReport[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [processing, setProcessing] = useState<Record<string, boolean>>({});
 
   // Form state
   const [formData, setFormData] = useState({
