@@ -19,6 +19,12 @@ export function protectViteClient(): void {
     return; // Only protect in development mode
   }
 
+  // Allow disabling via window flag for debugging
+  if (typeof window !== 'undefined' && (window as any).DISABLE_VITE_PROTECTION) {
+    console.log('🔧 Vite protection disabled via window.DISABLE_VITE_PROTECTION');
+    return;
+  }
+
   try {
     // Store original fetch before any modifications
     originalFetch = window.fetch.bind(window);
