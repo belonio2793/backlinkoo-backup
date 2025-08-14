@@ -36,19 +36,7 @@ import { productionContentTemplate } from '@/services/productionContentTemplate'
 import { LoginModal } from '@/components/LoginModal';
 import { DatabaseInit } from '@/utils/databaseInit';
 
-interface Campaign {
-  id: string;
-  name: string;
-  keywords: string[];
-  anchor_texts: string[];
-  target_url: string;
-  status: 'active' | 'paused' | 'completed' | 'draft';
-  created_at: string;
-  user_id: string;
-  links_built?: number;
-  available_sites?: number;
-  target_sites_used?: string[];
-}
+// Using LiveCampaign interface from liveCampaignManager
 
 export default function Automation() {
   const { user } = useAuth();
