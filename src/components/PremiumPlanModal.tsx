@@ -235,7 +235,7 @@ export function PremiumPlanModal({
         throw new Error(result.error || 'Failed to create subscription checkout');
       }
     } catch (error: any) {
-      logError('Premium checkout error', error);
+      ErrorLogger.logError('Premium checkout error', error);
 
       setCurrentStep('checkout');
       toast({
