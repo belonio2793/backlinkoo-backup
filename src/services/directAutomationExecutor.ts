@@ -83,8 +83,15 @@ class DirectAutomationExecutor {
         target_url: input.target_url
       });
 
-      // Step 2: Generate content using Netlify function
-      console.log('🤖 Generating content via Netlify function...');
+      // Step 2: Generate content (using mock service in dev environment)
+      const useMockServices = this.isDevEnvironment() && mockAutomationService.shouldUseMockServices();
+
+      if (useMockServices) {
+        console.log('🎭 Generating content via mock service (development mode)...');
+      } else {
+        console.log('🤖 Generating content via Netlify function...');
+      }
+
       const contentResult = await this.generateContent({
         keyword: selectedKeyword,
         anchor_text: selectedAnchorText,
