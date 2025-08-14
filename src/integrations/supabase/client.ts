@@ -2,10 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { SecureConfig } from '../../lib/secure-config';
-import { safeFetch, preserveOriginalFetch } from '../../utils/fullstoryWorkaround';
-
-// Store original fetch before third-party scripts can modify it
-preserveOriginalFetch();
+// Simplified imports without fetch workarounds
 
 // Get Supabase configuration with proper fallback
 const getSupabaseConfig = () => {
