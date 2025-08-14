@@ -46,9 +46,10 @@ export class AutomationOrchestrator {
         .from('automation_campaigns')
         .insert({
           user_id: user.id,
+          name: `Campaign for ${params.keyword}`,
           target_url: params.target_url,
-          keyword: params.keyword,
-          anchor_text: params.anchor_text,
+          keywords: [params.keyword],
+          anchor_texts: [params.anchor_text],
           status: 'pending'
         })
         .select()
