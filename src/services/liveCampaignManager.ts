@@ -225,8 +225,8 @@ class LiveCampaignManager {
             ...campaignData,
             links_built: 0,
             available_sites: availablePlatforms.length,
-            target_sites_used: [], // PostgreSQL will handle TEXT[] conversion
-            published_articles: [], // PostgreSQL will handle JSONB conversion
+            target_sites_used: [], // PostgreSQL TEXT[] array
+            published_articles: '[]', // JSONB string format for empty array
             started_at: params.auto_start ? new Date().toISOString() : null
           };
 
