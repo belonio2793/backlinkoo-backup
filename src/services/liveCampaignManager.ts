@@ -1057,10 +1057,23 @@ class LiveCampaignManager {
   }
 
   /**
-   * Get available platforms for rotation
+   * Get available platforms for rotation (includes degraded platforms as fallback)
    */
   private getAvailablePlatforms(): PlatformTarget[] {
-    return this.platformTargets.filter(platform => platform.is_active);
+    return this.platformTargets.filter(platform =>
+      platform.is_active &&
+      platform.current_health_status !== 'disabled'
+    ).sort((a, b) => {
+      // Sort by health status (healthy first, then degraded, then unhealthy)
+      const healthOrder = { 'healthy': 0, 'degraded': 1, 'unhealthy': 2, 'disabled': 3 };
+      const aOrder = healthOrder[a.current_health_status] || 3;
+      const bOrder = healthOrder[b.current_health_status] || 3;
+
+      if (aOrder !== bOrder) return aOrder - bOrder;
+
+      // Then sort by success rate
+      return b.success_rate - a.success_rate;
+    });
   }
 
   /**
