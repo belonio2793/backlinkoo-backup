@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Campaign Creation Error</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .error-box {
+            background: #fee;
+            border: 1px solid #fcc;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .success-box {
+            background: #efe;
+            border: 1px solid #cfc;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        .info-box {
+            background: #eef;
+            border: 1px solid #ccf;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #5a6fd8;
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        #results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            min-height: 100px;
+        }
+        .step {
+            margin: 10px 0;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Fix Campaign Creation Error</h1>
+        
+        <div class="error-box">
+            <strong>Error:</strong> "Failed to create campaign: Unknown error"<br>
+            <strong>Cause:</strong> Missing database columns in the automation_campaigns table
+        </div>
+
+        <div class="info-box">
+            <strong>What this tool does:</strong><br>
+            • Checks if required database columns exist<br>
+            • Adds missing columns automatically<br>
+            • Verifies the fix was successful<br>
+            • Allows you to test campaign creation
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <button onclick="runDiagnostic()" id="diagBtn">
+                🔍 Run Full Diagnostic & Fix
+            </button>
+            <button onclick="testCampaign()" id="testBtn">
+                🧪 Test Campaign Creation
+            </button>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script type="module">
+        let results = document.getElementById('results');
+        let diagBtn = document.getElementById('diagBtn');
+        let testBtn = document.getElementById('testBtn');
+
+        function addStep(title, content, type = 'info') {
+            const step = document.createElement('div');
+            step.className = 'step';
+            step.innerHTML = `
+                <strong>${title}</strong><br>
+                <div style="margin-top: 8px;">${JSON.stringify(content, null, 2)}</div>
+            `;
+            if (type === 'error') step.style.borderLeftColor = '#e74c3c';
+            if (type === 'success') step.style.borderLeftColor = '#27ae60';
+            results.appendChild(step);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function setLoading(button, loading) {
+            if (loading) {
+                button.innerHTML = `<span class="loading"></span> ${button.textContent}`;
+                button.disabled = true;
+            } else {
+                button.innerHTML = button.textContent.replace('🔍 ', '🔍 ').replace('🧪 ', '🧪 ');
+                button.disabled = false;
+            }
+        }
+
+        window.runDiagnostic = async function() {
+            results.innerHTML = '';
+            setLoading(diagBtn, true);
+
+            try {
+                addStep('Step 1: Importing emergency fix utility...', 'Loading database fix tools');
+                
+                const { EmergencyDatabaseFix } = await import('/src/utils/emergencyDatabaseFix.ts');
+                
+                addStep('Step 2: Verifying current database state...', 'Checking for missing columns');
+                const verification = await EmergencyDatabaseFix.verifyColumns();
+                addStep('Verification Result', verification, verification.success ? 'success' : 'error');
+
+                if (!verification.success) {
+                    addStep('Step 3: Applying database fix...', `Fixing ${verification.missing.length} missing columns`);
+                    const fixResult = await EmergencyDatabaseFix.runCompleteFix();
+                    addStep('Fix Result', fixResult, fixResult.success ? 'success' : 'error');
+
+                    if (fixResult.success) {
+                        addStep('Step 4: Re-verifying database...', 'Confirming fix was successful');
+                        const postVerification = await EmergencyDatabaseFix.verifyColumns();
+                        addStep('Post-Fix Verification', postVerification, postVerification.success ? 'success' : 'error');
+                    }
+                } else {
+                    addStep('Step 3: Database is healthy', 'All required columns exist', 'success');
+                }
+
+                addStep('✅ Diagnostic Complete', 'You can now try creating a campaign again', 'success');
+
+            } catch (error) {
+                addStep('❌ Diagnostic Failed', {
+                    error: error.message,
+                    stack: error.stack?.substring(0, 200) + '...'
+                }, 'error');
+            } finally {
+                setLoading(diagBtn, false);
+            }
+        }
+
+        window.testCampaign = async function() {
+            setLoading(testBtn, true);
+            
+            try {
+                addStep('Testing campaign creation...', 'Creating test campaign');
+                
+                const { liveCampaignManager } = await import('/src/services/liveCampaignManager.ts');
+                
+                const testData = {
+                    name: `Test Campaign ${Date.now()}`,
+                    keywords: ['test keyword'],
+                    anchor_texts: ['test anchor text'],
+                    target_url: 'https://example.com',
+                    user_id: 'test-user-' + Date.now(),
+                    auto_start: false
+                };
+                
+                addStep('Test Data', testData);
+                
+                const result = await liveCampaignManager.createCampaign(testData);
+                
+                if (result.success) {
+                    addStep('✅ Test Successful!', {
+                        message: 'Campaign creation is working properly',
+                        campaign_id: result.campaign?.id,
+                        campaign_name: result.campaign?.name
+                    }, 'success');
+                    
+                    // Clean up test campaign
+                    if (result.campaign?.id) {
+                        await liveCampaignManager.deleteCampaign(result.campaign.id, testData.user_id);
+                        addStep('Cleanup', 'Test campaign deleted successfully', 'success');
+                    }
+                } else {
+                    addStep('❌ Test Failed', {
+                        error: result.error,
+                        suggestion: 'Try running the diagnostic first'
+                    }, 'error');
+                }
+                
+            } catch (error) {
+                addStep('❌ Test Error', {
+                    error: error.message,
+                    suggestion: 'Run the diagnostic to fix database issues'
+                }, 'error');
+            } finally {
+                setLoading(testBtn, false);
+            }
+        }
+
+        // Auto-run diagnostic on page load
+        setTimeout(() => {
+            addStep('Welcome', 'Click "Run Full Diagnostic & Fix" to automatically fix the campaign creation error');
+        }, 500);
+    </script>
+</body>
+</html>
