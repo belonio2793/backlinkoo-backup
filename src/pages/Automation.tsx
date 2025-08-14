@@ -68,6 +68,15 @@ export default function Automation() {
 
   // Unified execution results
   const [directResults, setDirectResults] = useState<DirectExecutionResult[]>([]);
+  const [campaignProgress, setCampaignProgress] = useState<{
+    isRunning: boolean;
+    currentPlatform: string;
+    platformsUsed: string[];
+    totalPlatforms: number;
+    articlesPublished: number;
+    status: 'starting' | 'generating' | 'publishing' | 'rotating' | 'completed' | 'paused';
+    timeStarted?: number;
+  } | null>(null);
 
   // Initialize logging and database check
   useEffect(() => {
