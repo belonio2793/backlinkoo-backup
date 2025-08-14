@@ -306,7 +306,7 @@ export class AutomationOrchestrator {
       .from('automation_logs')
       .insert({
         campaign_id: campaignId,
-        log_level: level,
+        level: level,
         message,
         details
       });
