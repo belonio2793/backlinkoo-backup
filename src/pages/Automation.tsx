@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2, Target, FileText, Link, BarChart3 } from 'lucide-react';
 import { getOrchestrator } from '@/services/automationOrchestrator';
 import AutomationReporting from '@/components/AutomationReporting';
+import AutomationServiceStatus from '@/components/AutomationServiceStatus';
 
 const Automation = () => {
   const { toast } = useToast();
@@ -100,7 +101,7 @@ const Automation = () => {
 
         {/* Main Content */}
         <Tabs defaultValue="create" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="create" className="flex items-center gap-2">
               <Target className="w-4 h-4" />
               Create Campaign
@@ -108,6 +109,10 @@ const Automation = () => {
             <TabsTrigger value="reports" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Reports & Analytics
+            </TabsTrigger>
+            <TabsTrigger value="status" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Service Status
             </TabsTrigger>
           </TabsList>
 
@@ -226,6 +231,10 @@ const Automation = () => {
 
           <TabsContent value="reports">
             <AutomationReporting />
+          </TabsContent>
+
+          <TabsContent value="status">
+            <AutomationServiceStatus />
           </TabsContent>
         </Tabs>
       </div>
