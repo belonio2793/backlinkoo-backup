@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Plus,
   Play,
@@ -37,6 +38,8 @@ import { LoginModal } from '@/components/LoginModal';
 import { DatabaseInit } from '@/utils/databaseInit';
 import { CampaignDebugger } from '@/components/CampaignDebugger';
 import { ApiHealthChecker } from '@/components/ApiHealthChecker';
+import guestPostingSites from '@/data/guestPostingSites.json';
+import { PLATFORM_CONFIGS, getImplementedPlatforms, getPlannedPlatforms, type PlatformConfig } from '@/services/platformConfigs';
 
 export default function AutomationLive() {
   const { user } = useAuth();
@@ -430,11 +433,13 @@ export default function AutomationLive() {
 
           {/* Create Campaign Tab */}
           <TabsContent value="create" className="space-y-6">
-            <Card className="max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
+              {/* Campaign Creation Form */}
+              <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="h-5 w-5" />
-                  Create New Live Campaign
+                  Create New Campaign
                 </CardTitle>
                 <CardDescription>
                   Generate high-quality content with ChatGPT and publish to Telegraph with your anchor text links.
@@ -518,7 +523,7 @@ export default function AutomationLive() {
                   ) : (
                     <>
                       <Zap className="h-4 w-4 mr-2" />
-                      Create Live Campaign
+                      Create Campaign
                     </>
                   )}
                 </Button>
@@ -536,6 +541,84 @@ export default function AutomationLive() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Target Platforms Container */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Target Platforms
+                </CardTitle>
+                <CardDescription>
+                  Publishing domains for link building rotation
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {/* Scrollable Domain List */}
+                <div className="h-64 overflow-y-auto border rounded-lg bg-white text-xs">
+                  {Object.values(PLATFORM_CONFIGS).map((platform) => (
+                    <div key={platform.id} className="border-b border-gray-100 last:border-b-0 px-2 py-1.5 hover:bg-gray-50 transition-colors">
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-1.5 mb-0.5">
+                            <div className={`w-1.5 h-1.5 rounded-full ${
+                              platform.implementation.status === 'implemented' ? 'bg-green-500' : 'bg-blue-500'
+                            }`}></div>
+                            <span className="font-medium text-gray-900 text-xs">{platform.domain}</span>
+                            <Badge
+                              variant="outline"
+                              className={`text-[10px] px-1 py-0 h-4 ${
+                                platform.implementation.status === 'implemented'
+                                  ? 'bg-green-50 text-green-700 border-green-200'
+                                  : 'bg-blue-50 text-blue-700 border-blue-200'
+                              }`}
+                            >
+                              {platform.implementation.status === 'implemented' ? 'Active' : 'Ready'}
+                            </Badge>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2 text-[10px] text-gray-600">
+                            <div>
+                              <span className="text-gray-500">DR:</span>
+                              <span className="ml-0.5 font-medium">
+                                {platform.domain === 'telegra.ph' ? '85+' :
+                                 platform.domain === 'write.as' ? '75+' :
+                                 platform.domain === 'rentry.co' ? '60+' : '55+'}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Type:</span>
+                              <span className="ml-0.5">
+                                {platform.features.anonymous ? 'Anon' : 'Acct'}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-gray-500">Format:</span>
+                              <span className="ml-0.5">
+                                {platform.features.markdown ? 'MD' : 'HTML'}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => window.open(platform.documentation, '_blank')}
+                          className="ml-1 text-gray-400 hover:text-gray-600 p-0.5 h-5 w-5"
+                        >
+                          <ExternalLink className="h-2 w-2" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Footer Summary */}
+                <div className="mt-2 text-[10px] text-gray-500 text-center">
+                  {Object.keys(PLATFORM_CONFIGS).length} domains • {Object.values(PLATFORM_CONFIGS).filter(p => p.implementation.status === 'implemented').length} active • Growing to 100s
+                </div>
+              </CardContent>
+            </Card>
+            </div>
           </TabsContent>
 
           {/* Manage Campaigns Tab */}
