@@ -541,144 +541,56 @@ export default function AutomationLive() {
                   Target Platforms
                 </CardTitle>
                 <CardDescription>
-                  All integrated publishing platforms with API access for automated link building rotation.
+                  Publishing platforms for link building rotation
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Implemented Platforms */}
-                <div className="space-y-3">
-                  <h4 className="font-medium text-gray-800 text-sm flex items-center gap-2">
-                    <CheckCircle className="h-4 w-4 text-green-600" />
-                    Active Platforms
-                  </h4>
-                  {Object.values(PLATFORM_CONFIGS)
-                    .filter(config => config.implementation.status === 'implemented')
-                    .map((platform) => (
-                      <div key={platform.id} className="border rounded-lg p-4 bg-green-50 border-green-200">
-                        <div className="flex items-center justify-between mb-2">
+              <CardContent>
+                {/* Clean URL List */}
+                <div className="max-h-64 overflow-y-auto border rounded-lg bg-gray-50">
+                  <div className="divide-y divide-gray-200">
+                    {Object.values(PLATFORM_CONFIGS).map((platform) => (
+                      <div key={platform.id} className="p-3 hover:bg-white transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-2 h-2 rounded-full ${
+                              platform.implementation.status === 'implemented' ? 'bg-green-500' : 'bg-blue-500'
+                            }`}></div>
+                            <div>
+                              <div className="font-medium text-sm">{platform.name}</div>
+                              <div className="text-xs text-gray-500">{platform.domain}</div>
+                            </div>
+                          </div>
                           <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                            <h3 className="font-semibold text-green-800">{platform.name}</h3>
-                            <Badge className="bg-green-600 text-white text-xs">Implemented</Badge>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => window.open(platform.documentation, '_blank')}
-                            className="text-green-600 hover:text-green-700 p-1"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-3">
-                          {platform.implementation.notes}
-                        </p>
-                        <div className="grid grid-cols-2 gap-3 text-xs">
-                          <div>
-                            <span className="text-gray-500">Features:</span>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {platform.features.anonymous && <Badge variant="outline" className="text-xs">Anonymous</Badge>}
-                              {platform.features.instantPublish && <Badge variant="outline" className="text-xs">Instant</Badge>}
-                              {platform.features.markdown && <Badge variant="outline" className="text-xs">Markdown</Badge>}
-                              {platform.features.html && <Badge variant="outline" className="text-xs">HTML</Badge>}
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-gray-500">Domain:</span>
-                            <div className="mt-1">
-                              <span className="font-medium text-xs">{platform.domain}</span>
-                            </div>
+                            <Badge
+                              variant="outline"
+                              className={`text-xs ${
+                                platform.implementation.status === 'implemented'
+                                  ? 'bg-green-50 text-green-700 border-green-200'
+                                  : 'bg-blue-50 text-blue-700 border-blue-200'
+                              }`}
+                            >
+                              {platform.implementation.status === 'implemented' ? 'Active' : 'Ready'}
+                            </Badge>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => window.open(platform.documentation, '_blank')}
+                              className="h-6 w-6 p-0 text-gray-400 hover:text-gray-600"
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                            </Button>
                           </div>
                         </div>
                       </div>
-                    ))
-                  }
+                    ))}
+                  </div>
                 </div>
 
-                {/* Planned Platforms */}
-                <div className="space-y-3">
-                  <h4 className="font-medium text-gray-800 text-sm flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-blue-600" />
-                    Integrated Platforms (Ready to Deploy)
-                  </h4>
-                  {Object.values(PLATFORM_CONFIGS)
-                    .filter(config => config.implementation.status === 'planned')
-                    .map((platform) => (
-                      <div key={platform.id} className="border rounded-lg p-4 bg-blue-50 border-blue-200">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                            <h3 className="font-semibold text-blue-800">{platform.name}</h3>
-                            <Badge className="bg-blue-600 text-white text-xs">Ready</Badge>
-                            <Badge variant="outline" className="text-xs">{platform.implementation.priority} Priority</Badge>
-                          </div>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            onClick={() => window.open(platform.documentation, '_blank')}
-                            className="text-blue-600 hover:text-blue-700 p-1"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                          </Button>
-                        </div>
-                        <p className="text-sm text-gray-600 mb-3">
-                          {platform.implementation.notes}
-                        </p>
-                        <div className="grid grid-cols-2 gap-3 text-xs">
-                          <div>
-                            <span className="text-gray-500">Features:</span>
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {platform.features.anonymous && <Badge variant="outline" className="text-xs">Anonymous</Badge>}
-                              {platform.features.instantPublish && <Badge variant="outline" className="text-xs">Instant</Badge>}
-                              {platform.features.markdown && <Badge variant="outline" className="text-xs">Markdown</Badge>}
-                              {platform.features.html && <Badge variant="outline" className="text-xs">HTML</Badge>}
-                              {platform.features.customSlugs && <Badge variant="outline" className="text-xs">Custom URLs</Badge>}
-                            </div>
-                          </div>
-                          <div>
-                            <span className="text-gray-500">API Endpoint:</span>
-                            <div className="mt-1">
-                              <span className="font-medium text-xs">{platform.apiUrl}</span>
-                            </div>
-                          </div>
-                        </div>
-                        {platform.limits.rateLimit && (
-                          <div className="mt-2 text-xs text-gray-500">
-                            <span className="font-medium">Rate Limit:</span> {platform.limits.rateLimit}
-                          </div>
-                        )}
-                      </div>
-                    ))
-                  }
-                </div>
-
-                {/* Platform Rotation Strategy */}
-                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Target className="h-4 w-4 text-purple-600" />
-                    <span className="font-medium text-purple-800">Multi-Platform Strategy</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">
-                    Intelligent rotation across {Object.keys(PLATFORM_CONFIGS).length} integrated platforms for maximum link diversity and SEO impact.
-                  </p>
-                  <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-500">Active Platforms:</span>
-                      <span className="font-medium">{Object.values(PLATFORM_CONFIGS).filter(p => p.implementation.status === 'implemented').length}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-500">Ready to Deploy:</span>
-                      <span className="font-medium">{Object.values(PLATFORM_CONFIGS).filter(p => p.implementation.status === 'planned').length}</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-500">Content Format:</span>
-                      <span className="font-medium">HTML + Markdown</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-gray-500">Publishing:</span>
-                      <span className="font-medium">Instant Anonymous</span>
-                    </div>
-                  </div>
+                {/* Summary Stats */}
+                <div className="mt-4 flex items-center justify-between text-xs text-gray-500 bg-gray-50 rounded-lg p-3">
+                  <span>{Object.values(PLATFORM_CONFIGS).filter(p => p.implementation.status === 'implemented').length} Active</span>
+                  <span>{Object.values(PLATFORM_CONFIGS).filter(p => p.implementation.status === 'planned').length} Ready</span>
+                  <span>{Object.keys(PLATFORM_CONFIGS).length} Total Platforms</span>
                 </div>
               </CardContent>
             </Card>
