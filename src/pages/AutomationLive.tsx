@@ -37,6 +37,7 @@ import { LoginModal } from '@/components/LoginModal';
 import { DatabaseInit } from '@/utils/databaseInit';
 import { CampaignDebugger } from '@/components/CampaignDebugger';
 import { ApiHealthChecker } from '@/components/ApiHealthChecker';
+import guestPostingSites from '@/data/guestPostingSites.json';
 
 export default function AutomationLive() {
   const { user } = useAuth();
@@ -422,7 +423,9 @@ export default function AutomationLive() {
 
           {/* Create Campaign Tab */}
           <TabsContent value="create" className="space-y-6">
-            <Card className="max-w-2xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-6xl mx-auto">
+              {/* Campaign Creation Form */}
+              <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="h-5 w-5" />
@@ -510,7 +513,7 @@ export default function AutomationLive() {
                   ) : (
                     <>
                       <Zap className="h-4 w-4 mr-2" />
-                      Create Live Campaign
+                      Create Campaign
                     </>
                   )}
                 </Button>
@@ -528,6 +531,85 @@ export default function AutomationLive() {
                 )}
               </CardContent>
             </Card>
+
+            {/* Target Platforms Container */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Target className="h-5 w-5" />
+                  Target Platforms
+                </CardTitle>
+                <CardDescription>
+                  Websites and platforms where we rotate link building for maximum reach and diversity.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {/* Telegraph Platform */}
+                <div className="border rounded-lg p-4 bg-green-50 border-green-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <h3 className="font-semibold text-green-800">{guestPostingSites.publishingPlatform.site.name}</h3>
+                      <Badge className="bg-green-600 text-white text-xs">Active</Badge>
+                    </div>
+                    <ExternalLink className="h-4 w-4 text-green-600" />
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">Professional publishing platform with instant anonymous posting</p>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div>
+                      <span className="text-gray-500">Features:</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {guestPostingSites.publishingPlatform.site.features.slice(0, 2).map((feature, index) => (
+                          <Badge key={index} variant="outline" className="text-xs">{feature}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Status:</span>
+                      <div className="mt-1">
+                        <Badge className="bg-green-100 text-green-800 text-xs">Operational</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Platform Rotation Info */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Link className="h-4 w-4 text-blue-600" />
+                    <span className="font-medium text-blue-800">Link Building Strategy</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">Our automation rotates through reliable platforms to ensure natural link distribution and maximum SEO impact.</p>
+                  <div className="grid grid-cols-1 gap-2 text-xs">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500">Primary Platform:</span>
+                      <span className="font-medium">Telegraph (85+ DR)</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500">Link Type:</span>
+                      <span className="font-medium">Contextual Backlinks</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500">Content Quality:</span>
+                      <span className="font-medium">AI-Generated Professional</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Coming Soon Platforms */}
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Clock className="h-4 w-4 text-gray-500" />
+                    <span className="font-medium text-gray-700">Platform Expansion</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-3">Additional high-authority platforms will be added to increase link diversity.</p>
+                  <div className="text-xs text-gray-500">
+                    <span>Focus: Reliable platforms with working APIs and instant publishing capabilities</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            </div>
           </TabsContent>
 
           {/* Manage Campaigns Tab */}
