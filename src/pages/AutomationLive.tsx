@@ -38,6 +38,7 @@ import { DatabaseInit } from '@/utils/databaseInit';
 import { CampaignDebugger } from '@/components/CampaignDebugger';
 import { ApiHealthChecker } from '@/components/ApiHealthChecker';
 import guestPostingSites from '@/data/guestPostingSites.json';
+import { PLATFORM_CONFIGS, getImplementedPlatforms, getPlannedPlatforms, type PlatformConfig } from '@/services/platformConfigs';
 
 export default function AutomationLive() {
   const { user } = useAuth();
@@ -540,71 +541,143 @@ export default function AutomationLive() {
                   Target Platforms
                 </CardTitle>
                 <CardDescription>
-                  Websites and platforms where we rotate link building for maximum reach and diversity.
+                  All integrated publishing platforms with API access for automated link building rotation.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Telegraph Platform */}
-                <div className="border rounded-lg p-4 bg-green-50 border-green-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <h3 className="font-semibold text-green-800">{guestPostingSites.publishingPlatform.site.name}</h3>
-                      <Badge className="bg-green-600 text-white text-xs">Active</Badge>
-                    </div>
-                    <ExternalLink className="h-4 w-4 text-green-600" />
+                {/* Implemented Platforms */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-800 text-sm flex items-center gap-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    Active Platforms
+                  </h4>
+                  {Object.values(PLATFORM_CONFIGS)
+                    .filter(config => config.implementation.status === 'implemented')
+                    .map((platform) => (
+                      <div key={platform.id} className="border rounded-lg p-4 bg-green-50 border-green-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <h3 className="font-semibold text-green-800">{platform.name}</h3>
+                            <Badge className="bg-green-600 text-white text-xs">Implemented</Badge>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => window.open(platform.documentation, '_blank')}
+                            className="text-green-600 hover:text-green-700 p-1"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">
+                          {platform.implementation.notes}
+                        </p>
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div>
+                            <span className="text-gray-500">Features:</span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {platform.features.anonymous && <Badge variant="outline" className="text-xs">Anonymous</Badge>}
+                              {platform.features.instantPublish && <Badge variant="outline" className="text-xs">Instant</Badge>}
+                              {platform.features.markdown && <Badge variant="outline" className="text-xs">Markdown</Badge>}
+                              {platform.features.html && <Badge variant="outline" className="text-xs">HTML</Badge>}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Domain:</span>
+                            <div className="mt-1">
+                              <span className="font-medium text-xs">{platform.domain}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  }
+                </div>
+
+                {/* Planned Platforms */}
+                <div className="space-y-3">
+                  <h4 className="font-medium text-gray-800 text-sm flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-blue-600" />
+                    Integrated Platforms (Ready to Deploy)
+                  </h4>
+                  {Object.values(PLATFORM_CONFIGS)
+                    .filter(config => config.implementation.status === 'planned')
+                    .map((platform) => (
+                      <div key={platform.id} className="border rounded-lg p-4 bg-blue-50 border-blue-200">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <h3 className="font-semibold text-blue-800">{platform.name}</h3>
+                            <Badge className="bg-blue-600 text-white text-xs">Ready</Badge>
+                            <Badge variant="outline" className="text-xs">{platform.implementation.priority} Priority</Badge>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => window.open(platform.documentation, '_blank')}
+                            className="text-blue-600 hover:text-blue-700 p-1"
+                          >
+                            <ExternalLink className="h-3 w-3" />
+                          </Button>
+                        </div>
+                        <p className="text-sm text-gray-600 mb-3">
+                          {platform.implementation.notes}
+                        </p>
+                        <div className="grid grid-cols-2 gap-3 text-xs">
+                          <div>
+                            <span className="text-gray-500">Features:</span>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {platform.features.anonymous && <Badge variant="outline" className="text-xs">Anonymous</Badge>}
+                              {platform.features.instantPublish && <Badge variant="outline" className="text-xs">Instant</Badge>}
+                              {platform.features.markdown && <Badge variant="outline" className="text-xs">Markdown</Badge>}
+                              {platform.features.html && <Badge variant="outline" className="text-xs">HTML</Badge>}
+                              {platform.features.customSlugs && <Badge variant="outline" className="text-xs">Custom URLs</Badge>}
+                            </div>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">API Endpoint:</span>
+                            <div className="mt-1">
+                              <span className="font-medium text-xs">{platform.apiUrl}</span>
+                            </div>
+                          </div>
+                        </div>
+                        {platform.limits.rateLimit && (
+                          <div className="mt-2 text-xs text-gray-500">
+                            <span className="font-medium">Rate Limit:</span> {platform.limits.rateLimit}
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  }
+                </div>
+
+                {/* Platform Rotation Strategy */}
+                <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Target className="h-4 w-4 text-purple-600" />
+                    <span className="font-medium text-purple-800">Multi-Platform Strategy</span>
                   </div>
-                  <p className="text-sm text-gray-600 mb-3">Professional publishing platform with instant anonymous posting</p>
+                  <p className="text-sm text-gray-600 mb-3">
+                    Intelligent rotation across {Object.keys(PLATFORM_CONFIGS).length} integrated platforms for maximum link diversity and SEO impact.
+                  </p>
                   <div className="grid grid-cols-2 gap-3 text-xs">
-                    <div>
-                      <span className="text-gray-500">Features:</span>
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {guestPostingSites.publishingPlatform.site.features.slice(0, 2).map((feature, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">{feature}</Badge>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <span className="text-gray-500">Status:</span>
-                      <div className="mt-1">
-                        <Badge className="bg-green-100 text-green-800 text-xs">Operational</Badge>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Platform Rotation Info */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Link className="h-4 w-4 text-blue-600" />
-                    <span className="font-medium text-blue-800">Link Building Strategy</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">Our automation rotates through reliable platforms to ensure natural link distribution and maximum SEO impact.</p>
-                  <div className="grid grid-cols-1 gap-2 text-xs">
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-500">Primary Platform:</span>
-                      <span className="font-medium">Telegraph (85+ DR)</span>
+                      <span className="text-gray-500">Active Platforms:</span>
+                      <span className="font-medium">{Object.values(PLATFORM_CONFIGS).filter(p => p.implementation.status === 'implemented').length}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-500">Link Type:</span>
-                      <span className="font-medium">Contextual Backlinks</span>
+                      <span className="text-gray-500">Ready to Deploy:</span>
+                      <span className="font-medium">{Object.values(PLATFORM_CONFIGS).filter(p => p.implementation.status === 'planned').length}</span>
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-gray-500">Content Quality:</span>
-                      <span className="font-medium">AI-Generated Professional</span>
+                      <span className="text-gray-500">Content Format:</span>
+                      <span className="font-medium">HTML + Markdown</span>
                     </div>
-                  </div>
-                </div>
-
-                {/* Coming Soon Platforms */}
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Clock className="h-4 w-4 text-gray-500" />
-                    <span className="font-medium text-gray-700">Platform Expansion</span>
-                  </div>
-                  <p className="text-sm text-gray-600 mb-3">Additional high-authority platforms will be added to increase link diversity.</p>
-                  <div className="text-xs text-gray-500">
-                    <span>Focus: Reliable platforms with working APIs and instant publishing capabilities</span>
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-500">Publishing:</span>
+                      <span className="font-medium">Instant Anonymous</span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
