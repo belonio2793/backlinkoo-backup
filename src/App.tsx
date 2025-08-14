@@ -49,6 +49,10 @@ const LazyDatabaseColumnsFix = lazy(() => import("./pages/DatabaseColumnsFix"));
 const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
 const LazyMarkdownTest = lazy(() => import("./pages/MarkdownTest"));
 const LazyPremiumSEOAnalysisTest = lazy(() => import("./pages/PremiumSEOAnalysisTest"));
+
+// Array-free automation components
+import ArrayFreeAutomation from "./pages/ArrayFreeAutomation";
+import ArrayFreeTest from "./pages/ArrayFreeTest";
 const LazyDebugUserReports = lazy(() => import("./pages/DebugUserReports"));
 const LazyBlogPostChecker = lazy(() => import("./components/BlogPostChecker").then(module => ({ default: module.BlogPostChecker })));
 
