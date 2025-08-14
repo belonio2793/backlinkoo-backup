@@ -93,6 +93,10 @@ export default function Automation() {
 
   const loadSitesInfo = async () => {
     try {
+      // Ensure sites are loaded first
+      await targetSitesManager.loadSites();
+
+      // Then get stats
       const stats = targetSitesManager.getStats();
       setSitesStats(stats);
       setAvailableSites(stats.active_sites);
@@ -359,7 +363,7 @@ export default function Automation() {
 
       automationLogger.error('campaign', 'Failed to create campaign', errorDetails, undefined, error as Error);
 
-      console.error('🎯 Campaign creation error details:', {
+      console.error('��� Campaign creation error details:', {
         error,
         formData,
         user: user?.id,
