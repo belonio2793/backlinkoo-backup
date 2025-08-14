@@ -332,9 +332,19 @@ function convertMarkdownToTelegraph(markdown) {
     }
     // Lists
     else if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('* ')) {
+      const listText = trimmedLine.replace(/^[-*]\s*/, '');
+      const parsedContent = parseInlineMarkdown(listText);
+
+      let children = ['• '];
+      if (Array.isArray(parsedContent)) {
+        children.push(...parsedContent);
+      } else {
+        children.push(parsedContent);
+      }
+
       telegraphContent.push({
         tag: 'p',
-        children: ['• ' + parseInlineMarkdown(trimmedLine.replace(/^[-*]\s*/, ''))]
+        children: children
       });
     }
     // Regular paragraphs
