@@ -684,6 +684,222 @@ class LiveCampaignManager {
   }
 
   /**
+   * Get healthy platforms that are available for use
+   */
+  private getHealthyPlatforms(): PlatformTarget[] {
+    return this.platformTargets.filter(platform =>
+      platform.is_active &&
+      platform.current_health_status === 'healthy' &&
+      !this.isPlatformInCooldown(platform)
+    );
+  }
+
+  /**
+   * Check if platform is in cooldown period after failures
+   */
+  private isPlatformInCooldown(platform: PlatformTarget): boolean {
+    if (!platform.next_retry_after) return false;
+    return new Date() < new Date(platform.next_retry_after);
+  }
+
+  /**
+   * Record platform success and update health metrics
+   */
+  private async recordPlatformSuccess(platform: PlatformTarget, result: any): Promise<void> {
+    platform.total_attempts++;
+    platform.total_successes++;
+    platform.consecutive_failures = 0;
+    platform.last_used = new Date().toISOString();
+    platform.next_retry_after = undefined;
+
+    // Update success rate
+    platform.success_rate = (platform.total_successes / platform.total_attempts) * 100;
+
+    // Update health status
+    if (platform.success_rate >= 80) {
+      platform.current_health_status = 'healthy';
+    } else if (platform.success_rate >= 60) {
+      platform.current_health_status = 'degraded';
+    } else {
+      platform.current_health_status = 'unhealthy';
+    }
+
+    internalLogger.info('platform_health', `Platform success recorded`, {
+      platform: platform.domain,
+      successRate: platform.success_rate,
+      healthStatus: platform.current_health_status,
+      totalAttempts: platform.total_attempts
+    });
+  }
+
+  /**
+   * Record platform failure and update health metrics
+   */
+  private async recordPlatformFailure(platform: PlatformTarget, error: string, errorType: string): Promise<void> {
+    platform.total_attempts++;
+    platform.consecutive_failures++;
+    platform.last_failure = new Date().toISOString();
+
+    // Add to failure history (keep last 10 failures)
+    platform.failure_reasons.push({
+      timestamp: new Date().toISOString(),
+      error,
+      error_type: errorType as any
+    });
+
+    if (platform.failure_reasons.length > 10) {
+      platform.failure_reasons = platform.failure_reasons.slice(-10);
+    }
+
+    // Update success rate
+    platform.success_rate = (platform.total_successes / platform.total_attempts) * 100;
+
+    // Update health status and cooldown
+    if (platform.consecutive_failures >= this.MAX_CONSECUTIVE_FAILURES) {
+      platform.current_health_status = 'unhealthy';
+      // Set cooldown period
+      const cooldownMs = this.PLATFORM_COOLDOWN_MINUTES * 60 * 1000;
+      platform.next_retry_after = new Date(Date.now() + cooldownMs).toISOString();
+
+      internalLogger.warn('platform_health', `Platform ${platform.domain} marked as unhealthy and placed in cooldown`, {
+        consecutiveFailures: platform.consecutive_failures,
+        cooldownUntil: platform.next_retry_after,
+        error,
+        errorType
+      });
+    } else if (platform.success_rate < 60) {
+      platform.current_health_status = 'degraded';
+    } else if (platform.success_rate < 80) {
+      platform.current_health_status = 'degraded';
+    }
+
+    internalLogger.error('platform_health', `Platform failure recorded`, {
+      platform: platform.domain,
+      error,
+      errorType,
+      consecutiveFailures: platform.consecutive_failures,
+      successRate: platform.success_rate,
+      healthStatus: platform.current_health_status
+    });
+  }
+
+  /**
+   * Execute on platform with retry logic
+   */
+  private async executeOnPlatformWithRetry(campaign: LiveCampaign, platform: PlatformTarget): Promise<{
+    success: boolean;
+    article_title?: string;
+    article_url?: string;
+    word_count?: number;
+    anchor_text_used?: string;
+    error?: string;
+    error_type?: string;
+  }> {
+    let lastError = '';
+    let lastErrorType = 'unknown';
+
+    for (let attempt = 1; attempt <= this.MAX_RETRY_ATTEMPTS; attempt++) {
+      try {
+        internalLogger.debug('platform_execution', `Attempt ${attempt} for platform ${platform.domain}`, {
+          campaignId: campaign.id,
+          platform: platform.domain
+        });
+
+        const result = await this.executeOnPlatform(campaign, platform);
+
+        if (result.success) {
+          return result;
+        } else {
+          lastError = result.error || 'Unknown error';
+          lastErrorType = this.classifyError(lastError);
+
+          // Don't retry certain error types
+          if (lastErrorType === 'auth_error' || lastErrorType === 'content_error') {
+            break;
+          }
+
+          if (attempt < this.MAX_RETRY_ATTEMPTS) {
+            // Wait before retry
+            await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
+          }
+        }
+      } catch (error) {
+        lastError = error instanceof Error ? error.message : 'Unknown error';
+        lastErrorType = this.classifyError(lastError);
+
+        if (attempt < this.MAX_RETRY_ATTEMPTS) {
+          await new Promise(resolve => setTimeout(resolve, 2000 * attempt));
+        }
+      }
+    }
+
+    return {
+      success: false,
+      error: lastError,
+      error_type: lastErrorType
+    };
+  }
+
+  /**
+   * Classify error type for better handling
+   */
+  private classifyError(error: string): 'api_error' | 'network_error' | 'content_error' | 'auth_error' | 'rate_limit' | 'unknown' {
+    const errorLower = error.toLowerCase();
+
+    if (errorLower.includes('auth') || errorLower.includes('unauthorized') || errorLower.includes('forbidden')) {
+      return 'auth_error';
+    }
+    if (errorLower.includes('rate limit') || errorLower.includes('too many requests')) {
+      return 'rate_limit';
+    }
+    if (errorLower.includes('network') || errorLower.includes('timeout') || errorLower.includes('connection')) {
+      return 'network_error';
+    }
+    if (errorLower.includes('content') || errorLower.includes('invalid') || errorLower.includes('format')) {
+      return 'content_error';
+    }
+    if (errorLower.includes('api') || errorLower.includes('server error') || errorLower.includes('500')) {
+      return 'api_error';
+    }
+
+    return 'unknown';
+  }
+
+  /**
+   * Start periodic platform health monitoring
+   */
+  private startPlatformHealthMonitoring(): void {
+    setInterval(() => {
+      this.performHealthCheck();
+    }, this.HEALTH_CHECK_INTERVAL);
+  }
+
+  /**
+   * Perform periodic health check on platforms
+   */
+  private async performHealthCheck(): Promise<void> {
+    internalLogger.info('platform_health', 'Performing periodic health check');
+
+    for (const platform of this.platformTargets) {
+      // Reset platforms that have been in cooldown long enough
+      if (platform.next_retry_after && new Date() > new Date(platform.next_retry_after)) {
+        platform.next_retry_after = undefined;
+        platform.consecutive_failures = Math.max(0, platform.consecutive_failures - 1);
+
+        // Improve health status if failures have been reset
+        if (platform.consecutive_failures === 0 && platform.success_rate >= 60) {
+          platform.current_health_status = platform.success_rate >= 80 ? 'healthy' : 'degraded';
+
+          internalLogger.info('platform_health', `Platform ${platform.domain} recovered from cooldown`, {
+            healthStatus: platform.current_health_status,
+            successRate: platform.success_rate
+          });
+        }
+      }
+    }
+  }
+
+  /**
    * Execute content generation and publishing on specific platform
    */
   private async executeOnPlatform(campaign: LiveCampaign, platform: PlatformTarget): Promise<{
