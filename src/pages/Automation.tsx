@@ -35,6 +35,7 @@ import { automationOrchestrator } from '@/services/automationOrchestrator';
 import AutomationTestDashboard from '@/components/automation/AutomationTestDashboard';
 import { LoginModal } from '@/components/LoginModal';
 import { DatabaseInit } from '@/utils/databaseInit';
+import { directAutomationExecutor, DirectExecutionResult } from '@/services/directAutomationExecutor';
 
 interface Campaign {
   id: string;
