@@ -653,6 +653,8 @@ export default function Automation() {
         user_id: 'test-user'
       };
 
+      toast.info('Running content formatting test...', { duration: 3000 });
+
       const result = await directAutomationExecutor.executeWorkflow(testInput);
 
       if (result.success && result.article_content) {
@@ -666,14 +668,30 @@ export default function Automation() {
         console.log(`- Contains [object Object]: ${hasObjectError ? '❌' : '✅'}`);
         console.log(`- Contains markdown links: ${hasLinks ? '✅' : '❌'}`);
         console.log(`- Word count: ${result.word_count || 'unknown'}`);
+        console.log(`- Article URL: ${result.article_url || 'none'}`);
 
         if (!hasObjectError && hasLinks) {
-          toast.success('Content formatting test passed!');
+          toast.success('✅ Content formatting test passed! Check console for details.');
         } else {
-          toast.error('Content formatting test revealed issues');
+          toast.error('❌ Content formatting test revealed issues - check console');
+        }
+
+        // Additional info about the execution method
+        if (result.article_url && result.article_url.includes('telegra.ph')) {
+          if (result.debug_info && result.debug_info.execution_method === 'client_side') {
+            toast.info('ℹ️ Used client-side fallback (Netlify functions not available)');
+          } else {
+            toast.success('🌐 Used live Netlify functions');
+          }
         }
       } else {
+        console.error('❌ Test failed:', result.error);
         toast.error(`Content test failed: ${result.error}`);
+
+        // Check if it's a 404 error
+        if (result.error && result.error.includes('404')) {
+          toast.info('ℹ️ 404 errors are normal in development - functions will work in production');
+        }
       }
     } catch (error) {
       console.error('🧪 Content formatting test error:', error);
