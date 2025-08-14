@@ -171,9 +171,23 @@ class LiveCampaignManager {
     auto_start?: boolean;
   }): Promise<{ success: boolean; campaign?: LiveCampaign; error?: string }> {
 
-    internalLogger.info('campaign_creation', 'Starting campaign creation process', { params });
+    internalLogger.info('campaign_creation', 'Starting campaign creation process', {
+      params: {
+        ...params,
+        keywords: Array.isArray(params.keywords) ? params.keywords : 'NOT_ARRAY',
+        anchor_texts: Array.isArray(params.anchor_texts) ? params.anchor_texts : 'NOT_ARRAY'
+      }
+    });
 
     try {
+      // Validate input parameters
+      if (!Array.isArray(params.keywords) || params.keywords.length === 0) {
+        throw new Error('Keywords must be a non-empty array');
+      }
+      if (!Array.isArray(params.anchor_texts) || params.anchor_texts.length === 0) {
+        throw new Error('Anchor texts must be a non-empty array');
+      }
+
       // Get available platforms for this campaign
       const availablePlatforms = this.getAvailablePlatforms();
       internalLogger.debug('campaign_creation', 'Available platforms retrieved', { count: availablePlatforms.length });
