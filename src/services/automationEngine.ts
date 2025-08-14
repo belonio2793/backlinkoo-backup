@@ -103,23 +103,69 @@ class AutomationEngine {
   }
 
   private formatContentWithLinks(content: string, anchor_text: string, target_url: string): string {
-    // Ensure the anchor text is properly hyperlinked
-    if (!content.includes(`[${anchor_text}]`) && !content.includes(`<a href="${target_url}"`)) {
-      // If the content doesn't already have the link, ensure it's properly formatted
-      const linkText = `[${anchor_text}](${target_url})`;
-      
-      // Insert the link naturally in the content if it's not already there
-      if (!content.includes(linkText)) {
-        // Find a good place to insert the link (after first paragraph)
-        const paragraphs = content.split('\n\n');
-        if (paragraphs.length > 1) {
-          paragraphs[1] = paragraphs[1] + ` Learn more about this topic at ${linkText}.`;
-          content = paragraphs.join('\n\n');
-        } else {
-          content = content + `\n\nFor more information, visit ${linkText}.`;
-        }
-      }
+    console.log(`🔗 Formatting content with anchor text: "${anchor_text}" -> ${target_url}`);
+
+    // Create the properly formatted markdown link
+    const markdownLink = `[${anchor_text}](${target_url})`;
+
+    // Check if the anchor text already exists as a hyperlink in various formats
+    const hasMarkdownLink = content.includes(markdownLink);
+    const hasHTMLLink = content.includes(`<a href="${target_url}"`);
+    const hasPlainAnchorText = content.includes(anchor_text);
+
+    console.log(`🔍 Link analysis:`, {
+      hasMarkdownLink,
+      hasHTMLLink,
+      hasPlainAnchorText,
+      anchorText: anchor_text
+    });
+
+    // If anchor text exists but isn't linked, replace it with a hyperlink
+    if (hasPlainAnchorText && !hasMarkdownLink && !hasHTMLLink) {
+      // Replace the first occurrence of anchor text with the hyperlinked version
+      content = content.replace(anchor_text, markdownLink);
+      console.log(`✅ Replaced plain anchor text with hyperlink`);
     }
+    // If no anchor text exists at all, add it naturally to the content
+    else if (!hasPlainAnchorText && !hasMarkdownLink && !hasHTMLLink) {
+      console.log(`⚠️ Anchor text not found in content, inserting naturally...`);
+
+      // Find a good place to insert the link (middle of content for natural flow)
+      const paragraphs = content.split('\n\n').filter(p => p.trim());
+
+      if (paragraphs.length >= 2) {
+        // Insert in the second paragraph for natural flow
+        const insertIndex = 1;
+        paragraphs[insertIndex] = paragraphs[insertIndex] + ` For more insights, check out ${markdownLink}.`;
+        content = paragraphs.join('\n\n');
+      } else if (paragraphs.length === 1) {
+        // Single paragraph - add at the end
+        content = content + `\n\nLearn more at ${markdownLink}.`;
+      } else {
+        // Fallback - add at the end
+        content = content + `\n\nFor additional information, visit ${markdownLink}.`;
+      }
+
+      console.log(`✅ Added anchor text link to content naturally`);
+    } else {
+      console.log(`✅ Anchor text already properly linked in content`);
+    }
+
+    // Ensure content is properly formatted for Telegraph
+    content = this.ensureProperFormatting(content);
+
+    console.log(`🎯 Final content preview: ${content.substring(0, 200)}...`);
+    return content;
+  }
+
+  private ensureProperFormatting(content: string): string {
+    // Clean up formatting for Telegraph publishing
+    content = content
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>') // Bold
+      .replace(/\*([^*]+)\*/g, '<em>$1</em>') // Italic
+      .replace(/^\s*#\s+(.+)$/gm, '\n## $1\n') // Headers
+      .replace(/^\s*##\s+(.+)$/gm, '\n### $1\n') // Subheaders
+      .trim();
 
     return content;
   }
