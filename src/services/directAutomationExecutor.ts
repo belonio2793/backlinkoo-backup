@@ -478,28 +478,37 @@ class DirectAutomationExecutor {
   }> {
     const startTime = Date.now();
 
-    // Use mock service in development when Netlify functions aren't available
+    // Use client-side Telegraph publisher when Netlify functions aren't available
     if (useMockService) {
       try {
-        const mockResult = await mockAutomationService.publishMockContent({
+        console.log('🔧 Using client-side Telegraph publishing fallback...');
+
+        const { ClientTelegraphPublisher } = await import('./clientTelegraphPublisher');
+
+        const clientResult = await ClientTelegraphPublisher.publishArticle({
           title: params.title,
           content: params.content,
-          user_id: params.user_id
+          user_id: params.user_id,
+          author_name: 'SEO Content Bot'
         });
 
-        return {
-          success: mockResult.success,
-          url: mockResult.url,
-          publishing_time_ms: mockResult.publishing_time_ms,
-          error: mockResult.error
-        };
+        if (clientResult.success) {
+          return {
+            success: true,
+            url: clientResult.url || '',
+            publishing_time_ms: Date.now() - startTime,
+            warning: clientResult.warning
+          };
+        } else {
+          throw new Error(clientResult.error || 'Client-side publishing failed');
+        }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         return {
           success: false,
           url: '',
           publishing_time_ms: Date.now() - startTime,
-          error: `Mock service error: ${errorMessage}`
+          error: `Client-side publishing error: ${errorMessage}`
         };
       }
     }
