@@ -153,14 +153,30 @@ export function CampaignCreationFix() {
                 )}
 
                 {!testResult.success && testResult.error && (
-                  <details className="mt-2">
-                    <summary className="text-xs cursor-pointer text-gray-500">
-                      View Error Details
-                    </summary>
-                    <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-auto max-h-32">
-                      {JSON.stringify(testResult.error, null, 2)}
-                    </pre>
-                  </details>
+                  <>
+                    {testResult.message.includes('"Expected JSON array"') && (
+                      <div className="mt-2 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                        <h4 className="text-sm font-semibold text-orange-800 mb-2">🔧 Quick Fix Required</h4>
+                        <p className="text-xs text-orange-700 mb-2">
+                          This error means the database is missing required columns. Run this SQL in your Supabase Dashboard:
+                        </p>
+                        <code className="text-xs bg-orange-100 px-2 py-1 rounded">
+                          ALTER TABLE automation_campaigns ADD COLUMN published_articles JSONB DEFAULT '[]'::jsonb;
+                        </code>
+                        <p className="text-xs text-orange-600 mt-1">
+                          See <strong>AUTOMATION_SCHEMA_FIX_IMMEDIATE.md</strong> for complete fix.
+                        </p>
+                      </div>
+                    )}
+                    <details className="mt-2">
+                      <summary className="text-xs cursor-pointer text-gray-500">
+                        View Error Details
+                      </summary>
+                      <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-auto max-h-32">
+                        {JSON.stringify(testResult.error, null, 2)}
+                      </pre>
+                    </details>
+                  </>
                 )}
               </div>
             )}
