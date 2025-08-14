@@ -40,8 +40,8 @@ let lastPublicationTime = 0;
 
 class AutomationEngine {
   private async generateContent(
-    keyword: string, 
-    anchor_text: string, 
+    keyword: string,
+    anchor_text: string,
     target_url: string,
     promptIndex: number = 0
   ): Promise<{ content: string; title: string; word_count: number }> {
@@ -50,10 +50,10 @@ class AutomationEngine {
       .replace('{{anchor_text}}', anchor_text)
       .replace('{{url}}', target_url);
 
-    console.log(`🤖 Generating content with prompt ${promptIndex + 1}:`, prompt);
+    console.log(`🤖 Generating content with ChatGPT 3.5 Turbo - Prompt ${promptIndex + 1}:`, prompt);
 
     try {
-      // Call OpenAI via Netlify function
+      // Call OpenAI via Netlify function (using ChatGPT 3.5 Turbo)
       const response = await fetch('/.netlify/functions/ai-content-generator', {
         method: 'POST',
         headers: {
@@ -64,7 +64,10 @@ class AutomationEngine {
           keyword,
           anchor_text,
           target_url,
-          word_count: 1000
+          word_count: 1000,
+          model: 'gpt-3.5-turbo', // Explicitly specify ChatGPT 3.5 Turbo
+          temperature: 0.7, // Balanced creativity
+          max_tokens: 2000 // Ensure enough tokens for 1000 words
         })
       });
 
@@ -73,15 +76,17 @@ class AutomationEngine {
       }
 
       const result = await response.json();
-      
+
       if (!result.success) {
         throw new Error(result.error || 'Content generation failed');
       }
 
-      // Format content with proper anchor text linking
+      console.log(`✅ ChatGPT 3.5 Turbo generated ${result.word_count || 'unknown'} words`);
+
+      // REQUIREMENT: Format content with proper anchor text linking before publish
       const formattedContent = this.formatContentWithLinks(
-        result.content, 
-        anchor_text, 
+        result.content,
+        anchor_text,
         target_url
       );
 
