@@ -293,7 +293,7 @@ async function createMissingTable(tableName) {
 }
 
 // Run if called directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
     checkAndFixSchema()
         .then(success => {
             if (success) {
@@ -310,4 +310,4 @@ if (require.main === module) {
         });
 }
 
-module.exports = { checkAndFixSchema };
+export { checkAndFixSchema };
