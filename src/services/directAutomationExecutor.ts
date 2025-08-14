@@ -28,6 +28,32 @@ class DirectAutomationExecutor {
   
   async executeWorkflow(input: DirectExecutionInput): Promise<DirectExecutionResult> {
     const startTime = Date.now();
+
+    // Input validation
+    if (!input.keywords || input.keywords.length === 0) {
+      return {
+        success: false,
+        error: 'No keywords provided',
+        execution_time_ms: 0
+      };
+    }
+
+    if (!input.anchor_texts || input.anchor_texts.length === 0) {
+      return {
+        success: false,
+        error: 'No anchor texts provided',
+        execution_time_ms: 0
+      };
+    }
+
+    if (!input.target_url || !input.target_url.trim()) {
+      return {
+        success: false,
+        error: 'No target URL provided',
+        execution_time_ms: 0
+      };
+    }
+
     console.log('🚀 Starting direct automation execution:', {
       keywords: input.keywords.slice(0, 3),
       target_url: input.target_url,
