@@ -69,22 +69,38 @@ export function protectViteClient(): void {
  * Check if a request is from Vite client
  */
 function isViteClientRequest(url: string, init?: RequestInit): boolean {
+  // Exclude Supabase and other external API requests
+  if (url.includes('supabase.co') ||
+      url.includes('supabase.in') ||
+      url.includes('netlify') ||
+      url.startsWith('https://') && !url.includes(window.location.hostname)) {
+    return false;
+  }
+
   // Vite client typically makes requests to:
   // - WebSocket endpoint for HMR
   // - Ping endpoints for connection health
-  // - Module requests during development
-  
+  // - Module requests during development (only local ones)
+
   const vitePatterns = [
     '/@vite/client',
     '/__vite_ping',
-    '/src/',
-    '.tsx',
-    '.ts',
-    '.jsx',
-    '.js'
+    '/@fs/',
+    '/@id/',
+    '/@react-refresh'
   ];
-  
-  return vitePatterns.some(pattern => url.includes(pattern)) ||
+
+  // Only match local development requests
+  const isLocalViteRequest = vitePatterns.some(pattern => url.includes(pattern)) ||
+    // Local source file requests
+    (url.includes('/src/') && !url.startsWith('https://')) ||
+    // Local TypeScript/JavaScript module requests
+    ((url.endsWith('.tsx') || url.endsWith('.ts') || url.endsWith('.jsx') || url.endsWith('.js')) &&
+     !url.startsWith('https://'));
+
+  return isLocalViteRequest &&
+         // Double-check it's not an external request
+         !url.startsWith('https://') &&
          // Check if request is made from Vite client code
          (new Error().stack?.includes('@vite/client') || false);
 }
