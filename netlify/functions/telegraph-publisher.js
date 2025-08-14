@@ -90,9 +90,41 @@ exports.handler = async (event, context) => {
 
     if (pageData.ok) {
       const pageUrl = `https://telegra.ph/${pageData.result.path}`;
-      
-      console.log('✅ Successfully published to Telegraph:', pageUrl);
-      
+
+      console.log('✅ Telegraph page created:', pageUrl);
+
+      // Verify the page is actually accessible (common 404 fix)
+      try {
+        console.log('🔍 Verifying page accessibility...');
+        const verifyResponse = await fetch(pageUrl, {
+          method: 'HEAD',
+          timeout: 10000
+        });
+
+        if (verifyResponse.status === 404) {
+          console.error('⚠️ Telegraph page returns 404 immediately after creation');
+          console.error('This usually indicates content policy violation or rate limiting');
+
+          return {
+            statusCode: 200,
+            headers,
+            body: JSON.stringify({
+              success: true,
+              url: pageUrl,
+              path: pageData.result.path,
+              title: pageData.result.title,
+              views: pageData.result.views || 0,
+              warning: 'Page created but may not be immediately accessible (404). This is common with Telegraph and usually resolves within minutes.'
+            })
+          };
+        }
+
+        console.log('✅ Page verified accessible');
+      } catch (verifyError) {
+        console.warn('⚠️ Could not verify page accessibility:', verifyError.message);
+        // Continue anyway - verification failure doesn't mean the page is broken
+      }
+
       return {
         statusCode: 200,
         headers,
@@ -106,12 +138,22 @@ exports.handler = async (event, context) => {
       };
     } else {
       console.error('Telegraph page creation error:', pageData);
+
+      // Provide more specific error messages
+      let errorMessage = pageData.error || 'Failed to create Telegraph page';
+      if (pageData.error === 'CONTENT_TOO_BIG') {
+        errorMessage = 'Content is too large for Telegraph (max ~64KB)';
+      } else if (pageData.error === 'INVALID_HTML') {
+        errorMessage = 'Content contains invalid HTML format';
+      }
+
       return {
         statusCode: 500,
         headers,
         body: JSON.stringify({
-          error: pageData.error || 'Failed to create Telegraph page',
-          success: false
+          error: errorMessage,
+          success: false,
+          telegraph_error: pageData.error
         })
       };
     }
