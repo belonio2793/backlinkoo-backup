@@ -266,7 +266,15 @@ class LiveCampaignManager {
         }
       }
 
-      internalLogger.info('campaign_creation', 'Attempting database insert', { finalCampaignData: campaignData });
+      internalLogger.info('campaign_creation', 'Attempting database insert', {
+        finalCampaignData: {
+          ...campaignData,
+          keywords_type: Array.isArray(campaignData.keywords) ? 'array' : typeof campaignData.keywords,
+          anchor_texts_type: Array.isArray(campaignData.anchor_texts) ? 'array' : typeof campaignData.anchor_texts,
+          keywords_length: Array.isArray(campaignData.keywords) ? campaignData.keywords.length : 'N/A',
+          anchor_texts_length: Array.isArray(campaignData.anchor_texts) ? campaignData.anchor_texts.length : 'N/A'
+        }
+      });
 
       let { data, error } = await supabase
         .from('automation_campaigns')
