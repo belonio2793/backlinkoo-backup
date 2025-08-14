@@ -127,11 +127,7 @@ createRoot(document.getElementById("root")!).render(<App />);
 
 // Defer heavy initialization to after app mount
 requestIdleCallback(() => {
-  // Initialize platform filtering and trial post cleanup after app loads
-  import('./services/platformInitializer').then(({ platformInitializer }) => {
-    platformInitializer.initialize().catch(console.error);
-  });
-
+  // Initialize trial post cleanup service after app loads
   import('./services/trialPostCleanupService').then(({ trialPostCleanupService }) => {
     trialPostCleanupService.scheduleCleanup().catch(console.error);
   });
