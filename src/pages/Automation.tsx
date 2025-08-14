@@ -374,14 +374,14 @@ export default function Automation() {
     }
   };
 
-  const executeDirectly = async () => {
+  const executeUnified = async () => {
     if (!formData.keywords || !formData.anchor_texts || !formData.target_url) {
-      toast.error('Please fill in all required fields for direct execution');
+      toast.error('Please fill in all required fields');
       return;
     }
 
-    setDirectExecuting(true);
-    automationLogger.info('direct_execution', 'Starting direct automation execution', {
+    setCreating(true);
+    automationLogger.info('campaign', 'Starting unified link building execution', {
       keywords: formData.keywords.split(',').length,
       anchor_texts: formData.anchor_texts.split(',').length,
       target_url: formData.target_url
@@ -393,16 +393,47 @@ export default function Automation() {
 
       toast.info('🚀 Starting content generation and publishing...', { duration: 3000 });
 
+      // Try direct execution (works with or without database)
       const result = await directAutomationExecutor.executeWorkflow({
         keywords: keywordsArray,
         anchor_texts: anchorTextsArray,
         target_url: formData.target_url,
-        user_id: user?.id || 'anonymous-user'
+        user_id: user?.id || 'guest-user'
       });
 
       if (result.success) {
-        // Add to results at the top
+        // Add to direct results for immediate display
         setDirectResults(prev => [result, ...prev]);
+
+        // Try to save to database if user is authenticated (optional, non-blocking)
+        if (user) {
+          try {
+            const generatedName = generateCampaignName(formData.keywords, formData.target_url);
+            const { data, error } = await supabase
+              .from('automation_campaigns')
+              .insert({
+                user_id: user.id,
+                name: generatedName,
+                keywords: keywordsArray,
+                anchor_texts: anchorTextsArray,
+                target_url: formData.target_url,
+                status: 'completed',
+                links_built: 1,
+                available_sites: 1,
+                target_sites_used: [result.target_platform || 'Telegraph']
+              })
+              .select()
+              .single();
+
+            if (!error && data) {
+              setCampaigns(prev => [data, ...prev]);
+              automationLogger.info('campaign', 'Campaign also saved to database', { campaignId: data.id });
+            }
+          } catch (dbError) {
+            // Database save failed, but that's ok - direct execution succeeded
+            automationLogger.warn('campaign', 'Database save failed, but direct execution succeeded', {}, undefined, dbError as Error);
+          }
+        }
 
         // Clear form
         setFormData({
@@ -411,34 +442,33 @@ export default function Automation() {
           target_url: ''
         });
 
-        automationLogger.info('direct_execution', 'Direct execution completed successfully', {
+        automationLogger.info('campaign', 'Link building campaign completed successfully', {
           article_url: result.article_url,
           execution_time: result.execution_time_ms,
           word_count: result.word_count
         });
 
         toast.success(
-          `🎉 Article published successfully!
-          ${result.word_count} words in ${Math.round((result.execution_time_ms || 0) / 1000)}s`,
+          `🎉 Link building campaign completed! Article published with ${result.word_count} words in ${Math.round((result.execution_time_ms || 0) / 1000)}s`,
           { duration: 5000 }
         );
       } else {
-        automationLogger.error('direct_execution', 'Direct execution failed', {
+        automationLogger.error('campaign', 'Link building campaign failed', {
           error: result.error,
           execution_time: result.execution_time_ms
         });
-        toast.error(`Direct execution failed: ${result.error}`);
+        toast.error(`Campaign failed: ${result.error}`);
       }
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      automationLogger.error('direct_execution', 'Direct execution error', {
+      automationLogger.error('campaign', 'Link building execution error', {
         errorMessage,
         formData
       }, undefined, error as Error);
-      toast.error(`Execution failed: ${errorMessage}`);
+      toast.error(`Campaign failed: ${errorMessage}`);
     } finally {
-      setDirectExecuting(false);
+      setCreating(false);
     }
   };
 
