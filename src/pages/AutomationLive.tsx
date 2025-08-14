@@ -35,6 +35,7 @@ import { liveCampaignManager, type LiveCampaign } from '@/services/liveCampaignM
 import { campaignReportingSystem, type PublishedLink, type CampaignReport } from '@/services/campaignReportingSystem';
 import { LoginModal } from '@/components/LoginModal';
 import { DatabaseInit } from '@/utils/databaseInit';
+import { CampaignDebugger } from '@/components/CampaignDebugger';
 
 export default function AutomationLive() {
   const { user } = useAuth();
