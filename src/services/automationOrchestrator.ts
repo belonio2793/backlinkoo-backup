@@ -58,6 +58,16 @@ export class AutomationOrchestrator {
 
       if (error) {
         console.error('Error creating campaign:', error);
+
+        // Handle specific database errors
+        if (error.message.includes('violates row-level security policy')) {
+          throw new Error('Authentication required: Please log in to create campaigns');
+        }
+
+        if (error.message.includes('column') && error.message.includes('does not exist')) {
+          throw new Error('Database schema error: Please contact administrator');
+        }
+
         throw new Error(`Failed to create campaign: ${error.message}`);
       }
 
