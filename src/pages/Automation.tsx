@@ -643,8 +643,9 @@ export default function Automation() {
     }
   };
 
-  // Load submissions when user changes
+  // Load submissions and platform status when user changes
   useEffect(() => {
+    loadPlatformStatus();
     if (user) {
       loadSubmissions();
     } else {
