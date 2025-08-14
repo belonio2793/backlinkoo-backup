@@ -42,6 +42,7 @@ import { PlatformHealthMonitor } from '@/components/debug/PlatformHealthMonitor'
 import { PlatformErrorSimulator } from '@/components/debug/PlatformErrorSimulator';
 import { CampaignCreationDebugger } from '@/components/debug/CampaignCreationDebugger';
 import { DatabaseSchemaFixer } from '@/components/debug/DatabaseSchemaFixer';
+import { SchemaFixTester } from '@/components/debug/SchemaFixTester';
 import { internalLogger } from '@/services/internalLogger';
 import guestPostingSites from '@/data/guestPostingSites.json';
 import { PLATFORM_CONFIGS, getImplementedPlatforms, getPlannedPlatforms, type PlatformConfig } from '@/services/platformConfigs';
@@ -376,6 +377,16 @@ export default function AutomationLive() {
       } else if (error && typeof error === 'object') {
         // Handle object errors by extracting meaningful information
         const errorObj = error as any;
+
+        // Enhanced debugging for object errors
+        console.error('🔍 Campaign Creation Error Debug:', {
+          errorType: typeof error,
+          errorConstructor: error.constructor?.name,
+          errorKeys: Object.keys(error),
+          rawError: error,
+          stringified: JSON.stringify(error, null, 2)
+        });
+
         errorMessage = errorObj.message || errorObj.error || errorObj.details ||
                       (errorObj.toString && errorObj.toString !== '[object Object]' ? errorObj.toString() : '') ||
                       'Campaign creation failed with no additional details';
@@ -1160,6 +1171,7 @@ export default function AutomationLive() {
           {/* Debug Tab */}
           <TabsContent value="debug" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <SchemaFixTester />
               <DatabaseSchemaFixer />
               <CampaignCreationDebugger />
             </div>
