@@ -28,7 +28,16 @@ export interface DirectExecutionResult {
 }
 
 class DirectAutomationExecutor {
-  
+
+  private isDevEnvironment(): boolean {
+    return import.meta.env.MODE === 'development' ||
+           import.meta.env.DEV === true ||
+           (typeof window !== 'undefined' && (
+             window.location.hostname === 'localhost' ||
+             window.location.hostname.includes('127.0.0.1')
+           ));
+  }
+
   async executeWorkflow(input: DirectExecutionInput): Promise<DirectExecutionResult> {
     const startTime = Date.now();
 
