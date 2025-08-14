@@ -801,65 +801,23 @@ export default function Automation() {
                   </div>
                 </div>
 
-                <div className="space-y-3">
-                  <Button
-                    onClick={createCampaign}
-                    disabled={creating || directExecuting}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                  >
-                    {creating ? (
-                      <>
-                        <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                        Creating Campaign...
-                      </>
-                    ) : user ? (
-                      <>
-                        <Plus className="h-4 w-4 mr-2" />
-                        Create Campaign
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-4 w-4 mr-2" />
-                        {formData.keywords || formData.anchor_texts || formData.target_url
-                          ? 'Save Progress & Sign In'
-                          : 'Sign In to Create Campaign'
-                        }
-                      </>
-                    )}
-                  </Button>
-
-                  <div className="relative">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-gray-300" />
-                    </div>
-                    <div className="relative flex justify-center text-xs uppercase">
-                      <span className="bg-white px-2 text-gray-500">Or</span>
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={executeDirectly}
-                    disabled={directExecuting || creating}
-                    variant="outline"
-                    className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-green-600 hover:border-green-700"
-                  >
-                    {directExecuting ? (
-                      <>
-                        <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                        Generating & Publishing...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="h-4 w-4 mr-2" />
-                        Execute Directly (No Database)
-                      </>
-                    )}
-                  </Button>
-
-                  <p className="text-xs text-gray-500 text-center">
-                    Direct execution: Generate content and publish immediately without saving to database
-                  </p>
-                </div>
+                <Button
+                  onClick={executeUnified}
+                  disabled={creating}
+                  className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+                >
+                  {creating ? (
+                    <>
+                      <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                      Generating & Publishing Article...
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4 mr-2" />
+                      Start Link Building Campaign
+                    </>
+                  )}
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
