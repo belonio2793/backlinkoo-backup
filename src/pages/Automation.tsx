@@ -138,27 +138,27 @@ export default function Automation() {
     setPublishedArticles([
       {
         id: 'demo-article-1',
-        article_title: 'Complete Guide to SEO Tools & Digital Marketing',
-        article_url: 'https://telegra.ph/demo-article-1',
-        status: 'published',
-        published_date: new Date().toISOString(),
-        anchor_text: 'best SEO tools',
-        word_count: 847,
+        title: 'Complete Guide to SEO Tools & Digital Marketing',
+        url: 'https://telegra.ph/demo-article-1',
         platform: 'Telegraph',
-        campaign_name: 'SEO tools & digital marketing → example.com',
-        target_url: 'https://example.com'
+        word_count: 847,
+        anchor_text_used: 'best SEO tools',
+        keyword_used: 'SEO tools',
+        content_preview: 'This comprehensive guide covers everything you need to know about SEO tools and digital marketing strategies. From keyword research to link building...',
+        published_at: new Date().toISOString(),
+        execution_time_ms: 15430
       },
       {
         id: 'demo-article-2',
-        article_title: 'Content Marketing Strategies for Growth',
-        article_url: 'https://telegra.ph/demo-article-2',
-        status: 'published',
-        published_date: new Date(Date.now() - 3600000).toISOString(),
-        anchor_text: 'learn more',
-        word_count: 692,
+        title: 'Content Marketing Strategies for Growth',
+        url: 'https://telegra.ph/demo-article-2',
         platform: 'Telegraph',
-        campaign_name: 'content marketing → example.com',
-        target_url: 'https://example.com/blog'
+        word_count: 692,
+        anchor_text_used: 'learn more',
+        keyword_used: 'content marketing',
+        content_preview: 'Content marketing has become one of the most effective ways to grow your business online. This article explores proven strategies...',
+        published_at: new Date(Date.now() - 3600000).toISOString(),
+        execution_time_ms: 12850
       }
     ]);
 
