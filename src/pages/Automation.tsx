@@ -1055,30 +1055,47 @@ export default function Automation() {
 
                 {/* Available Sites Info */}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-3">
                     <BarChart3 className="h-5 w-5 text-blue-600" />
-                    <span className="font-medium text-blue-800">Target Platform</span>
+                    <span className="font-medium text-blue-800">Target Platforms</span>
                     <Badge variant="outline" className="ml-auto bg-green-50 text-green-700 border-green-200">
-                      Telegraph Ready
+                      4 Platforms Ready
                     </Badge>
                   </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <p className="text-blue-700">
-                        <span className="font-semibold">Telegraph</span> instant publishing
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                    <div className="bg-white rounded-lg p-3 border border-blue-100">
+                      <p className="text-blue-700 font-semibold flex items-center gap-1">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Telegraph
                       </p>
-                      <p className="text-blue-600">
-                        Anonymous posting with immediate live URLs
-                      </p>
+                      <p className="text-blue-600 text-xs">DR 85+ • Instant publishing</p>
                     </div>
-                    <div>
-                      <p className="text-blue-700">
-                        <span className="font-semibold">High Authority</span> domain
+                    <div className="bg-white rounded-lg p-3 border border-blue-100">
+                      <p className="text-blue-700 font-semibold flex items-center gap-1">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Write.as
                       </p>
-                      <p className="text-blue-600">
-                        Domain Rating 85+ with reliable API
-                      </p>
+                      <p className="text-blue-600 text-xs">DR 82+ • Minimalist platform</p>
                     </div>
+                    <div className="bg-white rounded-lg p-3 border border-blue-100">
+                      <p className="text-blue-700 font-semibold flex items-center gap-1">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Rentry.co
+                      </p>
+                      <p className="text-blue-600 text-xs">DR 78+ • Simple text publishing</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 border border-blue-100">
+                      <p className="text-blue-700 font-semibold flex items-center gap-1">
+                        <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                        JustPaste.it
+                      </p>
+                      <p className="text-blue-600 text-xs">DR 75+ • Quick content sharing</p>
+                    </div>
+                  </div>
+                  <div className="mt-3 pt-3 border-t border-blue-200">
+                    <p className="text-blue-700 text-xs">
+                      <span className="font-semibold">Multi-Platform Rotation:</span> Automatically distributes content across all available platforms for maximum reach
+                    </p>
                   </div>
                 </div>
 

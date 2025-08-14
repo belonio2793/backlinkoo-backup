@@ -118,12 +118,12 @@ class TargetSitesManager {
   }
 
   private getFilteredWorkingSites(): TargetSite[] {
-    // Telegraph only - the one platform that actually works
-    automationLogger.info('system', 'Loading Telegraph as the only platform');
+    // Multiple platforms - Telegraph, Write.as, Rentry.co, and JustPaste.it
+    automationLogger.info('system', 'Loading multiple automation platforms');
 
     return [
       {
-        id: 'telegraph-only',
+        id: 'telegraph',
         domain: 'telegra.ph',
         url: 'https://telegra.ph',
         type: 'blog',
@@ -142,6 +142,78 @@ class TargetSitesManager {
           submission_guidelines: 'Telegraph - instant anonymous publishing',
           response_time_hours: 0,
           notes: 'Telegraph API for instant publishing'
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: 'write-as',
+        domain: 'write.as',
+        url: 'https://write.as',
+        type: 'blog',
+        status: 'active',
+        domain_rating: 82,
+        success_rate: 90,
+        total_attempts: 0,
+        successful_submissions: 0,
+        requirements: {
+          min_word_count: 100,
+          topics: ['writing', 'technology', 'personal'],
+          approval_process: false,
+          registration_required: false
+        },
+        metadata: {
+          submission_guidelines: 'Write.as - minimalist publishing platform',
+          response_time_hours: 0,
+          notes: 'Write.as API - https://developers.write.as/docs/api/'
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: 'rentry-co',
+        domain: 'rentry.co',
+        url: 'https://rentry.co',
+        type: 'blog',
+        status: 'active',
+        domain_rating: 78,
+        success_rate: 88,
+        total_attempts: 0,
+        successful_submissions: 0,
+        requirements: {
+          min_word_count: 50,
+          topics: ['any'],
+          approval_process: false,
+          registration_required: false
+        },
+        metadata: {
+          submission_guidelines: 'Rentry.co - simple text publishing',
+          response_time_hours: 0,
+          notes: 'Rentry.co API - https://rentry.co/api'
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      },
+      {
+        id: 'justpaste-it',
+        domain: 'justpaste.it',
+        url: 'https://justpaste.it',
+        type: 'blog',
+        status: 'active',
+        domain_rating: 75,
+        success_rate: 85,
+        total_attempts: 0,
+        successful_submissions: 0,
+        requirements: {
+          min_word_count: 100,
+          topics: ['any'],
+          approval_process: false,
+          registration_required: false
+        },
+        metadata: {
+          submission_guidelines: 'JustPaste.it - quick content sharing',
+          response_time_hours: 0,
+          notes: 'JustPaste.it API - https://justpaste.it/api'
         },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
