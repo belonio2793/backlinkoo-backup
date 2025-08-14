@@ -554,13 +554,13 @@ class LiveCampaignManager {
         let resolved = false;
         if (error.message.includes('expected JSON array')) {
           internalLogger.info('campaign_creation', 'JSON array error detected, attempting schema fix');
-          resolved = await errorResolver.resolveSpecificError('expected JSON array');
+          resolved = await fixedErrorResolver.resolveSpecificError('expected JSON array');
         } else if (error.message.includes('column') && error.message.includes('does not exist')) {
           internalLogger.info('campaign_creation', 'Missing column error detected, attempting schema fix');
-          resolved = await errorResolver.resolveSpecificError(error.message);
+          resolved = await fixedErrorResolver.resolveSpecificError(error.message);
         } else {
           internalLogger.info('campaign_creation', 'General error resolution attempt');
-          resolved = await errorResolver.resolveSpecificError(error.message);
+          resolved = await fixedErrorResolver.resolveSpecificError(error.message);
         }
 
         if (resolved) {
