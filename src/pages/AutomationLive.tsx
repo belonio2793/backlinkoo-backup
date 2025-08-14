@@ -671,15 +671,19 @@ export default function AutomationLive() {
                               </span>
                             </div>
                             <div>
-                              <span className="text-gray-500">Type:</span>
-                              <span className="ml-0.5">
-                                {platform.features.anonymous ? 'Anon' : 'Acct'}
+                              <span className="text-gray-500">Traffic:</span>
+                              <span className="ml-0.5 font-medium">
+                                {platform.domain === 'telegra.ph' ? '2.5M' :
+                                 platform.domain === 'write.as' ? '180K' :
+                                 platform.domain === 'rentry.co' ? '95K' : '45K'}
                               </span>
                             </div>
                             <div>
-                              <span className="text-gray-500">Format:</span>
-                              <span className="ml-0.5">
-                                {platform.features.markdown ? 'MD' : 'HTML'}
+                              <span className="text-gray-500">Success:</span>
+                              <span className="ml-0.5 font-medium">
+                                {platform.domain === 'telegra.ph' ? '95%' :
+                                 platform.domain === 'write.as' ? '90%' :
+                                 platform.domain === 'rentry.co' ? '85%' : '80%'}
                               </span>
                             </div>
                           </div>
