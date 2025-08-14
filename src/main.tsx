@@ -185,6 +185,16 @@ if (import.meta.env.DEV) {
     }
   };
 
+  // Add client Telegraph publisher test
+  (window as any).testClientTelegraph = async () => {
+    try {
+      const { testClientTelegraphPublisher } = await import('./utils/testClientTelegraphPublisher');
+      await testClientTelegraphPublisher();
+    } catch (error) {
+      console.error('❌ Client Telegraph test failed:', error);
+    }
+  };
+
   console.log('  - disableViteProtection() - Disable fetch protection and refresh');
   console.log('  - testContentGeneration() - Test content generation functions');
   console.log('  - fixFetchErrors() - Emergency fix for fetch protection issues');
