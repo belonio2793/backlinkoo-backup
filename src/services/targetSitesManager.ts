@@ -55,10 +55,13 @@ class TargetSitesManager {
   }
 
   async loadSites(): Promise<void> {
-    if (this.isLoaded) return;
+    if (this.isLoaded) {
+      automationLogger.debug('system', `Sites already loaded: ${this.sites.length} sites available`);
+      return;
+    }
 
     try {
-      automationLogger.debug('database', 'Loading target sites from database');
+      automationLogger.debug('database', 'Attempting to load target sites from database...');
       
       const { data, error } = await supabase
         .from('target_sites')
