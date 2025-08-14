@@ -46,6 +46,23 @@ class DirectAutomationExecutor {
     return isLocalDev;
   }
 
+  /**
+   * Quick check if Netlify functions are available
+   */
+  private async checkNetlifyFunctionsAvailable(): Promise<boolean> {
+    try {
+      // Quick test of a simple function
+      const response = await fetch('/.netlify/functions/api-status', {
+        method: 'GET'
+      });
+
+      return response.status !== 404;
+    } catch (error) {
+      console.log('🔍 Netlify functions check failed:', error);
+      return false;
+    }
+  }
+
   async executeWorkflow(input: DirectExecutionInput): Promise<DirectExecutionResult> {
     const startTime = Date.now();
 
