@@ -44,14 +44,14 @@ class ActiveErrorLogger {
   private metrics: AutomationMetrics[] = [];
   private sessionId: string;
   private subscribers: ((log: DebugLog) => void)[] = [];
-  private errorEngine: ErrorHandlingEngine;
+  // private errorEngine: ErrorHandlingEngine; // Removed with automation cleanup
   private isDevMode: boolean;
   private maxLogSize = 1000; // Keep last 1000 logs in memory
   private persistInterval: NodeJS.Timeout | null = null;
 
   private constructor() {
     this.sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    this.errorEngine = ErrorHandlingEngine.getInstance();
+    // this.errorEngine = ErrorHandlingEngine.getInstance(); // Removed with automation cleanup
     this.isDevMode = import.meta.env.DEV || import.meta.env.MODE === 'development';
     this.initializeLogging();
     this.startPersistanceLoop();
@@ -165,14 +165,15 @@ class ActiveErrorLogger {
     this.addLog('error', component, operation, message, data, stackTrace);
 
     // Send to ErrorHandlingEngine for comprehensive error handling
-    if (error instanceof Error) {
-      this.errorEngine.handleError(error, {
-        component,
-        operation,
-        severity: 'high',
-        metadata: data
-      }).catch(console.error);
-    }
+    // ErrorHandlingEngine removed with automation cleanup
+    // if (error instanceof Error) {
+    //   this.errorEngine.handleError(error, {
+    //     component,
+    //     operation,
+    //     severity: 'high',
+    //     metadata: data
+    //   }).catch(console.error);
+    // }
   }
 
   public logCritical(component: string, operation: string, message: string, data?: any): void {
