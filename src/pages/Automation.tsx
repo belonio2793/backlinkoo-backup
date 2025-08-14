@@ -675,6 +675,15 @@ export default function Automation() {
     }
   }, [user]);
 
+  const loadPlatformStatus = async () => {
+    try {
+      const status = await platformInitializer.getPlatformStatus();
+      setPlatformStatus(status);
+    } catch (error) {
+      console.error('Failed to load platform status:', error);
+    }
+  };
+
   const getStatusColor = (status: Campaign['status']) => {
     switch (status) {
       case 'active': return 'bg-green-500';
