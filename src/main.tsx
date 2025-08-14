@@ -132,7 +132,7 @@ if (import.meta.env.DEV) {
 
   // Add content generation test helper
   (window as any).testContentGeneration = async () => {
-    console.log('��� Testing content generation functions...');
+    console.log('🧪 Testing content generation functions...');
     const functions = ['working-content-generator', 'ai-content-generator', 'generate-content'];
 
     for (const func of functions) {
@@ -210,6 +210,7 @@ if (import.meta.env.DEV) {
   console.log('  - fixFetchErrors() - Emergency fix for fetch protection issues');
   console.log('  - testClientContent() - Test client-side content generation');
   console.log('  - testClientTelegraph() - Test client-side Telegraph publishing');
+  console.log('  - testFullPipeline() - Test complete automation pipeline');
 }
 
 // Priority: Get React app rendering ASAP
