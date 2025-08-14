@@ -172,20 +172,52 @@ class LiveCampaignManager {
       // Get available platforms for this campaign
       const availablePlatforms = this.getAvailablePlatforms();
       
-      const campaignData = {
+      // Base campaign data that should exist in all schema versions
+      let campaignData: any = {
         name: params.name,
         keywords: params.keywords,
         anchor_texts: params.anchor_texts,
         target_url: params.target_url,
         user_id: params.user_id,
         status: params.auto_start ? 'active' : 'draft',
-        links_built: 0,
-        available_sites: availablePlatforms.length,
-        target_sites_used: [],
         auto_start: params.auto_start || false,
-        published_articles: [],
-        started_at: params.auto_start ? new Date().toISOString() : undefined
       };
+
+      // Add optional columns if they exist in the schema
+      try {
+        // Test if the new columns exist by trying a select
+        const { error: testError } = await supabase
+          .from('automation_campaigns')
+          .select('links_built, available_sites, target_sites_used, published_articles, started_at')
+          .limit(1);
+
+        if (!testError) {
+          // New schema with all columns
+          campaignData = {
+            ...campaignData,
+            links_built: 0,
+            available_sites: availablePlatforms.length,
+            target_sites_used: [],
+            published_articles: [],
+            started_at: params.auto_start ? new Date().toISOString() : null
+          };
+        } else {
+          // Old schema - add started_at if it exists
+          if (params.auto_start) {
+            campaignData.started_at = new Date().toISOString();
+          }
+        }
+      } catch (e) {
+        console.log('Using basic schema columns for campaign creation');
+        // Fallback for very old schema
+        if (params.auto_start) {
+          try {
+            campaignData.started_at = new Date().toISOString();
+          } catch {
+            // started_at might not exist either
+          }
+        }
+      }
 
       const { data, error } = await supabase
         .from('automation_campaigns')
