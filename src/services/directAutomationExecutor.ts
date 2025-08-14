@@ -67,6 +67,16 @@ class DirectAutomationExecutor {
       };
     }
 
+    // Verify we have working platforms available
+    const workingPlatforms = await automaticUrlFilterService.getWorkingPlatforms();
+    if (workingPlatforms.length === 0) {
+      return {
+        success: false,
+        error: 'No working platforms available. All target sites have been filtered out due to non-functional APIs.',
+        execution_time_ms: Date.now() - startTime
+      };
+    }
+
     console.log('🚀 Starting direct automation execution:', {
       keywords: input.keywords.slice(0, 3),
       target_url: input.target_url,
