@@ -1,48 +1,14 @@
 {
-  "instantPublishSites": {
-    "description": "Sites that allow immediate posting without account creation",
-    "sites": [
-      {
-        "url": "https://telegra.ph",
-        "name": "Telegraph",
-        "htmlSupport": true,
-        "linksAllowed": true,
-        "accountRequired": false,
-        "features": ["Rich text editor", "Instant publish", "Anonymous posting"]
-      },
-      {
-        "url": "https://write.as",
-        "name": "Write.as",
-        "htmlSupport": true,
-        "linksAllowed": true,
-        "accountRequired": false,
-        "features": ["Markdown support", "Custom domains", "Anonymous posting"]
-      },
-      {
-        "url": "https://rentry.co",
-        "name": "Rentry",
-        "htmlSupport": true,
-        "linksAllowed": true,
-        "accountRequired": false,
-        "features": ["Markdown", "Password protection", "Edit codes"]
-      },
-      {
-        "url": "https://notepin.co",
-        "name": "NotePIN",
-        "htmlSupport": false,
-        "linksAllowed": true,
-        "accountRequired": false,
-        "features": ["Simple text", "Link sharing", "Pin notes"]
-      },
-      {
-        "url": "https://pen.io",
-        "name": "Pen.io",
-        "htmlSupport": true,
-        "linksAllowed": true,
-        "accountRequired": false,
-        "features": ["WYSIWYG editor", "Custom URLs", "Anonymous publishing"]
-      }
-    ]
+  "publishingPlatform": {
+    "description": "The only platform we use for instant publishing",
+    "site": {
+      "url": "https://telegra.ph",
+      "name": "Telegraph",
+      "htmlSupport": true,
+      "linksAllowed": true,
+      "accountRequired": false,
+      "features": ["Rich text editor", "Instant publish", "Anonymous posting", "Working API"]
+    }
   },
   "pastebinWithFormatting": {
     "description": "Pastebin-style sites that support HTML and links",
