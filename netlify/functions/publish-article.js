@@ -356,43 +356,61 @@ function convertMarkdownToTelegraph(markdown) {
 function parseInlineMarkdown(text) {
   // Handle links [text](url)
   const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-  
-  if (linkRegex.test(text)) {
-    const parts = [];
-    let lastIndex = 0;
-    
-    text.replace(linkRegex, (match, linkText, url, index) => {
-      // Add text before link
-      if (index > lastIndex) {
-        const beforeText = text.substring(lastIndex, index);
-        if (beforeText) {
-          parts.push(parseTextFormatting(beforeText));
+  const parts = [];
+  let lastIndex = 0;
+  let match;
+
+  // Use exec instead of test + replace to avoid regex position issues
+  while ((match = linkRegex.exec(text)) !== null) {
+    const [fullMatch, linkText, url] = match;
+    const index = match.index;
+
+    // Add text before link
+    if (index > lastIndex) {
+      const beforeText = text.substring(lastIndex, index);
+      if (beforeText.trim()) {
+        const formatted = parseTextFormatting(beforeText);
+        if (typeof formatted === 'string') {
+          parts.push(formatted);
+        } else if (Array.isArray(formatted)) {
+          parts.push(...formatted);
+        } else {
+          parts.push(formatted);
         }
       }
-      
-      // Add link
-      parts.push({
-        tag: 'a',
-        attrs: { href: url },
-        children: [linkText]
-      });
-      
-      lastIndex = index + match.length;
-      return match;
+    }
+
+    // Add link
+    parts.push({
+      tag: 'a',
+      attrs: { href: url },
+      children: [linkText]
     });
-    
-    // Add remaining text
-    if (lastIndex < text.length) {
-      const remainingText = text.substring(lastIndex);
-      if (remainingText) {
-        parts.push(parseTextFormatting(remainingText));
+
+    lastIndex = index + fullMatch.length;
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    const remainingText = text.substring(lastIndex);
+    if (remainingText.trim()) {
+      const formatted = parseTextFormatting(remainingText);
+      if (typeof formatted === 'string') {
+        parts.push(formatted);
+      } else if (Array.isArray(formatted)) {
+        parts.push(...formatted);
+      } else {
+        parts.push(formatted);
       }
     }
-    
-    return parts.length === 1 ? parts[0] : parts;
   }
-  
-  return parseTextFormatting(text);
+
+  // If no links were found, parse for other formatting
+  if (parts.length === 0) {
+    return parseTextFormatting(text);
+  }
+
+  return parts;
 }
 
 /**
