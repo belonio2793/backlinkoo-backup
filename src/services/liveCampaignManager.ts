@@ -107,7 +107,7 @@ class LiveCampaignManager {
    * Initialize available platform targets for rotation
    */
   private initializePlatformTargets(): void {
-    // Multiple publishing platforms for campaign rotation
+    // Multiple publishing platforms for campaign rotation with enhanced error tracking
     this.platformTargets = [
       {
         id: 'telegraph-1',
@@ -116,7 +116,12 @@ class LiveCampaignManager {
         domain_rating: 85,
         success_rate: 95,
         avg_response_time: 2000,
-        is_active: true
+        is_active: true,
+        consecutive_failures: 0,
+        failure_reasons: [],
+        total_attempts: 0,
+        total_successes: 0,
+        current_health_status: 'healthy'
       },
       {
         id: 'writeas-1',
@@ -125,7 +130,12 @@ class LiveCampaignManager {
         domain_rating: 75,
         success_rate: 90,
         avg_response_time: 2500,
-        is_active: true
+        is_active: true,
+        consecutive_failures: 0,
+        failure_reasons: [],
+        total_attempts: 0,
+        total_successes: 0,
+        current_health_status: 'healthy'
       },
       {
         id: 'rentry-1',
@@ -134,7 +144,12 @@ class LiveCampaignManager {
         domain_rating: 65,
         success_rate: 85,
         avg_response_time: 1800,
-        is_active: true
+        is_active: true,
+        consecutive_failures: 0,
+        failure_reasons: [],
+        total_attempts: 0,
+        total_successes: 0,
+        current_health_status: 'healthy'
       },
       {
         id: 'justpaste-1',
@@ -143,9 +158,17 @@ class LiveCampaignManager {
         domain_rating: 60,
         success_rate: 80,
         avg_response_time: 2200,
-        is_active: true
+        is_active: true,
+        consecutive_failures: 0,
+        failure_reasons: [],
+        total_attempts: 0,
+        total_successes: 0,
+        current_health_status: 'healthy'
       }
     ];
+
+    // Start periodic health checks
+    this.startPlatformHealthMonitoring();
   }
 
   /**
