@@ -38,7 +38,7 @@ if (import.meta.env.DEV) {
         headers: { 'Content-Type': 'application/json' }
       });
       const result = await response.json();
-      console.log('�� RLS fix result:', result);
+      console.log('🔧 RLS fix result:', result);
       if (result.success) {
         console.log('✅ RLS fix successful - refreshing page...');
         setTimeout(() => window.location.reload(), 1000);
@@ -147,7 +147,7 @@ if (import.meta.env.DEV) {
           }),
         });
 
-        console.log(`${func}: Status ${response.status} ${response.status === 200 ? '✅' : '❌'}`);
+        console.log(`${func}: Status ${response.status} ${response.status === 200 ? '✅' : '���'}`);
 
         if (response.ok) {
           const data = await response.json();
@@ -177,6 +177,7 @@ if (import.meta.env.DEV) {
 
   console.log('  - disableViteProtection() - Disable fetch protection and refresh');
   console.log('  - testContentGeneration() - Test content generation functions');
+  console.log('  - fixFetchErrors() - Emergency fix for fetch protection issues');
 }
 
 // Priority: Get React app rendering ASAP
