@@ -208,15 +208,15 @@ export default function Automation() {
 
       const formattedArticles: PublishedArticle[] = (articlesData || []).map(article => ({
         id: article.id,
-        article_title: article.article_title,
-        article_url: article.article_url,
-        status: article.status as 'published',
-        published_date: article.published_date,
-        anchor_text: article.anchor_text,
+        title: article.article_title,
+        url: article.article_url,
+        platform: 'Telegraph',
         word_count: article.metadata?.word_count || 0,
-        platform: 'Telegraph', // Default platform
-        campaign_name: article.automation_campaigns?.name || 'Unknown Campaign',
-        target_url: article.automation_campaigns?.target_url || ''
+        anchor_text_used: article.anchor_text,
+        keyword_used: article.metadata?.keyword_used || 'Unknown',
+        content_preview: article.metadata?.content_preview || 'No preview available',
+        published_at: article.published_date,
+        execution_time_ms: article.metadata?.execution_time_ms || 0
       }));
 
       setPublishedArticles(formattedArticles);
