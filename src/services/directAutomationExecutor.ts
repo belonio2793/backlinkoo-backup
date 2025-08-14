@@ -256,24 +256,32 @@ class DirectAutomationExecutor {
   }> {
     const startTime = Date.now();
 
-    // Use mock service in development when Netlify functions aren't available
+    // Use client-side content generation when Netlify functions aren't available
     if (useMockService) {
       try {
-        const mockResult = await mockAutomationService.generateMockContent({
+        console.log('🔧 Using client-side content generation as fallback...');
+
+        const { ClientContentGenerator } = await import('./clientContentGenerator');
+
+        const clientResult = await ClientContentGenerator.generateContent({
           keyword: params.keyword,
           anchor_text: params.anchor_text,
           target_url: params.target_url,
-          user_id: params.user_id
+          word_count: 800,
+          tone: 'professional'
         });
 
-        return {
-          success: mockResult.success,
-          title: mockResult.title,
-          content: mockResult.content,
-          word_count: mockResult.word_count,
-          generation_time_ms: mockResult.generation_time_ms,
-          error: mockResult.error
-        };
+        if (clientResult.success && clientResult.data) {
+          return {
+            success: true,
+            title: clientResult.data.title,
+            content: clientResult.data.content,
+            word_count: clientResult.data.word_count,
+            generation_time_ms: Date.now() - startTime
+          };
+        } else {
+          throw new Error(clientResult.error || 'Client-side generation failed');
+        }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         return {
@@ -282,7 +290,7 @@ class DirectAutomationExecutor {
           content: '',
           word_count: 0,
           generation_time_ms: Date.now() - startTime,
-          error: `Mock service error: ${errorMessage}`
+          error: `Client-side generation error: ${errorMessage}`
         };
       }
     }
