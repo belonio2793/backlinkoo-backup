@@ -15,6 +15,7 @@ import { UserFlowProvider } from "@/contexts/UserFlowContext";
 import { useSymbolCleaner } from "@/utils/symbolCleaner";
 import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
+import "@/utils/emergencyDisable"; // Load emergency disable utilities
 // import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
 import Index from "./pages/Index";
 
