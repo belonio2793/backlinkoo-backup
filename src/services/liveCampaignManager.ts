@@ -229,8 +229,13 @@ class LiveCampaignManager {
 
       const campaign: LiveCampaign = {
         ...data,
-        published_articles: [],
-        execution_progress: undefined
+        // Provide defaults for potentially missing columns
+        links_built: data.links_built ?? 0,
+        available_sites: data.available_sites ?? availablePlatforms.length,
+        target_sites_used: data.target_sites_used ?? [],
+        published_articles: data.published_articles ?? [],
+        current_platform: data.current_platform ?? undefined,
+        execution_progress: data.execution_progress ?? undefined
       };
 
       this.activeCampaigns.set(campaign.id, campaign);
