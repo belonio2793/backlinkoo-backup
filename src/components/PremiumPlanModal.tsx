@@ -240,7 +240,7 @@ export function PremiumPlanModal({
       setCurrentStep('checkout');
       toast({
         title: "Checkout Error",
-        description: getErrorMessage(error) || "Failed to create checkout session. Please try again.",
+        description: ErrorLogger.getUserFriendlyMessage(error, "Failed to create checkout session. Please try again."),
         variant: "destructive"
       });
     } finally {
