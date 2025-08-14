@@ -340,9 +340,20 @@ function convertMarkdownToTelegraph(markdown) {
     // Regular paragraphs
     else {
       const parsedContent = parseInlineMarkdown(trimmedLine);
+
+      // Ensure children is always an array of valid Telegraph nodes
+      let children;
+      if (Array.isArray(parsedContent)) {
+        children = parsedContent.filter(item => item !== null && item !== undefined);
+      } else if (parsedContent !== null && parsedContent !== undefined) {
+        children = [parsedContent];
+      } else {
+        children = [trimmedLine]; // fallback to original text
+      }
+
       telegraphContent.push({
         tag: 'p',
-        children: Array.isArray(parsedContent) ? parsedContent : [parsedContent]
+        children: children
       });
     }
   }
