@@ -28,16 +28,8 @@ import { liveCampaignManager, type LiveCampaign } from '@/services/liveCampaignM
 import { campaignReportingSystem, type PublishedLink, type CampaignReport } from '@/services/campaignReportingSystem';
 import { LoginModal } from '@/components/LoginModal';
 import { DatabaseInit } from '@/utils/databaseInit';
-import { InternalLogViewer } from '@/components/debug/InternalLogViewer';
-import { CampaignCreationFix } from '@/components/debug/CampaignCreationFix';
-import { PlatformHealthMonitor } from '@/components/debug/PlatformHealthMonitor';
-import { PlatformErrorSimulator } from '@/components/debug/PlatformErrorSimulator';
-import { CampaignCreationDebugger } from '@/components/debug/CampaignCreationDebugger';
-import { DatabaseSchemaFixer } from '@/components/debug/DatabaseSchemaFixer';
-import { SchemaFixTester } from '@/components/debug/SchemaFixTester';
 import { internalLogger } from '@/services/internalLogger';
-import guestPostingSites from '@/data/guestPostingSites.json';
-import { PLATFORM_CONFIGS, getImplementedPlatforms, getPlannedPlatforms, type PlatformConfig } from '@/services/platformConfigs';
+import { PLATFORM_CONFIGS } from '@/services/platformConfigs';
 
 export default function AutomationLive() {
   const { user } = useAuth();
