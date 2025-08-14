@@ -1234,12 +1234,21 @@ class LiveCampaignManager {
       });
     });
 
-    return Array.from(platformStats.entries()).map(([platform, stats]) => ({
-      platform,
-      total_articles: stats.total,
-      success_rate: (stats.successful / stats.total) * 100,
-      avg_word_count: stats.total > 0 ? Math.round(stats.total_words / stats.total) : 0
-    }));
+    return Array.from(platformStats.entries()).map(([platformDomain, stats]) => {
+      const platformConfig = this.platformTargets.find(p => p.domain === platformDomain);
+      return {
+        platform: platformDomain,
+        total_articles: stats.total,
+        success_rate: (stats.successful / stats.total) * 100,
+        avg_word_count: stats.total > 0 ? Math.round(stats.total_words / stats.total) : 0,
+        health_status: platformConfig?.current_health_status || 'unknown',
+        consecutive_failures: platformConfig?.consecutive_failures || 0,
+        is_available: platformConfig ?
+          platformConfig.is_active &&
+          platformConfig.current_health_status !== 'disabled' &&
+          !this.isPlatformInCooldown(platformConfig) : false
+      };
+    });
   }
 }
 
