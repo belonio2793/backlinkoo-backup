@@ -160,7 +160,10 @@ BEGIN
 
 END $$;
 
--- Step 3: Create exec_sql function for application usage
+-- Step 3: Create exec_sql function for application usage (drop existing first)
+DROP FUNCTION IF EXISTS exec_sql(text);
+DROP FUNCTION IF EXISTS public.exec_sql(text);
+
 CREATE OR REPLACE FUNCTION exec_sql(query TEXT)
 RETURNS TABLE(result TEXT) AS $$
 BEGIN
@@ -170,6 +173,10 @@ EXCEPTION
         RETURN QUERY SELECT SQLSTATE || ': ' || SQLERRM;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Grant permissions
+GRANT EXECUTE ON FUNCTION exec_sql(text) TO authenticated;
+GRANT EXECUTE ON FUNCTION exec_sql(text) TO anon;
 
 -- Step 4: Enable Row Level Security
 ALTER TABLE automation_campaigns ENABLE ROW LEVEL SECURITY;
