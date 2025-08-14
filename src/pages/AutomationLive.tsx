@@ -391,7 +391,7 @@ export default function AutomationLive() {
         </div>
 
         <Tabs defaultValue="create" className="max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-4 mb-8">
+          <TabsList className="grid w-full grid-cols-5 mb-8">
             <TabsTrigger value="create" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Create Campaign
@@ -412,6 +412,10 @@ export default function AutomationLive() {
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="debug" className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              Debug
             </TabsTrigger>
           </TabsList>
 
