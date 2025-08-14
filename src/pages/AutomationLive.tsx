@@ -199,7 +199,7 @@ export default function AutomationLive() {
       ? primaryKeywords.substring(0, 27) + '...'
       : primaryKeywords;
 
-    return `${shortKeywords} �� ${domain} (${timestamp})`;
+    return `${shortKeywords} → ${domain} (${timestamp})`;
   };
 
   // Create campaign
@@ -253,12 +253,20 @@ export default function AutomationLive() {
       });
 
       if (result.success && result.campaign) {
+        internalLogger.info('ui_campaign_creation', 'Campaign created successfully', {
+          campaignId: result.campaign.id,
+          campaignName: result.campaign.name
+        });
+
         setCampaigns(prev => [result.campaign!, ...prev]);
         setFormData({ keywords: '', anchor_texts: '', target_url: '' });
         toast.success(`Campaign '${result.campaign.name}' created successfully!`);
         await refreshData();
       } else {
-        console.error('🔧 Campaign creation failed:', result);
+        internalLogger.error('ui_campaign_creation', 'Campaign creation failed', {
+          result,
+          formData: campaignParams
+        });
         throw new Error(result.error || 'Failed to create campaign');
       }
     } catch (error) {
