@@ -10,50 +10,9 @@
       "features": ["Rich text editor", "Instant publish", "Anonymous posting", "Working API"]
     }
   },
-  "pastebinWithFormatting": {
-    "description": "Pastebin-style sites that support HTML and links",
-    "sites": [
-      {
-        "url": "https://pastelink.net",
-        "name": "PasteLink",
-        "htmlSupport": true,
-        "linksAllowed": true,
-        "accountRequired": false,
-        "features": ["HTML support", "Syntax highlighting", "Expiration dates"]
-      },
-      {
-        "url": "https://justpaste.it",
-        "name": "JustPaste.it",
-        "htmlSupport": true,
-        "linksAllowed": true,
-        "accountRequired": false,
-        "features": ["Rich formatting", "Image uploads", "Password protection"]
-      },
-      {
-        "url": "https://ghostbin.com",
-        "name": "GhostBin",
-        "htmlSupport": true,
-        "linksAllowed": true,
-        "accountRequired": false,
-        "features": ["Markdown", "Syntax highlighting", "Encrypted pastes"]
-      },
-      {
-        "url": "https://paste.ee",
-        "name": "Paste.ee",
-        "htmlSupport": true,
-        "linksAllowed": true,
-        "accountRequired": false,
-        "features": ["Multiple formats", "API access", "Download options"]
-      },
-      {
-        "url": "https://privatebin.net",
-        "name": "PrivateBin",
-        "htmlSupport": false,
-        "linksAllowed": true,
-        "accountRequired": false,
-        "features": ["End-to-end encryption", "Self-destructing", "Open source"]
-      }
-    ]
+  "removedPlatforms": {
+    "description": "All other platforms removed - only Telegraph works reliably",
+    "reason": "Complex authentication, no APIs, or non-functional integrations"
   },
   "devPlatforms": {
     "description": "Developer and tech platforms accepting guest content",
