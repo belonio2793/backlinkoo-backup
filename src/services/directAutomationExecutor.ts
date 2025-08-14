@@ -51,14 +51,23 @@ class DirectAutomationExecutor {
    */
   private async checkNetlifyFunctionsAvailable(): Promise<boolean> {
     try {
-      // Quick test of a simple function
+      // Quick test of a simple function with shorter timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000); // 2 second timeout
+
       const response = await fetch('/.netlify/functions/api-status', {
-        method: 'GET'
+        method: 'GET',
+        signal: controller.signal
       });
 
-      return response.status !== 404;
+      clearTimeout(timeoutId);
+
+      const isAvailable = response.status !== 404;
+      console.log(`🔍 Netlify functions availability: ${isAvailable ? 'Available' : 'Not available'} (status: ${response.status})`);
+
+      return isAvailable;
     } catch (error) {
-      console.log('🔍 Netlify functions check failed:', error);
+      console.log('🔍 Netlify functions check failed - assuming not available:', error.message);
       return false;
     }
   }
