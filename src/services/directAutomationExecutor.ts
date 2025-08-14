@@ -281,11 +281,11 @@ class DirectAutomationExecutor {
           errorData = { error: response.statusText };
         }
 
-        console.error('Publishing HTTP error:', {
-          status: response.status,
-          statusText: response.statusText,
-          errorData
-        });
+        console.error('Publishing HTTP error:',
+          `Status: ${response.status}, ` +
+          `StatusText: ${response.statusText}, ` +
+          `Error: ${JSON.stringify(errorData)}`
+        );
 
         throw new Error(`Publishing HTTP ${response.status}: ${errorData.error || response.statusText || 'Unknown error'}`);
       }
