@@ -2,7 +2,10 @@
  * Direct Automation Executor
  * Executes the automation workflow directly without database persistence
  * Perfect for immediate execution and testing
+ * Automatically detects development environment and uses mock services when appropriate
  */
+
+import { mockAutomationService } from './mockAutomationService';
 
 export interface DirectExecutionInput {
   keywords: string[];
