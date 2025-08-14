@@ -60,6 +60,8 @@ export default function Automation() {
   const [publishedArticles, setPublishedArticles] = useState<PublishedArticle[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [executing, setExecuting] = useState(false);
+  const [executionProgress, setExecutionProgress] = useState<string>('');
 
   // Form state
   const [formData, setFormData] = useState({
