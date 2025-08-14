@@ -69,40 +69,30 @@ export function protectViteClient(): void {
  * Check if a request is from Vite client
  */
 function isViteClientRequest(url: string, init?: RequestInit): boolean {
-  // Exclude Supabase and other external API requests
+  // NEVER interfere with Supabase, Netlify, or any external API requests
   if (url.includes('supabase.co') ||
       url.includes('supabase.in') ||
       url.includes('netlify') ||
-      url.startsWith('https://') && !url.includes(window.location.hostname)) {
+      url.includes('.fly.dev') ||
+      url.startsWith('https://') ||
+      url.startsWith('http://') && !url.includes('localhost')) {
     return false;
   }
 
-  // Vite client typically makes requests to:
-  // - WebSocket endpoint for HMR
-  // - Ping endpoints for connection health
-  // - Module requests during development (only local ones)
-
-  const vitePatterns = [
+  // Only very specific Vite HMR patterns
+  const strictVitePatterns = [
     '/@vite/client',
-    '/__vite_ping',
-    '/@fs/',
-    '/@id/',
-    '/@react-refresh'
+    '/__vite_ping'
   ];
 
-  // Only match local development requests
-  const isLocalViteRequest = vitePatterns.some(pattern => url.includes(pattern)) ||
-    // Local source file requests
-    (url.includes('/src/') && !url.startsWith('https://')) ||
-    // Local TypeScript/JavaScript module requests
-    ((url.endsWith('.tsx') || url.endsWith('.ts') || url.endsWith('.jsx') || url.endsWith('.js')) &&
-     !url.startsWith('https://'));
+  // Only match extremely specific Vite requests
+  const isStrictViteRequest = strictVitePatterns.some(pattern => url.includes(pattern));
 
-  return isLocalViteRequest &&
-         // Double-check it's not an external request
-         !url.startsWith('https://') &&
-         // Check if request is made from Vite client code
-         (new Error().stack?.includes('@vite/client') || false);
+  // Additional check: must be from Vite client stack trace
+  const stack = new Error().stack || '';
+  const isFromViteClient = stack.includes('@vite/client') && stack.includes('connectWebSocket');
+
+  return isStrictViteRequest && isFromViteClient;
 }
 
 /**
