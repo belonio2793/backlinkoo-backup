@@ -36,6 +36,7 @@ import { campaignReportingSystem, type PublishedLink, type CampaignReport } from
 import { LoginModal } from '@/components/LoginModal';
 import { DatabaseInit } from '@/utils/databaseInit';
 import { CampaignDebugger } from '@/components/CampaignDebugger';
+import { ApiHealthChecker } from '@/components/ApiHealthChecker';
 
 export default function AutomationLive() {
   const { user } = useAuth();
