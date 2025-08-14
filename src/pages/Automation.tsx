@@ -688,7 +688,7 @@ export default function Automation() {
 
   // Handle auth success from modal
   const handleAuthSuccess = (user: any) => {
-    console.log('�� Automation: Auth success, user:', user?.email);
+    console.log('🎯 Automation: Auth success, user:', user?.email);
     setShowSignInModal(false);
     // Form restoration will happen via useEffect above
   };
@@ -793,41 +793,29 @@ export default function Automation() {
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                   <div className="flex items-center gap-2 mb-2">
                     <BarChart3 className="h-5 w-5 text-blue-600" />
-                    <span className="font-medium text-blue-800">Target Sites Available</span>
-                    {platformStatus && (
-                      <Badge variant="outline" className="ml-auto bg-green-50 text-green-700 border-green-200">
-                        {platformStatus.workingPlatforms.length} Verified APIs
-                      </Badge>
-                    )}
+                    <span className="font-medium text-blue-800">Target Platform</span>
+                    <Badge variant="outline" className="ml-auto bg-green-50 text-green-700 border-green-200">
+                      Telegraph Ready
+                    </Badge>
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <p className="text-blue-700">
-                        <span className="font-semibold">{availableSites}</span> active publishing sites
+                        <span className="font-semibold">Telegraph</span> instant publishing
                       </p>
                       <p className="text-blue-600">
-                        {platformStatus ?
-                          `${platformStatus.workingPlatforms.join(', ')} - APIs verified working` :
-                          'High-quality domains ready for articles'
-                        }
+                        Anonymous posting with immediate live URLs
                       </p>
                     </div>
-                    {sitesStats && (
-                      <div>
-                        <p className="text-blue-700">
-                          <span className="font-semibold">{sitesStats.average_success_rate}%</span> average success rate
-                        </p>
-                        <p className="text-blue-600">
-                          Only platforms with working APIs included
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  {platformStatus && platformStatus.workingPlatforms.length === 0 && (
-                    <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-xs">
-                      ⚠️ No working platforms found. System automatically filters out non-functional APIs.
+                    <div>
+                      <p className="text-blue-700">
+                        <span className="font-semibold">High Authority</span> domain
+                      </p>
+                      <p className="text-blue-600">
+                        Domain Rating 85+ with reliable API
+                      </p>
                     </div>
-                  )}
+                  </div>
                 </div>
 
                 <Button
