@@ -6,23 +6,15 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
   Plus,
-  Play,
-  Pause,
-  Settings,
   BarChart3,
   Target,
-  Link,
   Zap,
   Calendar,
-  Clock,
   CheckCircle,
   AlertCircle,
-  Trash2,
   ExternalLink,
-  Download,
   FileText,
   TrendingUp
 } from 'lucide-react';
@@ -36,16 +28,8 @@ import { liveCampaignManager, type LiveCampaign } from '@/services/liveCampaignM
 import { campaignReportingSystem, type PublishedLink, type CampaignReport } from '@/services/campaignReportingSystem';
 import { LoginModal } from '@/components/LoginModal';
 import { DatabaseInit } from '@/utils/databaseInit';
-import { InternalLogViewer } from '@/components/debug/InternalLogViewer';
-import { CampaignCreationFix } from '@/components/debug/CampaignCreationFix';
-import { PlatformHealthMonitor } from '@/components/debug/PlatformHealthMonitor';
-import { PlatformErrorSimulator } from '@/components/debug/PlatformErrorSimulator';
-import { CampaignCreationDebugger } from '@/components/debug/CampaignCreationDebugger';
-import { DatabaseSchemaFixer } from '@/components/debug/DatabaseSchemaFixer';
-import { SchemaFixTester } from '@/components/debug/SchemaFixTester';
 import { internalLogger } from '@/services/internalLogger';
-import guestPostingSites from '@/data/guestPostingSites.json';
-import { PLATFORM_CONFIGS, getImplementedPlatforms, getPlannedPlatforms, type PlatformConfig } from '@/services/platformConfigs';
+import { PLATFORM_CONFIGS } from '@/services/platformConfigs';
 
 export default function AutomationLive() {
   const { user } = useAuth();
@@ -64,7 +48,6 @@ export default function AutomationLive() {
   const [savedReports, setSavedReports] = useState<CampaignReport[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [processing, setProcessing] = useState<Record<string, boolean>>({});
 
   // Form state
   const [formData, setFormData] = useState({
@@ -456,161 +439,6 @@ export default function AutomationLive() {
     }
   };
 
-  // Start campaign
-  const startCampaign = async (campaignId: string) => {
-    setProcessing(prev => ({ ...prev, [campaignId]: true }));
-
-    try {
-      const result = await liveCampaignManager.startCampaign(campaignId);
-      
-      if (result.success) {
-        toast.success('Campaign started successfully!');
-        await refreshData();
-      } else {
-        throw new Error(result.error || 'Failed to start campaign');
-      }
-    } catch (error) {
-      let errorMessage = 'Unknown error';
-
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error && typeof error === 'object') {
-        const errorObj = error as any;
-        errorMessage = errorObj.message || errorObj.error || errorObj.details ||
-                      'Failed to start campaign with no additional details';
-      }
-
-      toast.error(`Failed to start campaign: ${errorMessage}`);
-    } finally {
-      setProcessing(prev => ({ ...prev, [campaignId]: false }));
-    }
-  };
-
-  // Pause campaign
-  const pauseCampaign = async (campaignId: string) => {
-    setProcessing(prev => ({ ...prev, [campaignId]: true }));
-
-    try {
-      const result = await liveCampaignManager.pauseCampaign(campaignId);
-      
-      if (result.success) {
-        toast.success('Campaign paused successfully!');
-        await refreshData();
-      } else {
-        throw new Error(result.error || 'Failed to pause campaign');
-      }
-    } catch (error) {
-      let errorMessage = 'Unknown error';
-
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error && typeof error === 'object') {
-        const errorObj = error as any;
-        errorMessage = errorObj.message || errorObj.error || errorObj.details ||
-                      'Failed to pause campaign with no additional details';
-      }
-
-      toast.error(`Failed to pause campaign: ${errorMessage}`);
-    } finally {
-      setProcessing(prev => ({ ...prev, [campaignId]: false }));
-    }
-  };
-
-  // Delete campaign
-  const deleteCampaign = async (campaignId: string) => {
-    if (!confirm('Are you sure you want to delete this campaign?')) return;
-
-    try {
-      const result = await liveCampaignManager.deleteCampaign(campaignId, user?.id || '');
-      
-      if (result.success) {
-        setCampaigns(prev => prev.filter(c => c.id !== campaignId));
-        toast.success('Campaign deleted successfully');
-        await refreshData();
-      } else {
-        throw new Error(result.error || 'Failed to delete campaign');
-      }
-    } catch (error) {
-      let errorMessage = 'Unknown error';
-
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error && typeof error === 'object') {
-        const errorObj = error as any;
-        errorMessage = errorObj.message || errorObj.error || errorObj.details ||
-                      'Failed to delete campaign with no additional details';
-      }
-
-      toast.error(`Failed to delete campaign: ${errorMessage}`);
-    }
-  };
-
-  // Generate report
-  const generateReport = async (campaignId: string, reportType: 'summary' | 'detailed' | 'links' = 'summary') => {
-    try {
-      const result = await campaignReportingSystem.generateCampaignReport(campaignId, reportType);
-      
-      if (result.success && result.report) {
-        setSavedReports(prev => [result.report!, ...prev]);
-        toast.success(`${reportType} report generated successfully!`);
-      } else {
-        throw new Error(result.error || 'Failed to generate report');
-      }
-    } catch (error) {
-      let errorMessage = 'Unknown error';
-
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === 'string') {
-        errorMessage = error;
-      } else if (error && typeof error === 'object') {
-        const errorObj = error as any;
-        errorMessage = errorObj.message || errorObj.error || errorObj.details ||
-                      'Failed to generate report with no additional details';
-      }
-
-      toast.error(`Failed to generate report: ${errorMessage}`);
-    }
-  };
-
-  // Export report as CSV
-  const exportReportCSV = (report: CampaignReport) => {
-    const csvContent = campaignReportingSystem.exportToCSV(report);
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `${report.report_name}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success('Report exported as CSV');
-  };
-
-  const getStatusColor = (status: LiveCampaign['status']) => {
-    switch (status) {
-      case 'active': return 'bg-green-500';
-      case 'paused': return 'bg-yellow-500';
-      case 'completed': return 'bg-blue-500';
-      default: return 'bg-gray-500';
-    }
-  };
-
-  const getStatusIcon = (status: LiveCampaign['status']) => {
-    switch (status) {
-      case 'active': return <Play className="h-3 w-3" />;
-      case 'paused': return <Pause className="h-3 w-3" />;
-      case 'completed': return <CheckCircle className="h-3 w-3" />;
-      default: return <AlertCircle className="h-3 w-3" />;
-    }
-  };
 
   const handleAuthSuccess = (user: any) => {
     setShowSignInModal(false);
@@ -653,14 +481,10 @@ export default function AutomationLive() {
         </div>
 
         <Tabs defaultValue="create" className="max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-5 mb-8">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="create" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Create Campaign
-            </TabsTrigger>
-            <TabsTrigger value="manage" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Manage Campaigns
             </TabsTrigger>
             <TabsTrigger value="reporting" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
@@ -670,14 +494,6 @@ export default function AutomationLive() {
                   {publishedLinks.length}
                 </Badge>
               )}
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Analytics
-            </TabsTrigger>
-            <TabsTrigger value="debug" className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4" />
-              Debug
             </TabsTrigger>
           </TabsList>
 
@@ -871,160 +687,6 @@ export default function AutomationLive() {
             </div>
           </TabsContent>
 
-          {/* Manage Campaigns Tab */}
-          <TabsContent value="manage" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold">Live Campaigns</h2>
-              <Button 
-                onClick={refreshData}
-                variant="outline"
-                disabled={loading}
-              >
-                {loading ? (
-                  <div className="animate-spin mr-2 h-4 w-4 border-2 border-gray-600 border-t-transparent rounded-full" />
-                ) : (
-                  <BarChart3 className="h-4 w-4 mr-2" />
-                )}
-                Refresh
-              </Button>
-            </div>
-
-            {!user ? (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">Sign in to manage campaigns</h3>
-                  <p className="text-gray-500 mb-4">Create and manage your automated link building campaigns</p>
-                  <Button 
-                    onClick={() => setShowSignInModal(true)}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Sign In to Get Started
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : loading ? (
-              <div className="flex items-center justify-center py-12">
-                <div className="animate-spin h-8 w-8 border-2 border-blue-600 border-t-transparent rounded-full" />
-              </div>
-            ) : campaigns.length === 0 ? (
-              <Card>
-                <CardContent className="text-center py-12">
-                  <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No campaigns yet</h3>
-                  <p className="text-gray-500 mb-4">Create your first live automation campaign to get started</p>
-                  <Button 
-                    onClick={() => document.querySelector('[value="create"]')?.click()}
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Your First Campaign
-                  </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid gap-4">
-                {campaigns.map((campaign) => (
-                  <Card key={campaign.id} className="hover:shadow-md transition-shadow">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-3 mb-2">
-                            <h3 className="text-lg font-semibold">{campaign.name}</h3>
-                            <Badge 
-                              className={`${getStatusColor(campaign.status)} text-white flex items-center gap-1`}
-                            >
-                              {getStatusIcon(campaign.status)}
-                              {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
-                            </Badge>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-                            <div>
-                              <p className="text-sm text-gray-500">Target URL</p>
-                              <p className="text-sm font-medium truncate">{campaign.target_url}</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">Keywords</p>
-                              <p className="text-sm font-medium">{campaign.keywords?.length || 0} keywords</p>
-                            </div>
-                            <div>
-                              <p className="text-sm text-gray-500">Articles Published</p>
-                              <p className="text-sm font-medium">
-                                {campaign.published_articles?.length || 0} articles
-                              </p>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-4 text-sm text-gray-500">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              {new Date(campaign.created_at).toLocaleDateString()}
-                            </div>
-                            {campaign.started_at && (
-                              <div className="flex items-center gap-1">
-                                <Clock className="h-4 w-4" />
-                                Started {new Date(campaign.started_at).toLocaleDateString()}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 ml-4">
-                          {processing[campaign.id] ? (
-                            <Button size="sm" disabled className="bg-blue-600">
-                              <div className="animate-spin mr-2 h-3 w-3 border-2 border-white border-t-transparent rounded-full" />
-                              Processing...
-                            </Button>
-                          ) : (
-                            <>
-                              {campaign.status === 'active' ? (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => pauseCampaign(campaign.id)}
-                                >
-                                  <Pause className="h-4 w-4 mr-1" />
-                                  Pause
-                                </Button>
-                              ) : campaign.status === 'paused' || campaign.status === 'draft' ? (
-                                <Button
-                                  size="sm"
-                                  onClick={() => startCampaign(campaign.id)}
-                                  className="bg-green-600 hover:bg-green-700"
-                                >
-                                  <Play className="h-4 w-4 mr-1" />
-                                  Start
-                                </Button>
-                              ) : null}
-
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => generateReport(campaign.id, 'summary')}
-                              >
-                                <FileText className="h-4 w-4" />
-                              </Button>
-
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => deleteCampaign(campaign.id)}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
 
           {/* Results & Reporting Tab */}
           <TabsContent value="reporting" className="space-y-6">
@@ -1168,106 +830,7 @@ export default function AutomationLive() {
             )}
           </TabsContent>
 
-          {/* Debug Tab */}
-          <TabsContent value="debug" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <SchemaFixTester />
-              <DatabaseSchemaFixer />
-              <CampaignCreationDebugger />
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <CampaignCreationFix />
-              <PlatformErrorSimulator />
-            </div>
-            <div className="w-full">
-              <PlatformHealthMonitor />
-            </div>
-            <div className="w-full">
-              <InternalLogViewer />
-            </div>
-          </TabsContent>
 
-          {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Total Campaigns</p>
-                      <p className="text-2xl font-bold">{analytics.total_campaigns}</p>
-                    </div>
-                    <Target className="h-8 w-8 text-blue-500" />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Links Built</p>
-                      <p className="text-2xl font-bold">{analytics.total_links}</p>
-                    </div>
-                    <Link className="h-8 w-8 text-green-500" />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Success Rate</p>
-                      <p className="text-2xl font-bold">{analytics.success_rate.toFixed(1)}%</p>
-                    </div>
-                    <TrendingUp className="h-8 w-8 text-purple-500" />
-                  </div>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-500">Total Words</p>
-                      <p className="text-2xl font-bold">{Math.round(analytics.total_word_count / 1000)}k</p>
-                    </div>
-                    <FileText className="h-8 w-8 text-orange-500" />
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {analytics.platform_breakdown.length > 0 && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Platform Breakdown</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {analytics.platform_breakdown.map((platform) => (
-                      <div key={platform.platform} className="flex items-center justify-between">
-                        <span className="font-medium">{platform.platform}</span>
-                        <div className="flex items-center gap-4">
-                          <div className="text-sm text-gray-500">{platform.count} links</div>
-                          <div className="w-24 bg-gray-200 rounded-full h-2">
-                            <div
-                              className="bg-blue-600 h-2 rounded-full"
-                              style={{ width: `${platform.percentage}%` }}
-                            />
-                          </div>
-                          <div className="text-sm font-medium w-12 text-right">
-                            {platform.percentage.toFixed(1)}%
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
         </Tabs>
       </div>
 
