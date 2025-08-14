@@ -290,6 +290,11 @@ class DirectAutomationExecutor {
           `Error: ${JSON.stringify(errorData)}`
         );
 
+        // Special handling for 404 - function doesn't exist
+        if (response.status === 404) {
+          throw new Error('Publishing function not available. Netlify functions may not be deployed.');
+        }
+
         throw new Error(`Publishing HTTP ${response.status}: ${errorData.error || response.statusText || 'Unknown error'}`);
       }
 
