@@ -47,7 +47,10 @@ export class SavedBacklinkReportsService {
 
       console.log('📱 Report saved to localStorage as fallback');
     } catch (error) {
-      console.error('Failed to save to localStorage:', error);
+      console.error('Failed to save to localStorage:', {
+        error: error instanceof Error ? error.message : String(error),
+        details: error
+      });
     }
   }
 
@@ -62,7 +65,10 @@ export class SavedBacklinkReportsService {
       const parsed = JSON.parse(stored);
       return parsed.reports || [];
     } catch (error) {
-      console.error('Failed to get from localStorage:', error);
+      console.error('Failed to get from localStorage:', {
+        error: error instanceof Error ? error.message : String(error),
+        details: error
+      });
       return [];
     }
   }
@@ -80,7 +86,10 @@ export class SavedBacklinkReportsService {
         reports: filteredReports
       }));
     } catch (error) {
-      console.error('Failed to remove from localStorage:', error);
+      console.error('Failed to remove from localStorage:', {
+        error: error instanceof Error ? error.message : String(error),
+        details: error
+      });
     }
   }
   /**
