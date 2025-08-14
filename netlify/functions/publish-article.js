@@ -320,14 +320,20 @@ function convertMarkdownToTelegraph(markdown) {
 
     // Headers
     if (trimmedLine.startsWith('##')) {
+      const headerText = trimmedLine.replace(/^#+\s*/, '');
+      const parsedContent = parseInlineMarkdown(headerText);
+
       telegraphContent.push({
         tag: 'h3',
-        children: [parseInlineMarkdown(trimmedLine.replace(/^#+\s*/, ''))]
+        children: Array.isArray(parsedContent) ? parsedContent : [parsedContent]
       });
     } else if (trimmedLine.startsWith('#')) {
+      const headerText = trimmedLine.replace(/^#+\s*/, '');
+      const parsedContent = parseInlineMarkdown(headerText);
+
       telegraphContent.push({
         tag: 'h3',
-        children: [parseInlineMarkdown(trimmedLine.replace(/^#+\s*/, ''))]
+        children: Array.isArray(parsedContent) ? parsedContent : [parsedContent]
       });
     }
     // Lists
