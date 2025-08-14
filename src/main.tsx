@@ -147,7 +147,7 @@ if (import.meta.env.DEV) {
           }),
         });
 
-        console.log(`${func}: Status ${response.status} ${response.status === 200 ? '✅' : '���'}`);
+        console.log(`${func}: Status ${response.status} ${response.status === 200 ? '✅' : '❌'}`);
 
         if (response.ok) {
           const data = await response.json();
@@ -172,6 +172,16 @@ if (import.meta.env.DEV) {
       console.log('✅ Fetch protection disabled - try your request again');
     } catch (error) {
       console.error('❌ Failed to apply fetch fix:', error);
+    }
+  };
+
+  // Add client content generator test
+  (window as any).testClientContent = async () => {
+    try {
+      const { testClientContentGenerator } = await import('./utils/testClientContentGenerator');
+      await testClientContentGenerator();
+    } catch (error) {
+      console.error('❌ Client content test failed:', error);
     }
   };
 
