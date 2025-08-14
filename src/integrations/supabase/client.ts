@@ -238,72 +238,25 @@ export const supabase = hasValidCredentials ?
       headers: {
         'X-Client-Info': 'backlink-infinity@1.0.0',
       },
-      fetch: (url, options = {}) => {
-        // Create a timeout that won't interfere with existing signals
-        const timeoutMs = 30000;
-        const timeoutController = new AbortController();
+      fetch: async (url, options = {}) => {
+        try {
+          // Use native fetch with simple timeout
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-        let timeoutId;
-        if (!options.signal) {
-          timeoutId = setTimeout(() => timeoutController.abort(), timeoutMs);
-        }
+          const response = await fetch(url, {
+            ...options,
+            signal: controller.signal,
+          });
 
-        const finalSignal = options.signal || timeoutController.signal;
-
-        return safeFetch(url, {
-          ...options,
-          signal: finalSignal,
-        }).then(response => {
-          if (timeoutId) clearTimeout(timeoutId);
+          clearTimeout(timeoutId);
           return response;
-        }).catch(async (error) => {
-          if (timeoutId) clearTimeout(timeoutId);
-
-          // Handle specific error types
+        } catch (error) {
           if (error.name === 'AbortError') {
-            console.warn('🔍 Request aborted (likely timeout):', url);
             throw new Error('Request timeout - please try again');
           }
-
-          // Enhanced FullStory error handling with retry - but be more specific
-          const isDefinitelyFullStory = (
-            error.stack?.includes('fullstory') ||
-            error.stack?.includes('edge.fullstory.com') ||
-            error.message?.includes('Third-party script interference')
-          );
-
-          const isPossiblyFullStory = (
-            error.message?.includes('Failed to fetch') &&
-            (error.stack?.includes('messageHandler') && error.stack?.includes('eval'))
-          );
-
-          if (isDefinitelyFullStory || isPossiblyFullStory) {
-            console.warn('🔍 Potential FullStory interference detected, attempting bypass retry for:', url);
-
-            try {
-              // Import the bypass fetch dynamically to avoid circular imports
-              const { createBypassFetch } = await import('../../utils/fullstoryWorkaround');
-              const bypassFetch = createBypassFetch();
-
-              // Retry with XMLHttpRequest-based fetch
-              const retryResponse = await bypassFetch(url, {
-                ...options,
-                signal: finalSignal,
-              });
-
-              console.log('✅ Successfully bypassed FullStory interference for:', url);
-              return retryResponse;
-
-            } catch (bypassError) {
-              console.error('❌ Bypass retry also failed:', bypassError.message || bypassError.toString() || JSON.stringify(bypassError));
-              // If bypass also fails, provide a more helpful error message
-              throw new Error(`Network request failed due to third-party script interference. Please try refreshing the page or disabling browser extensions.`);
-            }
-          }
-
-          console.warn('Supabase fetch error:', error);
-          throw new Error(`Network request failed: ${error.message || 'Unknown network error'}`);
-        });
+          throw error;
+        }
       },
     },
   }) :
