@@ -376,6 +376,16 @@ export default function AutomationLive() {
       } else if (error && typeof error === 'object') {
         // Handle object errors by extracting meaningful information
         const errorObj = error as any;
+
+        // Enhanced debugging for object errors
+        console.error('🔍 Campaign Creation Error Debug:', {
+          errorType: typeof error,
+          errorConstructor: error.constructor?.name,
+          errorKeys: Object.keys(error),
+          rawError: error,
+          stringified: JSON.stringify(error, null, 2)
+        });
+
         errorMessage = errorObj.message || errorObj.error || errorObj.details ||
                       (errorObj.toString && errorObj.toString !== '[object Object]' ? errorObj.toString() : '') ||
                       'Campaign creation failed with no additional details';
