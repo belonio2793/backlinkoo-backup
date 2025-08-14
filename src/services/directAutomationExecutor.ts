@@ -6,7 +6,6 @@
  */
 
 import { mockAutomationService } from './mockAutomationService';
-import { automaticUrlFilterService } from './automaticUrlFilterService';
 
 export interface DirectExecutionInput {
   keywords: string[];
