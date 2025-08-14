@@ -73,12 +73,30 @@ export interface PlatformTarget {
   avg_response_time: number;
   is_active: boolean;
   last_used?: string;
+  // Enhanced error tracking
+  consecutive_failures: number;
+  last_failure?: string;
+  failure_reasons: Array<{
+    timestamp: string;
+    error: string;
+    error_type: 'api_error' | 'network_error' | 'content_error' | 'auth_error' | 'rate_limit' | 'unknown';
+  }>;
+  total_attempts: number;
+  total_successes: number;
+  current_health_status: 'healthy' | 'degraded' | 'unhealthy' | 'disabled';
+  next_retry_after?: string;
 }
 
 class LiveCampaignManager {
   private activeCampaigns = new Map<string, LiveCampaign>();
   private executionTimers = new Map<string, NodeJS.Timeout>();
   private platformTargets: PlatformTarget[] = [];
+
+  // Platform error handling configuration
+  private readonly MAX_CONSECUTIVE_FAILURES = 3;
+  private readonly PLATFORM_COOLDOWN_MINUTES = 30;
+  private readonly MAX_RETRY_ATTEMPTS = 2;
+  private readonly HEALTH_CHECK_INTERVAL = 5 * 60 * 1000; // 5 minutes
 
   constructor() {
     this.initializePlatformTargets();
