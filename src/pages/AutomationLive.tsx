@@ -131,8 +131,12 @@ export default function AutomationLive() {
       
       automationLogger.info('system', `Loaded user data: ${userCampaigns.length} campaigns, ${userLinks.length} links`);
     } catch (error) {
-      automationLogger.error('system', 'Failed to load user data', {}, undefined, error as Error);
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      const errorMessage = error instanceof Error ? error.message :
+                          typeof error === 'string' ? error :
+                          (error as any)?.message ||
+                          (error as any)?.error ||
+                          'Unknown error occurred';
+      automationLogger.error('system', 'Failed to load user data', { errorMessage, originalError: error }, undefined, error as Error);
       toast.error(`Failed to load user data: ${errorMessage}`);
     } finally {
       setLoading(false);
@@ -231,8 +235,12 @@ export default function AutomationLive() {
         throw new Error(result.error || 'Failed to create campaign');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      automationLogger.error('campaign', 'Failed to create campaign', { errorMessage }, undefined, error as Error);
+      const errorMessage = error instanceof Error ? error.message :
+                          typeof error === 'string' ? error :
+                          (error as any)?.message ||
+                          (error as any)?.error ||
+                          'Unknown error';
+      automationLogger.error('campaign', 'Failed to create campaign', { errorMessage, originalError: error }, undefined, error as Error);
       toast.error(`Failed to create campaign: ${errorMessage}`);
     } finally {
       setCreating(false);
