@@ -54,6 +54,7 @@ const LazyPremiumSEOAnalysisTest = lazy(() => import("./pages/PremiumSEOAnalysis
 // Array-free automation components
 import ArrayFreeAutomation from "./pages/ArrayFreeAutomation";
 import ArrayFreeTest from "./pages/ArrayFreeTest";
+import FetchTest from "./pages/FetchTest";
 const LazyDebugUserReports = lazy(() => import("./pages/DebugUserReports"));
 const LazyBlogPostChecker = lazy(() => import("./components/BlogPostChecker").then(module => ({ default: module.BlogPostChecker })));
 
