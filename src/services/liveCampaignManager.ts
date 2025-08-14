@@ -676,10 +676,14 @@ class LiveCampaignManager {
                       'Campaign creation failed with no additional details';
       }
 
-      internalLogger.critical('campaign_creation', 'Campaign creation failed completely', {
-        originalError: error,
+      // Safe error logging - avoid Response objects that could cause "body stream already read"
+      const safeErrorInfo = {
         errorMessage,
         errorCategory,
+        errorType: typeof error,
+        errorConstructor: error?.constructor?.name,
+        isError: error instanceof Error,
+        isResponse: error && typeof error === 'object' && error.constructor?.name === 'Response',
         params: {
           ...params,
           keywords_validation: {
@@ -694,7 +698,9 @@ class LiveCampaignManager {
           }
         },
         stackTrace: error instanceof Error ? error.stack : undefined
-      });
+      };
+
+      internalLogger.critical('campaign_creation', 'Campaign creation failed completely', safeErrorInfo);
 
       return {
         success: false,

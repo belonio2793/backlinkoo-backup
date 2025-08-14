@@ -31,7 +31,17 @@ export const handler = async (event, context) => {
   }
 
   try {
-    const { prompt, keyword, anchor_text, target_url, word_count = 1000 } = JSON.parse(event.body);
+    const requestBody = JSON.parse(event.body);
+    const {
+      prompt,
+      keyword,
+      anchor_text,
+      target_url,
+      word_count = 1000,
+      model = 'gpt-3.5-turbo',
+      temperature = 0.7,
+      max_tokens = 2000
+    } = requestBody;
 
     console.log('🤖 AI Content Generation Request:', {
       prompt: prompt.substring(0, 100) + '...',
@@ -79,20 +89,22 @@ Format the response as a complete article with proper markdown formatting.`;
 
     console.log('🚀 Sending request to OpenAI...');
 
+    console.log(`🤖 Using model: ${model} with temperature: ${temperature}`);
+
     const completion = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
+      model: model, // Support dynamic model selection (ChatGPT 3.5 Turbo by default)
       messages: [
         {
           role: 'system',
-          content: 'You are a professional content writer specializing in creating high-quality, SEO-optimized articles. Always include the specified anchor text as a natural hyperlink in the content.'
+          content: 'You are a professional content writer specializing in link building automation. Create high-quality, engaging articles that naturally incorporate the provided anchor text as a hyperlink. The content should be informative, well-structured, provide real value to readers, and seamlessly integrate the anchor text within the context. Ensure the anchor text appears naturally in the content flow.'
         },
         {
           role: 'user',
-          content: enhancedPrompt
+          content: `${enhancedPrompt}\n\nIMPORTANT: Make sure to naturally include the anchor text "${anchor_text}" within the article content in a way that makes sense contextually. The anchor text should appear as part of the natural flow of the article.`
         }
       ],
-      max_tokens: 2000,
-      temperature: 0.7,
+      max_tokens: max_tokens,
+      temperature: temperature,
     });
 
     const generatedContent = completion.choices[0]?.message?.content;

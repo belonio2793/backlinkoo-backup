@@ -353,7 +353,16 @@ export default function AutomationLive() {
       let errorMessage = 'Unknown error';
       let isKnownIssue = false;
 
-      if (error instanceof Error) {
+      // Handle specific Response stream errors
+      if (error instanceof Error && error.message.includes('body stream already read')) {
+        errorMessage = 'Network request error. Please try again.';
+        isKnownIssue = true;
+        console.error('🔍 Response stream error detected:', {
+          message: error.message,
+          stack: error.stack,
+          errorType: 'body_stream_already_read'
+        });
+      } else if (error instanceof Error) {
         errorMessage = error.message;
       } else if (typeof error === 'string') {
         errorMessage = error;
@@ -410,16 +419,24 @@ export default function AutomationLive() {
         errorMessage = 'Permission error. Please sign out and sign back in, then try again.';
       }
 
-      automationLogger.error('campaign', 'Failed to create campaign', {
+      // Safe error logging - avoid passing Response objects that may have consumed body streams
+      const safeErrorData = {
         errorMessage,
-        originalError: error,
         isKnownIssue,
         formData: {
           keywords_length: formData.keywords.length,
           anchor_texts_length: formData.anchor_texts.length,
           target_url_length: formData.target_url.length
+        },
+        errorInfo: {
+          type: typeof error,
+          constructor: error?.constructor?.name,
+          message: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined
         }
-      }, undefined, error as Error);
+      };
+
+      automationLogger.error('campaign', 'Failed to create campaign', safeErrorData);
 
       // Show user-friendly error message
       if (isKnownIssue) {
