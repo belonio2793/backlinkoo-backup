@@ -151,6 +151,16 @@ class DirectAutomationExecutor {
       // If Telegraph publishing failed and we're not using mock service, fallback to mock
       if (!publishResult.success && !useMockServices) {
         console.log('🎭 Telegraph publishing failed, falling back to mock service...');
+
+        // Import error fixer for better user messaging
+        try {
+          const { TelegraphErrorFixer } = await import('../utils/telegraphErrorFixer');
+          const errorMessage = TelegraphErrorFixer.getErrorMessage(publishResult.error);
+          console.log('📋 Telegraph error:', errorMessage);
+        } catch (importError) {
+          console.log('📋 Telegraph error (could not load error fixer):', publishResult.error);
+        }
+
         publishResult = await this.publishToTelegraph({
           title: contentResult.title,
           content: contentResult.content,
