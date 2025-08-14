@@ -288,7 +288,13 @@ class DirectAutomationExecutor {
     }
 
     try {
-      const response = await fetch('/.netlify/functions/generate-content', {
+      // First, try to find a working content generation function
+      const { ContentGenerationDiagnostic } = await import('../utils/contentGenerationDiagnostic');
+      let functionToUse = ContentGenerationDiagnostic.getWorkingFunction();
+
+      console.log(`🎯 Using content function: ${functionToUse}`);
+
+      const response = await fetch(`/.netlify/functions/${functionToUse}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
