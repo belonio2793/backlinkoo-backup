@@ -138,7 +138,7 @@ const Automation = () => {
       
       toast({
         title: "Campaign Creation Failed",
-        description: error instanceof Error ? error.message : "There was an error creating your campaign. Please try again.",
+        description: formatErrorMessage(error),
         variant: "destructive"
       });
     } finally {
