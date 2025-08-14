@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Function Availability Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test { margin: 10px 0; padding: 10px; border: 1px solid #ccc; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        button { padding: 10px 20px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <h1>Netlify Functions Availability Test</h1>
+    
+    <button onclick="testApiStatus()">Test API Status</button>
+    <button onclick="testContentGenerator()">Test Content Generator</button>
+    <button onclick="testPublishArticle()">Test Publish Article</button>
+    <button onclick="testTelegraphPublisher()">Test Telegraph Publisher</button>
+    
+    <div id="results"></div>
+
+    <script>
+        async function testFunction(functionName, payload = {}) {
+            const resultDiv = document.getElementById('results');
+            const testDiv = document.createElement('div');
+            testDiv.className = 'test';
+            testDiv.innerHTML = `<strong>Testing ${functionName}...</strong>`;
+            resultDiv.appendChild(testDiv);
+            
+            try {
+                const response = await fetch(`/.netlify/functions/${functionName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json().catch(() => ({ error: 'Invalid JSON response' }));
+                
+                if (response.ok) {
+                    testDiv.className = 'test success';
+                    testDiv.innerHTML = `<strong>✅ ${functionName}</strong><br>Status: ${response.status}<br>Response: ${JSON.stringify(data, null, 2)}`;
+                } else {
+                    testDiv.className = 'test error';
+                    testDiv.innerHTML = `<strong>❌ ${functionName}</strong><br>Status: ${response.status}<br>Error: ${JSON.stringify(data, null, 2)}`;
+                }
+            } catch (error) {
+                testDiv.className = 'test error';
+                testDiv.innerHTML = `<strong>❌ ${functionName}</strong><br>Network Error: ${error.message}`;
+            }
+        }
+        
+        async function testApiStatus() {
+            await testFunction('api-status');
+        }
+        
+        async function testContentGenerator() {
+            await testFunction('working-content-generator', {
+                keyword: 'test',
+                anchor_text: 'test link',
+                target_url: 'https://example.com',
+                user_id: 'test-user'
+            });
+        }
+        
+        async function testPublishArticle() {
+            await testFunction('publish-article', {
+                title: 'Test Article',
+                content: 'This is test content with a [test link](https://example.com).',
+                campaign_id: 'test-campaign',
+                target_site: 'telegraph',
+                user_id: 'test-user'
+            });
+        }
+        
+        async function testTelegraphPublisher() {
+            await testFunction('telegraph-publisher', {
+                title: 'Test Article',
+                content: 'This is test content with a [test link](https://example.com).',
+                author_name: 'Test Author'
+            });
+        }
+    </script>
+</body>
+</html>
