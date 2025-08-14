@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emergency Array Column Fix</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f8fafc;
+        }
+        .container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .status {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            min-height: 400px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+        }
+        .button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin: 5px;
+        }
+        .button:hover { background: #2563eb; }
+        .button:disabled { background: #94a3b8; cursor: not-allowed; }
+        .danger { background: #ef4444; }
+        .danger:hover { background: #dc2626; }
+        .success { background: #10b981; }
+        .success:hover { background: #059669; }
+        .warning { background: #f59e0b; }
+        .warning:hover { background: #d97706; }
+        .input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            margin: 5px 0;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+        .alert-error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+        .alert-success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+        .alert-warning {
+            background: #fffbeb;
+            border: 1px solid #fed7aa;
+            color: #92400e;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚨 Emergency Array Column Fix</h1>
+            <p>Fixes "expected JSON array" errors by converting TEXT columns to TEXT[]</p>
+        </div>
+
+        <div class="alert alert-warning">
+            <strong>⚠️ Important:</strong> This tool fixes database schema issues where columns are TEXT instead of TEXT[]. 
+            Make sure you have admin/service role access to your Supabase database.
+        </div>
+
+        <div class="grid">
+            <div>
+                <input type="text" id="supabaseUrl" class="input" placeholder="Supabase URL (https://xxx.supabase.co)">
+                <input type="password" id="serviceKey" class="input" placeholder="Service Role Key (service_role key)">
+            </div>
+            <div>
+                <button class="button" onclick="checkSchema()">🔍 Check Current Schema</button>
+                <button class="button danger" onclick="fixArrayColumns()">🔧 Fix Array Columns</button>
+                <button class="button success" onclick="testArrays()">🧪 Test Array Insertion</button>
+                <button class="button" onclick="clearLog()">🗑️ Clear Log</button>
+            </div>
+        </div>
+
+        <div id="status" class="status">Ready to fix array column issues. Please enter your Supabase credentials above.</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        let supabase = null;
+        let logContainer = document.getElementById('status');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const icons = { error: '❌', success: '✅', warning: '⚠️', info: 'ℹ️' };
+            const icon = icons[type] || 'ℹ️';
+            
+            logContainer.textContent += `[${timestamp}] ${icon} ${message}\n`;
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        function clearLog() {
+            logContainer.textContent = '';
+        }
+
+        function initSupabase() {
+            const url = document.getElementById('supabaseUrl').value;
+            const key = document.getElementById('serviceKey').value;
+
+            if (!url || !key) {
+                log('Please enter Supabase URL and Service Role Key', 'error');
+                return false;
+            }
+
+            try {
+                supabase = window.supabase.createClient(url, key);
+                log('Supabase client initialized', 'success');
+                return true;
+            } catch (error) {
+                log(`Failed to initialize Supabase: ${error.message}`, 'error');
+                return false;
+            }
+        }
+
+        async function checkSchema() {
+            if (!initSupabase()) return;
+
+            log('🔍 Checking current schema...');
+
+            try {
+                const { data, error } = await supabase.rpc('exec_sql', {
+                    query: `
+                        SELECT column_name, data_type, is_nullable
+                        FROM information_schema.columns 
+                        WHERE table_name = 'automation_campaigns' 
+                        AND column_name IN ('keywords', 'anchor_texts', 'target_sites_used', 'available_sites')
+                        ORDER BY column_name;
+                    `
+                });
+
+                if (error) throw error;
+
+                log('📋 Current schema for array columns:');
+                if (data && data.length > 0) {
+                    data.forEach(col => {
+                        const isArray = col.data_type.includes('ARRAY');
+                        const isCorrect = col.column_name === 'available_sites' ? 
+                            col.data_type === 'integer' : isArray;
+                        const status = isCorrect ? '✅' : '❌';
+                        log(`  ${status} ${col.column_name}: ${col.data_type} (nullable: ${col.is_nullable})`);
+                    });
+                } else {
+                    log('No array columns found - table may not exist', 'warning');
+                }
+
+            } catch (error) {
+                log(`Schema check failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function fixArrayColumns() {
+            if (!initSupabase()) return;
+
+            log('🔧 Starting array column fixes...');
+            
+            const fixes = [
+                {
+                    name: 'keywords',
+                    description: 'Convert keywords from TEXT to TEXT[]',
+                    sql: `
+                        DO $$
+                        DECLARE
+                            col_type TEXT;
+                        BEGIN
+                            SELECT data_type INTO col_type
+                            FROM information_schema.columns
+                            WHERE table_name = 'automation_campaigns' AND column_name = 'keywords';
+                            
+                            IF col_type IS NOT NULL AND NOT col_type LIKE '%ARRAY%' THEN
+                                -- Create backup
+                                ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS keywords_backup TEXT;
+                                UPDATE automation_campaigns SET keywords_backup = keywords::TEXT WHERE keywords IS NOT NULL;
+                                
+                                -- Drop and recreate
+                                ALTER TABLE automation_campaigns DROP COLUMN keywords;
+                                ALTER TABLE automation_campaigns ADD COLUMN keywords TEXT[] DEFAULT '{}' NOT NULL;
+                                
+                                -- Convert data back
+                                UPDATE automation_campaigns 
+                                SET keywords = 
+                                    CASE 
+                                        WHEN keywords_backup IS NULL OR keywords_backup = '' THEN '{}'::TEXT[]
+                                        WHEN keywords_backup LIKE '{%}' THEN keywords_backup::TEXT[]
+                                        ELSE ARRAY[keywords_backup]
+                                    END
+                                WHERE keywords_backup IS NOT NULL;
+                                
+                                -- Cleanup
+                                ALTER TABLE automation_campaigns DROP COLUMN keywords_backup;
+                                
+                                RAISE NOTICE 'Fixed keywords column';
+                            ELSE
+                                RAISE NOTICE 'Keywords column already correct type';
+                            END IF;
+                        END $$;
+                    `
+                },
+                {
+                    name: 'anchor_texts',
+                    description: 'Convert anchor_texts from TEXT to TEXT[]',
+                    sql: `
+                        DO $$
+                        DECLARE
+                            col_type TEXT;
+                        BEGIN
+                            SELECT data_type INTO col_type
+                            FROM information_schema.columns
+                            WHERE table_name = 'automation_campaigns' AND column_name = 'anchor_texts';
+                            
+                            IF col_type IS NOT NULL AND NOT col_type LIKE '%ARRAY%' THEN
+                                -- Create backup
+                                ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS anchor_texts_backup TEXT;
+                                UPDATE automation_campaigns SET anchor_texts_backup = anchor_texts::TEXT WHERE anchor_texts IS NOT NULL;
+                                
+                                -- Drop and recreate
+                                ALTER TABLE automation_campaigns DROP COLUMN anchor_texts;
+                                ALTER TABLE automation_campaigns ADD COLUMN anchor_texts TEXT[] DEFAULT '{}' NOT NULL;
+                                
+                                -- Convert data back
+                                UPDATE automation_campaigns 
+                                SET anchor_texts = 
+                                    CASE 
+                                        WHEN anchor_texts_backup IS NULL OR anchor_texts_backup = '' THEN '{}'::TEXT[]
+                                        WHEN anchor_texts_backup LIKE '{%}' THEN anchor_texts_backup::TEXT[]
+                                        ELSE ARRAY[anchor_texts_backup]
+                                    END
+                                WHERE anchor_texts_backup IS NOT NULL;
+                                
+                                -- Cleanup
+                                ALTER TABLE automation_campaigns DROP COLUMN anchor_texts_backup;
+                                
+                                RAISE NOTICE 'Fixed anchor_texts column';
+                            ELSE
+                                RAISE NOTICE 'Anchor_texts column already correct type';
+                            END IF;
+                        END $$;
+                    `
+                },
+                {
+                    name: 'target_sites_used',
+                    description: 'Ensure target_sites_used is TEXT[]',
+                    sql: `
+                        DO $$
+                        DECLARE
+                            col_type TEXT;
+                        BEGIN
+                            SELECT data_type INTO col_type
+                            FROM information_schema.columns
+                            WHERE table_name = 'automation_campaigns' AND column_name = 'target_sites_used';
+                            
+                            IF col_type IS NULL THEN
+                                ALTER TABLE automation_campaigns ADD COLUMN target_sites_used TEXT[] DEFAULT '{}';
+                                RAISE NOTICE 'Added target_sites_used column';
+                            ELSIF NOT col_type LIKE '%ARRAY%' THEN
+                                -- Create backup
+                                ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS target_sites_used_backup TEXT;
+                                UPDATE automation_campaigns SET target_sites_used_backup = target_sites_used::TEXT WHERE target_sites_used IS NOT NULL;
+                                
+                                -- Drop and recreate
+                                ALTER TABLE automation_campaigns DROP COLUMN target_sites_used;
+                                ALTER TABLE automation_campaigns ADD COLUMN target_sites_used TEXT[] DEFAULT '{}';
+                                
+                                -- Convert data back
+                                UPDATE automation_campaigns 
+                                SET target_sites_used = 
+                                    CASE 
+                                        WHEN target_sites_used_backup IS NULL OR target_sites_used_backup = '' THEN '{}'::TEXT[]
+                                        WHEN target_sites_used_backup LIKE '{%}' THEN target_sites_used_backup::TEXT[]
+                                        ELSE ARRAY[target_sites_used_backup]
+                                    END
+                                WHERE target_sites_used_backup IS NOT NULL;
+                                
+                                -- Cleanup
+                                ALTER TABLE automation_campaigns DROP COLUMN target_sites_used_backup;
+                                
+                                RAISE NOTICE 'Fixed target_sites_used column';
+                            ELSE
+                                RAISE NOTICE 'Target_sites_used column already correct type';
+                            END IF;
+                        END $$;
+                    `
+                }
+            ];
+
+            for (const fix of fixes) {
+                log(`🔧 ${fix.description}...`);
+                
+                try {
+                    const { error } = await supabase.rpc('exec_sql', { query: fix.sql });
+                    
+                    if (error) throw error;
+                    
+                    log(`✅ ${fix.name} fixed successfully`, 'success');
+                    
+                } catch (error) {
+                    log(`❌ Failed to fix ${fix.name}: ${error.message}`, 'error');
+                }
+            }
+
+            // Add missing columns
+            log('🔧 Adding missing columns...');
+            try {
+                const { error } = await supabase.rpc('exec_sql', {
+                    query: `
+                        ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS links_built INTEGER DEFAULT 0;
+                        ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS available_sites INTEGER DEFAULT 0;
+                        ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS published_articles JSONB DEFAULT '[]'::jsonb;
+                        ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ NULL;
+                        ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ NULL;
+                        ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS current_platform TEXT NULL;
+                        ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS execution_progress JSONB DEFAULT '{}'::jsonb;
+                        ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS auto_start BOOLEAN DEFAULT false;
+                    `
+                });
+
+                if (error) throw error;
+                log('✅ Missing columns added', 'success');
+
+            } catch (error) {
+                log(`⚠️ Some columns may already exist: ${error.message}`, 'warning');
+            }
+        }
+
+        async function testArrays() {
+            if (!initSupabase()) return;
+
+            log('🧪 Testing array insertion...');
+
+            const testData = {
+                name: 'ARRAY_TEST_DELETE_ME',
+                engine_type: 'web2_platforms',
+                user_id: '00000000-0000-0000-0000-000000000000',
+                status: 'draft',
+                auto_start: false,
+                keywords: ['test', 'keyword', 'array'],
+                anchor_texts: ['test anchor', 'click here', 'read more'],
+                target_url: 'https://example.com',
+                target_sites_used: ['example1.com', 'example2.com'],
+                links_built: 0,
+                available_sites: 2
+            };
+
+            try {
+                const { data, error } = await supabase
+                    .from('automation_campaigns')
+                    .insert(testData)
+                    .select('id, keywords, anchor_texts, target_sites_used')
+                    .single();
+
+                if (error) {
+                    log(`❌ Array insertion failed: ${error.message}`, 'error');
+                    if (error.code) log(`   Error code: ${error.code}`, 'error');
+                    if (error.details) log(`   Details: ${error.details}`, 'error');
+                    if (error.hint) log(`   Hint: ${error.hint}`, 'error');
+                } else {
+                    log('✅ Array insertion successful!', 'success');
+                    log(`   Keywords: ${JSON.stringify(data.keywords)}`);
+                    log(`   Anchor texts: ${JSON.stringify(data.anchor_texts)}`);
+                    log(`   Target sites: ${JSON.stringify(data.target_sites_used)}`);
+                    
+                    // Clean up
+                    await supabase.from('automation_campaigns').delete().eq('id', data.id);
+                    log('✅ Test data cleaned up', 'success');
+                }
+
+            } catch (error) {
+                log(`❌ Array test failed: ${error.message}`, 'error');
+            }
+        }
+
+        // Auto-fill from environment if available
+        window.addEventListener('load', () => {
+            // Try to get from current page context
+            if (window.location.origin.includes('localhost')) {
+                log('Development environment detected. Please enter credentials manually.');
+            }
+        });
+    </script>
+</body>
+</html>
