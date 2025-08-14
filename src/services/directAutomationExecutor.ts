@@ -132,7 +132,7 @@ class DirectAutomationExecutor {
         article_title: contentResult.title,
         article_url: publishResult.url,
         article_content: contentResult.content,
-        target_platform: 'Telegraph',
+        target_platform: useMockServices ? 'Telegraph (Mock)' : 'Telegraph',
         anchor_text_used: selectedAnchorText,
         word_count: contentResult.word_count,
         execution_time_ms: executionTime,
