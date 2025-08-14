@@ -1,7 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { logError as logFormattedError, getErrorMessage } from '@/utils/errorFormatter';
-import { logError } from '@/utils/errorLogger';
+import { ErrorLogger } from '@/utils/errorLogger';
 import { mockPaymentService } from '@/services/mockPaymentService';
 import { CheckoutRedirectManager, type CheckoutRedirectOptions } from '@/utils/checkoutRedirectManager';
 
