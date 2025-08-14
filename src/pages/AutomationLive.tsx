@@ -130,7 +130,8 @@ export default function AutomationLive() {
       automationLogger.info('system', `Loaded user data: ${userCampaigns.length} campaigns, ${userLinks.length} links`);
     } catch (error) {
       automationLogger.error('system', 'Failed to load user data', {}, undefined, error as Error);
-      toast.error('Failed to load data');
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast.error(`Failed to load user data: ${errorMessage}`);
     } finally {
       setLoading(false);
     }

@@ -5,6 +5,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { ErrorLogger } from '../utils/errorLogger';
 import type { LiveCampaign } from './liveCampaignManager';
 
 export interface PublishedLink {
@@ -126,7 +127,11 @@ class CampaignReportingSystem {
       console.log(`Published link saved: ${linkData.url}`);
       return { success: true, link_id: data.id };
     } catch (error) {
-      console.error('Failed to save published link:', error);
+      console.error('Failed to save published link:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        details: error
+      });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -175,7 +180,11 @@ class CampaignReportingSystem {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Failed to get campaign links:', error);
+      console.error('Failed to get campaign links:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        details: error
+      });
       return [];
     }
   }
@@ -233,7 +242,11 @@ class CampaignReportingSystem {
       if (error) throw error;
       return data || [];
     } catch (error) {
-      console.error('Failed to get user published links:', error);
+      console.error('Failed to get user published links:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        details: error
+      });
       return [];
     }
   }
@@ -324,7 +337,11 @@ class CampaignReportingSystem {
 
       return { success: true, report };
     } catch (error) {
-      console.error('Failed to generate campaign report:', error);
+      console.error('Failed to generate campaign report:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        details: error
+      });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -364,7 +381,11 @@ class CampaignReportingSystem {
         report_type: row.report_type
       }));
     } catch (error) {
-      console.error('Failed to get user reports:', error);
+      ErrorLogger.logError('Failed to get user reports', error, {
+        context: 'campaignReportingSystem.getUserReports',
+        userId,
+        additionalData: { campaignId }
+      });
       return [];
     }
   }
@@ -438,7 +459,11 @@ class CampaignReportingSystem {
 
       return { success: true };
     } catch (error) {
-      console.error('Failed to update link metrics:', error);
+      console.error('Failed to update link metrics:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        details: error
+      });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'
@@ -558,7 +583,11 @@ class CampaignReportingSystem {
         top_performing_links: topPerformingLinks
       };
     } catch (error) {
-      console.error('Failed to get dashboard analytics:', error);
+      console.error('Failed to get dashboard analytics:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        details: error
+      });
       return {
         total_links: 0,
         total_campaigns: 0,
@@ -632,7 +661,11 @@ class CampaignReportingSystem {
 
       return { success: true };
     } catch (error) {
-      console.error('Failed to delete report:', error);
+      console.error('Failed to delete report:', {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+        details: error
+      });
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error'

@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { AuthFormTabs } from '@/components/shared/AuthFormTabs';
 import SubscriptionService from '@/services/subscriptionService';
-import { logError, getErrorMessage } from '@/utils/errorLogger';
+import { ErrorLogger } from '@/utils/errorLogger';
 import { CheckoutRedirectManager } from '@/utils/checkoutRedirectManager';
 import {
   Crown, Shield, CheckCircle, X, Lock, Star, Infinity, BookOpen,
@@ -235,12 +235,12 @@ export function PremiumPlanModal({
         throw new Error(result.error || 'Failed to create subscription checkout');
       }
     } catch (error: any) {
-      logError('Premium checkout error', error);
+      ErrorLogger.logError('Premium checkout error', error);
 
       setCurrentStep('checkout');
       toast({
         title: "Checkout Error",
-        description: getErrorMessage(error) || "Failed to create checkout session. Please try again.",
+        description: ErrorLogger.getUserFriendlyMessage(error, "Failed to create checkout session. Please try again."),
         variant: "destructive"
       });
     } finally {
