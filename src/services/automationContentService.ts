@@ -35,8 +35,14 @@ export class AutomationContentService {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Network error' }));
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (parseError) {
+          console.warn('Failed to parse error response:', parseError);
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -89,14 +95,20 @@ export class AutomationContentService {
       });
 
       // We expect this to work or give a specific error about missing API key
-      const data = await response.json().catch(() => null);
-      
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.warn('Failed to parse validation response:', parseError);
+        return false;
+      }
+
       // If we get a proper response structure, the service is available
       if (data && (data.success || data.error)) {
         console.log('Content generation service is available');
         return true;
       }
-      
+
       return false;
     } catch (error) {
       console.error('Content generation service validation failed:', error);
@@ -125,8 +137,18 @@ export class AutomationContentService {
         })
       });
 
-      const data = await response.json().catch(() => null);
-      
+      let data = null;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.warn('Failed to parse status response:', parseError);
+        return {
+          available: false,
+          configured: false,
+          error: 'Service not responding or invalid response format'
+        };
+      }
+
       if (!data) {
         return {
           available: false,
