@@ -702,22 +702,43 @@ class LiveCampaignManager {
    * Update complete campaign data in database
    */
   private async updateCampaignInDatabase(campaign: LiveCampaign): Promise<void> {
+    // Ensure published_articles is a valid array before sending to database
+    const publishedArticles = Array.isArray(campaign.published_articles) ? campaign.published_articles : [];
+
+    const updateData = {
+      status: campaign.status,
+      links_built: campaign.links_built,
+      target_sites_used: campaign.target_sites_used || [],
+      current_platform: campaign.current_platform,
+      execution_progress: campaign.execution_progress || {},
+      published_articles: publishedArticles, // Ensure it's an array
+      started_at: campaign.started_at,
+      completed_at: campaign.completed_at
+    };
+
+    internalLogger.debug('campaign_update', 'Updating campaign in database', {
+      campaignId: campaign.id,
+      status: campaign.status,
+      publishedArticlesCount: publishedArticles.length,
+      updateData
+    });
+
     const { error } = await supabase
       .from('automation_campaigns')
-      .update({
-        status: campaign.status,
-        links_built: campaign.links_built,
-        target_sites_used: campaign.target_sites_used,
-        current_platform: campaign.current_platform,
-        execution_progress: campaign.execution_progress,
-        published_articles: campaign.published_articles,
-        started_at: campaign.started_at,
-        completed_at: campaign.completed_at
-      })
+      .update(updateData)
       .eq('id', campaign.id);
 
     if (error) {
-      console.error('Failed to update campaign in database:', error);
+      internalLogger.error('campaign_update', 'Failed to update campaign in database', {
+        campaignId: campaign.id,
+        error: {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        },
+        updateData
+      });
       throw error;
     }
   }
