@@ -34,18 +34,17 @@ export class AutomationContentService {
         })
       });
 
-      if (!response.ok) {
-        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorMessage;
-        } catch (parseError) {
-          console.warn('Failed to parse error response:', parseError);
-        }
-        throw new Error(errorMessage);
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        throw new Error(`Failed to parse response: ${parseError instanceof Error ? parseError.message : 'Invalid JSON'}`);
       }
 
-      const data = await response.json();
+      if (!response.ok) {
+        const errorMessage = data?.error || `HTTP ${response.status}: ${response.statusText}`;
+        throw new Error(errorMessage);
+      }
       
       if (!data.success) {
         throw new Error(data.error || 'Content generation failed');
