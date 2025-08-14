@@ -113,11 +113,25 @@ export class TelegraphService {
       });
 
       if (!response.ok) {
-        throw new Error(`Telegraph API error: ${response.status} ${response.statusText}`);
+        let errorMessage = `Telegraph API error: ${response.status} ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          if (errorData.error) {
+            errorMessage = `Telegraph API error: ${errorData.error}`;
+          }
+        } catch (parseError) {
+          console.warn('Failed to parse Telegraph error response:', parseError);
+        }
+        throw new Error(errorMessage);
       }
 
-      const data = await response.json();
-      
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        throw new Error('Telegraph API returned invalid JSON response');
+      }
+
       if (!data.ok) {
         throw new Error(`Telegraph API error: ${data.error || 'Unknown error'}`);
       }
