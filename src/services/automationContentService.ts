@@ -20,9 +20,17 @@ export class AutomationContentService {
 
     try {
       console.log(`Generating content for keyword: ${keyword}`);
-      
+
+      // Use mock content in development if OpenAI is not configured
+      const isDevelopment = import.meta.env.DEV;
+      const endpoint = isDevelopment ?
+        '/.netlify/functions/mock-automation-content' :
+        '/.netlify/functions/generate-automation-content';
+
+      console.log(`Using endpoint: ${endpoint} (development: ${isDevelopment})`);
+
       // Call Netlify function for secure content generation
-      const response = await fetch('/.netlify/functions/generate-automation-content', {
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
