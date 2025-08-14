@@ -323,19 +323,17 @@ class DirectAutomationExecutor {
           `Error: ${JSON.stringify(errorData)}`
         );
 
-        // Special handling for 404 - try to find alternative function
+        // Special handling for 404 - try backup functions
         if (response.status === 404) {
-          console.log('🔄 Primary function not found, searching for alternatives...');
+          console.log('🔄 Primary function not found, trying alternatives...');
 
-          try {
-            const { ContentGenerationDiagnostic } = await import('../utils/contentGenerationDiagnostic');
-            const workingFunction = await ContentGenerationDiagnostic.findWorkingContentFunction();
+          const backupFunctions = ['ai-content-generator', 'generate-content', 'generate-openai'];
 
-            if (workingFunction && workingFunction !== functionToUse) {
-              console.log(`🎯 Found alternative function: ${workingFunction}`);
+          for (const backupFunc of backupFunctions) {
+            try {
+              console.log(`🎯 Trying backup function: ${backupFunc}`);
 
-              // Retry with working function
-              const retryResponse = await fetch(`/.netlify/functions/${workingFunction}`, {
+              const backupResponse = await fetch(`/.netlify/functions/${backupFunc}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -344,63 +342,30 @@ class DirectAutomationExecutor {
                   target_url: params.target_url,
                   word_count: 800,
                   tone: 'professional',
-                  user_id: params.user_id,
-                  campaign_id: `direct-${Date.now()}`
+                  user_id: params.user_id
                 }),
               });
 
-              if (retryResponse.ok) {
-                const retryData = await retryResponse.json();
-                if (retryData.success) {
-                  console.log(`✅ Alternative function ${workingFunction} worked!`);
-                  // Continue with successful response
+              if (backupResponse.ok) {
+                const backupData = await backupResponse.json();
+                if (backupData.success) {
+                  console.log(`✅ Backup function ${backupFunc} worked!`);
                   return {
                     success: true,
-                    title: retryData.data?.title || retryData.title || `Article about ${params.keyword}`,
-                    content: retryData.data?.content || retryData.content || 'Content generated successfully.',
-                    word_count: retryData.data?.word_count || 800,
+                    title: backupData.data?.title || backupData.title || `Article about ${params.keyword}`,
+                    content: backupData.data?.content || backupData.content || 'Content generated successfully.',
+                    word_count: backupData.data?.word_count || 800,
                     generation_time_ms: Date.now() - startTime
                   };
                 }
               }
+            } catch (backupError) {
+              console.warn(`Backup function ${backupFunc} failed:`, backupError.message);
+              continue;
             }
-
-            // Emergency fallback - try our fixed content generator
-            console.log('🚨 Trying emergency fallback: content-generator-fixed');
-            try {
-              const emergencyResponse = await fetch('/.netlify/functions/content-generator-fixed', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  keyword: params.keyword,
-                  anchor_text: params.anchor_text,
-                  target_url: params.target_url,
-                  word_count: 800,
-                  tone: 'professional'
-                }),
-              });
-
-              if (emergencyResponse.ok) {
-                const emergencyData = await emergencyResponse.json();
-                if (emergencyData.success) {
-                  console.log('✅ Emergency fallback function worked!');
-                  return {
-                    success: true,
-                    title: emergencyData.data?.title || `Article about ${params.keyword}`,
-                    content: emergencyData.data?.content || 'Content generated successfully.',
-                    word_count: emergencyData.data?.word_count || 800,
-                    generation_time_ms: Date.now() - startTime
-                  };
-                }
-              }
-            } catch (emergencyError) {
-              console.warn('Emergency fallback also failed:', emergencyError);
-            }
-          } catch (diagnosticError) {
-            console.warn('Diagnostic fallback failed:', diagnosticError);
           }
 
-          throw new Error('Content generation function not available. Netlify functions may not be deployed.');
+          throw new Error('All content generation functions unavailable (404). Check Netlify deployment.');
         }
 
         throw new Error(`Content generation HTTP ${response.status}: ${errorData.error || response.statusText || 'Unknown error'}`);
