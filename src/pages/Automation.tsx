@@ -1581,9 +1581,23 @@ export default function Automation() {
                   )}
                 </Button>
 
-                <p className="text-sm text-gray-500">
-                  Test Netlify function availability and run workflow tests. The formatting test specifically checks for proper link generation and Telegraph compatibility. Check the browser console for detailed debugging information.
-                </p>
+                <div className="text-sm text-gray-500 space-y-2">
+                  <p>
+                    Test Netlify function availability and run workflow tests. The formatting test specifically checks for proper link generation and Telegraph compatibility. Check the browser console for detailed debugging information.
+                  </p>
+
+                  {typeof window !== 'undefined' && window.location.hostname === 'localhost' && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-blue-800">
+                      <div className="flex items-center gap-2 text-sm">
+                        <AlertCircle className="h-4 w-4" />
+                        <span className="font-medium">Development Mode Notice</span>
+                      </div>
+                      <p className="text-xs mt-1">
+                        404 errors for Netlify functions are normal in development. The system will automatically use client-side fallbacks. All functions work properly in production.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
