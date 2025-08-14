@@ -7,6 +7,8 @@
 import { supabase } from '@/integrations/supabase/client';
 import { productionContentTemplate } from './productionContentTemplate';
 import { directAutomationExecutor } from './directAutomationExecutor';
+import { internalLogger } from './internalLogger';
+import { errorResolver } from './errorResolver';
 
 export interface LiveCampaign {
   id: string;
