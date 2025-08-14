@@ -653,14 +653,10 @@ export default function AutomationLive() {
         </div>
 
         <Tabs defaultValue="create" className="max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-5 mb-8">
+          <TabsList className="grid w-full grid-cols-2 mb-8">
             <TabsTrigger value="create" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Create Campaign
-            </TabsTrigger>
-            <TabsTrigger value="manage" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Manage Campaigns
             </TabsTrigger>
             <TabsTrigger value="reporting" className="flex items-center gap-2">
               <BarChart3 className="h-4 w-4" />
@@ -670,14 +666,6 @@ export default function AutomationLive() {
                   {publishedLinks.length}
                 </Badge>
               )}
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Analytics
-            </TabsTrigger>
-            <TabsTrigger value="debug" className="flex items-center gap-2">
-              <AlertCircle className="h-4 w-4" />
-              Debug
             </TabsTrigger>
           </TabsList>
 
