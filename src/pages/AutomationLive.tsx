@@ -353,7 +353,16 @@ export default function AutomationLive() {
       let errorMessage = 'Unknown error';
       let isKnownIssue = false;
 
-      if (error instanceof Error) {
+      // Handle specific Response stream errors
+      if (error instanceof Error && error.message.includes('body stream already read')) {
+        errorMessage = 'Network request error. Please try again.';
+        isKnownIssue = true;
+        console.error('🔍 Response stream error detected:', {
+          message: error.message,
+          stack: error.stack,
+          errorType: 'body_stream_already_read'
+        });
+      } else if (error instanceof Error) {
         errorMessage = error.message;
       } else if (typeof error === 'string') {
         errorMessage = error;
