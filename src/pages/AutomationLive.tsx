@@ -701,10 +701,6 @@ export default function AutomationLive() {
                   ))}
                 </div>
 
-                {/* Footer Summary */}
-                <div className="mt-2 text-[10px] text-gray-500 text-center">
-                  {Object.keys(PLATFORM_CONFIGS).length} domains • {Object.values(PLATFORM_CONFIGS).filter(p => p.implementation.status === 'implemented').length} active • Growing to 100s
-                </div>
               </CardContent>
             </Card>
             </div>
