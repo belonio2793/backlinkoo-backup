@@ -36,10 +36,8 @@ import { liveCampaignManager, type LiveCampaign } from '@/services/liveCampaignM
 import { campaignReportingSystem, type PublishedLink, type CampaignReport } from '@/services/campaignReportingSystem';
 import { LoginModal } from '@/components/LoginModal';
 import { DatabaseInit } from '@/utils/databaseInit';
-import { CampaignDebugger } from '@/components/CampaignDebugger';
-import { ApiHealthChecker } from '@/components/ApiHealthChecker';
-import { CampaignSchemaCheck } from '@/components/debug/CampaignSchemaCheck';
-import { CampaignCreationTest } from '@/components/debug/CampaignCreationTest';
+import { InternalLogViewer } from '@/components/debug/InternalLogViewer';
+import { internalLogger } from '@/services/internalLogger';
 import guestPostingSites from '@/data/guestPostingSites.json';
 import { PLATFORM_CONFIGS, getImplementedPlatforms, getPlannedPlatforms, type PlatformConfig } from '@/services/platformConfigs';
 
