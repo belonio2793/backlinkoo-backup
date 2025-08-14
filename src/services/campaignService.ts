@@ -427,11 +427,16 @@ class CampaignService {
         };
       }
 
+      const errorMessage = error instanceof Error ? error.message :
+                           typeof error === 'string' ? error :
+                           (error as any)?.message || 'Unknown error';
+
       console.error('Failed to create campaign:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-        code: error.code
+        message: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+        name: error instanceof Error ? error.name : undefined,
+        code: (error as any)?.code,
+        originalError: error
       });
       throw error;
     }

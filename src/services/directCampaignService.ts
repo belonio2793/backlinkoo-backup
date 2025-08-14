@@ -82,13 +82,18 @@ class DirectCampaignService {
       console.log('✅ Campaign created directly in database:', data);
       return data;
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message :
+                           typeof error === 'string' ? error :
+                           (error as any)?.message || (error as any)?.error || 'Unknown error';
+
       console.error('Failed to create campaign directly:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: errorMessage,
         stack: error instanceof Error ? error.stack : undefined,
         name: error instanceof Error ? error.name : undefined,
-        code: error.code
+        code: (error as any)?.code,
+        originalError: error
       });
-      throw error;
+      throw new Error(`Campaign creation failed: ${errorMessage}`);
     }
   }
 
@@ -116,13 +121,18 @@ class DirectCampaignService {
       console.log('✅ Campaigns fetched directly from database:', data?.length || 0);
       return data || [];
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message :
+                           typeof error === 'string' ? error :
+                           (error as any)?.message || (error as any)?.error || 'Unknown error';
+
       console.error('Failed to fetch campaigns directly:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: errorMessage,
         stack: error instanceof Error ? error.stack : undefined,
         name: error instanceof Error ? error.name : undefined,
-        code: error.code
+        code: (error as any)?.code,
+        originalError: error
       });
-      throw error;
+      throw new Error(`Failed to fetch campaigns: ${errorMessage}`);
     }
   }
 
@@ -151,13 +161,18 @@ class DirectCampaignService {
 
       console.log('✅ Campaign status updated directly:', campaignId, status);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message :
+                           typeof error === 'string' ? error :
+                           (error as any)?.message || (error as any)?.error || 'Unknown error';
+
       console.error('Failed to update campaign status directly:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: errorMessage,
         stack: error instanceof Error ? error.stack : undefined,
         name: error instanceof Error ? error.name : undefined,
-        code: error.code
+        code: (error as any)?.code,
+        originalError: error
       });
-      throw error;
+      throw new Error(`Failed to update campaign status: ${errorMessage}`);
     }
   }
 
@@ -220,13 +235,18 @@ class DirectCampaignService {
 
       console.log('✅ Campaign deleted directly:', campaignId);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message :
+                           typeof error === 'string' ? error :
+                           (error as any)?.message || (error as any)?.error || 'Unknown error';
+
       console.error('Failed to delete campaign directly:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: errorMessage,
         stack: error instanceof Error ? error.stack : undefined,
         name: error instanceof Error ? error.name : undefined,
-        code: error.code
+        code: (error as any)?.code,
+        originalError: error
       });
-      throw error;
+      throw new Error(`Failed to delete campaign: ${errorMessage}`);
     }
   }
 }

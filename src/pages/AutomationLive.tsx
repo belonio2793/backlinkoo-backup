@@ -134,11 +134,20 @@ export default function AutomationLive() {
       
       automationLogger.info('system', `Loaded user data: ${userCampaigns.length} campaigns, ${userLinks.length} links`);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message :
-                          typeof error === 'string' ? error :
-                          (error as any)?.message ||
-                          (error as any)?.error ||
-                          'Unknown error occurred';
+      let errorMessage = 'Unknown error occurred';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        // Handle object errors by extracting meaningful information
+        const errorObj = error as any;
+        errorMessage = errorObj.message || errorObj.error || errorObj.details ||
+                      (errorObj.toString && errorObj.toString !== '[object Object]' ? errorObj.toString() : '') ||
+                      'An error occurred with no additional details';
+      }
+
       automationLogger.error('system', 'Failed to load user data', { errorMessage, originalError: error }, undefined, error as Error);
       toast.error(`Failed to load user data: ${errorMessage}`);
     } finally {
@@ -238,11 +247,20 @@ export default function AutomationLive() {
         throw new Error(result.error || 'Failed to create campaign');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message :
-                          typeof error === 'string' ? error :
-                          (error as any)?.message ||
-                          (error as any)?.error ||
-                          'Unknown error';
+      let errorMessage = 'Unknown error';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        // Handle object errors by extracting meaningful information
+        const errorObj = error as any;
+        errorMessage = errorObj.message || errorObj.error || errorObj.details ||
+                      (errorObj.toString && errorObj.toString !== '[object Object]' ? errorObj.toString() : '') ||
+                      'Campaign creation failed with no additional details';
+      }
+
       automationLogger.error('campaign', 'Failed to create campaign', { errorMessage, originalError: error }, undefined, error as Error);
       toast.error(`Failed to create campaign: ${errorMessage}`);
     } finally {
@@ -264,7 +282,18 @@ export default function AutomationLive() {
         throw new Error(result.error || 'Failed to start campaign');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      let errorMessage = 'Unknown error';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        const errorObj = error as any;
+        errorMessage = errorObj.message || errorObj.error || errorObj.details ||
+                      'Failed to start campaign with no additional details';
+      }
+
       toast.error(`Failed to start campaign: ${errorMessage}`);
     } finally {
       setProcessing(prev => ({ ...prev, [campaignId]: false }));
@@ -285,7 +314,18 @@ export default function AutomationLive() {
         throw new Error(result.error || 'Failed to pause campaign');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      let errorMessage = 'Unknown error';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        const errorObj = error as any;
+        errorMessage = errorObj.message || errorObj.error || errorObj.details ||
+                      'Failed to pause campaign with no additional details';
+      }
+
       toast.error(`Failed to pause campaign: ${errorMessage}`);
     } finally {
       setProcessing(prev => ({ ...prev, [campaignId]: false }));
@@ -307,7 +347,18 @@ export default function AutomationLive() {
         throw new Error(result.error || 'Failed to delete campaign');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      let errorMessage = 'Unknown error';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        const errorObj = error as any;
+        errorMessage = errorObj.message || errorObj.error || errorObj.details ||
+                      'Failed to delete campaign with no additional details';
+      }
+
       toast.error(`Failed to delete campaign: ${errorMessage}`);
     }
   };
@@ -324,7 +375,18 @@ export default function AutomationLive() {
         throw new Error(result.error || 'Failed to generate report');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      let errorMessage = 'Unknown error';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        const errorObj = error as any;
+        errorMessage = errorObj.message || errorObj.error || errorObj.details ||
+                      'Failed to generate report with no additional details';
+      }
+
       toast.error(`Failed to generate report: ${errorMessage}`);
     }
   };

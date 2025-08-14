@@ -172,20 +172,52 @@ class LiveCampaignManager {
       // Get available platforms for this campaign
       const availablePlatforms = this.getAvailablePlatforms();
       
-      const campaignData = {
+      // Base campaign data that should exist in all schema versions
+      let campaignData: any = {
         name: params.name,
         keywords: params.keywords,
         anchor_texts: params.anchor_texts,
         target_url: params.target_url,
         user_id: params.user_id,
         status: params.auto_start ? 'active' : 'draft',
-        links_built: 0,
-        available_sites: availablePlatforms.length,
-        target_sites_used: [],
         auto_start: params.auto_start || false,
-        published_articles: [],
-        started_at: params.auto_start ? new Date().toISOString() : undefined
       };
+
+      // Add optional columns if they exist in the schema
+      try {
+        // Test if the new columns exist by trying a select
+        const { error: testError } = await supabase
+          .from('automation_campaigns')
+          .select('links_built, available_sites, target_sites_used, published_articles, started_at')
+          .limit(1);
+
+        if (!testError) {
+          // New schema with all columns
+          campaignData = {
+            ...campaignData,
+            links_built: 0,
+            available_sites: availablePlatforms.length,
+            target_sites_used: [],
+            published_articles: [],
+            started_at: params.auto_start ? new Date().toISOString() : null
+          };
+        } else {
+          // Old schema - add started_at if it exists
+          if (params.auto_start) {
+            campaignData.started_at = new Date().toISOString();
+          }
+        }
+      } catch (e) {
+        console.log('Using basic schema columns for campaign creation');
+        // Fallback for very old schema
+        if (params.auto_start) {
+          try {
+            campaignData.started_at = new Date().toISOString();
+          } catch {
+            // started_at might not exist either
+          }
+        }
+      }
 
       const { data, error } = await supabase
         .from('automation_campaigns')
@@ -197,8 +229,13 @@ class LiveCampaignManager {
 
       const campaign: LiveCampaign = {
         ...data,
-        published_articles: [],
-        execution_progress: undefined
+        // Provide defaults for potentially missing columns
+        links_built: data.links_built ?? 0,
+        available_sites: data.available_sites ?? availablePlatforms.length,
+        target_sites_used: data.target_sites_used ?? [],
+        published_articles: data.published_articles ?? [],
+        current_platform: data.current_platform ?? undefined,
+        execution_progress: data.execution_progress ?? undefined
       };
 
       this.activeCampaigns.set(campaign.id, campaign);
@@ -210,10 +247,23 @@ class LiveCampaignManager {
 
       return { success: true, campaign };
     } catch (error) {
-      console.error('Failed to create campaign:', error);
+      let errorMessage = 'Unknown error';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        const errorObj = error as any;
+        errorMessage = errorObj.message || errorObj.error || errorObj.details ||
+                      'Campaign creation failed with no additional details';
+      }
+
+      console.error('Failed to create campaign:', { originalError: error, errorMessage });
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: errorMessage
       };
     }
   }
