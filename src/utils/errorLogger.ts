@@ -2,6 +2,8 @@
  * Utility for consistent error logging across the application
  */
 
+import { getErrorMessage, getErrorDetails, logError as logFormattedError } from './errorFormatter';
+
 export interface ErrorLogOptions {
   context?: string;
   userId?: string;
@@ -13,33 +15,31 @@ export class ErrorLogger {
    * Log an error with proper serialization
    */
   static logError(message: string, error: unknown, options: ErrorLogOptions = {}): void {
+    const errorDetails = getErrorDetails(error, options.context);
+
     const errorInfo = {
       message,
-      error: error instanceof Error ? error.message : String(error),
+      error: errorDetails.message,
       stack: error instanceof Error ? error.stack : undefined,
       context: options.context,
       userId: options.userId,
-      timestamp: new Date().toISOString(),
+      timestamp: errorDetails.timestamp,
       additionalData: options.additionalData,
+      type: errorDetails.type,
       details: error
     };
 
     console.error(message, errorInfo);
+
+    // Also use the formatted logger for consistent logging
+    logFormattedError(message, error, options.context);
   }
 
   /**
    * Get a user-friendly error message from an error object
    */
   static getUserFriendlyMessage(error: unknown, fallbackMessage = 'An unexpected error occurred'): string {
-    if (error instanceof Error) {
-      return error.message;
-    }
-    
-    if (typeof error === 'string') {
-      return error;
-    }
-    
-    return fallbackMessage;
+    return getErrorMessage(error, fallbackMessage);
   }
 
   /**
