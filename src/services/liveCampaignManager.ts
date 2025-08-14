@@ -7,6 +7,8 @@
 import { supabase } from '@/integrations/supabase/client';
 import { productionContentTemplate } from './productionContentTemplate';
 import { directAutomationExecutor } from './directAutomationExecutor';
+import { internalLogger } from './internalLogger';
+import { errorResolver } from './errorResolver';
 
 export interface LiveCampaign {
   id: string;
@@ -168,10 +170,14 @@ class LiveCampaignManager {
     user_id: string;
     auto_start?: boolean;
   }): Promise<{ success: boolean; campaign?: LiveCampaign; error?: string }> {
+
+    internalLogger.info('campaign_creation', 'Starting campaign creation process', { params });
+
     try {
       // Get available platforms for this campaign
       const availablePlatforms = this.getAvailablePlatforms();
-      
+      internalLogger.debug('campaign_creation', 'Available platforms retrieved', { count: availablePlatforms.length });
+
       // Base campaign data that should exist in all schema versions
       let campaignData: any = {
         name: params.name,
@@ -183,8 +189,12 @@ class LiveCampaignManager {
         auto_start: params.auto_start || false,
       };
 
+      internalLogger.debug('campaign_creation', 'Base campaign data prepared', { campaignData });
+
       // Add optional columns if they exist in the schema
       try {
+        internalLogger.debug('campaign_creation', 'Testing schema columns existence');
+
         // Test if the new columns exist by trying a select
         const { error: testError } = await supabase
           .from('automation_campaigns')
@@ -192,32 +202,57 @@ class LiveCampaignManager {
           .limit(1);
 
         if (!testError) {
-          // New schema with all columns
+          internalLogger.info('campaign_creation', 'New schema detected, adding extended fields');
+
+          // New schema with all columns - ensure proper data types
           campaignData = {
             ...campaignData,
             links_built: 0,
             available_sites: availablePlatforms.length,
-            target_sites_used: [],
-            published_articles: [],
+            target_sites_used: [], // PostgreSQL will handle TEXT[] conversion
+            published_articles: [], // PostgreSQL will handle JSONB conversion
             started_at: params.auto_start ? new Date().toISOString() : null
           };
+
+          internalLogger.debug('campaign_creation', 'Extended campaign data prepared', { campaignData });
         } else {
-          // Old schema - add started_at if it exists
-          if (params.auto_start) {
-            campaignData.started_at = new Date().toISOString();
+          internalLogger.warn('campaign_creation', 'Schema test failed, using basic schema', { testError });
+
+          // Try to resolve schema issues automatically
+          internalLogger.info('campaign_creation', 'Attempting automatic schema resolution');
+          const resolved = await errorResolver.resolveSpecificError('column does not exist');
+
+          if (resolved) {
+            internalLogger.info('campaign_creation', 'Schema resolution successful, retrying with extended fields');
+            campaignData = {
+              ...campaignData,
+              links_built: 0,
+              available_sites: availablePlatforms.length,
+              target_sites_used: [],
+              published_articles: [],
+              started_at: params.auto_start ? new Date().toISOString() : null
+            };
+          } else {
+            // Old schema - add started_at if it exists
+            if (params.auto_start) {
+              campaignData.started_at = new Date().toISOString();
+            }
           }
         }
       } catch (e) {
-        console.log('Using basic schema columns for campaign creation');
+        internalLogger.error('campaign_creation', 'Schema preparation exception', { error: e });
+
         // Fallback for very old schema
         if (params.auto_start) {
           try {
             campaignData.started_at = new Date().toISOString();
           } catch {
-            // started_at might not exist either
+            internalLogger.warn('campaign_creation', 'Could not add started_at field');
           }
         }
       }
+
+      internalLogger.info('campaign_creation', 'Attempting database insert', { finalCampaignData: campaignData });
 
       const { data, error } = await supabase
         .from('automation_campaigns')
@@ -225,7 +260,55 @@ class LiveCampaignManager {
         .select()
         .single();
 
-      if (error) throw error;
+      internalLogger.debug('campaign_creation', 'Database insert completed', {
+        success: !error,
+        hasData: !!data,
+        errorInfo: error ? {
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+          code: error.code
+        } : null
+      });
+
+      if (error) {
+        internalLogger.error('campaign_creation', 'Database insert failed', {
+          error: {
+            message: error.message,
+            details: error.details,
+            hint: error.hint,
+            code: error.code,
+            fullError: error
+          },
+          attemptedData: campaignData
+        });
+
+        // Attempt automatic error resolution
+        internalLogger.info('campaign_creation', 'Attempting automatic error resolution');
+        const resolved = await errorResolver.resolveSpecificError(error.message);
+
+        if (resolved) {
+          internalLogger.info('campaign_creation', 'Error resolved, retrying insert');
+
+          // Retry the insert
+          const { data: retryData, error: retryError } = await supabase
+            .from('automation_campaigns')
+            .insert(campaignData)
+            .select()
+            .single();
+
+          if (!retryError && retryData) {
+            internalLogger.info('campaign_creation', 'Retry successful after error resolution');
+            data = retryData;
+            error = null;
+          } else {
+            internalLogger.error('campaign_creation', 'Retry failed after error resolution', { retryError });
+            throw retryError || error;
+          }
+        } else {
+          throw error;
+        }
+      }
 
       const campaign: LiveCampaign = {
         ...data,
@@ -238,12 +321,23 @@ class LiveCampaignManager {
         execution_progress: data.execution_progress ?? undefined
       };
 
+      internalLogger.info('campaign_creation', 'Campaign object created successfully', {
+        campaignId: campaign.id,
+        campaignName: campaign.name
+      });
+
       this.activeCampaigns.set(campaign.id, campaign);
 
       // Auto-start if requested
       if (params.auto_start) {
+        internalLogger.info('campaign_creation', 'Auto-starting campaign', { campaignId: campaign.id });
         await this.startCampaign(campaign.id);
       }
+
+      internalLogger.info('campaign_creation', 'Campaign creation completed successfully', {
+        campaignId: campaign.id,
+        autoStarted: params.auto_start
+      });
 
       return { success: true, campaign };
     } catch (error) {
@@ -259,7 +353,12 @@ class LiveCampaignManager {
                       'Campaign creation failed with no additional details';
       }
 
-      console.error('Failed to create campaign:', { originalError: error, errorMessage });
+      internalLogger.critical('campaign_creation', 'Campaign creation failed completely', {
+        originalError: error,
+        errorMessage,
+        params,
+        stackTrace: error instanceof Error ? error.stack : undefined
+      });
 
       return {
         success: false,

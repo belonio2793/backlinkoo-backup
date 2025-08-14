@@ -36,8 +36,8 @@ import { liveCampaignManager, type LiveCampaign } from '@/services/liveCampaignM
 import { campaignReportingSystem, type PublishedLink, type CampaignReport } from '@/services/campaignReportingSystem';
 import { LoginModal } from '@/components/LoginModal';
 import { DatabaseInit } from '@/utils/databaseInit';
-import { CampaignDebugger } from '@/components/CampaignDebugger';
-import { ApiHealthChecker } from '@/components/ApiHealthChecker';
+import { InternalLogViewer } from '@/components/debug/InternalLogViewer';
+import { internalLogger } from '@/services/internalLogger';
 import guestPostingSites from '@/data/guestPostingSites.json';
 import { PLATFORM_CONFIGS, getImplementedPlatforms, getPlannedPlatforms, type PlatformConfig } from '@/services/platformConfigs';
 
@@ -229,21 +229,44 @@ export default function AutomationLive() {
       const anchorTextsArray = formData.anchor_texts.split(',').map(a => a.trim()).filter(a => a);
       const generatedName = generateCampaignName(formData.keywords, formData.target_url);
 
-      const result = await liveCampaignManager.createCampaign({
+      const campaignParams = {
         name: generatedName,
         keywords: keywordsArray,
         anchor_texts: anchorTextsArray,
         target_url: formData.target_url,
         user_id: user.id,
         auto_start: false
+      };
+
+      internalLogger.info('ui_campaign_creation', 'User initiated campaign creation', {
+        campaignParams,
+        formData,
+        userInfo: { id: user.id, email: user.email }
+      });
+
+      const result = await liveCampaignManager.createCampaign(campaignParams);
+
+      internalLogger.info('ui_campaign_creation', 'Campaign creation result received', {
+        success: result.success,
+        hasCampaign: !!result.campaign,
+        error: result.error
       });
 
       if (result.success && result.campaign) {
+        internalLogger.info('ui_campaign_creation', 'Campaign created successfully', {
+          campaignId: result.campaign.id,
+          campaignName: result.campaign.name
+        });
+
         setCampaigns(prev => [result.campaign!, ...prev]);
         setFormData({ keywords: '', anchor_texts: '', target_url: '' });
         toast.success(`Campaign '${result.campaign.name}' created successfully!`);
         await refreshData();
       } else {
+        internalLogger.error('ui_campaign_creation', 'Campaign creation failed', {
+          result,
+          formData: campaignParams
+        });
         throw new Error(result.error || 'Failed to create campaign');
       }
     } catch (error) {
@@ -982,8 +1005,7 @@ export default function AutomationLive() {
 
           {/* Debug Tab */}
           <TabsContent value="debug" className="space-y-6">
-            <ApiHealthChecker />
-            <CampaignDebugger />
+            <InternalLogViewer />
           </TabsContent>
 
           {/* Analytics Tab */}
