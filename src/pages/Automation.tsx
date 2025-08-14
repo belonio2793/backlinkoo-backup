@@ -811,6 +811,11 @@ export default function Automation() {
                   <div className="flex items-center gap-2 mb-2">
                     <BarChart3 className="h-5 w-5 text-blue-600" />
                     <span className="font-medium text-blue-800">Target Sites Available</span>
+                    {platformStatus && (
+                      <Badge variant="outline" className="ml-auto bg-green-50 text-green-700 border-green-200">
+                        {platformStatus.workingPlatforms.length} Verified APIs
+                      </Badge>
+                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
@@ -818,7 +823,10 @@ export default function Automation() {
                         <span className="font-semibold">{availableSites}</span> active publishing sites
                       </p>
                       <p className="text-blue-600">
-                        High-quality domains ready for articles
+                        {platformStatus ?
+                          `${platformStatus.workingPlatforms.join(', ')} - APIs verified working` :
+                          'High-quality domains ready for articles'
+                        }
                       </p>
                     </div>
                     {sitesStats && (
@@ -827,11 +835,16 @@ export default function Automation() {
                           <span className="font-semibold">{sitesStats.average_success_rate}%</span> average success rate
                         </p>
                         <p className="text-blue-600">
-                          Rotating through top-performing sites
+                          Only platforms with working APIs included
                         </p>
                       </div>
                     )}
                   </div>
+                  {platformStatus && platformStatus.workingPlatforms.length === 0 && (
+                    <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-red-700 text-xs">
+                      ⚠️ No working platforms found. System automatically filters out non-functional APIs.
+                    </div>
+                  )}
                 </div>
 
                 <Button
