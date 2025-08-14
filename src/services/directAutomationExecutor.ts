@@ -103,8 +103,16 @@ class DirectAutomationExecutor {
         target_url: input.target_url
       });
 
-      // Step 2: Generate content (using mock service in dev environment or as fallback)
-      let useMockServices = this.isDevEnvironment() && mockAutomationService.shouldUseMockServices();
+      // Step 2: Generate content (force live services in production)
+      let useMockServices = false; // Always try live services first
+
+      // Only use mock services if explicitly in localhost development
+      const isLocalDev = typeof window !== 'undefined' &&
+                        (window.location.hostname === 'localhost' && window.location.port !== '');
+
+      if (isLocalDev && this.isDevEnvironment()) {
+        useMockServices = mockAutomationService.shouldUseMockServices();
+      }
 
       if (useMockServices) {
         console.log('🎭 Generating content via mock service (development mode)...');
