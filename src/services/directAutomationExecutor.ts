@@ -199,6 +199,11 @@ class DirectAutomationExecutor {
           `Error: ${JSON.stringify(errorData)}`
         );
 
+        // Special handling for 404 - function doesn't exist
+        if (response.status === 404) {
+          throw new Error('Content generation function not available. Netlify functions may not be deployed.');
+        }
+
         throw new Error(`Content generation HTTP ${response.status}: ${errorData.error || response.statusText || 'Unknown error'}`);
       }
 
