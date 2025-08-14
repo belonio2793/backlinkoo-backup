@@ -1,77 +1,85 @@
-const fetch = require('node-fetch');
-
-exports.handler = async (event, context) => {
+export const handler = async (event, context) => {
+  // Set CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Headers': 'Content-Type',
     'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   };
 
+  // Handle preflight requests
   if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers };
+    return {
+      statusCode: 200,
+      headers,
+      body: '',
+    };
   }
 
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
       headers,
-      body: JSON.stringify({ error: 'Method not allowed' })
+      body: JSON.stringify({ success: false, error: 'Method not allowed' }),
     };
   }
 
   try {
-    const { title, content, author_name = 'Anonymous', return_content = false } = JSON.parse(event.body || '{}');
-    
+    const { title, content, author_name = 'Content Automation', author_url = '', user_id, keyword } = JSON.parse(event.body);
+
+    console.log('📡 Telegraph Publishing Request:', {
+      title: title?.substring(0, 50) + '...',
+      contentLength: content?.length,
+      author_name,
+      user_id,
+      keyword
+    });
+
     if (!title || !content) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: 'Title and content are required' })
+        body: JSON.stringify({
+          success: false,
+          error: 'Missing required fields: title, content'
+        }),
       };
     }
 
-    console.log('📝 Publishing to Telegraph:', { title, author_name });
+    // Convert markdown content to Telegraph format
+    const telegraphContent = convertMarkdownToTelegraph(content);
 
-    // First, create an account (or use existing token)
-    let accessToken;
+    // Create Telegraph account if needed (using a simple approach)
+    let accessToken = process.env.TELEGRAPH_ACCESS_TOKEN;
     
-    try {
+    if (!accessToken) {
+      console.log('🔑 Creating Telegraph account...');
+      
       const accountResponse = await fetch('https://api.telegra.ph/createAccount', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          short_name: author_name.substring(0, 32),
-          author_name: author_name,
-          author_url: ''
+          short_name: 'AutomationBot',
+          author_name: author_name || 'Content Automation',
+          author_url: author_url || ''
         })
       });
 
       const accountData = await accountResponse.json();
       
-      if (accountData.ok) {
-        accessToken = accountData.result.access_token;
-      } else {
-        throw new Error('Failed to create Telegraph account');
+      if (!accountData.ok) {
+        throw new Error(`Failed to create Telegraph account: ${accountData.error}`);
       }
-    } catch (accountError) {
-      console.error('Telegraph account creation error:', accountError);
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({ 
-          error: 'Failed to create Telegraph account',
-          success: false 
-        })
-      };
+      
+      accessToken = accountData.result.access_token;
+      console.log('✅ Telegraph account created');
     }
 
-    // Convert content to Telegraph format
-    const telegraphContent = convertToTelegraphFormat(content);
-
-    // Create the page
+    // Create the page on Telegraph
+    console.log('📄 Creating Telegraph page...');
+    
     const pageResponse = await fetch('https://api.telegra.ph/createPage', {
       method: 'POST',
       headers: {
@@ -79,196 +87,115 @@ exports.handler = async (event, context) => {
       },
       body: JSON.stringify({
         access_token: accessToken,
-        title: title.substring(0, 256), // Telegraph title limit
+        title: title,
+        author_name: author_name || 'Content Automation',
+        author_url: author_url || '',
         content: telegraphContent,
-        author_name: author_name,
-        return_content: return_content
+        return_content: false
       })
     });
 
     const pageData = await pageResponse.json();
 
-    if (pageData.ok) {
-      const pageUrl = `https://telegra.ph/${pageData.result.path}`;
-
-      console.log('✅ Telegraph page created:', pageUrl);
-
-      // Verify the page is actually accessible (common 404 fix)
-      try {
-        console.log('🔍 Verifying page accessibility...');
-        const verifyResponse = await fetch(pageUrl, {
-          method: 'HEAD',
-          timeout: 10000
-        });
-
-        if (verifyResponse.status === 404) {
-          console.error('⚠️ Telegraph page returns 404 immediately after creation');
-          console.error('This usually indicates content policy violation or rate limiting');
-
-          return {
-            statusCode: 200,
-            headers,
-            body: JSON.stringify({
-              success: true,
-              url: pageUrl,
-              path: pageData.result.path,
-              title: pageData.result.title,
-              views: pageData.result.views || 0,
-              warning: 'Page created but may not be immediately accessible (404). This is common with Telegraph and usually resolves within minutes.'
-            })
-          };
-        }
-
-        console.log('✅ Page verified accessible');
-      } catch (verifyError) {
-        console.warn('⚠️ Could not verify page accessibility:', verifyError.message);
-        // Continue anyway - verification failure doesn't mean the page is broken
-      }
-
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          success: true,
-          url: pageUrl,
-          path: pageData.result.path,
-          title: pageData.result.title,
-          views: pageData.result.views || 0
-        })
-      };
-    } else {
-      console.error('Telegraph page creation error:', pageData);
-
-      // Provide more specific error messages
-      let errorMessage = pageData.error || 'Failed to create Telegraph page';
-      if (pageData.error === 'CONTENT_TOO_BIG') {
-        errorMessage = 'Content is too large for Telegraph (max ~64KB)';
-      } else if (pageData.error === 'INVALID_HTML') {
-        errorMessage = 'Content contains invalid HTML format';
-      }
-
-      return {
-        statusCode: 500,
-        headers,
-        body: JSON.stringify({
-          error: errorMessage,
-          success: false,
-          telegraph_error: pageData.error
-        })
-      };
+    if (!pageData.ok) {
+      throw new Error(`Failed to create Telegraph page: ${pageData.error || 'Unknown error'}`);
     }
 
+    const pageUrl = pageData.result.url;
+    
+    console.log('✅ Telegraph page created successfully:', pageUrl);
+
+    // Store the published article in database for reporting
+    if (user_id) {
+      await storePublishedArticle({
+        title,
+        url: pageUrl,
+        platform: 'Telegraph',
+        user_id,
+        keyword,
+        content_preview: content.substring(0, 200)
+      });
+    }
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        success: true,
+        url: pageUrl,
+        title: title,
+        platform: 'Telegraph',
+        published_at: new Date().toISOString()
+      }),
+    };
+
   } catch (error) {
-    console.error('Telegraph publisher error:', error);
+    console.error('❌ Telegraph Publishing Error:', error);
+    
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ 
-        error: error.message,
-        success: false 
-      })
+      body: JSON.stringify({
+        success: false,
+        error: error.message || 'Failed to publish to Telegraph',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      }),
     };
   }
 };
 
-function convertToTelegraphFormat(content) {
-  // Telegraph expects an array of Node objects
-  // For simplicity, we'll convert text content to paragraphs
-  
-  if (typeof content !== 'string') {
-    content = String(content);
-  }
-
-  // Split content into paragraphs
-  const paragraphs = content.split('\n\n').filter(p => p.trim());
-  
+// Convert markdown content to Telegraph DOM format
+function convertMarkdownToTelegraph(markdown) {
+  const lines = markdown.split('\n');
   const telegraphNodes = [];
   
-  paragraphs.forEach(paragraph => {
-    const trimmedParagraph = paragraph.trim();
+  for (const line of lines) {
+    const trimmed = line.trim();
     
-    if (!trimmedParagraph) return;
+    if (!trimmed) {
+      continue; // Skip empty lines
+    }
     
-    // Check if it's a heading (starts with #)
-    if (trimmedParagraph.startsWith('#')) {
-      const headingLevel = (trimmedParagraph.match(/^#+/) || [''])[0].length;
-      const headingText = trimmedParagraph.replace(/^#+\s*/, '');
-      
+    // Handle headings
+    if (trimmed.startsWith('# ')) {
       telegraphNodes.push({
-        tag: headingLevel <= 3 ? `h${Math.min(headingLevel, 3)}` : 'h3',
-        children: [headingText]
+        tag: 'h3',
+        children: [trimmed.substring(2)]
+      });
+    } else if (trimmed.startsWith('## ')) {
+      telegraphNodes.push({
+        tag: 'h4',
+        children: [trimmed.substring(3)]
       });
     }
-    // Check if it's a list item
-    else if (trimmedParagraph.startsWith('- ') || trimmedParagraph.startsWith('* ')) {
-      const listText = trimmedParagraph.replace(/^[-*]\s*/, '');
-      telegraphNodes.push({
-        tag: 'ul',
-        children: [
-          {
-            tag: 'li',
-            children: [listText]
-          }
-        ]
-      });
-    }
-    // Check if it's a numbered list
-    else if (/^\d+\.\s/.test(trimmedParagraph)) {
-      const listText = trimmedParagraph.replace(/^\d+\.\s*/, '');
-      telegraphNodes.push({
-        tag: 'ol',
-        children: [
-          {
-            tag: 'li',
-            children: [listText]
-          }
-        ]
-      });
-    }
-    // Regular paragraph
+    // Handle paragraphs with links
     else {
-      // Handle links in the paragraph
-      const processedParagraph = processLinksInText(trimmedParagraph);
+      const processedText = processLinksInText(trimmed);
       telegraphNodes.push({
         tag: 'p',
-        children: processedParagraph
+        children: processedText
       });
     }
-  });
-
-  // If no content was processed, add a default paragraph
-  if (telegraphNodes.length === 0) {
-    telegraphNodes.push({
-      tag: 'p',
-      children: [content.substring(0, 1000)] // Limit content length
-    });
   }
-
+  
   return telegraphNodes;
 }
 
+// Process markdown links and convert them to Telegraph format
 function processLinksInText(text) {
-  if (!text || typeof text !== 'string') {
-    return [text || ''];
-  }
-
-  // Simple link detection and conversion
   const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
-  const parts = [];
+  const result = [];
   let lastIndex = 0;
   let match;
-
+  
   while ((match = linkRegex.exec(text)) !== null) {
     // Add text before the link
     if (match.index > lastIndex) {
-      const beforeText = text.substring(lastIndex, match.index);
-      if (beforeText.trim()) {
-        parts.push(beforeText);
-      }
+      result.push(text.substring(lastIndex, match.index));
     }
-
+    
     // Add the link
-    parts.push({
+    result.push({
       tag: 'a',
       attrs: {
         href: match[2],
@@ -276,18 +203,33 @@ function processLinksInText(text) {
       },
       children: [match[1]]
     });
-
+    
     lastIndex = match.index + match[0].length;
   }
-
+  
   // Add remaining text
   if (lastIndex < text.length) {
-    const remainingText = text.substring(lastIndex);
-    if (remainingText.trim()) {
-      parts.push(remainingText);
-    }
+    result.push(text.substring(lastIndex));
   }
+  
+  return result.length > 0 ? result : [text];
+}
 
-  // If no links were found, return the original text as array
-  return parts.length === 0 ? [text] : parts;
+// Store published article in database for reporting
+async function storePublishedArticle(articleData) {
+  try {
+    // This would integrate with your Supabase database
+    // For now, we'll just log it
+    console.log('📊 Article data for database:', articleData);
+    
+    // In a real implementation, you would:
+    // 1. Initialize Supabase client
+    // 2. Insert into article_submissions table
+    // 3. Update campaign statistics
+    
+    return true;
+  } catch (error) {
+    console.error('Failed to store article data:', error);
+    return false;
+  }
 }
