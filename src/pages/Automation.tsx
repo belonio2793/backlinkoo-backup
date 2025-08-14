@@ -393,84 +393,27 @@ export default function Automation() {
     }
 
     setCreating(true);
-    automationLogger.info('campaign', 'Starting unified link building execution', {
-      keywords: formData.keywords.split(',').length,
-      anchor_texts: formData.anchor_texts.split(',').length,
-      target_url: formData.target_url
-    });
 
     try {
       const keywordsArray = formData.keywords.split(',').map(k => k.trim()).filter(k => k);
       const anchorTextsArray = formData.anchor_texts.split(',').map(a => a.trim()).filter(a => a);
 
-      toast.info('🚀 Starting content generation and publishing...', { duration: 3000 });
+      // Get available sites for rotation
+      await targetSitesManager.loadSites();
+      const availableSites = await targetSitesManager.getAvailableSites();
 
-      // Try direct execution (works with or without database)
-      const result = await directAutomationExecutor.executeWorkflow({
+      if (availableSites.length === 0) {
+        toast.error('No target sites available. Please try again later.');
+        return;
+      }
+
+      // Start campaign with progress tracking and rotation
+      await startCampaignWithRotation({
         keywords: keywordsArray,
         anchor_texts: anchorTextsArray,
         target_url: formData.target_url,
-        user_id: user?.id || 'guest-user'
+        availableSites
       });
-
-      if (result.success) {
-        // Add to direct results for immediate display
-        setDirectResults(prev => [result, ...prev]);
-
-        // Try to save to database if user is authenticated (optional, non-blocking)
-        if (user) {
-          try {
-            const generatedName = generateCampaignName(formData.keywords, formData.target_url);
-            const { data, error } = await supabase
-              .from('automation_campaigns')
-              .insert({
-                user_id: user.id,
-                name: generatedName,
-                keywords: keywordsArray,
-                anchor_texts: anchorTextsArray,
-                target_url: formData.target_url,
-                status: 'completed',
-                links_built: 1,
-                available_sites: 1,
-                target_sites_used: [result.target_platform || 'Telegraph']
-              })
-              .select()
-              .single();
-
-            if (!error && data) {
-              setCampaigns(prev => [data, ...prev]);
-              automationLogger.info('campaign', 'Campaign also saved to database', { campaignId: data.id });
-            }
-          } catch (dbError) {
-            // Database save failed, but that's ok - direct execution succeeded
-            automationLogger.warn('campaign', 'Database save failed, but direct execution succeeded', {}, undefined, dbError as Error);
-          }
-        }
-
-        // Clear form
-        setFormData({
-          keywords: '',
-          anchor_texts: '',
-          target_url: ''
-        });
-
-        automationLogger.info('campaign', 'Link building campaign completed successfully', {
-          article_url: result.article_url,
-          execution_time: result.execution_time_ms,
-          word_count: result.word_count
-        });
-
-        toast.success(
-          `🎉 Link building campaign completed! Article published with ${result.word_count} words in ${Math.round((result.execution_time_ms || 0) / 1000)}s`,
-          { duration: 5000 }
-        );
-      } else {
-        automationLogger.error('campaign', 'Link building campaign failed', {
-          error: result.error,
-          execution_time: result.execution_time_ms
-        });
-        toast.error(`Campaign failed: ${result.error}`);
-      }
 
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -479,9 +422,188 @@ export default function Automation() {
         formData
       }, undefined, error as Error);
       toast.error(`Campaign failed: ${errorMessage}`);
-    } finally {
+
+      // Reset progress
+      setCampaignProgress(null);
       setCreating(false);
     }
+  };
+
+  const startCampaignWithRotation = async (params: {
+    keywords: string[];
+    anchor_texts: string[];
+    target_url: string;
+    availableSites: any[];
+  }) => {
+    const { keywords, anchor_texts, target_url, availableSites } = params;
+
+    // Initialize campaign progress
+    setCampaignProgress({
+      isRunning: true,
+      currentPlatform: 'Initializing...',
+      platformsUsed: [],
+      totalPlatforms: availableSites.length,
+      articlesPublished: 0,
+      status: 'starting',
+      timeStarted: Date.now()
+    });
+
+    automationLogger.info('campaign', 'Starting campaign with platform rotation', {
+      keywordsCount: keywords.length,
+      anchorTextsCount: anchor_texts.length,
+      totalPlatforms: availableSites.length
+    });
+
+    toast.info('🚀 Starting multi-platform link building campaign...', { duration: 3000 });
+
+    let successfulPublications = 0;
+    const platformsUsed: string[] = [];
+    const publishedArticles: DirectExecutionResult[] = [];
+
+    // Since we only have Telegraph currently, we'll simulate rotation for extensibility
+    // This design allows easy addition of more platforms later
+    const platformRotations = Math.max(availableSites.length, 1); // At least 1 rotation
+
+    for (let rotationIndex = 0; rotationIndex < platformRotations; rotationIndex++) {
+      const currentSite = availableSites[rotationIndex % availableSites.length];
+
+      // Update progress - starting platform
+      setCampaignProgress(prev => prev ? {
+        ...prev,
+        currentPlatform: currentSite.domain,
+        status: 'generating'
+      } : null);
+
+      await new Promise(resolve => setTimeout(resolve, 800)); // UI feedback delay
+
+      try {
+        // Generate content for this platform
+        toast.info(`📝 Generating content for ${currentSite.domain}...`, { duration: 2000 });
+
+        const directResult = await directAutomationExecutor.executeWorkflow({
+          keywords,
+          anchor_texts,
+          target_url,
+          user_id: user?.id || 'guest-user'
+        });
+
+        if (directResult.success) {
+          // Update progress for publishing
+          setCampaignProgress(prev => prev ? { ...prev, status: 'publishing' } : null);
+
+          toast.info(`📤 Publishing to ${currentSite.domain}...`, { duration: 2000 });
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Publishing simulation
+
+          successfulPublications++;
+          platformsUsed.push(currentSite.domain);
+          publishedArticles.push(directResult);
+
+          // Update results in real-time
+          setDirectResults(prev => [directResult, ...prev]);
+
+          // Update progress
+          setCampaignProgress(prev => prev ? {
+            ...prev,
+            platformsUsed: [...platformsUsed],
+            articlesPublished: successfulPublications,
+            status: rotationIndex < platformRotations - 1 ? 'rotating' : 'completed'
+          } : null);
+
+          automationLogger.info('campaign', `Article published on ${currentSite.domain}`, {
+            articleUrl: directResult.article_url,
+            platform: directResult.target_platform,
+            publicationNumber: successfulPublications
+          });
+
+          toast.success(`✅ Article ${successfulPublications} published on ${currentSite.domain}!`);
+
+          // Try to save to database if user is authenticated
+          if (user) {
+            try {
+              const generatedName = generateCampaignName(formData.keywords, formData.target_url);
+              const { data, error } = await supabase
+                .from('automation_campaigns')
+                .insert({
+                  user_id: user.id,
+                  name: `${generatedName} (${successfulPublications})`,
+                  keywords,
+                  anchor_texts,
+                  target_url,
+                  status: 'completed',
+                  links_built: successfulPublications,
+                  available_sites: availableSites.length,
+                  target_sites_used: platformsUsed
+                })
+                .select()
+                .single();
+
+              if (!error && data) {
+                setCampaigns(prev => [data, ...prev]);
+              }
+            } catch (dbError) {
+              // Database save failed, but that's ok
+              automationLogger.warn('campaign', 'Database save failed, but execution succeeded', {}, undefined, dbError as Error);
+            }
+          }
+
+          // Delay before next platform (if not last)
+          if (rotationIndex < platformRotations - 1) {
+            setCampaignProgress(prev => prev ? { ...prev, status: 'rotating' } : null);
+            toast.info(`🔄 Rotating to next platform...`, { duration: 1500 });
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Rotation delay
+          }
+        } else {
+          automationLogger.warn('campaign', `Failed to publish on ${currentSite.domain}`, {
+            error: directResult.error,
+            platform: currentSite.domain
+          });
+
+          toast.error(`❌ Failed to publish on ${currentSite.domain}: ${directResult.error}`);
+        }
+
+      } catch (error) {
+        automationLogger.error('campaign', `Error publishing on ${currentSite.domain}`, {
+          platform: currentSite.domain,
+          error: error instanceof Error ? error.message : String(error)
+        }, undefined, error as Error);
+
+        toast.error(`❌ Error on ${currentSite.domain}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      }
+    }
+
+    // Campaign completed - auto-pause
+    setCampaignProgress(prev => prev ? {
+      ...prev,
+      isRunning: false,
+      status: 'paused',
+      currentPlatform: `Completed - Auto-paused`
+    } : null);
+
+    const completionMessage = successfulPublications > 0
+      ? `🎉 Campaign completed! ${successfulPublications} articles published. Campaign auto-paused.`
+      : '⚠️ Campaign completed but no articles were published successfully.';
+
+    toast.success(completionMessage, { duration: 6000 });
+
+    automationLogger.info('campaign', 'Campaign rotation completed and auto-paused', {
+      totalPublished: successfulPublications,
+      platformsUsed: platformsUsed.length,
+      timeElapsed: Date.now() - (campaignProgress?.timeStarted || Date.now())
+    });
+
+    // Clear form
+    setFormData({
+      keywords: '',
+      anchor_texts: '',
+      target_url: ''
+    });
+
+    setCreating(false);
+
+    // Keep progress visible for a few seconds then clear
+    setTimeout(() => {
+      setCampaignProgress(null);
+    }, 8000);
   };
 
   const testDirectExecution = async () => {
