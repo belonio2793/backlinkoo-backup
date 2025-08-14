@@ -207,7 +207,7 @@ class DirectAutomationExecutor {
       const data = await response.json();
 
       if (!data.success) {
-        console.error('Content generation service error:', data);
+        console.error('Content generation service error:', JSON.stringify(data));
         throw new Error(data.error || 'Content generation service returned failure');
       }
 
