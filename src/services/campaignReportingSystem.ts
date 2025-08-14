@@ -381,12 +381,26 @@ class CampaignReportingSystem {
         report_type: row.report_type
       }));
     } catch (error) {
-      ErrorLogger.logError('Failed to get user reports', error, {
+      let errorMessage = 'Unknown error getting user reports';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        const errorObj = error as any;
+        errorMessage = errorObj.message || errorObj.error || errorObj.details ||
+                      'Failed to get user reports with no additional details';
+      }
+
+      ErrorLogger.logError(`Failed to get user reports: ${errorMessage}`, error, {
         context: 'campaignReportingSystem.getUserReports',
         userId,
-        additionalData: { campaignId }
+        additionalData: { campaignId, errorMessage }
       });
-      return [];
+
+      // Instead of silently returning empty array, throw meaningful error
+      throw new Error(`Failed to get user reports: ${errorMessage}`);
     }
   }
 
