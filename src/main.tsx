@@ -188,6 +188,7 @@ if (import.meta.env.DEV) {
   console.log('  - disableViteProtection() - Disable fetch protection and refresh');
   console.log('  - testContentGeneration() - Test content generation functions');
   console.log('  - fixFetchErrors() - Emergency fix for fetch protection issues');
+  console.log('  - testClientContent() - Test client-side content generation');
 }
 
 // Priority: Get React app rendering ASAP
