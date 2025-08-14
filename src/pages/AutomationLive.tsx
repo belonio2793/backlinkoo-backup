@@ -426,7 +426,7 @@ export default function AutomationLive() {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="h-5 w-5" />
-                  Create New Live Campaign
+                  Create New Campaign
                 </CardTitle>
                 <CardDescription>
                   Generate high-quality content with ChatGPT and publish to Telegraph with your anchor text links.
