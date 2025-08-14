@@ -535,93 +535,149 @@ class LiveCampaignManager {
   }
 
   /**
-   * Execute platform rotation for campaign
+   * Execute platform rotation for campaign with enhanced error handling and platform skipping
    */
   private async executePlatformRotation(campaignId: string): Promise<void> {
     const campaign = this.activeCampaigns.get(campaignId);
     if (!campaign || campaign.status !== 'active') {
-      console.log(`Campaign ${campaignId} is not active, stopping execution`);
+      internalLogger.info('platform_rotation', `Campaign ${campaignId} is not active, stopping execution`);
       return;
     }
 
-    const availablePlatforms = this.getAvailablePlatforms();
     const progress = campaign.execution_progress;
-    
     if (!progress || progress.completed_platforms >= progress.total_platforms) {
-      // Campaign completed
       await this.completeCampaign(campaignId);
       return;
     }
 
-    const currentPlatform = availablePlatforms[progress.current_rotation % availablePlatforms.length];
-    console.log(`Executing campaign ${campaignId} on platform: ${currentPlatform.domain}`);
+    // Get healthy platforms first, then fallback to all if none are healthy
+    const healthyPlatforms = this.getHealthyPlatforms();
+    const availablePlatforms = healthyPlatforms.length > 0 ? healthyPlatforms : this.getAvailablePlatforms();
 
-    try {
-      // Update current platform in campaign
-      campaign.current_platform = currentPlatform.domain;
-      await this.updateCampaignInDatabase(campaign);
+    if (availablePlatforms.length === 0) {
+      internalLogger.error('platform_rotation', `No available platforms for campaign ${campaignId}`);
+      await this.pauseCampaign(campaignId);
+      return;
+    }
 
-      // Generate and publish content
-      const result = await this.executeOnPlatform(campaign, currentPlatform);
+    // Try to find the next working platform
+    let attemptedPlatforms = 0;
+    let maxAttempts = Math.min(availablePlatforms.length * 2, 10); // Prevent infinite loops
 
-      if (result.success && result.article_url) {
-        // Record successful publication
-        const publishedArticle = {
-          title: result.article_title || 'Generated Article',
-          url: result.article_url,
-          platform: currentPlatform.domain,
-          published_at: new Date().toISOString(),
-          word_count: result.word_count || 0,
-          anchor_text_used: result.anchor_text_used || ''
-        };
+    while (attemptedPlatforms < maxAttempts && campaign.status === 'active') {
+      const platformIndex = progress.current_rotation % availablePlatforms.length;
+      const currentPlatform = availablePlatforms[platformIndex];
 
-        campaign.published_articles.push(publishedArticle);
-        campaign.links_built = campaign.published_articles.length;
-        
-        if (!campaign.target_sites_used.includes(currentPlatform.domain)) {
-          campaign.target_sites_used.push(currentPlatform.domain);
-        }
+      internalLogger.info('platform_rotation', `Attempting campaign ${campaignId} on platform: ${currentPlatform.domain}`, {
+        platformHealth: currentPlatform.current_health_status,
+        consecutiveFailures: currentPlatform.consecutive_failures,
+        attemptNumber: attemptedPlatforms + 1
+      });
 
-        // Update progress
-        progress.completed_platforms++;
+      // Check if platform is in cooldown
+      if (this.isPlatformInCooldown(currentPlatform)) {
+        internalLogger.warn('platform_rotation', `Platform ${currentPlatform.domain} is in cooldown, skipping`);
         progress.current_rotation++;
-
-        console.log(`Successfully published article for campaign ${campaignId}: ${result.article_url}`);
-      } else {
-        console.warn(`Failed to publish on ${currentPlatform.domain} for campaign ${campaignId}: ${result.error}`);
-        // Still increment rotation to try next platform
-        progress.current_rotation++;
+        attemptedPlatforms++;
+        continue;
       }
 
-      // Update campaign in database
-      await this.updateCampaignInDatabase(campaign);
+      try {
+        // Update current platform in campaign
+        campaign.current_platform = currentPlatform.domain;
+        await this.updateCampaignInDatabase(campaign);
 
-      // Check if campaign should continue
-      if (progress.completed_platforms >= progress.total_platforms) {
-        await this.completeCampaign(campaignId);
-      } else if (campaign.status === 'active') {
-        // Schedule next platform execution (with delay for rate limiting)
-        const delay = 30000; // 30 seconds between platforms
+        // Execute on platform with retry logic
+        const result = await this.executeOnPlatformWithRetry(campaign, currentPlatform);
+
+        if (result.success && result.article_url) {
+          // Record successful publication
+          await this.recordPlatformSuccess(currentPlatform, result);
+
+          const publishedArticle = {
+            title: result.article_title || 'Generated Article',
+            url: result.article_url,
+            platform: currentPlatform.domain,
+            published_at: new Date().toISOString(),
+            word_count: result.word_count || 0,
+            anchor_text_used: result.anchor_text_used || ''
+          };
+
+          campaign.published_articles.push(publishedArticle);
+          campaign.links_built = campaign.published_articles.length;
+
+          if (!campaign.target_sites_used.includes(currentPlatform.domain)) {
+            campaign.target_sites_used.push(currentPlatform.domain);
+          }
+
+          progress.completed_platforms++;
+          progress.current_rotation++;
+
+          internalLogger.info('platform_rotation', `Successfully published article for campaign ${campaignId}`, {
+            url: result.article_url,
+            platform: currentPlatform.domain,
+            wordCount: result.word_count
+          });
+
+          // Update campaign in database
+          await this.updateCampaignInDatabase(campaign);
+
+          // Success! Continue to next cycle
+          break;
+        } else {
+          // Record platform failure
+          await this.recordPlatformFailure(currentPlatform, result.error || 'Unknown error', result.error_type || 'unknown');
+
+          internalLogger.warn('platform_rotation', `Failed to publish on ${currentPlatform.domain}`, {
+            campaignId,
+            error: result.error,
+            errorType: result.error_type,
+            platformHealth: currentPlatform.current_health_status
+          });
+
+          progress.current_rotation++;
+          attemptedPlatforms++;
+        }
+      } catch (error) {
+        // Record platform error
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        await this.recordPlatformFailure(currentPlatform, errorMessage, 'unknown');
+
+        internalLogger.error('platform_rotation', `Error executing campaign on platform ${currentPlatform.domain}`, {
+          campaignId,
+          error: errorMessage,
+          platformHealth: currentPlatform.current_health_status
+        });
+
+        progress.current_rotation++;
+        attemptedPlatforms++;
+      }
+    }
+
+    // Update campaign in database
+    await this.updateCampaignInDatabase(campaign);
+
+    // Check if campaign should continue
+    if (progress.completed_platforms >= progress.total_platforms) {
+      await this.completeCampaign(campaignId);
+    } else if (campaign.status === 'active') {
+      if (attemptedPlatforms >= maxAttempts) {
+        // All platforms failed, wait longer before next attempt
+        internalLogger.warn('platform_rotation', `All platforms failed for campaign ${campaignId}, extending delay`);
+
+        const delay = 5 * 60 * 1000; // 5 minutes delay when all platforms fail
         const timer = setTimeout(() => {
           this.executePlatformRotation(campaignId);
         }, delay);
-        
-        this.executionTimers.set(campaignId, timer);
-      }
 
-    } catch (error) {
-      console.error(`Error executing campaign ${campaignId} on platform ${currentPlatform.domain}:`, error);
-      
-      // Continue to next platform after error
-      if (progress) {
-        progress.current_rotation++;
-        await this.updateCampaignInDatabase(campaign);
-        
-        // Schedule retry with next platform
+        this.executionTimers.set(campaignId, timer);
+      } else {
+        // Continue with normal delay
+        const delay = 30000; // 30 seconds between successful attempts
         const timer = setTimeout(() => {
           this.executePlatformRotation(campaignId);
-        }, 60000); // 1 minute delay after error
-        
+        }, delay);
+
         this.executionTimers.set(campaignId, timer);
       }
     }
