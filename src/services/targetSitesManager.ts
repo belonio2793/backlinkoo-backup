@@ -64,11 +64,21 @@ class TargetSitesManager {
         .order('success_rate', { ascending: false });
 
       if (error) {
-        if (error.message.includes('relation') && error.message.includes('does not exist')) {
-          automationLogger.warn('database', 'Target sites table does not exist, using default sites');
+        const errorMessage = error.message || String(error);
+
+        if (errorMessage.includes('relation') && errorMessage.includes('does not exist')) {
+          automationLogger.warn('database', 'Target sites table does not exist, using default sites', {
+            errorMessage,
+            errorCode: error.code
+          });
           this.sites = this.getDefaultSites();
         } else {
-          throw error;
+          automationLogger.error('database', 'Target sites query failed, using defaults', {
+            errorMessage,
+            errorCode: error.code,
+            errorDetails: error.details
+          });
+          this.sites = this.getDefaultSites();
         }
       } else {
         this.sites = data || [];
@@ -81,7 +91,20 @@ class TargetSitesManager {
       this.isLoaded = true;
       automationLogger.info('system', `Loaded ${this.sites.length} target sites`);
     } catch (error) {
-      automationLogger.error('database', 'Failed to load target sites', {}, undefined, error as Error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      automationLogger.error('database', 'Failed to load target sites', {
+        errorMessage,
+        errorType: typeof error,
+        errorName: error instanceof Error ? error.name : 'Unknown'
+      }, undefined, error as Error);
+
+      console.error('Target sites loading error details:', {
+        error,
+        errorMessage,
+        errorType: typeof error
+      });
+
       // Use default sites as fallback
       this.sites = this.getDefaultSites();
       this.isLoaded = true;
