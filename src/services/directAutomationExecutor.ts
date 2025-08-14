@@ -107,12 +107,24 @@ class DirectAutomationExecutor {
         console.log('🤖 Generating content via Netlify function...');
       }
 
-      const contentResult = await this.generateContent({
+      let contentResult = await this.generateContent({
         keyword: selectedKeyword,
         anchor_text: selectedAnchorText,
         target_url: input.target_url,
         user_id: input.user_id || 'direct-execution-user'
       }, useMockServices);
+
+      // If Netlify function failed and we're not using mock service, fallback to mock
+      if (!contentResult.success && !useMockServices) {
+        console.log('🎭 Netlify function failed, falling back to mock service...');
+        useMockServices = true;
+        contentResult = await this.generateContent({
+          keyword: selectedKeyword,
+          anchor_text: selectedAnchorText,
+          target_url: input.target_url,
+          user_id: input.user_id || 'direct-execution-user'
+        }, true);
+      }
 
       if (!contentResult.success) {
         throw new Error(`Content generation failed: ${contentResult.error}`);
