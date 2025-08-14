@@ -54,53 +54,55 @@ exports.handler = async (event, context) => {
       }
     ];
 
+    // Randomly select one prompt
+    const randomIndex = Math.floor(Math.random() * prompts.length);
+    const selectedPrompt = prompts[randomIndex];
+
+    console.log(`Randomly selected prompt type: ${selectedPrompt.type}`);
+
     const results = [];
 
-    // Generate content for each prompt
-    for (const { type, prompt } of prompts) {
-      try {
-        console.log(`Generating ${type} content for keyword: ${keyword}`);
-        
-        const completion = await openai.chat.completions.create({
-          model: 'gpt-3.5-turbo',
-          messages: [
-            {
-              role: 'system',
-              content: 'You are a professional content writer specializing in SEO-optimized articles and blog posts. Write engaging, informative content that naturally incorporates anchor text for backlinking purposes. Always aim for the specified word count and maintain high quality throughout.'
-            },
-            {
-              role: 'user',
-              content: prompt
-            }
-          ],
-          max_tokens: 2000,
-          temperature: 0.7
-        });
+    // Generate content for the randomly selected prompt
+    const { type, prompt } = selectedPrompt;
+    try {
+      console.log(`Generating ${type} content for keyword: ${keyword}`);
 
-        const content = completion.choices[0]?.message?.content;
-        if (!content) {
-          throw new Error(`No content generated for ${type}`);
-        }
+      const completion = await openai.chat.completions.create({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a professional content writer specializing in SEO-optimized articles and blog posts. Write engaging, informative content that naturally incorporates anchor text for backlinking purposes. Always aim for the specified word count and maintain high quality throughout.'
+          },
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 2000,
+        temperature: 0.7
+      });
 
-        // Format content with proper anchor text linking
-        const formattedContent = formatContentWithAnchorLink(content, anchorText, targetUrl);
-        const wordCount = countWords(formattedContent);
-
-        results.push({
-          type,
-          content: formattedContent,
-          wordCount
-        });
-
-        console.log(`Successfully generated ${type} content (${wordCount} words)`);
-        
-        // Add small delay between requests to avoid rate limits
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-      } catch (error) {
-        console.error(`Error generating ${type} content:`, error);
-        throw new Error(`Failed to generate ${type} content: ${error.message}`);
+      const content = completion.choices[0]?.message?.content;
+      if (!content) {
+        throw new Error(`No content generated for ${type}`);
       }
+
+      // Format content with proper anchor text linking
+      const formattedContent = formatContentWithAnchorLink(content, anchorText, targetUrl);
+      const wordCount = countWords(formattedContent);
+
+      results.push({
+        type,
+        content: formattedContent,
+        wordCount
+      });
+
+      console.log(`Successfully generated ${type} content (${wordCount} words)`);
+
+    } catch (error) {
+      console.error(`Error generating ${type} content:`, error);
+      throw new Error(`Failed to generate ${type} content: ${error.message}`);
     }
 
     return {
