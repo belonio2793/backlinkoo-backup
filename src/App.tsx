@@ -25,7 +25,6 @@ const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDisc
 const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
 const LazyBlog = lazy(() => import("./pages/Blog"));
 const LazyDashboard = lazy(() => import("./pages/Dashboard"));
-const LazyAutomation = lazy(() => import("./pages/AutomationLive"));
 const LazyLogin = lazy(() => import("./pages/Login"));
 const LazyBeautifulBlogPost = lazy(() => import("./components/BeautifulBlogPost").then(module => ({ default: module.BeautifulBlogPost })));
 const LazyAuthCallback = lazy(() => import("./pages/AuthCallback"));
@@ -51,9 +50,6 @@ const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
 const LazyMarkdownTest = lazy(() => import("./pages/MarkdownTest"));
 const LazyPremiumSEOAnalysisTest = lazy(() => import("./pages/PremiumSEOAnalysisTest"));
 
-// Array-free automation components
-import ArrayFreeAutomation from "./pages/ArrayFreeAutomation";
-import ArrayFreeTest from "./pages/ArrayFreeTest";
 import FetchTest from "./pages/FetchTest";
 const LazyDebugUserReports = lazy(() => import("./pages/DebugUserReports"));
 const LazyBlogPostChecker = lazy(() => import("./components/BlogPostChecker").then(module => ({ default: module.BlogPostChecker })));
@@ -132,52 +128,10 @@ const App = () => (
               }
             />
             <Route
-              path="/automation"
-              element={
-                <Suspense fallback={
-                  <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-                    <div className="text-center">
-                    <LoadingSpinner />
-                    <div className="mt-4">
-                      <h2 className="text-xl font-semibold text-gray-900">Loading Link Building Automation</h2>
-                      <p className="text-gray-600 mt-2">Preparing your automated content generation and publishing system...</p>
-                    </div>
-                  </div>
-                  </div>
-                }>
-                  <LazyAutomation />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/automation/array-free"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <ArrayFreeAutomation />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/automation/test"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <ArrayFreeTest />
-                </Suspense>
-              }
-            />
-            <Route
               path="/fetch-test"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <FetchTest />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/automation/old"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyBlogCommentsSystem />
                 </Suspense>
               }
             />
