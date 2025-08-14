@@ -198,7 +198,19 @@ class DirectAutomationExecutor {
 
     } catch (error) {
       const generationTime = Date.now() - startTime;
-      const errorMessage = error instanceof Error ? error.message : 'Content generation failed';
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      console.error('Content generation error details:', {
+        errorMessage,
+        errorType: typeof error,
+        errorName: error instanceof Error ? error.name : 'Unknown',
+        params: {
+          keyword: params.keyword,
+          anchor_text: params.anchor_text,
+          target_url: params.target_url
+        },
+        generation_time_ms: generationTime
+      });
 
       return {
         success: false,
