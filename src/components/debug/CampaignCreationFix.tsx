@@ -53,12 +53,23 @@ export function CampaignCreationFix() {
         });
         toast.success('✅ Campaign creation test passed!');
       } else {
+        // Check for specific "expected JSON array" error
+        const errorMessage = result.error || 'Campaign creation failed';
+        const isJsonArrayError = errorMessage.includes('expected JSON array');
+
         setTestResult({
           success: false,
-          message: result.error || 'Campaign creation failed',
+          message: isJsonArrayError
+            ? '❌ "Expected JSON array" error detected - Database schema needs fixing'
+            : errorMessage,
           error: result
         });
-        toast.error('❌ Campaign creation test failed');
+
+        if (isJsonArrayError) {
+          toast.error('❌ Schema Error: Missing database columns. Check AUTOMATION_SCHEMA_FIX_IMMEDIATE.md for fix.');
+        } else {
+          toast.error('❌ Campaign creation test failed');
+        }
       }
     } catch (error) {
       console.error('❌ Campaign creation test error:', error);
