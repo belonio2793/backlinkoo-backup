@@ -442,6 +442,29 @@ export default function Automation() {
     }
   };
 
+  const testDirectExecution = async () => {
+    console.log('🧪 Testing direct execution with debug info...');
+
+    try {
+      // Test Netlify function availability first
+      const functionTest = await directAutomationExecutor.testNetlifyFunctions();
+      console.log('🔧 Function availability test:', functionTest);
+
+      // Test with minimal data
+      const result = await directAutomationExecutor.testExecution();
+      console.log('🧪 Test execution result:', result);
+
+      if (result.success) {
+        toast.success('Test execution successful!');
+      } else {
+        toast.error(`Test failed: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('🧪 Test execution error:', error);
+      toast.error(`Test error: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  };
+
   const updateCampaignStatus = async (campaignId: string, status: Campaign['status']) => {
     automationLogger.info('campaign', `Updating campaign status to ${status}`, {}, campaignId);
 
