@@ -35,6 +35,8 @@ import { liveCampaignManager, type LiveCampaign } from '@/services/liveCampaignM
 import { campaignReportingSystem, type PublishedLink, type CampaignReport } from '@/services/campaignReportingSystem';
 import { LoginModal } from '@/components/LoginModal';
 import { DatabaseInit } from '@/utils/databaseInit';
+import { CampaignDebugger } from '@/components/CampaignDebugger';
+import { ApiHealthChecker } from '@/components/ApiHealthChecker';
 
 export default function AutomationLive() {
   const { user } = useAuth();
@@ -390,7 +392,7 @@ export default function AutomationLive() {
         </div>
 
         <Tabs defaultValue="create" className="max-w-6xl mx-auto">
-          <TabsList className="grid w-full grid-cols-4 mb-8">
+          <TabsList className="grid w-full grid-cols-5 mb-8">
             <TabsTrigger value="create" className="flex items-center gap-2">
               <Plus className="h-4 w-4" />
               Create Campaign
@@ -411,6 +413,10 @@ export default function AutomationLive() {
             <TabsTrigger value="analytics" className="flex items-center gap-2">
               <TrendingUp className="h-4 w-4" />
               Analytics
+            </TabsTrigger>
+            <TabsTrigger value="debug" className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              Debug
             </TabsTrigger>
           </TabsList>
 
@@ -470,50 +476,26 @@ export default function AutomationLive() {
                   </p>
                 </div>
 
-                {/* Campaign Progress Info */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <BarChart3 className="h-5 w-5 text-blue-600" />
-                    <span className="font-medium text-blue-800">Campaign Progress Tracking</span>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-blue-700">Content Generation</span>
-                        <span className="text-blue-600 font-medium">AI-Powered</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-blue-700">Publishing Platforms</span>
-                        <span className="text-blue-600 font-medium">Multi-Platform</span>
-                      </div>
+                {/* Campaign Analytics Summary */}
+                {user && analytics.total_campaigns > 0 && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <BarChart3 className="h-5 w-5 text-blue-600" />
+                      <span className="font-medium text-blue-800">Campaign Overview</span>
                     </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-blue-700">Campaign Monitoring</span>
-                        <span className="text-blue-600 font-medium">Real-Time</span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-blue-700">Success Tracking</span>
-                        <span className="text-blue-600 font-medium">Detailed Reports</span>
-                      </div>
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-blue-600">
+                        {campaigns.filter(c => c.status === 'active').length} Active Campaigns
+                      </span>
+                      <span className="text-blue-600">
+                        {analytics.total_links} Links Published
+                      </span>
+                      <span className="text-blue-600">
+                        {analytics.success_rate.toFixed(0)}% Success Rate
+                      </span>
                     </div>
                   </div>
-                  {user && analytics.total_campaigns > 0 && (
-                    <div className="mt-3 pt-3 border-t border-blue-200">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="text-blue-600">
-                          {campaigns.filter(c => c.status === 'active').length} Active Campaigns
-                        </span>
-                        <span className="text-blue-600">
-                          {analytics.total_links} Links Published
-                        </span>
-                        <span className="text-blue-600">
-                          {analytics.success_rate.toFixed(0)}% Success Rate
-                        </span>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                )}
 
                 <Button
                   onClick={createCampaign}
@@ -843,6 +825,12 @@ export default function AutomationLive() {
                 </div>
               </div>
             )}
+          </TabsContent>
+
+          {/* Debug Tab */}
+          <TabsContent value="debug" className="space-y-6">
+            <ApiHealthChecker />
+            <CampaignDebugger />
           </TabsContent>
 
           {/* Analytics Tab */}
