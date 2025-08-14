@@ -50,7 +50,7 @@ class TargetSitesManager {
   constructor() {
     automationLogger.info('system', 'Target Sites Manager initialized');
     // Ensure we always have default sites available as fallback
-    this.sites = this.getDefaultSites();
+    this.sites = this.getFilteredWorkingSites();
     this.isLoaded = false; // Will be set to true after proper loading attempt
   }
 
