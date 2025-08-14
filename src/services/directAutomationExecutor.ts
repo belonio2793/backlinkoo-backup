@@ -515,7 +515,7 @@ class DirectAutomationExecutor {
 
         // Special handling for 404 - function doesn't exist, use client-side fallback
         if (response.status === 404) {
-          console.log('🔄 Publishing function not found, using client-side Telegraph fallback...');
+          console.log('❌ Publishing function not available (404) - switching to client-side Telegraph...');
 
           try {
             const { ClientTelegraphPublisher } = await import('./clientTelegraphPublisher');
