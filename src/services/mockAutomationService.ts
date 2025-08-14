@@ -117,7 +117,13 @@ class MockAutomationService {
 
   // Check if we should use mock services
   shouldUseMockServices(): boolean {
-    return this.isDevEnvironment();
+    const shouldUse = this.isDevEnvironment();
+    console.log('🎭 Mock service check:', {
+      isDev: this.isDevEnvironment(),
+      shouldUse,
+      hostname: typeof window !== 'undefined' ? window.location.hostname : 'server'
+    });
+    return shouldUse;
   }
 
   // Generate comprehensive article content
