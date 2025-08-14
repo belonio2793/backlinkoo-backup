@@ -15,6 +15,8 @@ import './utils/silentErrorTest'
 // import './utils/fixMissingColumns' // Disabled - using new blog comment system
 // Direct database fix
 // import './utils/directDatabaseFix' // Disabled - using new blog comment system
+// Emergency fetch fix (load first)
+import './utils/emergencyFetchFix'
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
 // Protect Vite client from FullStory interference in development
