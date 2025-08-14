@@ -18,8 +18,8 @@ export const AutomationSystemTest: React.FC = () => {
     setTestResults(null);
 
     try {
-      const debugger = getAutomationDebugger();
-      const diagnosticResults = await debugger.runDiagnostics();
+      const automationDebugger = getAutomationDebugger();
+      const diagnosticResults = await automationDebugger.runDiagnostics();
       setResults(diagnosticResults);
 
       if (diagnosticResults.overall.ready) {
@@ -58,14 +58,14 @@ export const AutomationSystemTest: React.FC = () => {
 
     setIsRunning(true);
     try {
-      const debugger = getAutomationDebugger();
+      const automationDebugger = getAutomationDebugger();
       const testParams = {
         target_url: 'https://example.com',
         keyword: 'automation testing',
         anchor_text: 'test automation link'
       };
 
-      const campaignResults = await debugger.testCampaignFlow(testParams);
+      const campaignResults = await automationDebugger.testCampaignFlow(testParams);
       setTestResults(campaignResults);
 
       if (campaignResults.success) {
