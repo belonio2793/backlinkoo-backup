@@ -84,7 +84,12 @@ class DirectAutomationExecutor {
     console.log('🚀 Starting direct automation execution:', {
       keywords: input.keywords.slice(0, 3),
       target_url: input.target_url,
-      anchor_count: input.anchor_texts.length
+      anchor_count: input.anchor_texts.length,
+      environment: {
+        mode: import.meta.env.MODE,
+        dev: import.meta.env.DEV,
+        hostname: typeof window !== 'undefined' ? window.location.hostname : 'server'
+      }
     });
 
     try {
