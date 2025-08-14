@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emergency Database Fix</title>
+</head>
+<body>
+    <h1>Database Column Fix</h1>
+    <div id="log"></div>
+    <button onclick="fixDatabase()">Fix Missing Columns</button>
+    <button onclick="testCampaign()">Test Campaign Creation</button>
+
+    <script type="module">
+        window.log = function(message) {
+            console.log(message);
+            document.getElementById('log').innerHTML += '<p>' + JSON.stringify(message, null, 2) + '</p>';
+        }
+
+        window.fixDatabase = async function() {
+            try {
+                log("Starting database fix...");
+                
+                const { supabase } = await import('/src/integrations/supabase/client.ts');
+                
+                // Add missing columns
+                const { data, error } = await supabase.rpc('exec_sql', {
+                    sql: `
+                        -- Add missing columns to automation_campaigns table
+                        ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS started_at TIMESTAMPTZ NULL;
+                        ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS completed_at TIMESTAMPTZ NULL;
+                        ALTER TABLE automation_campaigns ADD COLUMN IF NOT EXISTS auto_start BOOLEAN DEFAULT false;
+                        
+                        -- Verify columns exist
+                        SELECT column_name, data_type 
+                        FROM information_schema.columns 
+                        WHERE table_name = 'automation_campaigns' 
+                        AND column_name IN ('started_at', 'completed_at', 'auto_start')
+                        ORDER BY column_name;
+                    `
+                });
+                
+                if (error) {
+                    log({error: "Database fix failed", details: error});
+                } else {
+                    log({success: "Database columns added successfully", data});
+                }
+                
+            } catch (error) {
+                log({error: "Fix failed", message: error.message});
+            }
+        }
+
+        window.testCampaign = async function() {
+            try {
+                log("Testing campaign creation...");
+                
+                const { liveCampaignManager } = await import('/src/services/liveCampaignManager.ts');
+                
+                const result = await liveCampaignManager.createCampaign({
+                    name: 'Test Campaign - ' + Date.now(),
+                    keywords: ['test keyword'],
+                    anchor_texts: ['test anchor'],
+                    target_url: 'https://example.com',
+                    user_id: 'test-user-123',
+                    auto_start: false
+                });
+                
+                log({test_result: result});
+                
+            } catch (error) {
+                log({test_error: error.message, stack: error.stack});
+            }
+        }
+    </script>
+</body>
+</html>
