@@ -102,8 +102,8 @@ export class AutomationOrchestrator {
 
       // Step 3: Generate content
       const generatedContent = await this.contentService.generateAllContent({
-        keyword: campaign.keyword,
-        anchorText: campaign.anchor_text,
+        keyword: campaign.keywords[0] || 'default keyword',
+        anchorText: campaign.anchor_texts[0] || 'click here',
         targetUrl: campaign.target_url
       });
 
