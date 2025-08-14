@@ -116,7 +116,7 @@ class DirectAutomationExecutor {
         title: contentResult.title,
         content: contentResult.content,
         user_id: input.user_id || 'direct-execution-user'
-      });
+      }, useMockServices);
 
       if (!publishResult.success) {
         throw new Error(`Publishing failed: ${publishResult.error}`);
