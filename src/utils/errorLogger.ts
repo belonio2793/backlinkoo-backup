@@ -1,73 +1,72 @@
 /**
- * Safe Error Logging Utility
- * Prevents "[object Object]" errors by properly formatting error objects
+ * Utility for consistent error logging across the application
  */
 
-export function logError(context: string, error: any): void {
-  const formattedError = formatErrorForLogging(error);
-  console.error(`${context}:`, formattedError);
+export interface ErrorLogOptions {
+  context?: string;
+  userId?: string;
+  additionalData?: Record<string, any>;
 }
 
-export function formatErrorForLogging(error: any): string {
-  if (!error) {
-    return 'Unknown error (null/undefined)';
+export class ErrorLogger {
+  /**
+   * Log an error with proper serialization
+   */
+  static logError(message: string, error: unknown, options: ErrorLogOptions = {}): void {
+    const errorInfo = {
+      message,
+      error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
+      context: options.context,
+      userId: options.userId,
+      timestamp: new Date().toISOString(),
+      additionalData: options.additionalData,
+      details: error
+    };
+
+    console.error(message, errorInfo);
   }
 
-  // If it's already a string, return it
-  if (typeof error === 'string') {
-    return error;
-  }
-
-  // If it's an Error object with a message
-  if (error instanceof Error) {
-    return error.message || error.toString();
-  }
-
-  // If it's an object with common error properties
-  if (typeof error === 'object') {
-    // Try different common error properties
-    if (error.message) {
+  /**
+   * Get a user-friendly error message from an error object
+   */
+  static getUserFriendlyMessage(error: unknown, fallbackMessage = 'An unexpected error occurred'): string {
+    if (error instanceof Error) {
       return error.message;
     }
-    if (error.error && typeof error.error === 'string') {
-      return error.error;
-    }
-    if (error.details) {
-      return error.details;
-    }
-    if (error.msg) {
-      return error.msg;
-    }
-    if (error.description) {
-      return error.description;
+    
+    if (typeof error === 'string') {
+      return error;
     }
     
-    // If it has a toString method that's not the default Object toString
-    if (error.toString && error.toString !== Object.prototype.toString) {
-      const stringified = error.toString();
-      if (stringified !== '[object Object]') {
-        return stringified;
-      }
-    }
-    
-    // Last resort: safely stringify the object
-    try {
-      return JSON.stringify(error, null, 2);
-    } catch (jsonError) {
-      return `Error object (could not stringify): ${String(error)}`;
-    }
+    return fallbackMessage;
   }
 
-  // For any other type, convert to string
-  return String(error);
-}
+  /**
+   * Check if an error is a network/connection related error
+   */
+  static isNetworkError(error: unknown): boolean {
+    if (error instanceof Error) {
+      const message = error.message.toLowerCase();
+      return message.includes('fetch') || 
+             message.includes('network') || 
+             message.includes('connection') ||
+             message.includes('timeout');
+    }
+    return false;
+  }
 
-export function getErrorMessage(error: any): string {
-  return formatErrorForLogging(error);
+  /**
+   * Check if an error is a database related error
+   */
+  static isDatabaseError(error: unknown): boolean {
+    if (error instanceof Error) {
+      const message = error.message.toLowerCase();
+      return message.includes('database') || 
+             message.includes('table') || 
+             message.includes('column') ||
+             message.includes('query');
+    }
+    return false;
+  }
 }
-
-export default {
-  logError,
-  formatErrorForLogging,
-  getErrorMessage
-};
