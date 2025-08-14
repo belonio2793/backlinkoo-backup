@@ -850,6 +850,11 @@ export default function AutomationLive() {
             )}
           </TabsContent>
 
+          {/* Debug Tab */}
+          <TabsContent value="debug" className="space-y-6">
+            <CampaignDebugger />
+          </TabsContent>
+
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
