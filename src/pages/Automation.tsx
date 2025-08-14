@@ -374,6 +374,74 @@ export default function Automation() {
     }
   };
 
+  const executeDirectly = async () => {
+    if (!formData.keywords || !formData.anchor_texts || !formData.target_url) {
+      toast.error('Please fill in all required fields for direct execution');
+      return;
+    }
+
+    setDirectExecuting(true);
+    automationLogger.info('direct_execution', 'Starting direct automation execution', {
+      keywords: formData.keywords.split(',').length,
+      anchor_texts: formData.anchor_texts.split(',').length,
+      target_url: formData.target_url
+    });
+
+    try {
+      const keywordsArray = formData.keywords.split(',').map(k => k.trim()).filter(k => k);
+      const anchorTextsArray = formData.anchor_texts.split(',').map(a => a.trim()).filter(a => a);
+
+      toast.info('🚀 Starting content generation and publishing...', { duration: 3000 });
+
+      const result = await directAutomationExecutor.executeWorkflow({
+        keywords: keywordsArray,
+        anchor_texts: anchorTextsArray,
+        target_url: formData.target_url,
+        user_id: user?.id || 'anonymous-user'
+      });
+
+      if (result.success) {
+        // Add to results at the top
+        setDirectResults(prev => [result, ...prev]);
+
+        // Clear form
+        setFormData({
+          keywords: '',
+          anchor_texts: '',
+          target_url: ''
+        });
+
+        automationLogger.info('direct_execution', 'Direct execution completed successfully', {
+          article_url: result.article_url,
+          execution_time: result.execution_time_ms,
+          word_count: result.word_count
+        });
+
+        toast.success(
+          `🎉 Article published successfully!
+          ${result.word_count} words in ${Math.round((result.execution_time_ms || 0) / 1000)}s`,
+          { duration: 5000 }
+        );
+      } else {
+        automationLogger.error('direct_execution', 'Direct execution failed', {
+          error: result.error,
+          execution_time: result.execution_time_ms
+        });
+        toast.error(`Direct execution failed: ${result.error}`);
+      }
+
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      automationLogger.error('direct_execution', 'Direct execution error', {
+        errorMessage,
+        formData
+      }, undefined, error as Error);
+      toast.error(`Execution failed: ${errorMessage}`);
+    } finally {
+      setDirectExecuting(false);
+    }
+  };
+
   const updateCampaignStatus = async (campaignId: string, status: Campaign['status']) => {
     automationLogger.info('campaign', `Updating campaign status to ${status}`, {}, campaignId);
 
