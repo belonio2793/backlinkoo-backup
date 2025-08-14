@@ -564,23 +564,60 @@ export default function Automation() {
                     </p>
                   </div>
 
-                  <Button
-                    onClick={createCampaign}
-                    disabled={creating || !user}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                  >
-                    {creating ? (
-                      <>
-                        <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                        Creating Campaign...
-                      </>
-                    ) : (
-                      <>
-                        <Zap className="h-4 w-4 mr-2" />
-                        Create Campaign
-                      </>
-                    )}
-                  </Button>
+                  {/* Execution Progress */}
+                  {executing && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className="animate-spin h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full"></div>
+                        <span className="font-medium text-blue-800">{executionProgress}</span>
+                      </div>
+                      <div className="w-full bg-blue-200 rounded-full h-2 mt-3">
+                        <div className="bg-blue-500 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+                      </div>
+                      <p className="text-blue-700 text-sm mt-2">
+                        Generating content and publishing to Telegraph...
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="space-y-3">
+                    <Button
+                      onClick={executeAutomation}
+                      disabled={executing || creating || !user}
+                      className="w-full bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700"
+                    >
+                      {executing ? (
+                        <>
+                          <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                          Running Automation...
+                        </>
+                      ) : (
+                        <>
+                          <Zap className="h-4 w-4 mr-2" />
+                          Start Link Building Automation
+                        </>
+                      )}
+                    </Button>
+
+                    <Button
+                      onClick={createCampaign}
+                      disabled={creating || executing || !user}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      {creating ? (
+                        <>
+                          <div className="animate-spin mr-2 h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full" />
+                          Creating Campaign...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-4 w-4 mr-2" />
+                          Save as Campaign (Draft)
+                        </>
+                      )}
+                    </Button>
+                  </div>
 
                   {!user && (
                     <div className="text-center text-sm text-gray-600">
