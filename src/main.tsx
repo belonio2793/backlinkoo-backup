@@ -128,7 +128,41 @@ if (import.meta.env.DEV) {
     console.log('🔧 Vite protection disabled. Refresh page to apply.');
   };
 
+  // Add content generation test helper
+  (window as any).testContentGeneration = async () => {
+    console.log('🧪 Testing content generation functions...');
+    const functions = ['working-content-generator', 'ai-content-generator', 'generate-content'];
+
+    for (const func of functions) {
+      try {
+        const response = await fetch(`/.netlify/functions/${func}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            keyword: 'test keyword',
+            anchor_text: 'test link',
+            target_url: 'https://example.com'
+          }),
+        });
+
+        console.log(`${func}: Status ${response.status} ${response.status === 200 ? '✅' : '❌'}`);
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            console.log(`  ✅ ${func} WORKING - Generated ${data.data?.word_count || 0} words`);
+            return;
+          }
+        }
+      } catch (error) {
+        console.log(`  ❌ ${func} failed:`, error.message);
+      }
+    }
+    console.log('❌ No working content functions found');
+  };
+
   console.log('  - disableViteProtection() - Disable fetch protection and refresh');
+  console.log('  - testContentGeneration() - Test content generation functions');
 }
 
 // Priority: Get React app rendering ASAP
