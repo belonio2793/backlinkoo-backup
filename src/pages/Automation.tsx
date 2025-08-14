@@ -66,8 +66,7 @@ export default function Automation() {
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
 
-  // Direct execution state
-  const [directExecuting, setDirectExecuting] = useState(false);
+  // Unified execution results
   const [directResults, setDirectResults] = useState<DirectExecutionResult[]>([]);
 
   // Initialize logging and database check
