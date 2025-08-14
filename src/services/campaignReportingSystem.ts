@@ -381,10 +381,10 @@ class CampaignReportingSystem {
         report_type: row.report_type
       }));
     } catch (error) {
-      console.error('Failed to get user reports:', {
-        error: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack : undefined,
-        details: error
+      ErrorLogger.logError('Failed to get user reports', error, {
+        context: 'campaignReportingSystem.getUserReports',
+        userId,
+        additionalData: { campaignId }
       });
       return [];
     }
