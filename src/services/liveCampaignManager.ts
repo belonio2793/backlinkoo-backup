@@ -196,6 +196,7 @@ class LiveCampaignManager {
       // Ensure arrays are properly formatted for PostgreSQL
       let campaignData: any = {
         name: params.name,
+        engine_type: 'web2_platforms', // Required field based on schema
         keywords: Array.isArray(params.keywords) ? params.keywords : [],
         anchor_texts: Array.isArray(params.anchor_texts) ? params.anchor_texts : [],
         target_url: params.target_url,
