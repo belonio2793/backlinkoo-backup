@@ -11,7 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { AuthFormTabs } from '@/components/shared/AuthFormTabs';
 import SubscriptionService from '@/services/subscriptionService';
-import { logError, getErrorMessage } from '@/utils/errorLogger';
+import { ErrorLogger } from '@/utils/errorLogger';
 import { CheckoutRedirectManager } from '@/utils/checkoutRedirectManager';
 import {
   Crown, Shield, CheckCircle, X, Lock, Star, Infinity, BookOpen,
