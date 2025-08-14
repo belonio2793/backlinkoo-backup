@@ -160,23 +160,33 @@ The system is working correctly!`,
 
       // Test 4: Campaign Creation
       await runTest(3, async () => {
+        // Ensure all required fields are provided
+        const testCampaignData = {
+          user_id: user.id,
+          name: `Test Campaign - ${new Date().toISOString()}`,
+          keywords: ['automation testing', 'link building', 'SEO tools'],
+          anchor_texts: ['automation platform', 'SEO testing', 'click here'],
+          target_url: 'https://test-automation.example.com', // Required NOT NULL field
+          status: 'draft',
+          links_built: 0,
+          target_links: 10,
+          available_sites: 1,
+          target_sites_used: []
+        };
+
+        console.log('Creating test campaign with data:', testCampaignData);
+
         const { data, error } = await supabase
           .from('automation_campaigns')
-          .insert({
-            user_id: user.id,
-            name: `Test Campaign - ${new Date().toISOString()}`,
-            keywords: ['automation testing', 'link building', 'SEO tools'],
-            anchor_texts: ['automation platform', 'SEO testing', 'click here'],
-            target_url: 'https://test-automation.example.com',
-            status: 'draft',
-            links_built: 0,
-            available_sites: 1,
-            target_sites_used: []
-          })
+          .insert(testCampaignData)
           .select()
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error('Campaign creation error:', error);
+          throw new Error(`Campaign creation failed: ${error.message}`);
+        }
+
         setLastTestCampaign(data);
         return `Campaign created with ID: ${data.id}`;
       });
