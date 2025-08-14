@@ -36,8 +36,6 @@ import AutomationTestDashboard from '@/components/automation/AutomationTestDashb
 import { LoginModal } from '@/components/LoginModal';
 import { DatabaseInit } from '@/utils/databaseInit';
 import { directAutomationExecutor, DirectExecutionResult } from '@/services/directAutomationExecutor';
-import { automaticUrlFilterService } from '@/services/automaticUrlFilterService';
-import { platformInitializer } from '@/services/platformInitializer';
 
 interface Campaign {
   id: string;
