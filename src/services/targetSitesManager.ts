@@ -77,20 +77,20 @@ class TargetSitesManager {
             errorMessage,
             errorCode: error.code
           });
-          this.sites = this.getDefaultSites();
+          this.sites = this.getFilteredWorkingSites();
         } else {
           automationLogger.error('database', 'Target sites query failed, using defaults', {
             errorMessage,
             errorCode: error.code,
             errorDetails: error.details
           });
-          this.sites = this.getDefaultSites();
+          this.sites = this.getFilteredWorkingSites();
         }
       } else {
         this.sites = data || [];
         if (this.sites.length === 0) {
           automationLogger.info('system', 'No sites in database, using defaults');
-          this.sites = this.getDefaultSites();
+          this.sites = this.getFilteredWorkingSites();
         }
       }
 
