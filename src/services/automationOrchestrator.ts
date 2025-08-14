@@ -5,9 +5,10 @@ import { getTelegraphService } from './telegraphService';
 export interface Campaign {
   id: string;
   user_id: string;
+  name: string;
   target_url: string;
-  keyword: string;
-  anchor_text: string;
+  keywords: string[];
+  anchor_texts: string[];
   status: 'pending' | 'generating' | 'publishing' | 'completed' | 'paused' | 'failed';
   created_at: string;
   updated_at: string;
