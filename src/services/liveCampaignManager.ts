@@ -1165,13 +1165,51 @@ class LiveCampaignManager {
   }
 
   /**
-   * Get platform statistics
+   * Get platform health status for monitoring
+   */
+  getPlatformHealthStatus(): Array<{
+    platform: string;
+    domain: string;
+    health_status: string;
+    success_rate: number;
+    consecutive_failures: number;
+    total_attempts: number;
+    total_successes: number;
+    last_failure?: string;
+    next_retry_after?: string;
+    is_in_cooldown: boolean;
+    recent_errors: Array<{
+      timestamp: string;
+      error: string;
+      error_type: string;
+    }>;
+  }> {
+    return this.platformTargets.map(platform => ({
+      platform: platform.name,
+      domain: platform.domain,
+      health_status: platform.current_health_status,
+      success_rate: Math.round(platform.success_rate * 100) / 100,
+      consecutive_failures: platform.consecutive_failures,
+      total_attempts: platform.total_attempts,
+      total_successes: platform.total_successes,
+      last_failure: platform.last_failure,
+      next_retry_after: platform.next_retry_after,
+      is_in_cooldown: this.isPlatformInCooldown(platform),
+      recent_errors: platform.failure_reasons.slice(-5) // Last 5 errors
+    }));
+  }
+
+  /**
+   * Get platform statistics with enhanced health metrics
    */
   getPlatformStats(): Array<{
     platform: string;
     total_articles: number;
     success_rate: number;
     avg_word_count: number;
+    health_status: string;
+    consecutive_failures: number;
+    is_available: boolean;
   }> {
     const platformStats = new Map<string, {
       total: number;
