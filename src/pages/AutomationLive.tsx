@@ -39,6 +39,7 @@ import { DatabaseInit } from '@/utils/databaseInit';
 import { CampaignDebugger } from '@/components/CampaignDebugger';
 import { ApiHealthChecker } from '@/components/ApiHealthChecker';
 import { CampaignSchemaCheck } from '@/components/debug/CampaignSchemaCheck';
+import { CampaignCreationTest } from '@/components/debug/CampaignCreationTest';
 import guestPostingSites from '@/data/guestPostingSites.json';
 import { PLATFORM_CONFIGS, getImplementedPlatforms, getPlannedPlatforms, type PlatformConfig } from '@/services/platformConfigs';
 
@@ -248,7 +249,7 @@ export default function AutomationLive() {
         auto_start: false
       });
 
-      console.log('��� Campaign creation result:', result);
+      console.log('🔧 Campaign creation result:', result);
 
       if (result.success && result.campaign) {
         setCampaigns(prev => [result.campaign!, ...prev]);
