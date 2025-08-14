@@ -192,13 +192,13 @@ class LiveCampaignManager {
           .limit(1);
 
         if (!testError) {
-          // New schema with all columns
+          // New schema with all columns - ensure proper data types
           campaignData = {
             ...campaignData,
             links_built: 0,
             available_sites: availablePlatforms.length,
-            target_sites_used: [],
-            published_articles: [],
+            target_sites_used: [], // PostgreSQL will handle TEXT[] conversion
+            published_articles: [], // PostgreSQL will handle JSONB conversion
             started_at: params.auto_start ? new Date().toISOString() : null
           };
         } else {
