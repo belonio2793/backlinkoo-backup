@@ -264,11 +264,23 @@ export default function AutomationLive() {
       });
 
       // Ensure all data is properly typed and cleaned
+      // Validate target_url before trimming
+      if (!formData.target_url || typeof formData.target_url !== 'string') {
+        toast.error('Please provide a valid target URL');
+        return;
+      }
+
+      const cleanTargetUrl = formData.target_url.trim();
+      if (!cleanTargetUrl) {
+        toast.error('Target URL cannot be empty');
+        return;
+      }
+
       const campaignParams = {
         name: generatedName,
         keywords: keywordsArray, // Guaranteed to be a valid array of strings
         anchor_texts: anchorTextsArray, // Guaranteed to be a valid array of strings
-        target_url: formData.target_url.trim(),
+        target_url: cleanTargetUrl,
         user_id: user.id,
         auto_start: false
       };
@@ -299,12 +311,39 @@ export default function AutomationLive() {
         userInfo: { id: user.id, email: user.email }
       });
 
+      // Log the exact params being sent for debugging
+      console.log('🚀 Final campaign params validation:', {
+        name: typeof campaignParams.name,
+        keywords: {
+          type: Array.isArray(campaignParams.keywords) ? 'array' : typeof campaignParams.keywords,
+          length: Array.isArray(campaignParams.keywords) ? campaignParams.keywords.length : 'N/A',
+          sample: Array.isArray(campaignParams.keywords) ? campaignParams.keywords.slice(0, 2) : 'N/A',
+          allStrings: Array.isArray(campaignParams.keywords) ? campaignParams.keywords.every(k => typeof k === 'string') : false
+        },
+        anchor_texts: {
+          type: Array.isArray(campaignParams.anchor_texts) ? 'array' : typeof campaignParams.anchor_texts,
+          length: Array.isArray(campaignParams.anchor_texts) ? campaignParams.anchor_texts.length : 'N/A',
+          sample: Array.isArray(campaignParams.anchor_texts) ? campaignParams.anchor_texts.slice(0, 2) : 'N/A',
+          allStrings: Array.isArray(campaignParams.anchor_texts) ? campaignParams.anchor_texts.every(a => typeof a === 'string') : false
+        },
+        target_url: typeof campaignParams.target_url,
+        user_id: typeof campaignParams.user_id,
+        auto_start: typeof campaignParams.auto_start
+      });
+
       const result = await liveCampaignManager.createCampaign(campaignParams);
 
       internalLogger.info('ui_campaign_creation', 'Campaign creation result received', {
         success: result.success,
         hasCampaign: !!result.campaign,
-        error: result.error
+        error: result.error,
+        campaignId: result.campaign?.id || 'No ID',
+        errorDetails: result.error ? {
+          message: result.error,
+          containsJsonArray: result.error.includes('expected JSON array'),
+          containsColumn: result.error.includes('column'),
+          containsPermission: result.error.includes('permission')
+        } : null
       });
 
       if (result.success && result.campaign) {
@@ -345,12 +384,23 @@ export default function AutomationLive() {
         isKnownIssue = true;
         errorMessage = 'Database configuration error. Please try again or contact support if the issue persists.';
 
-        // Log additional debugging information
+        // Log additional debugging information with better serialization
         console.error('🔍 JSON Array Error Debug:', {
-          originalError: error,
-          formData,
-          processedKeywords: formData.keywords.split(',').map(k => k.trim()).filter(k => k),
-          processedAnchorTexts: formData.anchor_texts.split(',').map(a => a.trim()).filter(a => a)
+          errorMessage: error instanceof Error ? error.message : String(error),
+          errorStack: error instanceof Error ? error.stack : 'No stack trace',
+          formDataValidation: {
+            keywords_string: typeof formData.keywords === 'string' ? formData.keywords.substring(0, 100) : 'Not a string',
+            anchor_texts_string: typeof formData.anchor_texts === 'string' ? formData.anchor_texts.substring(0, 100) : 'Not a string',
+            target_url_string: typeof formData.target_url === 'string' ? formData.target_url : 'Not a string'
+          },
+          processedArrays: {
+            keywords: formData.keywords ? formData.keywords.split(',').map(k => k.trim()).filter(k => k) : [],
+            anchor_texts: formData.anchor_texts ? formData.anchor_texts.split(',').map(a => a.trim()).filter(a => a) : []
+          },
+          userInfo: {
+            hasUser: !!user,
+            userId: user?.id || 'No ID'
+          }
         });
       }
 
