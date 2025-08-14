@@ -182,11 +182,39 @@ class LiveCampaignManager {
     try {
       // Validate input parameters
       if (!Array.isArray(params.keywords) || params.keywords.length === 0) {
+        internalLogger.error('campaign_creation', 'Keywords validation failed', {
+          keywords: params.keywords,
+          isArray: Array.isArray(params.keywords),
+          length: Array.isArray(params.keywords) ? params.keywords.length : 'N/A'
+        });
         throw new Error('Keywords must be a non-empty array');
       }
       if (!Array.isArray(params.anchor_texts) || params.anchor_texts.length === 0) {
+        internalLogger.error('campaign_creation', 'Anchor texts validation failed', {
+          anchor_texts: params.anchor_texts,
+          isArray: Array.isArray(params.anchor_texts),
+          length: Array.isArray(params.anchor_texts) ? params.anchor_texts.length : 'N/A'
+        });
         throw new Error('Anchor texts must be a non-empty array');
       }
+
+      // Ensure all array elements are strings and clean them
+      const cleanKeywords = params.keywords.filter(k => k && typeof k === 'string' && k.trim().length > 0).map(k => k.trim());
+      const cleanAnchorTexts = params.anchor_texts.filter(a => a && typeof a === 'string' && a.trim().length > 0).map(a => a.trim());
+
+      if (cleanKeywords.length === 0) {
+        throw new Error('No valid keywords provided after cleaning');
+      }
+      if (cleanAnchorTexts.length === 0) {
+        throw new Error('No valid anchor texts provided after cleaning');
+      }
+
+      internalLogger.info('campaign_creation', 'Arrays validated and cleaned', {
+        originalKeywords: params.keywords.length,
+        cleanKeywords: cleanKeywords.length,
+        originalAnchorTexts: params.anchor_texts.length,
+        cleanAnchorTexts: cleanAnchorTexts.length
+      });
 
       // Get available platforms for this campaign
       const availablePlatforms = this.getAvailablePlatforms();
