@@ -33,7 +33,8 @@
     "fix:schema": "node scripts/fix-automation-schema.js",
     "test:schema": "node test-automation-schema.js",
     "check:schema": "node check-schema-structure.js",
-    "test:campaign": "node test-campaign-creation.js"
+    "test:campaign": "node test-campaign-creation.js",
+    "test:fix": "node test-campaign-fix.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
