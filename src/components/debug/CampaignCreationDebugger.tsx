@@ -32,34 +32,88 @@ export function CampaignCreationDebugger() {
 
   const testDatabaseSchema = async () => {
     addLog('Testing database schema...');
-    
-    try {
-      const { data: columns, error } = await supabase
-        .from('information_schema.columns')
-        .select('column_name, data_type')
-        .eq('table_name', 'automation_campaigns')
-        .eq('table_schema', 'public');
 
-      if (error) {
-        addLog(`Schema check failed: ${error.message}`, 'error');
+    try {
+      // Test 1: Check if the automation_campaigns table exists by trying to select from it
+      addLog('Checking if automation_campaigns table exists...');
+      const { data: tableTest, error: tableError } = await supabase
+        .from('automation_campaigns')
+        .select('id')
+        .limit(1);
+
+      if (tableError) {
+        addLog(`Table test failed: ${tableError.message}`, 'error');
         return false;
       }
 
-      addLog(`Found ${columns?.length || 0} columns in automation_campaigns table`);
-      
-      const arrayColumns = columns?.filter(col => 
-        col.column_name === 'keywords' || 
-        col.column_name === 'anchor_texts' || 
-        col.column_name === 'target_sites_used' ||
-        col.column_name === 'published_articles'
-      ) || [];
+      addLog('✅ automation_campaigns table exists and is accessible');
 
-      addLog('Array columns found:');
-      arrayColumns.forEach(col => {
-        addLog(`  ${col.column_name}: ${col.data_type}`);
-      });
+      // Test 2: Check for specific columns by trying to select them
+      addLog('Testing for required columns...');
+      const columnsToTest = ['keywords', 'anchor_texts', 'target_sites_used', 'published_articles', 'name', 'engine_type', 'user_id', 'status'];
+      const columnResults = [];
 
-      return true;
+      for (const columnName of columnsToTest) {
+        try {
+          const { error: columnError } = await supabase
+            .from('automation_campaigns')
+            .select(columnName)
+            .limit(1);
+
+          if (columnError) {
+            addLog(`  ❌ ${columnName}: ${columnError.message}`, 'error');
+            columnResults.push({ name: columnName, exists: false, error: columnError.message });
+          } else {
+            addLog(`  ✅ ${columnName}: exists`);
+            columnResults.push({ name: columnName, exists: true });
+          }
+        } catch (error) {
+          addLog(`  ❌ ${columnName}: ${error}`, 'error');
+          columnResults.push({ name: columnName, exists: false, error: String(error) });
+        }
+      }
+
+      const missingColumns = columnResults.filter(col => !col.exists);
+      if (missingColumns.length > 0) {
+        addLog(`⚠️ Found ${missingColumns.length} missing or problematic columns`, 'error');
+        missingColumns.forEach(col => {
+          addLog(`  Missing: ${col.name} - ${col.error}`, 'error');
+        });
+      } else {
+        addLog('✅ All required columns found and accessible', 'success');
+      }
+
+      // Test 3: Test a basic insert/delete to verify write permissions
+      addLog('Testing write permissions...');
+      try {
+        const testData = {
+          name: 'Schema Test - DELETE ME',
+          engine_type: 'web2_platforms',
+          user_id: 'test-schema-check',
+          status: 'draft',
+          auto_start: false
+        };
+
+        const { data: insertResult, error: insertError } = await supabase
+          .from('automation_campaigns')
+          .insert(testData)
+          .select('id')
+          .single();
+
+        if (insertError) {
+          addLog(`Write test failed: ${insertError.message}`, 'error');
+          addLog('This might indicate missing columns or permission issues', 'error');
+        } else {
+          addLog('✅ Write permissions confirmed');
+          // Clean up test record
+          await supabase.from('automation_campaigns').delete().eq('id', insertResult.id);
+          addLog('Test record cleaned up');
+        }
+      } catch (error) {
+        addLog(`Write test error: ${error}`, 'error');
+      }
+
+      return missingColumns.length === 0;
     } catch (error) {
       addLog(`Schema test error: ${error}`, 'error');
       return false;
@@ -122,11 +176,37 @@ export function CampaignCreationDebugger() {
 
   const testDirectInsertion = async (campaignParams: any) => {
     addLog('Testing direct database insertion...');
-    
+
     try {
-      // Create minimal campaign data for testing
-      const testData = {
-        name: campaignParams.name,
+      // Start with minimal data and progressively add more complex fields
+      addLog('Step 1: Testing minimal insertion...');
+      const minimalData = {
+        name: `${campaignParams.name} - Minimal`,
+        engine_type: 'web2_platforms',
+        user_id: campaignParams.user_id,
+        status: 'draft',
+        auto_start: false
+      };
+
+      const { data: minimalResult, error: minimalError } = await supabase
+        .from('automation_campaigns')
+        .insert(minimalData)
+        .select('id')
+        .single();
+
+      if (minimalError) {
+        addLog(`Minimal insertion failed: ${minimalError.message}`, 'error');
+        addLog(`This indicates basic table/permission issues`, 'error');
+        return false;
+      }
+
+      addLog(`✅ Minimal insertion successful! ID: ${minimalResult.id}`);
+      await supabase.from('automation_campaigns').delete().eq('id', minimalResult.id);
+
+      // Step 2: Test with arrays
+      addLog('Step 2: Testing with array fields...');
+      const arrayData = {
+        name: `${campaignParams.name} - Arrays`,
         engine_type: 'web2_platforms',
         keywords: campaignParams.keywords,
         anchor_texts: campaignParams.anchor_texts,
@@ -136,30 +216,36 @@ export function CampaignCreationDebugger() {
         auto_start: false
       };
 
-      addLog('Test data prepared:');
-      addLog(`  name: ${typeof testData.name}`);
-      addLog(`  keywords: ${Array.isArray(testData.keywords)} (${testData.keywords?.length || 0} items)`);
-      addLog(`  anchor_texts: ${Array.isArray(testData.anchor_texts)} (${testData.anchor_texts?.length || 0} items)`);
-      addLog(`  target_url: ${typeof testData.target_url}`);
+      addLog('Array test data:');
+      addLog(`  keywords: ${Array.isArray(arrayData.keywords)} - ${JSON.stringify(arrayData.keywords)}`);
+      addLog(`  anchor_texts: ${Array.isArray(arrayData.anchor_texts)} - ${JSON.stringify(arrayData.anchor_texts)}`);
 
-      const { data, error } = await supabase
+      const { data: arrayResult, error: arrayError } = await supabase
         .from('automation_campaigns')
-        .insert(testData)
-        .select()
+        .insert(arrayData)
+        .select('id, keywords, anchor_texts')
         .single();
 
-      if (error) {
-        addLog(`Direct insertion failed: ${error.message}`, 'error');
-        addLog(`Error details: ${JSON.stringify({ details: error.details, hint: error.hint, code: error.code })}`);
+      if (arrayError) {
+        addLog(`Array insertion failed: ${arrayError.message}`, 'error');
+        addLog(`Error details: ${JSON.stringify({ details: arrayError.details, hint: arrayError.hint, code: arrayError.code })}`);
+
+        // This is likely the "expected JSON array" error
+        if (arrayError.message.includes('expected JSON array')) {
+          addLog('🎯 This is the "expected JSON array" error we\'re trying to fix!', 'error');
+        }
+
         return false;
       }
 
-      addLog(`✅ Direct insertion successful! ID: ${data.id}`, 'success');
-      
+      addLog(`✅ Array insertion successful! ID: ${arrayResult.id}`, 'success');
+      addLog(`Retrieved keywords: ${JSON.stringify(arrayResult.keywords)}`);
+      addLog(`Retrieved anchor_texts: ${JSON.stringify(arrayResult.anchor_texts)}`);
+
       // Clean up test data
-      await supabase.from('automation_campaigns').delete().eq('id', data.id);
-      addLog('Test data cleaned up');
-      
+      await supabase.from('automation_campaigns').delete().eq('id', arrayResult.id);
+      addLog('Array test data cleaned up');
+
       return true;
     } catch (error) {
       addLog(`Direct insertion error: ${error}`, 'error');
