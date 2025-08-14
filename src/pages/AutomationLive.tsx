@@ -1171,6 +1171,7 @@ export default function AutomationLive() {
           {/* Debug Tab */}
           <TabsContent value="debug" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <SchemaFixTester />
               <DatabaseSchemaFixer />
               <CampaignCreationDebugger />
             </div>
