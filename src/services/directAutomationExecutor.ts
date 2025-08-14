@@ -99,7 +99,7 @@ class DirectAutomationExecutor {
         anchor_text: selectedAnchorText,
         target_url: input.target_url,
         user_id: input.user_id || 'direct-execution-user'
-      });
+      }, useMockServices);
 
       if (!contentResult.success) {
         throw new Error(`Content generation failed: ${contentResult.error}`);
