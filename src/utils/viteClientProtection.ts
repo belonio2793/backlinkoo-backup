@@ -110,16 +110,22 @@ function isViteClientRequest(url: string, init?: RequestInit): boolean {
  */
 function isViteClientError(error: any): boolean {
   if (!error) return false;
-  
+
   const message = error.message || '';
   const stack = error.stack || '';
-  
-  return (message.includes('Failed to fetch') || 
-          message.includes('TypeError')) &&
+
+  // Only consider it a Vite client error if:
+  // 1. It's a fetch failure AND
+  // 2. The stack trace specifically shows Vite client code AND
+  // 3. NOT from Supabase or other external services
+  return (message.includes('Failed to fetch') || message.includes('TypeError')) &&
          (stack.includes('@vite/client') ||
-          stack.includes('ping') ||
-          stack.includes('waitForSuccessfulPing') ||
-          stack.includes('messageHandler'));
+          stack.includes('__vite_ping') ||
+          stack.includes('viteClientProtection')) &&
+         // Exclude Supabase and other legitimate fetch failures
+         !stack.includes('supabase') &&
+         !stack.includes('netlify') &&
+         !stack.includes('fetch (eval at messageHandler');
 }
 
 /**
