@@ -245,7 +245,7 @@ class LiveCampaignManager {
               links_built: 0,
               available_sites: availablePlatforms.length,
               target_sites_used: [],
-              published_articles: [],
+              published_articles: '[]', // JSONB string format for empty array
               started_at: params.auto_start ? new Date().toISOString() : null
             };
           } else {
