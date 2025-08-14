@@ -42,18 +42,7 @@ interface Campaign {
   target_sites_used?: string[];
 }
 
-interface PublishedArticle {
-  id: string;
-  article_title: string;
-  article_url: string;
-  status: 'published';
-  published_date: string;
-  anchor_text: string;
-  word_count?: number;
-  platform: string;
-  campaign_name?: string;
-  target_url?: string;
-}
+// Using PublishedArticle type from automation engine
 
 export default function Automation() {
   const { user } = useAuth();
