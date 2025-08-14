@@ -744,19 +744,6 @@ export default function Automation() {
                   Generate keyword-relevant content with your anchor text links and publish to high-authority websites for instant backlinks.
                 </CardDescription>
 
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mt-4">
-                  <h4 className="font-medium text-blue-800 mb-2">Two Execution Modes:</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-                    <div>
-                      <p className="font-medium text-blue-700">📊 Create Campaign</p>
-                      <p className="text-blue-600">Saves to database for tracking and management</p>
-                    </div>
-                    <div>
-                      <p className="font-medium text-green-700">⚡ Execute Directly</p>
-                      <p className="text-green-600">Immediate execution without database storage</p>
-                    </div>
-                  </div>
-                </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="space-y-2">
