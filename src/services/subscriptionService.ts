@@ -108,7 +108,7 @@ export class SubscriptionService {
         .eq('subscribed', true);
 
       if (error) {
-        logError('Error checking subscription', error);
+        ErrorLogger.logError('Error checking subscription', error);
       }
 
       // Get the most recent active subscriber if multiple exist
@@ -131,7 +131,7 @@ export class SubscriptionService {
         stripeCustomerId: subscriber?.stripe_customer_id,
       };
     } catch (error: any) {
-      logError('Exception checking subscription status', error);
+      ErrorLogger.logError('Exception checking subscription status', error);
       return {
         isSubscribed: false,
         subscriptionTier: null,
@@ -269,7 +269,7 @@ export class SubscriptionService {
       }
 
       if (error) {
-        logError('Edge function error', error);
+        ErrorLogger.logError('Edge function error', error);
 
         // Provide more specific error messages
         let errorMessage = 'Failed to create subscription';
@@ -308,7 +308,7 @@ export class SubscriptionService {
           errorMessage = 'Invalid Stripe price ID. Please verify your Stripe configuration and ensure the price exists.';
         }
 
-        logError('Subscription creation error', error);
+        ErrorLogger.logError('Subscription creation error', error);
         return { success: false, error: errorMessage };
       }
 
@@ -318,7 +318,7 @@ export class SubscriptionService {
       return { success: true, url: data.url || data.checkoutUrl };
 
     } catch (error: any) {
-      logError('Exception creating subscription', error);
+      ErrorLogger.logError('Exception creating subscription', error);
 
       let errorMessage = 'An unexpected error occurred';
 
@@ -356,7 +356,7 @@ export class SubscriptionService {
         .eq('email', user.email);
 
       if (error) {
-        logError('Error fetching subscription info', error);
+        ErrorLogger.logError('Error fetching subscription info', error);
         return null;
       }
 
@@ -383,7 +383,7 @@ export class SubscriptionService {
         ]
       };
     } catch (error: any) {
-      logError('Exception fetching subscription info', error);
+      ErrorLogger.logError('Exception fetching subscription info', error);
       return null;
     }
   }
@@ -409,13 +409,13 @@ export class SubscriptionService {
         .eq('subscribed', true);
 
       if (error) {
-        logError('Error cancelling subscription', error);
+        ErrorLogger.logError('Error cancelling subscription', error);
         return { success: false, error: getErrorMessage(error) || 'Failed to cancel subscription' };
       }
 
       return { success: true };
     } catch (error: any) {
-      logError('Exception cancelling subscription', error);
+      ErrorLogger.logError('Exception cancelling subscription', error);
       return { success: false, error: error.message || 'Failed to cancel subscription' };
     }
   }
@@ -447,13 +447,13 @@ export class SubscriptionService {
       const { error } = await query;
 
       if (error) {
-        logError('Error updating subscription status', error);
+        ErrorLogger.logError('Error updating subscription status', error);
         return false;
       }
 
       return true;
     } catch (error: any) {
-      logError('Exception updating subscription status', error);
+      ErrorLogger.logError('Exception updating subscription status', error);
       return false;
     }
   }
