@@ -39,6 +39,7 @@ import { DatabaseInit } from '@/utils/databaseInit';
 import { InternalLogViewer } from '@/components/debug/InternalLogViewer';
 import { CampaignCreationFix } from '@/components/debug/CampaignCreationFix';
 import { PlatformHealthMonitor } from '@/components/debug/PlatformHealthMonitor';
+import { PlatformErrorSimulator } from '@/components/debug/PlatformErrorSimulator';
 import { internalLogger } from '@/services/internalLogger';
 import guestPostingSites from '@/data/guestPostingSites.json';
 import { PLATFORM_CONFIGS, getImplementedPlatforms, getPlannedPlatforms, type PlatformConfig } from '@/services/platformConfigs';
