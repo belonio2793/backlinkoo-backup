@@ -8,20 +8,26 @@ import { getOrchestrator } from '@/services/automationOrchestrator';
 export class AutomationTest {
   
   /**
-   * Test OpenAI content generation
+   * Test content generation service
    */
   static async testContentGeneration(): Promise<boolean> {
     try {
       const contentService = getContentService();
-      
-      // Test API connection first
-      const isConnected = await contentService.validateConnection();
-      if (!isConnected) {
-        console.error('OpenAI API connection failed');
+
+      // Get service status
+      const status = await contentService.getServiceStatus();
+
+      if (!status.available) {
+        console.error('Content generation service is not available:', status.error);
         return false;
       }
 
-      console.log('✅ OpenAI API connection validated');
+      if (!status.configured) {
+        console.error('Content generation service is not properly configured:', status.error);
+        return false;
+      }
+
+      console.log('✅ Content generation service validated');
       return true;
     } catch (error) {
       console.error('Content generation test failed:', error);
