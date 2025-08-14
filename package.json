@@ -30,7 +30,8 @@
     "admin:create": "node scripts/create-admin-user.js create",
     "admin:list": "node scripts/create-admin-user.js list",
     "admin:test": "node scripts/create-admin-user.js test",
-    "fix:schema": "node scripts/fix-automation-schema.js"
+    "fix:schema": "node scripts/fix-automation-schema.js",
+    "test:schema": "node test-automation-schema.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
