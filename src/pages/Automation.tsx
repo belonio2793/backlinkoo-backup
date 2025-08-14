@@ -73,6 +73,19 @@ const Automation = () => {
     return true;
   };
 
+  const formatErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    if (typeof error === 'string') {
+      return error;
+    }
+    if (error && typeof error === 'object') {
+      return JSON.stringify(error);
+    }
+    return 'An unknown error occurred';
+  };
+
   const handleCreateCampaign = async () => {
     if (!validateForm()) return;
 
@@ -125,7 +138,7 @@ const Automation = () => {
       
       toast({
         title: "Campaign Creation Failed",
-        description: error instanceof Error ? error.message : "There was an error creating your campaign. Please try again.",
+        description: formatErrorMessage(error),
         variant: "destructive"
       });
     } finally {
