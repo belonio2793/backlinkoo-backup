@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation Fix Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .status { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 5px; overflow-x: auto; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Automation Schema Fix Test</h1>
+    
+    <div class="info status">
+        <strong>Testing Status:</strong> This page will test if the "expected JSON array" error has been resolved.
+    </div>
+
+    <h2>📋 Test Steps</h2>
+    <ol>
+        <li>Click "Test Database Schema" to verify columns exist</li>
+        <li>Click "Test Campaign Creation" to test the actual functionality</li>
+        <li>If both pass, the fix is successful!</li>
+    </ol>
+
+    <div id="results"></div>
+
+    <button onclick="testDatabaseSchema()" id="testSchemaBtn">Test Database Schema</button>
+    <button onclick="testCampaignCreation()" id="testCampaignBtn">Test Campaign Creation</button>
+    <button onclick="clearResults()">Clear Results</button>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.skypack.dev/@supabase/supabase-js@2';
+        
+        // Initialize Supabase client
+        const supabaseUrl = import.meta.env?.VITE_SUPABASE_URL || 'YOUR_SUPABASE_URL';
+        const supabaseKey = import.meta.env?.VITE_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_KEY';
+        
+        let supabase;
+        try {
+            supabase = createClient(supabaseUrl, supabaseKey);
+        } catch (error) {
+            addResult('❌ Supabase Connection Failed', `Could not connect to Supabase: ${error.message}`, 'error');
+        }
+
+        function addResult(title, message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = `<strong>${title}</strong><br>${message}`;
+            results.appendChild(div);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // Test 1: Check if required columns exist
+        window.testDatabaseSchema = async function() {
+            addResult('🔍 Testing Database Schema...', 'Checking for required columns in automation_campaigns table', 'info');
+            
+            try {
+                // Check if the table and columns exist
+                const { data: columns, error } = await supabase
+                    .from('information_schema.columns')
+                    .select('column_name, data_type')
+                    .eq('table_name', 'automation_campaigns')
+                    .in('column_name', [
+                        'published_articles', 
+                        'links_built', 
+                        'available_sites', 
+                        'target_sites_used',
+                        'engine_type',
+                        'execution_progress',
+                        'current_platform'
+                    ]);
+
+                if (error) {
+                    addResult('❌ Schema Check Failed', `Error checking schema: ${error.message}`, 'error');
+                    return;
+                }
+
+                const requiredColumns = ['published_articles', 'links_built', 'available_sites', 'target_sites_used', 'engine_type'];
+                const foundColumns = columns?.map(col => col.column_name) || [];
+                const missingColumns = requiredColumns.filter(col => !foundColumns.includes(col));
+
+                if (missingColumns.length === 0) {
+                    addResult('✅ Schema Check Passed', 
+                        `All required columns found: ${foundColumns.join(', ')}`, 'success');
+                } else {
+                    addResult('❌ Schema Check Failed', 
+                        `Missing columns: ${missingColumns.join(', ')}<br>Found: ${foundColumns.join(', ')}`, 'error');
+                }
+
+            } catch (error) {
+                addResult('❌ Schema Test Error', `Unexpected error: ${error.message}`, 'error');
+            }
+        };
+
+        // Test 2: Try to create a test campaign
+        window.testCampaignCreation = async function() {
+            addResult('🧪 Testing Campaign Creation...', 'Attempting to create a test campaign', 'info');
+            
+            try {
+                // First check if user is authenticated
+                const { data: { user }, error: authError } = await supabase.auth.getUser();
+                
+                if (authError || !user) {
+                    addResult('⚠️ Authentication Required', 
+                        'Please sign in to test campaign creation. This test requires a user account.', 'error');
+                    return;
+                }
+
+                // Test campaign data that should work with the fixed schema
+                const testCampaign = {
+                    user_id: user.id,
+                    name: `Schema Fix Test - ${new Date().toISOString()}`,
+                    keywords: ['test', 'automation'],
+                    anchor_texts: ['test link'],
+                    target_url: 'https://test.example.com',
+                    status: 'draft',
+                    engine_type: 'web2_platforms',
+                    links_built: 0,
+                    available_sites: 1,
+                    target_sites_used: [],
+                    published_articles: []
+                };
+
+                const { data, error } = await supabase
+                    .from('automation_campaigns')
+                    .insert(testCampaign)
+                    .select()
+                    .single();
+
+                if (error) {
+                    if (error.message.includes('expected JSON array')) {
+                        addResult('❌ "Expected JSON Array" Error Still Present', 
+                            `The schema fix didn't work completely. Error: ${error.message}`, 'error');
+                    } else {
+                        addResult('❌ Campaign Creation Failed', 
+                            `Error: ${error.message}`, 'error');
+                    }
+                    return;
+                }
+
+                // Success! Clean up the test data
+                await supabase
+                    .from('automation_campaigns')
+                    .delete()
+                    .eq('id', data.id);
+
+                addResult('✅ Campaign Creation Test Passed', 
+                    `Successfully created and deleted test campaign (ID: ${data.id}). The "expected JSON array" error is fixed!`, 'success');
+
+            } catch (error) {
+                addResult('❌ Campaign Creation Test Error', 
+                    `Unexpected error: ${error.message}`, 'error');
+            }
+        };
+
+        // Add initial message
+        addResult('🚀 Automation Fix Test Ready', 
+            'Click the buttons above to test if the schema fix resolved the "expected JSON array" error.', 'info');
+
+    </script>
+</body>
+</html>
