@@ -2,10 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { SecureConfig } from '../../lib/secure-config';
-import { safeFetch, preserveOriginalFetch } from '../../utils/fullstoryWorkaround';
-
-// Store original fetch before third-party scripts can modify it
-preserveOriginalFetch();
+// Simplified imports without fetch workarounds
 
 // Get Supabase configuration with proper fallback
 const getSupabaseConfig = () => {
@@ -238,117 +235,31 @@ export const supabase = hasValidCredentials ?
       headers: {
         'X-Client-Info': 'backlink-infinity@1.0.0',
       },
-      fetch: (url, options = {}) => {
-        // Create a timeout that won't interfere with existing signals
-        const timeoutMs = 30000;
-        const timeoutController = new AbortController();
+      fetch: async (url, options = {}) => {
+        try {
+          // Use native fetch with simple timeout
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-        let timeoutId;
-        if (!options.signal) {
-          timeoutId = setTimeout(() => timeoutController.abort(), timeoutMs);
-        }
+          const response = await fetch(url, {
+            ...options,
+            signal: controller.signal,
+          });
 
-        const finalSignal = options.signal || timeoutController.signal;
-
-        return safeFetch(url, {
-          ...options,
-          signal: finalSignal,
-        }).then(response => {
-          if (timeoutId) clearTimeout(timeoutId);
+          clearTimeout(timeoutId);
           return response;
-        }).catch(async (error) => {
-          if (timeoutId) clearTimeout(timeoutId);
-
-          // Handle specific error types
+        } catch (error) {
           if (error.name === 'AbortError') {
-            console.warn('🔍 Request aborted (likely timeout):', url);
             throw new Error('Request timeout - please try again');
           }
-
-          // Enhanced FullStory error handling with retry - but be more specific
-          const isDefinitelyFullStory = (
-            error.stack?.includes('fullstory') ||
-            error.stack?.includes('edge.fullstory.com') ||
-            error.message?.includes('Third-party script interference')
-          );
-
-          const isPossiblyFullStory = (
-            error.message?.includes('Failed to fetch') &&
-            (error.stack?.includes('messageHandler') && error.stack?.includes('eval'))
-          );
-
-          if (isDefinitelyFullStory || isPossiblyFullStory) {
-            console.warn('🔍 Potential FullStory interference detected, attempting bypass retry for:', url);
-
-            try {
-              // Import the bypass fetch dynamically to avoid circular imports
-              const { createBypassFetch } = await import('../../utils/fullstoryWorkaround');
-              const bypassFetch = createBypassFetch();
-
-              // Retry with XMLHttpRequest-based fetch
-              const retryResponse = await bypassFetch(url, {
-                ...options,
-                signal: finalSignal,
-              });
-
-              console.log('✅ Successfully bypassed FullStory interference for:', url);
-              return retryResponse;
-
-            } catch (bypassError) {
-              console.error('❌ Bypass retry also failed:', bypassError.message || bypassError.toString() || JSON.stringify(bypassError));
-              // If bypass also fails, provide a more helpful error message
-              throw new Error(`Network request failed due to third-party script interference. Please try refreshing the page or disabling browser extensions.`);
-            }
-          }
-
-          console.warn('Supabase fetch error:', error);
-          throw new Error(`Network request failed: ${error.message || 'Unknown network error'}`);
-        });
+          throw error;
+        }
       },
     },
   }) :
   createMockSupabaseClient() as any;
 
-/**
- * Wrapper to add retry logic to critical Supabase operations
- */
-const withRetry = async <T>(operation: () => Promise<T>, operationName: string, maxRetries: number = 2): Promise<T> => {
-  let lastError: Error;
-
-  for (let attempt = 1; attempt <= maxRetries + 1; attempt++) {
-    try {
-      return await operation();
-    } catch (error: any) {
-      lastError = error;
-
-      if (attempt <= maxRetries && (
-        error.message?.includes('Third-party script interference') ||
-        error.message?.includes('NetworkInterferenceError') ||
-        error.message?.includes('Failed to fetch')
-      )) {
-        console.warn(`🔄 Retrying ${operationName} (attempt ${attempt}/${maxRetries + 1}) due to:`, error.message);
-        // Wait a bit before retrying
-        await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
-        continue;
-      }
-
-      // If it's not a retryable error or we've exhausted retries, throw
-      break;
-    }
-  }
-
-  console.error(`❌ ${operationName} failed after ${maxRetries + 1} attempts:`, lastError.message);
-  throw lastError;
-};
-
-// Enhanced client with retry capabilities for auth operations
-if (hasValidCredentials && supabase.auth) {
-  const originalGetUser = supabase.auth.getUser.bind(supabase.auth);
-  const originalGetSession = supabase.auth.getSession.bind(supabase.auth);
-
-  supabase.auth.getUser = () => withRetry(originalGetUser, 'auth.getUser');
-  supabase.auth.getSession = () => withRetry(originalGetSession, 'auth.getSession');
-}
+// Simplified client without complex retry logic to prevent response reading issues
 
 // Log the final client type
 if (hasValidCredentials) {

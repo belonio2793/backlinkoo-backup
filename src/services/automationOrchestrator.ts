@@ -5,9 +5,10 @@ import { getTelegraphService } from './telegraphService';
 export interface Campaign {
   id: string;
   user_id: string;
+  name: string;
   target_url: string;
-  keyword: string;
-  anchor_text: string;
+  keywords: string[];
+  anchor_texts: string[];
   status: 'pending' | 'generating' | 'publishing' | 'completed' | 'paused' | 'failed';
   created_at: string;
   updated_at: string;
@@ -46,9 +47,10 @@ export class AutomationOrchestrator {
         .from('automation_campaigns')
         .insert({
           user_id: user.id,
+          name: `Campaign for ${params.keyword}`,
           target_url: params.target_url,
-          keyword: params.keyword,
-          anchor_text: params.anchor_text,
+          keywords: [params.keyword],
+          anchor_texts: [params.anchor_text],
           status: 'pending'
         })
         .select()
@@ -56,6 +58,16 @@ export class AutomationOrchestrator {
 
       if (error) {
         console.error('Error creating campaign:', error);
+
+        // Handle specific database errors
+        if (error.message.includes('violates row-level security policy')) {
+          throw new Error('Authentication required: Please log in to create campaigns');
+        }
+
+        if (error.message.includes('column') && error.message.includes('does not exist')) {
+          throw new Error('Database schema error: Please contact administrator');
+        }
+
         throw new Error(`Failed to create campaign: ${error.message}`);
       }
 
@@ -100,8 +112,8 @@ export class AutomationOrchestrator {
 
       // Step 3: Generate content
       const generatedContent = await this.contentService.generateAllContent({
-        keyword: campaign.keyword,
-        anchorText: campaign.anchor_text,
+        keyword: campaign.keywords[0] || 'default keyword',
+        anchorText: campaign.anchor_texts[0] || 'click here',
         targetUrl: campaign.target_url
       });
 
@@ -114,9 +126,11 @@ export class AutomationOrchestrator {
           .from('automation_content')
           .insert({
             campaign_id: campaignId,
-            prompt_type: content.type,
+            title: `Generated ${content.type}`,
             content: content.content,
-            word_count: content.wordCount
+            target_keyword: campaign.keywords[0] || '',
+            anchor_text: campaign.anchor_texts[0] || '',
+            backlink_url: campaign.target_url
           })
           .select()
           .single();
@@ -136,7 +150,7 @@ export class AutomationOrchestrator {
       const publishedLinks = [];
       for (const contentRecord of contentRecords) {
         try {
-          const title = this.telegraphService.generateTitleFromContent(campaign.keyword);
+          const title = this.telegraphService.generateTitleFromContent(campaign.keywords[0] || 'SEO');
 
           const publishedPage = await this.telegraphService.publishContent({
             title,
@@ -294,7 +308,7 @@ export class AutomationOrchestrator {
       .from('automation_logs')
       .insert({
         campaign_id: campaignId,
-        log_level: level,
+        level: level,
         message,
         details
       });

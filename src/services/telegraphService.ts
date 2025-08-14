@@ -48,24 +48,16 @@ export class TelegraphService {
         })
       });
 
-      if (!response.ok) {
-        let errorMessage = `Telegraph API error: ${response.status} ${response.statusText}`;
-        try {
-          const errorData = await response.json();
-          if (errorData.error) {
-            errorMessage = `Telegraph API error: ${errorData.error}`;
-          }
-        } catch (parseError) {
-          console.warn('Failed to parse Telegraph error response:', parseError);
-        }
-        throw new Error(errorMessage);
-      }
-
       let data;
       try {
         data = await response.json();
       } catch (parseError) {
         throw new Error('Telegraph API returned invalid JSON response');
+      }
+
+      if (!response.ok) {
+        const errorMessage = data?.error || `Telegraph API error: ${response.status} ${response.statusText}`;
+        throw new Error(errorMessage);
       }
 
       if (!data.ok) {
@@ -112,24 +104,16 @@ export class TelegraphService {
         })
       });
 
-      if (!response.ok) {
-        let errorMessage = `Telegraph API error: ${response.status} ${response.statusText}`;
-        try {
-          const errorData = await response.json();
-          if (errorData.error) {
-            errorMessage = `Telegraph API error: ${errorData.error}`;
-          }
-        } catch (parseError) {
-          console.warn('Failed to parse Telegraph error response:', parseError);
-        }
-        throw new Error(errorMessage);
-      }
-
       let data;
       try {
         data = await response.json();
       } catch (parseError) {
         throw new Error('Telegraph API returned invalid JSON response');
+      }
+
+      if (!response.ok) {
+        const errorMessage = data?.error || `Telegraph API error: ${response.status} ${response.statusText}`;
+        throw new Error(errorMessage);
       }
 
       if (!data.ok) {
@@ -167,150 +151,129 @@ export class TelegraphService {
         }
       });
 
+      // If no children were processed, treat the entire content as text
+      if (telegraphNodes.length === 0) {
+        // Split by paragraphs and create paragraph nodes
+        const paragraphs = htmlContent.split('\n\n').filter(p => p.trim());
+        paragraphs.forEach(paragraph => {
+          if (paragraph.trim()) {
+            telegraphNodes.push({
+              tag: 'p',
+              children: [paragraph.trim()]
+            });
+          }
+        });
+      }
+
       return telegraphNodes;
     } catch (error) {
       console.error('Error converting HTML to Telegraph format:', error);
-      // Fallback: create simple text nodes
-      return [{ tag: 'p', children: [htmlContent.replace(/<[^>]*>/g, '')] }];
+      // Fallback: create simple paragraph nodes
+      const paragraphs = htmlContent.split('\n\n').filter(p => p.trim());
+      return paragraphs.map(paragraph => ({
+        tag: 'p',
+        children: [paragraph.trim()]
+      }));
     }
   }
 
   /**
-   * Convert HTML element to Telegraph node format
+   * Convert DOM element to Telegraph node
    */
   private convertElementToTelegraphNode(element: Element): any {
     const tagName = element.tagName.toLowerCase();
     
-    switch (tagName) {
-      case 'h1':
-      case 'h2':
-      case 'h3':
-      case 'h4':
-      case 'h5':
-      case 'h6':
-        return {
-          tag: 'h3', // Telegraph only supports h3 and h4
-          children: this.getTextContent(element)
-        };
-      
-      case 'p':
-        const children = this.processChildNodes(element);
-        return children.length > 0 ? { tag: 'p', children } : null;
-      
-      case 'a':
-        return {
-          tag: 'a',
-          attrs: {
-            href: element.getAttribute('href') || '',
-            target: '_blank'
-          },
-          children: this.getTextContent(element)
-        };
-      
-      case 'strong':
-      case 'b':
-        return {
-          tag: 'strong',
-          children: this.getTextContent(element)
-        };
-      
-      case 'em':
-      case 'i':
-        return {
-          tag: 'em',
-          children: this.getTextContent(element)
-        };
-      
-      case 'br':
-        return { tag: 'br' };
-      
-      default:
-        // For unsupported tags, just get text content
-        const textContent = element.textContent?.trim();
-        return textContent ? { tag: 'p', children: [textContent] } : null;
-    }
-  }
+    // Map HTML tags to Telegraph supported tags
+    const tagMapping: { [key: string]: string } = {
+      'h1': 'h3',
+      'h2': 'h4',
+      'h3': 'h4',
+      'h4': 'h4',
+      'h5': 'h4',
+      'h6': 'h4',
+      'div': 'p',
+      'span': 'p'
+    };
 
-  /**
-   * Process child nodes of an element
-   */
-  private processChildNodes(element: Element): any[] {
-    const children: any[] = [];
+    const telegraphTag = tagMapping[tagName] || tagName;
+
+    // Only allow supported Telegraph tags
+    const supportedTags = ['p', 'h3', 'h4', 'br', 'strong', 'em', 'u', 'del', 'code', 'pre', 'blockquote', 'a', 'ul', 'ol', 'li'];
     
-    Array.from(element.childNodes).forEach(node => {
-      if (node.nodeType === Node.TEXT_NODE) {
-        const text = node.textContent?.trim();
+    if (!supportedTags.includes(telegraphTag)) {
+      // For unsupported tags, extract text content and wrap in paragraph
+      return {
+        tag: 'p',
+        children: [element.textContent || '']
+      };
+    }
+
+    const children: any[] = [];
+
+    // Process child nodes
+    Array.from(element.childNodes).forEach(child => {
+      if (child.nodeType === Node.TEXT_NODE) {
+        const text = child.textContent?.trim();
         if (text) {
           children.push(text);
         }
-      } else if (node.nodeType === Node.ELEMENT_NODE) {
-        const childElement = node as Element;
-        
-        if (childElement.tagName.toLowerCase() === 'a') {
-          children.push({
-            tag: 'a',
-            attrs: {
-              href: childElement.getAttribute('href') || '',
-              target: '_blank'
-            },
-            children: [childElement.textContent || '']
-          });
-        } else if (childElement.tagName.toLowerCase() === 'strong' || childElement.tagName.toLowerCase() === 'b') {
-          children.push({
-            tag: 'strong',
-            children: [childElement.textContent || '']
-          });
-        } else if (childElement.tagName.toLowerCase() === 'em' || childElement.tagName.toLowerCase() === 'i') {
-          children.push({
-            tag: 'em',
-            children: [childElement.textContent || '']
-          });
-        } else {
-          const text = childElement.textContent?.trim();
-          if (text) {
-            children.push(text);
-          }
+      } else if (child.nodeType === Node.ELEMENT_NODE) {
+        const childNode = this.convertElementToTelegraphNode(child as Element);
+        if (childNode) {
+          children.push(childNode);
         }
       }
     });
-    
-    return children;
+
+    // Handle special cases
+    if (telegraphTag === 'a') {
+      const href = element.getAttribute('href');
+      if (href) {
+        return {
+          tag: 'a',
+          attrs: { href },
+          children
+        };
+      }
+    }
+
+    if (telegraphTag === 'br') {
+      return { tag: 'br' };
+    }
+
+    return {
+      tag: telegraphTag,
+      children: children.length > 0 ? children : [element.textContent || '']
+    };
   }
 
   /**
-   * Get text content from element, preserving inline formatting
-   */
-  private getTextContent(element: Element): string[] {
-    const text = element.textContent?.trim();
-    return text ? [text] : [];
-  }
-
-  /**
-   * Generate a title from content
+   * Generate a title from content and keyword
    */
   generateTitleFromContent(keyword: string): string {
     const titles = [
       `The Ultimate Guide to ${keyword}`,
-      `Everything You Need to Know About ${keyword}`,
-      `Mastering ${keyword}: A Comprehensive Guide`,
-      `${keyword}: Tips, Tricks, and Best Practices`,
-      `Understanding ${keyword}: A Complete Overview`
+      `Mastering ${keyword}: Tips and Strategies`,
+      `${keyword}: Everything You Need to Know`,
+      `Expert Insights on ${keyword}`,
+      `${keyword} Best Practices and Techniques`
     ];
     
     return titles[Math.floor(Math.random() * titles.length)];
   }
 
   /**
-   * Test Telegraph API connection
+   * Get account information
    */
-  async testConnection(): Promise<boolean> {
-    try {
-      await this.createAccount();
-      return true;
-    } catch (error) {
-      console.error('Telegraph connection test failed:', error);
-      return false;
-    }
+  getAccount(): TelegraphAccount | null {
+    return this.account;
+  }
+
+  /**
+   * Clear account (for testing or reset)
+   */
+  clearAccount(): void {
+    this.account = null;
   }
 }
 

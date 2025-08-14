@@ -29,7 +29,13 @@
     "deploy:build": "npm run build && npm run deploy:netlify",
     "admin:create": "node scripts/create-admin-user.js create",
     "admin:list": "node scripts/create-admin-user.js list",
-    "admin:test": "node scripts/create-admin-user.js test"
+    "admin:test": "node scripts/create-admin-user.js test",
+    "fix:schema": "node scripts/fix-automation-schema.js",
+    "test:schema": "node test-automation-schema.js",
+    "check:schema": "node check-schema-structure.js",
+    "test:campaign": "node test-campaign-creation.js",
+    "test:fix": "node test-campaign-fix.js",
+    "test:final": "node final-campaign-test.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
