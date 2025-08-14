@@ -254,7 +254,7 @@ class LiveCampaignManager {
 
       internalLogger.info('campaign_creation', 'Attempting database insert', { finalCampaignData: campaignData });
 
-      const { data, error } = await supabase
+      let { data, error } = await supabase
         .from('automation_campaigns')
         .insert(campaignData)
         .select()
