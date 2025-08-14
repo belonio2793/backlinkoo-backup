@@ -1022,6 +1022,9 @@ export default function AutomationLive() {
           <TabsContent value="debug" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <CampaignCreationFix />
+              <PlatformErrorSimulator />
+            </div>
+            <div className="w-full">
               <PlatformHealthMonitor />
             </div>
             <div className="w-full">
