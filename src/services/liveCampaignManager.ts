@@ -210,10 +210,23 @@ class LiveCampaignManager {
 
       return { success: true, campaign };
     } catch (error) {
-      console.error('Failed to create campaign:', error);
+      let errorMessage = 'Unknown error';
+
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (error && typeof error === 'object') {
+        const errorObj = error as any;
+        errorMessage = errorObj.message || errorObj.error || errorObj.details ||
+                      'Campaign creation failed with no additional details';
+      }
+
+      console.error('Failed to create campaign:', { originalError: error, errorMessage });
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: errorMessage
       };
     }
   }
