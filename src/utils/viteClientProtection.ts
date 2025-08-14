@@ -104,18 +104,18 @@ function isViteClientError(error: any): boolean {
   const message = error.message || '';
   const stack = error.stack || '';
 
-  // Only consider it a Vite client error if:
-  // 1. It's a fetch failure AND
-  // 2. The stack trace specifically shows Vite client code AND
-  // 3. NOT from Supabase or other external services
-  return (message.includes('Failed to fetch') || message.includes('TypeError')) &&
-         (stack.includes('@vite/client') ||
-          stack.includes('__vite_ping') ||
-          stack.includes('viteClientProtection')) &&
-         // Exclude Supabase and other legitimate fetch failures
+  // EXTREMELY conservative - only consider it a Vite client error if:
+  // 1. The stack explicitly shows Vite WebSocket connection code
+  // 2. AND it's NOT from any external service
+  return message.includes('Failed to fetch') &&
+         stack.includes('@vite/client') &&
+         stack.includes('connectWebSocket') &&
+         // Absolutely exclude any external services
          !stack.includes('supabase') &&
          !stack.includes('netlify') &&
-         !stack.includes('fetch (eval at messageHandler');
+         !stack.includes('.fly.dev') &&
+         !stack.includes('https://') &&
+         !stack.includes('messageHandler');
 }
 
 /**
