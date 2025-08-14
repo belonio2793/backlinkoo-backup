@@ -38,7 +38,7 @@ if (import.meta.env.DEV) {
         headers: { 'Content-Type': 'application/json' }
       });
       const result = await response.json();
-      console.log('🔧 RLS fix result:', result);
+      console.log('�� RLS fix result:', result);
       if (result.success) {
         console.log('✅ RLS fix successful - refreshing page...');
         setTimeout(() => window.location.reload(), 1000);
@@ -161,6 +161,18 @@ if (import.meta.env.DEV) {
       }
     }
     console.log('❌ No working content functions found');
+  };
+
+  // Add emergency fetch fix helper
+  (window as any).fixFetchErrors = async () => {
+    console.log('🚨 Applying emergency fetch fix...');
+    try {
+      const { emergencyDisableFetchProtection } = await import('./utils/emergencyFetchFix');
+      emergencyDisableFetchProtection();
+      console.log('✅ Fetch protection disabled - try your request again');
+    } catch (error) {
+      console.error('❌ Failed to apply fetch fix:', error);
+    }
   };
 
   console.log('  - disableViteProtection() - Disable fetch protection and refresh');
