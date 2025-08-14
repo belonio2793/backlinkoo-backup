@@ -252,14 +252,27 @@ class DirectAutomationExecutor {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP ${response.status}: ${errorData.error || 'Publishing failed'}`);
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch {
+          errorData = { error: response.statusText };
+        }
+
+        console.error('Publishing HTTP error:', {
+          status: response.status,
+          statusText: response.statusText,
+          errorData
+        });
+
+        throw new Error(`Publishing HTTP ${response.status}: ${errorData.error || response.statusText || 'Unknown error'}`);
       }
 
       const data = await response.json();
-      
+
       if (!data.success) {
-        throw new Error(data.error || 'Publishing returned failure');
+        console.error('Publishing service error:', data);
+        throw new Error(data.error || 'Publishing service returned failure');
       }
 
       const publishingTime = Date.now() - startTime;
