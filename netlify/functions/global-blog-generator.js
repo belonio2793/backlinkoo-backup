@@ -389,7 +389,7 @@ const generateContextualLinks = (request) => {
       {
         url: targetUrl,
         anchor: 'get started',
-        context: 'Call-to-action in conclusion section'
+        context: 'Helpful resource in conclusion section'
       }
     ]
   };
