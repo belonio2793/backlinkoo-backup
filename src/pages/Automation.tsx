@@ -601,6 +601,9 @@ const Automation = () => {
           isAuthenticated={isAuthenticated}
           smartFlow={smartFlow}
           addStatusMessage={addStatusMessage}
+          onAuthSuccess={() => {
+            addStatusMessage('Successfully signed in! Starting your campaign...', 'success');
+          }}
         />
 
         {/* Form Completion Celebration */}
