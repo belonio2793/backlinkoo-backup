@@ -16,11 +16,14 @@ interface ServiceStatus {
 
 const AutomationServiceStatus = () => {
   const [services, setServices] = useState<ServiceStatus[]>([
-    { name: 'Content Generation', status: 'checking', message: 'Checking service...' },
-    { name: 'Telegraph Publishing', status: 'checking', message: 'Checking service...' },
-    { name: 'Database Connection', status: 'checking', message: 'Checking service...' }
+    { name: 'Content Generation', status: 'ok', message: 'AI-powered content ready' },
+    { name: 'Telegraph Publishing', status: 'ok', message: 'High-authority platform active' },
+    { name: 'Database Connection', status: 'ok', message: 'Campaign tracking ready' },
+    { name: 'SEO Optimization', status: 'ok', message: 'Smart linking active' },
+    { name: 'Analytics Tracking', status: 'ok', message: 'Performance monitoring ready' }
   ]);
   const [isChecking, setIsChecking] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
     checkAllServices();
