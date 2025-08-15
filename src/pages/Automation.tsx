@@ -384,38 +384,6 @@ const Automation = () => {
                   }}
                 />
 
-                {/* Platform Info */}
-                <Card>
-              <CardHeader>
-                <CardTitle>Publishing Platforms</CardTitle>
-                <CardDescription>
-                  Current and upcoming platforms for content publication
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 border rounded-lg bg-green-50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <span className="font-medium">Telegraph.ph</span>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Anonymous publishing platform with instant publication
-                    </p>
-                  </div>
-                  
-                  <div className="p-4 border rounded-lg bg-gray-50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                      <span className="font-medium">More Platforms</span>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Additional platforms coming soon
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-                </Card>
               </TabsContent>
 
               <TabsContent value="reports">
