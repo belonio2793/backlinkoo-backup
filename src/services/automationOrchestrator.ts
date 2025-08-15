@@ -91,6 +91,11 @@ export class AutomationOrchestrator {
     const activePlatforms = this.getActivePlatforms();
     const campaignProgress = this.platformProgressMap.get(campaignId) || [];
 
+    // Safety check: if no active platforms, should not pause
+    if (activePlatforms.length === 0) {
+      return false;
+    }
+
     // Check if all active platforms have been completed
     return activePlatforms.every(platform =>
       campaignProgress.some(p => p.platformId === platform.id && p.isCompleted)
