@@ -17,14 +17,14 @@ export default function TextCleanerDebug() {
   
   // Test samples with problematic characters
   const [testSamples] = useState([
-    'This text has � replacement characters',
+    'This text has \uFFFD replacement characters',
     'Text with null char\u0000 and BOM\uFEFF',
     'Zero-width\u200B\u200C\u200D spaces included',
     'Normal text without issues',
-    'Mixed content � with\u0000 multiple\uFEFF problems\u200B',
+    'Mixed content \uFFFD with\u0000 multiple\uFEFF problems\u200B',
   ]);
 
-  const [formInput, setFormInput] = useState('Test input with � character');
+  const [formInput, setFormInput] = useState('Test input with \uFFFD character');
   const [textareaInput, setTextareaInput] = useState('Textarea content\u0000 with problems\uFEFF');
 
   return (
@@ -166,7 +166,7 @@ export default function TextCleanerDebug() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setFormInput('New text with � problems\u0000');
+                  setFormInput('New text with \uFFFD problems\u0000');
                   setTextareaInput('Textarea with\uFEFF BOM and\u200B zero-width spaces');
                 }}
               >
