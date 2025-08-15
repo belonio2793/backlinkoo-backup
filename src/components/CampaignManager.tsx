@@ -71,8 +71,12 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
         onStatusUpdate?.('Campaigns refreshed successfully', 'success');
       }
     } catch (error) {
-      console.error('Error loading campaigns:', error);
-      onStatusUpdate?.('Failed to load campaigns', 'error');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error loading campaigns:', {
+        message: errorMessage,
+        error: error
+      });
+      onStatusUpdate?.(`Failed to load campaigns: ${errorMessage}`, 'error');
     } finally {
       setLoading(false);
       setRefreshing(false);
