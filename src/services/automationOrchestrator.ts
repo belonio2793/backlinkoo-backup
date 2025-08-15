@@ -290,7 +290,16 @@ export class AutomationOrchestrator {
       }
 
       await this.logActivity(data.id, 'info', 'Campaign created successfully');
-      
+
+      // Emit real-time feed event for campaign creation
+      realTimeFeedService.emitCampaignCreated(
+        data.id,
+        data.name,
+        params.keyword,
+        params.target_url,
+        user.id
+      );
+
       // Initialize progress tracking
       this.initializeProgress(data);
 
