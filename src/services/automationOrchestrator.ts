@@ -798,19 +798,10 @@ export class AutomationOrchestrator {
   }
 
   /**
-   * Resume campaign
+   * Resume campaign (uses smart resume logic)
    */
-  async resumeCampaign(campaignId: string): Promise<void> {
-    await this.updateCampaignStatus(campaignId, 'active');
-    await this.logActivity(campaignId, 'info', 'Campaign resumed by user');
-    
-    // Restart processing
-    this.processCampaign(campaignId).catch(error => {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('Campaign processing error:', errorMessage);
-      // Note: 'failed' is not a valid status in current schema, so we'll pause the campaign instead
-      this.updateCampaignStatus(campaignId, 'paused', errorMessage);
-    });
+  async resumeCampaign(campaignId: string): Promise<{ success: boolean; message: string }> {
+    return await this.smartResumeCampaign(campaignId);
   }
 
   /**
