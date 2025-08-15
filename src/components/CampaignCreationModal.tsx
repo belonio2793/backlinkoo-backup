@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Target, CheckCircle, Clock, Info, Wand2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToast } from '@/hooks/use-toast';
+import { Loader2, Target, CheckCircle, Clock, Info, Wand2, Mail, Lock, User } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CampaignCreationModalProps {
   isOpen: boolean;
@@ -20,6 +23,7 @@ interface CampaignCreationModalProps {
   isAuthenticated: boolean;
   smartFlow: any; // Type this properly based on your smart flow hook
   addStatusMessage: (message: string, type: 'success' | 'error' | 'info') => void;
+  onAuthSuccess?: () => void;
 }
 
 const CampaignCreationModal: React.FC<CampaignCreationModalProps> = ({
@@ -31,8 +35,126 @@ const CampaignCreationModal: React.FC<CampaignCreationModalProps> = ({
   isCreating,
   isAuthenticated,
   smartFlow,
-  addStatusMessage
+  addStatusMessage,
+  onAuthSuccess
 }) => {
+  const { toast } = useToast();
+  const [showAuth, setShowAuth] = useState(false);
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signin');
+  const [isAuthLoading, setIsAuthLoading] = useState(false);
+  const [authFormData, setAuthFormData] = useState({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    name: ''
+  });
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const handleAuthInputChange = (field: string, value: string) => {
+    setAuthFormData(prev => ({ ...prev, [field]: value }));
+    setAuthError(null);
+  };
+
+  const validateAuthForm = () => {
+    if (!authFormData.email || !authFormData.password) {
+      setAuthError('Email and password are required');
+      return false;
+    }
+
+    if (activeTab === 'signup') {
+      if (!authFormData.name) {
+        setAuthError('Name is required for sign up');
+        return false;
+      }
+      if (authFormData.password !== authFormData.confirmPassword) {
+        setAuthError('Passwords do not match');
+        return false;
+      }
+      if (authFormData.password.length < 6) {
+        setAuthError('Password must be at least 6 characters');
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateAuthForm()) return;
+
+    setIsAuthLoading(true);
+    setAuthError(null);
+
+    try {
+      if (activeTab === 'signin') {
+        const { error } = await supabase.auth.signInWithPassword({
+          email: authFormData.email,
+          password: authFormData.password,
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: 'Success!',
+          description: 'Successfully signed in. Your campaign will start shortly.',
+        });
+      } else {
+        const { error } = await supabase.auth.signUp({
+          email: authFormData.email,
+          password: authFormData.password,
+          options: {
+            data: {
+              name: authFormData.name,
+            },
+          },
+        });
+
+        if (error) throw error;
+
+        toast({
+          title: 'Account created!',
+          description: 'Please check your email to verify your account, then sign in.',
+        });
+        setActiveTab('signin');
+        return;
+      }
+
+      // Reset auth form
+      setAuthFormData({ email: '', password: '', confirmPassword: '', name: '' });
+      setShowAuth(false);
+
+      // Call auth success callback
+      if (onAuthSuccess) {
+        onAuthSuccess();
+      }
+
+      // Add a small delay to let auth state update
+      setTimeout(() => {
+        onCreateCampaign();
+      }, 500);
+
+    } catch (error: any) {
+      console.error('Authentication error:', error);
+      setAuthError(error.message || 'Authentication failed');
+
+      toast({
+        title: 'Authentication failed',
+        description: error.message || 'Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsAuthLoading(false);
+    }
+  };
+
+  const handleCreateCampaignClick = () => {
+    if (!isAuthenticated) {
+      setShowAuth(true);
+    } else {
+      onCreateCampaign();
+    }
+  };
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
