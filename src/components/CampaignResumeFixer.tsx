@@ -292,6 +292,20 @@ export const CampaignResumeFixer: React.FC = () => {
             <li>• <strong>Content Not Posting:</strong> Check OpenAI API key configuration</li>
             <li>• <strong>Telegraph Errors:</strong> Service may be temporarily unavailable</li>
           </ul>
+
+          <div className="mt-3 pt-3 border-t border-muted-foreground/20">
+            <p className="text-xs text-muted-foreground mb-2">
+              For severe issues, use the emergency fix center:
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open('/emergency-campaign-fix.html', '_blank')}
+              className="text-xs"
+            >
+              🚨 Emergency Fix Center
+            </Button>
+          </div>
         </div>
       </CardContent>
     </Card>
