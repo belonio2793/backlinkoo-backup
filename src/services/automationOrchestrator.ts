@@ -3,6 +3,7 @@ import { getContentService, type ContentGenerationParams } from './automationCon
 import { getTelegraphService } from './telegraphService';
 import { ProgressStep, CampaignProgress } from '@/components/CampaignProgressTracker';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
+import { realTimeFeedService } from './realTimeFeedService';
 
 export interface Campaign {
   id: string;
