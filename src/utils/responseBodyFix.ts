@@ -98,14 +98,23 @@ class ResponseBodyManager {
    * Create a mock response when cloning fails
    */
   private createMockResponse(this: ResponseWithTracking): Response {
-    const mockResponse = new Response('{"error": "Response body was already consumed"}', {
-      status: this.status || 200,
-      statusText: this.statusText || 'OK',
-      headers: this.headers
-    });
+    try {
+      const mockResponse = new Response('{"error": "Response body was already consumed"}', {
+        status: this.status || 200,
+        statusText: this.statusText || 'OK',
+        headers: this.headers
+      });
 
-    ResponseBodyManager.getInstance().responseMap.set(mockResponse, { consumed: false, cloneCount: 0 });
-    return mockResponse;
+      ResponseBodyManager.getInstance().responseMap.set(mockResponse, { consumed: false, cloneCount: 0 });
+      return mockResponse;
+    } catch (error) {
+      // Fallback: create minimal response
+      const fallbackResponse = new Response('{}', {
+        status: 200,
+        statusText: 'OK'
+      });
+      return fallbackResponse;
+    }
   }
 
   /**
@@ -133,13 +142,34 @@ class ResponseBodyManager {
    */
   safeClone(response: Response): Response {
     try {
+      // Check if response is already consumed
+      if (response.bodyUsed) {
+        console.warn('Attempted to clone consumed response, creating mock');
+        return this.createMockResponseFromConsumed(response);
+      }
+
       return response.clone();
     } catch (error) {
       console.warn('Failed to clone response, returning mock:', error);
-      return new Response('{"error": "Failed to clone response"}', {
+      return this.createMockResponseFromConsumed(response);
+    }
+  }
+
+  /**
+   * Create mock response from consumed response
+   */
+  private createMockResponseFromConsumed(response: Response): Response {
+    try {
+      return new Response('{"error": "Response body already consumed", "status": ' + response.status + '}', {
         status: response.status,
         statusText: response.statusText,
         headers: response.headers
+      });
+    } catch (error) {
+      // Ultimate fallback
+      return new Response('{"error": "Response unavailable"}', {
+        status: 200,
+        statusText: 'OK'
       });
     }
   }
