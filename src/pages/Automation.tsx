@@ -17,6 +17,7 @@ import CampaignManager from '@/components/CampaignManager';
 import FormCompletionCelebration from '@/components/FormCompletionCelebration';
 import RealTimeFeedModal from '@/components/RealTimeFeedModal';
 import RealTimeFeedToggle from '@/components/RealTimeFeedToggle';
+import FeedModal from '@/components/FeedModal';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
