@@ -305,17 +305,8 @@ export class AutomationOrchestrator {
       this.initializeProgress(data);
 
       // Start processing the campaign asynchronously
-      this.processCampaign(data.id).catch(error => {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error('Campaign processing error:', errorMessage);
-        // Note: 'failed' is not a valid status in current schema, so we'll pause the campaign instead
-        this.updateCampaignStatus(data.id, 'paused', errorMessage);
-
-        // Update progress to show error
-        this.updateProgress(data.id, {
-          isError: true,
-          endTime: new Date()
-        });
+      this.processCampaignWithErrorHandling(data.id).catch(error => {
+        console.error('Unhandled campaign processing error:', formatErrorForLogging(error, 'createCampaign'));
       });
 
       return data;
