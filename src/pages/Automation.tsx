@@ -697,7 +697,7 @@ const Automation = () => {
                       <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
                       <div>
                         <div className="font-medium text-sm">Dev.to</div>
-                        <div className="text-xs text-gray-600">Developer community</div>
+                        <div className="text-xs text-gray-600">Priority #3 • Coming soon</div>
                       </div>
                     </div>
                     <div className="text-right">
