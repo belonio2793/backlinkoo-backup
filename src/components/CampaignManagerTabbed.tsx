@@ -558,37 +558,12 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                         <div className="flex flex-col gap-2 ml-4">
                           {(() => {
                             const summary = campaignStatusSummaries.get(campaign.id);
+                            const isActive = ['active', 'pending', 'generating', 'publishing'].includes(campaign.status);
+                            const isPaused = campaign.status === 'paused';
+                            const isCompleted = campaign.status === 'completed';
 
-                            // Resume button for paused campaigns
-                            if (campaign.status === 'paused') {
-                              const canResume = summary?.nextPlatform;
-                              const tooltipText = canResume
-                                ? `Resume to continue posting to ${summary.nextPlatform}`
-                                : 'All available platforms have been used';
-
-                              return (
-                                <Button
-                                  size="sm"
-                                  variant={canResume ? "default" : "outline"}
-                                  onClick={() => handleResumeCampaign(campaign.id)}
-                                  disabled={actionLoading === campaign.id || !canResume}
-                                  title={tooltipText}
-                                  className={canResume ? "bg-green-600 hover:bg-green-700 text-white" : ""}
-                                >
-                                  {actionLoading === campaign.id ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    <>
-                                      <Play className="w-4 h-4 mr-1" />
-                                      {canResume ? 'Resume' : 'Complete'}
-                                    </>
-                                  )}
-                                </Button>
-                              );
-                            }
-
-                            // Pause button for active campaigns
-                            if (['active', 'pending', 'generating', 'publishing'].includes(campaign.status)) {
+                            // Always show pause button for active campaigns
+                            if (isActive) {
                               return (
                                 <Button
                                   size="sm"
@@ -604,6 +579,37 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                                     <>
                                       <Pause className="w-4 h-4 mr-1" />
                                       Pause
+                                    </>
+                                  )}
+                                </Button>
+                              );
+                            }
+
+                            // Always show resume button for paused or completed campaigns
+                            if (isPaused || isCompleted) {
+                              const hasNextPlatform = summary?.nextPlatform;
+                              const buttonText = isCompleted ? 'Re-run' : hasNextPlatform ? 'Resume' : 'Re-run';
+                              const tooltipText = isCompleted
+                                ? 'Campaign completed - click to check for new opportunities or re-run'
+                                : hasNextPlatform
+                                  ? `Resume to continue posting to ${summary.nextPlatform}`
+                                  : 'No more platforms available - click to check for new opportunities';
+
+                              return (
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  onClick={() => handleResumeCampaign(campaign.id)}
+                                  disabled={actionLoading === campaign.id}
+                                  title={tooltipText}
+                                  className={isCompleted ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-green-600 hover:bg-green-700 text-white"}
+                                >
+                                  {actionLoading === campaign.id ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <>
+                                      <Play className="w-4 h-4 mr-1" />
+                                      {buttonText}
                                     </>
                                   )}
                                 </Button>
