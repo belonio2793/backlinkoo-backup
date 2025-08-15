@@ -166,7 +166,7 @@ export class AutomationOrchestrator {
           target_url: params.target_url,
           keywords: [params.keyword],
           anchor_texts: [params.anchor_text],
-          status: 'pending'
+          status: 'draft'
         })
         .select()
         .single();
