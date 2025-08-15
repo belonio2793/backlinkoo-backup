@@ -201,6 +201,74 @@ export class SupabaseErrorHandler {
   }
 
   /**
+   * Create a safer database client that handles network errors
+   */
+  wrapDatabaseClient(client: any) {
+    const handler = this;
+
+    return {
+      ...client,
+
+      from(table: string) {
+        const query = client.from(table);
+
+        // Wrap query methods with error handling
+        const wrapQueryMethod = (method: string) => {
+          const originalMethod = query[method];
+          if (typeof originalMethod === 'function') {
+            return function(...args: any[]) {
+              const result = originalMethod.apply(query, args);
+
+              // If it returns a promise, wrap it with error handling
+              if (result && typeof result.then === 'function') {
+                return handler.retryDatabase(
+                  () => result,
+                  table,
+                  method
+                );
+              }
+
+              // If it returns a query builder, wrap its methods too
+              if (result && typeof result === 'object') {
+                return new Proxy(result, {
+                  get(target, prop) {
+                    const value = target[prop];
+                    if (typeof value === 'function' && prop !== 'then') {
+                      return wrapQueryMethod(prop as string);
+                    }
+                    return value;
+                  }
+                });
+              }
+
+              return result;
+            };
+          }
+          return originalMethod;
+        };
+
+        return new Proxy(query, {
+          get(target, prop) {
+            const value = target[prop];
+            if (typeof value === 'function') {
+              return wrapQueryMethod(prop as string);
+            }
+            return value;
+          }
+        });
+      },
+
+      rpc(fn: string, args?: any) {
+        return handler.retryDatabase(
+          () => client.rpc(fn, args),
+          'rpc',
+          fn
+        );
+      }
+    };
+  }
+
+  /**
    * Create a safer auth client that handles network errors
    */
   wrapAuthClient(authClient: any) {
