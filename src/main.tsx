@@ -17,6 +17,8 @@ import './utils/silentErrorTest'
 // import './utils/fixMissingColumns' // Disabled - using new blog comment system
 // Direct database fix
 // import './utils/directDatabaseFix' // Disabled - using new blog comment system
+// Emergency error fix (load first)
+import './utils/emergencyErrorFix'
 // Emergency fetch fix (load first)
 import './utils/emergencyFetchFix'
 // Network error handler for user-friendly solutions
