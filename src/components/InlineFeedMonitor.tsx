@@ -85,30 +85,11 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
     });
   };
 
-  // Subscribe to real-time feed service
+  // Subscribe to real-time feed service (temporarily disabled)
   useEffect(() => {
     if (!isVisible) return;
 
-    console.log('📡 InlineFeedMonitor: Subscribing to real-time events');
-
-    // Subscribe to real-time feed events
-    let unsubscribe: (() => void) | null = null;
-
-    try {
-      unsubscribe = realTimeFeedService.subscribe((event: RealTimeFeedEvent) => {
-        // Convert RealTimeFeedEvent to RealTimeFeedLog format
-        addLog({
-          type: event.type,
-          level: event.level,
-          message: event.message,
-          campaignId: event.campaignId,
-          campaignName: event.campaignName,
-          details: event.details
-        });
-      });
-    } catch (error) {
-      console.warn('Failed to subscribe to real-time feed service:', error);
-    }
+    console.log('📡 InlineFeedMonitor: Initializing...');
 
     // Initial logs for active campaigns (only if we don't have history)
     if (logs.length === 0) {
@@ -128,17 +109,11 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
       });
     }
 
+    // TODO: Re-enable real-time feed service subscription
     return () => {
-      console.log('📡 InlineFeedMonitor: Unsubscribing from real-time events');
-      if (unsubscribe) {
-        try {
-          unsubscribe();
-        } catch (error) {
-          console.warn('Error unsubscribing from real-time feed service:', error);
-        }
-      }
+      console.log('📡 InlineFeedMonitor: Cleanup');
     };
-  }, [isVisible, activeCampaigns.length]);
+  }, [isVisible, activeCampaigns.length, logs.length]);
 
   // Add periodic system updates to show activity
   useEffect(() => {
