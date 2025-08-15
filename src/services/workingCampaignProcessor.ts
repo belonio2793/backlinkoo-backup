@@ -20,7 +20,11 @@ export class WorkingCampaignProcessor {
     
     try {
       console.log(`🚀 Processing campaign: ${campaign.name}`);
-      
+
+      // Start network monitoring for this campaign
+      campaignNetworkLogger.startMonitoring(campaign.id);
+      campaignNetworkLogger.setCurrentCampaignId(campaign.id);
+
       // Step 1: Update status to active
       await this.updateCampaignStatus(campaign.id, 'active');
       await this.logActivity(campaign.id, 'info', 'Campaign processing started');
@@ -56,7 +60,7 @@ export class WorkingCampaignProcessor {
       const publishedUrl = result.data.publishedUrl;
       
       console.log('✅ Content generated and published successfully via server-side processor');
-      console.log('📤 Published successfully:', publishedUrl);
+      console.log('��� Published successfully:', publishedUrl);
       
       realTimeFeedService.emitContentGenerated(
         campaign.id,
