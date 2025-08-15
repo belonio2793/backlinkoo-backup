@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Function Deployment Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; border: 1px solid #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 3px; }
+        button:hover { background: #0056b3; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; white-space: pre-wrap; }
+        .loading { opacity: 0.6; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Function Deployment Test</h1>
+    <p>Testing Netlify function deployment and availability</p>
+    
+    <div>
+        <button onclick="runAllTests()">🧪 Run All Tests</button>
+        <button onclick="runSchemaFix()">🔧 Run Schema Fix</button>
+        <button onclick="runHealthCheck()">💚 Health Check</button>
+        <button onclick="testCampaignProcessor()">🚀 Test Campaign Processor</button>
+    </div>
+    
+    <div id="test-results"></div>
+
+    <script>
+        let resultContainer = document.getElementById('test-results');
+
+        function addResult(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = message;
+            resultContainer.appendChild(div);
+        }
+
+        function clearResults() {
+            resultContainer.innerHTML = '';
+        }
+
+        async function testFunction(functionName, testData = {}) {
+            try {
+                console.log(`Testing function: ${functionName}`);
+                
+                const response = await fetch(`/.netlify/functions/${functionName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+
+                const result = {
+                    function: functionName,
+                    status: response.status,
+                    ok: response.ok,
+                    headers: Object.fromEntries(response.headers.entries())
+                };
+
+                if (response.ok) {
+                    try {
+                        result.data = await response.json();
+                    } catch (e) {
+                        result.text = await response.text();
+                    }
+                    addResult(`✅ <strong>${functionName}</strong>: Working (${response.status})<br><pre>${JSON.stringify(result, null, 2)}</pre>`, 'success');
+                } else {
+                    result.error = await response.text();
+                    if (response.status === 404) {
+                        addResult(`❌ <strong>${functionName}</strong>: NOT FOUND (404)<br>Function not deployed or path incorrect`, 'error');
+                    } else {
+                        addResult(`⚠️ <strong>${functionName}</strong>: Error (${response.status})<br><pre>${result.error}</pre>`, 'error');
+                    }
+                }
+
+                return result;
+
+            } catch (error) {
+                addResult(`❌ <strong>${functionName}</strong>: Network Error<br>${error.message}`, 'error');
+                return { function: functionName, error: error.message };
+            }
+        }
+
+        async function runHealthCheck() {
+            addResult('🔍 Running health check...', 'info');
+            await testFunction('function-health-check');
+        }
+
+        async function runSchemaFix() {
+            addResult('🔧 Running emergency schema fix...', 'info');
+            await testFunction('emergency-schema-fix');
+        }
+
+        async function testCampaignProcessor() {
+            addResult('🚀 Testing campaign processor...', 'info');
+            await testFunction('working-campaign-processor', {
+                keyword: 'test keyword',
+                anchorText: 'test link',
+                targetUrl: 'https://example.com',
+                campaignId: 'test-' + Date.now()
+            });
+        }
+
+        async function runAllTests() {
+            clearResults();
+            addResult('🧪 Starting comprehensive function tests...', 'info');
+            
+            const functions = [
+                'function-health-check',
+                'emergency-schema-fix',
+                'working-campaign-processor',
+                'working-content-generator',
+                'fix-campaign-schema',
+                'api-status'
+            ];
+
+            for (const func of functions) {
+                await new Promise(resolve => setTimeout(resolve, 500)); // Small delay between tests
+                await testFunction(func, { test: true });
+            }
+
+            addResult('🏁 All tests completed!', 'success');
+        }
+
+        // Auto-run basic test on load
+        document.addEventListener('DOMContentLoaded', function() {
+            addResult('📋 Function deployment test page loaded. Click "Run All Tests" to begin.', 'info');
+        });
+    </script>
+</body>
+</html>
