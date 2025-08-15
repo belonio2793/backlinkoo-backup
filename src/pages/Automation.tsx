@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2, Activity } from 'lucide-react';
+import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2, Activity, Settings } from 'lucide-react';
 import { getOrchestrator } from '@/services/automationOrchestrator';
 import { campaignMonitoringService } from '@/services/campaignMonitoringService';
 import { workingCampaignProcessor } from '@/services/workingCampaignProcessor';
@@ -18,14 +18,15 @@ import CampaignProgressTracker, { CampaignProgress } from '@/components/Campaign
 import LiveCampaignStatus from '@/components/LiveCampaignStatus';
 import CampaignManagerTabbed from '@/components/CampaignManagerTabbed';
 import FormCompletionCelebration from '@/components/FormCompletionCelebration';
-import InlineAuthForm from '@/components/InlineAuthForm';
-import InlineProgressTracker from '@/components/InlineProgressTracker';
 import InlineFeedMonitor from '@/components/InlineFeedMonitor';
+import { CampaignDebugger } from '@/components/CampaignDebugger';
+import { CampaignResumeFixer } from '@/components/CampaignResumeFixer';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
+import { useAuthModal } from '@/contexts/ModalContext';
 // Enhanced feed hooks removed - using simpler state management
 
 const Automation = () => {
@@ -42,10 +43,10 @@ const Automation = () => {
   const [hasShownRestoreMessage, setHasShownRestoreMessage] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastFormValidState, setLastFormValidState] = useState(false);
+  const [showDebugger, setShowDebugger] = useState(false);
 
-  // State for inline components
-  const [showInlineAuth, setShowInlineAuth] = useState(false);
-  const [needsAuth, setNeedsAuth] = useState(false);
+  // Modal state for authentication
+  const { openLoginModal } = useAuthModal();
   const [formData, setFormData] = useState({
     targetUrl: '',
     keyword: '',
@@ -191,17 +192,21 @@ const Automation = () => {
   const handleCreateCampaign = async () => {
     // Check if user needs authentication first
     if (!isAuthenticated) {
-      setNeedsAuth(true);
-      setShowInlineAuth(true);
       saveFormData(formData);
       addStatusMessage('Please sign in to continue with your campaign', 'info');
+
+      // Open authentication modal with campaign context
+      openLoginModal({
+        onAuthSuccess: handleAuthSuccess,
+        pendingAction: `your ${formData.keyword || 'link building'} campaign`
+      });
       return;
     }
 
     await smartFlow.handleCampaignAction(
       formData,
       createCampaign,
-      () => {} // Don't show auth modal - we'll handle auth inline
+      () => {} // Auth is handled via modal
     );
   };
 
@@ -259,10 +264,14 @@ const Automation = () => {
     } catch (error) {
       console.error('Campaign creation error:', error);
       
-      // Handle specific authentication errors - keep inline
+      // Handle specific authentication errors - open modal
       if (error instanceof Error && error.message.includes('not authenticated')) {
         saveFormData(formData);
         addStatusMessage('Please sign in to continue with your campaign', 'error');
+        openLoginModal({
+          onAuthSuccess: handleAuthSuccess,
+          pendingAction: `your ${formData.keyword || 'link building'} campaign`
+        });
         return;
       }
       
@@ -272,9 +281,8 @@ const Automation = () => {
     }
   };
 
-  const handleAuthSuccess = async () => {
-    setShowInlineAuth(false);
-    setNeedsAuth(false);
+  const handleAuthSuccess = async (user: any) => {
+    console.log('🎯 Auth success for automation, user:', user?.email);
     addStatusMessage('Successfully signed in! Starting your campaign...', 'success');
 
     // Use a small delay to let the user see the success message
@@ -331,14 +339,24 @@ const Automation = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <main className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 px-2 py-4">
+        <div className="w-full space-y-6">
 
           {/* Page Header */}
           <div className="text-center space-y-4">
             <div className="flex items-center justify-center gap-4">
               <h1 className="text-4xl font-bold text-gray-900">Link Building Automation</h1>
               <NetworkStatusIndicator />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDebugger(true)}
+                className="border-orange-300 text-orange-700 hover:bg-orange-50"
+                title="Debug Campaign Issues"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Debug
+              </Button>
             </div>
             <p className="text-lg text-gray-600">
               Automatically generate and publish high-quality content with backlinks to your target URL
@@ -367,7 +385,10 @@ const Automation = () => {
                   size="sm"
                   variant="outline"
                   className="ml-4 border-blue-300 text-blue-700 hover:bg-blue-100"
-                  onClick={() => setShowInlineAuth(true)}
+                  onClick={() => openLoginModal({
+                    onAuthSuccess: handleAuthSuccess,
+                    pendingAction: `your ${savedFormData.keyword || 'saved'} campaign`
+                  })}
                 >
                   Sign In to Continue
                 </Button>
@@ -390,29 +411,11 @@ const Automation = () => {
           </div>
         )}
 
-        {/* Inline Authentication */}
-        {showInlineAuth && !isAuthenticated && (
-          <div className="mb-6">
-            <InlineAuthForm
-              onSuccess={handleAuthSuccess}
-              campaignData={hasValidSavedData(savedFormData) ? savedFormData : formData}
-              isVisible={showInlineAuth}
-            />
-          </div>
-        )}
-
-        {/* Inline Progress Tracker */}
-        {campaignProgress && (
-          <div className="mb-6">
-            <InlineProgressTracker
-              progress={campaignProgress}
-              onRetry={handleRetryCampaign}
-            />
-          </div>
-        )}
+        {/* Campaign Resume Debugger */}
+        <CampaignResumeFixer />
 
         {/* Main Content - Top Row: Campaign Creation, Activity, Live Monitor */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mb-4">
           {/* Campaign Creation (Left Column) */}
           <div className="lg:col-span-1">
             <Tabs defaultValue="create" className="w-full">
@@ -673,6 +676,8 @@ const Automation = () => {
             {isAuthenticated && (
               <CampaignManagerTabbed
                 onStatusUpdate={(message, type) => addStatusMessage(message, type)}
+                currentCampaignProgress={campaignProgress}
+                onRetryProgress={handleRetryCampaign}
               />
             )}
           </div>
@@ -798,6 +803,25 @@ const Automation = () => {
 
         </div>
       </main>
+
+      {/* Campaign Debugger Modal */}
+      {showDebugger && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b">
+              <h2 className="text-lg font-semibold">Campaign System Debugger</h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowDebugger(false)}
+              >
+                ×
+              </Button>
+            </div>
+            <CampaignDebugger />
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

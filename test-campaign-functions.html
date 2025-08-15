@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campaign Functions Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .error { background-color: #f8d7da; border-color: #f5c6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        .loading { opacity: 0.6; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Campaign Functions Test</h1>
+    
+    <div class="test-section info">
+        <h2>Function Availability Test</h2>
+        <button onclick="testFunctionAvailability()">Test All Functions</button>
+        <div id="function-results"></div>
+    </div>
+    
+    <div class="test-section info">
+        <h2>Campaign Processor Test</h2>
+        <button onclick="testCampaignProcessor()">Test Campaign Processor</button>
+        <div id="processor-results"></div>
+    </div>
+    
+    <div class="test-section info">
+        <h2>Database Schema Test</h2>
+        <button onclick="testDatabaseSchema()">Test Database Access</button>
+        <div id="database-results"></div>
+    </div>
+
+    <script>
+        // Test function availability
+        async function testFunctionAvailability() {
+            const resultsDiv = document.getElementById('function-results');
+            resultsDiv.innerHTML = '<p>Testing functions...</p>';
+            resultsDiv.className = 'loading';
+            
+            const functions = [
+                'working-campaign-processor',
+                'working-content-generator', 
+                'fix-campaign-schema',
+                'api-status'
+            ];
+            
+            let results = '<h3>Function Test Results:</h3>';
+            
+            for (const func of functions) {
+                try {
+                    console.log(`Testing /.netlify/functions/${func}...`);
+                    
+                    const response = await fetch(`/.netlify/functions/${func}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            keyword: 'test',
+                            anchorText: 'test link',
+                            targetUrl: 'https://example.com',
+                            campaignId: 'test-123'
+                        })
+                    });
+                    
+                    if (response.status === 404) {
+                        results += `<p>❌ <strong>${func}</strong>: NOT FOUND (404)</p>`;
+                    } else {
+                        results += `<p>✅ <strong>${func}</strong>: Available (status: ${response.status})</p>`;
+                        if (response.status !== 200) {
+                            const text = await response.text();
+                            results += `<pre>${text.substring(0, 300)}...</pre>`;
+                        }
+                    }
+                    
+                } catch (error) {
+                    results += `<p>❌ <strong>${func}</strong>: Error - ${error.message}</p>`;
+                }
+            }
+            
+            resultsDiv.innerHTML = results;
+            resultsDiv.className = '';
+        }
+
+        // Test campaign processor specifically
+        async function testCampaignProcessor() {
+            const resultsDiv = document.getElementById('processor-results');
+            resultsDiv.innerHTML = '<p>Testing campaign processor...</p>';
+            resultsDiv.className = 'loading';
+            
+            const testData = {
+                keyword: 'digital marketing',
+                anchorText: 'marketing services',
+                targetUrl: 'https://example.com',
+                campaignId: 'test-campaign-' + Date.now()
+            };
+            
+            try {
+                console.log('Testing working-campaign-processor with data:', testData);
+                
+                const response = await fetch('/.netlify/functions/working-campaign-processor', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                let results = `<h3>Campaign Processor Test:</h3>`;
+                results += `<p><strong>Status:</strong> ${response.status}</p>`;
+                results += `<p><strong>Headers:</strong></p><pre>${JSON.stringify(Object.fromEntries(response.headers.entries()), null, 2)}</pre>`;
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    results += `<div class="success"><h4>✅ SUCCESS</h4>`;
+                    results += `<pre>${JSON.stringify(result, null, 2)}</pre></div>`;
+                    
+                    if (result.success && result.data?.publishedUrls) {
+                        results += `<p><strong>Published URLs:</strong> ${result.data.publishedUrls.join(', ')}</p>`;
+                        results += `<p><strong>Total posts:</strong> ${result.data.totalPosts}</p>`;
+                        results += `<p><strong>Prompt used:</strong> ${result.data.promptUsed}</p>`;
+                    }
+                } else {
+                    const errorText = await response.text();
+                    results += `<div class="error"><h4>❌ FAILED</h4>`;
+                    results += `<pre>${errorText}</pre></div>`;
+                }
+                
+                resultsDiv.innerHTML = results;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error"><h4>❌ NETWORK ERROR</h4><p>${error.message}</p></div>`;
+            }
+            
+            resultsDiv.className = '';
+        }
+
+        // Test database schema
+        async function testDatabaseSchema() {
+            const resultsDiv = document.getElementById('database-results');
+            resultsDiv.innerHTML = '<p>Testing database schema...</p>';
+            resultsDiv.className = 'loading';
+            
+            // This would need the supabase client to be available
+            // For now, just test the schema fix function
+            
+            try {
+                const response = await fetch('/.netlify/functions/fix-campaign-schema', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                
+                let results = `<h3>Database Schema Test:</h3>`;
+                results += `<p><strong>Fix Schema Status:</strong> ${response.status}</p>`;
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    results += `<div class="success"><h4>✅ Schema Fix Available</h4>`;
+                    results += `<pre>${JSON.stringify(result, null, 2)}</pre></div>`;
+                } else {
+                    const errorText = await response.text();
+                    results += `<div class="error"><h4>❌ Schema Fix Failed</h4>`;
+                    results += `<pre>${errorText}</pre></div>`;
+                }
+                
+                resultsDiv.innerHTML = results;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error"><h4>❌ DATABASE TEST ERROR</h4><p>${error.message}</p></div>`;
+            }
+            
+            resultsDiv.className = '';
+        }
+
+        // Auto-run basic test on load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🔍 Campaign Functions Test Page Loaded');
+            console.log('Click the buttons above to test campaign functionality');
+        });
+    </script>
+</body>
+</html>

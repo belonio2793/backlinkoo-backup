@@ -5,6 +5,7 @@ import { workingCampaignProcessor } from './workingCampaignProcessor';
 import { ProgressStep, CampaignProgress } from '@/components/CampaignProgressTracker';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { realTimeFeedService } from './realTimeFeedService';
+import { campaignNetworkLogger } from './campaignNetworkLogger';
 // Removed campaignErrorHandler import - using simplified error handling
 
 export interface Campaign {
@@ -172,6 +173,13 @@ export class AutomationOrchestrator {
    */
   getCampaignPlatformProgress(campaignId: string): CampaignPlatformProgress[] {
     return this.platformProgressMap.get(campaignId) || [];
+  }
+
+  /**
+   * Get campaign progress (public access to private map)
+   */
+  getCampaignProgress(campaignId: string): CampaignProgress | undefined {
+    return this.campaignProgressMap.get(campaignId);
   }
 
   /**
@@ -344,6 +352,10 @@ export class AutomationOrchestrator {
 
       // Initialize progress tracking
       this.initializeProgress(data);
+
+      // Start network monitoring for this campaign
+      campaignNetworkLogger.startMonitoring(data.id);
+      campaignNetworkLogger.setCurrentCampaignId(data.id);
 
       // Start processing the campaign asynchronously
       this.processCampaignWithErrorHandling(data.id).catch(error => {

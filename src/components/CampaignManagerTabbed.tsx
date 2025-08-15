@@ -30,6 +30,9 @@ import { realTimeFeedService } from '@/services/realTimeFeedService';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import CampaignErrorStatus from './CampaignErrorStatus';
+import InlineProgressTracker from './InlineProgressTracker';
+import { CampaignProgress } from './CampaignProgressTracker';
+import { CampaignDetailsModal } from './CampaignDetailsModal';
 
 interface PublishedLink {
   id: string;
@@ -44,15 +47,30 @@ interface CampaignWithLinks extends Campaign {
 
 interface CampaignManagerTabbedProps {
   onStatusUpdate?: (message: string, type: 'success' | 'error' | 'info') => void;
+  currentCampaignProgress?: CampaignProgress | null;
+  onRetryProgress?: () => void;
 }
 
-const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({ onStatusUpdate }) => {
+const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
+  onStatusUpdate,
+  currentCampaignProgress,
+  onRetryProgress
+}) => {
   const [campaigns, setCampaigns] = useState<CampaignWithLinks[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [campaignStatusSummaries, setCampaignStatusSummaries] = useState<Map<string, any>>(new Map());
   const [activeTab, setActiveTab] = useState('activity');
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+
+  // Auto-switch to live monitor when a campaign progress starts
+  useEffect(() => {
+    if (currentCampaignProgress && !currentCampaignProgress.isComplete && !currentCampaignProgress.isError) {
+      setActiveTab('live-monitor');
+    }
+  }, [currentCampaignProgress]);
   const orchestrator = getOrchestrator();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -107,6 +125,11 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({ onStatusU
 
   const handleRefresh = () => {
     loadCampaigns(true);
+  };
+
+  const handleViewDetails = (campaignId: string) => {
+    setSelectedCampaignId(campaignId);
+    setShowDetailsModal(true);
   };
 
   const handlePauseCampaign = async (campaignId: string) => {
@@ -346,6 +369,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({ onStatusU
   }
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
@@ -392,14 +416,23 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({ onStatusU
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="activity" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
-              Campaign Activity
+              Activity
+            </TabsTrigger>
+            <TabsTrigger value="live-monitor" className="flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              Live Monitor
+              {currentCampaignProgress && (
+                <Badge variant="secondary" className="ml-1 h-4 px-1 text-xs">
+                  Active
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="live-links" className="flex items-center gap-2">
               <ExternalLink className="w-4 h-4" />
-              Live Links ({getAllPublishedLinks().length})
+              Links ({getAllPublishedLinks().length})
             </TabsTrigger>
           </TabsList>
 
@@ -560,6 +593,16 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({ onStatusU
                           <Button
                             size="sm"
                             variant="outline"
+                            onClick={() => handleViewDetails(campaign.id)}
+                            title="View Campaign Details"
+                            className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={() => handleDeleteCampaign(campaign.id, campaign.keywords?.[0] || campaign.name)}
                             disabled={actionLoading === campaign.id}
                             title="Delete Campaign"
@@ -604,6 +647,37 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({ onStatusU
                       </div>
                     </div>
                   ))
+              )}
+            </div>
+          </TabsContent>
+
+          {/* Live Monitor Tab */}
+          <TabsContent value="live-monitor" className="mt-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-blue-600" />
+                <h3 className="text-lg font-semibold">Live Campaign Monitor</h3>
+                {currentCampaignProgress && (
+                  <Badge variant="secondary">
+                    {currentCampaignProgress.isComplete ? 'Completed' :
+                     currentCampaignProgress.isError ? 'Error' : 'In Progress'}
+                  </Badge>
+                )}
+              </div>
+
+              {currentCampaignProgress ? (
+                <InlineProgressTracker
+                  progress={currentCampaignProgress}
+                  onRetry={onRetryProgress}
+                />
+              ) : (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                  <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Campaign</h3>
+                  <p className="text-gray-500 mb-4">
+                    Start a new campaign to see live progress monitoring here
+                  </p>
+                </div>
               )}
             </div>
           </TabsContent>
@@ -698,6 +772,16 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({ onStatusU
         </Tabs>
       </CardContent>
     </Card>
+
+    {/* Campaign Details Modal */}
+    {selectedCampaignId && (
+      <CampaignDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        campaignId={selectedCampaignId}
+      />
+    )}
+    </>
   );
 };
 

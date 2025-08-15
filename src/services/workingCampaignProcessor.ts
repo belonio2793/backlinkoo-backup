@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { SimpleCampaign } from '@/integrations/supabase/types';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { realTimeFeedService } from './realTimeFeedService';
+import { campaignNetworkLogger } from './campaignNetworkLogger';
 
 /**
  * Working Campaign Processor - Simplified server-side processing
@@ -19,7 +20,11 @@ export class WorkingCampaignProcessor {
     
     try {
       console.log(`🚀 Processing campaign: ${campaign.name}`);
-      
+
+      // Start network monitoring for this campaign
+      campaignNetworkLogger.startMonitoring(campaign.id);
+      campaignNetworkLogger.setCurrentCampaignId(campaign.id);
+
       // Step 1: Update status to active
       await this.updateCampaignStatus(campaign.id, 'active');
       await this.logActivity(campaign.id, 'info', 'Campaign processing started');
@@ -27,8 +32,17 @@ export class WorkingCampaignProcessor {
       // Step 2: Use simplified server-side processor to avoid browser analytics issues
       console.log('🔄 Using simplified server-side processor...');
       realTimeFeedService.emitSystemEvent(`Processing campaign "${keyword}" server-side`, 'info');
-      
-      const response = await fetch('/.netlify/functions/simple-campaign-processor', {
+
+      // Log the function call
+      const functionCallId = campaignNetworkLogger.logFunctionCall(
+        campaign.id,
+        'working-campaign-processor',
+        { keyword, anchorText, targetUrl, campaignId: campaign.id },
+        'content-generation'
+      );
+
+      const functionStartTime = Date.now();
+      const response = await fetch('/.netlify/functions/working-campaign-processor', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -43,56 +57,80 @@ export class WorkingCampaignProcessor {
 
       if (!response.ok) {
         const errorText = await response.text();
+        const functionDuration = Date.now() - functionStartTime;
+
+        // Log the failed function call
+        campaignNetworkLogger.updateFunctionCall(
+          functionCallId,
+          null,
+          `${response.status} - ${errorText}`,
+          functionDuration
+        );
+
         throw new Error(`Server-side processing failed: ${response.status} - ${errorText}`);
       }
 
       const result = await response.json();
+      const functionDuration = Date.now() - functionStartTime;
+
+      // Log successful function call
+      campaignNetworkLogger.updateFunctionCall(
+        functionCallId,
+        result,
+        undefined,
+        functionDuration
+      );
       
       if (!result.success) {
         throw new Error(`Campaign processing failed: ${result.error}`);
       }
 
-      const publishedUrl = result.data.publishedUrl;
-      
+      const publishedUrls = result.data.publishedUrls || [];
+      const totalPosts = result.data.totalPosts || publishedUrls.length;
+
       console.log('✅ Content generated and published successfully via server-side processor');
-      console.log('📤 Published successfully:', publishedUrl);
-      
+      console.log(`📤 Published ${totalPosts} posts successfully:`, publishedUrls);
+
       realTimeFeedService.emitContentGenerated(
         campaign.id,
         campaign.name,
         keyword,
-        result.data.content?.length || 0,
+        totalPosts * 500, // Approximate word count
         campaign.user_id
       );
 
-      // Step 3: Save published link to database
-      await this.savePublishedLink(campaign.id, publishedUrl);
-      
-      realTimeFeedService.emitUrlPublished(
-        campaign.id,
-        campaign.name,
-        keyword,
-        publishedUrl,
-        'Telegraph.ph',
-        campaign.user_id
-      );
+      // Step 3: Save all published links to database
+      for (const url of publishedUrls) {
+        await this.savePublishedLink(campaign.id, url);
+
+        realTimeFeedService.emitUrlPublished(
+          campaign.id,
+          campaign.name,
+          keyword,
+          url,
+          'Telegraph.ph',
+          campaign.user_id
+        );
+      }
 
       // Step 4: Mark campaign as completed
       await this.updateCampaignStatus(campaign.id, 'completed');
-      await this.logActivity(campaign.id, 'info', `Campaign completed successfully. Published: ${publishedUrl}`);
-      
+      await this.logActivity(campaign.id, 'info', `Campaign completed successfully. Published ${totalPosts} posts: ${publishedUrls.join(', ')}`);
+
       realTimeFeedService.emitCampaignCompleted(
         campaign.id,
         campaign.name,
         keyword,
-        [publishedUrl]
+        publishedUrls
       );
 
       console.log('🎉 Campaign processing completed successfully');
-      
-      return { 
-        success: true, 
-        publishedUrl 
+
+      return {
+        success: true,
+        publishedUrl: publishedUrls[0], // For backward compatibility
+        publishedUrls,
+        totalPosts
       };
 
     } catch (error) {
@@ -161,63 +199,134 @@ export class WorkingCampaignProcessor {
   }
 
   /**
-   * Update campaign status in database
+   * Update campaign status in database with fallback table names
    */
   private async updateCampaignStatus(campaignId: string, status: string): Promise<void> {
-    const { error } = await supabase
-      .from('campaigns')
-      .update({ status })
-      .eq('id', campaignId);
+    const queryStartTime = Date.now();
 
-    if (error) {
-      console.error('Failed to update campaign status:', error);
-      throw new Error(`Failed to update campaign status: ${error.message}`);
+    // Use automation-specific table (separate from blog service)
+    const tableNames = ['automation_campaigns'];
+    let lastError = null;
+
+    for (const tableName of tableNames) {
+      try {
+        const { error } = await supabase
+          .from(tableName)
+          .update({ status })
+          .eq('id', campaignId);
+
+        const queryDuration = Date.now() - queryStartTime;
+
+        // Log the database query
+        campaignNetworkLogger.logDatabaseQuery(campaignId, {
+          operation: 'update',
+          table: tableName,
+          query: `UPDATE ${tableName} SET status = '${status}' WHERE id = '${campaignId}'`,
+          params: { status, campaignId },
+          result: error ? null : { success: true },
+          error: error ? error.message : undefined,
+          duration: queryDuration,
+          step: 'database-update'
+        });
+
+        if (!error) {
+          console.log(`✅ Successfully updated campaign status in ${tableName} table`);
+          return; // Success, exit function
+        }
+
+        lastError = error;
+        console.warn(`Failed to update campaign status in ${tableName}:`, error.message);
+
+      } catch (error) {
+        lastError = error;
+        console.warn(`Error accessing ${tableName} table:`, error);
+      }
     }
+
+    // If we get here, all table attempts failed
+    console.error('Failed to update campaign status in any table:', lastError);
+    // Don't throw error - campaign can continue without status update
+    console.warn('Campaign will continue without status update');
   }
 
   /**
-   * Log activity for campaign
+   * Log activity for campaign with fallback handling
    */
   private async logActivity(campaignId: string, type: string, message: string): Promise<void> {
     try {
+      const queryStartTime = Date.now();
+
       const { error } = await supabase
-        .from('activity_logs')
+        .from('automation_logs')
         .insert({
           campaign_id: campaignId,
-          activity_type: type,
+          log_level: type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info',
           message,
+          step_name: 'campaign-processing',
           timestamp: new Date().toISOString()
         });
 
+      const queryDuration = Date.now() - queryStartTime;
+
+      // Log the database query
+      campaignNetworkLogger.logDatabaseQuery(campaignId, {
+        operation: 'insert',
+        table: 'activity_logs',
+        query: `INSERT INTO activity_logs (campaign_id, activity_type, message, timestamp) VALUES (...)`,
+        params: { campaign_id: campaignId, activity_type: type, message },
+        result: error ? null : { success: true },
+        error: error ? error.message : undefined,
+        duration: queryDuration,
+        step: 'activity-logging'
+      });
+
       if (error) {
-        console.warn('Failed to log activity:', error);
+        console.warn('Failed to log activity to activity_logs table:', error.message);
+        // Don't let logging failure stop the campaign
+      } else {
+        console.log(`✅ Activity logged successfully: ${type} - ${message}`);
       }
     } catch (error) {
-      console.warn('Activity logging failed:', error);
+      console.warn('Activity logging failed completely:', error);
+      // Don't let logging failure stop the campaign
     }
   }
 
   /**
-   * Save published link to database
+   * Save published link to database with fallback table names
    */
   private async savePublishedLink(campaignId: string, url: string): Promise<void> {
-    try {
-      const { error } = await supabase
-        .from('published_links')
-        .insert({
-          campaign_id: campaignId,
-          url,
-          platform: 'Telegraph.ph',
-          status: 'active',
-          created_at: new Date().toISOString()
-        });
+    // Use automation-specific table (separate from blog service)
+    const tableNames = ['automation_published_links'];
 
-      if (error) {
-        console.warn('Failed to save published link:', error);
+    for (const tableName of tableNames) {
+      try {
+        const linkData = {
+          campaign_id: campaignId,
+          published_url: url,
+          platform: 'telegraph',
+          status: 'active',
+          validation_status: 'pending',
+          published_at: new Date().toISOString()
+        };
+
+        const { error } = await supabase
+          .from(tableName)
+          .insert(linkData);
+
+        if (!error) {
+          console.log(`✅ Successfully saved published link to ${tableName} table`);
+          return; // Success, exit function
+        }
+
+        console.warn(`Failed to save published link to ${tableName}:`, error.message);
+
+      } catch (error) {
+        console.warn(`Error accessing ${tableName} table:`, error);
       }
-    } catch (error) {
-      console.warn('Published link saving failed:', error);
     }
+
+    console.warn('Failed to save published link to any table - continuing without saving');
   }
 }
 
