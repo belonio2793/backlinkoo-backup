@@ -343,8 +343,20 @@ const Automation = () => {
                     placeholder="best digital marketing tools"
                     value={formData.anchorText}
                     onChange={(e) => handleInputChange('anchorText', e.target.value)}
+                    className={smartFlow.analyzeFormData(formData).missingFields.includes('Anchor Text') ?
+                              'border-amber-300 focus:border-amber-500' : ''}
                   />
                   <p className="text-sm text-gray-500">The clickable text for your backlink</p>
+                  {formData.anchorText && (
+                    <div className="flex justify-between text-xs">
+                      <span className={formData.anchorText.length > 60 ? 'text-amber-600' : 'text-gray-500'}>
+                        {formData.anchorText.length} characters
+                      </span>
+                      {formData.anchorText.length > 60 && (
+                        <span className="text-amber-600">Consider shorter anchor text for better SEO</span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
 
