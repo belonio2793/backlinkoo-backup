@@ -28,6 +28,7 @@ const Automation = () => {
   const [campaignProgress, setCampaignProgress] = useState<CampaignProgress | null>(null);
   const [progressUnsubscribe, setProgressUnsubscribe] = useState<(() => void) | null>(null);
   const [lastCreatedCampaign, setLastCreatedCampaign] = useState<any>(null);
+  const [hasShownRestoreMessage, setHasShownRestoreMessage] = useState(false);
   const [formData, setFormData] = useState({
     targetUrl: '',
     keyword: '',
