@@ -175,6 +175,13 @@ export class AutomationOrchestrator {
   }
 
   /**
+   * Get campaign progress (public access to private map)
+   */
+  getCampaignProgress(campaignId: string): CampaignProgress | undefined {
+    return this.campaignProgressMap.get(campaignId);
+  }
+
+  /**
    * Subscribe to campaign progress updates
    */
   subscribeToProgress(campaignId: string, callback: (progress: CampaignProgress) => void): () => void {
