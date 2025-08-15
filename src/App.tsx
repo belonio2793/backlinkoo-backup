@@ -370,6 +370,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/draggable-demo"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyDraggableDemo />
+                </Suspense>
+              }
+            />
 
             {/* 404 Catch-all route */}
             <Route
