@@ -177,6 +177,7 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
 
   const getStatusIcon = (status: Campaign['status']) => {
     switch (status) {
+      case 'active': return <Play className="w-4 h-4" />;
       case 'generating': return <FileText className="w-4 h-4" />;
       case 'publishing': return <ExternalLink className="w-4 h-4" />;
       case 'completed': return <CheckCircle className="w-4 h-4" />;
@@ -186,7 +187,7 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
     }
   };
 
-  const getActiveCampaigns = () => campaigns.filter(c => ['pending', 'generating', 'publishing'].includes(c.status));
+  const getActiveCampaigns = () => campaigns.filter(c => ['active', 'pending', 'generating', 'publishing'].includes(c.status));
   const getCompletedCampaigns = () => campaigns.filter(c => c.status === 'completed');
   const getPausedCampaigns = () => campaigns.filter(c => c.status === 'paused');
   const getFailedCampaigns = () => campaigns.filter(c => c.status === 'failed');
