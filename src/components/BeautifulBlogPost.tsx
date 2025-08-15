@@ -282,7 +282,7 @@ export function BeautifulBlogPost() {
   const handleClaimPost = async () => {
     if (!user) {
       // Store claim intent and show modal instead of navigating
-      EnhancedBlogClaimService.handleClaimIntent(slug!, BlogContentCleaner.cleanTitle(blogPost?.title || ''));
+      EnhancedBlogClaimService.handleClaimIntent(slug!, EnhancedBlogCleaner.cleanTitle(blogPost?.title || ''));
       setShowClaimModal(true);
       return;
     }
