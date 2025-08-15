@@ -18,7 +18,6 @@ import CampaignProgressTracker, { CampaignProgress } from '@/components/Campaign
 import LiveCampaignStatus from '@/components/LiveCampaignStatus';
 import CampaignManagerTabbed from '@/components/CampaignManagerTabbed';
 import FormCompletionCelebration from '@/components/FormCompletionCelebration';
-import InlineAuthForm from '@/components/InlineAuthForm';
 import InlineProgressTracker from '@/components/InlineProgressTracker';
 import InlineFeedMonitor from '@/components/InlineFeedMonitor';
 import { Header } from '@/components/Header';
@@ -26,6 +25,7 @@ import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
+import { useAuthModal } from '@/contexts/ModalContext';
 // Enhanced feed hooks removed - using simpler state management
 
 const Automation = () => {
@@ -43,9 +43,8 @@ const Automation = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastFormValidState, setLastFormValidState] = useState(false);
 
-  // State for inline components
-  const [showInlineAuth, setShowInlineAuth] = useState(false);
-  const [needsAuth, setNeedsAuth] = useState(false);
+  // Modal state for authentication
+  const { openLoginModal } = useAuthModal();
   const [formData, setFormData] = useState({
     targetUrl: '',
     keyword: '',
@@ -191,17 +190,21 @@ const Automation = () => {
   const handleCreateCampaign = async () => {
     // Check if user needs authentication first
     if (!isAuthenticated) {
-      setNeedsAuth(true);
-      setShowInlineAuth(true);
       saveFormData(formData);
       addStatusMessage('Please sign in to continue with your campaign', 'info');
+
+      // Open authentication modal with campaign context
+      openLoginModal({
+        onAuthSuccess: handleAuthSuccess,
+        pendingAction: `your ${formData.keyword || 'link building'} campaign`
+      });
       return;
     }
 
     await smartFlow.handleCampaignAction(
       formData,
       createCampaign,
-      () => {} // Don't show auth modal - we'll handle auth inline
+      () => {} // Auth is handled via modal
     );
   };
 
@@ -259,10 +262,14 @@ const Automation = () => {
     } catch (error) {
       console.error('Campaign creation error:', error);
       
-      // Handle specific authentication errors - keep inline
+      // Handle specific authentication errors - open modal
       if (error instanceof Error && error.message.includes('not authenticated')) {
         saveFormData(formData);
         addStatusMessage('Please sign in to continue with your campaign', 'error');
+        openLoginModal({
+          onAuthSuccess: handleAuthSuccess,
+          pendingAction: `your ${formData.keyword || 'link building'} campaign`
+        });
         return;
       }
       
@@ -272,9 +279,8 @@ const Automation = () => {
     }
   };
 
-  const handleAuthSuccess = async () => {
-    setShowInlineAuth(false);
-    setNeedsAuth(false);
+  const handleAuthSuccess = async (user: any) => {
+    console.log('🎯 Auth success for automation, user:', user?.email);
     addStatusMessage('Successfully signed in! Starting your campaign...', 'success');
 
     // Use a small delay to let the user see the success message
@@ -367,7 +373,10 @@ const Automation = () => {
                   size="sm"
                   variant="outline"
                   className="ml-4 border-blue-300 text-blue-700 hover:bg-blue-100"
-                  onClick={() => setShowInlineAuth(true)}
+                  onClick={() => openLoginModal({
+                    onAuthSuccess: handleAuthSuccess,
+                    pendingAction: `your ${savedFormData.keyword || 'saved'} campaign`
+                  })}
                 >
                   Sign In to Continue
                 </Button>
@@ -390,16 +399,6 @@ const Automation = () => {
           </div>
         )}
 
-        {/* Inline Authentication */}
-        {showInlineAuth && !isAuthenticated && (
-          <div className="mb-6">
-            <InlineAuthForm
-              onSuccess={handleAuthSuccess}
-              campaignData={hasValidSavedData(savedFormData) ? savedFormData : formData}
-              isVisible={showInlineAuth}
-            />
-          </div>
-        )}
 
         {/* Inline Progress Tracker */}
         {campaignProgress && (
