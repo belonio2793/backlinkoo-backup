@@ -382,25 +382,6 @@ const Automation = () => {
 
               </TabsContent>
 
-              <TabsContent value="reports">
-                {isAuthenticated ? (
-                  <AutomationReporting />
-                ) : (
-                  <Card>
-                    <CardContent className="p-8 text-center">
-                      <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                      <h3 className="text-lg font-medium mb-2">Sign In Required</h3>
-                      <p className="text-gray-600 mb-4">
-                        Sign in to view your campaign reports and analytics.
-                      </p>
-                      <Button onClick={() => setShowAuthModal(true)}>
-                        Sign In
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
-              </TabsContent>
-
               <TabsContent value="status">
                 <AutomationServiceStatus />
               </TabsContent>
