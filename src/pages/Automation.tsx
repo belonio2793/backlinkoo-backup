@@ -76,6 +76,13 @@ const Automation = () => {
 
     // Update smart flow state
     smartFlow.updateFlowState(newFormData);
+
+    // Check if form just became valid for celebration
+    const isNowValid = smartFlow.hasValidForm(newFormData);
+    if (isNowValid && !lastFormValidState && !isAuthenticated) {
+      setShowCelebration(true);
+    }
+    setLastFormValidState(isNowValid);
   };
 
   const validateForm = () => {
