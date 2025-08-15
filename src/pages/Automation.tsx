@@ -312,7 +312,7 @@ const Automation = () => {
                   size="sm"
                   variant="outline"
                   className="ml-4 border-blue-300 text-blue-700 hover:bg-blue-100"
-                  onClick={() => setShowAuthModal(true)}
+                  onClick={() => setShowInlineAuth(true)}
                 >
                   Sign In to Continue
                 </Button>
@@ -589,6 +589,19 @@ const Automation = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Campaign Creation Modal */}
+        <CampaignCreationModal
+          isOpen={showCampaignModal}
+          onClose={() => setShowCampaignModal(false)}
+          formData={formData}
+          onInputChange={handleInputChange}
+          onCreateCampaign={handleCreateCampaign}
+          isCreating={isCreating}
+          isAuthenticated={isAuthenticated}
+          smartFlow={smartFlow}
+          addStatusMessage={addStatusMessage}
+        />
 
         {/* Form Completion Celebration */}
         <FormCompletionCelebration
