@@ -401,7 +401,7 @@ const Automation = () => {
 
 
         {/* Main Content - Top Row: Campaign Creation, Activity, Live Monitor */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mb-4">
           {/* Campaign Creation (Left Column) */}
           <div className="lg:col-span-1">
             <Tabs defaultValue="create" className="w-full">
