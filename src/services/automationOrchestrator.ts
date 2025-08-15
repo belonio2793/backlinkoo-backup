@@ -437,11 +437,12 @@ export class AutomationOrchestrator {
       });
 
       // Emit real-time feed event for content generation
+      const { data: { user } } = await supabase.auth.getUser();
       realTimeFeedService.emitContentGenerated(
         campaignId,
         campaign.name,
         campaign.keywords[0] || '',
-        generatedContent[0]?.content?.length, // Approximate word count
+        generatedContent[0]?.wordCount || generatedContent[0]?.content?.length, // Use word count if available
         user?.id
       );
 
@@ -544,13 +545,14 @@ export class AutomationOrchestrator {
             this.markPlatformCompleted(campaignId, nextPlatform.id, publishedPage.url);
 
             // Emit real-time feed event for URL published
+            const { data: { user: currentUser } } = await supabase.auth.getUser();
             realTimeFeedService.emitUrlPublished(
               campaignId,
               campaign.name,
               campaign.keywords[0] || '',
               publishedPage.url,
               nextPlatform.name,
-              user?.id
+              currentUser?.id
             );
 
             // Update progress with published URL
