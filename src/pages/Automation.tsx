@@ -10,6 +10,7 @@ import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, W
 import { getOrchestrator } from '@/services/automationOrchestrator';
 import { campaignMonitoringService } from '@/services/campaignMonitoringService';
 import CampaignMonitoringErrorBoundary from '@/components/CampaignMonitoringErrorBoundary';
+import NetworkStatusIndicator from '@/components/NetworkStatusIndicator';
 import AutomationReporting from '@/components/AutomationReporting';
 import AutomationServiceStatus from '@/components/AutomationServiceStatus';
 import CampaignProgressTracker, { CampaignProgress } from '@/components/CampaignProgressTracker';
@@ -309,7 +310,10 @@ const Automation = () => {
 
           {/* Page Header */}
           <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold text-gray-900">Link Building Automation</h1>
+            <div className="flex items-center justify-center gap-4">
+              <h1 className="text-4xl font-bold text-gray-900">Link Building Automation</h1>
+              <NetworkStatusIndicator />
+            </div>
             <p className="text-lg text-gray-600">
               Automatically generate and publish high-quality content with backlinks to your target URL
             </p>
