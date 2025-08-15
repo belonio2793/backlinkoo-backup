@@ -268,19 +268,48 @@ export const supabase = hasValidCredentials ? {
 if (hasValidCredentials) {
   console.log('✅ Using real Supabase client with retry protection');
 
-  // Test connection in development
+  // Test connection in development with better error handling
   if (import.meta.env.DEV) {
     setTimeout(async () => {
       try {
-        console.log('🔍 Testing Supabase connection...');
-        const { data, error } = await supabase.from('blog_posts').select('id').limit(1);
-        if (error) {
-          console.warn('⚠️ Supabase connection test failed:', error.message);
-        } else {
-          console.log('✅ Supabase connection test successful');
+        console.log('🔍 Testing Supabase connectivity...');
+
+        // First check basic connectivity
+        const canConnect = await supabaseErrorHandler.checkConnectivity(SUPABASE_URL);
+        if (!canConnect) {
+          console.warn('❌ Cannot reach Supabase servers - check your internet connection');
+          return;
         }
+
+        console.log('🌐 Network connectivity OK, testing database...');
+
+        // Test database connection with retry
+        const { data, error } = await supabaseErrorHandler.retryDatabase(
+          () => supabase.from('blog_posts').select('id').limit(1),
+          'blog_posts',
+          'test_connection'
+        );
+
+        if (error) {
+          console.warn('⚠️ Database test failed:', error.message);
+          if (error.message?.includes('relation "blog_posts" does not exist')) {
+            console.info('ℹ️ Database tables may not be created yet - this is normal for new projects');
+          }
+        } else {
+          console.log('✅ Supabase database connection test successful');
+        }
+
       } catch (testError: any) {
-        console.warn('⚠️ Supabase connection test error:', testError.message);
+        console.warn('⚠️ Supabase connection test failed:', testError.message);
+
+        if (testError.message?.includes('Failed to fetch')) {
+          console.error('🌐 Network connectivity issue detected');
+          console.info('💡 Try refreshing the page or check your internet connection');
+        } else if (testError.message?.includes('timeout')) {
+          console.error('⏰ Connection timeout - Supabase may be slow or unreachable');
+        } else {
+          console.error('🔧 Possible configuration issue:', testError.message);
+        }
       }
     }, 1000);
   }
