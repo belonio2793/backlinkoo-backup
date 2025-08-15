@@ -354,8 +354,8 @@ const Automation = () => {
           </div>
         )}
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Main Content - Top Row: Campaign Creation, Live Monitor, Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
           {/* Campaign Creation (Left Column) */}
           <div className="lg:col-span-1">
             <Tabs defaultValue="create" className="w-full">
@@ -619,129 +619,136 @@ const Automation = () => {
 
           </div>
 
-          {/* Publishing Platforms (Middle Column) */}
+          {/* Live Monitor (Middle Column) */}
           <div className="lg:col-span-1">
-            <Card className="h-fit">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Link className="w-5 h-5" />
-                  Publishing Platforms
-                </CardTitle>
-                <CardDescription>
-                  Platforms for automatic rotation (1 post per platform per campaign)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="max-h-96 overflow-y-auto space-y-3">
-                  {/* Active Platform */}
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50 border-green-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <div>
-                        <div className="font-medium text-sm">Telegraph.ph</div>
-                        <div className="text-xs text-gray-600">Priority #1 • Auto-rotation</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-medium text-green-700">DR 91</div>
-                      <div className="text-xs text-gray-500">High DA</div>
-                    </div>
-                  </div>
-
-                  {/* Coming Soon Platforms */}
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                      <div>
-                        <div className="font-medium text-sm">Medium.com</div>
-                        <div className="text-xs text-gray-600">Priority #2 • Coming soon</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-medium text-gray-700">DR 96</div>
-                      <div className="text-xs text-gray-500">Premium</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                      <div>
-                        <div className="font-medium text-sm">Dev.to</div>
-                        <div className="text-xs text-gray-600">Priority #3 • Coming soon</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-medium text-gray-700">DR 86</div>
-                      <div className="text-xs text-gray-500">Tech focused</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                      <div>
-                        <div className="font-medium text-sm">LinkedIn Articles</div>
-                        <div className="text-xs text-gray-600">Professional network</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-medium text-gray-700">DR 100</div>
-                      <div className="text-xs text-gray-500">B2B focus</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                      <div>
-                        <div className="font-medium text-sm">Hashnode</div>
-                        <div className="text-xs text-gray-600">Developer blogging</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-medium text-gray-700">DR 75</div>
-                      <div className="text-xs text-gray-500">Developer</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                      <div>
-                        <div className="font-medium text-sm">Substack</div>
-                        <div className="text-xs text-gray-600">Newsletter platform</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-medium text-gray-700">DR 88</div>
-                      <div className="text-xs text-gray-500">Newsletter</div>
-                    </div>
-                  </div>
-
-                  {/* Coming Soon Notice */}
-                  <div className="p-3 border-2 border-dashed border-gray-300 rounded-lg text-center">
-                    <p className="text-xs text-gray-500">More platforms coming soon...</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Live Activity (Right Column) */}
-          <div className="lg:col-span-1 space-y-4">
-            {/* Inline Feed Monitor */}
             <InlineFeedMonitor
               activeCampaigns={activeCampaigns}
               isVisible={isAuthenticated || activeCampaigns.length > 0}
             />
+          </div>
 
+          {/* Live Activity (Right Column) */}
+          <div className="lg:col-span-1">
             {isAuthenticated && (
               <CampaignManagerTabbed
                 onStatusUpdate={(message, type) => addStatusMessage(message, type)}
               />
             )}
           </div>
+        </div>
+
+        {/* Publishing Platforms - Full Width Second Row */}
+        <div className="w-full">
+          <Card className="h-fit">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Link className="w-5 h-5" />
+                Publishing Platforms
+              </CardTitle>
+              <CardDescription>
+                Platforms for automatic rotation (1 post per platform per campaign)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {/* Active Platform */}
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-green-50 border-green-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <div>
+                      <div className="font-medium text-sm">Telegraph.ph</div>
+                      <div className="text-xs text-gray-600">Priority #1 • Auto-rotation</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-medium text-green-700">DR 91</div>
+                    <div className="text-xs text-gray-500">High DA</div>
+                  </div>
+                </div>
+
+                {/* Coming Soon Platforms */}
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                    <div>
+                      <div className="font-medium text-sm">Medium.com</div>
+                      <div className="text-xs text-gray-600">Priority #2 • Coming soon</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-medium text-gray-700">DR 96</div>
+                    <div className="text-xs text-gray-500">Premium</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                    <div>
+                      <div className="font-medium text-sm">Dev.to</div>
+                      <div className="text-xs text-gray-600">Priority #3 • Coming soon</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-medium text-gray-700">DR 86</div>
+                    <div className="text-xs text-gray-500">Tech focused</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                    <div>
+                      <div className="font-medium text-sm">LinkedIn Articles</div>
+                      <div className="text-xs text-gray-600">Professional network</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-medium text-gray-700">DR 100</div>
+                    <div className="text-xs text-gray-500">B2B focus</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                    <div>
+                      <div className="font-medium text-sm">Hashnode</div>
+                      <div className="text-xs text-gray-600">Developer blogging</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-medium text-gray-700">DR 75</div>
+                    <div className="text-xs text-gray-500">Developer</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                    <div>
+                      <div className="font-medium text-sm">Substack</div>
+                      <div className="text-xs text-gray-600">Newsletter platform</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-medium text-gray-700">DR 88</div>
+                    <div className="text-xs text-gray-500">Newsletter</div>
+                  </div>
+                </div>
+
+                {/* Coming Soon Notice */}
+                <div className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg">
+                  <p className="text-xs text-gray-500">More platforms coming soon...</p>
+                </div>
+
+                {/* Additional future platform slots */}
+                <div className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg opacity-50">
+                  <p className="text-xs text-gray-400">Platform slot</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Form Completion Celebration */}
