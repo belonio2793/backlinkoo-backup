@@ -150,12 +150,42 @@ export class SimpleContentFormatter {
   }
 
   /**
-   * Process simple lists
+   * Process ordered list items
+   */
+  private static processOrderedList(items: string[]): string {
+    const listItems = items
+      .map(item => {
+        const cleanItem = item.replace(/^\d+\.\s+/, '').trim();
+        return cleanItem ? `  <li>${cleanItem}</li>` : '';
+      })
+      .filter(item => item)
+      .join('\n');
+
+    return `<ol>\n${listItems}\n</ol>`;
+  }
+
+  /**
+   * Process unordered list items
+   */
+  private static processUnorderedList(items: string[]): string {
+    const listItems = items
+      .map(item => {
+        const cleanItem = item.replace(/^[\*\-\+]\s+/, '').trim();
+        return cleanItem ? `  <li>${cleanItem}</li>` : '';
+      })
+      .filter(item => item)
+      .join('\n');
+
+    return `<ul>\n${listItems}\n</ul>`;
+  }
+
+  /**
+   * Process simple lists (legacy method for backward compatibility)
    */
   private static processList(content: string): string {
     const lines = content.split('\n');
     const isOrdered = lines[0].match(/^\d+\.\s/);
-    
+
     const listItems = lines
       .map(line => {
         // Remove numbered list markers (1., 2., etc.) or bullet markers (*, -, +)
