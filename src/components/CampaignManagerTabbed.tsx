@@ -32,6 +32,7 @@ import { useToast } from '@/hooks/use-toast';
 import CampaignErrorStatus from './CampaignErrorStatus';
 import InlineProgressTracker from './InlineProgressTracker';
 import { CampaignProgress } from './CampaignProgressTracker';
+import { CampaignDetailsModal } from './CampaignDetailsModal';
 
 interface PublishedLink {
   id: string;
