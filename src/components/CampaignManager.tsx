@@ -118,9 +118,14 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
   const handleResumeCampaign = async (campaignId: string) => {
     setActionLoading(campaignId);
     try {
-      await orchestrator.resumeCampaign(campaignId);
+      const result = await orchestrator.resumeCampaign(campaignId);
       await loadCampaigns();
-      onStatusUpdate?.('Campaign resumed successfully', 'success');
+
+      if (result.success) {
+        onStatusUpdate?.(result.message, 'success');
+      } else {
+        onStatusUpdate?.(result.message, 'error');
+      }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Error resuming campaign:', {
