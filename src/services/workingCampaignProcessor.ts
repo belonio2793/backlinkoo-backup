@@ -292,26 +292,53 @@ export class WorkingCampaignProcessor {
   }
 
   /**
-   * Save published link to database
+   * Save published link to database with fallback table names
    */
   private async savePublishedLink(campaignId: string, url: string): Promise<void> {
-    try {
-      const { error } = await supabase
-        .from('published_links')
-        .insert({
+    const tableNames = ['published_links', 'automation_published_links', 'published_blog_posts'];
+
+    for (const tableName of tableNames) {
+      try {
+        const linkData = tableName === 'published_blog_posts' ? {
+          campaign_id: campaignId,
+          published_url: url,
+          platform: 'Telegraph.ph',
+          title: `Campaign ${campaignId} Content`,
+          content: 'Generated content',
+          status: 'active',
+          published_at: new Date().toISOString()
+        } : tableName === 'automation_published_links' ? {
+          campaign_id: campaignId,
+          published_url: url,
+          platform: 'Telegraph.ph',
+          title: `Campaign ${campaignId} Content`,
+          status: 'active',
+          published_at: new Date().toISOString()
+        } : {
           campaign_id: campaignId,
           url,
           platform: 'Telegraph.ph',
           status: 'active',
           created_at: new Date().toISOString()
-        });
+        };
 
-      if (error) {
-        console.warn('Failed to save published link:', error);
+        const { error } = await supabase
+          .from(tableName)
+          .insert(linkData);
+
+        if (!error) {
+          console.log(`✅ Successfully saved published link to ${tableName} table`);
+          return; // Success, exit function
+        }
+
+        console.warn(`Failed to save published link to ${tableName}:`, error.message);
+
+      } catch (error) {
+        console.warn(`Error accessing ${tableName} table:`, error);
       }
-    } catch (error) {
-      console.warn('Published link saving failed:', error);
     }
+
+    console.warn('Failed to save published link to any table - continuing without saving');
   }
 }
 
