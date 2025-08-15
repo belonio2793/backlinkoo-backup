@@ -42,6 +42,7 @@ const Automation = () => {
   const [hasShownRestoreMessage, setHasShownRestoreMessage] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastFormValidState, setLastFormValidState] = useState(false);
+  const [showDebugger, setShowDebugger] = useState(false);
 
   // Modal state for authentication
   const { openLoginModal } = useAuthModal();
