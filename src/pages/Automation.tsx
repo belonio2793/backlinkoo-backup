@@ -327,8 +327,13 @@ const Automation = () => {
                     placeholder="digital marketing"
                     value={formData.keyword}
                     onChange={(e) => handleInputChange('keyword', e.target.value)}
+                    className={smartFlow.analyzeFormData(formData).missingFields.includes('Keyword') ?
+                              'border-amber-300 focus:border-amber-500' : ''}
                   />
                   <p className="text-sm text-gray-500">The main topic for content generation</p>
+                  {formData.keyword && formData.keyword.length > 50 && (
+                    <p className="text-sm text-amber-600">Consider using a shorter, more focused keyword</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
