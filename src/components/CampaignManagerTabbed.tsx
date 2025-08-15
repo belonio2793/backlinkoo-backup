@@ -96,8 +96,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
             duration: 5000,
           });
 
-          // Update parent status
-          onStatusUpdate?.(`New backlink published: ${event.details?.publishedUrl || event.url || 'new URL'}`, 'success');
+          // Note: Don't create duplicate status messages - BacklinkNotification handles popup notifications
         }
 
         // Refresh campaigns to show new data
