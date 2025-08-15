@@ -119,6 +119,9 @@ if (import.meta.env.DEV) {
     (window as any).checkUserSubscription = checkUserSubscription;
   });
 
+  // Import blog post fix utility
+  import('./utils/fixEmptyBlogPost');
+
   console.log('💡 Debug helpers available:');
   console.log('  - fixRLS() - Go to RLS recursion fix page');
   console.log('  - forcePremium() - Force current user to premium status');
@@ -248,7 +251,7 @@ requestIdleCallback(() => {
 
         if (response.status === 404) {
           console.warn('⚠️ Content generation functions not available (404)');
-          console.warn('💡 Run window.testContentGeneration() to check all functions');
+          console.warn('��� Run window.testContentGeneration() to check all functions');
         } else if (response.ok) {
           console.log('✅ Content generation functions are working');
         } else {
