@@ -283,11 +283,11 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
       await orchestrator.deleteCampaign(campaignId);
       
       // Emit real-time feed event
-      realTimeFeedService.emitUserAction(
-        'delete_campaign',
-        `Campaign "${keyword}" deleted successfully`,
-        user?.id,
-        campaignId
+      realTimeFeedService.emitCampaignDeleted(
+        campaignId,
+        keyword,
+        keyword,
+        user?.id
       );
       
       await loadCampaigns();
