@@ -144,9 +144,18 @@ const Automation = () => {
     setIsCreating(true);
 
     try {
+      // Ensure URL is properly formatted before creating campaign
+      const formattedUrl = smartFlow.autoFormatUrl(formData.targetUrl);
+
+      // Update form data if URL was auto-formatted
+      if (formattedUrl !== formData.targetUrl) {
+        setFormData(prev => ({ ...prev, targetUrl: formattedUrl }));
+        addStatusMessage('URL auto-formatted for campaign creation', 'info');
+      }
+
       // Create new campaign using orchestrator
       const campaign = await orchestrator.createCampaign({
-        target_url: formData.targetUrl,
+        target_url: formattedUrl,
         keyword: formData.keyword,
         anchor_text: formData.anchorText
       });
