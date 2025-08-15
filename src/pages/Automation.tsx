@@ -216,6 +216,21 @@ const Automation = () => {
     await smartFlow.handleSuccessfulAuth(createCampaign);
   };
 
+  const handleAuthModalClose = () => {
+    setShowAuthModal(false);
+  };
+
+  const handleProgressClose = () => {
+    setShowProgress(false);
+    setCampaignProgress(null);
+
+    // Cleanup subscription
+    if (progressUnsubscribe) {
+      progressUnsubscribe();
+      setProgressUnsubscribe(null);
+    }
+  };
+
   const handleRetryCampaign = () => {
     // Reset campaign progress and allow user to create a new campaign
     setCampaignProgress(null);
