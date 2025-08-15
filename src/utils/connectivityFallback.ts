@@ -1,8 +1,10 @@
 /**
  * Connectivity Fallback Utility
- * 
+ *
  * Provides fallback mechanisms when Supabase connectivity fails
  */
+
+import React from 'react';
 
 export interface ConnectivityStatus {
   isOnline: boolean;
