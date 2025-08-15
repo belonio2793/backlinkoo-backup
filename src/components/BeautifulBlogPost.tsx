@@ -1025,27 +1025,58 @@ export function BeautifulBlogPost() {
                       try {
                         let content = blogPost.content || '';
 
+                        console.log('🔍 CONTENT DEBUG - Blog Post Processing');
+                        console.log('📄 Blog Post Details:');
+                        console.log('  - Title:', blogPost.title || 'NO TITLE');
+                        console.log('  - Slug:', blogPost.slug || 'NO SLUG');
+                        console.log('  - Status:', blogPost.status || 'NO STATUS');
+                        console.log('  - Created:', blogPost.created_at || 'NO DATE');
+                        console.log('  - Raw content length:', content.length);
+                        console.log('  - Raw content preview:', content.substring(0, 200) + '...');
+
+                        if (!content || content.length === 0) {
+                          console.error('❌ EMPTY CONTENT - returning error message');
+                          return '<div style="padding: 20px; text-align: center; color: #ef4444;"><h3>Content Error</h3><p>This blog post appears to have no content. The post may be corrupted or still processing.</p></div>';
+                        }
+
                         // First apply enhanced cleaning to remove titles and call-to-action text
-                        content = EnhancedBlogCleaner.cleanContent(content, blogPost.title);
+                        console.log('🧹 Applying EnhancedBlogCleaner...');
+                        const cleanedContent = EnhancedBlogCleaner.cleanContent(content, blogPost.title);
+                        console.log('  - After cleaning length:', cleanedContent.length);
+                        console.log('  - After cleaning preview:', cleanedContent.substring(0, 200) + '...');
+
+                        if (!cleanedContent || cleanedContent.length === 0) {
+                          console.error('❌ CONTENT CLEANED TO NOTHING - using original');
+                          const formattedOriginal = SimpleContentFormatter.formatBlogContent(content, blogPost.title);
+                          return formattedOriginal || `<p>${content}</p>`;
+                        }
 
                         // Then use simplified formatter for HTML structure
-                        const formattedContent = SimpleContentFormatter.formatBlogContent(content, blogPost.title);
+                        console.log('📝 Applying SimpleContentFormatter...');
+                        const formattedContent = SimpleContentFormatter.formatBlogContent(cleanedContent, blogPost.title);
+                        console.log('  - After formatting length:', formattedContent.length);
+                        console.log('  - After formatting preview:', formattedContent.substring(0, 200) + '...');
 
                         // Validate the formatted content
                         const validation = SimpleContentFormatter.validateContent(formattedContent);
                         if (!validation.isValid) {
-                          console.warn('Content validation failed:', validation.errors);
-                          // Fallback to basic HTML wrapping with enhanced cleaning
-                          const cleanedFallback = EnhancedBlogCleaner.cleanContent(content, blogPost.title);
-                          return `<p>${cleanedFallback.replace(/\n\n/g, '</p><p>')}</p>`;
+                          console.warn('⚠️ Content validation failed:', validation.errors);
+                          // Fallback to basic HTML wrapping
+                          const fallback = `<p>${cleanedContent.replace(/\n\n/g, '</p><p>')}</p>`;
+                          console.log('🔄 Using fallback content:', fallback.substring(0, 100) + '...');
+                          return fallback;
                         }
 
+                        console.log('✅ Content processed successfully');
                         return formattedContent;
                       } catch (formatError) {
-                        console.error('Content formatting failed:', formatError);
-                        // Return cleaned content as fallback
-                        const cleanedFallback = EnhancedBlogCleaner.cleanContent(blogPost.content || '', blogPost.title);
-                        return `<p>${cleanedFallback.replace(/\n\n/g, '</p><p>')}</p>`;
+                        console.error('💥 Content formatting failed:', formatError);
+                        // Return raw content as emergency fallback
+                        const rawContent = blogPost.content || '';
+                        if (rawContent) {
+                          return `<div style="padding: 20px;"><h3>Content Processing Error</h3><pre style="white-space: pre-wrap; font-family: inherit;">${rawContent}</pre></div>`;
+                        }
+                        return '<div style="padding: 20px; color: #ef4444;">Content could not be loaded or processed.</div>';
                       }
                     })()
                   }}
