@@ -461,7 +461,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
 
           {/* Campaign Activity Tab */}
           <TabsContent value="activity" className="mt-6 space-y-4 flex-1 flex flex-col">
-            <div className="max-h-96 overflow-y-auto space-y-3">
+            <div className="flex-1 overflow-y-auto space-y-3 min-h-0">
               {campaigns.length === 0 ? (
                   <div className="text-center py-8">
                     <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
