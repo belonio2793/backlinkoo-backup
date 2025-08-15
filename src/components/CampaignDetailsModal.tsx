@@ -126,6 +126,8 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
         campaign,
         progress,
         logs,
+        networkRequests,
+        databaseQueries,
         publishedLinks,
         metrics
       });
