@@ -796,6 +796,33 @@ export class AutomationOrchestrator {
   }
 
   /**
+   * Reset platform progress for a campaign (useful for testing or restarting)
+   */
+  resetCampaignPlatformProgress(campaignId: string): void {
+    this.platformProgressMap.delete(campaignId);
+    console.log(`Platform progress reset for campaign: ${campaignId}`);
+  }
+
+  /**
+   * Get detailed platform information for debugging
+   */
+  getDebugInfo(campaignId?: string): any {
+    const info = {
+      availablePlatforms: this.getActivePlatforms(),
+      totalCampaigns: this.platformProgressMap.size,
+    };
+
+    if (campaignId) {
+      info.campaignProgress = this.getCampaignPlatformProgress(campaignId);
+      info.nextPlatform = this.getNextPlatformForCampaign(campaignId);
+      info.shouldAutoPause = this.shouldAutoPauseCampaign(campaignId);
+      info.statusSummary = this.getCampaignStatusSummary(campaignId);
+    }
+
+    return info;
+  }
+
+  /**
    * Get campaign status summary including platform progress
    */
   getCampaignStatusSummary(campaignId: string): {
