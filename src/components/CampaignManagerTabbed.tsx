@@ -447,7 +447,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="activity" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
