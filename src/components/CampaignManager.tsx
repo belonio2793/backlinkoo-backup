@@ -66,8 +66,16 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
         })
       );
       
+      // Load status summaries for each campaign
+      const statusSummaries = new Map();
+      for (const campaign of campaignsWithLinks) {
+        const summary = orchestrator.getCampaignStatusSummary(campaign.id);
+        statusSummaries.set(campaign.id, summary);
+      }
+
       setCampaigns(campaignsWithLinks);
-      
+      setCampaignStatusSummaries(statusSummaries);
+
       if (showRefreshing) {
         onStatusUpdate?.('Campaigns refreshed successfully', 'success');
       }
