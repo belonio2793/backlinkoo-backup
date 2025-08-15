@@ -650,34 +650,90 @@ const Automation = () => {
                                 Auto-detects and pauses stuck campaigns
                               </p>
                             </div>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={async () => {
-                                try {
-                                  addStatusMessage('Checking for stuck campaigns...', 'info');
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={async () => {
+                                  try {
+                                    addStatusMessage('Checking for stuck campaigns...', 'info');
 
-                                  // First, load current campaigns
-                                  const campaigns = await orchestrator.getUserCampaigns();
-                                  const active = campaigns.filter(c => c.status === 'active');
-                                  setActiveCampaigns(active);
+                                    // First, load current campaigns
+                                    const campaigns = await orchestrator.getUserCampaigns();
+                                    const active = campaigns.filter(c => c.status === 'active');
+                                    const paused = campaigns.filter(c => c.status === 'paused');
+                                    setActiveCampaigns([...active, ...paused]);
 
-                                  if (active.length > 0) {
-                                    addStatusMessage(`Found ${active.length} active campaign(s) - checking health...`, 'info');
+                                    if (active.length > 0) {
+                                      addStatusMessage(`Found ${active.length} active campaign(s) - checking health...`, 'info');
+                                    }
+
+                                    // Then run monitoring check
+                                    await campaignMonitoringService.forceCheck();
+                                    addStatusMessage('Campaign monitoring check completed', 'success');
+                                  } catch (error: any) {
+                                    console.error('Campaign monitoring check failed:', error);
+                                    addStatusMessage(`Monitoring check failed: ${error.message}`, 'error');
                                   }
+                                }}
+                                className="text-xs px-3 py-1"
+                              >
+                                Check Now
+                              </Button>
 
-                                  // Then run monitoring check
-                                  await campaignMonitoringService.forceCheck();
-                                  addStatusMessage('Campaign monitoring check completed', 'success');
-                                } catch (error: any) {
-                                  console.error('Campaign monitoring check failed:', error);
-                                  addStatusMessage(`Monitoring check failed: ${error.message}`, 'error');
-                                }
-                              }}
-                              className="text-xs px-3 py-1"
-                            >
-                              Check Now
-                            </Button>
+                              <Button
+                                size="sm"
+                                variant="default"
+                                onClick={async () => {
+                                  try {
+                                    addStatusMessage('Force processing campaigns...', 'info');
+
+                                    // Get all campaigns that might need processing
+                                    const campaigns = await orchestrator.getUserCampaigns();
+                                    const needsProcessing = campaigns.filter(c =>
+                                      c.status === 'paused' || c.status === 'active'
+                                    );
+
+                                    if (needsProcessing.length === 0) {
+                                      addStatusMessage('No campaigns need processing', 'info');
+                                      return;
+                                    }
+
+                                    addStatusMessage(`Processing ${needsProcessing.length} campaign(s)...`, 'info');
+
+                                    // Process each campaign using working processor
+                                    for (const campaign of needsProcessing) {
+                                      try {
+                                        addStatusMessage(`Processing "${campaign.keywords?.[0] || campaign.name}"...`, 'info');
+
+                                        const result = await workingCampaignProcessor.processCampaign(campaign);
+
+                                        if (result.success) {
+                                          addStatusMessage(`✅ "${campaign.keywords?.[0]}" completed! Link: ${result.publishedUrl}`, 'success');
+                                        } else {
+                                          addStatusMessage(`❌ "${campaign.keywords?.[0]}" failed: ${result.error}`, 'error');
+                                        }
+                                      } catch (error: any) {
+                                        addStatusMessage(`❌ "${campaign.keywords?.[0]}" error: ${error.message}`, 'error');
+                                      }
+                                    }
+
+                                    addStatusMessage('Force processing completed', 'success');
+
+                                    // Refresh campaigns list
+                                    const updatedCampaigns = await orchestrator.getUserCampaigns();
+                                    setActiveCampaigns(updatedCampaigns.filter(c => c.status !== 'completed'));
+
+                                  } catch (error: any) {
+                                    console.error('Force processing failed:', error);
+                                    addStatusMessage(`Force processing failed: ${error.message}`, 'error');
+                                  }
+                                }}
+                                className="text-xs px-3 py-1 bg-green-600 hover:bg-green-700"
+                              >
+                                Force Process
+                              </Button>
+                            </div>
                           </div>
                         </div>
                       </CampaignMonitoringErrorBoundary>
