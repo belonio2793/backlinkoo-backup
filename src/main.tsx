@@ -7,6 +7,8 @@ import './styles/mobile-payment-fix.css'
 import './utils/unifiedErrorHandler'
 // Campaign-specific error handling
 import './utils/campaignErrorHandler'
+// Comprehensive error debug fix
+import './utils/errorDebugFix'
 // Test error formatting in development (no promise rejections)
 import './utils/silentErrorTest'
 // Check if database schema is properly configured
