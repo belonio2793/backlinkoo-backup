@@ -346,6 +346,16 @@ const Automation = () => {
             <div className="flex items-center justify-center gap-4">
               <h1 className="text-4xl font-bold text-gray-900">Link Building Automation</h1>
               <NetworkStatusIndicator />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowDebugger(true)}
+                className="border-orange-300 text-orange-700 hover:bg-orange-50"
+                title="Debug Campaign Issues"
+              >
+                <Settings className="w-4 h-4 mr-2" />
+                Debug
+              </Button>
             </div>
             <p className="text-lg text-gray-600">
               Automatically generate and publish high-quality content with backlinks to your target URL
