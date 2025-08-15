@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info } from 'lucide-react';
+import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2 } from 'lucide-react';
 import { getOrchestrator } from '@/services/automationOrchestrator';
 import AutomationReporting from '@/components/AutomationReporting';
 import AutomationServiceStatus from '@/components/AutomationServiceStatus';
@@ -14,14 +14,24 @@ import AutomationAuthModal from '@/components/AutomationAuthModal';
 import CampaignProgressTracker, { CampaignProgress } from '@/components/CampaignProgressTracker';
 import LiveCampaignStatus from '@/components/LiveCampaignStatus';
 import CampaignManager from '@/components/CampaignManager';
+import FormCompletionCelebration from '@/components/FormCompletionCelebration';
+import RealTimeFeedModal from '@/components/RealTimeFeedModal';
+import RealTimeFeedToggle from '@/components/RealTimeFeedToggle';
+import FeedModal from '@/components/FeedModal';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
+import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
+import { useRealTimeFeedModal } from '@/hooks/useRealTimeFeedModal';
+import { useFeedModal } from '@/hooks/useFeedModal';
 
 const Automation = () => {
   const [statusMessages, setStatusMessages] = useState<Array<{message: string, type: 'success' | 'error' | 'info', id: string}>>([]);
   const { isAuthenticated, isLoading: authLoading, user } = useAuthState();
   const { savedFormData, saveFormData, clearFormData, hasValidSavedData } = useCampaignFormPersistence();
-  
+  const smartFlow = useSmartCampaignFlow();
+  const realTimeFeed = useRealTimeFeedModal();
+  const feedModal = useFeedModal();
+
   const [isCreating, setIsCreating] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
@@ -29,12 +39,14 @@ const Automation = () => {
   const [progressUnsubscribe, setProgressUnsubscribe] = useState<(() => void) | null>(null);
   const [lastCreatedCampaign, setLastCreatedCampaign] = useState<any>(null);
   const [hasShownRestoreMessage, setHasShownRestoreMessage] = useState(false);
+  const [showCelebration, setShowCelebration] = useState(false);
+  const [lastFormValidState, setLastFormValidState] = useState(false);
   const [formData, setFormData] = useState({
     targetUrl: '',
     keyword: '',
     anchorText: ''
   });
-  
+
   const orchestrator = getOrchestrator();
 
   // Add status message helper
@@ -54,11 +66,30 @@ const Automation = () => {
       setFormData(savedFormData);
       addStatusMessage('Form data restored - you can continue with your campaign', 'info');
       setHasShownRestoreMessage(true);
+
+      // Update smart flow with restored data
+      smartFlow.updateFlowState(savedFormData);
     }
-  }, [savedFormData, hasValidSavedData, hasShownRestoreMessage]);
+  }, [savedFormData, hasValidSavedData, hasShownRestoreMessage, smartFlow]);
+
+  // Initialize smart flow on mount
+  useEffect(() => {
+    smartFlow.updateFlowState(formData);
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    const newFormData = { ...formData, [field]: value };
+    setFormData(newFormData);
+
+    // Update smart flow state
+    smartFlow.updateFlowState(newFormData);
+
+    // Check if form just became valid for celebration
+    const isNowValid = smartFlow.hasValidForm(newFormData);
+    if (isNowValid && !lastFormValidState && !isAuthenticated) {
+      setShowCelebration(true);
+    }
+    setLastFormValidState(isNowValid);
   };
 
   const validateForm = () => {
@@ -109,26 +140,32 @@ const Automation = () => {
   };
 
   const handleCreateCampaign = async () => {
-    if (!validateForm()) return;
-
-    // Check authentication first
-    if (!isAuthenticated) {
-      // Save form data before showing auth modal
-      saveFormData(formData);
-      setShowAuthModal(true);
-      return;
-    }
-
-    await createCampaign();
+    await smartFlow.handleCampaignAction(
+      formData,
+      createCampaign,
+      () => setShowAuthModal(true)
+    );
   };
 
   const createCampaign = async () => {
     setIsCreating(true);
 
+    // Open Feed modal for creation process
+    feedModal.openFeedForCreation();
+
     try {
+      // Ensure URL is properly formatted before creating campaign
+      const formattedUrl = smartFlow.autoFormatUrl(formData.targetUrl);
+
+      // Update form data if URL was auto-formatted
+      if (formattedUrl !== formData.targetUrl) {
+        setFormData(prev => ({ ...prev, targetUrl: formattedUrl }));
+        addStatusMessage('URL auto-formatted for campaign creation', 'info');
+      }
+
       // Create new campaign using orchestrator
       const campaign = await orchestrator.createCampaign({
-        target_url: formData.targetUrl,
+        target_url: formattedUrl,
         keyword: formData.keyword,
         anchor_text: formData.anchorText
       });
@@ -143,6 +180,12 @@ const Automation = () => {
 
       // Store the created campaign for live status
       setLastCreatedCampaign(campaign);
+
+      // Update Feed modal with created campaign
+      feedModal.updateActiveCampaign(campaign);
+
+      // Refresh Real Time Feed to show new campaign
+      realTimeFeed.forceRefresh();
 
       // Clear saved form data since campaign was created successfully
       clearFormData();
@@ -170,14 +213,12 @@ const Automation = () => {
       addStatusMessage(`Campaign creation failed: ${formatErrorMessage(error)}`, 'error');
     } finally {
       setIsCreating(false);
+      feedModal.setCreatingState(false);
     }
   };
 
-  const handleAuthSuccess = () => {
-    // After successful authentication, create the campaign
-    if (hasValidSavedData(savedFormData)) {
-      createCampaign();
-    }
+  const handleAuthSuccess = async () => {
+    await smartFlow.handleSuccessfulAuth(createCampaign);
   };
 
   const handleAuthModalClose = () => {
@@ -214,9 +255,16 @@ const Automation = () => {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading automation system...</p>
+        <div className="text-center space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-600" />
+          <div>
+            <p className="text-gray-900 font-medium">Loading automation system...</p>
+            {hasValidSavedData(savedFormData) && (
+              <p className="text-sm text-blue-600 mt-2">
+                Restoring your saved campaign for "{savedFormData.keyword}"
+              </p>
+            )}
+          </div>
         </div>
       </div>
     );
@@ -255,10 +303,25 @@ const Automation = () => {
 
         {/* Saved form data notification */}
         {hasValidSavedData(savedFormData) && !isAuthenticated && (
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              You have saved campaign details. Sign in to continue with your campaign for "<strong>{savedFormData.keyword}</strong>".
+          <Alert className="border-blue-200 bg-blue-50">
+            <Target className="h-4 w-4" />
+            <AlertDescription className="text-blue-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  You have a saved campaign ready: <strong>"{savedFormData.keyword}"</strong>
+                  <div className="text-sm mt-1 opacity-90">
+                    Target: {savedFormData.targetUrl} • Anchor: {savedFormData.anchorText}
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="ml-4 border-blue-300 text-blue-700 hover:bg-blue-100"
+                  onClick={() => setShowAuthModal(true)}
+                >
+                  Sign In to Continue
+                </Button>
+              </div>
             </AlertDescription>
           </Alert>
         )}
@@ -297,24 +360,122 @@ const Automation = () => {
                 {/* Campaign Creation Form */}
                 <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="w-5 h-5" />
-                  Create New Campaign
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-5 h-5" />
+                    Create New Campaign
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    {smartFlow.hasValidForm(formData) ? (
+                      <div className="flex items-center gap-1 text-green-600">
+                        <CheckCircle className="w-4 h-4" />
+                        <span>Ready</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <Clock className="w-4 h-4" />
+                        <span>{3 - smartFlow.analyzeFormData(formData).missingFields.length}/3</span>
+                      </div>
+                    )}
+                  </div>
                 </CardTitle>
                 <CardDescription>
                   Enter your target URL, keyword, and anchor text to generate and publish backlink content
                 </CardDescription>
+
+                {/* Form Completion Progress Bar */}
+                <div className="mt-3">
+                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>Form Progress</span>
+                    <span>{Math.round(((3 - smartFlow.analyzeFormData(formData).missingFields.length) / 3) * 100)}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-1.5">
+                    <div
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        smartFlow.hasValidForm(formData) ? 'bg-green-500' : 'bg-blue-500'
+                      }`}
+                      style={{ width: `${((3 - smartFlow.analyzeFormData(formData).missingFields.length) / 3) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="targetUrl">Target URL *</Label>
-                  <Input
-                    id="targetUrl"
-                    placeholder="https://example.com"
-                    value={formData.targetUrl}
-                    onChange={(e) => handleInputChange('targetUrl', e.target.value)}
-                  />
-                  <p className="text-sm text-gray-500">The URL where your backlink will point</p>
+                  <div className="flex gap-2">
+                    <Input
+                      id="targetUrl"
+                      placeholder="https://example.com or example.com"
+                      value={formData.targetUrl}
+                      onChange={(e) => handleInputChange('targetUrl', e.target.value)}
+                      onKeyDown={(e) => {
+                        // Ctrl/Cmd + Enter to auto-format
+                        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                          e.preventDefault();
+                          const formattedUrl = smartFlow.autoFormatUrl(formData.targetUrl);
+                          if (formattedUrl !== formData.targetUrl) {
+                            handleInputChange('targetUrl', formattedUrl);
+                            addStatusMessage('URL formatted with Ctrl+Enter shortcut', 'success');
+                          }
+                        }
+                      }}
+                      onBlur={(e) => {
+                        // Auto-format URL when user leaves the field
+                        const formattedUrl = smartFlow.autoFormatUrl(e.target.value);
+                        if (formattedUrl !== e.target.value) {
+                          handleInputChange('targetUrl', formattedUrl);
+                          addStatusMessage('URL automatically formatted with https://', 'info');
+                        }
+                      }}
+                      onPaste={(e) => {
+                        // Auto-format pasted content after a short delay
+                        setTimeout(() => {
+                          const pastedValue = e.currentTarget.value;
+                          const formattedUrl = smartFlow.autoFormatUrl(pastedValue);
+                          if (formattedUrl !== pastedValue) {
+                            handleInputChange('targetUrl', formattedUrl);
+                            addStatusMessage('Pasted URL automatically formatted with https://', 'info');
+                          }
+                        }, 10);
+                      }}
+                      className={`flex-1 ${smartFlow.analyzeFormData(formData).missingFields.includes('Target URL') ||
+                                smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') ?
+                                'border-amber-300 focus:border-amber-500' : ''}`}
+                    />
+                    {formData.targetUrl && !formData.targetUrl.startsWith('http') && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const formattedUrl = smartFlow.autoFormatUrl(formData.targetUrl);
+                          if (formattedUrl !== formData.targetUrl) {
+                            handleInputChange('targetUrl', formattedUrl);
+                            addStatusMessage('URL formatted with https://', 'success');
+                          }
+                        }}
+                        className="px-3"
+                        title="Add https:// to URL"
+                      >
+                        <Wand2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-500">
+                    The URL where your backlink will point
+                  </p>
+                  {formData.targetUrl && !formData.targetUrl.startsWith('http') && formData.targetUrl.includes('.') && (
+                    <p className="text-sm text-blue-600 flex items-center gap-1">
+                      <Wand2 className="h-3 w-3" />
+                      Will auto-format to: {smartFlow.autoFormatUrl(formData.targetUrl)}
+                    </p>
+                  )}
+                  {smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') && formData.targetUrl &&
+                   !formData.targetUrl.includes('.') && (
+                    <p className="text-sm text-amber-600">
+                      Please enter a valid domain (e.g., example.com)
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -324,8 +485,13 @@ const Automation = () => {
                     placeholder="digital marketing"
                     value={formData.keyword}
                     onChange={(e) => handleInputChange('keyword', e.target.value)}
+                    className={smartFlow.analyzeFormData(formData).missingFields.includes('Keyword') ?
+                              'border-amber-300 focus:border-amber-500' : ''}
                   />
                   <p className="text-sm text-gray-500">The main topic for content generation</p>
+                  {formData.keyword && formData.keyword.length > 50 && (
+                    <p className="text-sm text-amber-600">Consider using a shorter, more focused keyword</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
@@ -335,8 +501,20 @@ const Automation = () => {
                     placeholder="best digital marketing tools"
                     value={formData.anchorText}
                     onChange={(e) => handleInputChange('anchorText', e.target.value)}
+                    className={smartFlow.analyzeFormData(formData).missingFields.includes('Anchor Text') ?
+                              'border-amber-300 focus:border-amber-500' : ''}
                   />
                   <p className="text-sm text-gray-500">The clickable text for your backlink</p>
+                  {formData.anchorText && (
+                    <div className="flex justify-between text-xs">
+                      <span className={formData.anchorText.length > 60 ? 'text-amber-600' : 'text-gray-500'}>
+                        {formData.anchorText.length} characters
+                      </span>
+                      {formData.anchorText.length > 60 && (
+                        <span className="text-amber-600">Consider shorter anchor text for better SEO</span>
+                      )}
+                    </div>
+                  )}
                 </div>
 
 
@@ -349,36 +527,78 @@ const Automation = () => {
                   </Alert>
                 )}
 
-                <Button 
+                <Button
                   onClick={handleCreateCampaign}
-                  disabled={isCreating}
-                  className="w-full"
+                  disabled={smartFlow.getButtonState(formData).disabled || isCreating}
+                  className="w-full transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
                   size="lg"
+                  variant={smartFlow.getButtonState(formData).variant}
                 >
-                  {isCreating ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Creating Campaign...
-                    </>
-                  ) : (
-                    <>
-                      <Target className="w-4 h-4 mr-2" />
-                      {isAuthenticated ? 'Start Link Building Campaign' : 'Continue with Campaign'}
-                    </>
-                  )}
+                  <div className="flex items-center justify-center transition-all duration-200">
+                    {(isCreating || smartFlow.getButtonState(formData).icon === 'loader') ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <span className="animate-pulse">{smartFlow.getButtonState(formData).text}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Target className={`w-4 h-4 mr-2 transition-transform duration-200 ${
+                          smartFlow.hasValidForm(formData) ? 'rotate-0' : 'rotate-45'
+                        }`} />
+                        <span>{smartFlow.getButtonState(formData).text}</span>
+                      </>
+                    )}
+                  </div>
                 </Button>
+
+                {/* Button description */}
+                {smartFlow.getButtonState(formData).description && (
+                  <p className="text-xs text-gray-500 text-center">
+                    {smartFlow.getButtonState(formData).description}
+                  </p>
+                )}
+
+                {/* Smart Flow Contextual Messages */}
+                {smartFlow.getContextualMessages(formData).map((msg, index) => (
+                  <Alert key={index} className={
+                    msg.type === 'success' ? 'border-green-200 bg-green-50' :
+                    msg.type === 'warning' ? 'border-yellow-200 bg-yellow-50' :
+                    'border-blue-200 bg-blue-50'
+                  }>
+                    <Info className="h-4 w-4" />
+                    <AlertDescription className={
+                      msg.type === 'success' ? 'text-green-700' :
+                      msg.type === 'warning' ? 'text-yellow-700' :
+                      'text-blue-700'
+                    }>
+                      {msg.message}
+                    </AlertDescription>
+                  </Alert>
+                ))}
               </CardContent>
                 </Card>
 
-                {/* Live Campaign Status */}
-                <LiveCampaignStatus
-                  isCreating={isCreating}
-                  lastCreatedCampaign={lastCreatedCampaign}
-                  onCampaignUpdate={(campaign) => {
-                    setLastCreatedCampaign(campaign);
-                    addStatusMessage(`Campaign "${campaign.keyword}" status updated to ${campaign.status}`, 'info');
-                  }}
-                />
+                {/* Campaign Status Summary (when not using Feed modal) */}
+                {lastCreatedCampaign && !feedModal.isOpen && (
+                  <div className="mt-6 p-4 border rounded-lg bg-blue-50 border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-blue-900">Campaign Active</h4>
+                        <p className="text-sm text-blue-700">
+                          "{lastCreatedCampaign.keywords?.[0] || lastCreatedCampaign.name}" is running
+                        </p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => feedModal.openFeedForCampaign(lastCreatedCampaign)}
+                        className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                      >
+                        View Feed
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
               </TabsContent>
 
@@ -513,6 +733,36 @@ const Automation = () => {
           onClose={handleAuthModalClose}
           onSuccess={handleAuthSuccess}
           campaignData={hasValidSavedData(savedFormData) ? savedFormData : undefined}
+        />
+
+        {/* Form Completion Celebration */}
+        <FormCompletionCelebration
+          isVisible={showCelebration}
+          onComplete={() => setShowCelebration(false)}
+        />
+
+        {/* Real Time Feed Modal */}
+        <RealTimeFeedModal
+          isVisible={realTimeFeed.isVisible}
+          activeCampaigns={realTimeFeed.activeCampaigns}
+          onClose={realTimeFeed.hideModal}
+          onMinimize={realTimeFeed.minimizeModal}
+          isMinimized={realTimeFeed.isMinimized}
+        />
+
+        {/* Feed Modal */}
+        <FeedModal
+          isOpen={feedModal.isOpen}
+          onClose={feedModal.closeFeed}
+          activeCampaign={feedModal.activeCampaign}
+          isCreating={feedModal.isCreating}
+        />
+
+        {/* Real Time Feed Toggle Button */}
+        <RealTimeFeedToggle
+          isVisible={realTimeFeed.isVisible}
+          activeCampaignsCount={realTimeFeed.activeCampaigns.length}
+          onClick={realTimeFeed.showModal}
         />
       </div>
     </div>

@@ -17,6 +17,7 @@ import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
 import "@/utils/emergencyDisable"; // Load emergency disable utilities
 // import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
+import EnvironmentSwitcher from "@/components/shared/EnvironmentSwitcher";
 import Index from "./pages/Index";
 
 const LazyBlogCommentsSystem = lazy(() => import("./pages/BlogCommentsSystem"));
@@ -53,6 +54,7 @@ const LazyPremiumSEOAnalysisTest = lazy(() => import("./pages/PremiumSEOAnalysis
 
 const LazyDebugUserReports = lazy(() => import("./pages/DebugUserReports"));
 const LazyBlogPostChecker = lazy(() => import("./components/BlogPostChecker").then(module => ({ default: module.BlogPostChecker })));
+const LazyAutomationTestingDashboard = lazy(() => import("./components/admin/AutomationTestingDashboard"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -352,6 +354,14 @@ const App = () => (
               }
             />
             <Route
+              path="/admin/automation-testing"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyAutomationTestingDashboard />
+                </Suspense>
+              }
+            />
+            <Route
               path="/premium-seo-test"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
@@ -377,6 +387,7 @@ const App = () => (
           </SymbolCleanerProvider>
         </UserFlowProvider>
       </ModalProvider>
+      <EnvironmentSwitcher />
     </TooltipProvider>
   </QueryClientProvider>
 );
