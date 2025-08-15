@@ -276,6 +276,7 @@ if (import.meta.env.DEV) {
   console.log('  - testRealTimeFeed() - Test real-time feed integration');
   console.log('  - testCampaignTabs() - Test campaign manager tabs and live links');
   console.log('  - testResponseBodyFix() - Test response body conflict prevention');
+  console.log('  - testDevelopmentProcessor() - Test mock content + Telegraph publishing');
   console.log('  - fetchTest.runDiagnostics() - Test fetch and network connectivity');
 }
 
