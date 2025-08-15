@@ -204,8 +204,8 @@ export class WorkingCampaignProcessor {
   private async updateCampaignStatus(campaignId: string, status: string): Promise<void> {
     const queryStartTime = Date.now();
 
-    // Try multiple table names as fallbacks
-    const tableNames = ['campaigns', 'automation_campaigns'];
+    // Use automation-specific table (separate from blog service)
+    const tableNames = ['automation_campaigns'];
     let lastError = null;
 
     for (const tableName of tableNames) {
