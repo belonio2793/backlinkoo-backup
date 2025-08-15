@@ -50,6 +50,8 @@ interface DetailedCampaignInfo {
   campaign: Campaign;
   progress?: CampaignProgress;
   logs: CampaignLog[];
+  networkRequests: NetworkRequest[];
+  databaseQueries: DatabaseQuery[];
   publishedLinks: Array<{
     id: string;
     url: string;
@@ -63,6 +65,8 @@ interface DetailedCampaignInfo {
     publishingTime: number;
     retryCount: number;
     errorCount: number;
+    requestCount: number;
+    failedRequestCount: number;
   };
 }
 
