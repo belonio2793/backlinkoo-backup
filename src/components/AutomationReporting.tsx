@@ -76,10 +76,14 @@ const AutomationReporting = () => {
       
       setCampaigns(campaignsWithLinks);
     } catch (error) {
-      console.error('Error loading campaigns:', error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error loading campaigns:', {
+        message: errorMessage,
+        error: error
+      });
       toast({
         title: "Error Loading Campaigns",
-        description: "Failed to load your campaigns. Please try again.",
+        description: `Failed to load your campaigns: ${errorMessage}`,
         variant: "destructive"
       });
     } finally {
