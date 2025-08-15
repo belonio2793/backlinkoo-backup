@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2, Activity } from 'lucide-react';
 import { getOrchestrator } from '@/services/automationOrchestrator';
+import { campaignMonitoringService } from '@/services/campaignMonitoringService';
 import AutomationReporting from '@/components/AutomationReporting';
 import AutomationServiceStatus from '@/components/AutomationServiceStatus';
 import CampaignProgressTracker, { CampaignProgress } from '@/components/CampaignProgressTracker';
@@ -77,6 +78,24 @@ const Automation = () => {
   useEffect(() => {
     smartFlow.updateFlowState(formData);
   }, []);
+
+  // Start campaign monitoring when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      // Start monitoring with a small delay to ensure other services are ready
+      const startMonitoring = setTimeout(() => {
+        campaignMonitoringService.startMonitoring();
+        addStatusMessage('Campaign monitoring service started', 'info');
+      }, 2000);
+
+      return () => {
+        clearTimeout(startMonitoring);
+      };
+    } else {
+      // Stop monitoring when user logs out
+      campaignMonitoringService.stopMonitoring();
+    }
+  }, [isAuthenticated]);
 
 
   const handleInputChange = (field: string, value: string) => {
