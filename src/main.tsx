@@ -298,6 +298,9 @@ if (import.meta.env.DEV) {
   console.log('  - testDatabaseSchema() - Test database connection and published_blog_posts table');
   console.log('  - checkDatabaseSchema() - Check if published_blog_posts table exists');
   console.log('  - fixDatabaseSchema() - Auto-fix missing published_blog_posts table');
+  console.log('  - testWorkingContentGenerator() - Test working-content-generator function');
+  console.log('  - testContentGeneratorAvailability() - Check function accessibility');
+  console.log('  - runContentGeneratorDiagnostics() - Full content generator diagnostic');
 }
 
 // Priority: Get React app rendering ASAP
@@ -329,7 +332,7 @@ requestIdleCallback(() => {
 
         if (response.status === 404) {
           console.warn('⚠️ Content generation functions not available (404)');
-          console.warn('🔧 Run window.testContentGeneration() to check all functions');
+          console.warn('�� Run window.testContentGeneration() to check all functions');
         } else if (response.ok) {
           console.log('✅ Content generation functions are working');
         } else {
