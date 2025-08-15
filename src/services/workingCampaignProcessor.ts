@@ -32,7 +32,16 @@ export class WorkingCampaignProcessor {
       // Step 2: Use simplified server-side processor to avoid browser analytics issues
       console.log('🔄 Using simplified server-side processor...');
       realTimeFeedService.emitSystemEvent(`Processing campaign "${keyword}" server-side`, 'info');
-      
+
+      // Log the function call
+      const functionCallId = campaignNetworkLogger.logFunctionCall(
+        campaign.id,
+        'simple-campaign-processor',
+        { keyword, anchorText, targetUrl, campaignId: campaign.id },
+        'content-generation'
+      );
+
+      const functionStartTime = Date.now();
       const response = await fetch('/.netlify/functions/simple-campaign-processor', {
         method: 'POST',
         headers: {
@@ -60,7 +69,7 @@ export class WorkingCampaignProcessor {
       const publishedUrl = result.data.publishedUrl;
       
       console.log('✅ Content generated and published successfully via server-side processor');
-      console.log('��� Published successfully:', publishedUrl);
+      console.log('📤 Published successfully:', publishedUrl);
       
       realTimeFeedService.emitContentGenerated(
         campaign.id,
