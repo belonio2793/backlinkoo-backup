@@ -326,7 +326,40 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                         <p><strong>Target:</strong> {campaign.target_url}</p>
                         <p><strong>Anchor:</strong> {campaign.anchor_text}</p>
                         <p><strong>Created:</strong> {new Date(campaign.created_at).toLocaleString()}</p>
-                        
+
+                        {/* Platform Progress */}
+                        {(() => {
+                          const summary = campaignStatusSummaries.get(campaign.id);
+                          if (summary) {
+                            return (
+                              <div className="mt-2 p-2 bg-gray-50 rounded-md">
+                                <p className="text-xs font-medium text-gray-700 mb-1">Platform Progress</p>
+                                <div className="flex items-center gap-2 text-xs">
+                                  <span className="text-gray-600">
+                                    {summary.platformsCompleted}/{summary.totalPlatforms} platforms completed
+                                  </span>
+                                  {summary.nextPlatform && (
+                                    <span className="text-blue-600">
+                                      • Next: {summary.nextPlatform}
+                                    </span>
+                                  )}
+                                  {summary.isFullyCompleted && (
+                                    <span className="text-green-600 font-medium">
+                                      • All platforms completed
+                                    </span>
+                                  )}
+                                </div>
+                                {summary.completedPlatforms.length > 0 && (
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    Completed: {summary.completedPlatforms.join(', ')}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
+
                         {campaign.automation_published_links && campaign.automation_published_links.length > 0 && (
                           <div className="mt-2">
                             <p className="font-medium">Published Links ({campaign.automation_published_links.length}):</p>
