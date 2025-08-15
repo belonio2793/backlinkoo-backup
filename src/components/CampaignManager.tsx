@@ -179,7 +179,7 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
           <div>
             <CardTitle className="flex items-center gap-2">
               <Settings className="w-5 h-5" />
-              Campaign Management
+              Activity
             </CardTitle>
             <CardDescription>
               Monitor and control your active campaigns
@@ -219,8 +219,54 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
 
         <Separator className="mb-4" />
 
+        {/* Live Links Section */}
+        {campaigns.some(c => c.automation_published_links?.length > 0) && (
+          <div className="mb-6">
+            <h4 className="font-medium text-sm text-gray-700 mb-3 flex items-center gap-2">
+              <ExternalLink className="w-4 h-4" />
+              Live Links ({campaigns.reduce((total, c) => total + (c.automation_published_links?.length || 0), 0)})
+            </h4>
+            <ScrollArea className="h-32 border rounded-lg bg-gray-50 p-3">
+              <div className="space-y-2">
+                {campaigns
+                  .filter(c => c.automation_published_links?.length > 0)
+                  .map(campaign =>
+                    campaign.automation_published_links.map(link => (
+                      <div key={link.id} className="flex items-center justify-between p-2 bg-white rounded border text-xs">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-gray-900 truncate">{campaign.keywords?.[0] || campaign.keyword}</span>
+                            <Badge variant="outline" className="text-xs px-1 py-0">
+                              {link.platform}
+                            </Badge>
+                          </div>
+                          <a
+                            href={link.published_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline truncate block"
+                            title={link.published_url}
+                          >
+                            {link.published_url}
+                          </a>
+                        </div>
+                        <div className="text-gray-500 text-xs ml-2 flex-shrink-0">
+                          {new Date(link.published_at).toLocaleDateString()}
+                        </div>
+                      </div>
+                    ))
+                  )}
+              </div>
+            </ScrollArea>
+            <Separator className="mt-4 mb-4" />
+          </div>
+        )}
+
         {/* Campaigns List */}
-        <ScrollArea className="h-96">
+        <div className="mb-3">
+          <h4 className="font-medium text-sm text-gray-700">Campaign Activity</h4>
+        </div>
+        <ScrollArea className="h-80">
           <div className="space-y-3">
             {campaigns.length === 0 ? (
               <div className="text-center py-8">

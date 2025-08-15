@@ -28,6 +28,7 @@ const Automation = () => {
   const [campaignProgress, setCampaignProgress] = useState<CampaignProgress | null>(null);
   const [progressUnsubscribe, setProgressUnsubscribe] = useState<(() => void) | null>(null);
   const [lastCreatedCampaign, setLastCreatedCampaign] = useState<any>(null);
+  const [hasShownRestoreMessage, setHasShownRestoreMessage] = useState(false);
   const [formData, setFormData] = useState({
     targetUrl: '',
     keyword: '',
@@ -49,11 +50,12 @@ const Automation = () => {
 
   // Load saved form data when component mounts or when saved data changes
   useEffect(() => {
-    if (hasValidSavedData(savedFormData)) {
+    if (hasValidSavedData(savedFormData) && !hasShownRestoreMessage) {
       setFormData(savedFormData);
       addStatusMessage('Form data restored - you can continue with your campaign', 'info');
+      setHasShownRestoreMessage(true);
     }
-  }, [savedFormData, hasValidSavedData]);
+  }, [savedFormData, hasValidSavedData, hasShownRestoreMessage]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -144,6 +146,7 @@ const Automation = () => {
 
       // Clear saved form data since campaign was created successfully
       clearFormData();
+      setHasShownRestoreMessage(false);
 
       // Reset form
       setFormData({
@@ -233,8 +236,8 @@ const Automation = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="max-w-7xl mx-auto space-y-6">
         
         {/* Header */}
         <div className="text-center space-y-4">
@@ -275,22 +278,18 @@ const Automation = () => {
         )}
 
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Campaign Creation (Left Column) */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-1">
             <Tabs defaultValue="create" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="create" className="flex items-center gap-2">
                   <Target className="w-4 h-4" />
-                  Create Campaign
-                </TabsTrigger>
-                <TabsTrigger value="reports" className="flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4" />
-                  Reports & Analytics
+                  New Campaign
                 </TabsTrigger>
                 <TabsTrigger value="status" className="flex items-center gap-2">
                   <FileText className="w-4 h-4" />
-                  Service Status
+                  Status
                 </TabsTrigger>
               </TabsList>
 
@@ -340,17 +339,6 @@ const Automation = () => {
                   <p className="text-sm text-gray-500">The clickable text for your backlink</p>
                 </div>
 
-                <Separator />
-
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-900 mb-2">How it works:</h4>
-                  <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-                    <li>Generate a unique 1000-word article using AI (randomly selected style)</li>
-                    <li>Format content with your anchor text linked to your target URL</li>
-                    <li>Publish to Telegraph.ph automatically</li>
-                    <li>Track published links in your reporting dashboard</li>
-                  </ol>
-                </div>
 
                 {!isAuthenticated && (
                   <Alert>
@@ -392,57 +380,6 @@ const Automation = () => {
                   }}
                 />
 
-                {/* Platform Info */}
-                <Card>
-              <CardHeader>
-                <CardTitle>Publishing Platforms</CardTitle>
-                <CardDescription>
-                  Current and upcoming platforms for content publication
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 border rounded-lg bg-green-50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <span className="font-medium">Telegraph.ph</span>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Anonymous publishing platform with instant publication
-                    </p>
-                  </div>
-                  
-                  <div className="p-4 border rounded-lg bg-gray-50">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                      <span className="font-medium">More Platforms</span>
-                    </div>
-                    <p className="text-sm text-gray-600">
-                      Additional platforms coming soon
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-                </Card>
-              </TabsContent>
-
-              <TabsContent value="reports">
-                {isAuthenticated ? (
-                  <AutomationReporting />
-                ) : (
-                  <Card>
-                    <CardContent className="p-8 text-center">
-                      <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                      <h3 className="text-lg font-medium mb-2">Sign In Required</h3>
-                      <p className="text-gray-600 mb-4">
-                        Sign in to view your campaign reports and analytics.
-                      </p>
-                      <Button onClick={() => setShowAuthModal(true)}>
-                        Sign In
-                      </Button>
-                    </CardContent>
-                  </Card>
-                )}
               </TabsContent>
 
               <TabsContent value="status">
@@ -451,7 +388,116 @@ const Automation = () => {
             </Tabs>
           </div>
 
-          {/* Campaign Management (Right Column) */}
+          {/* Publishing Platforms (Middle Column) */}
+          <div className="lg:col-span-1">
+            <Card className="h-fit">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Link className="w-5 h-5" />
+                  Publishing Platforms
+                </CardTitle>
+                <CardDescription>
+                  Available platforms for content publication
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="max-h-96 overflow-y-auto space-y-3">
+                  {/* Active Platform */}
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50 border-green-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-sm">Telegraph.ph</div>
+                        <div className="text-xs text-gray-600">Anonymous publishing</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs font-medium text-green-700">DR 91</div>
+                      <div className="text-xs text-gray-500">High DA</div>
+                    </div>
+                  </div>
+
+                  {/* Coming Soon Platforms */}
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-sm">Medium.com</div>
+                        <div className="text-xs text-gray-600">Professional publishing</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs font-medium text-gray-700">DR 96</div>
+                      <div className="text-xs text-gray-500">Premium</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-sm">Dev.to</div>
+                        <div className="text-xs text-gray-600">Developer community</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs font-medium text-gray-700">DR 86</div>
+                      <div className="text-xs text-gray-500">Tech focused</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-sm">LinkedIn Articles</div>
+                        <div className="text-xs text-gray-600">Professional network</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs font-medium text-gray-700">DR 100</div>
+                      <div className="text-xs text-gray-500">B2B focus</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-sm">Hashnode</div>
+                        <div className="text-xs text-gray-600">Developer blogging</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs font-medium text-gray-700">DR 75</div>
+                      <div className="text-xs text-gray-500">Developer</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-sm">Substack</div>
+                        <div className="text-xs text-gray-600">Newsletter platform</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs font-medium text-gray-700">DR 88</div>
+                      <div className="text-xs text-gray-500">Newsletter</div>
+                    </div>
+                  </div>
+
+                  {/* Coming Soon Notice */}
+                  <div className="p-3 border-2 border-dashed border-gray-300 rounded-lg text-center">
+                    <p className="text-xs text-gray-500">More platforms coming soon...</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Live Activity (Right Column) */}
           <div className="lg:col-span-1">
             {isAuthenticated && (
               <CampaignManager

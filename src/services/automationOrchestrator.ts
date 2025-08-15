@@ -10,7 +10,7 @@ export interface Campaign {
   target_url: string;
   keywords: string[];
   anchor_texts: string[];
-  status: 'pending' | 'generating' | 'publishing' | 'completed' | 'paused' | 'failed';
+  status: 'draft' | 'active' | 'paused' | 'completed';
   created_at: string;
   updated_at: string;
   completed_at?: string;
@@ -166,7 +166,7 @@ export class AutomationOrchestrator {
           target_url: params.target_url,
           keywords: [params.keyword],
           anchor_texts: [params.anchor_text],
-          status: 'pending'
+          status: 'draft'
         })
         .select()
         .single();
@@ -198,7 +198,8 @@ export class AutomationOrchestrator {
       this.processCampaign(data.id).catch(error => {
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error('Campaign processing error:', errorMessage);
-        this.updateCampaignStatus(data.id, 'failed', errorMessage);
+        // Note: 'failed' is not a valid status in current schema, so we'll pause the campaign instead
+        this.updateCampaignStatus(data.id, 'paused', errorMessage);
 
         // Update progress to show error
         this.updateProgress(data.id, {
@@ -237,13 +238,13 @@ export class AutomationOrchestrator {
         throw new Error('Campaign not found');
       }
 
-      // Step 2: Update status to generating
+      // Step 2: Update status to active (campaign is now running)
       this.updateStep(campaignId, 'generate-content', {
         status: 'in_progress',
         details: 'Generating unique AI content...'
       });
 
-      await this.updateCampaignStatus(campaignId, 'generating');
+      await this.updateCampaignStatus(campaignId, 'active');
       await this.logActivity(campaignId, 'info', 'Starting content generation');
 
       // Step 3: Generate content
@@ -287,13 +288,13 @@ export class AutomationOrchestrator {
         contentRecords.push(data);
       }
 
-      // Step 5: Update status to publishing
+      // Step 5: Update status to remain active during publishing
       this.updateStep(campaignId, 'publish-content', {
         status: 'in_progress',
         details: 'Publishing content to Telegraph.ph...'
       });
 
-      await this.updateCampaignStatus(campaignId, 'publishing');
+      // Keep status as 'active' during publishing since 'publishing' isn't a valid status
       await this.logActivity(campaignId, 'info', 'Starting content publication');
 
       // Step 6: Publish content to Telegraph
@@ -374,7 +375,8 @@ export class AutomationOrchestrator {
           endTime: new Date()
         });
 
-        await this.updateCampaignStatus(campaignId, 'failed', 'No content was successfully published');
+        // Note: 'failed' is not a valid status in current schema, so we'll pause the campaign instead
+        await this.updateCampaignStatus(campaignId, 'paused', 'No content was successfully published');
         await this.logActivity(campaignId, 'error', 'Campaign failed: No content was successfully published');
       }
 
@@ -399,7 +401,8 @@ export class AutomationOrchestrator {
         });
       }
 
-      await this.updateCampaignStatus(campaignId, 'failed', errorMessage);
+      // Note: 'failed' is not a valid status in current schema, so we'll pause the campaign instead
+      await this.updateCampaignStatus(campaignId, 'paused', errorMessage);
       await this.logActivity(campaignId, 'error', `Campaign failed: ${errorMessage}`);
       throw new Error(`Campaign processing failed: ${errorMessage}`);
     }
@@ -494,7 +497,12 @@ export class AutomationOrchestrator {
       .eq('id', campaignId);
 
     if (error) {
-      console.error('Error updating campaign status:', error);
+      console.error('Error updating campaign status:', {
+        message: error.message || 'Unknown error',
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
     }
   }
 
@@ -551,14 +559,15 @@ export class AutomationOrchestrator {
    * Resume campaign
    */
   async resumeCampaign(campaignId: string): Promise<void> {
-    await this.updateCampaignStatus(campaignId, 'pending');
+    await this.updateCampaignStatus(campaignId, 'active');
     await this.logActivity(campaignId, 'info', 'Campaign resumed by user');
     
     // Restart processing
     this.processCampaign(campaignId).catch(error => {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Campaign processing error:', errorMessage);
-      this.updateCampaignStatus(campaignId, 'failed', errorMessage);
+      // Note: 'failed' is not a valid status in current schema, so we'll pause the campaign instead
+      this.updateCampaignStatus(campaignId, 'paused', errorMessage);
     });
   }
 
