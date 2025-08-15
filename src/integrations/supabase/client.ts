@@ -256,16 +256,18 @@ const baseClient = hasValidCredentials ?
   }) :
   createMockSupabaseClient() as any;
 
-// For now, only wrap auth to avoid breaking database methods
-// TODO: Add database error handling in a future update
-export const supabase = hasValidCredentials ?
-  Object.create(baseClient, {
-    auth: {
-      value: supabaseErrorHandler.wrapAuthClient(baseClient.auth),
-      enumerable: true,
-      configurable: true
-    }
-  }) : baseClient;
+// Create enhanced client with error handling while preserving all methods
+let enhancedClient: any;
+
+if (hasValidCredentials) {
+  enhancedClient = baseClient;
+  // Only enhance the auth client for now
+  enhancedClient.auth = supabaseErrorHandler.wrapAuthClient(baseClient.auth);
+} else {
+  enhancedClient = baseClient;
+}
+
+export const supabase = enhancedClient;
 
 // Simplified client without complex retry logic to prevent response reading issues
 
