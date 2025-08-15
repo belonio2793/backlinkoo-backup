@@ -33,14 +33,37 @@ export const BacklinkNotification: React.FC<BacklinkNotificationProps> = ({
     const handleNewEvent = (event: RealTimeFeedEvent) => {
       // Listen for URL published events
       if (event.type === 'url_published') {
+        // Validate that we have a proper URL before showing notification
+        const publishedUrl = event.details?.publishedUrl || '';
+
+        // Don't show notification for undefined or empty URLs
+        if (!publishedUrl || publishedUrl === 'undefined' || publishedUrl.trim() === '') {
+          console.warn('⚠️ BacklinkNotification: Skipping notification for undefined/empty URL:', event);
+          return;
+        }
+
+        // Validate URL format
+        try {
+          new URL(publishedUrl);
+        } catch (urlError) {
+          console.warn('⚠️ BacklinkNotification: Invalid URL format, skipping notification:', publishedUrl);
+          return;
+        }
+
         const notification: NotificationData = {
           id: `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           campaignName: event.campaignName || 'Campaign',
           keyword: event.details?.keyword || 'Unknown',
-          publishedUrl: event.details?.publishedUrl || '',
+          publishedUrl: publishedUrl,
           platform: event.details?.platform || 'Telegraph',
           timestamp: new Date()
         };
+
+        console.log('📡 BacklinkNotification: Showing notification for:', {
+          keyword: notification.keyword,
+          url: notification.publishedUrl,
+          platform: notification.platform
+        });
 
         setNotifications(prev => [notification, ...prev.slice(0, 2)]); // Keep max 3 notifications
 
@@ -113,15 +136,21 @@ export const BacklinkNotification: React.FC<BacklinkNotificationProps> = ({
             </div>
 
             <div className="bg-gray-50 rounded p-2">
-              <a
-                href={notification.publishedUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-600 hover:text-blue-800 text-xs font-mono truncate block"
-                title={notification.publishedUrl}
-              >
-                {notification.publishedUrl}
-              </a>
+              {notification.publishedUrl ? (
+                <a
+                  href={notification.publishedUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:text-blue-800 text-xs font-mono truncate block"
+                  title={notification.publishedUrl}
+                >
+                  {notification.publishedUrl}
+                </a>
+              ) : (
+                <span className="text-gray-500 text-xs italic">
+                  URL not available
+                </span>
+              )}
             </div>
           </div>
 
@@ -136,8 +165,11 @@ export const BacklinkNotification: React.FC<BacklinkNotificationProps> = ({
                 variant="outline"
                 className="h-7 text-xs"
                 onClick={() => {
-                  navigator.clipboard.writeText(notification.publishedUrl);
+                  if (notification.publishedUrl) {
+                    navigator.clipboard.writeText(notification.publishedUrl);
+                  }
                 }}
+                disabled={!notification.publishedUrl}
               >
                 Copy
               </Button>
@@ -145,7 +177,12 @@ export const BacklinkNotification: React.FC<BacklinkNotificationProps> = ({
                 size="sm"
                 variant="default"
                 className="h-7 text-xs bg-green-600 hover:bg-green-700"
-                onClick={() => window.open(notification.publishedUrl, '_blank')}
+                onClick={() => {
+                  if (notification.publishedUrl) {
+                    window.open(notification.publishedUrl, '_blank');
+                  }
+                }}
+                disabled={!notification.publishedUrl}
               >
                 <ExternalLink className="w-3 h-3 mr-1" />
                 View
