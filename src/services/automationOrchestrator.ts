@@ -463,7 +463,13 @@ export class AutomationOrchestrator {
       .single();
 
     if (error) {
-      console.error('Error fetching campaign with links:', error);
+      console.error('Error fetching campaign with links:', {
+        message: error.message || 'Unknown error',
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        campaignId
+      });
       return null;
     }
 
