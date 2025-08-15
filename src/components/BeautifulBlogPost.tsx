@@ -896,7 +896,7 @@ export function BeautifulBlogPost() {
                             <p className="text-sm">
                               Delete this unclaimed post. Anyone can delete unclaimed posts to help clean up content.
                             </p>
-                            <p className="text-xs text-red-400">��️ This action cannot be undone</p>
+                            <p className="text-xs text-red-400">⚠️ This action cannot be undone</p>
                           </div>
                         </TooltipContent>
                       </Tooltip>
@@ -1015,22 +1015,27 @@ export function BeautifulBlogPost() {
                       try {
                         let content = blogPost.content || '';
 
-                        // Use simplified formatter to avoid over-processing
+                        // First apply enhanced cleaning to remove titles and call-to-action text
+                        content = EnhancedBlogCleaner.cleanContent(content, blogPost.title);
+
+                        // Then use simplified formatter for HTML structure
                         const formattedContent = SimpleContentFormatter.formatBlogContent(content, blogPost.title);
 
                         // Validate the formatted content
                         const validation = SimpleContentFormatter.validateContent(formattedContent);
                         if (!validation.isValid) {
                           console.warn('Content validation failed:', validation.errors);
-                          // Fallback to basic HTML wrapping
-                          return `<p>${content.replace(/\n\n/g, '</p><p>')}</p>`;
+                          // Fallback to basic HTML wrapping with enhanced cleaning
+                          const cleanedFallback = EnhancedBlogCleaner.cleanContent(content, blogPost.title);
+                          return `<p>${cleanedFallback.replace(/\n\n/g, '</p><p>')}</p>`;
                         }
 
                         return formattedContent;
                       } catch (formatError) {
                         console.error('Content formatting failed:', formatError);
-                        // Return raw content as fallback
-                        return `<p>${(blogPost.content || '').replace(/\n\n/g, '</p><p>')}</p>`;
+                        // Return cleaned content as fallback
+                        const cleanedFallback = EnhancedBlogCleaner.cleanContent(blogPost.content || '', blogPost.title);
+                        return `<p>${cleanedFallback.replace(/\n\n/g, '</p><p>')}</p>`;
                       }
                     })()
                   }}
