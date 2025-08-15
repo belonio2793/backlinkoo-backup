@@ -263,18 +263,7 @@ const Automation = () => {
     );
   }
 
-  // Show progress tracker if active
-  if (showProgress && campaignProgress) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6 flex items-center justify-center">
-        <CampaignProgressTracker
-          progress={campaignProgress}
-          onClose={handleProgressClose}
-          onRetry={handleRetryCampaign}
-        />
-      </div>
-    );
-  }
+  // Don't show full screen progress tracker - we'll show inline progress instead
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
