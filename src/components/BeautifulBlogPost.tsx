@@ -1285,7 +1285,7 @@ export function BeautifulBlogPost() {
         isOpen={showClaimModal}
         onClose={() => setShowClaimModal(false)}
         onAuthSuccess={handleAuthSuccess}
-        postTitle={BlogContentCleaner.cleanTitle(blogPost?.title || '')}
+        postTitle={EnhancedBlogCleaner.cleanTitle(blogPost?.title || '')}
         postSlug={slug || ''}
       />
 
@@ -1311,7 +1311,7 @@ export function BeautifulBlogPost() {
       <ExitIntentPopup
         isVisible={showExitPopup}
         onClose={() => setShowExitPopup(false)}
-        postTitle={BlogContentCleaner.cleanTitle(blogPost?.title || '')}
+        postTitle={EnhancedBlogCleaner.cleanTitle(blogPost?.title || '')}
         timeRemaining={blogPost?.expires_at ? getTimeRemaining(blogPost.expires_at) : '24 hours'}
       />
 
