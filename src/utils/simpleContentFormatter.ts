@@ -34,8 +34,17 @@ export class SimpleContentFormatter {
     // Step 2: Remove duplicate title if provided
     if (title) {
       const cleanTitle = title.replace(/[*#]/g, '').trim();
-      const titlePattern = new RegExp(`^\\s*${this.escapeRegex(cleanTitle)}\\s*\\n?`, 'i');
-      formattedContent = formattedContent.replace(titlePattern, '');
+      // Remove various title patterns
+      const titlePatterns = [
+        new RegExp(`^\\s*\\*\\*${this.escapeRegex(cleanTitle)}\\*\\*\\s*\\n?`, 'i'),
+        new RegExp(`^\\s*${this.escapeRegex(cleanTitle)}\\s*\\n?`, 'i'),
+        new RegExp(`^\\s*#\\s*${this.escapeRegex(cleanTitle)}\\s*\\n?`, 'i'),
+        new RegExp(`^\\s*##\\s*${this.escapeRegex(cleanTitle)}\\s*\\n?`, 'i')
+      ];
+
+      titlePatterns.forEach(pattern => {
+        formattedContent = formattedContent.replace(pattern, '');
+      });
     }
 
     // Step 3: Convert basic markdown to HTML
