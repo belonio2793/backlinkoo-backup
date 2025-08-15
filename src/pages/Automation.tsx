@@ -84,10 +84,34 @@ const Automation = () => {
   // Start campaign monitoring when user is authenticated
   useEffect(() => {
     if (isAuthenticated) {
+      // Load active campaigns for Live Monitor
+      const loadActiveCampaigns = async () => {
+        try {
+          const campaigns = await orchestrator.getUserCampaigns();
+          const active = campaigns.filter(c => c.status === 'active');
+          setActiveCampaigns(active);
+
+          if (active.length > 0) {
+            addStatusMessage(`Found ${active.length} active campaign(s)`, 'info');
+          }
+        } catch (error) {
+          console.error('Error loading active campaigns:', error);
+        }
+      };
+
       // Start monitoring with a small delay to ensure other services are ready
-      const startMonitoring = setTimeout(() => {
+      const startMonitoring = setTimeout(async () => {
         campaignMonitoringService.startMonitoring();
         addStatusMessage('Campaign monitoring service started', 'info');
+
+        // Load campaigns and check immediately
+        await loadActiveCampaigns();
+
+        // Force an immediate check for stuck campaigns
+        setTimeout(async () => {
+          await campaignMonitoringService.forceCheck();
+          addStatusMessage('Initial campaign health check completed', 'info');
+        }, 1000);
       }, 2000);
 
       return () => {
@@ -96,6 +120,7 @@ const Automation = () => {
     } else {
       // Stop monitoring when user logs out
       campaignMonitoringService.stopMonitoring();
+      setActiveCampaigns([]);
     }
   }, [isAuthenticated]);
 
@@ -687,7 +712,7 @@ const Automation = () => {
           <div className="lg:col-span-1">
             <InlineFeedMonitor
               activeCampaigns={activeCampaigns}
-              isVisible={isAuthenticated || activeCampaigns.length > 0}
+              isVisible={isAuthenticated}
             />
           </div>
         </div>
