@@ -22,6 +22,12 @@ export class BlogContentCleaner {
       .replace(/^(Introduction|Section \d+[^:]*|Conclusion|Call-to-Action):\s*/gim, '')
       .replace(/^(Hook Introduction|Summary|Overview|Abstract):\s*/gim, '')
 
+      // Remove Call-to-Action patterns anywhere in content (main issue reported)
+      .replace(/Call-to-Action:\s*/gi, '')
+      .replace(/Call to Action:\s*/gi, '')
+      .replace(/\*\*Call-to-Action:\*\*\s*/gi, '')
+      .replace(/\*\*Call to Action:\*\*\s*/gi, '')
+
       // PRIORITY: Remove the specific footer pattern mentioned by user
       .replace(/---\s*This \d+-word blog post[^.]*\.\s*By integrating[^.]*level\./gim, '')
       .replace(/---\s*This blog post[^.]*provides[^.]*\./gim, '')
