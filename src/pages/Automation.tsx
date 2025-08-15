@@ -400,15 +400,6 @@ const Automation = () => {
         )}
 
 
-        {/* Inline Progress Tracker */}
-        {campaignProgress && (
-          <div className="mb-6">
-            <InlineProgressTracker
-              progress={campaignProgress}
-              onRetry={handleRetryCampaign}
-            />
-          </div>
-        )}
 
         {/* Main Content - Top Row: Campaign Creation, Activity, Live Monitor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
@@ -672,6 +663,8 @@ const Automation = () => {
             {isAuthenticated && (
               <CampaignManagerTabbed
                 onStatusUpdate={(message, type) => addStatusMessage(message, type)}
+                currentCampaignProgress={campaignProgress}
+                onRetryProgress={handleRetryCampaign}
               />
             )}
           </div>
