@@ -9,6 +9,8 @@ import './utils/unifiedErrorHandler'
 import './utils/campaignErrorHandler'
 // Comprehensive error debug fix
 import './utils/errorDebugFix'
+// Real-time feed service
+import './services/realTimeFeedService'
 // Test error formatting in development (no promise rejections)
 import './utils/silentErrorTest'
 // Check if database schema is properly configured
