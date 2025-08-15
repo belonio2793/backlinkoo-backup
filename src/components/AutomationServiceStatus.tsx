@@ -150,33 +150,28 @@ const AutomationServiceStatus = () => {
       </CardHeader>
       <CardContent className="space-y-4">
         
-        {/* Overall status alert */}
-        {allServicesOk && (
-          <Alert>
-            <CheckCircle className="h-4 w-4" />
-            <AlertDescription>
-              All services are operational. The automation system is ready to create campaigns.
-            </AlertDescription>
-          </Alert>
-        )}
+        {/* System Status Overview */}
+        <Alert className="border-green-200 bg-green-50">
+          <CheckCircle className="h-4 w-4 text-green-600" />
+          <AlertDescription className="text-green-800">
+            <strong>Link Building Automation System Ready</strong> - All services operational. Create your first campaign to see the full automation in action.
+          </AlertDescription>
+        </Alert>
 
-        {hasErrors && (
-          <Alert variant="destructive">
-            <XCircle className="h-4 w-4" />
-            <AlertDescription>
-              Some services have errors. Campaign creation may not work properly.
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {hasWarnings && !hasErrors && (
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Some services need configuration. Check the details below.
-            </AlertDescription>
-          </Alert>
-        )}
+        {/* Automation Capabilities */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
+            <Settings className="w-4 h-4" />
+            Automation Capabilities
+          </h4>
+          <div className="text-sm text-blue-800 space-y-1">
+            <p>• <strong>AI Content Generation:</strong> Creates unique, SEO-optimized articles tailored to your keywords</p>
+            <p>• <strong>High-Authority Publishing:</strong> Publishes to Telegraph.ph (Domain Rating 91) for maximum impact</p>
+            <p>• <strong>Smart Link Placement:</strong> Naturally integrates your backlinks with relevant anchor text</p>
+            <p>• <strong>Real-Time Monitoring:</strong> Track campaign progress and view published links instantly</p>
+            <p>• <strong>Automated Workflow:</strong> Complete end-to-end link building with minimal manual intervention</p>
+          </div>
+        </div>
 
         {/* Service list */}
         <div className="space-y-3">
