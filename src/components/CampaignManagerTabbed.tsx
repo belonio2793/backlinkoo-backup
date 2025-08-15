@@ -212,44 +212,62 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
       const campaign = campaigns.find(c => c.id === campaignId);
       const keyword = campaign?.keywords?.[0] || campaign?.name || 'Unknown';
       const campaignName = campaign?.name || `Campaign for ${keyword}`;
-      
-      const result = await orchestrator.resumeCampaign(campaignId);
-      
-      if (result.success) {
-        // Emit real-time feed event
-        realTimeFeedService.emitCampaignResumed(
-          campaignId,
-          campaignName,
-          keyword,
-          'Resumed by user',
-          user?.id
-        );
-        
-        onStatusUpdate?.(result.message, 'success');
-      } else {
-        // For completion messages, use info instead of error
-        const messageType = result.message.includes('completed') ? 'info' : 'error';
-        
-        // Emit appropriate event based on result
-        if (result.message.includes('completed')) {
-          realTimeFeedService.emitUserAction(
-            'resume_campaign_completed',
-            `Campaign already completed: ${result.message}`,
-            user?.id,
-            campaignId
+
+      // Check if campaign is completed
+      const isCompleted = campaign?.status === 'completed';
+
+      // Check published links to determine true completion status
+      const campaignWithLinks = await orchestrator.getCampaignWithLinks(campaignId);
+      const hasPublishedLinks = campaignWithLinks?.automation_published_links &&
+                               campaignWithLinks.automation_published_links.length > 0;
+
+      // If completed, show warning but proceed with forced resume
+      if (isCompleted || hasPublishedLinks) {
+        const publishedCount = campaignWithLinks?.automation_published_links?.length || 0;
+        const warningMessage = `⚠️ Campaign "${keyword}" was completed with ${publishedCount} published link(s). Checking for new opportunities...`;
+
+        onStatusUpdate?.(warningMessage, 'warning');
+
+        // Force resume by calling smartResumeCampaign directly
+        const result = await orchestrator.smartResumeCampaign(campaignId);
+
+        if (result.success) {
+          realTimeFeedService.emitCampaignResumed(
+            campaignId,
+            campaignName,
+            keyword,
+            'Force resumed completed campaign',
+            user?.id
           );
+
+          onStatusUpdate?.(`Campaign restarted: ${result.message}`, 'success');
         } else {
-          realTimeFeedService.emitUserAction(
-            'resume_campaign_failed',
-            result.message,
-            user?.id,
-            campaignId
-          );
+          // Check if it's because no more platforms are available
+          if (result.message.includes('No available platforms') || result.message.includes('platforms have been used')) {
+            onStatusUpdate?.(`✅ Campaign "${keyword}" has completed all available platforms. Consider enabling more platforms or creating a new campaign.`, 'info');
+          } else {
+            onStatusUpdate?.(result.message, 'warning');
+          }
         }
-        
-        onStatusUpdate?.(result.message, messageType);
+      } else {
+        // Normal resume for non-completed campaigns
+        const result = await orchestrator.resumeCampaign(campaignId);
+
+        if (result.success) {
+          realTimeFeedService.emitCampaignResumed(
+            campaignId,
+            campaignName,
+            keyword,
+            'Resumed by user',
+            user?.id
+          );
+
+          onStatusUpdate?.(result.message, 'success');
+        } else {
+          onStatusUpdate?.(result.message, 'error');
+        }
       }
-      
+
       await loadCampaigns();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -258,7 +276,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
         campaignId,
         error: error
       });
-      
+
       // Emit error event to feed
       realTimeFeedService.emitUserAction(
         'resume_campaign_failed',
@@ -266,7 +284,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
         user?.id,
         campaignId
       );
-      
+
       onStatusUpdate?.(`Failed to resume campaign: ${errorMessage}`, 'error');
     } finally {
       setActionLoading(null);
