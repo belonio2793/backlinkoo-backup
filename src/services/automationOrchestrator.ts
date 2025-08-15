@@ -60,6 +60,72 @@ export class AutomationOrchestrator {
   private platformProgressMap: Map<string, CampaignPlatformProgress[]> = new Map();
   
   /**
+   * Get active publishing platforms
+   */
+  getActivePlatforms(): PublishingPlatform[] {
+    return AVAILABLE_PLATFORMS.filter(p => p.isActive).sort((a, b) => a.priority - b.priority);
+  }
+
+  /**
+   * Get next available platform for a campaign
+   */
+  getNextPlatformForCampaign(campaignId: string): PublishingPlatform | null {
+    const activePlatforms = this.getActivePlatforms();
+    const campaignProgress = this.platformProgressMap.get(campaignId) || [];
+
+    // Find the first platform that hasn't been used yet
+    for (const platform of activePlatforms) {
+      const hasPosted = campaignProgress.some(p => p.platformId === platform.id && p.isCompleted);
+      if (!hasPosted) {
+        return platform;
+      }
+    }
+
+    return null; // All platforms have been used
+  }
+
+  /**
+   * Check if campaign should auto-pause (completed all available platforms)
+   */
+  shouldAutoPauseCampaign(campaignId: string): boolean {
+    const activePlatforms = this.getActivePlatforms();
+    const campaignProgress = this.platformProgressMap.get(campaignId) || [];
+
+    // Check if all active platforms have been completed
+    return activePlatforms.every(platform =>
+      campaignProgress.some(p => p.platformId === platform.id && p.isCompleted)
+    );
+  }
+
+  /**
+   * Mark platform as completed for a campaign
+   */
+  markPlatformCompleted(campaignId: string, platformId: string, publishedUrl: string): void {
+    const campaignProgress = this.platformProgressMap.get(campaignId) || [];
+
+    // Remove any existing entry for this platform
+    const filteredProgress = campaignProgress.filter(p => p.platformId !== platformId);
+
+    // Add the completed entry
+    filteredProgress.push({
+      campaignId,
+      platformId,
+      isCompleted: true,
+      publishedUrl,
+      publishedAt: new Date().toISOString()
+    });
+
+    this.platformProgressMap.set(campaignId, filteredProgress);
+  }
+
+  /**
+   * Get platform progress for a campaign
+   */
+  getCampaignPlatformProgress(campaignId: string): CampaignPlatformProgress[] {
+    return this.platformProgressMap.get(campaignId) || [];
+  }
+
+  /**
    * Subscribe to campaign progress updates
    */
   subscribeToProgress(campaignId: string, callback: (progress: CampaignProgress) => void): () => void {
