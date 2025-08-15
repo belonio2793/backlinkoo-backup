@@ -86,7 +86,7 @@ export function TextCleanerControls() {
   };
 
   const insertTestCharacters = () => {
-    const testString = 'Sample text with � replacement chars � and other issues�';
+    const testString = 'Sample text with \uFFFD replacement chars \uFFFD and other issues\uFFFD';
     setTestText(testString);
   };
 
@@ -150,7 +150,7 @@ export function TextCleanerControls() {
           </div>
 
           <div className="text-sm text-muted-foreground">
-            The auto-cleaner removes replacement characters (�), null characters, 
+            The auto-cleaner removes replacement characters (\uFFFD), null characters, 
             and other problematic Unicode characters from all text content.
           </div>
         </CardContent>
