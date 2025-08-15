@@ -4,6 +4,7 @@ import { getTelegraphService } from './telegraphService';
 import { ProgressStep, CampaignProgress } from '@/components/CampaignProgressTracker';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { realTimeFeedService } from './realTimeFeedService';
+import { campaignErrorHandler, type CampaignProgressSnapshot } from './campaignErrorHandler';
 
 export interface Campaign {
   id: string;
