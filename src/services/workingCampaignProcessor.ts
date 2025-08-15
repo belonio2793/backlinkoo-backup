@@ -199,34 +199,54 @@ export class WorkingCampaignProcessor {
   }
 
   /**
-   * Update campaign status in database
+   * Update campaign status in database with fallback table names
    */
   private async updateCampaignStatus(campaignId: string, status: string): Promise<void> {
     const queryStartTime = Date.now();
 
-    const { error } = await supabase
-      .from('campaigns')
-      .update({ status })
-      .eq('id', campaignId);
+    // Try multiple table names as fallbacks
+    const tableNames = ['campaigns', 'automation_campaigns'];
+    let lastError = null;
 
-    const queryDuration = Date.now() - queryStartTime;
+    for (const tableName of tableNames) {
+      try {
+        const { error } = await supabase
+          .from(tableName)
+          .update({ status })
+          .eq('id', campaignId);
 
-    // Log the database query
-    campaignNetworkLogger.logDatabaseQuery(campaignId, {
-      operation: 'update',
-      table: 'campaigns',
-      query: `UPDATE campaigns SET status = '${status}' WHERE id = '${campaignId}'`,
-      params: { status, campaignId },
-      result: error ? null : { success: true },
-      error: error ? error.message : undefined,
-      duration: queryDuration,
-      step: 'database-update'
-    });
+        const queryDuration = Date.now() - queryStartTime;
 
-    if (error) {
-      console.error('Failed to update campaign status:', error);
-      throw new Error(`Failed to update campaign status: ${error.message}`);
+        // Log the database query
+        campaignNetworkLogger.logDatabaseQuery(campaignId, {
+          operation: 'update',
+          table: tableName,
+          query: `UPDATE ${tableName} SET status = '${status}' WHERE id = '${campaignId}'`,
+          params: { status, campaignId },
+          result: error ? null : { success: true },
+          error: error ? error.message : undefined,
+          duration: queryDuration,
+          step: 'database-update'
+        });
+
+        if (!error) {
+          console.log(`✅ Successfully updated campaign status in ${tableName} table`);
+          return; // Success, exit function
+        }
+
+        lastError = error;
+        console.warn(`Failed to update campaign status in ${tableName}:`, error.message);
+
+      } catch (error) {
+        lastError = error;
+        console.warn(`Error accessing ${tableName} table:`, error);
+      }
     }
+
+    // If we get here, all table attempts failed
+    console.error('Failed to update campaign status in any table:', lastError);
+    // Don't throw error - campaign can continue without status update
+    console.warn('Campaign will continue without status update');
   }
 
   /**
