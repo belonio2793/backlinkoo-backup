@@ -237,6 +237,16 @@ if (import.meta.env.DEV) {
     }
   };
 
+  // Add campaign manager tabs testing
+  (window as any).testCampaignTabs = async () => {
+    try {
+      const { testCampaignManagerTabs } = await import('./utils/testCampaignManagerTabs');
+      return await testCampaignManagerTabs();
+    } catch (error) {
+      console.error('❌ Campaign tabs test failed:', error);
+    }
+  };
+
   // Import fetch test helper
   import('./utils/fetchTestHelper');
 
