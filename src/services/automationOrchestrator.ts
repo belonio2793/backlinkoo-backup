@@ -397,17 +397,37 @@ export class AutomationOrchestrator {
       // Keep status as 'active' during publishing since 'publishing' isn't a valid status
       await this.logActivity(campaignId, 'info', 'Starting content publication');
 
-      // Step 6: Publish content to Telegraph
+      // Step 6: Publish content to next available platform
+      const nextPlatform = this.getNextPlatformForCampaign(campaignId);
       const publishedLinks = [];
+
+      if (!nextPlatform) {
+        // No more platforms available, campaign should be paused
+        await this.autoPauseCampaign(campaignId, 'All available platforms have been used');
+        return;
+      }
+
+      this.updateStep(campaignId, 'publish-content', {
+        status: 'in_progress',
+        details: `Publishing content to ${nextPlatform.name}...`
+      });
+
       for (const contentRecord of contentRecords) {
         try {
-          const title = this.telegraphService.generateTitleFromContent(campaign.keywords[0] || 'SEO');
+          let publishedPage: { url: string };
 
-          const publishedPage = await this.telegraphService.publishContent({
-            title,
-            content: contentRecord.content,
-            author_name: 'Link Builder'
-          });
+          // Platform-specific publishing logic
+          if (nextPlatform.id === 'telegraph') {
+            const title = this.telegraphService.generateTitleFromContent(campaign.keywords[0] || 'SEO');
+            publishedPage = await this.telegraphService.publishContent({
+              title,
+              content: contentRecord.content,
+              author_name: 'Link Builder'
+            });
+          } else {
+            // For future platforms, we'll implement their specific logic here
+            throw new Error(`Publishing to ${nextPlatform.name} is not yet implemented`);
+          }
 
           // Save published link
           const { error: linkError } = await supabase
@@ -415,7 +435,7 @@ export class AutomationOrchestrator {
             .insert({
               campaign_id: campaignId,
               content_id: contentRecord.id,
-              platform: 'telegraph',
+              platform: nextPlatform.id,
               published_url: publishedPage.url
             });
 
@@ -427,29 +447,31 @@ export class AutomationOrchestrator {
               hint: linkError.hint,
               campaignId,
               contentId: contentRecord.id,
-              publishedUrl: publishedPage.url
+              publishedUrl: publishedPage.url,
+              platform: nextPlatform.id
             });
           } else {
             publishedLinks.push(publishedPage.url);
 
+            // Mark platform as completed
+            this.markPlatformCompleted(campaignId, nextPlatform.id, publishedPage.url);
+
             // Update progress with published URL
             this.updateProgress(campaignId, {
-              publishedUrls: publishedLinks
+              publishedUrls: [...(this.campaignProgressMap.get(campaignId)?.publishedUrls || []), publishedPage.url]
             });
 
             this.updateStep(campaignId, 'publish-content', {
-              details: `Published content to ${publishedPage.url}`
+              details: `Successfully published to ${nextPlatform.name}: ${publishedPage.url}`
             });
 
-            await this.logActivity(campaignId, 'info', `Published content to ${publishedPage.url}`);
+            await this.logActivity(campaignId, 'info', `Published content to ${nextPlatform.name}: ${publishedPage.url}`);
           }
-
-          // No delay needed since we're only publishing one piece of content
 
         } catch (error) {
           const errorMessage = error instanceof Error ? error.message : String(error);
           console.error('Error publishing content:', errorMessage);
-          await this.logActivity(campaignId, 'error', `Failed to publish content: ${errorMessage}`);
+          await this.logActivity(campaignId, 'error', `Failed to publish to ${nextPlatform.name}: ${errorMessage}`);
         }
       }
 
