@@ -173,7 +173,7 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
         const randomUpdate = systemUpdates[Math.floor(Math.random() * systemUpdates.length)];
         addLog(randomUpdate);
       }
-    }, 30000); // Every 30 seconds
+    }, 60000); // Every 60 seconds (less frequent)
 
     return () => clearInterval(interval);
   }, [isVisible]);
