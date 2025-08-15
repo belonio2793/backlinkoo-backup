@@ -23,7 +23,7 @@ import {
   ChevronUp,
   ChevronDown
 } from 'lucide-react';
-import { realTimeFeedService, type RealTimeFeedEvent } from '@/services/realTimeFeedService';
+// import { realTimeFeedService, type RealTimeFeedEvent } from '@/services/realTimeFeedService';
 import { type Campaign } from '@/services/automationOrchestrator';
 
 interface RealTimeFeedLog {
