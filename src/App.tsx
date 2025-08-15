@@ -54,6 +54,7 @@ const LazyPremiumSEOAnalysisTest = lazy(() => import("./pages/PremiumSEOAnalysis
 
 const LazyDebugUserReports = lazy(() => import("./pages/DebugUserReports"));
 const LazyBlogPostChecker = lazy(() => import("./components/BlogPostChecker").then(module => ({ default: module.BlogPostChecker })));
+const LazyAutomationTestingDashboard = lazy(() => import("./components/admin/AutomationTestingDashboard"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
