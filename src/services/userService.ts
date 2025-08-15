@@ -111,9 +111,22 @@ class UserService {
       const errorMessage = formatErrorForUI(error);
       console.error('❌ userService: Error getting current user profile:', formatErrorForLogging(error, 'getCurrentUserProfile'));
 
+      // Check for specific client issues
+      if (error.message?.includes('supabase.from is not a function')) {
+        console.error('🔧 userService: Supabase client not properly initialized');
+        console.info('💡 This usually indicates the client is using mock mode or has initialization issues');
+        return null;
+      }
+
       // Handle infinite recursion gracefully
       if (errorMessage && errorMessage.includes('infinite recursion detected in policy')) {
         console.warn('⚠️ Infinite recursion detected in RLS policy - returning null profile');
+      }
+
+      // Handle network errors
+      if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
+        console.warn('🌐 userService: Network error - returning null profile');
+        return null;
       }
 
       return null;
