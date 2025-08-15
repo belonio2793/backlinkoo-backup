@@ -294,13 +294,44 @@ const Automation = () => {
                 {/* Campaign Creation Form */}
                 <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Target className="w-5 h-5" />
-                  Create New Campaign
+                <CardTitle className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Target className="w-5 h-5" />
+                    Create New Campaign
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    {smartFlow.hasValidForm(formData) ? (
+                      <div className="flex items-center gap-1 text-green-600">
+                        <CheckCircle className="w-4 h-4" />
+                        <span>Ready</span>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-1 text-gray-500">
+                        <Clock className="w-4 h-4" />
+                        <span>{3 - smartFlow.analyzeFormData(formData).missingFields.length}/3</span>
+                      </div>
+                    )}
+                  </div>
                 </CardTitle>
                 <CardDescription>
                   Enter your target URL, keyword, and anchor text to generate and publish backlink content
                 </CardDescription>
+
+                {/* Form Completion Progress Bar */}
+                <div className="mt-3">
+                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <span>Form Progress</span>
+                    <span>{Math.round(((3 - smartFlow.analyzeFormData(formData).missingFields.length) / 3) * 100)}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-1.5">
+                    <div
+                      className={`h-1.5 rounded-full transition-all duration-300 ${
+                        smartFlow.hasValidForm(formData) ? 'bg-green-500' : 'bg-blue-500'
+                      }`}
+                      style={{ width: `${((3 - smartFlow.analyzeFormData(formData).missingFields.length) / 3) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
