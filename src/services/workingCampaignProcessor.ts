@@ -228,6 +228,26 @@ export class WorkingCampaignProcessor {
   }
 
   /**
+   * Embed backlink naturally into markdown content
+   */
+  private embedBacklinkInContent(content: string, anchorText: string, targetUrl: string): string {
+    const paragraphs = content.split('\n\n').filter(p => p.trim());
+
+    if (paragraphs.length < 2) {
+      // If content is too short, just append the backlink
+      return content + `\n\nFor more detailed information about this topic, visit [${anchorText}](${targetUrl}) for expert guidance and resources.`;
+    }
+
+    // Find a good middle paragraph to insert the backlink
+    const insertIndex = Math.floor(paragraphs.length / 2);
+
+    // Insert backlink naturally into the content
+    paragraphs[insertIndex] = paragraphs[insertIndex] + ` For comprehensive insights on this topic, [${anchorText}](${targetUrl}) provides valuable expertise and solutions.`;
+
+    return paragraphs.join('\n\n');
+  }
+
+  /**
    * Convert content to Telegraph format with backlink
    */
   private convertToTelegraphFormat(content: string, anchorText: string, targetUrl: string): any[] {
