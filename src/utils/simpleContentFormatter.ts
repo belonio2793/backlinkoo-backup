@@ -89,8 +89,8 @@ export class SimpleContentFormatter {
           return paragraph;
         }
 
-        // Handle list items
-        if (paragraph.match(/^[\*\-\+\d\.]\s/)) {
+        // Handle list items - improved pattern for numbered lists
+        if (paragraph.match(/^[\*\-\+]\s/) || paragraph.match(/^\d+\.\s/)) {
           return this.processList(paragraph);
         }
 
