@@ -400,7 +400,8 @@ export class AutomationOrchestrator {
         });
       }
 
-      await this.updateCampaignStatus(campaignId, 'failed', errorMessage);
+      // Note: 'failed' is not a valid status in current schema, so we'll pause the campaign instead
+      await this.updateCampaignStatus(campaignId, 'paused', errorMessage);
       await this.logActivity(campaignId, 'error', `Campaign failed: ${errorMessage}`);
       throw new Error(`Campaign processing failed: ${errorMessage}`);
     }
