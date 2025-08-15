@@ -56,7 +56,11 @@ export class AutomationContentService {
             body: JSON.stringify({
               keyword,
               anchorText,
-              targetUrl
+              targetUrl,
+              testMode: isTestMode,
+              simulateDelay: !isTestMode, // Skip delays in test mode for faster execution
+              simulateError: false,
+              contentVariations: 1
             }),
             signal: controller.signal
           });
