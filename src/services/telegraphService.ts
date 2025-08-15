@@ -365,19 +365,6 @@ export class TelegraphService {
    */
   async testConnection(): Promise<boolean> {
     try {
-      // Return true by default to show service as available for preview
-      return true;
-    } catch (error) {
-      console.warn('Telegraph connection test:', error);
-      return true; // Always return true to maintain positive status
-    }
-  }
-
-  /**
-   * Test connection to Telegraph API
-   */
-  async testConnection(): Promise<boolean> {
-    try {
       // Simple ping to check if Telegraph API is accessible
       const fetchToUse = window._originalFetch || window.fetch || fetch;
 
