@@ -55,13 +55,56 @@ function fixStringConcatenation() {
       // If this would return [object Object], try to format it properly
       const result = originalToString.call(this);
       if (result === '[object Object]') {
-        return formatErrorForUI(this);
+        // Use a safe formatting approach that doesn't create circular references
+        return safeFormatObject(this);
       }
     }
     return originalToString.call(this);
   };
 
   console.log('✅ Fixed string concatenation with objects');
+}
+
+/**
+ * Safely format an object without circular dependencies
+ */
+function safeFormatObject(obj: any): string {
+  if (!obj || typeof obj !== 'object') {
+    return String(obj || 'Unknown error');
+  }
+
+  // Handle common error properties without calling formatErrorForUI
+  if (obj.message && typeof obj.message === 'string') {
+    return obj.message;
+  }
+
+  if (obj.error && typeof obj.error === 'string') {
+    return obj.error;
+  }
+
+  if (obj.details && typeof obj.details === 'string') {
+    return obj.details;
+  }
+
+  // Try to build a simple representation without recursion
+  try {
+    const keys = Object.keys(obj).filter(key =>
+      !['stack', 'constructor', '__proto__', 'name'].includes(key)
+    ).slice(0, 3);
+
+    if (keys.length > 0) {
+      const parts = keys.map(key => {
+        const value = obj[key];
+        if (typeof value === 'object') return `${key}: [object]`;
+        return `${key}: ${value}`;
+      });
+      return `Error: ${parts.join(', ')}`;
+    }
+  } catch {
+    // JSON.stringify failed, use fallback
+  }
+
+  return 'Unknown error occurred';
 }
 
 /**
