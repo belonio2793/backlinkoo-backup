@@ -30,7 +30,7 @@ export class WorkingCampaignProcessor {
       await this.logActivity(campaign.id, 'info', 'Campaign processing started');
 
       // Step 2: Use simplified server-side processor to avoid browser analytics issues
-      console.log('�� Using simplified server-side processor...');
+      console.log('🔄 Using simplified server-side processor...');
       realTimeFeedService.emitSystemEvent(`Processing campaign "${keyword}" server-side`, 'info');
 
       // Log the function call
@@ -42,7 +42,7 @@ export class WorkingCampaignProcessor {
       );
 
       const functionStartTime = Date.now();
-      const response = await fetch('/.netlify/functions/simple-campaign-processor', {
+      const response = await fetch('/.netlify/functions/working-campaign-processor', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
