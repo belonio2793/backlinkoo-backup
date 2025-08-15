@@ -34,6 +34,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { getOrchestrator, type Campaign } from '@/services/automationOrchestrator';
 import { CampaignProgress, ProgressStep } from './CampaignProgressTracker';
+import { campaignNetworkLogger, NetworkRequest, DatabaseQuery } from '@/services/campaignNetworkLogger';
 
 interface CampaignLog {
   id: string;
