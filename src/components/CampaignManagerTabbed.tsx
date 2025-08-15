@@ -50,7 +50,11 @@ interface CampaignManagerTabbedProps {
   onRetryProgress?: () => void;
 }
 
-const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({ onStatusUpdate }) => {
+const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
+  onStatusUpdate,
+  currentCampaignProgress,
+  onRetryProgress
+}) => {
   const [campaigns, setCampaigns] = useState<CampaignWithLinks[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
