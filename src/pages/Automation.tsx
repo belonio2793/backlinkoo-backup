@@ -186,6 +186,36 @@ const Automation = () => {
     setShowAuthModal(false);
   };
 
+  const handleProgressClose = () => {
+    setShowProgress(false);
+    setCampaignProgress(null);
+
+    // Cleanup subscription
+    if (progressUnsubscribe) {
+      progressUnsubscribe();
+      setProgressUnsubscribe(null);
+    }
+  };
+
+  const handleRetryCampaign = () => {
+    // Close progress tracker and allow user to create a new campaign
+    handleProgressClose();
+
+    toast({
+      title: "Ready to Retry",
+      description: "You can now create a new campaign with the same or different parameters."
+    });
+  };
+
+  // Cleanup subscription on unmount
+  useEffect(() => {
+    return () => {
+      if (progressUnsubscribe) {
+        progressUnsubscribe();
+      }
+    };
+  }, [progressUnsubscribe]);
+
   // Show loading state while checking authentication
   if (authLoading) {
     return (
@@ -196,6 +226,19 @@ const Automation = () => {
         </div>
       </div>
     );
+
+  // Show progress tracker if active
+  if (showProgress && campaignProgress) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6 flex items-center justify-center">
+        <CampaignProgressTracker
+          progress={campaignProgress}
+          onClose={handleProgressClose}
+          onRetry={handleRetryCampaign}
+        />
+      </div>
+    );
+  }
   }
 
   return (
