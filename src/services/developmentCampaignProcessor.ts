@@ -218,9 +218,10 @@ export class DevelopmentCampaignProcessor {
         .insert({
           campaign_id: campaignId,
           published_url: url,
+          anchor_text: contentData.anchorText,
+          target_url: contentData.targetUrl,
           platform: 'telegraph',
           status: 'active',
-          validation_status: 'pending',
           published_at: new Date().toISOString()
         });
 
