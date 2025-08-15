@@ -198,10 +198,10 @@ const Automation = () => {
     } catch (error) {
       console.error('Campaign creation error:', error);
       
-      // Handle specific authentication errors - keep inline
+      // Handle specific authentication errors
       if (error instanceof Error && error.message.includes('not authenticated')) {
         saveFormData(formData);
-        addStatusMessage('Please sign in to continue with your campaign', 'error');
+        setShowAuthModal(true);
         return;
       }
       
