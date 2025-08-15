@@ -327,7 +327,15 @@ export class AutomationOrchestrator {
             });
 
           if (linkError) {
-            console.error('Error saving published link:', linkError);
+            console.error('Error saving published link:', {
+              message: linkError.message || 'Unknown error',
+              code: linkError.code,
+              details: linkError.details,
+              hint: linkError.hint,
+              campaignId,
+              contentId: contentRecord.id,
+              publishedUrl: publishedPage.url
+            });
           } else {
             publishedLinks.push(publishedPage.url);
 
