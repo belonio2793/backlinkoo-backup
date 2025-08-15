@@ -743,29 +743,56 @@ export class AutomationOrchestrator {
    * Enhanced resume logic that continues platform rotation
    */
   async smartResumeCampaign(campaignId: string): Promise<{ success: boolean; message: string }> {
-    const nextPlatform = this.getNextPlatformForCampaign(campaignId);
+    try {
+      // Check if campaign exists
+      const campaign = await this.getCampaign(campaignId);
+      if (!campaign) {
+        return {
+          success: false,
+          message: 'Campaign not found'
+        };
+      }
 
-    if (!nextPlatform) {
+      // Check if campaign is already completed
+      if (campaign.status === 'completed') {
+        return {
+          success: false,
+          message: 'Campaign is already completed'
+        };
+      }
+
+      const nextPlatform = this.getNextPlatformForCampaign(campaignId);
+
+      if (!nextPlatform) {
+        // Mark as completed if all platforms are done
+        await this.autoPauseCampaign(campaignId, 'All available platforms have been used');
+        return {
+          success: false,
+          message: 'Campaign completed - all available platforms have been used'
+        };
+      }
+
+      await this.updateCampaignStatus(campaignId, 'active');
+      await this.logActivity(campaignId, 'info', `Campaign resumed to continue posting to ${nextPlatform.name}`);
+
+      // Continue processing the campaign
+      this.processCampaign(campaignId).catch(error => {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error('Campaign processing error:', errorMessage);
+        this.updateCampaignStatus(campaignId, 'paused', errorMessage);
+      });
+
+      return {
+        success: true,
+        message: `Campaign resumed. Will continue posting to ${nextPlatform.name}`
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
       return {
         success: false,
-        message: 'Campaign has already posted to all available platforms'
+        message: `Failed to resume campaign: ${errorMessage}`
       };
     }
-
-    await this.updateCampaignStatus(campaignId, 'active');
-    await this.logActivity(campaignId, 'info', `Campaign resumed to continue posting to ${nextPlatform.name}`);
-
-    // Continue processing the campaign
-    this.processCampaign(campaignId).catch(error => {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('Campaign processing error:', errorMessage);
-      this.updateCampaignStatus(campaignId, 'paused', errorMessage);
-    });
-
-    return {
-      success: true,
-      message: `Campaign resumed. Will continue posting to ${nextPlatform.name}`
-    };
   }
 
   /**
