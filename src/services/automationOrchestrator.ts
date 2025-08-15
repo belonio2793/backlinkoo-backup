@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { getContentService, type ContentGenerationParams } from './automationContentService';
 import { getTelegraphService } from './telegraphService';
+import { workingCampaignProcessor } from './workingCampaignProcessor';
 import { ProgressStep, CampaignProgress } from '@/components/CampaignProgressTracker';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { realTimeFeedService } from './realTimeFeedService';
@@ -404,9 +405,35 @@ export class AutomationOrchestrator {
 
 
   /**
-   * Process a campaign through all steps
+   * Process a campaign through all steps using working processor
    */
   async processCampaign(campaignId: string): Promise<void> {
+    try {
+      // Get campaign details
+      const campaign = await this.getCampaign(campaignId);
+      if (!campaign) {
+        throw new Error('Campaign not found');
+      }
+
+      // Use the working campaign processor for reliable processing
+      const result = await workingCampaignProcessor.processCampaign(campaign);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Campaign processing failed');
+      }
+
+      console.log('✅ Campaign processed successfully by working processor');
+
+    } catch (error) {
+      console.error('Campaign processing error:', formatErrorForLogging(error, 'processCampaign'));
+      throw error;
+    }
+  }
+
+  /**
+   * Original complex process campaign (keeping for reference but not used)
+   */
+  async processCampaignComplex(campaignId: string): Promise<void> {
     try {
       await this.logActivity(campaignId, 'info', 'Starting campaign processing');
 
