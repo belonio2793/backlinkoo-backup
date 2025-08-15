@@ -267,10 +267,25 @@ const Automation = () => {
 
         {/* Saved form data notification */}
         {hasValidSavedData(savedFormData) && !isAuthenticated && (
-          <Alert>
-            <Info className="h-4 w-4" />
-            <AlertDescription>
-              You have saved campaign details. Sign in to continue with your campaign for "<strong>{savedFormData.keyword}</strong>".
+          <Alert className="border-blue-200 bg-blue-50">
+            <Target className="h-4 w-4" />
+            <AlertDescription className="text-blue-700">
+              <div className="flex items-center justify-between">
+                <div>
+                  You have a saved campaign ready: <strong>"{savedFormData.keyword}"</strong>
+                  <div className="text-sm mt-1 opacity-90">
+                    Target: {savedFormData.targetUrl} • Anchor: {savedFormData.anchorText}
+                  </div>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  className="ml-4 border-blue-300 text-blue-700 hover:bg-blue-100"
+                  onClick={() => setShowAuthModal(true)}
+                >
+                  Sign In to Continue
+                </Button>
+              </div>
             </AlertDescription>
           </Alert>
         )}
