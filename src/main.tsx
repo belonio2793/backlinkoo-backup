@@ -25,6 +25,8 @@ import './utils/emergencyErrorFix'
 import './utils/emergencyFetchFix'
 // Network error handler for user-friendly solutions
 import './utils/errorHandler'
+// Fix response body conflicts early
+import './utils/responseBodyFix'
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
 // Protect Vite client from FullStory interference in development
