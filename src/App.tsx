@@ -33,7 +33,6 @@ const LazyEmailConfirmation = lazy(() => import("./pages/EmailConfirmation"));
 const LazyPasswordReset = lazy(() => import("./pages/PasswordReset"));
 const LazyPaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const LazyPaymentCancelled = lazy(() => import("./pages/PaymentCancelled"));
-const LazyPaymentTestPage = lazy(() => import("./pages/PaymentTestPage"));
 const LazySubscriptionSuccess = lazy(() => import("./pages/SubscriptionSuccess"));
 const LazySubscriptionCancelled = lazy(() => import("./pages/SubscriptionCancelled"));
 const LazyTermsOfService = lazy(() => import("./pages/TermsOfService"));
@@ -41,20 +40,6 @@ const LazyPrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const LazyNotFound = lazy(() => import("./pages/NotFound"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
-const LazySymbolCleanerDebug = lazy(() => import("./components/SymbolCleanerDebug"));
-const LazyCampaignMetricsDBVerifier = lazy(() => import("./components/CampaignMetricsDBVerifier"));
-const LazyPremiumUpgradeTest = lazy(() => import("./components/PremiumUpgradeTest"));
-const LazyAuthErrorDebug = lazy(() => import("./pages/AuthErrorDebug"));
-const LazyTextCleanerDebug = lazy(() => import("./pages/TextCleanerDebug"));
-const LazyDatabaseColumnsFix = lazy(() => import("./pages/DatabaseColumnsFix"));
-const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
-const LazyMarkdownTest = lazy(() => import("./pages/MarkdownTest"));
-const LazyPremiumSEOAnalysisTest = lazy(() => import("./pages/PremiumSEOAnalysisTest"));
-const LazyEnhancedFeedDemo = lazy(() => import("./pages/EnhancedFeedDemo"));
-
-const LazyDebugUserReports = lazy(() => import("./pages/DebugUserReports"));
-const LazyBlogPostChecker = lazy(() => import("./components/BlogPostChecker").then(module => ({ default: module.BlogPostChecker })));
-const LazyAutomationTestingDashboard = lazy(() => import("./components/admin/AutomationTestingDashboard"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
