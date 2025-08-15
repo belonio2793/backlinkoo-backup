@@ -29,6 +29,7 @@ import { getOrchestrator, type Campaign } from '@/services/automationOrchestrato
 import { realTimeFeedService } from '@/services/realTimeFeedService';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
+import CampaignErrorStatus from './CampaignErrorStatus';
 
 interface PublishedLink {
   id: string;
