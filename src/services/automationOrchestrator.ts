@@ -543,7 +543,15 @@ export class AutomationOrchestrator {
       });
 
     if (error) {
-      console.error('Error logging activity:', error);
+      console.error('Error logging activity:', {
+        message: error.message || 'Unknown error',
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        campaignId,
+        level,
+        activityMessage: message
+      });
     }
   }
 
