@@ -24,6 +24,7 @@ interface CampaignCreationModalProps {
   smartFlow: any; // Type this properly based on your smart flow hook
   addStatusMessage: (message: string, type: 'success' | 'error' | 'info') => void;
   onAuthSuccess?: () => void;
+  onAuthSuccessCloseModal?: () => void;
 }
 
 const CampaignCreationModal: React.FC<CampaignCreationModalProps> = ({
@@ -129,10 +130,13 @@ const CampaignCreationModal: React.FC<CampaignCreationModalProps> = ({
         onAuthSuccess();
       }
 
-      // Add a small delay to let auth state update
-      setTimeout(() => {
-        onCreateCampaign();
-      }, 500);
+      // Close modal and delegate campaign creation to main page
+      if (onAuthSuccessCloseModal) {
+        onAuthSuccessCloseModal();
+      }
+
+      // Close modal immediately after successful auth
+      onClose();
 
     } catch (error: any) {
       console.error('Authentication error:', error);
