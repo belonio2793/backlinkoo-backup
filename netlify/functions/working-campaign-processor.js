@@ -111,52 +111,53 @@ exports.handler = async (event, context) => {
 };
 
 /**
- * Generate 3 different blog posts using OpenAI GPT-3.5-turbo
+ * Generate a single blog post using randomly selected prompt from the 3 variations
  */
-async function generateBlogPosts(keyword, anchorText, targetUrl) {
-  // The 3 different prompts as specified
+async function generateSingleBlogPost(keyword, anchorText, targetUrl) {
+  // The 3 different prompts as specified - randomly select one to prevent footprints
   const prompts = [
     `Generate a blog post on ${keyword} including the ${anchorText} hyperlinked to ${targetUrl}`,
     `Write a article about ${keyword} with a hyperlinked ${anchorText} linked to ${targetUrl}`,
     `Produce a write up on ${keyword} that links ${anchorText} to ${targetUrl}`
   ];
 
-  const posts = [];
+  // Randomly select one of the 3 prompts
+  const randomIndex = Math.floor(Math.random() * prompts.length);
+  const selectedPrompt = prompts[randomIndex];
 
-  for (let i = 0; i < prompts.length; i++) {
-    const prompt = prompts[i];
-    
-    try {
-      // Generate content using OpenAI
-      if (process.env.OPENAI_API_KEY) {
-        const content = await generateOpenAIContent(prompt, keyword, anchorText, targetUrl);
-        posts.push({
-          title: `${keyword}: Professional Guide ${i + 1}`,
-          content: content,
-          prompt: prompt
-        });
-      } else {
-        // Fallback to template content
-        const content = generateTemplateContent(keyword, anchorText, targetUrl, i + 1);
-        posts.push({
-          title: `${keyword}: Professional Guide ${i + 1}`,
-          content: content,
-          prompt: prompt
-        });
-      }
-    } catch (error) {
-      console.error(`Failed to generate post ${i + 1}:`, error);
-      // Generate fallback content
-      const content = generateTemplateContent(keyword, anchorText, targetUrl, i + 1);
-      posts.push({
-        title: `${keyword}: Professional Guide ${i + 1}`,
+  console.log(`🎲 Using prompt ${randomIndex + 1} of 3: "${selectedPrompt}"`);
+
+  try {
+    // Generate content using OpenAI
+    if (process.env.OPENAI_API_KEY) {
+      const content = await generateOpenAIContent(selectedPrompt, keyword, anchorText, targetUrl);
+      return {
+        title: `${keyword}: Professional Guide`,
         content: content,
-        prompt: prompt
-      });
+        prompt: selectedPrompt,
+        promptIndex: randomIndex + 1
+      };
+    } else {
+      // Fallback to template content
+      const content = generateTemplateContent(keyword, anchorText, targetUrl, randomIndex + 1);
+      return {
+        title: `${keyword}: Professional Guide`,
+        content: content,
+        prompt: selectedPrompt,
+        promptIndex: randomIndex + 1
+      };
     }
+  } catch (error) {
+    console.error(`Failed to generate post with selected prompt:`, error);
+    // Generate fallback content
+    const content = generateTemplateContent(keyword, anchorText, targetUrl, randomIndex + 1);
+    return {
+      title: `${keyword}: Professional Guide`,
+      content: content,
+      prompt: selectedPrompt,
+      promptIndex: randomIndex + 1
+    };
   }
-
-  return posts;
 }
 
 /**
