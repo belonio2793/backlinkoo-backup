@@ -56,10 +56,10 @@ export class SimpleContentFormatter {
     // Step 4: Convert basic markdown to HTML
     formattedContent = this.convertBasicMarkdown(formattedContent);
 
-    // Step 4: Wrap content in paragraphs
+    // Step 5: Wrap content in paragraphs
     formattedContent = this.wrapInParagraphs(formattedContent);
 
-    // Step 5: Basic link fixes
+    // Step 6: Basic link fixes
     formattedContent = this.fixBasicLinks(formattedContent);
 
     console.log('SimpleContentFormatter: Final content has HTML tags:', 
