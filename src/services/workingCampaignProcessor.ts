@@ -250,7 +250,7 @@ export class WorkingCampaignProcessor {
   }
 
   /**
-   * Log activity for campaign
+   * Log activity for campaign with fallback handling
    */
   private async logActivity(campaignId: string, type: string, message: string): Promise<void> {
     try {
@@ -280,10 +280,14 @@ export class WorkingCampaignProcessor {
       });
 
       if (error) {
-        console.warn('Failed to log activity:', error);
+        console.warn('Failed to log activity to activity_logs table:', error.message);
+        // Don't let logging failure stop the campaign
+      } else {
+        console.log(`✅ Activity logged successfully: ${type} - ${message}`);
       }
     } catch (error) {
-      console.warn('Activity logging failed:', error);
+      console.warn('Activity logging failed completely:', error);
+      // Don't let logging failure stop the campaign
     }
   }
 
