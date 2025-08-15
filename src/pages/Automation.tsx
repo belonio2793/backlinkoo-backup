@@ -13,9 +13,10 @@ import AutomationServiceStatus from '@/components/AutomationServiceStatus';
 import CampaignProgressTracker, { CampaignProgress } from '@/components/CampaignProgressTracker';
 import LiveCampaignStatus from '@/components/LiveCampaignStatus';
 import CampaignManagerTabbed from '@/components/CampaignManagerTabbed';
-import AutomationAuthModal from '@/components/AutomationAuthModal';
 import FormCompletionCelebration from '@/components/FormCompletionCelebration';
-import EnhancedRealTimeFeed from '@/components/EnhancedRealTimeFeed';
+import InlineAuthForm from '@/components/InlineAuthForm';
+import InlineProgressTracker from '@/components/InlineProgressTracker';
+import InlineFeedMonitor from '@/components/InlineFeedMonitor';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
@@ -29,16 +30,16 @@ const Automation = () => {
   const [activeCampaigns, setActiveCampaigns] = useState<any[]>([]);
 
   const [isCreating, setIsCreating] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showProgress, setShowProgress] = useState(false);
   const [campaignProgress, setCampaignProgress] = useState<CampaignProgress | null>(null);
   const [progressUnsubscribe, setProgressUnsubscribe] = useState<(() => void) | null>(null);
   const [lastCreatedCampaign, setLastCreatedCampaign] = useState<any>(null);
   const [hasShownRestoreMessage, setHasShownRestoreMessage] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastFormValidState, setLastFormValidState] = useState(false);
-  const [showEnhancedFeed, setShowEnhancedFeed] = useState(false);
 
+  // State for inline components
+  const [showInlineAuth, setShowInlineAuth] = useState(false);
+  const [needsAuth, setNeedsAuth] = useState(false);
   const [formData, setFormData] = useState({
     targetUrl: '',
     keyword: '',
@@ -138,18 +139,27 @@ const Automation = () => {
   };
 
   const handleCreateCampaign = async () => {
+    // Check if user needs authentication first
+    if (!isAuthenticated) {
+      setNeedsAuth(true);
+      setShowInlineAuth(true);
+      saveFormData(formData);
+      addStatusMessage('Please sign in to continue with your campaign', 'info');
+      return;
+    }
+
     await smartFlow.handleCampaignAction(
       formData,
       createCampaign,
-      () => setShowAuthModal(true)
+      () => {} // Don't show auth modal - we'll handle auth inline
     );
   };
 
   const createCampaign = async () => {
     setIsCreating(true);
 
-    // Open Enhanced Feed for monitoring
-    setShowEnhancedFeed(true);
+    // Don't open Enhanced Feed popup - keep it inline
+    // setShowEnhancedFeed(true);
 
     try {
       // Ensure URL is properly formatted before creating campaign
@@ -174,7 +184,8 @@ const Automation = () => {
       });
 
       setProgressUnsubscribe(() => unsubscribe);
-      setShowProgress(true);
+      // Don't show full screen progress - keep inline progress
+      // setShowProgress(true);
 
       // Store the created campaign for live status
       setLastCreatedCampaign(campaign);
@@ -198,10 +209,10 @@ const Automation = () => {
     } catch (error) {
       console.error('Campaign creation error:', error);
       
-      // Handle specific authentication errors
+      // Handle specific authentication errors - keep inline
       if (error instanceof Error && error.message.includes('not authenticated')) {
         saveFormData(formData);
-        setShowAuthModal(true);
+        addStatusMessage('Please sign in to continue with your campaign', 'error');
         return;
       }
       
@@ -212,28 +223,14 @@ const Automation = () => {
   };
 
   const handleAuthSuccess = async () => {
-    await smartFlow.handleSuccessfulAuth(createCampaign);
-  };
+    setShowInlineAuth(false);
+    setNeedsAuth(false);
+    addStatusMessage('Successfully signed in! Starting your campaign...', 'success');
 
-  const handleAuthModalClose = () => {
-    setShowAuthModal(false);
-  };
-
-  const handleProgressClose = () => {
-    setShowProgress(false);
-    setCampaignProgress(null);
-
-    // Cleanup subscription
-    if (progressUnsubscribe) {
-      progressUnsubscribe();
-      setProgressUnsubscribe(null);
-    }
-  };
-
-  const handleRetryCampaign = () => {
-    // Close progress tracker and allow user to create a new campaign
-    handleProgressClose();
-    addStatusMessage('Ready to create a new campaign', 'info');
+    // Use a small delay to let the user see the success message
+    setTimeout(async () => {
+      await smartFlow.handleSuccessfulAuth(createCampaign);
+    }, 1000);
   };
 
   const handleRetryCampaign = () => {
@@ -277,18 +274,7 @@ const Automation = () => {
     );
   }
 
-  // Show progress tracker if active
-  if (showProgress && campaignProgress) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6 flex items-center justify-center">
-        <CampaignProgressTracker
-          progress={campaignProgress}
-          onClose={handleProgressClose}
-          onRetry={handleRetryCampaign}
-        />
-      </div>
-    );
-  }
+  // Don't show full screen progress tracker - we'll show inline progress instead
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -347,6 +333,26 @@ const Automation = () => {
           </div>
         )}
 
+        {/* Inline Authentication */}
+        {showInlineAuth && !isAuthenticated && (
+          <div className="mb-6">
+            <InlineAuthForm
+              onSuccess={handleAuthSuccess}
+              campaignData={hasValidSavedData(savedFormData) ? savedFormData : formData}
+              isVisible={showInlineAuth}
+            />
+          </div>
+        )}
+
+        {/* Inline Progress Tracker */}
+        {campaignProgress && (
+          <div className="mb-6">
+            <InlineProgressTracker
+              progress={campaignProgress}
+              onRetry={handleRetryCampaign}
+            />
+          </div>
+        )}
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -586,8 +592,8 @@ const Automation = () => {
               </CardContent>
                 </Card>
 
-                {/* Campaign Status Summary (when not using Feed modal) */}
-                {lastCreatedCampaign && !showEnhancedFeed && (
+                {/* Campaign Status Summary */}
+                {lastCreatedCampaign && (
                   <div className="mt-6 p-4 border rounded-lg bg-blue-50 border-blue-200">
                     <div className="flex items-center justify-between">
                       <div>
@@ -596,14 +602,10 @@ const Automation = () => {
                           "{lastCreatedCampaign.keywords?.[0] || lastCreatedCampaign.name}" is running
                         </p>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowEnhancedFeed(true)}
-                        className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                      >
-                        View Enhanced Feed
-                      </Button>
+                      <div className="flex items-center gap-2 text-sm text-blue-600">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                        <span>Monitoring live</span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -615,52 +617,6 @@ const Automation = () => {
               </TabsContent>
             </Tabs>
 
-            {/* Live Feed Monitor Button */}
-            {!showEnhancedFeed && (
-              <Card className="mt-4">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-blue-50">
-                        <Activity className={`h-5 w-5 transition-colors duration-200 ${
-                          activeCampaigns.length > 0 ? 'text-blue-600' : 'text-gray-500'
-                        }`} />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900">Live Feed Monitor</h3>
-                        <p className="text-sm text-gray-600">
-                          {activeCampaigns.length > 0
-                            ? `Track progress for ${activeCampaigns.length} active campaign${activeCampaigns.length !== 1 ? 's' : ''}`
-                            : 'Real-time monitoring ready when campaigns are running'
-                          }
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => setShowEnhancedFeed(true)}
-                      variant={activeCampaigns.length > 0 ? 'default' : 'outline'}
-                      className={`transition-all duration-200 ${
-                        activeCampaigns.length > 0
-                          ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                          : 'border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      {activeCampaigns.length > 0 ? (
-                        <>
-                          <Activity className="h-4 w-4 mr-2" />
-                          View Feed ({activeCampaigns.length})
-                        </>
-                      ) : (
-                        <>
-                          <Activity className="h-4 w-4 mr-2" />
-                          Open Monitor
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
 
           {/* Publishing Platforms (Middle Column) */}
@@ -774,6 +730,11 @@ const Automation = () => {
 
           {/* Live Activity (Right Column) */}
           <div className="lg:col-span-1 space-y-4">
+            {/* Inline Feed Monitor */}
+            <InlineFeedMonitor
+              activeCampaigns={activeCampaigns}
+              isVisible={isAuthenticated || activeCampaigns.length > 0}
+            />
 
             {isAuthenticated && (
               <CampaignManagerTabbed
@@ -783,25 +744,10 @@ const Automation = () => {
           </div>
         </div>
 
-        {/* Authentication Modal */}
-        <AutomationAuthModal
-          isOpen={showAuthModal}
-          onClose={handleAuthModalClose}
-          onSuccess={handleAuthSuccess}
-          campaignData={hasValidSavedData(savedFormData) ? savedFormData : undefined}
-        />
-
         {/* Form Completion Celebration */}
         <FormCompletionCelebration
           isVisible={showCelebration}
           onComplete={() => setShowCelebration(false)}
-        />
-
-        {/* Enhanced Real Time Feed */}
-        <EnhancedRealTimeFeed
-          isOpen={showEnhancedFeed}
-          onClose={() => setShowEnhancedFeed(false)}
-          activeCampaigns={activeCampaigns}
         />
 
       </div>
