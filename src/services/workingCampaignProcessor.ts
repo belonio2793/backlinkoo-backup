@@ -56,8 +56,17 @@ export class WorkingCampaignProcessor {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
+        let errorText = 'Unknown error';
         const functionDuration = Date.now() - functionStartTime;
+
+        try {
+          // Clone response before consuming it
+          const errorResponse = response.clone();
+          errorText = await errorResponse.text();
+        } catch (cloneError) {
+          console.warn('Failed to read error response:', cloneError);
+          errorText = `HTTP ${response.status} - ${response.statusText}`;
+        }
 
         // Log the failed function call
         campaignNetworkLogger.updateFunctionCall(
@@ -70,7 +79,15 @@ export class WorkingCampaignProcessor {
         throw new Error(`Server-side processing failed: ${response.status} - ${errorText}`);
       }
 
-      const result = await response.json();
+      let result;
+      try {
+        // Clone response before consuming it
+        const jsonResponse = response.clone();
+        result = await jsonResponse.json();
+      } catch (parseError) {
+        console.warn('Failed to parse JSON response:', parseError);
+        result = { success: false, error: 'Failed to parse server response' };
+      }
       const functionDuration = Date.now() - functionStartTime;
 
       // Log successful function call
