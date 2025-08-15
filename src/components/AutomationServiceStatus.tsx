@@ -176,20 +176,22 @@ const AutomationServiceStatus = () => {
         {/* Service list */}
         <div className="space-y-3">
           {services.map((service, index) => (
-            <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+            <div key={index} className="flex items-center justify-between p-3 border rounded-lg bg-white hover:bg-gray-50 transition-colors">
               <div className="flex items-center gap-3">
                 {getStatusIcon(service.status)}
-                <div>
-                  <p className="font-medium">{service.name}</p>
+                <div className="flex-1">
+                  <p className="font-medium text-gray-900">{service.name}</p>
                   <p className="text-sm text-gray-600">{service.message}</p>
-                  {service.details && (
-                    <p className="text-xs text-gray-500 mt-1">{service.details}</p>
+                  {service.details && showDetails && (
+                    <p className="text-xs text-gray-500 mt-1 bg-gray-100 px-2 py-1 rounded">{service.details}</p>
                   )}
                 </div>
               </div>
-              <Badge className={getStatusColor(service.status)}>
-                {service.status}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge className={getStatusColor(service.status)}>
+                  {service.status === 'ok' ? 'Active' : service.status}
+                </Badge>
+              </div>
             </div>
           ))}
         </div>
