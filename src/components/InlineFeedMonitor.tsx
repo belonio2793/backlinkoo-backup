@@ -92,17 +92,23 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
     console.log('📡 InlineFeedMonitor: Subscribing to real-time events');
 
     // Subscribe to real-time feed events
-    const unsubscribe = realTimeFeedService.subscribe((event: RealTimeFeedEvent) => {
-      // Convert RealTimeFeedEvent to RealTimeFeedLog format
-      addLog({
-        type: event.type,
-        level: event.level,
-        message: event.message,
-        campaignId: event.campaignId,
-        campaignName: event.campaignName,
-        details: event.details
+    let unsubscribe: (() => void) | null = null;
+
+    try {
+      unsubscribe = realTimeFeedService.subscribe((event: RealTimeFeedEvent) => {
+        // Convert RealTimeFeedEvent to RealTimeFeedLog format
+        addLog({
+          type: event.type,
+          level: event.level,
+          message: event.message,
+          campaignId: event.campaignId,
+          campaignName: event.campaignName,
+          details: event.details
+        });
       });
-    });
+    } catch (error) {
+      console.warn('Failed to subscribe to real-time feed service:', error);
+    }
 
     // Initial logs for active campaigns (only if we don't have history)
     if (logs.length === 0) {
@@ -124,7 +130,13 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
 
     return () => {
       console.log('📡 InlineFeedMonitor: Unsubscribing from real-time events');
-      unsubscribe();
+      if (unsubscribe) {
+        try {
+          unsubscribe();
+        } catch (error) {
+          console.warn('Error unsubscribing from real-time feed service:', error);
+        }
+      }
     };
   }, [isVisible, activeCampaigns.length]);
 
