@@ -150,6 +150,9 @@ const Automation = () => {
   const createCampaign = async () => {
     setIsCreating(true);
 
+    // Open Feed modal for creation process
+    feedModal.openFeedForCreation();
+
     try {
       // Ensure URL is properly formatted before creating campaign
       const formattedUrl = smartFlow.autoFormatUrl(formData.targetUrl);
