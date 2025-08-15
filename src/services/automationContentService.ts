@@ -47,8 +47,14 @@ export class AutomationContentService {
         const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
 
         let response: Response;
+        let responseText: string = '';
+
         try {
-          response = await fetch(endpoint, {
+          // Use native fetch to avoid FullStory interference
+          const originalFetch = window.fetch;
+          const fetchToUse = originalFetch && typeof originalFetch === 'function' ? originalFetch : fetch;
+
+          response = await fetchToUse.call(window, endpoint, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -64,39 +70,55 @@ export class AutomationContentService {
             }),
             signal: controller.signal
           });
+
+          clearTimeout(timeoutId);
+
+          // Read response body immediately to prevent stream already read errors
+          try {
+            responseText = await response.text();
+          } catch (readError) {
+            console.error('Failed to read response body:', readError);
+            throw new Error(`Failed to read response from server: ${readError instanceof Error ? readError.message : 'body stream already read'}`);
+          }
+
         } catch (fetchError) {
           clearTimeout(timeoutId);
+
+          // Handle FullStory and other network interference
           if (fetchError instanceof Error) {
             if (fetchError.name === 'AbortError') {
               throw new Error('Request timeout: Content generation service took too long to respond');
+            }
+            if (fetchError.message.includes('body stream already read')) {
+              throw new Error('Network interference detected: Please try again');
+            }
+            if (fetchError.message.includes('Failed to fetch')) {
+              throw new Error('Network error: Connection blocked by browser extension or firewall');
             }
             throw new Error(`Network error: ${fetchError.message}`);
           }
           throw new Error('Network error: Failed to connect to content generation service');
         }
 
-        clearTimeout(timeoutId);
-
-        // Read response body once, regardless of success or failure
-        let responseText: string;
-        try {
-          responseText = await response.text();
-        } catch (readError) {
-          console.error('Failed to read response body:', readError);
-          throw new Error(`Failed to read response from server: ${readError instanceof Error ? readError.message : 'Unknown read error'}`);
-        }
-
         // Parse JSON from text
         let data: any;
         try {
+          if (!responseText || responseText.trim() === '') {
+            throw new Error('Empty response received from server');
+          }
           data = JSON.parse(responseText);
         } catch (parseError) {
-          console.error('Failed to parse response as JSON:', { responseText, parseError });
+          console.error('Failed to parse response as JSON:', {
+            responseText: responseText.substring(0, 200) + '...',
+            parseError,
+            responseLength: responseText.length
+          });
+
           // If response isn't JSON, use text as error message
           if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${responseText || response.statusText}`);
+            throw new Error(`HTTP ${response.status}: ${responseText.substring(0, 200) || response.statusText}`);
           }
-          throw new Error(`Failed to parse response: ${parseError instanceof Error ? parseError.message : 'Invalid JSON'}`);
+          throw new Error(`Failed to parse response: ${parseError instanceof Error ? parseError.message : 'Invalid JSON response'}`);
         }
 
         // Handle error responses
