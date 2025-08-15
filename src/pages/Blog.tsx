@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ClaimableBlogService } from '@/services/claimableBlogService';
 import { UnifiedClaimService } from '@/services/unifiedClaimService';
 import { useAuth } from '@/hooks/useAuth';
+import { usePremiumSEOScore } from '@/hooks/usePremiumSEOScore';
 import { BlogClaimService } from '@/services/blogClaimService';
 import { supabase } from '@/integrations/supabase/client';
 import type { BlogPost } from '@/types/blogTypes';
@@ -964,28 +965,8 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
   const { toast } = useToast();
   const [claiming, setClaiming] = useState(false);
 
-  // Use premium SEO score logic
-  const [effectiveScore, setEffectiveScore] = useState(post.seo_score || 0);
-  const [isPremiumScore, setIsPremiumScore] = useState(false);
-
-  useEffect(() => {
-    async function checkPremiumScore() {
-      if (post.user_id) {
-        try {
-          const { PremiumService } = await import('@/services/premiumService');
-          const isPremium = await PremiumService.checkPremiumStatus(post.user_id);
-          if (isPremium) {
-            setEffectiveScore(100);
-            setIsPremiumScore(true);
-          }
-        } catch (error) {
-          console.error('Error checking premium status:', error);
-        }
-      }
-    }
-
-    checkPremiumScore();
-  }, [post.user_id, post.seo_score]);
+  // Use premium SEO score logic with hook for consistency
+  const { effectiveScore, isPremiumScore } = usePremiumSEOScore(post);
 
   const handleClaimRedirect = (e: React.MouseEvent) => {
     e.stopPropagation();

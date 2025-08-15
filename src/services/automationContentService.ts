@@ -36,8 +36,8 @@ export class AutomationContentService {
       // Use enhanced mock for development, testing, or when explicitly enabled
       endpoint = '/.netlify/functions/enhanced-mock-automation';
     } else {
-      // Use real content generation for production
-      endpoint = '/.netlify/functions/generate-automation-content';
+      // Use working content generator for production (more reliable)
+      endpoint = '/.netlify/functions/working-content-generator';
     }
 
     console.log(`Using endpoint: ${endpoint} (development: ${isDevelopment}, test: ${isTestMode}, mock: ${mockMode})`);
@@ -140,6 +140,32 @@ export class AutomationContentService {
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
         console.error(`Content generation error (attempt ${attempt}/${maxRetries}):`, lastError.message);
+
+        // Try working-content-generator as fallback if primary endpoint fails
+        if (endpoint !== '/.netlify/functions/working-content-generator' && attempt === 1) {
+          try {
+            console.log('🔄 Trying working-content-generator as fallback...');
+            const fallbackResponse = await (window._originalFetch || fetch)('/.netlify/functions/working-content-generator', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ keyword, anchorText, targetUrl })
+            });
+
+            if (fallbackResponse.ok) {
+              const fallbackData = await fallbackResponse.json();
+              if (fallbackData.success && fallbackData.data) {
+                console.log('✅ Fallback function succeeded');
+                return [{
+                  type: 'article',
+                  content: fallbackData.data.content,
+                  wordCount: fallbackData.data.wordCount || 800
+                }];
+              }
+            }
+          } catch (fallbackError) {
+            console.warn('Fallback function also failed:', fallbackError);
+          }
+        }
 
         // Don't retry for certain types of errors
         if (lastError.message.includes('OPENAI_API_KEY') ||

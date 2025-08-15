@@ -336,12 +336,10 @@ class DirectAutomationExecutor {
         },
         body: JSON.stringify({
           keyword: params.keyword,
-          anchor_text: params.anchor_text,
-          url: params.target_url,
-          word_count: 800,
-          tone: 'professional',
-          user_id: params.user_id,
-          campaign_id: `direct-${Date.now()}` // Temporary ID for tracking
+          anchorText: params.anchor_text,
+          targetUrl: params.target_url,
+          userId: params.user_id,
+          campaignId: `direct-${Date.now()}` // Temporary ID for tracking
         }),
       });
 

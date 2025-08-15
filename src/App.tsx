@@ -17,7 +17,6 @@ import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
 import "@/utils/emergencyDisable"; // Load emergency disable utilities
 // import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
-import DraggableEnvironmentSwitcher from "@/components/shared/DraggableEnvironmentSwitcher";
 import Index from "./pages/Index";
 
 const LazyBlogCommentsSystem = lazy(() => import("./pages/BlogCommentsSystem"));
@@ -34,7 +33,6 @@ const LazyEmailConfirmation = lazy(() => import("./pages/EmailConfirmation"));
 const LazyPasswordReset = lazy(() => import("./pages/PasswordReset"));
 const LazyPaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const LazyPaymentCancelled = lazy(() => import("./pages/PaymentCancelled"));
-const LazyPaymentTestPage = lazy(() => import("./pages/PaymentTestPage"));
 const LazySubscriptionSuccess = lazy(() => import("./pages/SubscriptionSuccess"));
 const LazySubscriptionCancelled = lazy(() => import("./pages/SubscriptionCancelled"));
 const LazyTermsOfService = lazy(() => import("./pages/TermsOfService"));
@@ -42,21 +40,6 @@ const LazyPrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const LazyNotFound = lazy(() => import("./pages/NotFound"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
-const LazySymbolCleanerDebug = lazy(() => import("./components/SymbolCleanerDebug"));
-const LazyCampaignMetricsDBVerifier = lazy(() => import("./components/CampaignMetricsDBVerifier"));
-const LazyPremiumUpgradeTest = lazy(() => import("./components/PremiumUpgradeTest"));
-const LazyAuthErrorDebug = lazy(() => import("./pages/AuthErrorDebug"));
-const LazyTextCleanerDebug = lazy(() => import("./pages/TextCleanerDebug"));
-const LazyDatabaseColumnsFix = lazy(() => import("./pages/DatabaseColumnsFix"));
-const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
-const LazyMarkdownTest = lazy(() => import("./pages/MarkdownTest"));
-const LazyPremiumSEOAnalysisTest = lazy(() => import("./pages/PremiumSEOAnalysisTest"));
-const LazyDraggableDemo = lazy(() => import("./pages/DraggableDemo"));
-const LazyEnhancedFeedDemo = lazy(() => import("./pages/EnhancedFeedDemo"));
-
-const LazyDebugUserReports = lazy(() => import("./pages/DebugUserReports"));
-const LazyBlogPostChecker = lazy(() => import("./components/BlogPostChecker").then(module => ({ default: module.BlogPostChecker })));
-const LazyAutomationTestingDashboard = lazy(() => import("./components/admin/AutomationTestingDashboard"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -189,22 +172,6 @@ const App = () => (
                 </Suspense>
               }
             />
-            <Route
-              path="/symbol-cleaner-debug"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazySymbolCleanerDebug />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/verify-database"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyCampaignMetricsDBVerifier />
-                </Suspense>
-              }
-            />
 
             {/* Authentication routes */}
             <Route
@@ -250,14 +217,6 @@ const App = () => (
               }
             />
             <Route
-              path="/payment-test"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyPaymentTestPage />
-                </Suspense>
-              }
-            />
-            <Route
               path="/subscription-success"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
@@ -291,102 +250,6 @@ const App = () => (
                 </Suspense>
               }
             />
-            <Route
-              path="/premium-upgrade-test"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyPremiumUpgradeTest />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/debug/auth-errors"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyAuthErrorDebug />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/debug/text-cleaner"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyTextCleanerDebug />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/debug/database-fix"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyDatabaseColumnsFix />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/verify-columns"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyVerifyColumns />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/debug/blog-checker"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyBlogPostChecker />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/debug/user-reports"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyDebugUserReports />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/markdown-test"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyMarkdownTest />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/admin/automation-testing"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyAutomationTestingDashboard />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/premium-seo-test"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyPremiumSEOAnalysisTest />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/draggable-demo"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyDraggableDemo />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/enhanced-feed-demo"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyEnhancedFeedDemo />
-                </Suspense>
-              }
-            />
 
             {/* 404 Catch-all route */}
             <Route
@@ -405,7 +268,6 @@ const App = () => (
           </SymbolCleanerProvider>
         </UserFlowProvider>
       </ModalProvider>
-      <DraggableEnvironmentSwitcher />
     </TooltipProvider>
   </QueryClientProvider>
 );

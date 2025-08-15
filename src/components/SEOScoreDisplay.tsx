@@ -85,6 +85,8 @@ export function SEOScoreDisplay({
     } else if (title && content) {
       // Show regular analysis for non-premium content
       const result = SEOAnalyzer.analyzeBlogPost(title, content, metaDescription, targetKeyword);
+      // Override the calculated overall score with the actual displayed score for consistency
+      result.overallScore = score;
       setAnalysis(result);
       setShowAnalysis(true);
     }
