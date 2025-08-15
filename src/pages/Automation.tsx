@@ -408,42 +408,196 @@ const Automation = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    {/* Quick Campaign Info */}
-                    {(formData.targetUrl || formData.keyword || formData.anchorText) && (
-                      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium text-blue-900">Draft Campaign</h4>
-                          <div className="flex items-center gap-2 text-sm text-blue-600">
-                            {smartFlow.hasValidForm(formData) ? (
-                              <div className="flex items-center gap-1 text-green-600">
-                                <CheckCircle className="w-4 h-4" />
-                                <span>Ready to Launch</span>
-                              </div>
-                            ) : (
-                              <div className="flex items-center gap-1 text-gray-500">
-                                <Clock className="w-4 h-4" />
-                                <span>{3 - smartFlow.analyzeFormData(formData).missingFields.length}/3 fields</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                        <div className="space-y-1 text-sm text-blue-700">
-                          {formData.targetUrl && <div><strong>Target:</strong> {formData.targetUrl}</div>}
-                          {formData.keyword && <div><strong>Keyword:</strong> {formData.keyword}</div>}
-                          {formData.anchorText && <div><strong>Anchor:</strong> {formData.anchorText}</div>}
-                        </div>
+                    {/* Form Progress Bar */}
+                    <div className="mb-4">
+                      <div className="flex justify-between text-xs text-gray-500 mb-1">
+                        <span>Form Progress</span>
+                        <span>{Math.round(((3 - smartFlow.analyzeFormData(formData).missingFields.length) / 3) * 100)}%</span>
                       </div>
-                    )}
+                      <div className="w-full bg-gray-200 rounded-full h-1.5">
+                        <div
+                          className={`h-1.5 rounded-full transition-all duration-300 ${
+                            smartFlow.hasValidForm(formData) ? 'bg-green-500' : 'bg-blue-500'
+                          }`}
+                          style={{ width: `${((3 - smartFlow.analyzeFormData(formData).missingFields.length) / 3) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    {/* Target URL Field */}
+                    <div className="space-y-2">
+                      <Label htmlFor="targetUrl">Target URL *</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="targetUrl"
+                          placeholder="https://example.com or example.com"
+                          value={formData.targetUrl}
+                          onChange={(e) => handleInputChange('targetUrl', e.target.value)}
+                          onKeyDown={(e) => {
+                            // Ctrl/Cmd + Enter to auto-format
+                            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                              e.preventDefault();
+                              const formattedUrl = smartFlow.autoFormatUrl(formData.targetUrl);
+                              if (formattedUrl !== formData.targetUrl) {
+                                handleInputChange('targetUrl', formattedUrl);
+                                addStatusMessage('URL formatted with Ctrl+Enter shortcut', 'success');
+                              }
+                            }
+                          }}
+                          onBlur={(e) => {
+                            // Auto-format URL when user leaves the field
+                            const formattedUrl = smartFlow.autoFormatUrl(e.target.value);
+                            if (formattedUrl !== e.target.value) {
+                              handleInputChange('targetUrl', formattedUrl);
+                              addStatusMessage('URL automatically formatted with https://', 'info');
+                            }
+                          }}
+                          onPaste={(e) => {
+                            // Auto-format pasted content after a short delay
+                            setTimeout(() => {
+                              const pastedValue = e.currentTarget.value;
+                              const formattedUrl = smartFlow.autoFormatUrl(pastedValue);
+                              if (formattedUrl !== pastedValue) {
+                                handleInputChange('targetUrl', formattedUrl);
+                                addStatusMessage('Pasted URL automatically formatted with https://', 'info');
+                              }
+                            }, 10);
+                          }}
+                          className={`flex-1 ${smartFlow.analyzeFormData(formData).missingFields.includes('Target URL') ||
+                                    smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') ?
+                                    'border-amber-300 focus:border-amber-500' : ''}`}
+                        />
+                        {formData.targetUrl && !formData.targetUrl.startsWith('http') && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const formattedUrl = smartFlow.autoFormatUrl(formData.targetUrl);
+                              if (formattedUrl !== formData.targetUrl) {
+                                handleInputChange('targetUrl', formattedUrl);
+                                addStatusMessage('URL formatted with https://', 'success');
+                              }
+                            }}
+                            className="px-3"
+                            title="Add https:// to URL"
+                          >
+                            <Wand2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500">
+                        The URL where your backlink will point
+                      </p>
+                      {formData.targetUrl && !formData.targetUrl.startsWith('http') && formData.targetUrl.includes('.') && (
+                        <p className="text-sm text-blue-600 flex items-center gap-1">
+                          <Wand2 className="h-3 w-3" />
+                          Will auto-format to: {smartFlow.autoFormatUrl(formData.targetUrl)}
+                        </p>
+                      )}
+                      {smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') && formData.targetUrl &&
+                       !formData.targetUrl.includes('.') && (
+                        <p className="text-sm text-amber-600">
+                          Please enter a valid domain (e.g., example.com)
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Keyword Field */}
+                    <div className="space-y-2">
+                      <Label htmlFor="keyword">Keyword *</Label>
+                      <Input
+                        id="keyword"
+                        placeholder="digital marketing"
+                        value={formData.keyword}
+                        onChange={(e) => handleInputChange('keyword', e.target.value)}
+                        className={smartFlow.analyzeFormData(formData).missingFields.includes('Keyword') ?
+                                  'border-amber-300 focus:border-amber-500' : ''}
+                      />
+                      <p className="text-sm text-gray-500">The main topic for content generation</p>
+                      {formData.keyword && formData.keyword.length > 50 && (
+                        <p className="text-sm text-amber-600">Consider using a shorter, more focused keyword</p>
+                      )}
+                    </div>
+
+                    {/* Anchor Text Field */}
+                    <div className="space-y-2">
+                      <Label htmlFor="anchorText">Anchor Text *</Label>
+                      <Input
+                        id="anchorText"
+                        placeholder="best digital marketing tools"
+                        value={formData.anchorText}
+                        onChange={(e) => handleInputChange('anchorText', e.target.value)}
+                        className={smartFlow.analyzeFormData(formData).missingFields.includes('Anchor Text') ?
+                                  'border-amber-300 focus:border-amber-500' : ''}
+                      />
+                      <p className="text-sm text-gray-500">The clickable text for your backlink</p>
+                      {formData.anchorText && (
+                        <div className="flex justify-between text-xs">
+                          <span className={formData.anchorText.length > 60 ? 'text-amber-600' : 'text-gray-500'}>
+                            {formData.anchorText.length} characters
+                          </span>
+                          {formData.anchorText.length > 60 && (
+                            <span className="text-amber-600">Consider shorter anchor text for better SEO</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Smart Flow Contextual Messages */}
+                    {smartFlow.getContextualMessages(formData).map((msg: any, index: number) => (
+                      <Alert key={index} className={
+                        msg.type === 'success' ? 'border-green-200 bg-green-50' :
+                        msg.type === 'warning' ? 'border-yellow-200 bg-yellow-50' :
+                        'border-blue-200 bg-blue-50'
+                      }>
+                        <Info className="h-4 w-4" />
+                        <AlertDescription className={
+                          msg.type === 'success' ? 'text-green-700' :
+                          msg.type === 'warning' ? 'text-yellow-700' :
+                          'text-blue-700'
+                        }>
+                          {msg.message}
+                        </AlertDescription>
+                      </Alert>
+                    ))}
 
                     {/* Create Campaign Button */}
                     <Button
-                      onClick={() => setShowCampaignModal(true)}
+                      onClick={handleCreateCampaign}
+                      disabled={(smartFlow.getButtonState(formData).disabled || isCreating) && isAuthenticated}
                       className="w-full h-12 text-lg font-medium transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
                       size="lg"
+                      variant={smartFlow.getButtonState(formData).variant}
                     >
-                      <Target className="w-5 h-5 mr-2" />
-                      {(formData.targetUrl || formData.keyword || formData.anchorText) ? 'Edit & Launch Campaign' : 'Create New Campaign'}
+                      <div className="flex items-center justify-center transition-all duration-200">
+                        {(isCreating || smartFlow.getButtonState(formData).icon === 'loader') ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            <span className="animate-pulse">{smartFlow.getButtonState(formData).text}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Target className={`w-4 h-4 mr-2 transition-transform duration-200 ${
+                              smartFlow.hasValidForm(formData) ? 'rotate-0' : 'rotate-45'
+                            }`} />
+                            <span>
+                              {!isAuthenticated && smartFlow.hasValidForm(formData)
+                                ? 'Sign In & Create Campaign'
+                                : smartFlow.getButtonState(formData).text
+                              }
+                            </span>
+                          </>
+                        )}
+                      </div>
                     </Button>
+
+                    {/* Button description */}
+                    {smartFlow.getButtonState(formData).description && (
+                      <p className="text-xs text-gray-500 text-center mt-2">
+                        {smartFlow.getButtonState(formData).description}
+                      </p>
+                    )}
 
                     {!isAuthenticated && (
                       <Alert>
