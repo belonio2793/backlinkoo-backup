@@ -270,21 +270,21 @@ const FeedModal: React.FC<FeedModalProps> = ({
 
   return (
     <Dialog open={isOpen && !isMinimized} onOpenChange={() => {}}>
-      <DialogContent className="max-w-2xl max-h-[80vh] p-0 gap-0">
-        <Card className="border-0 shadow-none">
-          <CardHeader className="pb-3">
+      <DialogContent className="max-w-2xl max-h-[85vh] p-0 gap-0 bg-gradient-to-br from-white to-gray-50">
+        <Card className="border-0 shadow-none bg-transparent">
+          <CardHeader className="pb-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-t-lg">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
-                  <CardTitle className="text-xl">Feed</CardTitle>
+                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
+                  <CardTitle className="text-xl font-semibold">Feed</CardTitle>
                 </div>
                 {activeCampaign && (
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-sm">
+                    <Badge variant="secondary" className="text-sm bg-white/20 text-white border-white/30">
                       {activeCampaign.status}
                     </Badge>
-                    <span className="text-sm text-gray-600">
+                    <span className="text-sm text-blue-100">
                       {activeCampaign.keywords?.[0] || activeCampaign.name}
                     </span>
                   </div>
@@ -295,7 +295,7 @@ const FeedModal: React.FC<FeedModalProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsAutoScrollEnabled(!isAutoScrollEnabled)}
-                  className={`text-xs ${isAutoScrollEnabled ? 'text-blue-600' : 'text-gray-400'}`}
+                  className={`text-xs hover:bg-white/20 ${isAutoScrollEnabled ? 'text-white' : 'text-blue-200'}`}
                 >
                   Auto-scroll {isAutoScrollEnabled ? 'ON' : 'OFF'}
                 </Button>
@@ -303,7 +303,7 @@ const FeedModal: React.FC<FeedModalProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleMinimize}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 hover:bg-white/20 text-white"
                 >
                   <Minimize2 className="h-4 w-4" />
                 </Button>
@@ -311,89 +311,98 @@ const FeedModal: React.FC<FeedModalProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={onClose}
-                  className="h-8 w-8 p-0"
+                  className="h-8 w-8 p-0 hover:bg-white/20 text-white"
                 >
                   <X className="h-4 w-4" />
                 </Button>
               </div>
             </div>
           </CardHeader>
-          
-          <CardContent className="pt-0 pb-4">
-            <div className="text-sm text-gray-600 mb-4">
+
+          <CardContent className="pt-4 pb-6 px-6">
+            <div className="text-sm text-gray-600 mb-4 flex items-center gap-2">
+              <Activity className="w-4 h-4" />
               Real-time campaign activities and system events
             </div>
 
-            <ScrollArea ref={scrollAreaRef} className="h-96 border rounded-lg bg-gray-50">
+            <ScrollArea ref={scrollAreaRef} className="h-96 border rounded-lg bg-white shadow-inner">
               <div className="p-4 space-y-3">
                 {activities.length === 0 ? (
-                  <div className="text-center text-gray-500 py-8">
-                    <Activity className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                    <p>Waiting for campaign activities...</p>
+                  <div className="text-center text-gray-500 py-12">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                      <Activity className="w-8 h-8 opacity-50" />
+                    </div>
+                    <p className="text-lg font-medium mb-2">Waiting for campaign activities...</p>
+                    <p className="text-sm">Activities will appear here as your campaign progresses</p>
                   </div>
                 ) : (
                   activities.map((activity, index) => (
                     <div key={activity.id}>
-                      <div className="flex items-start gap-3 text-sm bg-white p-3 rounded-lg border shadow-sm hover:shadow-md transition-shadow">
-                        <div className="flex-shrink-0 mt-0.5">
+                      <div className="flex items-start gap-3 text-sm bg-white p-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-md hover:border-blue-200 transition-all duration-200">
+                        <div className="flex-shrink-0 mt-1 p-1 rounded-full bg-gray-50">
                           {getActivityIcon(activity.type, activity.level)}
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
-                            <Badge 
-                              variant="outline" 
-                              className={`text-xs ${getActivityTypeColor(activity.type)}`}
+                            <Badge
+                              variant="outline"
+                              className={`text-xs font-medium ${getActivityTypeColor(activity.type)}`}
                             >
-                              {activity.type.replace('_', ' ')}
+                              {activity.type.replace('_', ' ').toUpperCase()}
                             </Badge>
-                            <span className="text-xs text-gray-500 font-mono">
+                            <span className="text-xs text-gray-500 font-mono bg-gray-100 px-2 py-1 rounded">
                               {formatTime(activity.timestamp)}
                             </span>
                           </div>
-                          <p className="text-gray-900 mb-2 font-medium">{activity.message}</p>
-                          
+                          <p className="text-gray-900 mb-2 font-medium leading-relaxed">{activity.message}</p>
+
                           {activity.details && (
-                            <div className="text-xs text-gray-600 space-y-1 bg-gray-50 p-2 rounded">
+                            <div className="text-xs text-gray-600 space-y-2 bg-gradient-to-r from-gray-50 to-blue-50 p-3 rounded-md border">
                               {activity.details.publishedUrl && (
                                 <div className="flex items-center gap-2">
-                                  <Link className="w-3 h-3 flex-shrink-0" />
-                                  <a 
-                                    href={activity.details.publishedUrl} 
-                                    target="_blank" 
+                                  <Link className="w-3 h-3 flex-shrink-0 text-blue-500" />
+                                  <a
+                                    href={activity.details.publishedUrl}
+                                    target="_blank"
                                     rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline break-all"
+                                    className="text-blue-600 hover:text-blue-800 hover:underline break-all font-medium"
                                   >
                                     {activity.details.publishedUrl}
                                   </a>
                                 </div>
                               )}
                               {activity.details.wordCount && (
-                                <div className="text-gray-500">
-                                  Word count: {activity.details.wordCount}
+                                <div className="text-gray-600 flex items-center gap-2">
+                                  <FileText className="w-3 h-3" />
+                                  Word count: <span className="font-medium">{activity.details.wordCount}</span>
                                 </div>
                               )}
                               {activity.details.keyword && (
-                                <div className="text-gray-500">
-                                  Keyword: "{activity.details.keyword}"
+                                <div className="text-gray-600 flex items-center gap-2">
+                                  <Target className="w-3 h-3" />
+                                  Keyword: <span className="font-medium">"{activity.details.keyword}"</span>
                                 </div>
                               )}
                               {activity.details.targetUrl && (
-                                <div className="text-gray-500">
-                                  Target: {activity.details.targetUrl}
+                                <div className="text-gray-600 flex items-center gap-2">
+                                  <Globe className="w-3 h-3" />
+                                  Target: <span className="font-medium break-all">{activity.details.targetUrl}</span>
                                 </div>
                               )}
                             </div>
                           )}
 
                           {activity.campaignName && (
-                            <div className="text-xs text-gray-500 mt-1 italic">
+                            <div className="text-xs text-gray-500 mt-2 italic bg-gray-100 px-2 py-1 rounded inline-block">
                               Campaign: {activity.campaignName}
                             </div>
                           )}
                         </div>
                       </div>
                       {index < activities.length - 1 && (
-                        <Separator className="my-2" />
+                        <div className="flex justify-center my-3">
+                          <Separator className="w-24" />
+                        </div>
                       )}
                     </div>
                   ))
