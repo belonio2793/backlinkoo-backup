@@ -433,22 +433,33 @@ const Automation = () => {
                 <Button
                   onClick={handleCreateCampaign}
                   disabled={smartFlow.getButtonState(formData).disabled || isCreating}
-                  className="w-full"
+                  className="w-full transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
                   size="lg"
                   variant={smartFlow.getButtonState(formData).variant}
                 >
-                  {(isCreating || smartFlow.getButtonState(formData).icon === 'loader') ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      {smartFlow.getButtonState(formData).text}
-                    </>
-                  ) : (
-                    <>
-                      <Target className="w-4 h-4 mr-2" />
-                      {smartFlow.getButtonState(formData).text}
-                    </>
-                  )}
+                  <div className="flex items-center justify-center transition-all duration-200">
+                    {(isCreating || smartFlow.getButtonState(formData).icon === 'loader') ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <span className="animate-pulse">{smartFlow.getButtonState(formData).text}</span>
+                      </>
+                    ) : (
+                      <>
+                        <Target className={`w-4 h-4 mr-2 transition-transform duration-200 ${
+                          smartFlow.hasValidForm(formData) ? 'rotate-0' : 'rotate-45'
+                        }`} />
+                        <span>{smartFlow.getButtonState(formData).text}</span>
+                      </>
+                    )}
+                  </div>
                 </Button>
+
+                {/* Button description */}
+                {smartFlow.getButtonState(formData).description && (
+                  <p className="text-xs text-gray-500 text-center">
+                    {smartFlow.getButtonState(formData).description}
+                  </p>
+                )}
 
                 {/* Smart Flow Contextual Messages */}
                 {smartFlow.getContextualMessages(formData).map((msg, index) => (
