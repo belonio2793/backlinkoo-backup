@@ -22,7 +22,8 @@ const Automation = () => {
   const [statusMessages, setStatusMessages] = useState<Array<{message: string, type: 'success' | 'error' | 'info', id: string}>>([]);
   const { isAuthenticated, isLoading: authLoading, user } = useAuthState();
   const { savedFormData, saveFormData, clearFormData, hasValidSavedData } = useCampaignFormPersistence();
-  
+  const smartFlow = useSmartCampaignFlow();
+
   const [isCreating, setIsCreating] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProgress, setShowProgress] = useState(false);
@@ -35,7 +36,7 @@ const Automation = () => {
     keyword: '',
     anchorText: ''
   });
-  
+
   const orchestrator = getOrchestrator();
 
   // Add status message helper
