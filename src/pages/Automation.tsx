@@ -10,12 +10,13 @@ import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, W
 import { getOrchestrator } from '@/services/automationOrchestrator';
 import AutomationReporting from '@/components/AutomationReporting';
 import AutomationServiceStatus from '@/components/AutomationServiceStatus';
-import AutomationAuthModal from '@/components/AutomationAuthModal';
 import CampaignProgressTracker, { CampaignProgress } from '@/components/CampaignProgressTracker';
 import LiveCampaignStatus from '@/components/LiveCampaignStatus';
 import CampaignManagerTabbed from '@/components/CampaignManagerTabbed';
 import FormCompletionCelebration from '@/components/FormCompletionCelebration';
-import EnhancedRealTimeFeed from '@/components/EnhancedRealTimeFeed';
+import InlineAuthForm from '@/components/InlineAuthForm';
+import InlineProgressTracker from '@/components/InlineProgressTracker';
+import InlineFeedMonitor from '@/components/InlineFeedMonitor';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
@@ -26,18 +27,19 @@ const Automation = () => {
   const { isAuthenticated, isLoading: authLoading, user } = useAuthState();
   const { savedFormData, saveFormData, clearFormData, hasValidSavedData } = useCampaignFormPersistence();
   const smartFlow = useSmartCampaignFlow();
-  const [showEnhancedFeed, setShowEnhancedFeed] = useState(false);
   const [activeCampaigns, setActiveCampaigns] = useState<any[]>([]);
 
   const [isCreating, setIsCreating] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showProgress, setShowProgress] = useState(false);
   const [campaignProgress, setCampaignProgress] = useState<CampaignProgress | null>(null);
   const [progressUnsubscribe, setProgressUnsubscribe] = useState<(() => void) | null>(null);
   const [lastCreatedCampaign, setLastCreatedCampaign] = useState<any>(null);
   const [hasShownRestoreMessage, setHasShownRestoreMessage] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastFormValidState, setLastFormValidState] = useState(false);
+
+  // State for inline components
+  const [showInlineAuth, setShowInlineAuth] = useState(false);
+  const [needsAuth, setNeedsAuth] = useState(false);
   const [formData, setFormData] = useState({
     targetUrl: '',
     keyword: '',
@@ -137,18 +139,27 @@ const Automation = () => {
   };
 
   const handleCreateCampaign = async () => {
+    // Check if user needs authentication first
+    if (!isAuthenticated) {
+      setNeedsAuth(true);
+      setShowInlineAuth(true);
+      saveFormData(formData);
+      addStatusMessage('Please sign in to continue with your campaign', 'info');
+      return;
+    }
+
     await smartFlow.handleCampaignAction(
       formData,
       createCampaign,
-      () => setShowAuthModal(true)
+      () => {} // Don't show auth modal - we'll handle auth inline
     );
   };
 
   const createCampaign = async () => {
     setIsCreating(true);
 
-    // Open Enhanced Feed for monitoring
-    setShowEnhancedFeed(true);
+    // Don't open Enhanced Feed popup - keep it inline
+    // setShowEnhancedFeed(true);
 
     try {
       // Ensure URL is properly formatted before creating campaign
@@ -173,7 +184,8 @@ const Automation = () => {
       });
 
       setProgressUnsubscribe(() => unsubscribe);
-      setShowProgress(true);
+      // Don't show full screen progress - keep inline progress
+      // setShowProgress(true);
 
       // Store the created campaign for live status
       setLastCreatedCampaign(campaign);
@@ -197,10 +209,10 @@ const Automation = () => {
     } catch (error) {
       console.error('Campaign creation error:', error);
       
-      // Handle specific authentication errors
+      // Handle specific authentication errors - keep inline
       if (error instanceof Error && error.message.includes('not authenticated')) {
         saveFormData(formData);
-        setShowAuthModal(true);
+        addStatusMessage('Please sign in to continue with your campaign', 'error');
         return;
       }
       
@@ -211,15 +223,18 @@ const Automation = () => {
   };
 
   const handleAuthSuccess = async () => {
-    await smartFlow.handleSuccessfulAuth(createCampaign);
+    setShowInlineAuth(false);
+    setNeedsAuth(false);
+    addStatusMessage('Successfully signed in! Starting your campaign...', 'success');
+
+    // Use a small delay to let the user see the success message
+    setTimeout(async () => {
+      await smartFlow.handleSuccessfulAuth(createCampaign);
+    }, 1000);
   };
 
-  const handleAuthModalClose = () => {
-    setShowAuthModal(false);
-  };
-
-  const handleProgressClose = () => {
-    setShowProgress(false);
+  const handleRetryCampaign = () => {
+    // Reset campaign progress and allow user to create a new campaign
     setCampaignProgress(null);
 
     // Cleanup subscription
@@ -227,11 +242,7 @@ const Automation = () => {
       progressUnsubscribe();
       setProgressUnsubscribe(null);
     }
-  };
 
-  const handleRetryCampaign = () => {
-    // Close progress tracker and allow user to create a new campaign
-    handleProgressClose();
     addStatusMessage('Ready to create a new campaign', 'info');
   };
 
@@ -263,18 +274,7 @@ const Automation = () => {
     );
   }
 
-  // Show progress tracker if active
-  if (showProgress && campaignProgress) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6 flex items-center justify-center">
-        <CampaignProgressTracker
-          progress={campaignProgress}
-          onClose={handleProgressClose}
-          onRetry={handleRetryCampaign}
-        />
-      </div>
-    );
-  }
+  // Don't show full screen progress tracker - we'll show inline progress instead
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
@@ -333,8 +333,29 @@ const Automation = () => {
           </div>
         )}
 
-        {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Inline Authentication */}
+        {showInlineAuth && !isAuthenticated && (
+          <div className="mb-6">
+            <InlineAuthForm
+              onSuccess={handleAuthSuccess}
+              campaignData={hasValidSavedData(savedFormData) ? savedFormData : formData}
+              isVisible={showInlineAuth}
+            />
+          </div>
+        )}
+
+        {/* Inline Progress Tracker */}
+        {campaignProgress && (
+          <div className="mb-6">
+            <InlineProgressTracker
+              progress={campaignProgress}
+              onRetry={handleRetryCampaign}
+            />
+          </div>
+        )}
+
+        {/* Main Content - Top Row: Campaign Creation, Live Monitor, Activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
           {/* Campaign Creation (Left Column) */}
           <div className="lg:col-span-1">
             <Tabs defaultValue="create" className="w-full">
@@ -522,7 +543,7 @@ const Automation = () => {
 
                 <Button
                   onClick={handleCreateCampaign}
-                  disabled={smartFlow.getButtonState(formData).disabled || isCreating}
+                  disabled={(smartFlow.getButtonState(formData).disabled || isCreating) && isAuthenticated}
                   className="w-full transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
                   size="lg"
                   variant={smartFlow.getButtonState(formData).variant}
@@ -571,8 +592,8 @@ const Automation = () => {
               </CardContent>
                 </Card>
 
-                {/* Campaign Status Summary (when not using Feed modal) */}
-                {lastCreatedCampaign && !showEnhancedFeed && (
+                {/* Campaign Status Summary */}
+                {lastCreatedCampaign && (
                   <div className="mt-6 p-4 border rounded-lg bg-blue-50 border-blue-200">
                     <div className="flex items-center justify-between">
                       <div>
@@ -581,14 +602,10 @@ const Automation = () => {
                           "{lastCreatedCampaign.keywords?.[0] || lastCreatedCampaign.name}" is running
                         </p>
                       </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setShowEnhancedFeed(true)}
-                        className="border-blue-300 text-blue-700 hover:bg-blue-100"
-                      >
-                        View Enhanced Feed
-                      </Button>
+                      <div className="flex items-center gap-2 text-sm text-blue-600">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                        <span>Monitoring live</span>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -600,161 +617,14 @@ const Automation = () => {
               </TabsContent>
             </Tabs>
 
-            {/* Live Feed Monitor Button */}
-            {!showEnhancedFeed && (
-              <Card className="mt-4">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-blue-50">
-                        <Activity className={`h-5 w-5 transition-colors duration-200 ${
-                          activeCampaigns.length > 0 ? 'text-blue-600' : 'text-gray-500'
-                        }`} />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900">Live Feed Monitor</h3>
-                        <p className="text-sm text-gray-600">
-                          {activeCampaigns.length > 0
-                            ? `Track progress for ${activeCampaigns.length} active campaign${activeCampaigns.length !== 1 ? 's' : ''}`
-                            : 'Real-time monitoring ready when campaigns are running'
-                          }
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => setShowEnhancedFeed(true)}
-                      variant={activeCampaigns.length > 0 ? 'default' : 'outline'}
-                      className={`transition-all duration-200 ${
-                        activeCampaigns.length > 0
-                          ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                          : 'border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      {activeCampaigns.length > 0 ? (
-                        <>
-                          <Activity className="h-4 w-4 mr-2" />
-                          View Feed ({activeCampaigns.length})
-                        </>
-                      ) : (
-                        <>
-                          <Activity className="h-4 w-4 mr-2" />
-                          Open Monitor
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
 
-          {/* Publishing Platforms (Middle Column) */}
+          {/* Live Monitor (Middle Column) */}
           <div className="lg:col-span-1">
-            <Card className="h-fit">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Link className="w-5 h-5" />
-                  Publishing Platforms
-                </CardTitle>
-                <CardDescription>
-                  Platforms for automatic rotation (1 post per platform per campaign)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="max-h-96 overflow-y-auto space-y-3">
-                  {/* Active Platform */}
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50 border-green-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                      <div>
-                        <div className="font-medium text-sm">Telegraph.ph</div>
-                        <div className="text-xs text-gray-600">Priority #1 • Auto-rotation</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-medium text-green-700">DR 91</div>
-                      <div className="text-xs text-gray-500">High DA</div>
-                    </div>
-                  </div>
-
-                  {/* Coming Soon Platforms */}
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                      <div>
-                        <div className="font-medium text-sm">Medium.com</div>
-                        <div className="text-xs text-gray-600">Priority #2 • Coming soon</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-medium text-gray-700">DR 96</div>
-                      <div className="text-xs text-gray-500">Premium</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                      <div>
-                        <div className="font-medium text-sm">Dev.to</div>
-                        <div className="text-xs text-gray-600">Priority #3 • Coming soon</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-medium text-gray-700">DR 86</div>
-                      <div className="text-xs text-gray-500">Tech focused</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                      <div>
-                        <div className="font-medium text-sm">LinkedIn Articles</div>
-                        <div className="text-xs text-gray-600">Professional network</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-medium text-gray-700">DR 100</div>
-                      <div className="text-xs text-gray-500">B2B focus</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                      <div>
-                        <div className="font-medium text-sm">Hashnode</div>
-                        <div className="text-xs text-gray-600">Developer blogging</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-medium text-gray-700">DR 75</div>
-                      <div className="text-xs text-gray-500">Developer</div>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
-                    <div className="flex items-center gap-3">
-                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                      <div>
-                        <div className="font-medium text-sm">Substack</div>
-                        <div className="text-xs text-gray-600">Newsletter platform</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-xs font-medium text-gray-700">DR 88</div>
-                      <div className="text-xs text-gray-500">Newsletter</div>
-                    </div>
-                  </div>
-
-                  {/* Coming Soon Notice */}
-                  <div className="p-3 border-2 border-dashed border-gray-300 rounded-lg text-center">
-                    <p className="text-xs text-gray-500">More platforms coming soon...</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            <InlineFeedMonitor
+              activeCampaigns={activeCampaigns}
+              isVisible={isAuthenticated || activeCampaigns.length > 0}
+            />
           </div>
 
           {/* Live Activity (Right Column) */}
@@ -767,25 +637,124 @@ const Automation = () => {
           </div>
         </div>
 
-        {/* Authentication Modal */}
-        <AutomationAuthModal
-          isOpen={showAuthModal}
-          onClose={handleAuthModalClose}
-          onSuccess={handleAuthSuccess}
-          campaignData={hasValidSavedData(savedFormData) ? savedFormData : undefined}
-        />
+        {/* Publishing Platforms - Full Width Second Row */}
+        <div className="w-full">
+          <Card className="h-fit">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Link className="w-5 h-5" />
+                Publishing Platforms
+              </CardTitle>
+              <CardDescription>
+                Platforms for automatic rotation (1 post per platform per campaign)
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {/* Active Platform */}
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-green-50 border-green-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                    <div>
+                      <div className="font-medium text-sm">Telegraph.ph</div>
+                      <div className="text-xs text-gray-600">Priority #1 • Auto-rotation</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-medium text-green-700">DR 91</div>
+                    <div className="text-xs text-gray-500">High DA</div>
+                  </div>
+                </div>
+
+                {/* Coming Soon Platforms */}
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                    <div>
+                      <div className="font-medium text-sm">Medium.com</div>
+                      <div className="text-xs text-gray-600">Priority #2 • Coming soon</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-medium text-gray-700">DR 96</div>
+                    <div className="text-xs text-gray-500">Premium</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                    <div>
+                      <div className="font-medium text-sm">Dev.to</div>
+                      <div className="text-xs text-gray-600">Priority #3 • Coming soon</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-medium text-gray-700">DR 86</div>
+                    <div className="text-xs text-gray-500">Tech focused</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                    <div>
+                      <div className="font-medium text-sm">LinkedIn Articles</div>
+                      <div className="text-xs text-gray-600">Professional network</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-medium text-gray-700">DR 100</div>
+                    <div className="text-xs text-gray-500">B2B focus</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                    <div>
+                      <div className="font-medium text-sm">Hashnode</div>
+                      <div className="text-xs text-gray-600">Developer blogging</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-medium text-gray-700">DR 75</div>
+                    <div className="text-xs text-gray-500">Developer</div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                    <div>
+                      <div className="font-medium text-sm">Substack</div>
+                      <div className="text-xs text-gray-600">Newsletter platform</div>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-xs font-medium text-gray-700">DR 88</div>
+                    <div className="text-xs text-gray-500">Newsletter</div>
+                  </div>
+                </div>
+
+                {/* Coming Soon Notice */}
+                <div className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg">
+                  <p className="text-xs text-gray-500">More platforms coming soon...</p>
+                </div>
+
+                {/* Additional future platform slots */}
+                <div className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg opacity-50">
+                  <p className="text-xs text-gray-400">Platform slot</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         {/* Form Completion Celebration */}
         <FormCompletionCelebration
           isVisible={showCelebration}
           onComplete={() => setShowCelebration(false)}
-        />
-
-        {/* Enhanced Real Time Feed */}
-        <EnhancedRealTimeFeed
-          isOpen={showEnhancedFeed}
-          onClose={() => setShowEnhancedFeed(false)}
-          activeCampaigns={activeCampaigns}
         />
 
       </div>
