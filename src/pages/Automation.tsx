@@ -20,6 +20,7 @@ import CampaignManagerTabbed from '@/components/CampaignManagerTabbed';
 import FormCompletionCelebration from '@/components/FormCompletionCelebration';
 import InlineFeedMonitor from '@/components/InlineFeedMonitor';
 import { CampaignDebugger } from '@/components/CampaignDebugger';
+import { CampaignResumeFixer } from '@/components/CampaignResumeFixer';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
