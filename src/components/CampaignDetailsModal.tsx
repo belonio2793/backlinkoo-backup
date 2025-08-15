@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getOrchestrator, type Campaign } from '@/services/automationOrchestrator';
+import { realTimeFeedService } from '@/services/realTimeFeedService';
 import { CampaignProgress, ProgressStep } from './CampaignProgressTracker';
 import { campaignNetworkLogger, NetworkRequest, DatabaseQuery } from '@/services/campaignNetworkLogger';
 
@@ -155,20 +156,36 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
 
   const generateCampaignLogs = async (campaign: Campaign, progress?: CampaignProgress): Promise<CampaignLog[]> => {
     const logs: CampaignLog[] = [];
-    
-    // Campaign creation
-    logs.push({
-      id: '1',
-      timestamp: new Date(campaign.created_at),
-      level: 'success',
-      step: 'initialization',
-      message: 'Campaign created successfully',
-      details: {
-        targetUrl: campaign.target_url,
-        keywords: campaign.keywords,
-        anchorTexts: campaign.anchor_texts
-      }
-    });
+
+    // Get real-time events specific to this campaign
+    const campaignEvents = realTimeFeedService.getHistory()
+      .filter(event => event.campaignId === campaign.id)
+      .map(event => ({
+        id: event.id,
+        timestamp: event.timestamp,
+        level: event.level as 'info' | 'warning' | 'error' | 'success',
+        step: event.type,
+        message: event.message,
+        details: event.details
+      }));
+
+    logs.push(...campaignEvents);
+
+    // Add campaign creation event if no events exist
+    if (logs.length === 0) {
+      logs.push({
+        id: '1',
+        timestamp: new Date(campaign.created_at),
+        level: 'success',
+        step: 'initialization',
+        message: 'Campaign created successfully',
+        details: {
+          targetUrl: campaign.target_url,
+          keywords: campaign.keywords,
+          anchorTexts: campaign.anchor_texts
+        }
+      });
+    }
 
     // Add progress-based logs
     if (progress) {
