@@ -473,6 +473,7 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                       {(() => {
                         const summary = campaignStatusSummaries.get(campaign.id);
                         if (summary && summary.totalPlatforms > 0) {
+                          const completedCount = summary.platformsCompleted || 0;
                           return (
                             <div className="flex flex-col gap-1 mt-2">
                               <div className="text-xs text-gray-500">Platforms:</div>
@@ -480,13 +481,13 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                                 {Array.from({ length: summary.totalPlatforms }, (_, i) => (
                                   <div
                                     key={i}
-                                    className={`w-2 h-2 rounded-full ${
-                                      i < summary.platformsCompleted
+                                    className={`w-2 h-2 rounded-full transition-colors duration-200 ${
+                                      i < completedCount
                                         ? 'bg-green-500'
                                         : 'bg-gray-300'
                                     }`}
                                     title={`Platform ${i + 1}: ${
-                                      i < summary.platformsCompleted ? 'Completed' : 'Pending'
+                                      i < completedCount ? 'Completed' : 'Pending'
                                     }`}
                                   />
                                 ))}
