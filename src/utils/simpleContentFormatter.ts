@@ -69,6 +69,66 @@ export class SimpleContentFormatter {
   }
 
   /**
+   * Fix numbered lists that should be formatted as HTML lists
+   */
+  private static fixNumberedLists(content: string): string {
+    // Look for patterns like "1. Enhanced SEO Performance: Forum" followed by text
+    // Convert these to proper numbered lists
+    const lines = content.split('\n');
+    const result = [];
+    let inList = false;
+    let listItems = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+
+      // Check if this line starts a numbered list item (1., 2., etc.)
+      const listMatch = line.match(/^(\d+)\.\s*(.+?):\s*(.+)/);
+
+      if (listMatch) {
+        if (!inList) {
+          inList = true;
+          listItems = [];
+        }
+
+        const [, number, title, description] = listMatch;
+        listItems.push(`<li><strong>${title}:</strong> ${description}</li>`);
+      } else if (inList && line === '') {
+        // Empty line might continue the list, check next line
+        const nextLine = lines[i + 1]?.trim();
+        if (nextLine && !nextLine.match(/^\d+\./)) {
+          // End of list
+          result.push('<ol>');
+          result.push(...listItems);
+          result.push('</ol>');
+          inList = false;
+          listItems = [];
+        }
+        result.push(line);
+      } else if (inList && !line.match(/^\d+\./)) {
+        // Line doesn't start with number, end the list
+        result.push('<ol>');
+        result.push(...listItems);
+        result.push('</ol>');
+        inList = false;
+        listItems = [];
+        result.push(line);
+      } else if (!inList) {
+        result.push(line);
+      }
+    }
+
+    // Handle case where content ends with a list
+    if (inList && listItems.length > 0) {
+      result.push('<ol>');
+      result.push(...listItems);
+      result.push('</ol>');
+    }
+
+    return result.join('\n');
+  }
+
+  /**
    * Convert basic markdown to HTML - essential patterns only
    */
   private static convertBasicMarkdown(content: string): string {
