@@ -5,7 +5,7 @@
 
 // Common problematic characters that should be cleaned
 const PROBLEMATIC_CHARS = {
-  REPLACEMENT_CHAR: '\uFFFD', // � - Unicode replacement character
+  REPLACEMENT_CHAR: '\uFFFD', // \uFFFD - Unicode replacement character
   NULL_CHAR: '\u0000',        // Null character
   BYTE_ORDER_MARK: '\uFEFF',  // BOM (Byte Order Mark)
   ZERO_WIDTH_SPACE: '\u200B', // Zero-width space
