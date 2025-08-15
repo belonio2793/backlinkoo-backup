@@ -247,6 +247,15 @@ const Automation = () => {
       // Add campaign to active campaigns for enhanced feed
       setActiveCampaigns(prev => [...prev, campaign]);
 
+      // Emit real-time feed event for campaign creation
+      realTimeFeedService.emitCampaignCreated(
+        campaign.id,
+        campaign.name || formData.keyword,
+        formData.keyword,
+        formattedUrl,
+        user?.id
+      );
+
       // Clear saved form data since campaign was created successfully
       clearFormData();
       setHasShownRestoreMessage(false);
