@@ -173,7 +173,8 @@ const Automation = () => {
       });
 
       setProgressUnsubscribe(() => unsubscribe);
-      setShowProgress(true);
+      // Don't show full screen progress - keep inline progress
+      // setShowProgress(true);
 
       // Store the created campaign for live status
       setLastCreatedCampaign(campaign);
