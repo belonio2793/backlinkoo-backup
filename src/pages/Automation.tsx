@@ -310,8 +310,14 @@ const Automation = () => {
                     placeholder="https://example.com"
                     value={formData.targetUrl}
                     onChange={(e) => handleInputChange('targetUrl', e.target.value)}
+                    className={smartFlow.analyzeFormData(formData).missingFields.includes('Target URL') ||
+                              smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') ?
+                              'border-amber-300 focus:border-amber-500' : ''}
                   />
                   <p className="text-sm text-gray-500">The URL where your backlink will point</p>
+                  {smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') && formData.targetUrl && (
+                    <p className="text-sm text-amber-600">Please enter a valid URL (e.g., https://example.com)</p>
+                  )}
                 </div>
 
                 <div className="space-y-2">
