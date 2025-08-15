@@ -234,10 +234,6 @@ export class CampaignMonitoringService {
         .update({
           status: 'paused',
           error_message: errorMessage,
-          auto_pause_reason: progressCheck.stuckReason,
-          can_auto_resume: false, // Manual intervention required for stuck campaigns
-          error_count: supabase.raw('COALESCE(error_count, 0) + 1'),
-          last_error_at: new Date().toISOString(),
           updated_at: new Date().toISOString()
         })
         .eq('id', progressCheck.campaignId);
