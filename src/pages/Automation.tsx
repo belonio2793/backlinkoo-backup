@@ -228,6 +228,9 @@ const Automation = () => {
   };
 
   const handleAuthSuccess = async () => {
+    setShowInlineAuth(false);
+    setNeedsAuth(false);
+    addStatusMessage('Successfully signed in! Starting your campaign...', 'success');
     await smartFlow.handleSuccessfulAuth(createCampaign);
   };
 
