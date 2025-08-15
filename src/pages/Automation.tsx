@@ -749,6 +749,14 @@ const Automation = () => {
           onMinimize={realTimeFeed.minimizeModal}
           isMinimized={realTimeFeed.isMinimized}
         />
+
+        {/* Feed Modal */}
+        <FeedModal
+          isOpen={feedModal.isOpen}
+          onClose={feedModal.closeFeed}
+          activeCampaign={feedModal.activeCampaign}
+          isCreating={feedModal.isCreating}
+        />
       </div>
     </div>
   );
