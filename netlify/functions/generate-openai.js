@@ -95,7 +95,7 @@ Write a comprehensive, authoritative guide that becomes the definitive resource 
 - Include 3-5 data points, statistics, or expert insights
 - Write scannable content with clear headings and visual breaks
 - Natural integration of "${anchorText || keyword}" linking to ${url}
-- End with a compelling call-to-action that drives engagement
+- End with a helpful conclusion that provides next steps
 
 🏗️ ENHANCED STRUCTURE:
 1. **Attention-Grabbing H1**: Include "${keyword}" and promise a specific benefit
@@ -104,7 +104,7 @@ Write a comprehensive, authoritative guide that becomes the definitive resource 
    - Each section solves a specific problem
    - Include actionable tips, examples, or case studies
    - Use H3 subheadings to break up longer sections
-4. **Strategic Backlink Placement**: Integrate "${anchorText || keyword}" → ${url} where it adds genuine value
+4. **Natural Link Integration**: Include "${anchorText || keyword}" → ${url} naturally within relevant context
 5. **Powerful Conclusion**: Summarize key insights and include next steps
 
 🚀 SEO & ENGAGEMENT OPTIMIZATION:
@@ -115,9 +115,9 @@ Write a comprehensive, authoritative guide that becomes the definitive resource 
 - Add transition phrases that improve readability
 - Include rhetorical questions to increase engagement
 
-🔗 STRATEGIC BACKLINK INTEGRATION:
-- Place "${anchorText || keyword}" linking to ${url} where it provides maximum value
-- Context should make the link feel like a natural extension of the content
+🔗 NATURAL LINK INTEGRATION:
+- Include "${anchorText || keyword}" linking to ${url} where it adds genuine value to readers
+- Ensure links feel like helpful resources rather than promotional placements
 - The link should solve a problem or provide additional resources mentioned in the content
 - Ensure the backlink enhances rather than interrupts the reading experience
 

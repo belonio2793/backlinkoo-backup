@@ -18,9 +18,18 @@ export class SimpleContentFormatter {
       .replace(/^---[\s\S]*?---\s*/m, '')
       // Remove title duplicates at the beginning
       .replace(/^[\s\n]*Title:\s*[^\n]*\n?/i, '')
+      .replace(/^[\s\n]*\*\*Title:\s*[^\n]*\*\*\n?/i, '')
       // Remove H1/H2 prefix patterns
       .replace(/^\*\*H[1-6]\*\*:\s*/gmi, '')
       .replace(/^H[1-6]:\s*/gmi, '')
+      // Remove Call-to-Action and Strategic Backlink Placement patterns
+      .replace(/^[\s\n]*\*?\*?Call-to-Action:\*?\*?[\s\n]*/gmi, '')
+      .replace(/^[\s\n]*\*?\*?Call to Action:\*?\*?[\s\n]*/gmi, '')
+      .replace(/^[\s\n]*\*?\*?Strategic Backlink Placement:\*?\*?[\s\n]*/gmi, '')
+      .replace(/^[\s\n]*\*?\*?Strategic backlink placement:\*?\*?[\s\n]*/gmi, '')
+      // Remove meta text about content structure
+      .replace(/---[\s\S]*?This content piece follows[\s\S]*?on the topic\.[\s\n]*/gi, '')
+      .replace(/---[\s\S]*?outlined structure and requirements[\s\S]*?\.[\s\n]*/gi, '')
       // Clean up line breaks
       .replace(/\r\n/g, '\n')
       .replace(/\r/g, '\n');
@@ -28,23 +37,95 @@ export class SimpleContentFormatter {
     // Step 2: Remove duplicate title if provided
     if (title) {
       const cleanTitle = title.replace(/[*#]/g, '').trim();
-      const titlePattern = new RegExp(`^\\s*${this.escapeRegex(cleanTitle)}\\s*\\n?`, 'i');
-      formattedContent = formattedContent.replace(titlePattern, '');
+      // Remove various title patterns
+      const titlePatterns = [
+        new RegExp(`^\\s*\\*\\*${this.escapeRegex(cleanTitle)}\\*\\*\\s*\\n?`, 'i'),
+        new RegExp(`^\\s*${this.escapeRegex(cleanTitle)}\\s*\\n?`, 'i'),
+        new RegExp(`^\\s*#\\s*${this.escapeRegex(cleanTitle)}\\s*\\n?`, 'i'),
+        new RegExp(`^\\s*##\\s*${this.escapeRegex(cleanTitle)}\\s*\\n?`, 'i')
+      ];
+
+      titlePatterns.forEach(pattern => {
+        formattedContent = formattedContent.replace(pattern, '');
+      });
     }
 
-    // Step 3: Convert basic markdown to HTML
+    // Step 3: Fix numbered lists before markdown conversion
+    formattedContent = this.fixNumberedLists(formattedContent);
+
+    // Step 4: Convert basic markdown to HTML
     formattedContent = this.convertBasicMarkdown(formattedContent);
 
-    // Step 4: Wrap content in paragraphs
+    // Step 5: Wrap content in paragraphs
     formattedContent = this.wrapInParagraphs(formattedContent);
 
-    // Step 5: Basic link fixes
+    // Step 6: Basic link fixes
     formattedContent = this.fixBasicLinks(formattedContent);
 
     console.log('SimpleContentFormatter: Final content has HTML tags:', 
       formattedContent.includes('<p>') || formattedContent.includes('<h'));
 
     return formattedContent;
+  }
+
+  /**
+   * Fix numbered lists that should be formatted as HTML lists
+   */
+  private static fixNumberedLists(content: string): string {
+    // Look for patterns like "1. Enhanced SEO Performance: Forum" followed by text
+    // Convert these to proper numbered lists
+    const lines = content.split('\n');
+    const result = [];
+    let inList = false;
+    let listItems = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i].trim();
+
+      // Check if this line starts a numbered list item (1., 2., etc.)
+      const listMatch = line.match(/^(\d+)\.\s*(.+?):\s*(.+)/);
+
+      if (listMatch) {
+        if (!inList) {
+          inList = true;
+          listItems = [];
+        }
+
+        const [, number, title, description] = listMatch;
+        listItems.push(`<li><strong>${title}:</strong> ${description}</li>`);
+      } else if (inList && line === '') {
+        // Empty line might continue the list, check next line
+        const nextLine = lines[i + 1]?.trim();
+        if (nextLine && !nextLine.match(/^\d+\./)) {
+          // End of list
+          result.push('<ol>');
+          result.push(...listItems);
+          result.push('</ol>');
+          inList = false;
+          listItems = [];
+        }
+        result.push(line);
+      } else if (inList && !line.match(/^\d+\./)) {
+        // Line doesn't start with number, end the list
+        result.push('<ol>');
+        result.push(...listItems);
+        result.push('</ol>');
+        inList = false;
+        listItems = [];
+        result.push(line);
+      } else if (!inList) {
+        result.push(line);
+      }
+    }
+
+    // Handle case where content ends with a list
+    if (inList && listItems.length > 0) {
+      result.push('<ol>');
+      result.push(...listItems);
+      result.push('</ol>');
+    }
+
+    return result.join('\n');
   }
 
   /**

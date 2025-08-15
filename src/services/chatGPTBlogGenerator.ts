@@ -160,7 +160,7 @@ export class ChatGPTBlogGenerator {
       4. H2: Introduction (include target keyword in first 100 words)
       5. H2: Main Content (3-4 paragraphs with LSI keywords and natural backlink using "${anchorText}")
       6. H2: Why ${input.targetKeyword} Matters (1-2 paragraphs about importance)
-      7. H2: Conclusion (Summary + call to action linking to ${input.destinationURL})
+      7. H2: Conclusion (Summary with helpful resource linking to ${input.destinationURL})
       
       Ensure natural, human tone with short sentences and readable formatting.`
     });
@@ -214,7 +214,7 @@ export class ChatGPTBlogGenerator {
 <h2>Conclusion</h2>
 <p>Success with ${input.targetKeyword} requires dedication, strategic thinking, and continuous learning. By implementing the strategies outlined in this guide and leveraging professional resources, you'll be well-positioned to achieve your objectives and drive meaningful results.</p>
 
-<p>Ready to take your ${input.targetKeyword} strategy to the next level? <a href="${input.destinationURL}" target="_blank" rel="noopener noreferrer"><strong><u>Discover comprehensive ${input.targetKeyword} solutions</u></strong></a> and unlock your organization's full potential with expert guidance and proven methodologies.</p>
+<p>For more in-depth guidance and resources, you can explore <a href="${input.destinationURL}" target="_blank" rel="noopener noreferrer">${input.targetKeyword} solutions</a> that align with your specific goals and requirements.</p>
     `.trim();
 
     return {
