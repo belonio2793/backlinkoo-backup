@@ -290,6 +290,7 @@ if (import.meta.env.DEV) {
   console.log('  - testDevelopmentProcessor() - Test mock content + Telegraph publishing');
   console.log('  - testBacklinkNotification() - Test single backlink notification');
   console.log('  - testMultipleNotifications() - Test multiple backlink notifications');
+  console.log('  - testRealTimeFeedSubscription() - Test real-time feed subscription fix');
   console.log('  - fetchTest.runDiagnostics() - Test fetch and network connectivity');
 }
 
