@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2, Activity, Settings } from 'lucide-react';
+import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2, Activity } from 'lucide-react';
 import { getOrchestrator } from '@/services/automationOrchestrator';
 import { campaignMonitoringService } from '@/services/campaignMonitoringService';
 import { workingCampaignProcessor } from '@/services/workingCampaignProcessor';
@@ -19,8 +19,6 @@ import LiveCampaignStatus from '@/components/LiveCampaignStatus';
 import CampaignManagerTabbed from '@/components/CampaignManagerTabbed';
 import FormCompletionCelebration from '@/components/FormCompletionCelebration';
 import InlineFeedMonitor from '@/components/InlineFeedMonitor';
-import { CampaignDebugger } from '@/components/CampaignDebugger';
-import { CampaignResumeFixer } from '@/components/CampaignResumeFixer';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -43,7 +41,6 @@ const Automation = () => {
   const [hasShownRestoreMessage, setHasShownRestoreMessage] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastFormValidState, setLastFormValidState] = useState(false);
-  const [showDebugger, setShowDebugger] = useState(false);
 
   // Modal state for authentication
   const { openLoginModal } = useAuthModal();
@@ -347,16 +344,6 @@ const Automation = () => {
             <div className="flex items-center justify-center gap-4">
               <h1 className="text-4xl font-bold text-gray-900">Link Building Automation</h1>
               <NetworkStatusIndicator />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowDebugger(true)}
-                className="border-orange-300 text-orange-700 hover:bg-orange-50"
-                title="Debug Campaign Issues"
-              >
-                <Settings className="w-4 h-4 mr-2" />
-                Debug
-              </Button>
             </div>
             <p className="text-lg text-gray-600">
               Automatically generate and publish high-quality content with backlinks to your target URL
@@ -411,8 +398,6 @@ const Automation = () => {
           </div>
         )}
 
-        {/* Campaign Resume Debugger */}
-        <CampaignResumeFixer />
 
         {/* Main Content - Top Row: Campaign Creation, Activity, Live Monitor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mb-4">
@@ -804,24 +789,6 @@ const Automation = () => {
         </div>
       </main>
 
-      {/* Campaign Debugger Modal */}
-      {showDebugger && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b">
-              <h2 className="text-lg font-semibold">Campaign System Debugger</h2>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowDebugger(false)}
-              >
-                ×
-              </Button>
-            </div>
-            <CampaignDebugger />
-          </div>
-        </div>
-      )}
 
       <Footer />
     </div>
