@@ -566,7 +566,8 @@ export class AutomationOrchestrator {
               published_url: publishedPage.url,
               anchor_text: campaign.anchor_texts[0] || '',
               target_url: campaign.target_url,
-              status: 'active'
+              status: 'active',
+              published_at: new Date().toISOString()
             });
 
           if (linkError) {
