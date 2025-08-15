@@ -506,6 +506,12 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                                     {step.details && (
                                       <p className="text-xs text-gray-500 mt-1">{step.details}</p>
                                     )}
+                                    {step.data && (
+                                      <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                                        <div className="font-medium text-gray-700 mb-1">Step Data:</div>
+                                        <div className="text-gray-600">{JSON.stringify(step.data, null, 2)}</div>
+                                      </div>
+                                    )}
                                   </div>
                                 </div>
                               ))}
@@ -590,6 +596,18 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                                         <strong>Error:</strong> {request.response.error}
                                       </div>
                                     )}
+                                    {request.body && (
+                                      <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
+                                        <div className="font-medium text-blue-700 mb-1">Request Body:</div>
+                                        <div className="text-blue-600">{JSON.stringify(request.body, null, 2)}</div>
+                                      </div>
+                                    )}
+                                    {request.response?.data && (
+                                      <div className="mt-2 p-2 bg-green-50 rounded text-xs">
+                                        <div className="font-medium text-green-700 mb-1">Response Data:</div>
+                                        <div className="text-green-600">{JSON.stringify(request.response.data, null, 2)}</div>
+                                      </div>
+                                    )}
                                   </div>
                                 ))
                               )}
@@ -644,6 +662,18 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                                         <strong>Error:</strong> {query.error}
                                       </div>
                                     )}
+                                    {query.params && (
+                                      <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
+                                        <div className="font-medium text-blue-700 mb-1">Parameters:</div>
+                                        <div className="text-blue-600">{JSON.stringify(query.params, null, 2)}</div>
+                                      </div>
+                                    )}
+                                    {query.result && (
+                                      <div className="mt-2 p-2 bg-green-50 rounded text-xs">
+                                        <div className="font-medium text-green-700 mb-1">Result:</div>
+                                        <div className="text-green-600">{JSON.stringify(query.result, null, 2)}</div>
+                                      </div>
+                                    )}
                                   </div>
                                 ))
                               )}
@@ -681,6 +711,12 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                                   </div>
                                 </div>
                                 <p className="text-sm mt-1">{log.message}</p>
+                                {log.details && (
+                                  <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                                    <div className="font-medium text-gray-700 mb-1">Log Details:</div>
+                                    <div className="text-gray-600">{JSON.stringify(log.details, null, 2)}</div>
+                                  </div>
+                                )}
                               </div>
                             </div>
                           ))}
