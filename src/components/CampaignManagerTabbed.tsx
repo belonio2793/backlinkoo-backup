@@ -46,6 +46,8 @@ interface CampaignWithLinks extends Campaign {
 
 interface CampaignManagerTabbedProps {
   onStatusUpdate?: (message: string, type: 'success' | 'error' | 'info') => void;
+  currentCampaignProgress?: CampaignProgress | null;
+  onRetryProgress?: () => void;
 }
 
 const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({ onStatusUpdate }) => {
