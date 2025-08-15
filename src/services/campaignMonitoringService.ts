@@ -42,9 +42,9 @@ export class CampaignMonitoringService {
   private isMonitoring = false;
 
   private config: CampaignMonitoringConfig = {
-    maxStuckTimeMs: 10 * 60 * 1000, // 10 minutes
-    checkIntervalMs: 2 * 60 * 1000,  // Check every 2 minutes
-    maxInitTimeMs: 5 * 60 * 1000,    // 5 minutes for initialization
+    maxStuckTimeMs: 3 * 60 * 1000,   // 3 minutes (more aggressive)
+    checkIntervalMs: 1 * 60 * 1000,  // Check every 1 minute (more frequent)
+    maxInitTimeMs: 2 * 60 * 1000,    // 2 minutes for initialization (faster)
     enabled: true
   };
 
@@ -65,14 +65,16 @@ export class CampaignMonitoringService {
 
     this.isMonitoring = true;
     console.log('🔍 Campaign monitoring service started');
-    
+
     realTimeFeedService.emitSystemEvent(
       'Campaign monitoring service started - checking for stuck campaigns',
       'info'
     );
 
-    // Initial check
-    this.checkCampaigns();
+    // Initial check with immediate feedback
+    setTimeout(() => {
+      this.checkCampaigns();
+    }, 500);
 
     // Set up recurring checks
     this.monitoringInterval = setInterval(() => {
@@ -167,12 +169,13 @@ export class CampaignMonitoringService {
     const createdAt = new Date(campaign.created_at);
     const timeSinceCreated = now.getTime() - createdAt.getTime();
 
-    // Get last activity from logs
+    // Get last activity from logs (exclude monitoring messages)
     const logs = await this.orchestrator.getCampaignLogs(campaign.id);
-    const lastActivityLog = logs.find(log => 
-      log.level === 'info' && 
+    const lastActivityLog = logs.find(log =>
+      log.level === 'info' &&
       !log.message.includes('monitoring') &&
-      !log.message.includes('checking')
+      !log.message.includes('checking') &&
+      !log.message.includes('Campaign monitoring')
     );
     
     const lastActivityAt = lastActivityLog ? new Date(lastActivityLog.created_at) : createdAt;
