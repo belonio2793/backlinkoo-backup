@@ -524,7 +524,7 @@ H1: Same as title
 H2: Introduction (include target keyword in first 100 words)
 H2: Main Content (3-4 paragraphs with natural backlink using "${anchorText}" linking to ${destinationUrl})
 H2: Why ${keyword} Matters (1-2 paragraphs about importance)
-H2: Conclusion (Summary + call to action linking to ${destinationUrl})
+H2: Conclusion (Summary with helpful resource link to ${destinationUrl})
 
 Requirements:
 - Natural, human tone with short sentences
