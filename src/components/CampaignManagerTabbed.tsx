@@ -66,10 +66,10 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  // Auto-switch to live monitor when a campaign progress starts
+  // Auto-switch to activity tab when a campaign progress starts
   useEffect(() => {
     if (currentCampaignProgress && !currentCampaignProgress.isComplete && !currentCampaignProgress.isError) {
-      setActiveTab('live-monitor');
+      setActiveTab('activity');
     }
   }, [currentCampaignProgress]);
   const orchestrator = getOrchestrator();
@@ -448,19 +448,10 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="activity" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Activity
-            </TabsTrigger>
-            <TabsTrigger value="live-monitor" className="flex items-center gap-2">
-              <Target className="w-4 h-4" />
-              Live Monitor
-              {currentCampaignProgress && (
-                <Badge variant="secondary" className="ml-1 h-4 px-1 text-xs">
-                  Active
-                </Badge>
-              )}
             </TabsTrigger>
             <TabsTrigger value="live-links" className="flex items-center gap-2">
               <ExternalLink className="w-4 h-4" />
@@ -680,39 +671,6 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                     </div>
                   ))
               )}
-            </div>
-          </TabsContent>
-
-          {/* Live Monitor Tab */}
-          <TabsContent value="live-monitor" className="mt-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-blue-600" />
-                <h3 className="text-lg font-semibold">Live Campaign Monitor</h3>
-                {currentCampaignProgress && (
-                  <Badge variant="secondary">
-                    {currentCampaignProgress.isComplete ? 'Completed' :
-                     currentCampaignProgress.isError ? 'Error' : 'In Progress'}
-                  </Badge>
-                )}
-              </div>
-
-              <div className="max-h-96 overflow-y-auto space-y-3">
-                {currentCampaignProgress ? (
-                  <InlineProgressTracker
-                    progress={currentCampaignProgress}
-                    onRetry={onRetryProgress}
-                  />
-                ) : (
-                  <div className="text-center py-12 bg-gray-50 rounded-lg">
-                    <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Campaign</h3>
-                    <p className="text-gray-500 mb-4">
-                      Start a new campaign to see live progress monitoring here
-                    </p>
-                  </div>
-                )}
-              </div>
             </div>
           </TabsContent>
 
