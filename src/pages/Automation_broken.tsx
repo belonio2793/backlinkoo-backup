@@ -261,7 +261,6 @@ const Automation = () => {
         </div>
       </div>
     );
-  }
 
   // Show progress tracker if active
   if (showProgress && campaignProgress) {
@@ -274,6 +273,7 @@ const Automation = () => {
         />
       </div>
     );
+  }
   }
 
   return (
