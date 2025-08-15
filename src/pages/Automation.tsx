@@ -19,6 +19,7 @@ import LiveCampaignStatus from '@/components/LiveCampaignStatus';
 import CampaignManagerTabbed from '@/components/CampaignManagerTabbed';
 import FormCompletionCelebration from '@/components/FormCompletionCelebration';
 import InlineFeedMonitor from '@/components/InlineFeedMonitor';
+import DevelopmentModeIndicator from '@/components/DevelopmentModeIndicator';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -383,6 +384,9 @@ const Automation = () => {
             </AlertDescription>
           </Alert>
         )}
+
+        {/* Development Mode Indicator */}
+        <DevelopmentModeIndicator />
 
         {/* Status Messages */}
         {statusMessages.length > 0 && (
