@@ -257,11 +257,12 @@ export class WorkingCampaignProcessor {
       const queryStartTime = Date.now();
 
       const { error } = await supabase
-        .from('activity_logs')
+        .from('automation_logs')
         .insert({
           campaign_id: campaignId,
-          activity_type: type,
+          log_level: type === 'error' ? 'error' : type === 'warning' ? 'warning' : 'info',
           message,
+          step_name: 'campaign-processing',
           timestamp: new Date().toISOString()
         });
 
