@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { SecureConfig } from '../../lib/secure-config';
+import { supabaseErrorHandler } from '../../utils/supabaseErrorHandler';
 // Simplified imports without fetch workarounds
 
 // Get Supabase configuration with proper fallback
