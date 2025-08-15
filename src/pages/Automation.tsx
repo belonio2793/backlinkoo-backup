@@ -38,6 +38,7 @@ const Automation = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastFormValidState, setLastFormValidState] = useState(false);
   const [showCampaignModal, setShowCampaignModal] = useState(false);
+  const [pendingCampaignFromModal, setPendingCampaignFromModal] = useState(false);
 
   // State for inline components
   const [showInlineAuth, setShowInlineAuth] = useState(false);
@@ -77,6 +78,17 @@ const Automation = () => {
   useEffect(() => {
     smartFlow.updateFlowState(formData);
   }, []);
+
+  // Handle pending campaign creation after modal auth success
+  useEffect(() => {
+    if (pendingCampaignFromModal && isAuthenticated) {
+      setPendingCampaignFromModal(false);
+      // Start campaign creation on main page
+      setTimeout(() => {
+        createCampaign();
+      }, 500);
+    }
+  }, [pendingCampaignFromModal, isAuthenticated]);
 
   const handleInputChange = (field: string, value: string) => {
     const newFormData = { ...formData, [field]: value };
@@ -233,6 +245,12 @@ const Automation = () => {
     setTimeout(async () => {
       await smartFlow.handleSuccessfulAuth(createCampaign);
     }, 1000);
+  };
+
+  const handleModalAuthSuccess = () => {
+    // Set flag to indicate we need to start campaign creation after modal closes
+    setPendingCampaignFromModal(true);
+    addStatusMessage('Successfully signed in! Preparing your campaign...', 'success');
   };
 
   const handleRetryCampaign = () => {
