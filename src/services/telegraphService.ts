@@ -36,20 +36,38 @@ export class TelegraphService {
    */
   async createAccount(): Promise<TelegraphAccount> {
     try {
-      // Use stored original fetch to avoid FullStory interference
-      const fetchToUse = window._originalFetch || window.fetch || fetch;
+      // Use enhanced Telegraph fetch if available, fallback to original
+      const fetchToUse = (window as any).enhancedTelegraphFetch ||
+                        window._originalFetch ||
+                        window.fetch ||
+                        fetch;
 
-      const response = await fetchToUse.call(window, `${this.baseUrl}/createAccount`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          short_name: 'LinkBuilder',
-          author_name: 'Automated Content',
-          author_url: ''
-        })
-      });
+      console.log('🔗 Creating Telegraph account...');
+
+      const requestBody = {
+        short_name: 'LinkBuilder',
+        author_name: 'Automated Content',
+        author_url: ''
+      };
+
+      let response;
+
+      if ((window as any).enhancedTelegraphFetch) {
+        response = await (window as any).enhancedTelegraphFetch(`${this.baseUrl}/createAccount`, {
+          method: 'POST',
+          body: JSON.stringify(requestBody)
+        });
+      } else {
+        response = await fetchToUse.call(window, `${this.baseUrl}/createAccount`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'User-Agent': 'LinkBuilder/1.0'
+          },
+          body: JSON.stringify(requestBody)
+        });
+      }
 
       if (!response.ok) {
         let errorMessage = `Telegraph API error: ${response.status} ${response.statusText}`;
@@ -76,8 +94,23 @@ export class TelegraphService {
       this.account = data.result;
       return this.account;
     } catch (error) {
-      console.error('Error creating Telegraph account:', error);
-      throw new Error(`Failed to create Telegraph account: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error creating Telegraph account:', {
+        error,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
+
+      // Handle specific error types
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        throw new Error('Network connection failed. Please check your internet connection and try again.');
+      }
+
+      if (error instanceof Error && error.message.includes('CORS')) {
+        throw new Error('Telegraph API access blocked. Please try again later.');
+      }
+
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to create Telegraph account: ${errorMessage}`);
     }
   }
 
@@ -98,23 +131,41 @@ export class TelegraphService {
       // Convert HTML content to Telegraph format
       const telegraphContent = this.convertHtmlToTelegraphFormat(params.content);
 
-      // Use stored original fetch to avoid FullStory interference
-      const fetchToUse = window._originalFetch || window.fetch || fetch;
+      // Use enhanced Telegraph fetch if available, fallback to original
+      const fetchToUse = (window as any).enhancedTelegraphFetch ||
+                        window._originalFetch ||
+                        window.fetch ||
+                        fetch;
 
-      const response = await fetchToUse.call(window, `${this.baseUrl}/createPage`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          access_token: this.account.access_token,
-          title: params.title,
-          author_name: params.author_name || this.account.author_name,
-          author_url: params.author_url || this.account.author_url,
-          content: telegraphContent,
-          return_content: params.return_content || false
-        })
-      });
+      console.log('🔗 Publishing to Telegraph...');
+
+      const requestBody = {
+        access_token: this.account.access_token,
+        title: params.title,
+        author_name: params.author_name || this.account.author_name,
+        author_url: params.author_url || this.account.author_url,
+        content: telegraphContent,
+        return_content: params.return_content || false
+      };
+
+      let response;
+
+      if ((window as any).enhancedTelegraphFetch) {
+        response = await (window as any).enhancedTelegraphFetch(`${this.baseUrl}/createPage`, {
+          method: 'POST',
+          body: JSON.stringify(requestBody)
+        });
+      } else {
+        response = await fetchToUse.call(window, `${this.baseUrl}/createPage`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'User-Agent': 'LinkBuilder/1.0'
+          },
+          body: JSON.stringify(requestBody)
+        });
+      }
 
       if (!response.ok) {
         let errorMessage = `Telegraph API error: ${response.status} ${response.statusText}`;
@@ -144,8 +195,23 @@ export class TelegraphService {
       
       return page;
     } catch (error) {
-      console.error('Error publishing to Telegraph:', error);
-      throw new Error(`Failed to publish to Telegraph: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error('Error publishing to Telegraph:', {
+        error,
+        message: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
+
+      // Handle specific error types
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        throw new Error('Network connection failed while publishing. Please check your internet connection and try again.');
+      }
+
+      if (error instanceof Error && error.message.includes('CORS')) {
+        throw new Error('Telegraph API access blocked during publishing. Please try again later.');
+      }
+
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to publish to Telegraph: ${errorMessage}`);
     }
   }
 
