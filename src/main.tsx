@@ -17,6 +17,8 @@ import './utils/silentErrorTest'
 // import './utils/directDatabaseFix' // Disabled - using new blog comment system
 // Emergency fetch fix (load first)
 import './utils/emergencyFetchFix'
+// Network error handler for user-friendly solutions
+import './utils/errorHandler'
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
 // Protect Vite client from FullStory interference in development
