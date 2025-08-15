@@ -110,7 +110,8 @@ export class SimpleContentFormatter {
     
     const listItems = lines
       .map(line => {
-        const cleanLine = line.replace(/^[\*\-\+\d\.]\s/, '').trim();
+        // Remove numbered list markers (1., 2., etc.) or bullet markers (*, -, +)
+        const cleanLine = line.replace(/^(?:\d+\.|[\*\-\+])\s+/, '').trim();
         return cleanLine ? `  <li>${cleanLine}</li>` : '';
       })
       .filter(item => item)
