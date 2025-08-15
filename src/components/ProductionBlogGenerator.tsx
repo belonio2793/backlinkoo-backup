@@ -188,7 +188,7 @@ export function ProductionBlogGenerator() {
                   </div>
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-blue-500 mt-0.5 shrink-0" />
-                    <span>Strategic backlink placement</span>
+                    <span>Natural link integration</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="h-4 w-4 text-purple-500 mt-0.5 shrink-0" />

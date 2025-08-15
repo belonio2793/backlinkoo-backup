@@ -208,7 +208,7 @@ CONTENT STRUCTURE:
 3. 3-5 <h2> major sections with valuable content
 4. 5-8 <h3> subheadings under main sections
 5. Natural integration of ${anchor} backlink within relevant context
-6. Strong conclusion with call-to-action
+6. Strong conclusion with helpful next steps
 7. Short paragraphs throughout (2-4 sentences each)
 
 Focus on creating content that ranks well while providing genuine value to users.`;
