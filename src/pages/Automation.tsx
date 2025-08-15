@@ -378,16 +378,39 @@ const Automation = () => {
                   <Label htmlFor="targetUrl">Target URL *</Label>
                   <Input
                     id="targetUrl"
-                    placeholder="https://example.com"
+                    placeholder="https://example.com or example.com"
                     value={formData.targetUrl}
                     onChange={(e) => handleInputChange('targetUrl', e.target.value)}
+                    onBlur={(e) => {
+                      // Auto-format URL when user leaves the field
+                      const formattedUrl = smartFlow.autoFormatUrl(e.target.value);
+                      if (formattedUrl !== e.target.value) {
+                        handleInputChange('targetUrl', formattedUrl);
+                        addStatusMessage('URL automatically formatted with https://', 'info');
+                      }
+                    }}
+                    onPaste={(e) => {
+                      // Auto-format pasted content after a short delay
+                      setTimeout(() => {
+                        const pastedValue = e.currentTarget.value;
+                        const formattedUrl = smartFlow.autoFormatUrl(pastedValue);
+                        if (formattedUrl !== pastedValue) {
+                          handleInputChange('targetUrl', formattedUrl);
+                          addStatusMessage('Pasted URL automatically formatted with https://', 'info');
+                        }
+                      }, 10);
+                    }}
                     className={smartFlow.analyzeFormData(formData).missingFields.includes('Target URL') ||
                               smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') ?
                               'border-amber-300 focus:border-amber-500' : ''}
                   />
-                  <p className="text-sm text-gray-500">The URL where your backlink will point</p>
+                  <p className="text-sm text-gray-500">
+                    The URL where your backlink will point. You can enter with or without https://
+                  </p>
                   {smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') && formData.targetUrl && (
-                    <p className="text-sm text-amber-600">Please enter a valid URL (e.g., https://example.com)</p>
+                    <p className="text-sm text-amber-600">
+                      URL will be auto-formatted when you finish typing
+                    </p>
                   )}
                 </div>
 
