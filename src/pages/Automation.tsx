@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2, Activity } from 'lucide-react';
 import { getOrchestrator } from '@/services/automationOrchestrator';
 import { campaignMonitoringService } from '@/services/campaignMonitoringService';
+import { workingCampaignProcessor } from '@/services/workingCampaignProcessor';
 import CampaignMonitoringErrorBoundary from '@/components/CampaignMonitoringErrorBoundary';
 import NetworkStatusIndicator from '@/components/NetworkStatusIndicator';
 import AutomationReporting from '@/components/AutomationReporting';
