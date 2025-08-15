@@ -343,17 +343,6 @@ const Automation = () => {
                   <p className="text-sm text-gray-500">The clickable text for your backlink</p>
                 </div>
 
-                <Separator />
-
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <h4 className="font-medium text-blue-900 mb-2">How it works:</h4>
-                  <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-                    <li>Generate a unique 1000-word article using AI (randomly selected style)</li>
-                    <li>Format content with your anchor text linked to your target URL</li>
-                    <li>Publish to Telegraph.ph automatically</li>
-                    <li>Track published links in your reporting dashboard</li>
-                  </ol>
-                </div>
 
                 {!isAuthenticated && (
                   <Alert>
@@ -454,7 +443,7 @@ const Automation = () => {
             </Tabs>
           </div>
 
-          {/* Campaign Management (Right Column) */}
+          {/* Live Activity (Right Column) */}
           <div className="lg:col-span-1">
             {isAuthenticated && (
               <CampaignManager
