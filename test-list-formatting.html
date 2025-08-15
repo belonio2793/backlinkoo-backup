@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test List Formatting</title>
+    <script type="module">
+        // Test the content formatter directly
+        const testContent = `
+This is a test blog post with numbered lists.
+
+1. Enhanced SEO Performance: Forum profile backlinks can significantly improve your website's search engine rankings by signaling to search engines that your site is credible and trustworthy.
+
+2. Targeted Traffic Generation: By participating in relevant discussions and including your website link in your forum profile, you attract visitors who are genuinely interested in your niche.
+
+3. Building Authority and Credibility: Active engagement on forums not only builds backlinks but also establishes you as an authority in your industry.
+
+Here are some bullet points:
+
+• First bullet point
+• Second bullet point  
+• Third bullet point
+
+And more numbered items:
+
+1. Choose the Right Forums: Select forums that are relevant to your niche and have a strong community of engaged users.
+
+2. Optimize Your Profile: Craft a compelling bio and include a link to your website in a natural and non-promotional way.
+
+3. Engage Meaningfully: Participate in discussions, offer valuable insights, and avoid overly promotional behavior.
+
+4. Monitor and Maintain: Regularly check your forum profile links for any changes or broken links.
+        `;
+
+        // Import and test the formatters
+        import('./src/utils/simpleContentFormatter.ts').then(({ SimpleContentFormatter }) => {
+            console.log('🧪 Testing list formatting...');
+            
+            console.log('📝 Original content:');
+            console.log(testContent);
+            
+            const formatted = SimpleContentFormatter.formatBlogContent(testContent);
+            console.log('🎨 Formatted content:');
+            console.log(formatted);
+            
+            // Display in the page
+            document.getElementById('result').innerHTML = formatted;
+        }).catch(error => {
+            console.error('Failed to test formatting:', error);
+            document.getElementById('result').innerHTML = '<p style="color: red;">Failed to load formatter</p>';
+        });
+    </script>
+</head>
+<body>
+    <h1>List Formatting Test</h1>
+    <div id="result" style="border: 1px solid #ccc; padding: 20px; margin: 20px; background: white;">
+        Loading...
+    </div>
+</body>
+</html>
