@@ -10,7 +10,7 @@ export interface Campaign {
   target_url: string;
   keywords: string[];
   anchor_texts: string[];
-  status: 'pending' | 'generating' | 'publishing' | 'completed' | 'paused' | 'failed';
+  status: 'draft' | 'active' | 'paused' | 'completed';
   created_at: string;
   updated_at: string;
   completed_at?: string;
