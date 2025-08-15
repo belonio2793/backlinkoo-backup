@@ -342,6 +342,27 @@ const Automation = () => {
           </div>
         )}
 
+        {/* Inline Authentication */}
+        {showInlineAuth && (
+          <div className="mb-6">
+            <InlineAuthForm
+              onSuccess={handleAuthSuccess}
+              campaignData={hasValidSavedData(savedFormData) ? savedFormData : formData}
+              isVisible={showInlineAuth}
+            />
+          </div>
+        )}
+
+        {/* Inline Progress Tracker */}
+        {campaignProgress && (
+          <div className="mb-6">
+            <InlineProgressTracker
+              progress={campaignProgress}
+              onRetry={handleRetryCampaign}
+            />
+          </div>
+        )}
+
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Campaign Creation (Left Column) */}
