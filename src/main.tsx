@@ -264,6 +264,7 @@ if (import.meta.env.DEV) {
   console.log('  - testErrorFixes() - Test all error fixes and formatting');
   console.log('  - testRealTimeFeed() - Test real-time feed integration');
   console.log('  - testCampaignTabs() - Test campaign manager tabs and live links');
+  console.log('  - testResponseBodyFix() - Test response body conflict prevention');
   console.log('  - fetchTest.runDiagnostics() - Test fetch and network connectivity');
 }
 
