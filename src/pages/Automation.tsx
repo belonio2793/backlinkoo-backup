@@ -683,7 +683,7 @@ const Automation = () => {
                       <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
                       <div>
                         <div className="font-medium text-sm">Medium.com</div>
-                        <div className="text-xs text-gray-600">Professional publishing</div>
+                        <div className="text-xs text-gray-600">Priority #2 • Coming soon</div>
                       </div>
                     </div>
                     <div className="text-right">
