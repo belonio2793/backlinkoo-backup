@@ -14,6 +14,7 @@ import AutomationAuthModal from '@/components/AutomationAuthModal';
 import CampaignProgressTracker, { CampaignProgress } from '@/components/CampaignProgressTracker';
 import LiveCampaignStatus from '@/components/LiveCampaignStatus';
 import CampaignManager from '@/components/CampaignManager';
+import FormCompletionCelebration from '@/components/FormCompletionCelebration';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
