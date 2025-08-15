@@ -630,52 +630,6 @@ const Automation = () => {
               </TabsContent>
             </Tabs>
 
-            {/* Live Feed Monitor Button */}
-            {!showEnhancedFeed && (
-              <Card className="mt-4">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-lg bg-blue-50">
-                        <Activity className={`h-5 w-5 transition-colors duration-200 ${
-                          activeCampaigns.length > 0 ? 'text-blue-600' : 'text-gray-500'
-                        }`} />
-                      </div>
-                      <div>
-                        <h3 className="font-medium text-gray-900">Live Feed Monitor</h3>
-                        <p className="text-sm text-gray-600">
-                          {activeCampaigns.length > 0
-                            ? `Track progress for ${activeCampaigns.length} active campaign${activeCampaigns.length !== 1 ? 's' : ''}`
-                            : 'Real-time monitoring ready when campaigns are running'
-                          }
-                        </p>
-                      </div>
-                    </div>
-                    <Button
-                      onClick={() => setShowEnhancedFeed(true)}
-                      variant={activeCampaigns.length > 0 ? 'default' : 'outline'}
-                      className={`transition-all duration-200 ${
-                        activeCampaigns.length > 0
-                          ? 'bg-blue-600 hover:bg-blue-700 text-white'
-                          : 'border-gray-300 hover:bg-gray-50'
-                      }`}
-                    >
-                      {activeCampaigns.length > 0 ? (
-                        <>
-                          <Activity className="h-4 w-4 mr-2" />
-                          View Feed ({activeCampaigns.length})
-                        </>
-                      ) : (
-                        <>
-                          <Activity className="h-4 w-4 mr-2" />
-                          Open Monitor
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
           </div>
 
           {/* Publishing Platforms (Middle Column) */}
