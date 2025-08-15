@@ -237,20 +237,38 @@ const baseClient = hasValidCredentials ?
         'X-Client-Info': 'backlink-infinity@1.0.0',
       },
       // Enhanced fetch with timeout and error handling
-      fetch: (url, options = {}) => {
-        return fetch(url, {
-          ...options,
-          signal: AbortSignal.timeout(30000), // 30 second timeout
-        }).catch(error => {
+      fetch: async (url, options = {}) => {
+        try {
+          // Create abort controller for timeout
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+          const response = await fetch(url, {
+            ...options,
+            signal: controller.signal,
+          });
+
+          clearTimeout(timeoutId);
+
+          // Don't clone response here to prevent body stream issues
+          // Let Supabase handle response processing
+          return response;
+
+        } catch (error: any) {
           console.error('🌐 Supabase fetch error:', error);
-          if (error.name === 'TimeoutError') {
+
+          if (error.name === 'AbortError') {
             throw new Error('Network timeout - please check your connection and try again');
           }
           if (error.message?.includes('Failed to fetch')) {
             throw new Error('Network connection failed - please check your internet connection');
           }
+          if (error.message?.includes('body stream already read')) {
+            throw new Error('Response processing error - please try again');
+          }
+
           throw error;
-        });
+        }
       },
     },
   }) :
