@@ -539,7 +539,7 @@ const Automation = () => {
 
                 <Button
                   onClick={handleCreateCampaign}
-                  disabled={smartFlow.getButtonState(formData).disabled || isCreating}
+                  disabled={(smartFlow.getButtonState(formData).disabled || isCreating) && isAuthenticated}
                   className="w-full transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
                   size="lg"
                   variant={smartFlow.getButtonState(formData).variant}
