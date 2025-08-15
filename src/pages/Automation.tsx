@@ -391,6 +391,17 @@ const Automation = () => {
                       placeholder="https://example.com or example.com"
                       value={formData.targetUrl}
                       onChange={(e) => handleInputChange('targetUrl', e.target.value)}
+                      onKeyDown={(e) => {
+                        // Ctrl/Cmd + Enter to auto-format
+                        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                          e.preventDefault();
+                          const formattedUrl = smartFlow.autoFormatUrl(formData.targetUrl);
+                          if (formattedUrl !== formData.targetUrl) {
+                            handleInputChange('targetUrl', formattedUrl);
+                            addStatusMessage('URL formatted with Ctrl+Enter shortcut', 'success');
+                          }
+                        }
+                      }}
                       onBlur={(e) => {
                         // Auto-format URL when user leaves the field
                         const formattedUrl = smartFlow.autoFormatUrl(e.target.value);
