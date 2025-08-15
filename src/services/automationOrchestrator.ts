@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { getContentService, type ContentGenerationParams } from './automationContentService';
 import { getTelegraphService } from './telegraphService';
+import { ProgressStep, CampaignProgress } from '@/components/CampaignProgressTracker';
 
 export interface Campaign {
   id: string;
@@ -16,7 +17,7 @@ export interface Campaign {
   error_message?: string;
 }
 
-export interface CampaignProgress {
+export interface CampaignProgressInfo {
   campaign_id: string;
   current_step: string;
   total_steps: number;
@@ -28,6 +29,8 @@ export interface CampaignProgress {
 export class AutomationOrchestrator {
   private contentService = getContentService();
   private telegraphService = getTelegraphService();
+  private progressListeners: Map<string, (progress: CampaignProgress) => void> = new Map();
+  private campaignProgressMap: Map<string, CampaignProgress> = new Map();
   
   /**
    * Create a new campaign
