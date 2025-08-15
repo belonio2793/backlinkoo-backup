@@ -61,6 +61,13 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
   const [refreshing, setRefreshing] = useState(false);
   const [campaignStatusSummaries, setCampaignStatusSummaries] = useState<Map<string, any>>(new Map());
   const [activeTab, setActiveTab] = useState('activity');
+
+  // Auto-switch to live monitor when a campaign progress starts
+  useEffect(() => {
+    if (currentCampaignProgress && !currentCampaignProgress.isComplete && !currentCampaignProgress.isError) {
+      setActiveTab('live-monitor');
+    }
+  }, [currentCampaignProgress]);
   const orchestrator = getOrchestrator();
   const { user } = useAuth();
   const { toast } = useToast();
