@@ -62,6 +62,8 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
   const [refreshing, setRefreshing] = useState(false);
   const [campaignStatusSummaries, setCampaignStatusSummaries] = useState<Map<string, any>>(new Map());
   const [activeTab, setActiveTab] = useState('activity');
+  const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
 
   // Auto-switch to live monitor when a campaign progress starts
   useEffect(() => {
