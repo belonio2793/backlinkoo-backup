@@ -234,12 +234,8 @@ const Automation = () => {
     await smartFlow.handleSuccessfulAuth(createCampaign);
   };
 
-  const handleAuthModalClose = () => {
-    setShowAuthModal(false);
-  };
-
-  const handleProgressClose = () => {
-    setShowProgress(false);
+  const handleRetryCampaign = () => {
+    // Reset campaign progress and allow user to create a new campaign
     setCampaignProgress(null);
 
     // Cleanup subscription
@@ -247,11 +243,7 @@ const Automation = () => {
       progressUnsubscribe();
       setProgressUnsubscribe(null);
     }
-  };
 
-  const handleRetryCampaign = () => {
-    // Close progress tracker and allow user to create a new campaign
-    handleProgressClose();
     addStatusMessage('Ready to create a new campaign', 'info');
   };
 
