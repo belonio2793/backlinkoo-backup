@@ -50,7 +50,6 @@ const LazyDatabaseColumnsFix = lazy(() => import("./pages/DatabaseColumnsFix"));
 const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
 const LazyMarkdownTest = lazy(() => import("./pages/MarkdownTest"));
 const LazyPremiumSEOAnalysisTest = lazy(() => import("./pages/PremiumSEOAnalysisTest"));
-const LazyDraggableDemo = lazy(() => import("./pages/DraggableDemo"));
 const LazyEnhancedFeedDemo = lazy(() => import("./pages/EnhancedFeedDemo"));
 
 const LazyDebugUserReports = lazy(() => import("./pages/DebugUserReports"));
