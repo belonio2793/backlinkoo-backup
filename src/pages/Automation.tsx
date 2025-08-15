@@ -147,8 +147,8 @@ const Automation = () => {
   const createCampaign = async () => {
     setIsCreating(true);
 
-    // Open Feed modal for creation process
-    feedModal.openFeedForCreation();
+    // Open Enhanced Feed for monitoring
+    setShowEnhancedFeed(true);
 
     try {
       // Ensure URL is properly formatted before creating campaign
