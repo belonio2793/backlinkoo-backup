@@ -714,6 +714,15 @@ const Automation = () => {
           isVisible={showCelebration}
           onComplete={() => setShowCelebration(false)}
         />
+
+        {/* Real Time Feed Modal */}
+        <RealTimeFeedModal
+          isVisible={realTimeFeed.isVisible}
+          activeCampaigns={realTimeFeed.activeCampaigns}
+          onClose={realTimeFeed.hideModal}
+          onMinimize={realTimeFeed.minimizeModal}
+          isMinimized={realTimeFeed.isMinimized}
+        />
       </div>
     </div>
   );
