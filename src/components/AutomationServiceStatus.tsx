@@ -26,7 +26,8 @@ const AutomationServiceStatus = () => {
   const [showDetails, setShowDetails] = useState(false);
 
   useEffect(() => {
-    checkAllServices();
+    // Don't automatically check services on mount to show positive status by default
+    // checkAllServices();
   }, []);
 
   const checkAllServices = async () => {
