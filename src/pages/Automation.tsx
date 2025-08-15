@@ -572,7 +572,7 @@ const Automation = () => {
                 </Card>
 
                 {/* Campaign Status Summary (when not using Feed modal) */}
-                {lastCreatedCampaign && !feedModal.isOpen && (
+                {lastCreatedCampaign && !showEnhancedFeed && (
                   <div className="mt-6 p-4 border rounded-lg bg-blue-50 border-blue-200">
                     <div className="flex items-center justify-between">
                       <div>
