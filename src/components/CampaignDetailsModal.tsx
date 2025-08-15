@@ -805,13 +805,13 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                             </div>
                             <div className="text-center p-3 bg-red-50 rounded-lg">
                               <div className="text-2xl font-bold text-red-600">
-                                {campaignInfo.metrics.errorCount}
+                                {campaignInfo.metrics.failedRequestCount}
                               </div>
-                              <div className="text-sm text-gray-600">Errors</div>
+                              <div className="text-sm text-gray-600">Failed Requests</div>
                             </div>
                             <div className="text-center p-3 bg-indigo-50 rounded-lg">
                               <div className="text-2xl font-bold text-indigo-600">
-                                {campaignInfo.campaign.status === 'completed' ? '100%' : 
+                                {campaignInfo.campaign.status === 'completed' ? '100%' :
                                  campaignInfo.progress ? `${Math.round((campaignInfo.progress.currentStep / campaignInfo.progress.steps.length) * 100)}%` : '0%'}
                               </div>
                               <div className="text-sm text-gray-600">Completion</div>
@@ -821,6 +821,18 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                                 {campaignInfo.campaign.status === 'active' ? 'Live' : 'Offline'}
                               </div>
                               <div className="text-sm text-gray-600">Status</div>
+                            </div>
+                            <div className="text-center p-3 bg-rose-50 rounded-lg">
+                              <div className="text-2xl font-bold text-rose-600">
+                                {campaignInfo.databaseQueries.filter(q => q.error).length}
+                              </div>
+                              <div className="text-sm text-gray-600">DB Errors</div>
+                            </div>
+                            <div className="text-center p-3 bg-amber-50 rounded-lg">
+                              <div className="text-2xl font-bold text-amber-600">
+                                {campaignInfo.networkRequests.filter(r => r.response?.status === 404).length}
+                              </div>
+                              <div className="text-sm text-gray-600">404 Errors</div>
                             </div>
                           </div>
                         </CardContent>
