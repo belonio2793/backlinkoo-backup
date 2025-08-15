@@ -265,6 +265,11 @@ const FeedModal: React.FC<FeedModalProps> = ({
                     {activities.length} activities
                   </Badge>
                 )}
+                {unreadCount > 0 && (
+                  <Badge className="text-xs bg-red-500 text-white animate-pulse">
+                    {unreadCount} new
+                  </Badge>
+                )}
               </div>
               <div className="flex items-center gap-1">
                 <Button
