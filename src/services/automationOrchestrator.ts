@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getContentService, type ContentGenerationParams } from './automationContentService';
 import { getTelegraphService } from './telegraphService';
 import { ProgressStep, CampaignProgress } from '@/components/CampaignProgressTracker';
+import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 
 export interface Campaign {
   id: string;
@@ -270,17 +271,10 @@ export class AutomationOrchestrator {
         .single();
 
       if (error) {
-        console.error('Error creating campaign:', {
-          message: error.message || 'Unknown error',
-          code: error.code,
-          details: error.details,
-          hint: error.hint,
-          targetUrl: params.target_url,
-          keyword: params.keyword
-        });
+        console.error('Error creating campaign:', formatErrorForLogging(error, 'createCampaign'));
 
-        // Extract error message safely
-        const errorMessage = error?.message || error?.details || String(error);
+        // Extract error message safely using utility
+        const errorMessage = formatErrorForUI(error);
 
         // Handle specific database errors
         if (errorMessage.includes('violates row-level security policy')) {
@@ -317,16 +311,9 @@ export class AutomationOrchestrator {
     } catch (error) {
       console.error('Campaign creation error:', error);
 
-      // Ensure we throw a proper Error object with a clear message
-      if (error instanceof Error) {
-        throw new Error(`Campaign creation failed: ${error.message}`);
-      } else {
-        // Handle non-Error objects (like Supabase error objects)
-        const errorMessage = error && typeof error === 'object' && 'message' in error
-          ? String(error.message)
-          : String(error);
-        throw new Error(`Campaign creation failed: ${errorMessage}`);
-      }
+      // Use utility to format error properly
+      const formattedError = formatErrorForUI(error);
+      throw new Error(`Campaign creation failed: ${formattedError}`);
     }
   }
 
@@ -474,8 +461,8 @@ export class AutomationOrchestrator {
           }
 
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          console.error('Error publishing content:', errorMessage);
+          const errorMessage = formatErrorForUI(error);
+          console.error('Error publishing content:', formatErrorForLogging(error, 'publishContent'));
           await this.logActivity(campaignId, 'error', `Failed to publish to ${nextPlatform.name}: ${errorMessage}`);
         }
       }
@@ -510,8 +497,8 @@ export class AutomationOrchestrator {
       }
 
     } catch (error) {
-      console.error('Campaign processing error:', error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Campaign processing error:', formatErrorForLogging(error, 'processCampaign'));
+      const errorMessage = formatErrorForUI(error);
 
       // Update progress to show error
       const progress = this.campaignProgressMap.get(campaignId);
@@ -530,8 +517,16 @@ export class AutomationOrchestrator {
         });
       }
 
-      // Note: 'failed' is not a valid status in current schema, so we'll pause the campaign instead
-      await this.updateCampaignStatus(campaignId, 'paused', errorMessage);
+      // Update campaign status using fixed function if available
+      if (typeof window !== 'undefined' && (window as any).fixedUpdateCampaignStatus) {
+        const result = await (window as any).fixedUpdateCampaignStatus(campaignId, 'paused', errorMessage);
+        if (!result.success) {
+          console.error('Failed to update campaign status:', result.error);
+        }
+      } else {
+        await this.updateCampaignStatus(campaignId, 'paused', errorMessage);
+      }
+
       await this.logActivity(campaignId, 'error', `Campaign failed: ${errorMessage}`);
       throw new Error(`Campaign processing failed: ${errorMessage}`);
     }
