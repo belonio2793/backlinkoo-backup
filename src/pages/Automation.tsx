@@ -211,9 +211,16 @@ const Automation = () => {
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading automation system...</p>
+        <div className="text-center space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto text-blue-600" />
+          <div>
+            <p className="text-gray-900 font-medium">Loading automation system...</p>
+            {hasValidSavedData(savedFormData) && (
+              <p className="text-sm text-blue-600 mt-2">
+                Restoring your saved campaign for "{savedFormData.keyword}"
+              </p>
+            )}
+          </div>
         </div>
       </div>
     );
