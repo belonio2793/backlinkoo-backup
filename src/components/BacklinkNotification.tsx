@@ -52,10 +52,10 @@ export const BacklinkNotification: React.FC<BacklinkNotificationProps> = ({
     };
 
     // Subscribe to real-time feed events
-    realTimeFeedService.subscribe(handleNewEvent);
+    const unsubscribe = realTimeFeedService.subscribe(handleNewEvent);
 
     return () => {
-      realTimeFeedService.unsubscribe(handleNewEvent);
+      unsubscribe();
     };
   }, [isVisible]);
 
