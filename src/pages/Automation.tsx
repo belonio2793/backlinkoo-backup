@@ -635,6 +635,12 @@ const Automation = () => {
           onSuccess={handleAuthSuccess}
           campaignData={hasValidSavedData(savedFormData) ? savedFormData : undefined}
         />
+
+        {/* Form Completion Celebration */}
+        <FormCompletionCelebration
+          isVisible={showCelebration}
+          onComplete={() => setShowCelebration(false)}
+        />
       </div>
     </div>
   );
