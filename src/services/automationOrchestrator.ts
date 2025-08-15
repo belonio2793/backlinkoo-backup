@@ -546,6 +546,19 @@ export class AutomationOrchestrator {
         });
       }
 
+      // Get campaign details for the error event
+      const campaign = await this.getCampaign(campaignId);
+
+      // Emit real-time feed event for campaign failure
+      if (campaign) {
+        realTimeFeedService.emitCampaignFailed(
+          campaignId,
+          campaign.name,
+          campaign.keywords[0] || '',
+          errorMessage
+        );
+      }
+
       // Update campaign status using fixed function if available
       if (typeof window !== 'undefined' && (window as any).fixedUpdateCampaignStatus) {
         const result = await (window as any).fixedUpdateCampaignStatus(campaignId, 'paused', errorMessage);
