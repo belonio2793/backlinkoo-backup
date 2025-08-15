@@ -214,6 +214,17 @@ if (import.meta.env.DEV) {
     }
   };
 
+  // Add error fix testing
+  (window as any).testErrorFixes = async () => {
+    try {
+      const { ErrorFixTester } = await import('./utils/testErrorFixes');
+      const tester = new ErrorFixTester();
+      return await tester.runAllTests();
+    } catch (error) {
+      console.error('❌ Error fix test failed:', error);
+    }
+  };
+
   // Import fetch test helper
   import('./utils/fetchTestHelper');
 
