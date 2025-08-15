@@ -32,6 +32,8 @@ import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { blogService } from '@/services/blogService';
 import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
+import { SEOScoreDisplay } from '@/components/SEOScoreDisplay';
+import { usePremiumSEOScore } from '@/hooks/usePremiumSEOScore';
 
 type BlogPost = Tables<'blog_posts'>;
 
