@@ -396,7 +396,7 @@ const App = () => (
           </SymbolCleanerProvider>
         </UserFlowProvider>
       </ModalProvider>
-      <EnvironmentSwitcher />
+      <DraggableEnvironmentSwitcher />
     </TooltipProvider>
   </QueryClientProvider>
 );
