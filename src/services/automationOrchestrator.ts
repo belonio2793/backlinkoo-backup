@@ -554,7 +554,7 @@ export class AutomationOrchestrator {
    * Resume campaign
    */
   async resumeCampaign(campaignId: string): Promise<void> {
-    await this.updateCampaignStatus(campaignId, 'pending');
+    await this.updateCampaignStatus(campaignId, 'active');
     await this.logActivity(campaignId, 'info', 'Campaign resumed by user');
     
     // Restart processing
