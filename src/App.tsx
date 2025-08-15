@@ -354,6 +354,14 @@ const App = () => (
               }
             />
             <Route
+              path="/admin/automation-testing"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyAutomationTestingDashboard />
+                </Suspense>
+              }
+            />
+            <Route
               path="/premium-seo-test"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
