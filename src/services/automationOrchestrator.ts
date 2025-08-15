@@ -26,11 +26,38 @@ export interface CampaignProgressInfo {
   error?: string;
 }
 
+// Available publishing platforms
+export interface PublishingPlatform {
+  id: string;
+  name: string;
+  isActive: boolean;
+  maxPostsPerCampaign: number;
+  priority: number;
+}
+
+export const AVAILABLE_PLATFORMS: PublishingPlatform[] = [
+  { id: 'telegraph', name: 'Telegraph.ph', isActive: true, maxPostsPerCampaign: 1, priority: 1 },
+  { id: 'medium', name: 'Medium.com', isActive: false, maxPostsPerCampaign: 1, priority: 2 },
+  { id: 'devto', name: 'Dev.to', isActive: false, maxPostsPerCampaign: 1, priority: 3 },
+  { id: 'linkedin', name: 'LinkedIn Articles', isActive: false, maxPostsPerCampaign: 1, priority: 4 },
+  { id: 'hashnode', name: 'Hashnode', isActive: false, maxPostsPerCampaign: 1, priority: 5 },
+  { id: 'substack', name: 'Substack', isActive: false, maxPostsPerCampaign: 1, priority: 6 }
+];
+
+export interface CampaignPlatformProgress {
+  campaignId: string;
+  platformId: string;
+  isCompleted: boolean;
+  publishedUrl?: string;
+  publishedAt?: string;
+}
+
 export class AutomationOrchestrator {
   private contentService = getContentService();
   private telegraphService = getTelegraphService();
   private progressListeners: Map<string, (progress: CampaignProgress) => void> = new Map();
   private campaignProgressMap: Map<string, CampaignProgress> = new Map();
+  private platformProgressMap: Map<string, CampaignPlatformProgress[]> = new Map();
   
   /**
    * Subscribe to campaign progress updates
