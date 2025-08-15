@@ -301,27 +301,13 @@ export class WorkingCampaignProcessor {
 
     for (const tableName of tableNames) {
       try {
-        const linkData = tableName === 'published_blog_posts' ? {
+        const linkData = {
           campaign_id: campaignId,
           published_url: url,
-          platform: 'Telegraph.ph',
-          title: `Campaign ${campaignId} Content`,
-          content: 'Generated content',
+          platform: 'telegraph',
           status: 'active',
+          validation_status: 'pending',
           published_at: new Date().toISOString()
-        } : tableName === 'automation_published_links' ? {
-          campaign_id: campaignId,
-          published_url: url,
-          platform: 'Telegraph.ph',
-          title: `Campaign ${campaignId} Content`,
-          status: 'active',
-          published_at: new Date().toISOString()
-        } : {
-          campaign_id: campaignId,
-          url,
-          platform: 'Telegraph.ph',
-          status: 'active',
-          created_at: new Date().toISOString()
         };
 
         const { error } = await supabase
