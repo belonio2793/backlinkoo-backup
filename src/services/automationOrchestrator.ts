@@ -561,7 +561,8 @@ export class AutomationOrchestrator {
     this.processCampaign(campaignId).catch(error => {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Campaign processing error:', errorMessage);
-      this.updateCampaignStatus(campaignId, 'failed', errorMessage);
+      // Note: 'failed' is not a valid status in current schema, so we'll pause the campaign instead
+      this.updateCampaignStatus(campaignId, 'paused', errorMessage);
     });
   }
 
