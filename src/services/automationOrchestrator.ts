@@ -33,6 +33,118 @@ export class AutomationOrchestrator {
   private campaignProgressMap: Map<string, CampaignProgress> = new Map();
   
   /**
+   * Subscribe to campaign progress updates
+   */
+  subscribeToProgress(campaignId: string, callback: (progress: CampaignProgress) => void): () => void {
+    this.progressListeners.set(campaignId, callback);
+
+    // Send current progress if available
+    const currentProgress = this.campaignProgressMap.get(campaignId);
+    if (currentProgress) {
+      callback(currentProgress);
+    }
+
+    // Return unsubscribe function
+    return () => {
+      this.progressListeners.delete(campaignId);
+      this.campaignProgressMap.delete(campaignId);
+    };
+  }
+
+  /**
+   * Update campaign progress and notify listeners
+   */
+  private updateProgress(campaignId: string, updates: Partial<CampaignProgress>): void {
+    const existing = this.campaignProgressMap.get(campaignId);
+    if (!existing) return;
+
+    const updated: CampaignProgress = {
+      ...existing,
+      ...updates
+    };
+
+    this.campaignProgressMap.set(campaignId, updated);
+
+    const listener = this.progressListeners.get(campaignId);
+    if (listener) {
+      listener(updated);
+    }
+  }
+
+  /**
+   * Update a specific step in the progress
+   */
+  private updateStep(campaignId: string, stepId: string, updates: Partial<ProgressStep>): void {
+    const progress = this.campaignProgressMap.get(campaignId);
+    if (!progress) return;
+
+    const stepIndex = progress.steps.findIndex(step => step.id === stepId);
+    if (stepIndex === -1) return;
+
+    const updatedSteps = [...progress.steps];
+    updatedSteps[stepIndex] = {
+      ...updatedSteps[stepIndex],
+      ...updates,
+      timestamp: updates.status ? new Date() : updatedSteps[stepIndex].timestamp
+    };
+
+    this.updateProgress(campaignId, {
+      steps: updatedSteps,
+      currentStep: stepIndex + 1
+    });
+  }
+
+  /**
+   * Initialize progress tracking for a campaign
+   */
+  private initializeProgress(campaign: Campaign): CampaignProgress {
+    const steps: ProgressStep[] = [
+      {
+        id: 'create-campaign',
+        title: 'Campaign Created',
+        description: 'Setting up your link building campaign',
+        status: 'completed',
+        timestamp: new Date()
+      },
+      {
+        id: 'generate-content',
+        title: 'Generate Content',
+        description: 'Creating unique AI-generated content with your keyword and anchor text',
+        status: 'pending'
+      },
+      {
+        id: 'publish-content',
+        title: 'Publish Content',
+        description: 'Publishing content to Telegraph.ph platform',
+        status: 'pending'
+      },
+      {
+        id: 'complete-campaign',
+        title: 'Campaign Complete',
+        description: 'Finalizing campaign and collecting published URLs',
+        status: 'pending'
+      }
+    ];
+
+    const progress: CampaignProgress = {
+      campaignId: campaign.id,
+      campaignName: campaign.name,
+      targetUrl: campaign.target_url,
+      keyword: campaign.keywords[0] || '',
+      anchorText: campaign.anchor_texts[0] || '',
+      steps,
+      currentStep: 1,
+      isComplete: false,
+      isError: false,
+      publishedUrls: [],
+      startTime: new Date()
+    };
+
+    this.campaignProgressMap.set(campaign.id, progress);
+    return progress;
+  }
+
+  /**
    * Create a new campaign
    */
   async createCampaign(params: {
@@ -79,11 +191,20 @@ export class AutomationOrchestrator {
 
       await this.logActivity(data.id, 'info', 'Campaign created successfully');
       
+      // Initialize progress tracking
+      this.initializeProgress(data);
+
       // Start processing the campaign asynchronously
       this.processCampaign(data.id).catch(error => {
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error('Campaign processing error:', errorMessage);
         this.updateCampaignStatus(data.id, 'failed', errorMessage);
+
+        // Update progress to show error
+        this.updateProgress(data.id, {
+          isError: true,
+          endTime: new Date()
+        });
       });
 
       return data;
