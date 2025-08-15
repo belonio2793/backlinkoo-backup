@@ -230,7 +230,7 @@ export class AutomationOrchestrator {
   async processCampaign(campaignId: string): Promise<void> {
     try {
       await this.logActivity(campaignId, 'info', 'Starting campaign processing');
-      
+
       // Step 1: Get campaign details
       const campaign = await this.getCampaign(campaignId);
       if (!campaign) {
@@ -238,14 +238,28 @@ export class AutomationOrchestrator {
       }
 
       // Step 2: Update status to generating
+      this.updateStep(campaignId, 'generate-content', {
+        status: 'in_progress',
+        details: 'Generating unique AI content...'
+      });
+
       await this.updateCampaignStatus(campaignId, 'generating');
       await this.logActivity(campaignId, 'info', 'Starting content generation');
 
       // Step 3: Generate content
+      this.updateStep(campaignId, 'generate-content', {
+        details: `Generating content for keyword: "${campaign.keywords[0] || 'default keyword'}"`
+      });
+
       const generatedContent = await this.contentService.generateAllContent({
         keyword: campaign.keywords[0] || 'default keyword',
         anchorText: campaign.anchor_texts[0] || 'click here',
         targetUrl: campaign.target_url
+      });
+
+      this.updateStep(campaignId, 'generate-content', {
+        status: 'completed',
+        details: `Successfully generated ${generatedContent.length} piece(s) of content`
       });
 
       await this.logActivity(campaignId, 'info', `Generated ${generatedContent.length} piece(s) of content`);
@@ -274,6 +288,11 @@ export class AutomationOrchestrator {
       }
 
       // Step 5: Update status to publishing
+      this.updateStep(campaignId, 'publish-content', {
+        status: 'in_progress',
+        details: 'Publishing content to Telegraph.ph...'
+      });
+
       await this.updateCampaignStatus(campaignId, 'publishing');
       await this.logActivity(campaignId, 'info', 'Starting content publication');
 
@@ -303,6 +322,16 @@ export class AutomationOrchestrator {
             console.error('Error saving published link:', linkError);
           } else {
             publishedLinks.push(publishedPage.url);
+
+            // Update progress with published URL
+            this.updateProgress(campaignId, {
+              publishedUrls: publishedLinks
+            });
+
+            this.updateStep(campaignId, 'publish-content', {
+              details: `Published content to ${publishedPage.url}`
+            });
+
             await this.logActivity(campaignId, 'info', `Published content to ${publishedPage.url}`);
           }
 
@@ -317,9 +346,34 @@ export class AutomationOrchestrator {
 
       // Step 7: Complete campaign
       if (publishedLinks.length > 0) {
+        this.updateStep(campaignId, 'publish-content', {
+          status: 'completed',
+          details: `Successfully published ${publishedLinks.length} link(s)`
+        });
+
+        this.updateStep(campaignId, 'complete-campaign', {
+          status: 'completed',
+          details: `Campaign completed with ${publishedLinks.length} published link(s)`
+        });
+
+        this.updateProgress(campaignId, {
+          isComplete: true,
+          endTime: new Date()
+        });
+
         await this.updateCampaignStatus(campaignId, 'completed');
         await this.logActivity(campaignId, 'info', `Campaign completed successfully. Published ${publishedLinks.length} links.`);
       } else {
+        this.updateStep(campaignId, 'publish-content', {
+          status: 'error',
+          details: 'Failed to publish any content'
+        });
+
+        this.updateProgress(campaignId, {
+          isError: true,
+          endTime: new Date()
+        });
+
         await this.updateCampaignStatus(campaignId, 'failed', 'No content was successfully published');
         await this.logActivity(campaignId, 'error', 'Campaign failed: No content was successfully published');
       }
@@ -327,6 +381,24 @@ export class AutomationOrchestrator {
     } catch (error) {
       console.error('Campaign processing error:', error);
       const errorMessage = error instanceof Error ? error.message : String(error);
+
+      // Update progress to show error
+      const progress = this.campaignProgressMap.get(campaignId);
+      if (progress) {
+        const currentStepId = progress.steps[progress.currentStep - 1]?.id;
+        if (currentStepId) {
+          this.updateStep(campaignId, currentStepId, {
+            status: 'error',
+            details: errorMessage
+          });
+        }
+
+        this.updateProgress(campaignId, {
+          isError: true,
+          endTime: new Date()
+        });
+      }
+
       await this.updateCampaignStatus(campaignId, 'failed', errorMessage);
       await this.logActivity(campaignId, 'error', `Campaign failed: ${errorMessage}`);
       throw new Error(`Campaign processing failed: ${errorMessage}`);
