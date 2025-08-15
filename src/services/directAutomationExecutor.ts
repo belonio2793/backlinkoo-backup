@@ -149,7 +149,7 @@ class DirectAutomationExecutor {
       if (useMockServices) {
         console.log('🎭 Generating content via mock service (development mode)...');
       } else {
-        console.log('�� Generating content via Netlify function...');
+        console.log('🤖 Generating content via Netlify function...');
       }
 
       let contentResult = await this.generateContent({
