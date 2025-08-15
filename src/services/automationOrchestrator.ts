@@ -353,6 +353,10 @@ export class AutomationOrchestrator {
       // Initialize progress tracking
       this.initializeProgress(data);
 
+      // Start network monitoring for this campaign
+      campaignNetworkLogger.startMonitoring(data.id);
+      campaignNetworkLogger.setCurrentCampaignId(data.id);
+
       // Start processing the campaign asynchronously
       this.processCampaignWithErrorHandling(data.id).catch(error => {
         console.error('Unhandled campaign processing error:', formatErrorForLogging(error, 'createCampaign'));
