@@ -74,20 +74,28 @@ export const useSmartCampaignFlow = () => {
 
     // Validate URL format (try auto-formatted version first)
     let isValidUrl = true;
+    let canAutoFormat = false;
+
     if (formData.targetUrl?.trim()) {
       try {
-        // Try the auto-formatted version first
-        const formattedUrl = autoFormatUrl(formData.targetUrl);
-        new URL(formattedUrl);
+        // Try the original URL first
+        new URL(formData.targetUrl);
       } catch {
-        // If that fails, try the original
+        // If original fails, try auto-formatted version
         try {
-          new URL(formData.targetUrl);
+          const formattedUrl = autoFormatUrl(formData.targetUrl);
+          new URL(formattedUrl);
+          canAutoFormat = true; // URL can be auto-formatted to be valid
         } catch {
           isValidUrl = false;
           missingFields.push('Valid Target URL');
         }
       }
+    }
+
+    // If URL can be auto-formatted, don't mark it as invalid
+    if (canAutoFormat) {
+      isValidUrl = true;
     }
 
     return {
