@@ -104,20 +104,28 @@ export class CampaignNetworkLogger {
         const response = await this.originalFetch.call(window, input, init);
         const duration = Date.now() - startTime;
 
-        // Clone response to read body without consuming it
-        const clonedResponse = response.clone();
+        // Safely handle response body reading
         let responseData;
         let responseError;
+        let clonedResponse;
 
         try {
-          const contentType = response.headers.get('content-type');
-          if (contentType?.includes('application/json')) {
-            responseData = await clonedResponse.json();
+          // Only clone if response hasn't been used and we need to read it
+          if (response.body && !response.bodyUsed && !(response as any)._isCloned) {
+            clonedResponse = response.clone();
+            const contentType = response.headers.get('content-type');
+            if (contentType?.includes('application/json')) {
+              responseData = await clonedResponse.json();
+            } else {
+              responseData = await clonedResponse.text();
+            }
           } else {
-            responseData = await clonedResponse.text();
+            // Response already used or cloned, just log metadata
+            responseData = `[Response body already consumed]`;
           }
         } catch (error) {
           responseError = `Failed to parse response: ${error}`;
+          // Don't throw here, just log the error
         }
 
         // Complete request log
@@ -136,6 +144,7 @@ export class CampaignNetworkLogger {
 
         this.logNetworkRequest(completeRequest);
 
+        // Return the original response (not the clone)
         return response;
       } catch (error) {
         const duration = Date.now() - startTime;
