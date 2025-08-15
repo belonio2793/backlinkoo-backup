@@ -17,7 +17,7 @@ import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
 import "@/utils/emergencyDisable"; // Load emergency disable utilities
 // import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
-import EnvironmentSwitcher from "@/components/shared/EnvironmentSwitcher";
+import DraggableEnvironmentSwitcher from "@/components/shared/DraggableEnvironmentSwitcher";
 import Index from "./pages/Index";
 
 const LazyBlogCommentsSystem = lazy(() => import("./pages/BlogCommentsSystem"));
@@ -51,6 +51,8 @@ const LazyDatabaseColumnsFix = lazy(() => import("./pages/DatabaseColumnsFix"));
 const LazyVerifyColumns = lazy(() => import("./pages/VerifyColumns"));
 const LazyMarkdownTest = lazy(() => import("./pages/MarkdownTest"));
 const LazyPremiumSEOAnalysisTest = lazy(() => import("./pages/PremiumSEOAnalysisTest"));
+const LazyDraggableDemo = lazy(() => import("./pages/DraggableDemo"));
+const LazyEnhancedFeedDemo = lazy(() => import("./pages/EnhancedFeedDemo"));
 
 const LazyDebugUserReports = lazy(() => import("./pages/DebugUserReports"));
 const LazyBlogPostChecker = lazy(() => import("./components/BlogPostChecker").then(module => ({ default: module.BlogPostChecker })));
@@ -369,6 +371,22 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/draggable-demo"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyDraggableDemo />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/enhanced-feed-demo"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyEnhancedFeedDemo />
+                </Suspense>
+              }
+            />
 
             {/* 404 Catch-all route */}
             <Route
@@ -387,7 +405,7 @@ const App = () => (
           </SymbolCleanerProvider>
         </UserFlowProvider>
       </ModalProvider>
-      <EnvironmentSwitcher />
+      <DraggableEnvironmentSwitcher />
     </TooltipProvider>
   </QueryClientProvider>
 );

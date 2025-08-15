@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2 } from 'lucide-react';
+import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2, Activity } from 'lucide-react';
 import { getOrchestrator } from '@/services/automationOrchestrator';
 import AutomationReporting from '@/components/AutomationReporting';
 import AutomationServiceStatus from '@/components/AutomationServiceStatus';
@@ -15,22 +15,19 @@ import CampaignProgressTracker, { CampaignProgress } from '@/components/Campaign
 import LiveCampaignStatus from '@/components/LiveCampaignStatus';
 import CampaignManager from '@/components/CampaignManager';
 import FormCompletionCelebration from '@/components/FormCompletionCelebration';
-import RealTimeFeedModal from '@/components/RealTimeFeedModal';
-import RealTimeFeedToggle from '@/components/RealTimeFeedToggle';
-import FeedModal from '@/components/FeedModal';
+import EnhancedRealTimeFeed from '@/components/EnhancedRealTimeFeed';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
-import { useRealTimeFeedModal } from '@/hooks/useRealTimeFeedModal';
-import { useFeedModal } from '@/hooks/useFeedModal';
+// Enhanced feed hooks removed - using simpler state management
 
 const Automation = () => {
   const [statusMessages, setStatusMessages] = useState<Array<{message: string, type: 'success' | 'error' | 'info', id: string}>>([]);
   const { isAuthenticated, isLoading: authLoading, user } = useAuthState();
   const { savedFormData, saveFormData, clearFormData, hasValidSavedData } = useCampaignFormPersistence();
   const smartFlow = useSmartCampaignFlow();
-  const realTimeFeed = useRealTimeFeedModal();
-  const feedModal = useFeedModal();
+  const [showEnhancedFeed, setShowEnhancedFeed] = useState(false);
+  const [activeCampaigns, setActiveCampaigns] = useState<any[]>([]);
 
   const [isCreating, setIsCreating] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -150,8 +147,8 @@ const Automation = () => {
   const createCampaign = async () => {
     setIsCreating(true);
 
-    // Open Feed modal for creation process
-    feedModal.openFeedForCreation();
+    // Open Enhanced Feed for monitoring
+    setShowEnhancedFeed(true);
 
     try {
       // Ensure URL is properly formatted before creating campaign
@@ -181,11 +178,8 @@ const Automation = () => {
       // Store the created campaign for live status
       setLastCreatedCampaign(campaign);
 
-      // Update Feed modal with created campaign
-      feedModal.updateActiveCampaign(campaign);
-
-      // Refresh Real Time Feed to show new campaign
-      realTimeFeed.forceRefresh();
+      // Add campaign to active campaigns for enhanced feed
+      setActiveCampaigns(prev => [...prev, campaign]);
 
       // Clear saved form data since campaign was created successfully
       clearFormData();
@@ -213,7 +207,6 @@ const Automation = () => {
       addStatusMessage(`Campaign creation failed: ${formatErrorMessage(error)}`, 'error');
     } finally {
       setIsCreating(false);
-      feedModal.setCreatingState(false);
     }
   };
 
@@ -591,10 +584,10 @@ const Automation = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => feedModal.openFeedForCampaign(lastCreatedCampaign)}
+                        onClick={() => setShowEnhancedFeed(true)}
                         className="border-blue-300 text-blue-700 hover:bg-blue-100"
                       >
-                        View Feed
+                        View Enhanced Feed
                       </Button>
                     </div>
                   </div>
@@ -741,29 +734,23 @@ const Automation = () => {
           onComplete={() => setShowCelebration(false)}
         />
 
-        {/* Real Time Feed Modal */}
-        <RealTimeFeedModal
-          isVisible={realTimeFeed.isVisible}
-          activeCampaigns={realTimeFeed.activeCampaigns}
-          onClose={realTimeFeed.hideModal}
-          onMinimize={realTimeFeed.minimizeModal}
-          isMinimized={realTimeFeed.isMinimized}
+        {/* Enhanced Real Time Feed */}
+        <EnhancedRealTimeFeed
+          isOpen={showEnhancedFeed}
+          onClose={() => setShowEnhancedFeed(false)}
+          activeCampaigns={activeCampaigns}
         />
 
-        {/* Feed Modal */}
-        <FeedModal
-          isOpen={feedModal.isOpen}
-          onClose={feedModal.closeFeed}
-          activeCampaign={feedModal.activeCampaign}
-          isCreating={feedModal.isCreating}
-        />
-
-        {/* Real Time Feed Toggle Button */}
-        <RealTimeFeedToggle
-          isVisible={realTimeFeed.isVisible}
-          activeCampaignsCount={realTimeFeed.activeCampaigns.length}
-          onClick={realTimeFeed.showModal}
-        />
+        {/* Enhanced Feed Toggle Button */}
+        {activeCampaigns.length > 0 && !showEnhancedFeed && (
+          <Button
+            className="fixed bottom-4 right-4 z-40 bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+            onClick={() => setShowEnhancedFeed(true)}
+          >
+            <Activity className="h-4 w-4 mr-2" />
+            View Feed ({activeCampaigns.length})
+          </Button>
+        )}
       </div>
     </div>
   );
