@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { SimpleCampaign } from '@/integrations/supabase/types';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { realTimeFeedService } from './realTimeFeedService';
+import { campaignNetworkLogger } from './campaignNetworkLogger';
 
 /**
  * Working Campaign Processor - Simplified server-side processing
