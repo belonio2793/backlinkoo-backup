@@ -293,6 +293,9 @@ if (import.meta.env.DEV) {
   console.log('  - testMultipleNotifications() - Test multiple backlink notifications');
   console.log('  - testRealTimeFeedSubscription() - Test real-time feed subscription fix');
   console.log('  - fetchTest.runDiagnostics() - Test fetch and network connectivity');
+  console.log('  - testDatabaseSchema() - Test database connection and published_blog_posts table');
+  console.log('  - checkDatabaseSchema() - Check if published_blog_posts table exists');
+  console.log('  - fixDatabaseSchema() - Auto-fix missing published_blog_posts table');
 }
 
 // Priority: Get React app rendering ASAP
