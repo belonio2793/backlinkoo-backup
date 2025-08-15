@@ -6,18 +6,19 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
 import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info } from 'lucide-react';
 import { getOrchestrator } from '@/services/automationOrchestrator';
 import AutomationReporting from '@/components/AutomationReporting';
 import AutomationServiceStatus from '@/components/AutomationServiceStatus';
 import AutomationAuthModal from '@/components/AutomationAuthModal';
 import CampaignProgressTracker, { CampaignProgress } from '@/components/CampaignProgressTracker';
+import LiveCampaignStatus from '@/components/LiveCampaignStatus';
+import CampaignManager from '@/components/CampaignManager';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 
 const Automation = () => {
-  const { toast } = useToast();
+  const [statusMessages, setStatusMessages] = useState<Array<{message: string, type: 'success' | 'error' | 'info', id: string}>>([]);
   const { isAuthenticated, isLoading: authLoading, user } = useAuthState();
   const { savedFormData, saveFormData, clearFormData, hasValidSavedData } = useCampaignFormPersistence();
   
@@ -26,6 +27,7 @@ const Automation = () => {
   const [showProgress, setShowProgress] = useState(false);
   const [campaignProgress, setCampaignProgress] = useState<CampaignProgress | null>(null);
   const [progressUnsubscribe, setProgressUnsubscribe] = useState<(() => void) | null>(null);
+  const [lastCreatedCampaign, setLastCreatedCampaign] = useState<any>(null);
   const [formData, setFormData] = useState({
     targetUrl: '',
     keyword: '',
@@ -34,19 +36,24 @@ const Automation = () => {
   
   const orchestrator = getOrchestrator();
 
+  // Add status message helper
+  const addStatusMessage = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const id = Date.now().toString();
+    setStatusMessages(prev => [...prev.slice(-4), { message, type, id }]); // Keep last 5 messages
+
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      setStatusMessages(prev => prev.filter(msg => msg.id !== id));
+    }, 5000);
+  };
+
   // Load saved form data when component mounts or when saved data changes
   useEffect(() => {
     if (hasValidSavedData(savedFormData)) {
       setFormData(savedFormData);
-      
-      // Show info about restored data
-      toast({
-        title: "Form Data Restored",
-        description: "Your previous campaign details have been restored. You can now start the campaign.",
-        duration: 5000
-      });
+      addStatusMessage('Form data restored - you can continue with your campaign', 'info');
     }
-  }, [savedFormData, hasValidSavedData, toast]);
+  }, [savedFormData, hasValidSavedData]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -54,11 +61,7 @@ const Automation = () => {
 
   const validateForm = () => {
     if (!formData.targetUrl || !formData.keyword || !formData.anchorText) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
+      addStatusMessage('Please fill in all required fields', 'error');
       return false;
     }
 
@@ -66,11 +69,7 @@ const Automation = () => {
     try {
       new URL(formData.targetUrl);
     } catch {
-      toast({
-        title: "Invalid URL",
-        description: "Please enter a valid target URL",
-        variant: "destructive"
-      });
+      addStatusMessage('Please enter a valid target URL', 'error');
       return false;
     }
 
@@ -140,6 +139,9 @@ const Automation = () => {
       setProgressUnsubscribe(() => unsubscribe);
       setShowProgress(true);
 
+      // Store the created campaign for live status
+      setLastCreatedCampaign(campaign);
+
       // Clear saved form data since campaign was created successfully
       clearFormData();
 
@@ -150,10 +152,7 @@ const Automation = () => {
         anchorText: ''
       });
 
-      toast({
-        title: "Campaign Created Successfully!",
-        description: "Your link building campaign is now starting. You can track progress in real-time."
-      });
+      addStatusMessage('Campaign created successfully! Check the status below.', 'success');
 
     } catch (error) {
       console.error('Campaign creation error:', error);
@@ -165,11 +164,7 @@ const Automation = () => {
         return;
       }
       
-      toast({
-        title: "Campaign Creation Failed",
-        description: formatErrorMessage(error),
-        variant: "destructive"
-      });
+      addStatusMessage(`Campaign creation failed: ${formatErrorMessage(error)}`, 'error');
     } finally {
       setIsCreating(false);
     }
@@ -200,11 +195,7 @@ const Automation = () => {
   const handleRetryCampaign = () => {
     // Close progress tracker and allow user to create a new campaign
     handleProgressClose();
-
-    toast({
-      title: "Ready to Retry",
-      description: "You can now create a new campaign with the same or different parameters."
-    });
+    addStatusMessage('Ready to create a new campaign', 'info');
   };
 
   // Cleanup subscription on unmount
@@ -269,26 +260,43 @@ const Automation = () => {
           </Alert>
         )}
 
-        {/* Main Content */}
-        <Tabs defaultValue="create" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="create" className="flex items-center gap-2">
-              <Target className="w-4 h-4" />
-              Create Campaign
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" />
-              Reports & Analytics
-            </TabsTrigger>
-            <TabsTrigger value="status" className="flex items-center gap-2">
-              <FileText className="w-4 h-4" />
-              Service Status
-            </TabsTrigger>
-          </TabsList>
+        {/* Status Messages */}
+        {statusMessages.length > 0 && (
+          <div className="space-y-2">
+            {statusMessages.map(msg => (
+              <Alert key={msg.id} className={msg.type === 'error' ? 'border-red-200 bg-red-50' : msg.type === 'success' ? 'border-green-200 bg-green-50' : 'border-blue-200 bg-blue-50'}>
+                <Info className="h-4 w-4" />
+                <AlertDescription className={msg.type === 'error' ? 'text-red-700' : msg.type === 'success' ? 'text-green-700' : 'text-blue-700'}>
+                  {msg.message}
+                </AlertDescription>
+              </Alert>
+            ))}
+          </div>
+        )}
 
-          <TabsContent value="create" className="space-y-6">
-            {/* Campaign Creation Form */}
-            <Card className="max-w-2xl mx-auto">
+        {/* Main Content */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Campaign Creation (Left Column) */}
+          <div className="lg:col-span-2">
+            <Tabs defaultValue="create" className="w-full">
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="create" className="flex items-center gap-2">
+                  <Target className="w-4 h-4" />
+                  Create Campaign
+                </TabsTrigger>
+                <TabsTrigger value="reports" className="flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4" />
+                  Reports & Analytics
+                </TabsTrigger>
+                <TabsTrigger value="status" className="flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Service Status
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="create" className="space-y-6">
+                {/* Campaign Creation Form */}
+                <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Target className="w-5 h-5" />
@@ -372,10 +380,20 @@ const Automation = () => {
                   )}
                 </Button>
               </CardContent>
-            </Card>
+                </Card>
 
-            {/* Platform Info */}
-            <Card className="max-w-4xl mx-auto">
+                {/* Live Campaign Status */}
+                <LiveCampaignStatus
+                  isCreating={isCreating}
+                  lastCreatedCampaign={lastCreatedCampaign}
+                  onCampaignUpdate={(campaign) => {
+                    setLastCreatedCampaign(campaign);
+                    addStatusMessage(`Campaign "${campaign.keyword}" status updated to ${campaign.status}`, 'info');
+                  }}
+                />
+
+                {/* Platform Info */}
+                <Card>
               <CardHeader>
                 <CardTitle>Publishing Platforms</CardTitle>
                 <CardDescription>
@@ -405,32 +423,43 @@ const Automation = () => {
                   </div>
                 </div>
               </CardContent>
-            </Card>
-          </TabsContent>
+                </Card>
+              </TabsContent>
 
-          <TabsContent value="reports">
-            {isAuthenticated ? (
-              <AutomationReporting />
-            ) : (
-              <Card className="max-w-2xl mx-auto">
-                <CardContent className="p-8 text-center">
-                  <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-medium mb-2">Sign In Required</h3>
-                  <p className="text-gray-600 mb-4">
-                    Sign in to view your campaign reports and analytics.
-                  </p>
-                  <Button onClick={() => setShowAuthModal(true)}>
-                    Sign In
-                  </Button>
-                </CardContent>
-              </Card>
+              <TabsContent value="reports">
+                {isAuthenticated ? (
+                  <AutomationReporting />
+                ) : (
+                  <Card>
+                    <CardContent className="p-8 text-center">
+                      <BarChart3 className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                      <h3 className="text-lg font-medium mb-2">Sign In Required</h3>
+                      <p className="text-gray-600 mb-4">
+                        Sign in to view your campaign reports and analytics.
+                      </p>
+                      <Button onClick={() => setShowAuthModal(true)}>
+                        Sign In
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+              </TabsContent>
+
+              <TabsContent value="status">
+                <AutomationServiceStatus />
+              </TabsContent>
+            </Tabs>
+          </div>
+
+          {/* Campaign Management (Right Column) */}
+          <div className="lg:col-span-1">
+            {isAuthenticated && (
+              <CampaignManager
+                onStatusUpdate={(message, type) => addStatusMessage(message, type)}
+              />
             )}
-          </TabsContent>
-
-          <TabsContent value="status">
-            <AutomationServiceStatus />
-          </TabsContent>
-        </Tabs>
+          </div>
+        </div>
 
         {/* Authentication Modal */}
         <AutomationAuthModal

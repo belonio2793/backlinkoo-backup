@@ -46,6 +46,8 @@ import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { usePremiumSEOScore } from '@/hooks/usePremiumSEOScore';
 import { blogService } from '@/services/blogService';
 import { ContentFormatter } from '@/utils/contentFormatter';
+import { SimpleContentFormatter } from '@/utils/simpleContentFormatter';
+import BlogErrorBoundary from '@/components/BlogErrorBoundary';
 import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 import { supabase } from '@/integrations/supabase/client';
@@ -69,6 +71,7 @@ export function BeautifulBlogPost() {
   const [blogPost, setBlogPost] = useState<BlogPost | null>(null);
   const [authorEmail, setAuthorEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   const [claiming, setClaiming] = useState(false);
   const [unclaiming, setUnclaiming] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -204,21 +207,38 @@ export function BeautifulBlogPost() {
   const loadBlogPost = async (slug: string) => {
     try {
       setLoading(true);
+      setError(null);
+
+      console.log('Loading blog post with slug:', slug);
 
       // First try database, if that fails, try localStorage fallback
       let post = null;
       try {
         post = await blogService.getBlogPostBySlug(slug);
+        console.log('Database query result:', post ? 'Found' : 'Not found');
       } catch (dbError) {
         console.warn('Database lookup failed, trying localStorage fallback:', dbError);
         // Try to load from localStorage as fallback
         const localStoragePost = localStorage.getItem(`blog_post_${slug}`);
         if (localStoragePost) {
-          post = JSON.parse(localStoragePost);
+          try {
+            post = JSON.parse(localStoragePost);
+            console.log('Loaded from localStorage fallback');
+          } catch (parseError) {
+            console.error('Failed to parse localStorage data:', parseError);
+          }
         }
       }
 
       if (!isMounted) return; // Prevent state update after unmount
+
+      if (!post) {
+        const notFoundError = new Error(`Blog post not found: ${slug}`);
+        setError(notFoundError);
+        setBlogPost(null);
+        return;
+      }
+
       setBlogPost(post);
 
       // If post is claimed, fetch the author's email
@@ -249,24 +269,8 @@ export function BeautifulBlogPost() {
 
       if (!isMounted) return; // Prevent error handling after unmount
 
-      // Check if this was a loading error vs a post not found error
-      const isNotFoundError = error.message?.includes('not found') ||
-                             error.status === 404 ||
-                             !blogPost;
-
-      if (isNotFoundError) {
-        toast({
-          title: "Blog Post Not Found",
-          description: "This blog post may have expired or been removed.",
-          variant: "destructive"
-        });
-      } else {
-        toast({
-          title: "Loading Error",
-          description: "Failed to load blog post. Please try refreshing the page.",
-          variant: "destructive"
-        });
-      }
+      setError(error);
+      setBlogPost(null);
     } finally {
       if (isMounted) {
         setLoading(false);
@@ -662,36 +666,19 @@ export function BeautifulBlogPost() {
     );
   }
 
-  if (!blogPost) {
+  // Show error boundary if there's an error or no blog post
+  if (error || !blogPost) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      <>
         <Header />
-        <div className="container mx-auto px-6 py-8">
-          <Card className="max-w-2xl mx-auto border-0 shadow-xl bg-white/80 backdrop-blur-sm">
-            <CardContent className="p-12 text-center">
-              <div className="mb-6">
-                <div className="w-20 h-20 mx-auto bg-gradient-to-r from-red-100 to-red-200 rounded-full flex items-center justify-center">
-                  <AlertTriangle className="w-10 h-10 text-red-600" />
-                </div>
-              </div>
-              <h2 className="text-3xl font-bold mb-4 bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
-                Blog Post Not Found
-              </h2>
-              <p className="text-gray-600 mb-8 text-lg leading-relaxed">
-                The requested blog post could not be found or may have expired.
-              </p>
-              <Button
-                onClick={() => startTransition(() => navigate('/blog'))}
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 px-8 py-6 text-lg"
-              >
-                <ArrowLeft className="mr-2 h-5 w-5" />
-                Back to Blog
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+        <BlogErrorBoundary
+          error={error || new Error('Blog post not found')}
+          slug={slug}
+          onRetry={() => slug && loadBlogPost(slug)}
+          showDebugInfo={process.env.NODE_ENV === 'development'}
+        />
         <Footer />
-      </div>
+      </>
     );
   }
 
@@ -1024,26 +1011,26 @@ export function BeautifulBlogPost() {
                   }}
                   dangerouslySetInnerHTML={{
                     __html: (() => {
-                      let content = blogPost.content || '';
+                      try {
+                        let content = blogPost.content || '';
 
-                      // Basic cleanup - remove problematic patterns and duplicate titles
-                      content = content
-                        // Remove section markers
-                        .replace(/\*\*(Introduction|Section \d+[^*]*|Conclusion|Call-to-Action):\*\*/gi, '')
-                        // Remove footer pattern
-                        .replace(/---\s*This \d+-word blog post[^.]*\./gi, '')
-                        // Remove duplicate title lines (simple approach)
-                        .split('\n')
-                        .filter(line => {
-                          const cleanLine = line.replace(/[#*]/g, '').trim().toLowerCase();
-                          const cleanTitle = (blogPost.title || '').toLowerCase();
-                          return !cleanLine.includes('ultimate guide') || cleanLine.length < 20;
-                        })
-                        .join('\n')
-                        .replace(/\n{3,}/g, '\n\n')
-                        .trim();
+                        // Use simplified formatter to avoid over-processing
+                        const formattedContent = SimpleContentFormatter.formatBlogContent(content, blogPost.title);
 
-                      return content;
+                        // Validate the formatted content
+                        const validation = SimpleContentFormatter.validateContent(formattedContent);
+                        if (!validation.isValid) {
+                          console.warn('Content validation failed:', validation.errors);
+                          // Fallback to basic HTML wrapping
+                          return `<p>${content.replace(/\n\n/g, '</p><p>')}</p>`;
+                        }
+
+                        return formattedContent;
+                      } catch (formatError) {
+                        console.error('Content formatting failed:', formatError);
+                        // Return raw content as fallback
+                        return `<p>${(blogPost.content || '').replace(/\n\n/g, '</p><p>')}</p>`;
+                      }
                     })()
                   }}
                 />
