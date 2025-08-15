@@ -276,6 +276,7 @@ if (import.meta.env.DEV) {
   import('./utils/testBacklinkNotification');
   import('./utils/testRealTimeFeedFix');
   import('./utils/databaseSchemaFixer');
+  import('./utils/testWorkingContentGenerator');
 
   console.log('  - disableViteProtection() - Disable fetch protection and refresh');
   console.log('  - testContentGeneration() - Test content generation functions');
