@@ -921,11 +921,20 @@ export class AutomationOrchestrator {
       await this.updateCampaignStatus(campaignId, 'active');
       await this.logActivity(campaignId, 'info', `Campaign resumed to continue posting to ${nextPlatform.name}`);
 
+      // Emit resume event to live feed
+      const { data: { user } } = await supabase.auth.getUser();
+      realTimeFeedService.emitCampaignResumed(
+        campaignId,
+        campaign.name,
+        campaign.keywords[0] || 'Unknown',
+        `Resumed to continue posting to ${nextPlatform.name}`,
+        user?.id
+      );
+
       // Continue processing the campaign
-      this.processCampaign(campaignId).catch(error => {
+      this.processCampaignWithErrorHandling(campaignId).catch(error => {
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error('Campaign processing error:', errorMessage);
-        this.updateCampaignStatus(campaignId, 'paused', errorMessage);
       });
 
       return {
