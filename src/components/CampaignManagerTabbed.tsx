@@ -78,11 +78,40 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
 
   useEffect(() => {
     loadCampaigns();
-    
+
     // Auto-refresh every 10 seconds
     const interval = setInterval(loadCampaigns, 10000);
-    return () => clearInterval(interval);
-  }, []);
+
+    // Real-time feed integration for instant updates
+    const handleFeedEvent = (event: any) => {
+      // Force refresh campaigns when events occur
+      if (['campaign_created', 'campaign_completed', 'campaign_failed', 'url_published'].includes(event.type)) {
+        console.log('📡 Real-time event received, refreshing campaigns:', event.type);
+
+        // Show toast notification for URL published events
+        if (event.type === 'url_published') {
+          toast({
+            title: "New Backlink Published!",
+            description: `Published "${event.keyword}" to ${event.platform}`,
+            duration: 5000,
+          });
+
+          // Update parent status
+          onStatusUpdate?.(`New backlink published: ${event.url}`, 'success');
+        }
+
+        // Refresh campaigns to show new data
+        loadCampaigns();
+      }
+    };
+
+    realTimeFeedService.subscribe(handleFeedEvent);
+
+    return () => {
+      clearInterval(interval);
+      realTimeFeedService.unsubscribe(handleFeedEvent);
+    };
+  }, [toast, onStatusUpdate]);
 
   const loadCampaigns = async (showRefreshing = false) => {
     try {
