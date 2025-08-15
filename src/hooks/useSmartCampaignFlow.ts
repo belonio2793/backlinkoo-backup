@@ -67,29 +67,36 @@ export const useSmartCampaignFlow = () => {
 
   const analyzeFormData = useCallback((formData: CampaignFormData) => {
     const missingFields: string[] = [];
-    
+
     if (!formData.targetUrl?.trim()) missingFields.push('Target URL');
     if (!formData.keyword?.trim()) missingFields.push('Keyword');
     if (!formData.anchorText?.trim()) missingFields.push('Anchor Text');
 
-    // Validate URL format
+    // Validate URL format (try auto-formatted version first)
     let isValidUrl = true;
     if (formData.targetUrl?.trim()) {
       try {
-        new URL(formData.targetUrl);
+        // Try the auto-formatted version first
+        const formattedUrl = autoFormatUrl(formData.targetUrl);
+        new URL(formattedUrl);
       } catch {
-        isValidUrl = false;
-        missingFields.push('Valid Target URL');
+        // If that fails, try the original
+        try {
+          new URL(formData.targetUrl);
+        } catch {
+          isValidUrl = false;
+          missingFields.push('Valid Target URL');
+        }
       }
     }
 
     return {
       isValid: missingFields.length === 0 && isValidUrl,
       missingFields,
-      hasUnsavedChanges: hasValidSavedData(savedFormData) && 
+      hasUnsavedChanges: hasValidSavedData(savedFormData) &&
         JSON.stringify(formData) !== JSON.stringify(savedFormData)
     };
-  }, [savedFormData, hasValidSavedData]);
+  }, [savedFormData, hasValidSavedData, autoFormatUrl]);
 
   const determineUserIntent = useCallback((formData: CampaignFormData) => {
     // If user has saved data and current form matches, they want to continue
