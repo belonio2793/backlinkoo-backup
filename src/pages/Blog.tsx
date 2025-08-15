@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ClaimableBlogService } from '@/services/claimableBlogService';
 import { UnifiedClaimService } from '@/services/unifiedClaimService';
 import { useAuth } from '@/hooks/useAuth';
+import { usePremiumSEOScore } from '@/hooks/usePremiumSEOScore';
 import { BlogClaimService } from '@/services/blogClaimService';
 import { supabase } from '@/integrations/supabase/client';
 import type { BlogPost } from '@/types/blogTypes';
