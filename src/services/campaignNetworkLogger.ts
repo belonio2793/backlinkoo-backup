@@ -1,3 +1,5 @@
+import { responseBodyManager } from '@/utils/responseBodyFix';
+
 export interface NetworkRequest {
   id: string;
   campaignId: string;
@@ -110,9 +112,9 @@ export class CampaignNetworkLogger {
         let clonedResponse;
 
         try {
-          // Only clone if response hasn't been used and we need to read it
-          if (response.body && !response.bodyUsed && !(response as any)._isCloned) {
-            clonedResponse = response.clone();
+          // Use safe response body management
+          if (responseBodyManager.canReadBody(response)) {
+            clonedResponse = responseBodyManager.safeClone(response);
             const contentType = response.headers.get('content-type');
             if (contentType?.includes('application/json')) {
               responseData = await clonedResponse.json();
@@ -120,12 +122,13 @@ export class CampaignNetworkLogger {
               responseData = await clonedResponse.text();
             }
           } else {
-            // Response already used or cloned, just log metadata
-            responseData = `[Response body already consumed]`;
+            // Response already used, just log metadata
+            responseData = `[Response body already consumed - status: ${response.status}]`;
           }
         } catch (error) {
           responseError = `Failed to parse response: ${error}`;
-          // Don't throw here, just log the error
+          responseData = `[Parse error - status: ${response.status}]`;
+          console.warn('Network logger failed to parse response:', error);
         }
 
         // Complete request log
