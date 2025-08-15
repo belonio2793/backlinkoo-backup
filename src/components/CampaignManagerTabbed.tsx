@@ -592,6 +592,16 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                           <Button
                             size="sm"
                             variant="outline"
+                            onClick={() => handleViewDetails(campaign.id)}
+                            title="View Campaign Details"
+                            className="border-blue-300 text-blue-700 hover:bg-blue-50"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+
+                          <Button
+                            size="sm"
+                            variant="outline"
                             onClick={() => handleDeleteCampaign(campaign.id, campaign.keywords?.[0] || campaign.name)}
                             disabled={actionLoading === campaign.id}
                             title="Delete Campaign"
