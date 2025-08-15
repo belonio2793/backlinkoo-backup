@@ -436,9 +436,16 @@ const Automation = () => {
                   <p className="text-sm text-gray-500">
                     The URL where your backlink will point. You can enter with or without https://
                   </p>
-                  {smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') && formData.targetUrl && (
+                  {formData.targetUrl && !formData.targetUrl.startsWith('http') && formData.targetUrl.includes('.') && (
+                    <p className="text-sm text-blue-600 flex items-center gap-1">
+                      <Wand2 className="h-3 w-3" />
+                      Will auto-format to: {smartFlow.autoFormatUrl(formData.targetUrl)}
+                    </p>
+                  )}
+                  {smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') && formData.targetUrl &&
+                   !formData.targetUrl.includes('.') && (
                     <p className="text-sm text-amber-600">
-                      URL will be auto-formatted when you finish typing or click the format button
+                      Please enter a valid domain (e.g., example.com)
                     </p>
                   )}
                 </div>
