@@ -531,6 +531,169 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                     )}
                   </TabsContent>
 
+                  <TabsContent value="network" className="mt-4 space-y-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                      {/* Network Requests */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Network className="w-4 h-4" />
+                            HTTP Requests ({campaignInfo.networkRequests.length})
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ScrollArea className="h-80">
+                            <div className="space-y-2">
+                              {campaignInfo.networkRequests.length === 0 ? (
+                                <p className="text-gray-500 text-center py-8">No network requests recorded</p>
+                              ) : (
+                                campaignInfo.networkRequests.map((request) => (
+                                  <div key={request.id} className="border rounded-lg p-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center gap-2">
+                                        <Badge
+                                          variant={
+                                            request.response?.status && request.response.status >= 400
+                                              ? "destructive"
+                                              : request.response?.status && request.response.status >= 200 && request.response.status < 300
+                                              ? "default"
+                                              : "secondary"
+                                          }
+                                          className="text-xs"
+                                        >
+                                          {request.method}
+                                        </Badge>
+                                        <Badge variant="outline" className="text-xs">
+                                          {request.type}
+                                        </Badge>
+                                        <Badge variant="outline" className="text-xs">
+                                          {request.step}
+                                        </Badge>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        {request.response && (
+                                          <Badge
+                                            variant={
+                                              request.response.status >= 400 ? "destructive" :
+                                              request.response.status >= 200 && request.response.status < 300 ? "default" : "secondary"
+                                            }
+                                            className="text-xs"
+                                          >
+                                            {request.response.status}
+                                          </Badge>
+                                        )}
+                                        <span className="text-xs text-gray-500">
+                                          {request.duration}ms
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <div className="text-sm mb-2">
+                                      <strong>URL:</strong> <code className="text-xs bg-gray-100 px-1 rounded">{request.url}</code>
+                                    </div>
+                                    <div className="text-xs text-gray-500 mb-2">
+                                      {request.timestamp.toLocaleString()}
+                                    </div>
+                                    {request.response?.error && (
+                                      <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
+                                        <strong>Error:</strong> {request.response.error}
+                                      </div>
+                                    )}
+                                    {request.body && (
+                                      <details className="mt-2">
+                                        <summary className="text-xs text-blue-600 cursor-pointer">Request Body</summary>
+                                        <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
+                                          {JSON.stringify(request.body, null, 2)}
+                                        </pre>
+                                      </details>
+                                    )}
+                                    {request.response?.data && (
+                                      <details className="mt-2">
+                                        <summary className="text-xs text-blue-600 cursor-pointer">Response Data</summary>
+                                        <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
+                                          {JSON.stringify(request.response.data, null, 2)}
+                                        </pre>
+                                      </details>
+                                    )}
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          </ScrollArea>
+                        </CardContent>
+                      </Card>
+
+                      {/* Database Queries */}
+                      <Card>
+                        <CardHeader>
+                          <CardTitle className="flex items-center gap-2">
+                            <Database className="w-4 h-4" />
+                            Database Queries ({campaignInfo.databaseQueries.length})
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <ScrollArea className="h-80">
+                            <div className="space-y-2">
+                              {campaignInfo.databaseQueries.length === 0 ? (
+                                <p className="text-gray-500 text-center py-8">No database queries recorded</p>
+                              ) : (
+                                campaignInfo.databaseQueries.map((query) => (
+                                  <div key={query.id} className="border rounded-lg p-3">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center gap-2">
+                                        <Badge
+                                          variant={query.error ? "destructive" : "default"}
+                                          className="text-xs"
+                                        >
+                                          {query.operation.toUpperCase()}
+                                        </Badge>
+                                        <Badge variant="outline" className="text-xs">
+                                          {query.table}
+                                        </Badge>
+                                        <Badge variant="outline" className="text-xs">
+                                          {query.step}
+                                        </Badge>
+                                      </div>
+                                      <span className="text-xs text-gray-500">
+                                        {query.duration}ms
+                                      </span>
+                                    </div>
+                                    <div className="text-sm mb-2">
+                                      <strong>Query:</strong> <code className="text-xs bg-gray-100 px-1 rounded">{query.query}</code>
+                                    </div>
+                                    <div className="text-xs text-gray-500 mb-2">
+                                      {query.timestamp.toLocaleString()}
+                                    </div>
+                                    {query.error && (
+                                      <div className="text-sm text-red-600 bg-red-50 p-2 rounded">
+                                        <strong>Error:</strong> {query.error}
+                                      </div>
+                                    )}
+                                    {query.params && (
+                                      <details className="mt-2">
+                                        <summary className="text-xs text-blue-600 cursor-pointer">Parameters</summary>
+                                        <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
+                                          {JSON.stringify(query.params, null, 2)}
+                                        </pre>
+                                      </details>
+                                    )}
+                                    {query.result && (
+                                      <details className="mt-2">
+                                        <summary className="text-xs text-blue-600 cursor-pointer">Result</summary>
+                                        <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
+                                          {JSON.stringify(query.result, null, 2)}
+                                        </pre>
+                                      </details>
+                                    )}
+                                  </div>
+                                ))
+                              )}
+                            </div>
+                          </ScrollArea>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  </TabsContent>
+
                   <TabsContent value="logs" className="mt-4 space-y-4">
                     <Card>
                       <CardHeader>
