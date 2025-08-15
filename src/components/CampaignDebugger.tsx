@@ -1,232 +1,306 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle, CheckCircle, Bug, Database, Zap } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { supabase } from '@/integrations/supabase/client';
-import { liveCampaignManager } from '@/services/liveCampaignManager';
-import { toast } from 'sonner';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { 
+  Play,
+  Settings,
+  Database,
+  TestTube,
+  CheckCircle,
+  XCircle,
+  Loader2,
+  ExternalLink,
+  AlertTriangle,
+  RefreshCw
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
-export const CampaignDebugger: React.FC = () => {
-  const { user } = useAuth();
-  const [testing, setTesting] = useState(false);
-  const [testResults, setTestResults] = useState<any[]>([]);
+export function CampaignDebugger() {
+  const [isFixingSchema, setIsFixingSchema] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
+  const [schemaResult, setSchemaResult] = useState<any>(null);
+  const [testResult, setTestResult] = useState<any>(null);
+  const { toast } = useToast();
 
-  const addResult = (test: string, result: boolean, details?: any) => {
-    setTestResults(prev => [...prev, { test, result, details, timestamp: new Date() }]);
-  };
-
-  const runDiagnostics = async () => {
-    setTesting(true);
-    setTestResults([]);
+  const fixDatabaseSchema = async () => {
+    setIsFixingSchema(true);
+    setSchemaResult(null);
 
     try {
-      // Test 1: Database connectivity
-      addResult('Database Connection', true, 'Initial connection check');
-      
-      try {
-        const { data, error } = await supabase.from('automation_campaigns').select('count').limit(1);
-        if (error) {
-          addResult('Database Query Test', false, error.message);
-        } else {
-          addResult('Database Query Test', true, 'Can query automation_campaigns table');
+      const response = await fetch('/.netlify/functions/fix-campaign-schema', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         }
-      } catch (dbError: any) {
-        addResult('Database Query Test', false, dbError.message);
-      }
+      });
 
-      // Test 2: User authentication
-      if (!user) {
-        addResult('User Authentication', false, 'No user logged in');
+      const result = await response.json();
+      setSchemaResult(result);
+
+      if (result.success) {
+        toast({
+          title: "Schema Fixed",
+          description: "Database schema has been updated successfully",
+        });
       } else {
-        addResult('User Authentication', true, `User ID: ${user.id}`);
+        toast({
+          title: "Schema Fix Failed",
+          description: result.error || "Failed to fix database schema",
+          variant: "destructive"
+        });
       }
-
-      // Test 3: Check table schema
-      try {
-        const { data: columns, error: schemaError } = await supabase
-          .rpc('check_table_columns', { table_name: 'automation_campaigns' })
-          .catch(async () => {
-            // Fallback to direct query if RPC doesn't exist
-            return await supabase
-              .from('information_schema.columns')
-              .select('column_name')
-              .eq('table_name', 'automation_campaigns')
-              .eq('table_schema', 'public');
-          });
-
-        if (schemaError) {
-          addResult('Table Schema Check', false, schemaError.message);
-        } else {
-          addResult('Table Schema Check', true, `Found ${columns?.length || 0} columns`);
-        }
-      } catch (schemaError: any) {
-        addResult('Table Schema Check', false, schemaError.message);
-      }
-
-      // Test 4: Try creating a test campaign
-      if (user) {
-        try {
-          const testCampaignData = {
-            name: `Debug Test Campaign ${Date.now()}`,
-            keywords: ['test keyword'],
-            anchor_texts: ['test anchor'],
-            target_url: 'https://example.com',
-            user_id: user.id,
-            auto_start: false
-          };
-
-          addResult('Campaign Data Validation', true, 'Test data prepared');
-
-          // Test direct Supabase insert
-          const { data: insertData, error: insertError } = await supabase
-            .from('automation_campaigns')
-            .insert({
-              name: testCampaignData.name,
-              keywords: testCampaignData.keywords,
-              anchor_texts: testCampaignData.anchor_texts,
-              target_url: testCampaignData.target_url,
-              user_id: testCampaignData.user_id,
-              status: 'draft',
-              links_built: 0,
-              available_sites: 4,
-              target_sites_used: [],
-              auto_start: testCampaignData.auto_start,
-              published_articles: []
-            })
-            .select()
-            .single();
-
-          if (insertError) {
-            addResult('Direct Database Insert', false, insertError.message);
-          } else {
-            addResult('Direct Database Insert', true, `Campaign created with ID: ${insertData.id}`);
-            
-            // Clean up test campaign
-            await supabase.from('automation_campaigns').delete().eq('id', insertData.id);
-            addResult('Test Cleanup', true, 'Test campaign deleted');
-          }
-
-        } catch (campaignError: any) {
-          addResult('Campaign Creation Test', false, campaignError.message);
-        }
-      }
-
-      // Test 5: Test campaign manager
-      if (user) {
-        try {
-          const managerResult = await liveCampaignManager.createCampaign({
-            name: `Manager Test ${Date.now()}`,
-            keywords: ['test'],
-            anchor_texts: ['test'],
-            target_url: 'https://example.com',
-            user_id: user.id,
-            auto_start: false
-          });
-
-          if (managerResult.success) {
-            addResult('Campaign Manager Test', true, `Campaign ID: ${managerResult.campaign?.id}`);
-            // Clean up
-            if (managerResult.campaign?.id) {
-              await liveCampaignManager.deleteCampaign(managerResult.campaign.id, user.id);
-              addResult('Manager Cleanup', true, 'Test campaign deleted via manager');
-            }
-          } else {
-            addResult('Campaign Manager Test', false, managerResult.error);
-          }
-        } catch (managerError: any) {
-          addResult('Campaign Manager Test', false, managerError.message);
-        }
-      }
-
-    } catch (error: any) {
-      addResult('Diagnostic Error', false, error.message);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setSchemaResult({ success: false, error: errorMessage });
+      toast({
+        title: "Error",
+        description: "Failed to fix database schema: " + errorMessage,
+        variant: "destructive"
+      });
     } finally {
-      setTesting(false);
+      setIsFixingSchema(false);
+    }
+  };
+
+  const runCampaignTest = async () => {
+    setIsTesting(true);
+    setTestResult(null);
+
+    try {
+      const response = await fetch('/.netlify/functions/test-campaign-flow', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+
+      const result = await response.json();
+      setTestResult(result);
+
+      if (result.success && result.testResults?.summary?.testPassed) {
+        toast({
+          title: "Campaign Test Passed",
+          description: `Successfully created ${result.testResults.summary.validUrls} working links`,
+        });
+      } else {
+        toast({
+          title: "Campaign Test Failed",
+          description: result.error || "Campaign test did not pass",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      setTestResult({ success: false, error: errorMessage });
+      toast({
+        title: "Error",
+        description: "Failed to run campaign test: " + errorMessage,
+        variant: "destructive"
+      });
+    } finally {
+      setIsTesting(false);
     }
   };
 
   return (
-    <Card className="max-w-4xl mx-auto">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Bug className="h-5 w-5" />
-          Campaign Creation Debugger
-        </CardTitle>
-        <CardDescription>
-          Run diagnostics to identify why campaign creation is failing
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Button 
-          onClick={runDiagnostics}
-          disabled={testing}
-          className="w-full"
-        >
-          {testing ? (
-            <>
-              <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-              Running Diagnostics...
-            </>
-          ) : (
-            <>
-              <Zap className="h-4 w-4 mr-2" />
-              Run Campaign Diagnostics
-            </>
-          )}
-        </Button>
-
-        {testResults.length > 0 && (
-          <div className="space-y-2">
-            <h3 className="text-lg font-semibold">Diagnostic Results</h3>
-            {testResults.map((result, index) => (
-              <div key={index} className="flex items-start gap-3 p-3 border rounded-lg">
-                <div className="flex-shrink-0 mt-0.5">
-                  {result.result ? (
-                    <CheckCircle className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <AlertCircle className="h-4 w-4 text-red-500" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium">{result.test}</span>
-                    <Badge variant={result.result ? "default" : "destructive"}>
-                      {result.result ? "PASS" : "FAIL"}
-                    </Badge>
-                  </div>
-                  {result.details && (
-                    <p className="text-sm text-gray-600 mt-1">
-                      {typeof result.details === 'string' ? result.details : JSON.stringify(result.details, null, 2)}
-                    </p>
-                  )}
-                </div>
+    <div className="space-y-6 p-6 max-w-4xl mx-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Settings className="w-5 h-5" />
+            Campaign System Debugger
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          
+          {/* Database Schema Fix */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium flex items-center gap-2">
+                  <Database className="w-4 h-4" />
+                  Fix Database Schema
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Create missing tables: automation_campaigns, automation_published_links, activity_logs
+                </p>
               </div>
-            ))}
-          </div>
-        )}
+              <Button 
+                onClick={fixDatabaseSchema} 
+                disabled={isFixingSchema}
+                className="flex items-center gap-2"
+              >
+                {isFixingSchema ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Database className="w-4 h-4" />
+                )}
+                {isFixingSchema ? 'Fixing...' : 'Fix Schema'}
+              </Button>
+            </div>
 
-        {testResults.length > 0 && (
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <h4 className="font-medium text-blue-800 mb-2">Next Steps:</h4>
-            <ul className="text-sm text-blue-700 space-y-1">
-              {testResults.some(r => !r.result && r.test.includes('Database')) && (
-                <li>• Database connection issues detected - check environment variables</li>
-              )}
-              {testResults.some(r => !r.result && r.test.includes('Authentication')) && (
-                <li>• User authentication required - please sign in</li>
-              )}
-              {testResults.some(r => !r.result && r.test.includes('Schema')) && (
-                <li>• Database schema issues - missing columns or table structure problems</li>
-              )}
-              {testResults.some(r => !r.result && r.test.includes('Campaign')) && (
-                <li>• Campaign creation logic issues - check the error details above</li>
-              )}
-            </ul>
+            {schemaResult && (
+              <Alert className={schemaResult.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                <div className="flex items-center gap-2">
+                  {schemaResult.success ? (
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                  ) : (
+                    <XCircle className="h-4 w-4 text-red-600" />
+                  )}
+                  <AlertDescription className={schemaResult.success ? 'text-green-700' : 'text-red-700'}>
+                    {schemaResult.success ? 'Database schema fixed successfully!' : `Error: ${schemaResult.error}`}
+                  </AlertDescription>
+                </div>
+              </Alert>
+            )}
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          {/* Campaign Flow Test */}
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium flex items-center gap-2">
+                  <TestTube className="w-4 h-4" />
+                  Test Campaign Flow
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Run end-to-end test: Generate content → Publish to Telegraph → Validate URLs
+                </p>
+              </div>
+              <Button 
+                onClick={runCampaignTest} 
+                disabled={isTesting}
+                className="flex items-center gap-2"
+              >
+                {isTesting ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Play className="w-4 h-4" />
+                )}
+                {isTesting ? 'Testing...' : 'Run Test'}
+              </Button>
+            </div>
+
+            {testResult && (
+              <div className="space-y-4">
+                <Alert className={testResult.success ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'}>
+                  <div className="flex items-center gap-2">
+                    {testResult.success ? (
+                      <CheckCircle className="h-4 w-4 text-green-600" />
+                    ) : (
+                      <XCircle className="h-4 w-4 text-red-600" />
+                    )}
+                    <AlertDescription className={testResult.success ? 'text-green-700' : 'text-red-700'}>
+                      {testResult.success ? 'Campaign test completed!' : `Error: ${testResult.error}`}
+                    </AlertDescription>
+                  </div>
+                </Alert>
+
+                {testResult.success && testResult.testResults && (
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-blue-600">
+                            {testResult.testResults.summary?.totalPosts || 0}
+                          </div>
+                          <div className="text-sm text-gray-600">Posts Generated</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-green-600">
+                            {testResult.testResults.summary?.validUrls || 0}
+                          </div>
+                          <div className="text-sm text-gray-600">Valid URLs</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    
+                    <Card>
+                      <CardContent className="p-4">
+                        <div className="text-center">
+                          <div className="text-2xl font-bold text-purple-600">
+                            {testResult.testResults.summary?.testPassed ? 'PASS' : 'FAIL'}
+                          </div>
+                          <div className="text-sm text-gray-600">Test Result</div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+
+                {testResult.testResults?.urlValidation?.details && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-sm">Published URLs</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <ScrollArea className="h-40">
+                        <div className="space-y-2">
+                          {testResult.testResults.urlValidation.details.map((urlTest: any, index: number) => (
+                            <div key={index} className="flex items-center justify-between p-2 border rounded">
+                              <div className="flex items-center gap-2">
+                                {urlTest.valid ? (
+                                  <CheckCircle className="w-4 h-4 text-green-500" />
+                                ) : (
+                                  <XCircle className="w-4 h-4 text-red-500" />
+                                )}
+                                <span className="text-sm font-mono text-gray-600">
+                                  {urlTest.url}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant={urlTest.valid ? 'default' : 'destructive'}>
+                                  {urlTest.status}
+                                </Badge>
+                                {urlTest.valid && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={() => window.open(urlTest.url, '_blank')}
+                                  >
+                                    <ExternalLink className="w-3 h-3" />
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Instructions */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-sm flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4" />
+                Troubleshooting Steps
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ol className="list-decimal list-inside space-y-2 text-sm">
+                <li>First, click "Fix Schema" to create missing database tables</li>
+                <li>Then click "Run Test" to verify the campaign flow works</li>
+                <li>If test passes, campaigns should work normally</li>
+                <li>If test fails, check the error messages for specific issues</li>
+                <li>Common issues: Missing OpenAI API key, Supabase permissions, network errors</li>
+              </ol>
+            </CardContent>
+          </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
-};
+}
