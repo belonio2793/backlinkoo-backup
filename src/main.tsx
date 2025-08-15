@@ -273,6 +273,7 @@ if (import.meta.env.DEV) {
   import('./utils/fetchTestHelper');
   import('./utils/automationPipelineTest');
   import('./utils/testResponseBodyFix');
+  import('./utils/testBacklinkNotification');
 
   console.log('  - disableViteProtection() - Disable fetch protection and refresh');
   console.log('  - testContentGeneration() - Test content generation functions');
@@ -287,6 +288,8 @@ if (import.meta.env.DEV) {
   console.log('  - testCampaignTabs() - Test campaign manager tabs and live links');
   console.log('  - testResponseBodyFix() - Test response body conflict prevention');
   console.log('  - testDevelopmentProcessor() - Test mock content + Telegraph publishing');
+  console.log('  - testBacklinkNotification() - Test single backlink notification');
+  console.log('  - testMultipleNotifications() - Test multiple backlink notifications');
   console.log('  - fetchTest.runDiagnostics() - Test fetch and network connectivity');
 }
 
