@@ -235,26 +235,8 @@ export const supabase = hasValidCredentials ?
       headers: {
         'X-Client-Info': 'backlink-infinity@1.0.0',
       },
-      fetch: async (url, options = {}) => {
-        try {
-          // Use native fetch with simple timeout
-          const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 30000);
-
-          const response = await fetch(url, {
-            ...options,
-            signal: controller.signal,
-          });
-
-          clearTimeout(timeoutId);
-          return response;
-        } catch (error) {
-          if (error.name === 'AbortError') {
-            throw new Error('Request timeout - please try again');
-          }
-          throw error;
-        }
-      },
+      // SIMPLIFIED: Use native fetch directly to avoid interference
+      // Remove custom fetch wrapper that may conflict with FullStory
     },
   }) :
   createMockSupabaseClient() as any;
