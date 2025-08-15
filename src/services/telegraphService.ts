@@ -36,9 +36,8 @@ export class TelegraphService {
    */
   async createAccount(): Promise<TelegraphAccount> {
     try {
-      // Use native fetch to avoid FullStory interference
-      const originalFetch = window.fetch;
-      const fetchToUse = originalFetch && typeof originalFetch === 'function' ? originalFetch : fetch;
+      // Use stored original fetch to avoid FullStory interference
+      const fetchToUse = window._originalFetch || window.fetch || fetch;
 
       const response = await fetchToUse.call(window, `${this.baseUrl}/createAccount`, {
         method: 'POST',
