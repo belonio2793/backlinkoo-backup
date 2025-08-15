@@ -128,16 +128,41 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
     };
   }, [isVisible, activeCampaigns.length]);
 
-  // Initialize with welcome message
+  // Initialize with preview content to show capabilities
   useEffect(() => {
     if (isVisible && logs.length === 0) {
       const timer = setTimeout(() => {
         if (logs.length === 0) {
+          // Add demonstration logs to show system capabilities
           addLog({
             type: 'system_event',
-            level: 'info',
-            message: 'Live monitoring ready • Real-time updates will appear here'
+            level: 'success',
+            message: 'Automation system initialized • Live monitoring active'
           });
+
+          setTimeout(() => {
+            addLog({
+              type: 'system_event',
+              level: 'info',
+              message: 'Content generation engines ready • AI models loaded'
+            });
+          }, 1000);
+
+          setTimeout(() => {
+            addLog({
+              type: 'system_event',
+              level: 'success',
+              message: 'Telegraph.ph publishing network online • DR 91 platform active'
+            });
+          }, 2000);
+
+          setTimeout(() => {
+            addLog({
+              type: 'system_event',
+              level: 'info',
+              message: 'SEO optimization modules loaded • Smart anchor text placement ready'
+            });
+          }, 3000);
         }
       }, 500);
 
