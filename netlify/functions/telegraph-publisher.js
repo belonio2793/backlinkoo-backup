@@ -113,9 +113,15 @@ export const handler = async (event, context) => {
         platform: 'Telegraph',
         user_id,
         keyword,
-        content_preview: content.substring(0, 200)
+        content_preview: content.substring(0, 200),
+        target_url: '', // Will be filled by the calling function
+        anchor_text: '' // Will be filled by the calling function
       });
     }
+
+    // Emit real-time event for the published URL
+    // This will be picked up by the BacklinkNotification component
+    console.log('📡 Emitting real-time event for published URL:', pageUrl);
 
     return {
       statusCode: 200,
@@ -218,15 +224,53 @@ function processLinksInText(text) {
 // Store published article in database for reporting
 async function storePublishedArticle(articleData) {
   try {
-    // This would integrate with your Supabase database
-    // For now, we'll just log it
-    console.log('📊 Article data for database:', articleData);
-    
-    // In a real implementation, you would:
-    // 1. Initialize Supabase client
-    // 2. Insert into article_submissions table
-    // 3. Update campaign statistics
-    
+    const { createClient } = require('@supabase/supabase-js');
+
+    const supabaseUrl = process.env.VITE_SUPABASE_URL;
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.log('⚠️ Supabase not configured, skipping database storage');
+      return true;
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Generate a slug from the title
+    const slug = articleData.title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .substring(0, 100);
+
+    // Insert into published_blog_posts table
+    const blogPostData = {
+      user_id: articleData.user_id,
+      title: articleData.title,
+      content: articleData.content_preview || 'Content generated via automation',
+      slug: `${slug}-${Date.now()}`, // Make it unique
+      excerpt: articleData.content_preview?.substring(0, 200) || '',
+      target_url: articleData.target_url || '',
+      anchor_text: articleData.anchor_text || '',
+      keyword: articleData.keyword || '',
+      platform: 'telegraph',
+      published_url: articleData.url,
+      status: 'published',
+      is_trial_post: true,
+      validation_status: 'pending',
+      created_at: new Date().toISOString()
+    };
+
+    const { error } = await supabase
+      .from('published_blog_posts')
+      .insert([blogPostData]);
+
+    if (error) {
+      console.error('Failed to store published article:', error);
+      return false;
+    }
+
+    console.log('✅ Article stored in database successfully');
     return true;
   } catch (error) {
     console.error('Failed to store article data:', error);
