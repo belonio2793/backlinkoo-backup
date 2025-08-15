@@ -138,6 +138,27 @@ export class RealTimeFeedService {
   }
 
   /**
+   * Emit campaign auto-paused event (due to errors)
+   */
+  emitCampaignAutoPaused(campaignId: string, campaignName: string, keyword: string, errorMessage: string, errorType?: string, userId?: string): void {
+    this.emit({
+      type: 'campaign_paused',
+      level: 'error',
+      message: `Campaign "${keyword}" auto-paused - ${errorMessage}`,
+      campaignId,
+      campaignName,
+      userId,
+      details: {
+        keyword,
+        reason: `Auto-paused: ${errorMessage}`,
+        errorMessage,
+        errorType,
+        action: 'auto_pause'
+      }
+    });
+  }
+
+  /**
    * Emit campaign resumed event
    */
   emitCampaignResumed(campaignId: string, campaignName: string, keyword: string, reason?: string, userId?: string): void {
