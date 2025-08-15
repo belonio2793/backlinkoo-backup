@@ -411,7 +411,8 @@ const Automation = () => {
           </div>
         )}
 
-
+        {/* Campaign Resume Debugger */}
+        <CampaignResumeFixer />
 
         {/* Main Content - Top Row: Campaign Creation, Activity, Live Monitor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mb-4">
