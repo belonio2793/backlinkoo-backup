@@ -115,17 +115,11 @@ const Automation = () => {
   };
 
   const handleCreateCampaign = async () => {
-    if (!validateForm()) return;
-
-    // Check authentication first
-    if (!isAuthenticated) {
-      // Save form data before showing auth modal
-      saveFormData(formData);
-      setShowAuthModal(true);
-      return;
-    }
-
-    await createCampaign();
+    await smartFlow.handleCampaignAction(
+      formData,
+      createCampaign,
+      () => setShowAuthModal(true)
+    );
   };
 
   const createCampaign = async () => {
