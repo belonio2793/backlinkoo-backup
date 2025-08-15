@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Globe, ExternalLink, X, CheckCircle } from 'lucide-react';
-import { realTimeFeedService, type FeedEvent } from '@/services/realTimeFeedService';
+import { realTimeFeedService, type RealTimeFeedEvent } from '@/services/realTimeFeedService';
 
 interface BacklinkNotificationProps {
   isVisible?: boolean;
