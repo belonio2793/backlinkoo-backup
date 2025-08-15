@@ -733,10 +733,25 @@ const Automation = () => {
           </div>
         </div>
 
+        {/* Authentication Modal */}
+        <AutomationAuthModal
+          isOpen={showAuthModal}
+          onClose={handleAuthModalClose}
+          onSuccess={handleAuthSuccess}
+          campaignData={hasValidSavedData(savedFormData) ? savedFormData : undefined}
+        />
+
         {/* Form Completion Celebration */}
         <FormCompletionCelebration
           isVisible={showCelebration}
           onComplete={() => setShowCelebration(false)}
+        />
+
+        {/* Enhanced Real Time Feed */}
+        <EnhancedRealTimeFeed
+          isOpen={showEnhancedFeed}
+          onClose={() => setShowEnhancedFeed(false)}
+          activeCampaigns={activeCampaigns}
         />
 
       </div>
