@@ -61,7 +61,24 @@ export class AutomationOrchestrator {
   private progressListeners: Map<string, (progress: CampaignProgress) => void> = new Map();
   private campaignProgressMap: Map<string, CampaignProgress> = new Map();
   private platformProgressMap: Map<string, CampaignPlatformProgress[]> = new Map();
-  
+
+  /**
+   * Validate Supabase client is available for database operations
+   */
+  private validateSupabaseClient(): boolean {
+    if (!supabase) {
+      console.error('❌ AutomationOrchestrator: Supabase client not available');
+      return false;
+    }
+
+    if (!supabase.from) {
+      console.error('❌ AutomationOrchestrator: Supabase.from method not available - using mock client?');
+      return false;
+    }
+
+    return true;
+  }
+
   /**
    * Get active publishing platforms
    */
