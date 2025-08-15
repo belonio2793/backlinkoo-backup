@@ -78,39 +78,118 @@ export class SimpleContentFormatter {
   private static wrapInParagraphs(content: string): string {
     // Split by double line breaks for paragraphs
     const paragraphs = content.split(/\n\s*\n/);
+    const result: string[] = [];
+    let i = 0;
 
-    return paragraphs
-      .map(paragraph => {
-        paragraph = paragraph.trim();
-        if (!paragraph) return '';
+    while (i < paragraphs.length) {
+      let paragraph = paragraphs[i].trim();
+      if (!paragraph) {
+        i++;
+        continue;
+      }
 
-        // Skip if already wrapped in HTML tags
-        if (paragraph.match(/^<(h[1-6]|ul|ol|blockquote|div)/i)) {
-          return paragraph;
+      // Skip if already wrapped in HTML tags
+      if (paragraph.match(/^<(h[1-6]|ul|ol|blockquote|div)/i)) {
+        result.push(paragraph);
+        i++;
+        continue;
+      }
+
+      // Check if this starts a numbered list
+      if (paragraph.match(/^\d+\.\s/)) {
+        // Collect consecutive numbered items
+        const listItems: string[] = [paragraph];
+        let j = i + 1;
+
+        while (j < paragraphs.length) {
+          const nextPara = paragraphs[j].trim();
+          if (nextPara.match(/^\d+\.\s/)) {
+            listItems.push(nextPara);
+            j++;
+          } else {
+            break;
+          }
         }
 
-        // Handle list items
-        if (paragraph.match(/^[\*\-\+\d\.]\s/)) {
-          return this.processList(paragraph);
+        // Process as ordered list
+        const processedList = this.processOrderedList(listItems);
+        result.push(processedList);
+        i = j;
+        continue;
+      }
+
+      // Check if this starts a bullet list
+      if (paragraph.match(/^[\*\-\+]\s/)) {
+        // Collect consecutive bullet items
+        const listItems: string[] = [paragraph];
+        let j = i + 1;
+
+        while (j < paragraphs.length) {
+          const nextPara = paragraphs[j].trim();
+          if (nextPara.match(/^[\*\-\+]\s/)) {
+            listItems.push(nextPara);
+            j++;
+          } else {
+            break;
+          }
         }
 
-        // Wrap in paragraph tags
-        return `<p>${paragraph}</p>`;
-      })
-      .filter(p => p.length > 0)
-      .join('\n\n');
+        // Process as unordered list
+        const processedList = this.processUnorderedList(listItems);
+        result.push(processedList);
+        i = j;
+        continue;
+      }
+
+      // Regular paragraph
+      result.push(`<p>${paragraph}</p>`);
+      i++;
+    }
+
+    return result.filter(p => p.length > 0).join('\n\n');
   }
 
   /**
-   * Process simple lists
+   * Process ordered list items
+   */
+  private static processOrderedList(items: string[]): string {
+    const listItems = items
+      .map(item => {
+        const cleanItem = item.replace(/^\d+\.\s+/, '').trim();
+        return cleanItem ? `  <li>${cleanItem}</li>` : '';
+      })
+      .filter(item => item)
+      .join('\n');
+
+    return `<ol>\n${listItems}\n</ol>`;
+  }
+
+  /**
+   * Process unordered list items
+   */
+  private static processUnorderedList(items: string[]): string {
+    const listItems = items
+      .map(item => {
+        const cleanItem = item.replace(/^[\*\-\+]\s+/, '').trim();
+        return cleanItem ? `  <li>${cleanItem}</li>` : '';
+      })
+      .filter(item => item)
+      .join('\n');
+
+    return `<ul>\n${listItems}\n</ul>`;
+  }
+
+  /**
+   * Process simple lists (legacy method for backward compatibility)
    */
   private static processList(content: string): string {
     const lines = content.split('\n');
     const isOrdered = lines[0].match(/^\d+\.\s/);
-    
+
     const listItems = lines
       .map(line => {
-        const cleanLine = line.replace(/^[\*\-\+\d\.]\s/, '').trim();
+        // Remove numbered list markers (1., 2., etc.) or bullet markers (*, -, +)
+        const cleanLine = line.replace(/^(?:\d+\.|[\*\-\+])\s+/, '').trim();
         return cleanLine ? `  <li>${cleanLine}</li>` : '';
       })
       .filter(item => item)

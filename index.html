@@ -33,6 +33,19 @@
   <body>
     <div id="root"></div>
 
+    <!-- Emergency FullStory disable (if causing fetch interference) -->
+    <script>
+      // Check if we need to disable FullStory due to fetch errors
+      if (localStorage.getItem('disable_fullstory') === 'true' ||
+          new URLSearchParams(window.location.search).get('no_fullstory') === 'true') {
+        console.log('🚫 FullStory disabled via emergency setting');
+        // Load the disable script
+        const script = document.createElement('script');
+        script.src = '/disable-fullstory.js';
+        document.head.appendChild(script);
+      }
+    </script>
+
     <!-- Prevent wallet extension conflicts -->
     <script>
       // Defensive code to prevent ethereum object redefinition errors

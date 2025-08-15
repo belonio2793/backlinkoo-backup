@@ -17,6 +17,8 @@ import './utils/silentErrorTest'
 // import './utils/directDatabaseFix' // Disabled - using new blog comment system
 // Emergency fetch fix (load first)
 import './utils/emergencyFetchFix'
+// Network error handler for user-friendly solutions
+import './utils/errorHandler'
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
 // Protect Vite client from FullStory interference in development
@@ -117,6 +119,9 @@ if (import.meta.env.DEV) {
     (window as any).checkUserSubscription = checkUserSubscription;
   });
 
+  // Import blog post fix utility
+  import('./utils/fixEmptyBlogPost');
+
   console.log('💡 Debug helpers available:');
   console.log('  - fixRLS() - Go to RLS recursion fix page');
   console.log('  - forcePremium() - Force current user to premium status');
@@ -205,12 +210,16 @@ if (import.meta.env.DEV) {
     }
   };
 
+  // Import fetch test helper
+  import('./utils/fetchTestHelper');
+
   console.log('  - disableViteProtection() - Disable fetch protection and refresh');
   console.log('  - testContentGeneration() - Test content generation functions');
   console.log('  - fixFetchErrors() - Emergency fix for fetch protection issues');
   console.log('  - testClientContent() - Test client-side content generation');
   console.log('  - testClientTelegraph() - Test client-side Telegraph publishing');
   console.log('  - testFullPipeline() - Test complete automation pipeline');
+  console.log('  - fetchTest.runDiagnostics() - Test fetch and network connectivity');
 }
 
 // Priority: Get React app rendering ASAP
@@ -242,7 +251,7 @@ requestIdleCallback(() => {
 
         if (response.status === 404) {
           console.warn('⚠️ Content generation functions not available (404)');
-          console.warn('💡 Run window.testContentGeneration() to check all functions');
+          console.warn('��� Run window.testContentGeneration() to check all functions');
         } else if (response.ok) {
           console.log('✅ Content generation functions are working');
         } else {

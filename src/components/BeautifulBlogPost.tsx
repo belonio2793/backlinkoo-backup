@@ -56,6 +56,7 @@ import { SEOScoreDisplay } from '@/components/SEOScoreDisplay';
 import { KillerDeletionWarning } from '@/components/KillerDeletionWarning';
 import { ExitIntentPopup } from '@/components/ExitIntentPopup';
 import { BlogContentCleaner } from '@/utils/blogContentCleaner';
+import { EnhancedBlogCleaner } from '@/utils/enhancedBlogCleaner';
 import { processBlogContent } from '@/utils/markdownProcessor';
 
 type BlogPost = Tables<'blog_posts'>;
@@ -209,13 +210,22 @@ export function BeautifulBlogPost() {
       setLoading(true);
       setError(null);
 
-      console.log('Loading blog post with slug:', slug);
+      console.log('🔍 Loading blog post with slug:', slug);
 
       // First try database, if that fails, try localStorage fallback
       let post = null;
       try {
         post = await blogService.getBlogPostBySlug(slug);
-        console.log('Database query result:', post ? 'Found' : 'Not found');
+        console.log('📡 Database query result:', post ? 'Found' : 'Not found');
+        if (post) {
+          console.log('📄 Database post details:');
+          console.log('  - ID:', post.id);
+          console.log('  - Title:', post.title || 'NO TITLE');
+          console.log('  - Status:', post.status);
+          console.log('  - Content length:', post.content?.length || 0);
+          console.log('  - Created:', post.created_at);
+          console.log('  - Claimed:', post.claimed);
+        }
       } catch (dbError) {
         console.warn('Database lookup failed, trying localStorage fallback:', dbError);
         // Try to load from localStorage as fallback
@@ -281,7 +291,7 @@ export function BeautifulBlogPost() {
   const handleClaimPost = async () => {
     if (!user) {
       // Store claim intent and show modal instead of navigating
-      EnhancedBlogClaimService.handleClaimIntent(slug!, BlogContentCleaner.cleanTitle(blogPost?.title || ''));
+      EnhancedBlogClaimService.handleClaimIntent(slug!, EnhancedBlogCleaner.cleanTitle(blogPost?.title || ''));
       setShowClaimModal(true);
       return;
     }
@@ -955,7 +965,7 @@ export function BeautifulBlogPost() {
 
               {/* Title */}
               <h1 className="beautiful-blog-title text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight break-words">
-                {BlogContentCleaner.cleanTitle(blogPost.title)}
+                {EnhancedBlogCleaner.cleanTitle(blogPost.title)}
               </h1>
 
               {/* Meta Description */}
@@ -970,7 +980,17 @@ export function BeautifulBlogPost() {
                 <div className="beautiful-meta flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   <span className="font-medium text-sm md:text-base">
-                    {format(new Date(blogPost.created_at), 'MMMM dd, yyyy')}
+                    {(() => {
+                      try {
+                        if (!blogPost.created_at) return 'Date unknown';
+                        const date = new Date(blogPost.created_at);
+                        if (isNaN(date.getTime())) return 'Invalid date';
+                        return format(date, 'MMMM dd, yyyy');
+                      } catch (error) {
+                        console.error('Date formatting error:', error, 'Value:', blogPost.created_at);
+                        return 'Date error';
+                      }
+                    })()}
                   </span>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
@@ -1014,22 +1034,38 @@ export function BeautifulBlogPost() {
                       try {
                         let content = blogPost.content || '';
 
-                        // Use simplified formatter to avoid over-processing
-                        const formattedContent = SimpleContentFormatter.formatBlogContent(content, blogPost.title);
+                        if (!content || content.length === 0) {
+                          return '<div style="padding: 20px; text-align: center; color: #ef4444;"><h3>Content Error</h3><p>This blog post appears to have no content. Try running <code>fixEmptyBlogPost()</code> in the browser console to fix this issue.</p></div>';
+                        }
+
+                        // First apply enhanced cleaning to remove titles and call-to-action text
+                        const cleanedContent = EnhancedBlogCleaner.cleanContent(content, blogPost.title);
+
+                        if (!cleanedContent || cleanedContent.length === 0) {
+                          const formattedOriginal = SimpleContentFormatter.formatBlogContent(content, blogPost.title);
+                          return formattedOriginal || `<p>${content}</p>`;
+                        }
+
+                        // Then use simplified formatter for HTML structure
+                        const formattedContent = SimpleContentFormatter.formatBlogContent(cleanedContent, blogPost.title);
 
                         // Validate the formatted content
                         const validation = SimpleContentFormatter.validateContent(formattedContent);
                         if (!validation.isValid) {
                           console.warn('Content validation failed:', validation.errors);
-                          // Fallback to basic HTML wrapping
-                          return `<p>${content.replace(/\n\n/g, '</p><p>')}</p>`;
+                          const fallback = `<p>${cleanedContent.replace(/\n\n/g, '</p><p>')}</p>`;
+                          return fallback;
                         }
 
                         return formattedContent;
                       } catch (formatError) {
-                        console.error('Content formatting failed:', formatError);
-                        // Return raw content as fallback
-                        return `<p>${(blogPost.content || '').replace(/\n\n/g, '</p><p>')}</p>`;
+                        console.error('💥 Content formatting failed:', formatError);
+                        // Return raw content as emergency fallback
+                        const rawContent = blogPost.content || '';
+                        if (rawContent) {
+                          return `<div style="padding: 20px;"><h3>Content Processing Error</h3><pre style="white-space: pre-wrap; font-family: inherit;">${rawContent}</pre></div>`;
+                        }
+                        return '<div style="padding: 20px; color: #ef4444;">Content could not be loaded or processed.</div>';
                       }
                     })()
                   }}
@@ -1279,7 +1315,7 @@ export function BeautifulBlogPost() {
         isOpen={showClaimModal}
         onClose={() => setShowClaimModal(false)}
         onAuthSuccess={handleAuthSuccess}
-        postTitle={BlogContentCleaner.cleanTitle(blogPost?.title || '')}
+        postTitle={EnhancedBlogCleaner.cleanTitle(blogPost?.title || '')}
         postSlug={slug || ''}
       />
 
@@ -1305,7 +1341,7 @@ export function BeautifulBlogPost() {
       <ExitIntentPopup
         isVisible={showExitPopup}
         onClose={() => setShowExitPopup(false)}
-        postTitle={BlogContentCleaner.cleanTitle(blogPost?.title || '')}
+        postTitle={EnhancedBlogCleaner.cleanTitle(blogPost?.title || '')}
         timeRemaining={blogPost?.expires_at ? getTimeRemaining(blogPost.expires_at) : '24 hours'}
       />
 
