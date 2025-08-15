@@ -259,6 +259,16 @@ if (import.meta.env.DEV) {
     }
   };
 
+  // Add development processor testing
+  (window as any).testDevelopmentProcessor = async () => {
+    try {
+      const { DevelopmentCampaignProcessor } = await import('./services/developmentCampaignProcessor');
+      return await DevelopmentCampaignProcessor.runTest();
+    } catch (error) {
+      console.error('❌ Development processor test failed:', error);
+    }
+  };
+
   // Import fetch test helper
   import('./utils/fetchTestHelper');
   import('./utils/automationPipelineTest');
