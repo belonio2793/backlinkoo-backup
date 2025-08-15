@@ -741,14 +741,22 @@ const Automation = () => {
           activeCampaigns={activeCampaigns}
         />
 
-        {/* Enhanced Feed Toggle Button */}
-        {activeCampaigns.length > 0 && !showEnhancedFeed && (
+        {/* Enhanced Feed Toggle Button - Always visible */}
+        {!showEnhancedFeed && (
           <Button
             className="fixed bottom-4 right-4 z-40 bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
             onClick={() => setShowEnhancedFeed(true)}
+            title={activeCampaigns.length === 0 ?
+              "Open live feed monitor (no active campaigns yet)" :
+              `View live feed for ${activeCampaigns.length} active campaign${activeCampaigns.length !== 1 ? 's' : ''}`
+            }
           >
             <Activity className="h-4 w-4 mr-2" />
-            View Feed ({activeCampaigns.length})
+            {activeCampaigns.length > 0 ? (
+              <>View Feed ({activeCampaigns.length})</>
+            ) : (
+              <>Live Feed</>
+            )}
           </Button>
         )}
       </div>
