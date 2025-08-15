@@ -18,83 +18,127 @@ export class AutomationContentService {
   async generateAllContent(params: ContentGenerationParams): Promise<GeneratedContent[]> {
     const { keyword, anchorText, targetUrl } = params;
 
-    try {
-      console.log(`Generating content for keyword: ${keyword}`);
+    // Retry logic
+    const maxRetries = 3;
+    let lastError: Error | null = null;
 
-      // Use mock content in development if OpenAI is not configured
-      const isDevelopment = import.meta.env.DEV;
-      const endpoint = isDevelopment ?
-        '/.netlify/functions/mock-automation-content' :
-        '/.netlify/functions/generate-automation-content';
-
-      console.log(`Using endpoint: ${endpoint} (development: ${isDevelopment})`);
-
-      // Call Netlify function for secure content generation
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          keyword,
-          anchorText,
-          targetUrl
-        })
-      });
-
-      // Read response body once, regardless of success or failure
-      let responseText: string;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        responseText = await response.text();
-      } catch (readError) {
-        throw new Error('Failed to read response from server');
-      }
+        console.log(`Generating content for keyword: ${keyword} (attempt ${attempt}/${maxRetries})`);
 
-      // Parse JSON from text
-      let data: any;
-      try {
-        data = JSON.parse(responseText);
-      } catch (parseError) {
-        // If response isn't JSON, use text as error message
+        // Use mock content in development if OpenAI is not configured
+        const isDevelopment = import.meta.env.DEV;
+        const endpoint = isDevelopment ?
+          '/.netlify/functions/mock-automation-content' :
+          '/.netlify/functions/generate-automation-content';
+
+        console.log(`Using endpoint: ${endpoint} (development: ${isDevelopment})`);
+
+        // Call Netlify function for secure content generation
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+
+        let response: Response;
+        try {
+          response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              keyword,
+              anchorText,
+              targetUrl
+            }),
+            signal: controller.signal
+          });
+        } catch (fetchError) {
+          clearTimeout(timeoutId);
+          if (fetchError instanceof Error) {
+            if (fetchError.name === 'AbortError') {
+              throw new Error('Request timeout: Content generation service took too long to respond');
+            }
+            throw new Error(`Network error: ${fetchError.message}`);
+          }
+          throw new Error('Network error: Failed to connect to content generation service');
+        }
+
+        clearTimeout(timeoutId);
+
+        // Read response body once, regardless of success or failure
+        let responseText: string;
+        try {
+          responseText = await response.text();
+        } catch (readError) {
+          console.error('Failed to read response body:', readError);
+          throw new Error(`Failed to read response from server: ${readError instanceof Error ? readError.message : 'Unknown read error'}`);
+        }
+
+        // Parse JSON from text
+        let data: any;
+        try {
+          data = JSON.parse(responseText);
+        } catch (parseError) {
+          console.error('Failed to parse response as JSON:', { responseText, parseError });
+          // If response isn't JSON, use text as error message
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${responseText || response.statusText}`);
+          }
+          throw new Error(`Failed to parse response: ${parseError instanceof Error ? parseError.message : 'Invalid JSON'}`);
+        }
+
+        // Handle error responses
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${responseText || response.statusText}`);
+          const errorMessage = data?.error || `HTTP ${response.status}: ${response.statusText}`;
+          throw new Error(errorMessage);
         }
-        throw new Error(`Failed to parse response: ${parseError instanceof Error ? parseError.message : 'Invalid JSON'}`);
-      }
 
-      // Handle error responses
-      if (!response.ok) {
-        const errorMessage = data?.error || `HTTP ${response.status}: ${response.statusText}`;
-        throw new Error(errorMessage);
-      }
-      
-      if (!data.success) {
-        throw new Error(data.error || 'Content generation failed');
-      }
-
-      if (!data.content || !Array.isArray(data.content)) {
-        throw new Error('Invalid response format from content generation service');
-      }
-
-      console.log(`Successfully generated ${data.content.length} pieces of content`);
-      return data.content;
-
-    } catch (error) {
-      console.error('Content generation error:', error);
-      
-      // Provide more specific error messages
-      if (error instanceof Error) {
-        if (error.message.includes('OPENAI_API_KEY')) {
-          throw new Error('OpenAI API key not configured. Please contact administrator.');
+        if (!data.success) {
+          throw new Error(data.error || 'Content generation failed');
         }
-        if (error.message.includes('Network error') || error.message.includes('fetch')) {
-          throw new Error('Network error: Unable to connect to content generation service.');
+
+        if (!data.content || !Array.isArray(data.content)) {
+          throw new Error('Invalid response format from content generation service');
         }
-        throw error;
+
+        console.log(`Successfully generated ${data.content.length} pieces of content`);
+        return data.content;
+
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        console.error(`Content generation error (attempt ${attempt}/${maxRetries}):`, lastError.message);
+
+        // Don't retry for certain types of errors
+        if (lastError.message.includes('OPENAI_API_KEY') ||
+            lastError.message.includes('Missing required parameters') ||
+            lastError.message.includes('HTTP 4')) {
+          break;
+        }
+
+        // Wait before retrying (exponential backoff)
+        if (attempt < maxRetries) {
+          const delay = Math.pow(2, attempt) * 1000; // 2s, 4s, 8s
+          console.log(`Waiting ${delay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
       }
-      
-      throw new Error('Failed to generate content: Unknown error occurred');
     }
+
+    // All retries failed, throw the last error with context
+    if (lastError) {
+      // Provide more specific error messages
+      if (lastError.message.includes('OPENAI_API_KEY')) {
+        throw new Error('OpenAI API key not configured. Please contact administrator.');
+      }
+      if (lastError.message.includes('Network error') ||
+          lastError.message.includes('timeout') ||
+          lastError.message.includes('fetch')) {
+        throw new Error('Network error: Unable to connect to content generation service after multiple attempts.');
+      }
+      throw new Error(`Content generation failed after ${maxRetries} attempts: ${lastError.message}`);
+    }
+
+    throw new Error('Failed to generate content: Unknown error occurred');
   }
 
   /**
