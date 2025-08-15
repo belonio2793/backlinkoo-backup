@@ -142,7 +142,11 @@ export class CampaignNetworkLogger {
           duration
         } as NetworkRequest;
 
-        this.logNetworkRequest(completeRequest);
+        try {
+          this.logNetworkRequest(completeRequest);
+        } catch (logError) {
+          console.warn('Failed to log network request:', logError);
+        }
 
         // Return the original response (not the clone)
         return response;
@@ -161,7 +165,11 @@ export class CampaignNetworkLogger {
           duration
         } as NetworkRequest;
 
-        this.logNetworkRequest(failedRequest);
+        try {
+          this.logNetworkRequest(failedRequest);
+        } catch (logError) {
+          console.warn('Failed to log failed request:', logError);
+        }
 
         throw error;
       }
