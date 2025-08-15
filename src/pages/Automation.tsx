@@ -213,6 +213,7 @@ const Automation = () => {
       addStatusMessage(`Campaign creation failed: ${formatErrorMessage(error)}`, 'error');
     } finally {
       setIsCreating(false);
+      feedModal.setCreatingState(false);
     }
   };
 
