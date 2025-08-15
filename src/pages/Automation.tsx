@@ -31,8 +31,6 @@ const Automation = () => {
   const [activeCampaigns, setActiveCampaigns] = useState<any[]>([]);
 
   const [isCreating, setIsCreating] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showProgress, setShowProgress] = useState(false);
   const [campaignProgress, setCampaignProgress] = useState<CampaignProgress | null>(null);
   const [progressUnsubscribe, setProgressUnsubscribe] = useState<(() => void) | null>(null);
   const [lastCreatedCampaign, setLastCreatedCampaign] = useState<any>(null);
