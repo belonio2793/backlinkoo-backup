@@ -656,6 +656,17 @@ const Automation = () => {
                               onClick={async () => {
                                 try {
                                   addStatusMessage('Checking for stuck campaigns...', 'info');
+
+                                  // First, load current campaigns
+                                  const campaigns = await orchestrator.getUserCampaigns();
+                                  const active = campaigns.filter(c => c.status === 'active');
+                                  setActiveCampaigns(active);
+
+                                  if (active.length > 0) {
+                                    addStatusMessage(`Found ${active.length} active campaign(s) - checking health...`, 'info');
+                                  }
+
+                                  // Then run monitoring check
                                   await campaignMonitoringService.forceCheck();
                                   addStatusMessage('Campaign monitoring check completed', 'success');
                                 } catch (error: any) {
