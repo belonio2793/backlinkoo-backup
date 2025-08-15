@@ -198,13 +198,19 @@ export class NetworkErrorHandler {
         // Use the stored original fetch to avoid recursive wrapping
         const response = await this.originalFetch(...args);
         
-        // Clone the response to prevent "body stream already read" errors
-        // Only for successful responses that might be read multiple times
-        if (response.ok && response.body) {
-          const clonedResponse = response.clone();
-          // Add a flag to track if this response has been cloned
-          (clonedResponse as any)._isCloned = true;
-          return clonedResponse;
+        // Only clone if response hasn't been used and we absolutely need to
+        // Check if response has already been cloned or body consumed
+        if (response.ok && response.body && !response.bodyUsed && !(response as any)._isCloned) {
+          try {
+            const clonedResponse = response.clone();
+            // Add a flag to track if this response has been cloned
+            (clonedResponse as any)._isCloned = true;
+            return clonedResponse;
+          } catch (cloneError) {
+            // If cloning fails, return original response
+            console.warn('Failed to clone response, returning original:', cloneError);
+            return response;
+          }
         }
         
         return response;
