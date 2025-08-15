@@ -376,40 +376,60 @@ const Automation = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="targetUrl">Target URL *</Label>
-                  <Input
-                    id="targetUrl"
-                    placeholder="https://example.com or example.com"
-                    value={formData.targetUrl}
-                    onChange={(e) => handleInputChange('targetUrl', e.target.value)}
-                    onBlur={(e) => {
-                      // Auto-format URL when user leaves the field
-                      const formattedUrl = smartFlow.autoFormatUrl(e.target.value);
-                      if (formattedUrl !== e.target.value) {
-                        handleInputChange('targetUrl', formattedUrl);
-                        addStatusMessage('URL automatically formatted with https://', 'info');
-                      }
-                    }}
-                    onPaste={(e) => {
-                      // Auto-format pasted content after a short delay
-                      setTimeout(() => {
-                        const pastedValue = e.currentTarget.value;
-                        const formattedUrl = smartFlow.autoFormatUrl(pastedValue);
-                        if (formattedUrl !== pastedValue) {
+                  <div className="flex gap-2">
+                    <Input
+                      id="targetUrl"
+                      placeholder="https://example.com or example.com"
+                      value={formData.targetUrl}
+                      onChange={(e) => handleInputChange('targetUrl', e.target.value)}
+                      onBlur={(e) => {
+                        // Auto-format URL when user leaves the field
+                        const formattedUrl = smartFlow.autoFormatUrl(e.target.value);
+                        if (formattedUrl !== e.target.value) {
                           handleInputChange('targetUrl', formattedUrl);
-                          addStatusMessage('Pasted URL automatically formatted with https://', 'info');
+                          addStatusMessage('URL automatically formatted with https://', 'info');
                         }
-                      }, 10);
-                    }}
-                    className={smartFlow.analyzeFormData(formData).missingFields.includes('Target URL') ||
-                              smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') ?
-                              'border-amber-300 focus:border-amber-500' : ''}
-                  />
+                      }}
+                      onPaste={(e) => {
+                        // Auto-format pasted content after a short delay
+                        setTimeout(() => {
+                          const pastedValue = e.currentTarget.value;
+                          const formattedUrl = smartFlow.autoFormatUrl(pastedValue);
+                          if (formattedUrl !== pastedValue) {
+                            handleInputChange('targetUrl', formattedUrl);
+                            addStatusMessage('Pasted URL automatically formatted with https://', 'info');
+                          }
+                        }, 10);
+                      }}
+                      className={`flex-1 ${smartFlow.analyzeFormData(formData).missingFields.includes('Target URL') ||
+                                smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') ?
+                                'border-amber-300 focus:border-amber-500' : ''}`}
+                    />
+                    {formData.targetUrl && !formData.targetUrl.startsWith('http') && (
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          const formattedUrl = smartFlow.autoFormatUrl(formData.targetUrl);
+                          if (formattedUrl !== formData.targetUrl) {
+                            handleInputChange('targetUrl', formattedUrl);
+                            addStatusMessage('URL formatted with https://', 'success');
+                          }
+                        }}
+                        className="px-3"
+                        title="Add https:// to URL"
+                      >
+                        <Wand2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
                   <p className="text-sm text-gray-500">
                     The URL where your backlink will point. You can enter with or without https://
                   </p>
                   {smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') && formData.targetUrl && (
                     <p className="text-sm text-amber-600">
-                      URL will be auto-formatted when you finish typing
+                      URL will be auto-formatted when you finish typing or click the format button
                     </p>
                   )}
                 </div>
