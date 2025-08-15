@@ -37,7 +37,8 @@ const CampaignCreationModal: React.FC<CampaignCreationModalProps> = ({
   isAuthenticated,
   smartFlow,
   addStatusMessage,
-  onAuthSuccess
+  onAuthSuccess,
+  onAuthSuccessCloseModal
 }) => {
   const { toast } = useToast();
   const [showAuth, setShowAuth] = useState(false);
