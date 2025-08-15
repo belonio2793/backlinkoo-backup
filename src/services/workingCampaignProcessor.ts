@@ -115,20 +115,22 @@ export class WorkingCampaignProcessor {
 
       // Step 4: Mark campaign as completed
       await this.updateCampaignStatus(campaign.id, 'completed');
-      await this.logActivity(campaign.id, 'info', `Campaign completed successfully. Published: ${publishedUrl}`);
-      
+      await this.logActivity(campaign.id, 'info', `Campaign completed successfully. Published ${totalPosts} posts: ${publishedUrls.join(', ')}`);
+
       realTimeFeedService.emitCampaignCompleted(
         campaign.id,
         campaign.name,
         keyword,
-        [publishedUrl]
+        publishedUrls
       );
 
       console.log('🎉 Campaign processing completed successfully');
-      
-      return { 
-        success: true, 
-        publishedUrl 
+
+      return {
+        success: true,
+        publishedUrl: publishedUrls[0], // For backward compatibility
+        publishedUrls,
+        totalPosts
       };
 
     } catch (error) {
