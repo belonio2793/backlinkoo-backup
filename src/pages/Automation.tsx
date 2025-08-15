@@ -140,7 +140,7 @@ const Automation = () => {
     await smartFlow.handleCampaignAction(
       formData,
       createCampaign,
-      () => setShowAuthModal(true)
+      () => {} // Don't show auth modal - we'll handle auth inline
     );
   };
 
