@@ -14,7 +14,6 @@ import CampaignProgressTracker, { CampaignProgress } from '@/components/Campaign
 import LiveCampaignStatus from '@/components/LiveCampaignStatus';
 import CampaignManagerTabbed from '@/components/CampaignManagerTabbed';
 import FormCompletionCelebration from '@/components/FormCompletionCelebration';
-import EnhancedRealTimeFeed from '@/components/EnhancedRealTimeFeed';
 import InlineAuthForm from '@/components/InlineAuthForm';
 import InlineProgressTracker from '@/components/InlineProgressTracker';
 import InlineFeedMonitor from '@/components/InlineFeedMonitor';
