@@ -41,6 +41,30 @@ export const useSmartCampaignFlow = () => {
   // Auto-save form data when user types (debounced)
   const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
 
+  const autoFormatUrl = useCallback((url: string): string => {
+    if (!url || !url.trim()) return url;
+
+    const trimmedUrl = url.trim();
+
+    // If URL already has a protocol, return as is
+    if (trimmedUrl.match(/^https?:\/\//i)) {
+      return trimmedUrl;
+    }
+
+    // If URL starts with www or appears to be a domain, add https://
+    if (trimmedUrl.match(/^(www\.|[a-zA-Z0-9-]+\.[a-zA-Z]{2,})/)) {
+      return `https://${trimmedUrl}`;
+    }
+
+    // If it looks like a domain without www, add https://
+    if (trimmedUrl.match(/^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/)) {
+      return `https://${trimmedUrl}`;
+    }
+
+    // Otherwise return as is
+    return trimmedUrl;
+  }, []);
+
   const analyzeFormData = useCallback((formData: CampaignFormData) => {
     const missingFields: string[] = [];
     
