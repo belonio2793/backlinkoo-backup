@@ -732,12 +732,15 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                 <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
-                      <div className="p-2 bg-blue-100 rounded-lg">
+                      <div className="p-2 bg-blue-100 rounded-lg relative">
                         <Globe className="w-5 h-5 text-blue-600" />
+                        {getAllPublishedLinks().length > 0 && (
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse" title="Live updates active" />
+                        )}
                       </div>
                       <div>
                         <h4 className="font-semibold text-gray-900">Link Performance</h4>
-                        <p className="text-sm text-gray-600">Active backlinks and their status</p>
+                        <p className="text-sm text-gray-600">Active backlinks and their status • Real-time updates</p>
                       </div>
                     </div>
                     <div className="flex gap-4 text-sm">
@@ -748,6 +751,10 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                       <div className="text-center">
                         <div className="font-bold text-blue-600">{getAllPublishedLinks().length}</div>
                         <div className="text-gray-500">Total</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-bold text-purple-600">{campaigns.filter(c => c.status === 'active').length}</div>
+                        <div className="text-gray-500">Running</div>
                       </div>
                     </div>
                   </div>
