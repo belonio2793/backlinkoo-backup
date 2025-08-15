@@ -124,7 +124,9 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
       if (result.success) {
         onStatusUpdate?.(result.message, 'success');
       } else {
-        onStatusUpdate?.(result.message, 'error');
+        // For completion messages, use info instead of error
+        const messageType = result.message.includes('completed') ? 'info' : 'error';
+        onStatusUpdate?.(result.message, messageType);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
