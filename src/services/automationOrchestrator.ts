@@ -237,13 +237,13 @@ export class AutomationOrchestrator {
         throw new Error('Campaign not found');
       }
 
-      // Step 2: Update status to generating
+      // Step 2: Update status to active (campaign is now running)
       this.updateStep(campaignId, 'generate-content', {
         status: 'in_progress',
         details: 'Generating unique AI content...'
       });
 
-      await this.updateCampaignStatus(campaignId, 'generating');
+      await this.updateCampaignStatus(campaignId, 'active');
       await this.logActivity(campaignId, 'info', 'Starting content generation');
 
       // Step 3: Generate content
