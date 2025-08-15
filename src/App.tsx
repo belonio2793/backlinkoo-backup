@@ -370,14 +370,6 @@ const App = () => (
               }
             />
             <Route
-              path="/draggable-demo"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyDraggableDemo />
-                </Suspense>
-              }
-            />
-            <Route
               path="/enhanced-feed-demo"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
