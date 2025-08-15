@@ -172,7 +172,14 @@ export class AutomationOrchestrator {
         .single();
 
       if (error) {
-        console.error('Error creating campaign:', error);
+        console.error('Error creating campaign:', {
+          message: error.message || 'Unknown error',
+          code: error.code,
+          details: error.details,
+          hint: error.hint,
+          targetUrl: params.target_url,
+          keyword: params.keyword
+        });
 
         // Extract error message safely
         const errorMessage = error?.message || error?.details || String(error);
