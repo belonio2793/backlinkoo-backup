@@ -707,11 +707,6 @@ const Automation = () => {
 
           {/* Live Activity (Right Column) */}
           <div className="lg:col-span-1 space-y-4">
-            {/* Inline Feed Monitor */}
-            <InlineFeedMonitor
-              activeCampaigns={activeCampaigns}
-              isVisible={isAuthenticated || activeCampaigns.length > 0}
-            />
 
             {isAuthenticated && (
               <CampaignManagerTabbed
