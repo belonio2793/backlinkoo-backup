@@ -30,6 +30,8 @@ import { realTimeFeedService } from '@/services/realTimeFeedService';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import CampaignErrorStatus from './CampaignErrorStatus';
+import InlineProgressTracker from './InlineProgressTracker';
+import { CampaignProgress } from './CampaignProgressTracker';
 
 interface PublishedLink {
   id: string;
