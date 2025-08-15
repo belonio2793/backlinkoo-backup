@@ -744,7 +744,11 @@ const Automation = () => {
         {/* Enhanced Feed Toggle Button - Always visible */}
         {!showEnhancedFeed && (
           <Button
-            className="fixed bottom-4 right-4 z-40 bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+            className={`fixed bottom-4 right-4 z-40 shadow-lg transition-all duration-200 ${
+              activeCampaigns.length > 0
+                ? 'bg-blue-600 hover:bg-blue-700 text-white ring-2 ring-blue-200'
+                : 'bg-gray-600 hover:bg-gray-700 text-white'
+            }`}
             onClick={() => setShowEnhancedFeed(true)}
             title={activeCampaigns.length === 0 ?
               "Open live feed monitor (no active campaigns yet)" :
