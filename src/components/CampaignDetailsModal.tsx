@@ -212,16 +212,34 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
     return logs.sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
   };
 
-  const calculateCampaignMetrics = (logs: CampaignLog[], progress?: CampaignProgress) => {
+  const calculateCampaignMetrics = (
+    logs: CampaignLog[],
+    progress?: CampaignProgress,
+    networkRequests?: NetworkRequest[],
+    databaseQueries?: DatabaseQuery[]
+  ) => {
     const startTime = new Date(logs[0]?.timestamp || Date.now());
     const endTime = progress?.endTime || new Date();
-    
+
+    // Calculate content generation time from network requests
+    const contentGenRequests = networkRequests?.filter(req => req.step === 'content-generation') || [];
+    const contentGenerationTime = contentGenRequests.reduce((total, req) => total + req.duration, 0) / 1000;
+
+    // Calculate publishing time from network requests
+    const publishingRequests = networkRequests?.filter(req => req.step === 'publishing') || [];
+    const publishingTime = publishingRequests.reduce((total, req) => total + req.duration, 0) / 1000;
+
+    // Count failed requests
+    const failedRequests = networkRequests?.filter(req => req.response?.status && req.response.status >= 400) || [];
+
     return {
       totalDuration: Math.floor((endTime.getTime() - startTime.getTime()) / 1000),
-      contentGenerationTime: 45, // Mock - would calculate from actual logs
-      publishingTime: 12, // Mock - would calculate from actual logs
+      contentGenerationTime: Math.floor(contentGenerationTime),
+      publishingTime: Math.floor(publishingTime),
       retryCount: logs.filter(log => log.message.includes('retry')).length,
-      errorCount: logs.filter(log => log.level === 'error').length
+      errorCount: logs.filter(log => log.level === 'error').length,
+      requestCount: (networkRequests?.length || 0) + (databaseQueries?.length || 0),
+      failedRequestCount: failedRequests.length + (databaseQueries?.filter(q => q.error)?.length || 0)
     };
   };
 
