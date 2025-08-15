@@ -15,9 +15,7 @@ import CampaignProgressTracker, { CampaignProgress } from '@/components/Campaign
 import LiveCampaignStatus from '@/components/LiveCampaignStatus';
 import CampaignManager from '@/components/CampaignManager';
 import FormCompletionCelebration from '@/components/FormCompletionCelebration';
-import RealTimeFeedModal from '@/components/RealTimeFeedModal';
-import RealTimeFeedToggle from '@/components/RealTimeFeedToggle';
-import FeedModal from '@/components/FeedModal';
+import EnhancedRealTimeFeed from '@/components/EnhancedRealTimeFeed';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
