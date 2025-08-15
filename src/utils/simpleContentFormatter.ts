@@ -18,9 +18,15 @@ export class SimpleContentFormatter {
       .replace(/^---[\s\S]*?---\s*/m, '')
       // Remove title duplicates at the beginning
       .replace(/^[\s\n]*Title:\s*[^\n]*\n?/i, '')
+      .replace(/^[\s\n]*\*\*Title:\s*[^\n]*\*\*\n?/i, '')
       // Remove H1/H2 prefix patterns
       .replace(/^\*\*H[1-6]\*\*:\s*/gmi, '')
       .replace(/^H[1-6]:\s*/gmi, '')
+      // Remove Call-to-Action and Strategic Backlink Placement patterns
+      .replace(/^[\s\n]*\*?\*?Call-to-Action:\*?\*?[\s\n]*/gmi, '')
+      .replace(/^[\s\n]*\*?\*?Call to Action:\*?\*?[\s\n]*/gmi, '')
+      .replace(/^[\s\n]*\*?\*?Strategic Backlink Placement:\*?\*?[\s\n]*/gmi, '')
+      .replace(/^[\s\n]*\*?\*?Strategic backlink placement:\*?\*?[\s\n]*/gmi, '')
       // Clean up line breaks
       .replace(/\r\n/g, '\n')
       .replace(/\r/g, '\n');
