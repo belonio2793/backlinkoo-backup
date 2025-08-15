@@ -144,12 +144,15 @@ export function restoreOriginalFetch(): void {
   }
 }
 
-// Auto-enable protection in development mode
-if (import.meta.env.DEV && typeof window !== 'undefined') {
-  // Wait for DOM to be ready before protecting
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', protectViteClient);
-  } else {
-    protectViteClient();
-  }
-}
+// TEMPORARILY DISABLED: Auto-enable protection in development mode
+// This protection system is causing fetch interference with Supabase calls
+// if (import.meta.env.DEV && typeof window !== 'undefined') {
+//   // Wait for DOM to be ready before protecting
+//   if (document.readyState === 'loading') {
+//     document.addEventListener('DOMContentLoaded', protectViteClient);
+//   } else {
+//     protectViteClient();
+//   }
+// }
+
+console.log('🔧 Vite client protection is DISABLED to prevent fetch interference');
