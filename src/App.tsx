@@ -65,7 +65,8 @@ const TextCleanerProvider = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+    <SupabaseErrorBoundary>
+      <TooltipProvider>
       <ModalProvider>
         <UserFlowProvider>
           <SymbolCleanerProvider>
@@ -269,7 +270,8 @@ const App = () => (
           </SymbolCleanerProvider>
         </UserFlowProvider>
       </ModalProvider>
-    </TooltipProvider>
+      </TooltipProvider>
+    </SupabaseErrorBoundary>
   </QueryClientProvider>
 );
 
