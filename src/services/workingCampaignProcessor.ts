@@ -92,13 +92,14 @@ export class WorkingCampaignProcessor {
 
     } catch (error) {
       console.error('❌ Campaign processing failed:', error);
-      
-      const errorMessage = formatErrorForUI(error);
-      
+
+      // Check for specific error types and provide user-friendly messages
+      let errorMessage = this.formatCampaignError(error);
+
       // Mark campaign as paused with error
       await this.updateCampaignStatus(campaign.id, 'paused');
       await this.logActivity(campaign.id, 'error', `Campaign failed: ${errorMessage}`);
-      
+
       realTimeFeedService.emitCampaignFailed(
         campaign.id,
         campaign.name,
@@ -106,9 +107,9 @@ export class WorkingCampaignProcessor {
         errorMessage
       );
 
-      return { 
-        success: false, 
-        error: errorMessage 
+      return {
+        success: false,
+        error: errorMessage
       };
     }
   }
