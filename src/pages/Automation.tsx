@@ -60,7 +60,11 @@ const Automation = () => {
   }, [savedFormData, hasValidSavedData, hasShownRestoreMessage]);
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    const newFormData = { ...formData, [field]: value };
+    setFormData(newFormData);
+
+    // Update smart flow state
+    smartFlow.updateFlowState(newFormData);
   };
 
   const validateForm = () => {
