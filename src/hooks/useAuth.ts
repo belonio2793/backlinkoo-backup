@@ -17,6 +17,7 @@ export function useAuth(): AuthState {
   const [isLoading, setIsLoading] = useState(false); // Start with false for instant auth
   const [isPremium, setIsPremium] = useState(false);
   const [subscriptionTier, setSubscriptionTier] = useState<string | null>(null);
+  const { handleSupabaseError } = useSupabaseErrorHandler();
 
   // Optimized function to check premium status - runs async without blocking auth
   const checkPremiumStatusAsync = async (authUser: User) => {
