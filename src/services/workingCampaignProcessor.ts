@@ -30,7 +30,7 @@ export class WorkingCampaignProcessor {
       await this.logActivity(campaign.id, 'info', 'Campaign processing started');
 
       // Step 2: Use simplified server-side processor to avoid browser analytics issues
-      console.log('🔄 Using simplified server-side processor...');
+      console.log('�� Using simplified server-side processor...');
       realTimeFeedService.emitSystemEvent(`Processing campaign "${keyword}" server-side`, 'info');
 
       // Log the function call
@@ -229,6 +229,8 @@ export class WorkingCampaignProcessor {
    */
   private async logActivity(campaignId: string, type: string, message: string): Promise<void> {
     try {
+      const queryStartTime = Date.now();
+
       const { error } = await supabase
         .from('activity_logs')
         .insert({
@@ -237,6 +239,20 @@ export class WorkingCampaignProcessor {
           message,
           timestamp: new Date().toISOString()
         });
+
+      const queryDuration = Date.now() - queryStartTime;
+
+      // Log the database query
+      campaignNetworkLogger.logDatabaseQuery(campaignId, {
+        operation: 'insert',
+        table: 'activity_logs',
+        query: `INSERT INTO activity_logs (campaign_id, activity_type, message, timestamp) VALUES (...)`,
+        params: { campaign_id: campaignId, activity_type: type, message },
+        result: error ? null : { success: true },
+        error: error ? error.message : undefined,
+        duration: queryDuration,
+        step: 'activity-logging'
+      });
 
       if (error) {
         console.warn('Failed to log activity:', error);
