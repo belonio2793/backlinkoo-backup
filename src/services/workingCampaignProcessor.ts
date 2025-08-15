@@ -187,37 +187,44 @@ export class WorkingCampaignProcessor {
   }
 
   /**
-   * Publish content to Telegraph
+   * Publish content to Telegraph using server-side function to bypass analytics blocking
    */
   private async publishToTelegraph(keyword: string, content: string, anchorText: string, targetUrl: string): Promise<string> {
-    // Create Telegraph account
-    const accountResponse = await fetch('https://api.telegra.ph/createAccount', {
+    const title = `The Ultimate Guide to ${keyword}`;
+
+    // Embed the anchor text link in the content
+    const contentWithBacklink = this.embedBacklinkInContent(content, anchorText, targetUrl);
+
+    console.log('📡 Publishing to Telegraph via server function...');
+
+    // Use server-side Telegraph publisher to bypass browser analytics blocking
+    const response = await fetch('/.netlify/functions/telegraph-publisher', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        short_name: 'LinkBuilder',
-        author_name: 'Automated Content',
-        author_url: ''
+        title,
+        content: contentWithBacklink,
+        author_name: 'Content Automation',
+        keyword,
+        user_id: 'automation_system'
       })
     });
 
-    if (!accountResponse.ok) {
-      throw new Error(`Failed to create Telegraph account: ${accountResponse.status}`);
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Telegraph publishing failed: ${response.status} - ${errorText}`);
     }
 
-    const accountData = await accountResponse.json();
-    
-    if (!accountData.ok) {
-      throw new Error(`Telegraph account creation failed: ${accountData.error}`);
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(`Telegraph publishing failed: ${result.error}`);
     }
 
-    const accessToken = accountData.result.access_token;
-
-    // Create page with content
-    const title = `The Ultimate Guide to ${keyword}`;
-    const telegraphContent = this.convertToTelegraphFormat(content, anchorText, targetUrl);
+    console.log('✅ Successfully published to Telegraph:', result.url);
+    return result.url;
 
     const pageResponse = await fetch('https://api.telegra.ph/createPage', {
       method: 'POST',
