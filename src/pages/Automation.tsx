@@ -9,6 +9,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2, Activity } from 'lucide-react';
 import { getOrchestrator } from '@/services/automationOrchestrator';
 import { campaignMonitoringService } from '@/services/campaignMonitoringService';
+import CampaignMonitoringErrorBoundary from '@/components/CampaignMonitoringErrorBoundary';
 import AutomationReporting from '@/components/AutomationReporting';
 import AutomationServiceStatus from '@/components/AutomationServiceStatus';
 import CampaignProgressTracker, { CampaignProgress } from '@/components/CampaignProgressTracker';
@@ -611,28 +612,35 @@ const Automation = () => {
 
                     {/* Campaign Monitoring Debug */}
                     {isAuthenticated && (
-                      <div className="p-3 border rounded-lg bg-gray-50 border-gray-200">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="font-medium text-gray-900 text-sm">Campaign Monitoring</h4>
-                            <p className="text-xs text-gray-600">
-                              Auto-detects and pauses stuck campaigns
-                            </p>
+                      <CampaignMonitoringErrorBoundary>
+                        <div className="p-3 border rounded-lg bg-gray-50 border-gray-200">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <h4 className="font-medium text-gray-900 text-sm">Campaign Monitoring</h4>
+                              <p className="text-xs text-gray-600">
+                                Auto-detects and pauses stuck campaigns
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={async () => {
+                                try {
+                                  addStatusMessage('Checking for stuck campaigns...', 'info');
+                                  await campaignMonitoringService.forceCheck();
+                                  addStatusMessage('Campaign monitoring check completed', 'success');
+                                } catch (error: any) {
+                                  console.error('Campaign monitoring check failed:', error);
+                                  addStatusMessage(`Monitoring check failed: ${error.message}`, 'error');
+                                }
+                              }}
+                              className="text-xs px-3 py-1"
+                            >
+                              Check Now
+                            </Button>
                           </div>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={async () => {
-                              addStatusMessage('Checking for stuck campaigns...', 'info');
-                              await campaignMonitoringService.forceCheck();
-                              addStatusMessage('Campaign monitoring check completed', 'success');
-                            }}
-                            className="text-xs px-3 py-1"
-                          >
-                            Check Now
-                          </Button>
                         </div>
-                      </div>
+                      </CampaignMonitoringErrorBoundary>
                     )}
 
                     {/* Campaign Status Summary */}
