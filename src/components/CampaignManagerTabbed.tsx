@@ -417,7 +417,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({ onStatusU
                         <li>• Auto-rotation across platforms</li>
                         <li>• Smart pause/resume controls</li>
                         <li>• Visual progress tracking</li>
-                        <li>��� 1 post per platform maximum</li>
+                        <li>🎯 1 post per platform maximum</li>
                       </ul>
                     </div>
                   </div>
