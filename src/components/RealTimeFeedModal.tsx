@@ -22,6 +22,7 @@ import {
   Zap
 } from 'lucide-react';
 import { getOrchestrator, type Campaign } from '@/services/automationOrchestrator';
+import { realTimeFeedService, type RealTimeFeedEvent } from '@/services/realTimeFeedService';
 
 interface RealTimeFeedLog {
   id: string;
