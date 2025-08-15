@@ -668,7 +668,7 @@ const Automation = () => {
                       <div className="w-3 h-3 bg-green-500 rounded-full"></div>
                       <div>
                         <div className="font-medium text-sm">Telegraph.ph</div>
-                        <div className="text-xs text-gray-600">Anonymous publishing</div>
+                        <div className="text-xs text-gray-600">Priority #1 • Auto-rotation</div>
                       </div>
                     </div>
                     <div className="text-right">
