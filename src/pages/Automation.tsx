@@ -586,8 +586,8 @@ const Automation = () => {
               </CardContent>
                 </Card>
 
-                {/* Campaign Status Summary */}
-                {lastCreatedCampaign && (
+                {/* Campaign Status Summary (when not using Feed modal) */}
+                {lastCreatedCampaign && !showEnhancedFeed && (
                   <div className="mt-6 p-4 border rounded-lg bg-blue-50 border-blue-200">
                     <div className="flex items-center justify-between">
                       <div>
@@ -596,10 +596,14 @@ const Automation = () => {
                           "{lastCreatedCampaign.keywords?.[0] || lastCreatedCampaign.name}" is running
                         </p>
                       </div>
-                      <div className="flex items-center gap-2 text-sm text-blue-600">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                        <span>Monitoring live</span>
-                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setShowEnhancedFeed(true)}
+                        className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                      >
+                        View Enhanced Feed
+                      </Button>
                     </div>
                   </div>
                 )}
