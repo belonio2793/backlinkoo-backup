@@ -448,8 +448,7 @@ const Automation = () => {
                     )}
                   </div>
                   <p className="text-sm text-gray-500">
-                    The URL where your backlink will point. Enter with or without https://
-                    <span className="text-gray-400">• Auto-formats on blur/paste ��� Ctrl+Enter to format</span>
+                    The URL where your backlink will point
                   </p>
                   {formData.targetUrl && !formData.targetUrl.startsWith('http') && formData.targetUrl.includes('.') && (
                     <p className="text-sm text-blue-600 flex items-center gap-1">
