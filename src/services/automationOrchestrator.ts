@@ -979,6 +979,56 @@ export class AutomationOrchestrator {
   }
 
   /**
+   * Auto-pause a campaign with error information and live feed event
+   */
+  async autoPauseCampaignWithError(campaignId: string, errorMessage: string, canAutoResume: boolean = false): Promise<void> {
+    try {
+      // Get campaign details for the live feed event
+      const campaign = await this.getCampaign(campaignId);
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // Update campaign with error information
+      const { error } = await supabase
+        .from('automation_campaigns')
+        .update({
+          status: 'paused',
+          error_message: errorMessage,
+          auto_pause_reason: errorMessage,
+          can_auto_resume: canAutoResume,
+          error_count: supabase.raw('COALESCE(error_count, 0) + 1'),
+          last_error_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', campaignId);
+
+      if (error) {
+        console.error('Error updating campaign with auto-pause info:', error);
+        // Fallback to basic status update
+        await this.updateCampaignStatus(campaignId, 'paused', errorMessage);
+      }
+
+      await this.logActivity(campaignId, 'error', `Campaign auto-paused: ${errorMessage}`);
+
+      // Emit auto-pause event to live feed
+      if (campaign) {
+        realTimeFeedService.emitCampaignAutoPaused(
+          campaignId,
+          campaign.name,
+          campaign.keywords[0] || 'Unknown',
+          errorMessage,
+          'auto_pause',
+          user?.id
+        );
+      }
+
+    } catch (error) {
+      console.error('Failed to auto-pause campaign:', error);
+      // Fallback to basic pause
+      await this.updateCampaignStatus(campaignId, 'paused', errorMessage);
+    }
+  }
+
+  /**
    * Pause campaign
    */
   async pauseCampaign(campaignId: string): Promise<void> {
