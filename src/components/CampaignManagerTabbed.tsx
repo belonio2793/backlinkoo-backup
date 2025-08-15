@@ -369,6 +369,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
   }
 
   return (
+    <>
     <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
@@ -771,6 +772,16 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
         </Tabs>
       </CardContent>
     </Card>
+
+    {/* Campaign Details Modal */}
+    {selectedCampaignId && (
+      <CampaignDetailsModal
+        isOpen={showDetailsModal}
+        onClose={() => setShowDetailsModal(false)}
+        campaignId={selectedCampaignId}
+      />
+    )}
+    </>
   );
 };
 
