@@ -374,7 +374,8 @@ export class AutomationOrchestrator {
           endTime: new Date()
         });
 
-        await this.updateCampaignStatus(campaignId, 'failed', 'No content was successfully published');
+        // Note: 'failed' is not a valid status in current schema, so we'll pause the campaign instead
+        await this.updateCampaignStatus(campaignId, 'paused', 'No content was successfully published');
         await this.logActivity(campaignId, 'error', 'Campaign failed: No content was successfully published');
       }
 
