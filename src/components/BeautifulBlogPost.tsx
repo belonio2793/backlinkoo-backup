@@ -56,6 +56,7 @@ import { SEOScoreDisplay } from '@/components/SEOScoreDisplay';
 import { KillerDeletionWarning } from '@/components/KillerDeletionWarning';
 import { ExitIntentPopup } from '@/components/ExitIntentPopup';
 import { BlogContentCleaner } from '@/utils/blogContentCleaner';
+import { EnhancedBlogCleaner } from '@/utils/enhancedBlogCleaner';
 import { processBlogContent } from '@/utils/markdownProcessor';
 
 type BlogPost = Tables<'blog_posts'>;
@@ -895,7 +896,7 @@ export function BeautifulBlogPost() {
                             <p className="text-sm">
                               Delete this unclaimed post. Anyone can delete unclaimed posts to help clean up content.
                             </p>
-                            <p className="text-xs text-red-400">⚠️ This action cannot be undone</p>
+                            <p className="text-xs text-red-400">��️ This action cannot be undone</p>
                           </div>
                         </TooltipContent>
                       </Tooltip>
