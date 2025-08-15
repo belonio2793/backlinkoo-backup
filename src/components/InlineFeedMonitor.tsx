@@ -23,7 +23,7 @@ import {
   ChevronUp,
   ChevronDown
 } from 'lucide-react';
-// import { realTimeFeedService, type RealTimeFeedEvent } from '@/services/realTimeFeedService';
+import { realTimeFeedService, type RealTimeFeedEvent } from '@/services/realTimeFeedService';
 import { type Campaign } from '@/services/automationOrchestrator';
 
 interface RealTimeFeedLog {
@@ -85,11 +85,24 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
     });
   };
 
-  // Subscribe to real-time feed service (temporarily disabled)
+  // Subscribe to real-time feed service
   useEffect(() => {
     if (!isVisible) return;
 
-    console.log('📡 InlineFeedMonitor: Initializing...');
+    console.log('📡 InlineFeedMonitor: Subscribing to real-time events');
+
+    // Subscribe to real-time feed events
+    const unsubscribe = realTimeFeedService.subscribe((event: RealTimeFeedEvent) => {
+      // Convert RealTimeFeedEvent to RealTimeFeedLog format
+      addLog({
+        type: event.type,
+        level: event.level,
+        message: event.message,
+        campaignId: event.campaignId,
+        campaignName: event.campaignName,
+        details: event.details
+      });
+    });
 
     // Initial logs for active campaigns (only if we don't have history)
     if (logs.length === 0) {
@@ -109,85 +122,22 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
       });
     }
 
-    // TODO: Re-enable real-time feed service subscription
     return () => {
-      console.log('📡 InlineFeedMonitor: Cleanup');
+      console.log('📡 InlineFeedMonitor: Unsubscribing from real-time events');
+      unsubscribe();
     };
-  }, [isVisible, activeCampaigns.length, logs.length]);
+  }, [isVisible, activeCampaigns.length]);
 
-  // Add periodic system updates to show activity
-  useEffect(() => {
-    if (!isVisible) return;
-
-    const interval = setInterval(() => {
-      const systemUpdates = [
-        {
-          type: 'system_event' as const,
-          level: 'info' as const,
-          message: 'Network health check completed • All publishing platforms operational'
-        },
-        {
-          type: 'system_event' as const,
-          level: 'info' as const,
-          message: 'SEO analysis engine updated • Enhanced keyword optimization algorithms'
-        },
-        {
-          type: 'system_event' as const,
-          level: 'success' as const,
-          message: 'Content quality assessment complete • AI models performing optimally'
-        },
-        {
-          type: 'system_event' as const,
-          level: 'info' as const,
-          message: 'Telegraph.ph API status verified • Publishing pipeline ready'
-        }
-      ];
-
-      // Only add updates occasionally to avoid spam
-      if (Math.random() < 0.3) {
-        const randomUpdate = systemUpdates[Math.floor(Math.random() * systemUpdates.length)];
-        addLog(randomUpdate);
-      }
-    }, 60000); // Every 60 seconds (less frequent)
-
-    return () => clearInterval(interval);
-  }, [isVisible]);
-
-  // Initialize with preview content to show capabilities
+  // Initialize with welcome message
   useEffect(() => {
     if (isVisible && logs.length === 0) {
       const timer = setTimeout(() => {
         if (logs.length === 0) {
-          // Add demonstration logs to show system capabilities
           addLog({
             type: 'system_event',
-            level: 'success',
-            message: 'Automation system initialized • Live monitoring active'
+            level: 'info',
+            message: 'Live monitoring ready • Real-time updates will appear here'
           });
-
-          setTimeout(() => {
-            addLog({
-              type: 'system_event',
-              level: 'info',
-              message: 'Content generation engines ready • AI models loaded'
-            });
-          }, 1000);
-
-          setTimeout(() => {
-            addLog({
-              type: 'system_event',
-              level: 'success',
-              message: 'Telegraph.ph publishing network online • DR 91 platform active'
-            });
-          }, 2000);
-
-          setTimeout(() => {
-            addLog({
-              type: 'system_event',
-              level: 'info',
-              message: 'SEO optimization modules loaded • Smart anchor text placement ready'
-            });
-          }, 3000);
         }
       }, 500);
 

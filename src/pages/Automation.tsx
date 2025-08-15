@@ -7,7 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2, Activity } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
 import { getOrchestrator } from '@/services/automationOrchestrator';
 import AutomationReporting from '@/components/AutomationReporting';
 import AutomationServiceStatus from '@/components/AutomationServiceStatus';
@@ -626,99 +625,103 @@ const Automation = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Link className="w-5 h-5" />
-                  Publishing Network
+                  Publishing Platforms
                 </CardTitle>
                 <CardDescription>
-                  High-authority platforms for instant backlink creation
+                  Platforms for automatic rotation (1 post per platform per campaign)
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {/* Platform Performance Stats */}
-                  <div className="bg-gradient-to-r from-green-50 to-blue-50 p-3 rounded-lg border border-green-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium text-green-900">Network Performance</h4>
-                      <Badge className="bg-green-100 text-green-800">Optimal</Badge>
+                <div className="max-h-96 overflow-y-auto space-y-3">
+                  {/* Active Platform */}
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50 border-green-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-sm">Telegraph.ph</div>
+                        <div className="text-xs text-gray-600">Priority #1 • Auto-rotation</div>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <div className="text-gray-600">Avg. Domain Rating</div>
-                        <div className="font-bold text-green-700">89.2</div>
-                      </div>
-                      <div>
-                        <div className="text-gray-600">Success Rate</div>
-                        <div className="font-bold text-green-700">99.7%</div>
-                      </div>
+                    <div className="text-right">
+                      <div className="text-xs font-medium text-green-700">DR 91</div>
+                      <div className="text-xs text-gray-500">High DA</div>
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    {/* Active Platform */}
-                    <div className="flex items-center justify-between p-3 border rounded-lg bg-green-50 border-green-200 hover:bg-green-100 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                        <div>
-                          <div className="font-medium text-sm">Telegraph.ph</div>
-                          <div className="text-xs text-green-700">✓ Live • Instant Publishing</div>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-xs font-medium text-green-700">DR 91</div>
-                        <div className="text-xs text-green-600">Active</div>
+                  {/* Coming Soon Platforms */}
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-sm">Medium.com</div>
+                        <div className="text-xs text-gray-600">Priority #2 • Coming soon</div>
                       </div>
                     </div>
+                    <div className="text-right">
+                      <div className="text-xs font-medium text-gray-700">DR 96</div>
+                      <div className="text-xs text-gray-500">Premium</div>
+                    </div>
+                  </div>
 
-                    {/* Network Expansion Preview */}
-                    <div className="space-y-2">
-                      <h5 className="text-sm font-medium text-gray-900 flex items-center gap-2">
-                        <Target className="w-4 h-4" />
-                        Network Expansion
-                      </h5>
-
-                      <div className="flex items-center justify-between p-2 border rounded bg-blue-50 border-blue-200">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          <span className="text-sm font-medium">Medium.com</span>
-                        </div>
-                        <Badge variant="outline" className="text-xs">DR 96</Badge>
-                      </div>
-
-                      <div className="flex items-center justify-between p-2 border rounded bg-blue-50 border-blue-200">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-                          <span className="text-sm font-medium">LinkedIn Articles</span>
-                        </div>
-                        <Badge variant="outline" className="text-xs">DR 100</Badge>
-                      </div>
-
-                      <div className="flex items-center justify-between p-2 border rounded bg-blue-50 border-blue-200">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
-                          <span className="text-sm font-medium">Dev.to</span>
-                        </div>
-                        <Badge variant="outline" className="text-xs">DR 86</Badge>
-                      </div>
-
-                      <div className="flex items-center justify-between p-2 border rounded bg-blue-50 border-blue-200">
-                        <div className="flex items-center gap-2">
-                          <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
-                          <span className="text-sm font-medium">Hashnode</span>
-                        </div>
-                        <Badge variant="outline" className="text-xs">DR 75</Badge>
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-sm">Dev.to</div>
+                        <div className="text-xs text-gray-600">Priority #3 • Coming soon</div>
                       </div>
                     </div>
-
-                    {/* Network Benefits */}
-                    <div className="bg-gray-50 p-3 rounded-lg border">
-                      <h5 className="text-sm font-medium text-gray-900 mb-2">Platform Benefits</h5>
-                      <ul className="text-xs text-gray-600 space-y-1">
-                        <li>• Instant indexing by search engines</li>
-                        <li>• No manual account creation required</li>
-                        <li>• Automatic content formatting</li>
-                        <li>• Built-in social sharing features</li>
-                        <li>• SEO-optimized URL structures</li>
-                      </ul>
+                    <div className="text-right">
+                      <div className="text-xs font-medium text-gray-700">DR 86</div>
+                      <div className="text-xs text-gray-500">Tech focused</div>
                     </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-sm">LinkedIn Articles</div>
+                        <div className="text-xs text-gray-600">Professional network</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs font-medium text-gray-700">DR 100</div>
+                      <div className="text-xs text-gray-500">B2B focus</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-sm">Hashnode</div>
+                        <div className="text-xs text-gray-600">Developer blogging</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs font-medium text-gray-700">DR 75</div>
+                      <div className="text-xs text-gray-500">Developer</div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between p-3 border rounded-lg bg-gray-50 border-gray-200">
+                    <div className="flex items-center gap-3">
+                      <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                      <div>
+                        <div className="font-medium text-sm">Substack</div>
+                        <div className="text-xs text-gray-600">Newsletter platform</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs font-medium text-gray-700">DR 88</div>
+                      <div className="text-xs text-gray-500">Newsletter</div>
+                    </div>
+                  </div>
+
+                  {/* Coming Soon Notice */}
+                  <div className="p-3 border-2 border-dashed border-gray-300 rounded-lg text-center">
+                    <p className="text-xs text-gray-500">More platforms coming soon...</p>
                   </div>
                 </div>
               </CardContent>
