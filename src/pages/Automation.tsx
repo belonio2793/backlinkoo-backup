@@ -231,6 +231,12 @@ const Automation = () => {
   };
 
   const handleRetryCampaign = () => {
+    // Close progress tracker and allow user to create a new campaign
+    handleProgressClose();
+    addStatusMessage('Ready to create a new campaign', 'info');
+  };
+
+  const handleRetryCampaign = () => {
     // Reset campaign progress and allow user to create a new campaign
     setCampaignProgress(null);
 
