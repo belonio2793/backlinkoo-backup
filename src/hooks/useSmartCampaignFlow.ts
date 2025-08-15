@@ -51,17 +51,27 @@ export const useSmartCampaignFlow = () => {
       return trimmedUrl;
     }
 
-    // If URL starts with www or appears to be a domain, add https://
-    if (trimmedUrl.match(/^(www\.|[a-zA-Z0-9-]+\.[a-zA-Z]{2,})/)) {
+    // If URL starts with ftp:// or other protocols, return as is
+    if (trimmedUrl.match(/^[a-zA-Z][a-zA-Z0-9+.-]*:\/\//)) {
+      return trimmedUrl;
+    }
+
+    // If URL starts with www, add https://
+    if (trimmedUrl.match(/^www\./i)) {
       return `https://${trimmedUrl}`;
     }
 
-    // If it looks like a domain without www, add https://
-    if (trimmedUrl.match(/^[a-zA-Z0-9-]+\.[a-zA-Z]{2,}/)) {
+    // If it looks like a domain (has at least one dot and valid TLD), add https://
+    if (trimmedUrl.match(/^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)*\.[a-zA-Z]{2,}(\/.*)?$/)) {
       return `https://${trimmedUrl}`;
     }
 
-    // Otherwise return as is
+    // If it contains a dot and looks like a domain, add https://
+    if (trimmedUrl.includes('.') && trimmedUrl.match(/^[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/)) {
+      return `https://${trimmedUrl}`;
+    }
+
+    // Otherwise return as is (might be an IP address, localhost, etc.)
     return trimmedUrl;
   }, []);
 
