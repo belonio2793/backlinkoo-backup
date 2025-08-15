@@ -18,6 +18,7 @@ import FormCompletionCelebration from '@/components/FormCompletionCelebration';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
+import { useRealTimeFeedModal } from '@/hooks/useRealTimeFeedModal';
 
 const Automation = () => {
   const [statusMessages, setStatusMessages] = useState<Array<{message: string, type: 'success' | 'error' | 'info', id: string}>>([]);
