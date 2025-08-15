@@ -92,12 +92,12 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
         if (event.type === 'url_published') {
           toast({
             title: "New Backlink Published!",
-            description: `Published "${event.keyword}" to ${event.platform}`,
+            description: `Published "${event.details?.keyword || event.keyword || 'content'}" to ${event.details?.platform || event.platform || 'platform'}`,
             duration: 5000,
           });
 
           // Update parent status
-          onStatusUpdate?.(`New backlink published: ${event.url}`, 'success');
+          onStatusUpdate?.(`New backlink published: ${event.details?.publishedUrl || event.url || 'new URL'}`, 'success');
         }
 
         // Refresh campaigns to show new data
