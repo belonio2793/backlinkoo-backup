@@ -458,6 +458,7 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                         onClick={() => handleDeleteCampaign(campaign.id, campaign.keyword)}
                         disabled={actionLoading === campaign.id}
                         title="Delete Campaign"
+                        className="border-red-300 text-red-700 hover:bg-red-50"
                       >
                         {actionLoading === campaign.id ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -465,6 +466,34 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                           <Trash2 className="w-4 h-4" />
                         )}
                       </Button>
+
+                      {/* Platform Visual Progress */}
+                      {(() => {
+                        const summary = campaignStatusSummaries.get(campaign.id);
+                        if (summary && summary.totalPlatforms > 0) {
+                          return (
+                            <div className="flex flex-col gap-1 mt-2">
+                              <div className="text-xs text-gray-500">Platforms:</div>
+                              <div className="flex gap-1">
+                                {Array.from({ length: summary.totalPlatforms }, (_, i) => (
+                                  <div
+                                    key={i}
+                                    className={`w-2 h-2 rounded-full ${
+                                      i < summary.platformsCompleted
+                                        ? 'bg-green-500'
+                                        : 'bg-gray-300'
+                                    }`}
+                                    title={`Platform ${i + 1}: ${
+                                      i < summary.platformsCompleted ? 'Completed' : 'Pending'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                   </div>
                 </div>
