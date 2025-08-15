@@ -228,19 +228,24 @@ export class CampaignMonitoringService {
       console.log(`   Reason: ${progressCheck.stuckReason}`);
       console.log(`   Time since last activity: ${this.formatDuration(progressCheck.timeSinceLastActivity)}`);
 
-      // Update campaign status in database
-      const { error: updateError } = await supabase
-        .from('automation_campaigns')
-        .update({
-          status: 'paused',
-          error_message: errorMessage,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', progressCheck.campaignId);
+      // Update campaign status in database with error handling
+      try {
+        const { error: updateError } = await supabase
+          .from('automation_campaigns')
+          .update({
+            status: 'paused',
+            error_message: errorMessage,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', progressCheck.campaignId);
 
-      if (updateError) {
-        console.error('Error updating stuck campaign status:', updateError);
-        throw updateError;
+        if (updateError) {
+          console.error('Error updating stuck campaign status:', updateError);
+          // Don't throw here - try to continue with logging and events
+        }
+      } catch (dbError) {
+        console.error('Database update failed for stuck campaign:', formatErrorForLogging(dbError, 'autoPauseStuckCampaign'));
+        // Continue with other operations even if database update fails
       }
 
       // Log the auto-pause action
