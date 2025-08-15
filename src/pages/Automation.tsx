@@ -16,6 +16,7 @@ import LiveCampaignStatus from '@/components/LiveCampaignStatus';
 import CampaignManager from '@/components/CampaignManager';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
+import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
 
 const Automation = () => {
   const [statusMessages, setStatusMessages] = useState<Array<{message: string, type: 'success' | 'error' | 'info', id: string}>>([]);
