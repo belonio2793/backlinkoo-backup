@@ -144,21 +144,31 @@ export class NetworkErrorHandler {
       }
     });
     
+    // Store original fetch for safe access
+    if (!window._originalFetch) {
+      window._originalFetch = window.fetch;
+    }
+
     // Handle fetch errors globally
-    const originalFetch = window.fetch;
     window.fetch = async (...args) => {
       try {
-        return await originalFetch(...args);
+        // Use the stored original fetch to avoid recursive wrapping
+        return await window._originalFetch(...args);
       } catch (error) {
         // Log fetch errors with context
-        console.error('Fetch error:', {
+        console.error('Fetch error detected:', {
           url: args[0],
           error: error.message,
-          stack: error.stack,
+          stack: error.stack?.substring(0, 200),
           isFullStoryError: this.isFullStoryError(error),
           isNetworkError: this.isNetworkError(error)
         });
-        
+
+        // If it's a FullStory error, try to provide a cleaner error message
+        if (this.isFullStoryError(error)) {
+          throw new Error('Network request blocked by browser analytics. Please try refreshing the page.');
+        }
+
         throw error;
       }
     };

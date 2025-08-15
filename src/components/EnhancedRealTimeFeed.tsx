@@ -325,11 +325,16 @@ const EnhancedRealTimeFeed: React.FC<EnhancedRealTimeFeedProps> = ({
               <h2 className="text-xl font-semibold text-gray-800">Real Time Feed</h2>
               <p className="text-sm text-gray-600">Live monitoring of campaign activities and system events</p>
             </div>
-            {activeCampaigns.length > 0 && (
-              <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
-                {activeCampaigns.length} active
-              </Badge>
-            )}
+            <Badge variant="outline" className={
+              activeCampaigns.length > 0 ?
+                "bg-blue-100 text-blue-700 border-blue-300" :
+                "bg-gray-100 text-gray-600 border-gray-300"
+            }>
+              {activeCampaigns.length > 0 ?
+                `${activeCampaigns.length} active` :
+                'ready to monitor'
+              }
+            </Badge>
           </div>
           
           <div className="flex items-center gap-2">
@@ -465,10 +470,30 @@ const EnhancedRealTimeFeed: React.FC<EnhancedRealTimeFeedProps> = ({
                 {filteredLogs.length === 0 ? (
                   <div className="text-center text-gray-500 py-12">
                     <Activity className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                    <p className="text-lg font-medium mb-2">No events found</p>
-                    <p className="text-sm">
-                      {searchTerm ? 'Try adjusting your search criteria' : 'Events will appear here as campaigns progress'}
+                    <p className="text-lg font-medium mb-2">
+                      {activeCampaigns.length === 0 ? 'No campaigns running yet' : 'No events found'}
                     </p>
+                    <p className="text-sm">
+                      {searchTerm ?
+                        'Try adjusting your search criteria' :
+                        activeCampaigns.length === 0 ?
+                          'Create your first campaign to see real-time progress and activity here' :
+                          'Events will appear here as campaigns progress'
+                      }
+                    </p>
+                    {activeCampaigns.length === 0 && !searchTerm && (
+                      <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg max-w-md mx-auto">
+                        <div className="text-sm text-blue-700">
+                          <strong>What you'll see here:</strong>
+                          <ul className="mt-2 space-y-1 text-left">
+                            <li>• Campaign creation events</li>
+                            <li>• Content generation progress</li>
+                            <li>• Publishing status updates</li>
+                            <li>• Live backlink notifications</li>
+                          </ul>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   filteredLogs.map((log, index) => (

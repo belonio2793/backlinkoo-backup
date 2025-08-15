@@ -41,6 +41,7 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [campaignStatusSummaries, setCampaignStatusSummaries] = useState<Map<string, any>>(new Map());
   const orchestrator = getOrchestrator();
 
   useEffect(() => {
@@ -65,14 +66,26 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
         })
       );
       
+      // Load status summaries for each campaign
+      const statusSummaries = new Map();
+      for (const campaign of campaignsWithLinks) {
+        const summary = orchestrator.getCampaignStatusSummary(campaign.id);
+        statusSummaries.set(campaign.id, summary);
+      }
+
       setCampaigns(campaignsWithLinks);
-      
+      setCampaignStatusSummaries(statusSummaries);
+
       if (showRefreshing) {
         onStatusUpdate?.('Campaigns refreshed successfully', 'success');
       }
     } catch (error) {
-      console.error('Error loading campaigns:', error);
-      onStatusUpdate?.('Failed to load campaigns', 'error');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error loading campaigns:', {
+        message: errorMessage,
+        error: error
+      });
+      onStatusUpdate?.(`Failed to load campaigns: ${errorMessage}`, 'error');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -90,8 +103,13 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
       await loadCampaigns();
       onStatusUpdate?.('Campaign paused successfully', 'success');
     } catch (error) {
-      console.error('Error pausing campaign:', error);
-      onStatusUpdate?.('Failed to pause campaign', 'error');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error pausing campaign:', {
+        message: errorMessage,
+        campaignId,
+        error: error
+      });
+      onStatusUpdate?.(`Failed to pause campaign: ${errorMessage}`, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -100,12 +118,24 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
   const handleResumeCampaign = async (campaignId: string) => {
     setActionLoading(campaignId);
     try {
-      await orchestrator.resumeCampaign(campaignId);
+      const result = await orchestrator.resumeCampaign(campaignId);
       await loadCampaigns();
-      onStatusUpdate?.('Campaign resumed successfully', 'success');
+
+      if (result.success) {
+        onStatusUpdate?.(result.message, 'success');
+      } else {
+        // For completion messages, use info instead of error
+        const messageType = result.message.includes('completed') ? 'info' : 'error';
+        onStatusUpdate?.(result.message, messageType);
+      }
     } catch (error) {
-      console.error('Error resuming campaign:', error);
-      onStatusUpdate?. ('Failed to resume campaign', 'error');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error resuming campaign:', {
+        message: errorMessage,
+        campaignId,
+        error: error
+      });
+      onStatusUpdate?.(`Failed to resume campaign: ${errorMessage}`, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -122,8 +152,14 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
       await loadCampaigns();
       onStatusUpdate?.(`Campaign "${keyword}" deleted successfully`, 'success');
     } catch (error) {
-      console.error('Error deleting campaign:', error);
-      onStatusUpdate?.('Failed to delete campaign', 'error');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error deleting campaign:', {
+        message: errorMessage,
+        campaignId,
+        campaignKeyword: keyword,
+        error: error
+      });
+      onStatusUpdate?.(`Failed to delete campaign: ${errorMessage}`, 'error');
     } finally {
       setActionLoading(null);
     }
@@ -131,10 +167,11 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
 
   const getStatusColor = (status: Campaign['status']) => {
     switch (status) {
+      case 'active': return 'bg-green-100 text-green-800 border-green-200';
       case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
       case 'generating': return 'bg-blue-100 text-blue-800 border-blue-200';
       case 'publishing': return 'bg-purple-100 text-purple-800 border-purple-200';
-      case 'completed': return 'bg-green-100 text-green-800 border-green-200';
+      case 'completed': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
       case 'paused': return 'bg-gray-100 text-gray-800 border-gray-200';
       case 'failed': return 'bg-red-100 text-red-800 border-red-200';
       default: return 'bg-gray-100 text-gray-800 border-gray-200';
@@ -143,6 +180,7 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
 
   const getStatusIcon = (status: Campaign['status']) => {
     switch (status) {
+      case 'active': return <Play className="w-4 h-4" />;
       case 'generating': return <FileText className="w-4 h-4" />;
       case 'publishing': return <ExternalLink className="w-4 h-4" />;
       case 'completed': return <CheckCircle className="w-4 h-4" />;
@@ -152,7 +190,7 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
     }
   };
 
-  const getActiveCampaigns = () => campaigns.filter(c => ['pending', 'generating', 'publishing'].includes(c.status));
+  const getActiveCampaigns = () => campaigns.filter(c => ['active', 'pending', 'generating', 'publishing'].includes(c.status));
   const getCompletedCampaigns = () => campaigns.filter(c => c.status === 'completed');
   const getPausedCampaigns = () => campaigns.filter(c => c.status === 'paused');
   const getFailedCampaigns = () => campaigns.filter(c => c.status === 'failed');
@@ -266,13 +304,21 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
         <div className="mb-3">
           <h4 className="font-medium text-sm text-gray-700">Campaign Activity</h4>
         </div>
-        <ScrollArea className="h-80">
-          <div className="space-y-3">
-            {campaigns.length === 0 ? (
+        <div className="max-h-96 overflow-y-auto space-y-3">
+          {campaigns.length === 0 ? (
               <div className="text-center py-8">
                 <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                 <p className="text-gray-600">No campaigns found</p>
                 <p className="text-sm text-gray-500">Create your first campaign to get started</p>
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg text-left max-w-sm mx-auto">
+                  <p className="text-xs font-medium text-blue-700 mb-2">✨ New Features:</p>
+                  <ul className="text-xs text-blue-600 space-y-1">
+                    <li>• Auto-rotation across platforms</li>
+                    <li>• Smart pause/resume controls</li>
+                    <li>• Visual progress tracking</li>
+                    <li>• 1 post per platform maximum</li>
+                  </ul>
+                </div>
               </div>
             ) : (
               campaigns.map((campaign) => (
@@ -293,7 +339,40 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                         <p><strong>Target:</strong> {campaign.target_url}</p>
                         <p><strong>Anchor:</strong> {campaign.anchor_text}</p>
                         <p><strong>Created:</strong> {new Date(campaign.created_at).toLocaleString()}</p>
-                        
+
+                        {/* Platform Progress */}
+                        {(() => {
+                          const summary = campaignStatusSummaries.get(campaign.id);
+                          if (summary && summary.totalPlatforms > 0) {
+                            return (
+                              <div className="mt-2 p-2 bg-gray-50 rounded-md">
+                                <p className="text-xs font-medium text-gray-700 mb-1">Platform Progress</p>
+                                <div className="flex items-center gap-2 text-xs">
+                                  <span className="text-gray-600">
+                                    {summary.platformsCompleted || 0}/{summary.totalPlatforms} platforms completed
+                                  </span>
+                                  {summary.nextPlatform && (
+                                    <span className="text-blue-600">
+                                      • Next: {summary.nextPlatform}
+                                    </span>
+                                  )}
+                                  {summary.isFullyCompleted && (
+                                    <span className="text-green-600 font-medium">
+                                      • All platforms completed
+                                    </span>
+                                  )}
+                                </div>
+                                {summary.completedPlatforms && summary.completedPlatforms.length > 0 && (
+                                  <div className="text-xs text-gray-500 mt-1">
+                                    Completed: {summary.completedPlatforms.join(', ')}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          }
+                          return null;
+                        })()}
+
                         {campaign.automation_published_links && campaign.automation_published_links.length > 0 && (
                           <div className="mt-2">
                             <p className="font-medium">Published Links ({campaign.automation_published_links.length}):</p>
@@ -328,38 +407,63 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                     </div>
 
                     {/* Campaign Controls */}
-                    <div className="flex gap-2 ml-4">
-                      {campaign.status === 'paused' && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleResumeCampaign(campaign.id)}
-                          disabled={actionLoading === campaign.id}
-                          title="Resume Campaign"
-                        >
-                          {actionLoading === campaign.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Play className="w-4 h-4" />
-                          )}
-                        </Button>
-                      )}
-                      
-                      {['pending', 'generating', 'publishing'].includes(campaign.status) && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handlePauseCampaign(campaign.id)}
-                          disabled={actionLoading === campaign.id}
-                          title="Pause Campaign"
-                        >
-                          {actionLoading === campaign.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Pause className="w-4 h-4" />
-                          )}
-                        </Button>
-                      )}
+                    <div className="flex flex-col gap-2 ml-4">
+                      {(() => {
+                        const summary = campaignStatusSummaries.get(campaign.id);
+
+                        // Resume button for paused campaigns
+                        if (campaign.status === 'paused') {
+                          const canResume = summary?.nextPlatform;
+                          const tooltipText = canResume
+                            ? `Resume to continue posting to ${summary.nextPlatform}`
+                            : 'All available platforms have been used';
+
+                          return (
+                            <Button
+                              size="sm"
+                              variant={canResume ? "default" : "outline"}
+                              onClick={() => handleResumeCampaign(campaign.id)}
+                              disabled={actionLoading === campaign.id || !canResume}
+                              title={tooltipText}
+                              className={canResume ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+                            >
+                              {actionLoading === campaign.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <Play className="w-4 h-4 mr-1" />
+                                  {canResume ? 'Resume' : 'Complete'}
+                                </>
+                              )}
+                            </Button>
+                          );
+                        }
+
+                        // Pause button for active campaigns
+                        if (['active', 'pending', 'generating', 'publishing'].includes(campaign.status)) {
+                          return (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handlePauseCampaign(campaign.id)}
+                              disabled={actionLoading === campaign.id}
+                              title="Pause Campaign"
+                              className="border-orange-300 text-orange-700 hover:bg-orange-50"
+                            >
+                              {actionLoading === campaign.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <Pause className="w-4 h-4 mr-1" />
+                                  Pause
+                                </>
+                              )}
+                            </Button>
+                          );
+                        }
+
+                        return null;
+                      })()}
                       
                       <Button
                         size="sm"
@@ -367,6 +471,7 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                         onClick={() => handleDeleteCampaign(campaign.id, campaign.keyword)}
                         disabled={actionLoading === campaign.id}
                         title="Delete Campaign"
+                        className="border-red-300 text-red-700 hover:bg-red-50"
                       >
                         {actionLoading === campaign.id ? (
                           <Loader2 className="w-4 h-4 animate-spin" />
@@ -374,13 +479,41 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                           <Trash2 className="w-4 h-4" />
                         )}
                       </Button>
+
+                      {/* Platform Visual Progress */}
+                      {(() => {
+                        const summary = campaignStatusSummaries.get(campaign.id);
+                        if (summary && summary.totalPlatforms > 0) {
+                          const completedCount = summary.platformsCompleted || 0;
+                          return (
+                            <div className="flex flex-col gap-1 mt-2">
+                              <div className="text-xs text-gray-500">Platforms:</div>
+                              <div className="flex gap-1">
+                                {Array.from({ length: summary.totalPlatforms }, (_, i) => (
+                                  <div
+                                    key={i}
+                                    className={`w-2 h-2 rounded-full transition-colors duration-200 ${
+                                      i < completedCount
+                                        ? 'bg-green-500'
+                                        : 'bg-gray-300'
+                                    }`}
+                                    title={`Platform ${i + 1}: ${
+                                      i < completedCount ? 'Completed' : 'Pending'
+                                    }`}
+                                  />
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      })()}
                     </div>
                   </div>
                 </div>
               ))
-            )}
-          </div>
-        </ScrollArea>
+          )}
+        </div>
       </CardContent>
     </Card>
   );

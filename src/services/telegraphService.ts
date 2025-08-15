@@ -36,7 +36,10 @@ export class TelegraphService {
    */
   async createAccount(): Promise<TelegraphAccount> {
     try {
-      const response = await fetch(`${this.baseUrl}/createAccount`, {
+      // Use stored original fetch to avoid FullStory interference
+      const fetchToUse = window._originalFetch || window.fetch || fetch;
+
+      const response = await fetchToUse.call(window, `${this.baseUrl}/createAccount`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +98,10 @@ export class TelegraphService {
       // Convert HTML content to Telegraph format
       const telegraphContent = this.convertHtmlToTelegraphFormat(params.content);
 
-      const response = await fetch(`${this.baseUrl}/createPage`, {
+      // Use stored original fetch to avoid FullStory interference
+      const fetchToUse = window._originalFetch || window.fetch || fetch;
+
+      const response = await fetchToUse.call(window, `${this.baseUrl}/createPage`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
