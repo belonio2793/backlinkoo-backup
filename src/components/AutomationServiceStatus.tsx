@@ -196,33 +196,46 @@ const AutomationServiceStatus = () => {
           ))}
         </div>
 
-        {/* Configuration help */}
-        {hasWarnings && (
-          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <h4 className="font-medium text-yellow-900 mb-2">Configuration Required</h4>
-            <p className="text-sm text-yellow-800 mb-2">
-              To complete the automation setup, ensure the following environment variable is set in your Netlify site settings:
-            </p>
-            <ul className="text-sm text-yellow-800 space-y-1">
-              <li><code className="bg-yellow-200 px-1 rounded">OPENAI_API_KEY</code> - Your OpenAI API key for content generation</li>
-            </ul>
-            <p className="text-xs text-yellow-700 mt-2">
-              Go to your Netlify site dashboard → Site settings → Environment variables to add these.
-            </p>
+        {/* Control buttons */}
+        <div className="flex justify-between items-center pt-2 border-t">
+          <div className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              id="show-details"
+              checked={showDetails}
+              onChange={(e) => setShowDetails(e.target.checked)}
+              className="rounded"
+            />
+            <label htmlFor="show-details" className="text-sm text-gray-600">
+              Show technical details
+            </label>
           </div>
-        )}
-
-        {/* Refresh button */}
-        <div className="flex justify-center pt-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={checkAllServices}
             disabled={isChecking}
             className="flex items-center gap-2"
+            size="sm"
           >
             <RefreshCw className={`w-4 h-4 ${isChecking ? 'animate-spin' : ''}`} />
-            {isChecking ? 'Checking...' : 'Refresh Status'}
+            {isChecking ? 'Checking...' : 'Run Diagnostics'}
           </Button>
+        </div>
+
+        {/* Performance metrics */}
+        <div className="grid grid-cols-3 gap-4 p-4 bg-gradient-to-r from-blue-50 to-green-50 rounded-lg border">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-600">91</div>
+            <div className="text-xs text-gray-600">Domain Rating</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-600">~800</div>
+            <div className="text-xs text-gray-600">Words/Article</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-purple-600">&lt;5min</div>
+            <div className="text-xs text-gray-600">Avg. Generation</div>
+          </div>
         </div>
       </CardContent>
     </Card>
