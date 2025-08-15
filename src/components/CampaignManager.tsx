@@ -136,8 +136,14 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
       await loadCampaigns();
       onStatusUpdate?.(`Campaign "${keyword}" deleted successfully`, 'success');
     } catch (error) {
-      console.error('Error deleting campaign:', error);
-      onStatusUpdate?.('Failed to delete campaign', 'error');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error deleting campaign:', {
+        message: errorMessage,
+        campaignId,
+        campaignKeyword: keyword,
+        error: error
+      });
+      onStatusUpdate?.(`Failed to delete campaign: ${errorMessage}`, 'error');
     } finally {
       setActionLoading(null);
     }
