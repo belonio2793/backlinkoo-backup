@@ -226,7 +226,11 @@ const Automation = () => {
     setShowInlineAuth(false);
     setNeedsAuth(false);
     addStatusMessage('Successfully signed in! Starting your campaign...', 'success');
-    await smartFlow.handleSuccessfulAuth(createCampaign);
+
+    // Use a small delay to let the user see the success message
+    setTimeout(async () => {
+      await smartFlow.handleSuccessfulAuth(createCampaign);
+    }, 1000);
   };
 
   const handleRetryCampaign = () => {
