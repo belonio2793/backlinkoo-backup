@@ -5,6 +5,7 @@ import { workingCampaignProcessor } from './workingCampaignProcessor';
 import { ProgressStep, CampaignProgress } from '@/components/CampaignProgressTracker';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { realTimeFeedService } from './realTimeFeedService';
+import { campaignNetworkLogger } from './campaignNetworkLogger';
 // Removed campaignErrorHandler import - using simplified error handling
 
 export interface Campaign {
