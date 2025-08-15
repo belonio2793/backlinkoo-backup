@@ -713,7 +713,7 @@ const Automation = () => {
           {/* Live Activity (Right Column) */}
           <div className="lg:col-span-1">
             {isAuthenticated && (
-              <CampaignManager
+              <CampaignManagerTabbed
                 onStatusUpdate={(message, type) => addStatusMessage(message, type)}
               />
             )}
