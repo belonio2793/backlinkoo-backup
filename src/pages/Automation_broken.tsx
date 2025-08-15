@@ -13,7 +13,7 @@ import AutomationServiceStatus from '@/components/AutomationServiceStatus';
 import AutomationAuthModal from '@/components/AutomationAuthModal';
 import CampaignProgressTracker, { CampaignProgress } from '@/components/CampaignProgressTracker';
 import LiveCampaignStatus from '@/components/LiveCampaignStatus';
-import CampaignManager from '@/components/CampaignManager';
+import CampaignManagerTabbed from '@/components/CampaignManagerTabbed';
 import FormCompletionCelebration from '@/components/FormCompletionCelebration';
 import EnhancedRealTimeFeed from '@/components/EnhancedRealTimeFeed';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -713,7 +713,7 @@ const Automation = () => {
           {/* Live Activity (Right Column) */}
           <div className="lg:col-span-1">
             {isAuthenticated && (
-              <CampaignManager
+              <CampaignManagerTabbed
                 onStatusUpdate={(message, type) => addStatusMessage(message, type)}
               />
             )}

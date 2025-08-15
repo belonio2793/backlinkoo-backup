@@ -2,6 +2,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { getContentService, type ContentGenerationParams } from './automationContentService';
 import { getTelegraphService } from './telegraphService';
 import { ProgressStep, CampaignProgress } from '@/components/CampaignProgressTracker';
+import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
+import { realTimeFeedService } from './realTimeFeedService';
 
 export interface Campaign {
   id: string;
@@ -270,17 +272,10 @@ export class AutomationOrchestrator {
         .single();
 
       if (error) {
-        console.error('Error creating campaign:', {
-          message: error.message || 'Unknown error',
-          code: error.code,
-          details: error.details,
-          hint: error.hint,
-          targetUrl: params.target_url,
-          keyword: params.keyword
-        });
+        console.error('Error creating campaign:', formatErrorForLogging(error, 'createCampaign'));
 
-        // Extract error message safely
-        const errorMessage = error?.message || error?.details || String(error);
+        // Extract error message safely using utility
+        const errorMessage = formatErrorForUI(error);
 
         // Handle specific database errors
         if (errorMessage.includes('violates row-level security policy')) {
@@ -295,7 +290,16 @@ export class AutomationOrchestrator {
       }
 
       await this.logActivity(data.id, 'info', 'Campaign created successfully');
-      
+
+      // Emit real-time feed event for campaign creation
+      realTimeFeedService.emitCampaignCreated(
+        data.id,
+        data.name,
+        params.keyword,
+        params.target_url,
+        user.id
+      );
+
       // Initialize progress tracking
       this.initializeProgress(data);
 
@@ -317,16 +321,9 @@ export class AutomationOrchestrator {
     } catch (error) {
       console.error('Campaign creation error:', error);
 
-      // Ensure we throw a proper Error object with a clear message
-      if (error instanceof Error) {
-        throw new Error(`Campaign creation failed: ${error.message}`);
-      } else {
-        // Handle non-Error objects (like Supabase error objects)
-        const errorMessage = error && typeof error === 'object' && 'message' in error
-          ? String(error.message)
-          : String(error);
-        throw new Error(`Campaign creation failed: ${errorMessage}`);
-      }
+      // Use utility to format error properly
+      const formattedError = formatErrorForUI(error);
+      throw new Error(`Campaign creation failed: ${formattedError}`);
     }
   }
 
@@ -362,6 +359,15 @@ export class AutomationOrchestrator {
         anchorText: campaign.anchor_texts[0] || 'click here',
         targetUrl: campaign.target_url
       });
+
+      // Emit real-time feed event for content generation
+      realTimeFeedService.emitContentGenerated(
+        campaignId,
+        campaign.name,
+        campaign.keywords[0] || '',
+        generatedContent[0]?.content?.length, // Approximate word count
+        user?.id
+      );
 
       this.updateStep(campaignId, 'generate-content', {
         status: 'completed',
@@ -461,6 +467,16 @@ export class AutomationOrchestrator {
             // Mark platform as completed
             this.markPlatformCompleted(campaignId, nextPlatform.id, publishedPage.url);
 
+            // Emit real-time feed event for URL published
+            realTimeFeedService.emitUrlPublished(
+              campaignId,
+              campaign.name,
+              campaign.keywords[0] || '',
+              publishedPage.url,
+              nextPlatform.name,
+              user?.id
+            );
+
             // Update progress with published URL
             this.updateProgress(campaignId, {
               publishedUrls: [...(this.campaignProgressMap.get(campaignId)?.publishedUrls || []), publishedPage.url]
@@ -474,8 +490,8 @@ export class AutomationOrchestrator {
           }
 
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          console.error('Error publishing content:', errorMessage);
+          const errorMessage = formatErrorForUI(error);
+          console.error('Error publishing content:', formatErrorForLogging(error, 'publishContent'));
           await this.logActivity(campaignId, 'error', `Failed to publish to ${nextPlatform.name}: ${errorMessage}`);
         }
       }
@@ -510,8 +526,8 @@ export class AutomationOrchestrator {
       }
 
     } catch (error) {
-      console.error('Campaign processing error:', error);
-      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Campaign processing error:', formatErrorForLogging(error, 'processCampaign'));
+      const errorMessage = formatErrorForUI(error);
 
       // Update progress to show error
       const progress = this.campaignProgressMap.get(campaignId);
@@ -530,8 +546,29 @@ export class AutomationOrchestrator {
         });
       }
 
-      // Note: 'failed' is not a valid status in current schema, so we'll pause the campaign instead
-      await this.updateCampaignStatus(campaignId, 'paused', errorMessage);
+      // Get campaign details for the error event
+      const campaign = await this.getCampaign(campaignId);
+
+      // Emit real-time feed event for campaign failure
+      if (campaign) {
+        realTimeFeedService.emitCampaignFailed(
+          campaignId,
+          campaign.name,
+          campaign.keywords[0] || '',
+          errorMessage
+        );
+      }
+
+      // Update campaign status using fixed function if available
+      if (typeof window !== 'undefined' && (window as any).fixedUpdateCampaignStatus) {
+        const result = await (window as any).fixedUpdateCampaignStatus(campaignId, 'paused', errorMessage);
+        if (!result.success) {
+          console.error('Failed to update campaign status:', result.error);
+        }
+      } else {
+        await this.updateCampaignStatus(campaignId, 'paused', errorMessage);
+      }
+
       await this.logActivity(campaignId, 'error', `Campaign failed: ${errorMessage}`);
       throw new Error(`Campaign processing failed: ${errorMessage}`);
     }
@@ -712,6 +749,8 @@ export class AutomationOrchestrator {
    * Auto-pause campaign when all platforms are completed
    */
   async autoPauseCampaign(campaignId: string, reason: string): Promise<void> {
+    const campaign = await this.getCampaign(campaignId);
+
     this.updateStep(campaignId, 'complete-campaign', {
       status: 'completed',
       details: reason
@@ -721,6 +760,20 @@ export class AutomationOrchestrator {
       isComplete: true,
       endTime: new Date()
     });
+
+    // Get published URLs for the completion event
+    const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
+    const publishedUrls = campaignWithLinks?.automation_published_links?.map(link => link.published_url) || [];
+
+    // Emit real-time feed event for campaign completion
+    if (campaign) {
+      realTimeFeedService.emitCampaignCompleted(
+        campaignId,
+        campaign.name,
+        campaign.keywords[0] || '',
+        publishedUrls
+      );
+    }
 
     await this.updateCampaignStatus(campaignId, 'completed');
     await this.logActivity(campaignId, 'info', `Campaign completed: ${reason}`);

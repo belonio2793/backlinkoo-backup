@@ -20,6 +20,8 @@ import {
   RefreshCw
 } from 'lucide-react';
 import { getOrchestrator, type Campaign } from '@/services/automationOrchestrator';
+import { realTimeFeedService } from '@/services/realTimeFeedService';
+import { useAuth } from '@/hooks/useAuth';
 
 interface PublishedLink {
   id: string;
@@ -43,6 +45,7 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
   const [refreshing, setRefreshing] = useState(false);
   const [campaignStatusSummaries, setCampaignStatusSummaries] = useState<Map<string, any>>(new Map());
   const orchestrator = getOrchestrator();
+  const { user } = useAuth();
 
   useEffect(() => {
     loadCampaigns();
@@ -99,7 +102,22 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
   const handlePauseCampaign = async (campaignId: string) => {
     setActionLoading(campaignId);
     try {
+      // Find the campaign to get details for the feed
+      const campaign = campaigns.find(c => c.id === campaignId);
+      const keyword = campaign?.keywords?.[0] || campaign?.name || 'Unknown';
+      const campaignName = campaign?.name || `Campaign for ${keyword}`;
+
       await orchestrator.pauseCampaign(campaignId);
+
+      // Emit real-time feed event
+      realTimeFeedService.emitCampaignPaused(
+        campaignId,
+        campaignName,
+        keyword,
+        'Paused by user',
+        user?.id
+      );
+
       await loadCampaigns();
       onStatusUpdate?.('Campaign paused successfully', 'success');
     } catch (error) {
@@ -109,6 +127,15 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
         campaignId,
         error: error
       });
+
+      // Emit error event to feed
+      realTimeFeedService.emitUserAction(
+        'pause_campaign_failed',
+        `Failed to pause campaign: ${errorMessage}`,
+        user?.id,
+        campaignId
+      );
+
       onStatusUpdate?.(`Failed to pause campaign: ${errorMessage}`, 'error');
     } finally {
       setActionLoading(null);
@@ -118,16 +145,49 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
   const handleResumeCampaign = async (campaignId: string) => {
     setActionLoading(campaignId);
     try {
+      // Find the campaign to get details for the feed
+      const campaign = campaigns.find(c => c.id === campaignId);
+      const keyword = campaign?.keywords?.[0] || campaign?.name || 'Unknown';
+      const campaignName = campaign?.name || `Campaign for ${keyword}`;
+
       const result = await orchestrator.resumeCampaign(campaignId);
-      await loadCampaigns();
 
       if (result.success) {
+        // Emit real-time feed event
+        realTimeFeedService.emitCampaignResumed(
+          campaignId,
+          campaignName,
+          keyword,
+          'Resumed by user',
+          user?.id
+        );
+
         onStatusUpdate?.(result.message, 'success');
       } else {
         // For completion messages, use info instead of error
         const messageType = result.message.includes('completed') ? 'info' : 'error';
+
+        // Emit appropriate event based on result
+        if (result.message.includes('completed')) {
+          realTimeFeedService.emitUserAction(
+            'resume_campaign_completed',
+            `Campaign already completed: ${result.message}`,
+            user?.id,
+            campaignId
+          );
+        } else {
+          realTimeFeedService.emitUserAction(
+            'resume_campaign_failed',
+            result.message,
+            user?.id,
+            campaignId
+          );
+        }
+
         onStatusUpdate?.(result.message, messageType);
       }
+
+      await loadCampaigns();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('Error resuming campaign:', {
@@ -135,6 +195,15 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
         campaignId,
         error: error
       });
+
+      // Emit error event to feed
+      realTimeFeedService.emitUserAction(
+        'resume_campaign_failed',
+        `Failed to resume campaign: ${errorMessage}`,
+        user?.id,
+        campaignId
+      );
+
       onStatusUpdate?.(`Failed to resume campaign: ${errorMessage}`, 'error');
     } finally {
       setActionLoading(null);
@@ -149,6 +218,15 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
     setActionLoading(campaignId);
     try {
       await orchestrator.deleteCampaign(campaignId);
+
+      // Emit real-time feed event
+      realTimeFeedService.emitUserAction(
+        'delete_campaign',
+        `Campaign "${keyword}" deleted successfully`,
+        user?.id,
+        campaignId
+      );
+
       await loadCampaigns();
       onStatusUpdate?.(`Campaign "${keyword}" deleted successfully`, 'success');
     } catch (error) {
@@ -159,6 +237,15 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
         campaignKeyword: keyword,
         error: error
       });
+
+      // Emit error event to feed
+      realTimeFeedService.emitUserAction(
+        'delete_campaign_failed',
+        `Failed to delete campaign "${keyword}": ${errorMessage}`,
+        user?.id,
+        campaignId
+      );
+
       onStatusUpdate?.(`Failed to delete campaign: ${errorMessage}`, 'error');
     } finally {
       setActionLoading(null);

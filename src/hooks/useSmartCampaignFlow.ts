@@ -201,8 +201,7 @@ export const useSmartCampaignFlow = () => {
         text: `Enter ${nextField || 'Required Information'}`,
         disabled: true,
         variant: 'secondary' as const,
-        icon: 'target' as const,
-        description: `Please fill in: ${validation.missingFields.join(', ')}`
+        icon: 'target' as const
       };
     }
 

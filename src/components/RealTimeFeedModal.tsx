@@ -22,6 +22,7 @@ import {
   Zap
 } from 'lucide-react';
 import { getOrchestrator, type Campaign } from '@/services/automationOrchestrator';
+import { realTimeFeedService, type RealTimeFeedEvent } from '@/services/realTimeFeedService';
 
 interface RealTimeFeedLog {
   id: string;
@@ -165,14 +166,43 @@ const RealTimeFeedModal: React.FC<RealTimeFeedModalProps> = ({
     };
   }, [activeCampaigns]);
 
+  // Subscribe to real-time feed service
+  useEffect(() => {
+    if (!isVisible) return;
+
+    console.log('📡 RealTimeFeedModal: Subscribing to real-time events');
+
+    // Subscribe to real-time feed events
+    const unsubscribe = realTimeFeedService.subscribe((event: RealTimeFeedEvent) => {
+      // Convert RealTimeFeedEvent to RealTimeFeedLog format
+      addLog({
+        type: event.type,
+        level: event.level,
+        message: event.message,
+        campaignId: event.campaignId,
+        campaignName: event.campaignName,
+        details: event.details
+      });
+    });
+
+    return () => {
+      console.log('📡 RealTimeFeedModal: Unsubscribing from real-time events');
+      unsubscribe();
+    };
+  }, [isVisible]);
+
   // Add initial welcome log
   useEffect(() => {
     if (isVisible && logs.length === 0) {
-      addLog({
-        type: 'system_event',
-        level: 'info',
-        message: 'Real Time Feed initialized - monitoring campaign activities'
-      });
+      setTimeout(() => {
+        if (logs.length === 0) {
+          addLog({
+            type: 'system_event',
+            level: 'info',
+            message: 'Real Time Feed initialized - monitoring campaign activities'
+          });
+        }
+      }, 500);
     }
   }, [isVisible]);
 

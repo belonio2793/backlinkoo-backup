@@ -7,6 +7,10 @@ import './styles/mobile-payment-fix.css'
 import './utils/unifiedErrorHandler'
 // Campaign-specific error handling
 import './utils/campaignErrorHandler'
+// Comprehensive error debug fix
+import './utils/errorDebugFix'
+// Real-time feed service
+import './services/realTimeFeedService'
 // Test error formatting in development (no promise rejections)
 import './utils/silentErrorTest'
 // Check if database schema is properly configured
@@ -15,6 +19,8 @@ import './utils/silentErrorTest'
 // import './utils/fixMissingColumns' // Disabled - using new blog comment system
 // Direct database fix
 // import './utils/directDatabaseFix' // Disabled - using new blog comment system
+// Emergency error fix (load first)
+import './utils/emergencyErrorFix'
 // Emergency fetch fix (load first)
 import './utils/emergencyFetchFix'
 // Network error handler for user-friendly solutions
@@ -210,6 +216,37 @@ if (import.meta.env.DEV) {
     }
   };
 
+  // Add error fix testing
+  (window as any).testErrorFixes = async () => {
+    try {
+      const { ErrorFixTester } = await import('./utils/testErrorFixes');
+      const tester = new ErrorFixTester();
+      return await tester.runAllTests();
+    } catch (error) {
+      console.error('❌ Error fix test failed:', error);
+    }
+  };
+
+  // Add real-time feed testing
+  (window as any).testRealTimeFeed = async () => {
+    try {
+      const { testRealTimeFeedIntegration } = await import('./utils/testRealTimeFeed');
+      return await testRealTimeFeedIntegration();
+    } catch (error) {
+      console.error('❌ Real-time feed test failed:', error);
+    }
+  };
+
+  // Add campaign manager tabs testing
+  (window as any).testCampaignTabs = async () => {
+    try {
+      const { testCampaignManagerTabs } = await import('./utils/testCampaignManagerTabs');
+      return await testCampaignManagerTabs();
+    } catch (error) {
+      console.error('❌ Campaign tabs test failed:', error);
+    }
+  };
+
   // Import fetch test helper
   import('./utils/fetchTestHelper');
 
@@ -219,6 +256,9 @@ if (import.meta.env.DEV) {
   console.log('  - testClientContent() - Test client-side content generation');
   console.log('  - testClientTelegraph() - Test client-side Telegraph publishing');
   console.log('  - testFullPipeline() - Test complete automation pipeline');
+  console.log('  - testErrorFixes() - Test all error fixes and formatting');
+  console.log('  - testRealTimeFeed() - Test real-time feed integration');
+  console.log('  - testCampaignTabs() - Test campaign manager tabs and live links');
   console.log('  - fetchTest.runDiagnostics() - Test fetch and network connectivity');
 }
 
