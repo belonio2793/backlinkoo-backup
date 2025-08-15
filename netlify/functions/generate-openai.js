@@ -95,7 +95,7 @@ Write a comprehensive, authoritative guide that becomes the definitive resource 
 - Include 3-5 data points, statistics, or expert insights
 - Write scannable content with clear headings and visual breaks
 - Natural integration of "${anchorText || keyword}" linking to ${url}
-- End with a compelling call-to-action that drives engagement
+- End with a helpful conclusion that provides next steps
 
 🏗️ ENHANCED STRUCTURE:
 1. **Attention-Grabbing H1**: Include "${keyword}" and promise a specific benefit
