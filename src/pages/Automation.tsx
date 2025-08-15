@@ -17,6 +17,7 @@ import FormCompletionCelebration from '@/components/FormCompletionCelebration';
 import InlineAuthForm from '@/components/InlineAuthForm';
 import InlineProgressTracker from '@/components/InlineProgressTracker';
 import InlineFeedMonitor from '@/components/InlineFeedMonitor';
+import CampaignCreationModal from '@/components/CampaignCreationModal';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
@@ -36,6 +37,7 @@ const Automation = () => {
   const [hasShownRestoreMessage, setHasShownRestoreMessage] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastFormValidState, setLastFormValidState] = useState(false);
+  const [showCampaignModal, setShowCampaignModal] = useState(false);
 
   // State for inline components
   const [showInlineAuth, setShowInlineAuth] = useState(false);
