@@ -80,13 +80,27 @@ const FeedModal: React.FC<FeedModalProps> = ({
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       timestamp: new Date()
     };
-    
+
     setActivities(prev => {
       const newActivities = [...prev, newActivity];
+
+      // If minimized, increment unread count
+      if (isMinimized && activity.level !== 'info') {
+        setUnreadCount(count => count + 1);
+      }
+
       // Keep last 50 activities
       return newActivities.slice(-50);
     });
   };
+
+  // Clear unread count when maximized
+  useEffect(() => {
+    if (!isMinimized && activities.length > 0) {
+      setUnreadCount(0);
+      setLastViewedActivityId(activities[activities.length - 1]?.id || null);
+    }
+  }, [isMinimized, activities]);
 
   // Initialize feed when modal opens
   useEffect(() => {
