@@ -42,13 +42,27 @@ export class AutomationContentService {
         })
       });
 
-      let data;
+      // Read response body once, regardless of success or failure
+      let responseText: string;
       try {
-        data = await response.json();
+        responseText = await response.text();
+      } catch (readError) {
+        throw new Error('Failed to read response from server');
+      }
+
+      // Parse JSON from text
+      let data: any;
+      try {
+        data = JSON.parse(responseText);
       } catch (parseError) {
+        // If response isn't JSON, use text as error message
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${responseText || response.statusText}`);
+        }
         throw new Error(`Failed to parse response: ${parseError instanceof Error ? parseError.message : 'Invalid JSON'}`);
       }
 
+      // Handle error responses
       if (!response.ok) {
         const errorMessage = data?.error || `HTTP ${response.status}: ${response.statusText}`;
         throw new Error(errorMessage);

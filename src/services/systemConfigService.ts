@@ -272,5 +272,5 @@ class SystemConfigurationService {
 // Export singleton instance
 export const systemConfig = new SystemConfigurationService();
 
-// Auto-initialize
-systemConfig.initialize().catch(console.error);
+// Initialize when first accessed to avoid conflicts
+// systemConfig.initialize().catch(console.error);

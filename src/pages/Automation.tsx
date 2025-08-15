@@ -12,6 +12,7 @@ import { getOrchestrator } from '@/services/automationOrchestrator';
 import AutomationReporting from '@/components/AutomationReporting';
 import AutomationServiceStatus from '@/components/AutomationServiceStatus';
 import AutomationAuthModal from '@/components/AutomationAuthModal';
+import CampaignProgressTracker, { CampaignProgress } from '@/components/CampaignProgressTracker';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 
@@ -22,6 +23,9 @@ const Automation = () => {
   
   const [isCreating, setIsCreating] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showProgress, setShowProgress] = useState(false);
+  const [campaignProgress, setCampaignProgress] = useState<CampaignProgress | null>(null);
+  const [progressUnsubscribe, setProgressUnsubscribe] = useState<(() => void) | null>(null);
   const [formData, setFormData] = useState({
     targetUrl: '',
     keyword: '',
@@ -119,18 +123,26 @@ const Automation = () => {
 
   const createCampaign = async () => {
     setIsCreating(true);
-    
+
     try {
       // Create new campaign using orchestrator
-      await orchestrator.createCampaign({
+      const campaign = await orchestrator.createCampaign({
         target_url: formData.targetUrl,
         keyword: formData.keyword,
         anchor_text: formData.anchorText
       });
-      
+
+      // Subscribe to progress updates
+      const unsubscribe = orchestrator.subscribeToProgress(campaign.id, (progress) => {
+        setCampaignProgress(progress);
+      });
+
+      setProgressUnsubscribe(() => unsubscribe);
+      setShowProgress(true);
+
       // Clear saved form data since campaign was created successfully
       clearFormData();
-      
+
       // Reset form
       setFormData({
         targetUrl: '',
@@ -140,7 +152,7 @@ const Automation = () => {
 
       toast({
         title: "Campaign Created Successfully!",
-        description: "Your link building campaign has been created and will start processing shortly. Check the Reports tab to monitor progress."
+        description: "Your link building campaign is now starting. You can track progress in real-time."
       });
 
     } catch (error) {
@@ -174,6 +186,36 @@ const Automation = () => {
     setShowAuthModal(false);
   };
 
+  const handleProgressClose = () => {
+    setShowProgress(false);
+    setCampaignProgress(null);
+
+    // Cleanup subscription
+    if (progressUnsubscribe) {
+      progressUnsubscribe();
+      setProgressUnsubscribe(null);
+    }
+  };
+
+  const handleRetryCampaign = () => {
+    // Close progress tracker and allow user to create a new campaign
+    handleProgressClose();
+
+    toast({
+      title: "Ready to Retry",
+      description: "You can now create a new campaign with the same or different parameters."
+    });
+  };
+
+  // Cleanup subscription on unmount
+  useEffect(() => {
+    return () => {
+      if (progressUnsubscribe) {
+        progressUnsubscribe();
+      }
+    };
+  }, [progressUnsubscribe]);
+
   // Show loading state while checking authentication
   if (authLoading) {
     return (
@@ -184,6 +226,19 @@ const Automation = () => {
         </div>
       </div>
     );
+
+  // Show progress tracker if active
+  if (showProgress && campaignProgress) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6 flex items-center justify-center">
+        <CampaignProgressTracker
+          progress={campaignProgress}
+          onClose={handleProgressClose}
+          onRetry={handleRetryCampaign}
+        />
+      </div>
+    );
+  }
   }
 
   return (

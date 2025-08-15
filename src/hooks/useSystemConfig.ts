@@ -18,6 +18,9 @@ export function useSystemConfig(): UseSystemConfigResult {
   const [config, setConfig] = useState<SystemConfigState>(() => systemConfig.getConfig());
 
   useEffect(() => {
+    // Initialize the system config when hook is first used
+    systemConfig.initialize().catch(console.error);
+
     // Subscribe to configuration changes
     const unsubscribe = systemConfig.subscribe((newConfig) => {
       setConfig(newConfig);

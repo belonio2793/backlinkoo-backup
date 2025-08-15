@@ -48,16 +48,22 @@ export class TelegraphService {
         })
       });
 
+      if (!response.ok) {
+        let errorMessage = `Telegraph API error: ${response.status} ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData?.error || errorMessage;
+        } catch {
+          // If JSON parsing fails, use default error message
+        }
+        throw new Error(errorMessage);
+      }
+
       let data;
       try {
         data = await response.json();
       } catch (parseError) {
         throw new Error('Telegraph API returned invalid JSON response');
-      }
-
-      if (!response.ok) {
-        const errorMessage = data?.error || `Telegraph API error: ${response.status} ${response.statusText}`;
-        throw new Error(errorMessage);
       }
 
       if (!data.ok) {
@@ -104,16 +110,22 @@ export class TelegraphService {
         })
       });
 
+      if (!response.ok) {
+        let errorMessage = `Telegraph API error: ${response.status} ${response.statusText}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData?.error || errorMessage;
+        } catch {
+          // If JSON parsing fails, use default error message
+        }
+        throw new Error(errorMessage);
+      }
+
       let data;
       try {
         data = await response.json();
       } catch (parseError) {
         throw new Error('Telegraph API returned invalid JSON response');
-      }
-
-      if (!response.ok) {
-        const errorMessage = data?.error || `Telegraph API error: ${response.status} ${response.statusText}`;
-        throw new Error(errorMessage);
       }
 
       if (!data.ok) {
