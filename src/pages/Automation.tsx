@@ -8,6 +8,10 @@ import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2, Activity } from 'lucide-react';
 import { getOrchestrator } from '@/services/automationOrchestrator';
+import { campaignMonitoringService } from '@/services/campaignMonitoringService';
+import { workingCampaignProcessor } from '@/services/workingCampaignProcessor';
+import CampaignMonitoringErrorBoundary from '@/components/CampaignMonitoringErrorBoundary';
+import NetworkStatusIndicator from '@/components/NetworkStatusIndicator';
 import AutomationReporting from '@/components/AutomationReporting';
 import AutomationServiceStatus from '@/components/AutomationServiceStatus';
 import CampaignProgressTracker, { CampaignProgress } from '@/components/CampaignProgressTracker';
@@ -17,6 +21,8 @@ import FormCompletionCelebration from '@/components/FormCompletionCelebration';
 import InlineAuthForm from '@/components/InlineAuthForm';
 import InlineProgressTracker from '@/components/InlineProgressTracker';
 import InlineFeedMonitor from '@/components/InlineFeedMonitor';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
@@ -75,6 +81,50 @@ const Automation = () => {
   useEffect(() => {
     smartFlow.updateFlowState(formData);
   }, []);
+
+  // Start campaign monitoring when user is authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      // Load active campaigns for Live Monitor
+      const loadActiveCampaigns = async () => {
+        try {
+          const campaigns = await orchestrator.getUserCampaigns();
+          const active = campaigns.filter(c => c.status === 'active');
+          setActiveCampaigns(active);
+
+          if (active.length > 0) {
+            addStatusMessage(`Found ${active.length} active campaign(s)`, 'info');
+          }
+        } catch (error) {
+          console.error('Error loading active campaigns:', error);
+        }
+      };
+
+      // Start monitoring with a small delay to ensure other services are ready
+      const startMonitoring = setTimeout(async () => {
+        campaignMonitoringService.startMonitoring();
+        addStatusMessage('Campaign monitoring service started', 'info');
+
+        // Load campaigns and check immediately
+        await loadActiveCampaigns();
+
+        // Force an immediate check for stuck campaigns
+        setTimeout(async () => {
+          await campaignMonitoringService.forceCheck();
+          addStatusMessage('Initial campaign health check completed', 'info');
+        }, 1000);
+      }, 2000);
+
+      return () => {
+        clearTimeout(startMonitoring);
+      };
+    } else {
+      // Stop monitoring when user logs out
+      campaignMonitoringService.stopMonitoring();
+      setActiveCampaigns([]);
+    }
+  }, [isAuthenticated]);
+
 
   const handleInputChange = (field: string, value: string) => {
     const newFormData = { ...formData, [field]: value };
@@ -233,6 +283,7 @@ const Automation = () => {
     }, 1000);
   };
 
+
   const handleRetryCampaign = () => {
     // Reset campaign progress and allow user to create a new campaign
     setCampaignProgress(null);
@@ -277,22 +328,28 @@ const Automation = () => {
   // Don't show full screen progress tracker - we'll show inline progress instead
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
-        
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-gray-900">Link Building Automation</h1>
-          <p className="text-lg text-gray-600">
-            Automatically generate and publish high-quality content with backlinks to your target URL
-          </p>
-          {user && (
-            <div className="flex items-center justify-center gap-2 text-sm text-green-700">
-              <CheckCircle className="w-4 h-4" />
-              <span>Signed in as {user.email}</span>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+
+      <main className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+        <div className="max-w-7xl mx-auto space-y-6">
+
+          {/* Page Header */}
+          <div className="text-center space-y-4">
+            <div className="flex items-center justify-center gap-4">
+              <h1 className="text-4xl font-bold text-gray-900">Link Building Automation</h1>
+              <NetworkStatusIndicator />
             </div>
-          )}
-        </div>
+            <p className="text-lg text-gray-600">
+              Automatically generate and publish high-quality content with backlinks to your target URL
+            </p>
+            {user && (
+              <div className="flex items-center justify-center gap-2 text-sm text-green-700">
+                <CheckCircle className="w-4 h-4" />
+                <span>Signed in as {user.email}</span>
+              </div>
+            )}
+          </div>
 
         {/* Saved form data notification */}
         {hasValidSavedData(savedFormData) && !isAuthenticated && (
@@ -310,7 +367,7 @@ const Automation = () => {
                   size="sm"
                   variant="outline"
                   className="ml-4 border-blue-300 text-blue-700 hover:bg-blue-100"
-                  onClick={() => setShowAuthModal(true)}
+                  onClick={() => setShowInlineAuth(true)}
                 >
                   Sign In to Continue
                 </Button>
@@ -354,7 +411,7 @@ const Automation = () => {
           </div>
         )}
 
-        {/* Main Content - Top Row: Campaign Creation, Live Monitor, Activity */}
+        {/* Main Content - Top Row: Campaign Creation, Activity, Live Monitor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
           {/* Campaign Creation (Left Column) */}
           <div className="lg:col-span-1">
@@ -371,263 +428,247 @@ const Automation = () => {
               </TabsList>
 
               <TabsContent value="create" className="space-y-6">
-                {/* Campaign Creation Form */}
+                {/* Campaign Creation Card with Modal Trigger */}
                 <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Target className="w-5 h-5" />
-                    Create New Campaign
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    {smartFlow.hasValidForm(formData) ? (
-                      <div className="flex items-center gap-1 text-green-600">
-                        <CheckCircle className="w-4 h-4" />
-                        <span>Ready</span>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Target className="w-5 h-5" />
+                      Create a New Campaign
+                    </CardTitle>
+                    <CardDescription>
+                      Launch a new link building campaign with automated content generation and backlinks
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Form Progress Bar */}
+                    <div className="mb-4">
+                      <div className="flex justify-between text-xs text-gray-500 mb-1">
+                        <span>Form Progress</span>
+                        <span>{Math.round(((3 - smartFlow.analyzeFormData(formData).missingFields.length) / 3) * 100)}%</span>
                       </div>
-                    ) : (
-                      <div className="flex items-center gap-1 text-gray-500">
-                        <Clock className="w-4 h-4" />
-                        <span>{3 - smartFlow.analyzeFormData(formData).missingFields.length}/3</span>
+                      <div className="w-full bg-gray-200 rounded-full h-1.5">
+                        <div
+                          className={`h-1.5 rounded-full transition-all duration-300 ${
+                            smartFlow.hasValidForm(formData) ? 'bg-green-500' : 'bg-blue-500'
+                          }`}
+                          style={{ width: `${((3 - smartFlow.analyzeFormData(formData).missingFields.length) / 3) * 100}%` }}
+                        ></div>
                       </div>
-                    )}
-                  </div>
-                </CardTitle>
-                <CardDescription>
-                  Enter your target URL, keyword, and anchor text to generate and publish backlink content
-                </CardDescription>
+                    </div>
 
-                {/* Form Completion Progress Bar */}
-                <div className="mt-3">
-                  <div className="flex justify-between text-xs text-gray-500 mb-1">
-                    <span>Form Progress</span>
-                    <span>{Math.round(((3 - smartFlow.analyzeFormData(formData).missingFields.length) / 3) * 100)}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-1.5">
-                    <div
-                      className={`h-1.5 rounded-full transition-all duration-300 ${
-                        smartFlow.hasValidForm(formData) ? 'bg-green-500' : 'bg-blue-500'
-                      }`}
-                      style={{ width: `${((3 - smartFlow.analyzeFormData(formData).missingFields.length) / 3) * 100}%` }}
-                    ></div>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="targetUrl">Target URL *</Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="targetUrl"
-                      placeholder="https://example.com or example.com"
-                      value={formData.targetUrl}
-                      onChange={(e) => handleInputChange('targetUrl', e.target.value)}
-                      onKeyDown={(e) => {
-                        // Ctrl/Cmd + Enter to auto-format
-                        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                          e.preventDefault();
-                          const formattedUrl = smartFlow.autoFormatUrl(formData.targetUrl);
-                          if (formattedUrl !== formData.targetUrl) {
-                            handleInputChange('targetUrl', formattedUrl);
-                            addStatusMessage('URL formatted with Ctrl+Enter shortcut', 'success');
-                          }
-                        }
-                      }}
-                      onBlur={(e) => {
-                        // Auto-format URL when user leaves the field
-                        const formattedUrl = smartFlow.autoFormatUrl(e.target.value);
-                        if (formattedUrl !== e.target.value) {
-                          handleInputChange('targetUrl', formattedUrl);
-                          addStatusMessage('URL automatically formatted with https://', 'info');
-                        }
-                      }}
-                      onPaste={(e) => {
-                        // Auto-format pasted content after a short delay
-                        setTimeout(() => {
-                          const pastedValue = e.currentTarget.value;
-                          const formattedUrl = smartFlow.autoFormatUrl(pastedValue);
-                          if (formattedUrl !== pastedValue) {
-                            handleInputChange('targetUrl', formattedUrl);
-                            addStatusMessage('Pasted URL automatically formatted with https://', 'info');
-                          }
-                        }, 10);
-                      }}
-                      className={`flex-1 ${smartFlow.analyzeFormData(formData).missingFields.includes('Target URL') ||
-                                smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') ?
-                                'border-amber-300 focus:border-amber-500' : ''}`}
-                    />
-                    {formData.targetUrl && !formData.targetUrl.startsWith('http') && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          const formattedUrl = smartFlow.autoFormatUrl(formData.targetUrl);
-                          if (formattedUrl !== formData.targetUrl) {
-                            handleInputChange('targetUrl', formattedUrl);
-                            addStatusMessage('URL formatted with https://', 'success');
-                          }
-                        }}
-                        className="px-3"
-                        title="Add https:// to URL"
-                      >
-                        <Wand2 className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-500">
-                    The URL where your backlink will point
-                  </p>
-                  {formData.targetUrl && !formData.targetUrl.startsWith('http') && formData.targetUrl.includes('.') && (
-                    <p className="text-sm text-blue-600 flex items-center gap-1">
-                      <Wand2 className="h-3 w-3" />
-                      Will auto-format to: {smartFlow.autoFormatUrl(formData.targetUrl)}
-                    </p>
-                  )}
-                  {smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') && formData.targetUrl &&
-                   !formData.targetUrl.includes('.') && (
-                    <p className="text-sm text-amber-600">
-                      Please enter a valid domain (e.g., example.com)
-                    </p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="keyword">Keyword *</Label>
-                  <Input
-                    id="keyword"
-                    placeholder="digital marketing"
-                    value={formData.keyword}
-                    onChange={(e) => handleInputChange('keyword', e.target.value)}
-                    className={smartFlow.analyzeFormData(formData).missingFields.includes('Keyword') ?
-                              'border-amber-300 focus:border-amber-500' : ''}
-                  />
-                  <p className="text-sm text-gray-500">The main topic for content generation</p>
-                  {formData.keyword && formData.keyword.length > 50 && (
-                    <p className="text-sm text-amber-600">Consider using a shorter, more focused keyword</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="anchorText">Anchor Text *</Label>
-                  <Input
-                    id="anchorText"
-                    placeholder="best digital marketing tools"
-                    value={formData.anchorText}
-                    onChange={(e) => handleInputChange('anchorText', e.target.value)}
-                    className={smartFlow.analyzeFormData(formData).missingFields.includes('Anchor Text') ?
-                              'border-amber-300 focus:border-amber-500' : ''}
-                  />
-                  <p className="text-sm text-gray-500">The clickable text for your backlink</p>
-                  {formData.anchorText && (
-                    <div className="flex justify-between text-xs">
-                      <span className={formData.anchorText.length > 60 ? 'text-amber-600' : 'text-gray-500'}>
-                        {formData.anchorText.length} characters
-                      </span>
-                      {formData.anchorText.length > 60 && (
-                        <span className="text-amber-600">Consider shorter anchor text for better SEO</span>
+                    {/* Target URL Field */}
+                    <div className="space-y-2">
+                      <Label htmlFor="targetUrl">Target URL *</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="targetUrl"
+                          placeholder="https://example.com or example.com"
+                          value={formData.targetUrl}
+                          onChange={(e) => handleInputChange('targetUrl', e.target.value)}
+                          onKeyDown={(e) => {
+                            // Ctrl/Cmd + Enter to auto-format
+                            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                              e.preventDefault();
+                              const formattedUrl = smartFlow.autoFormatUrl(formData.targetUrl);
+                              if (formattedUrl !== formData.targetUrl) {
+                                handleInputChange('targetUrl', formattedUrl);
+                                addStatusMessage('URL formatted with Ctrl+Enter shortcut', 'success');
+                              }
+                            }
+                          }}
+                          onBlur={(e) => {
+                            // Auto-format URL when user leaves the field
+                            const formattedUrl = smartFlow.autoFormatUrl(e.target.value);
+                            if (formattedUrl !== e.target.value) {
+                              handleInputChange('targetUrl', formattedUrl);
+                              addStatusMessage('URL automatically formatted with https://', 'info');
+                            }
+                          }}
+                          onPaste={(e) => {
+                            // Auto-format pasted content after a short delay
+                            setTimeout(() => {
+                              const pastedValue = e.currentTarget.value;
+                              const formattedUrl = smartFlow.autoFormatUrl(pastedValue);
+                              if (formattedUrl !== pastedValue) {
+                                handleInputChange('targetUrl', formattedUrl);
+                                addStatusMessage('Pasted URL automatically formatted with https://', 'info');
+                              }
+                            }, 10);
+                          }}
+                          className={`flex-1 ${smartFlow.analyzeFormData(formData).missingFields.includes('Target URL') ||
+                                    smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') ?
+                                    'border-amber-300 focus:border-amber-500' : ''}`}
+                        />
+                        {formData.targetUrl && !formData.targetUrl.startsWith('http') && (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const formattedUrl = smartFlow.autoFormatUrl(formData.targetUrl);
+                              if (formattedUrl !== formData.targetUrl) {
+                                handleInputChange('targetUrl', formattedUrl);
+                                addStatusMessage('URL formatted with https://', 'success');
+                              }
+                            }}
+                            className="px-3"
+                            title="Add https:// to URL"
+                          >
+                            <Wand2 className="h-4 w-4" />
+                          </Button>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-500">
+                        The URL where your backlink will point
+                      </p>
+                      {formData.targetUrl && !formData.targetUrl.startsWith('http') && formData.targetUrl.includes('.') && (
+                        <p className="text-sm text-blue-600 flex items-center gap-1">
+                          <Wand2 className="h-3 w-3" />
+                          Will auto-format to: {smartFlow.autoFormatUrl(formData.targetUrl)}
+                        </p>
+                      )}
+                      {smartFlow.analyzeFormData(formData).missingFields.includes('Valid Target URL') && formData.targetUrl &&
+                       !formData.targetUrl.includes('.') && (
+                        <p className="text-sm text-amber-600">
+                          Please enter a valid domain (e.g., example.com)
+                        </p>
                       )}
                     </div>
-                  )}
-                </div>
 
-
-                {!isAuthenticated && (
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertDescription>
-                      You'll need to sign in or create an account to start campaigns. Your form data will be saved automatically.
-                    </AlertDescription>
-                  </Alert>
-                )}
-
-                <Button
-                  onClick={handleCreateCampaign}
-                  disabled={(smartFlow.getButtonState(formData).disabled || isCreating) && isAuthenticated}
-                  className="w-full transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-                  size="lg"
-                  variant={smartFlow.getButtonState(formData).variant}
-                >
-                  <div className="flex items-center justify-center transition-all duration-200">
-                    {(isCreating || smartFlow.getButtonState(formData).icon === 'loader') ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        <span className="animate-pulse">{smartFlow.getButtonState(formData).text}</span>
-                      </>
-                    ) : (
-                      <>
-                        <Target className={`w-4 h-4 mr-2 transition-transform duration-200 ${
-                          smartFlow.hasValidForm(formData) ? 'rotate-0' : 'rotate-45'
-                        }`} />
-                        <span>{smartFlow.getButtonState(formData).text}</span>
-                      </>
-                    )}
-                  </div>
-                </Button>
-
-                {/* Button description */}
-                {smartFlow.getButtonState(formData).description && (
-                  <p className="text-xs text-gray-500 text-center">
-                    {smartFlow.getButtonState(formData).description}
-                  </p>
-                )}
-
-                {/* Smart Flow Contextual Messages */}
-                {smartFlow.getContextualMessages(formData).map((msg, index) => (
-                  <Alert key={index} className={
-                    msg.type === 'success' ? 'border-green-200 bg-green-50' :
-                    msg.type === 'warning' ? 'border-yellow-200 bg-yellow-50' :
-                    'border-blue-200 bg-blue-50'
-                  }>
-                    <Info className="h-4 w-4" />
-                    <AlertDescription className={
-                      msg.type === 'success' ? 'text-green-700' :
-                      msg.type === 'warning' ? 'text-yellow-700' :
-                      'text-blue-700'
-                    }>
-                      {msg.message}
-                    </AlertDescription>
-                  </Alert>
-                ))}
-              </CardContent>
-                </Card>
-
-                {/* Campaign Status Summary */}
-                {lastCreatedCampaign && (
-                  <div className="mt-6 p-4 border rounded-lg bg-blue-50 border-blue-200">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <h4 className="font-medium text-blue-900">Campaign Active</h4>
-                        <p className="text-sm text-blue-700">
-                          "{lastCreatedCampaign.keywords?.[0] || lastCreatedCampaign.name}" is running
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-blue-600">
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-                        <span>Monitoring live</span>
-                      </div>
+                    {/* Keyword Field */}
+                    <div className="space-y-2">
+                      <Label htmlFor="keyword">Keyword *</Label>
+                      <Input
+                        id="keyword"
+                        placeholder="digital marketing"
+                        value={formData.keyword}
+                        onChange={(e) => handleInputChange('keyword', e.target.value)}
+                        className={smartFlow.analyzeFormData(formData).missingFields.includes('Keyword') ?
+                                  'border-amber-300 focus:border-amber-500' : ''}
+                      />
+                      <p className="text-sm text-gray-500">The main topic for content generation</p>
+                      {formData.keyword && formData.keyword.length > 50 && (
+                        <p className="text-sm text-amber-600">Consider using a shorter, more focused keyword</p>
+                      )}
                     </div>
-                  </div>
-                )}
 
+                    {/* Anchor Text Field */}
+                    <div className="space-y-2">
+                      <Label htmlFor="anchorText">Anchor Text *</Label>
+                      <Input
+                        id="anchorText"
+                        placeholder="best digital marketing tools"
+                        value={formData.anchorText}
+                        onChange={(e) => handleInputChange('anchorText', e.target.value)}
+                        className={smartFlow.analyzeFormData(formData).missingFields.includes('Anchor Text') ?
+                                  'border-amber-300 focus:border-amber-500' : ''}
+                      />
+                      <p className="text-sm text-gray-500">The clickable text for your backlink</p>
+                      {formData.anchorText && (
+                        <div className="flex justify-between text-xs">
+                          <span className={formData.anchorText.length > 60 ? 'text-amber-600' : 'text-gray-500'}>
+                            {formData.anchorText.length} characters
+                          </span>
+                          {formData.anchorText.length > 60 && (
+                            <span className="text-amber-600">Consider shorter anchor text for better SEO</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Smart Flow Contextual Messages */}
+                    {smartFlow.getContextualMessages(formData).map((msg: any, index: number) => (
+                      <Alert key={index} className={
+                        msg.type === 'success' ? 'border-green-200 bg-green-50' :
+                        msg.type === 'warning' ? 'border-yellow-200 bg-yellow-50' :
+                        'border-blue-200 bg-blue-50'
+                      }>
+                        <Info className="h-4 w-4" />
+                        <AlertDescription className={
+                          msg.type === 'success' ? 'text-green-700' :
+                          msg.type === 'warning' ? 'text-yellow-700' :
+                          'text-blue-700'
+                        }>
+                          {msg.message}
+                        </AlertDescription>
+                      </Alert>
+                    ))}
+
+                    {/* Create Campaign Button */}
+                    <Button
+                      onClick={handleCreateCampaign}
+                      disabled={(smartFlow.getButtonState(formData).disabled || isCreating) && isAuthenticated}
+                      className="w-full h-12 text-lg font-medium transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                      size="lg"
+                      variant={smartFlow.getButtonState(formData).variant}
+                    >
+                      <div className="flex items-center justify-center transition-all duration-200">
+                        {(isCreating || smartFlow.getButtonState(formData).icon === 'loader') ? (
+                          <>
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            <span className="animate-pulse">{smartFlow.getButtonState(formData).text}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Target className={`w-4 h-4 mr-2 transition-transform duration-200 ${
+                              smartFlow.hasValidForm(formData) ? 'rotate-0' : 'rotate-45'
+                            }`} />
+                            <span>
+                              {!isAuthenticated && smartFlow.hasValidForm(formData)
+                                ? 'Sign In & Create Campaign'
+                                : smartFlow.getButtonState(formData).text
+                              }
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    </Button>
+
+                    {/* Button description */}
+                    {smartFlow.getButtonState(formData).description && (
+                      <p className="text-xs text-gray-500 text-center mt-2">
+                        {smartFlow.getButtonState(formData).description}
+                      </p>
+                    )}
+
+                    {!isAuthenticated && (
+                      <Alert>
+                        <Info className="h-4 w-4" />
+                        <AlertDescription>
+                          You'll need to sign in or create an account to start campaigns. Your form data will be saved automatically.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+
+
+                    {/* Campaign Status Summary */}
+                    {lastCreatedCampaign && (
+                      <div className="p-4 border rounded-lg bg-green-50 border-green-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium text-green-900">Campaign Active</h4>
+                            <p className="text-sm text-green-700">
+                              "{lastCreatedCampaign.keywords?.[0] || lastCreatedCampaign.name}" is running
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 text-sm text-green-600">
+                            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                            <span>Monitoring live</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
               </TabsContent>
 
               <TabsContent value="status">
                 <AutomationServiceStatus />
               </TabsContent>
             </Tabs>
-
           </div>
 
-          {/* Live Monitor (Middle Column) */}
-          <div className="lg:col-span-1">
-            <InlineFeedMonitor
-              activeCampaigns={activeCampaigns}
-              isVisible={isAuthenticated || activeCampaigns.length > 0}
-            />
-          </div>
-
-          {/* Live Activity (Right Column) */}
+          {/* Activity (Middle Column) */}
           <div className="lg:col-span-1">
             {isAuthenticated && (
               <CampaignManagerTabbed
@@ -635,121 +676,119 @@ const Automation = () => {
               />
             )}
           </div>
+
+          {/* Live Monitor (Right Column) */}
+          <div className="lg:col-span-1">
+            <InlineFeedMonitor
+              activeCampaigns={activeCampaigns}
+              isVisible={isAuthenticated}
+            />
+          </div>
         </div>
 
         {/* Publishing Platforms - Full Width Second Row */}
         <div className="w-full">
           <Card className="h-fit">
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+              <CardTitle className="flex items-center gap-2 text-lg">
                 <Link className="w-5 h-5" />
                 Publishing Platforms
               </CardTitle>
               <CardDescription>
-                Platforms for automatic rotation (1 post per platform per campaign)
+                Available platforms for automatic content publishing
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {/* Active Platform */}
-                <div className="flex items-center justify-between p-4 border rounded-lg bg-green-50 border-green-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                    <div>
-                      <div className="font-medium text-sm">Telegraph.ph</div>
-                      <div className="text-xs text-gray-600">Priority #1 • Auto-rotation</div>
+              <div className="space-y-3">
+                <div className="bg-gray-50 border rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-medium text-sm text-gray-900">Active Platforms</h3>
+                    <div className="text-xs text-green-700 bg-green-100 px-2 py-1 rounded">1 Available</div>
+                  </div>
+                  <div className="max-h-32 overflow-y-auto space-y-2">
+                    <div className="flex items-center justify-between p-3 bg-white border rounded">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div>
+                          <div className="font-medium text-sm">telegraph.ph</div>
+                          <div className="text-xs text-gray-600">High authority publishing</div>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-xs font-medium text-green-700">DR 91</div>
+                        <div className="text-xs text-gray-500">Active</div>
+                      </div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-xs font-medium text-green-700">DR 91</div>
-                    <div className="text-xs text-gray-500">High DA</div>
-                  </div>
                 </div>
 
-                {/* Coming Soon Platforms */}
-                <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-gray-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                    <div>
-                      <div className="font-medium text-sm">Medium.com</div>
-                      <div className="text-xs text-gray-600">Priority #2 • Coming soon</div>
+                <div className="bg-gray-50 border rounded-lg p-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="font-medium text-sm text-gray-900">Coming Soon</h3>
+                    <div className="text-xs text-gray-600 bg-gray-200 px-2 py-1 rounded">5 Planned</div>
+                  </div>
+                  <div className="max-h-48 overflow-y-auto space-y-2">
+                    <div className="flex items-center justify-between p-3 bg-white border rounded">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                        <div>
+                          <div className="font-medium text-sm">medium.com</div>
+                          <div className="text-xs text-gray-600">Professional publishing</div>
+                        </div>
+                      </div>
+                      <div className="text-xs font-medium text-gray-700">DR 96</div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-white border rounded">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                        <div>
+                          <div className="font-medium text-sm">dev.to</div>
+                          <div className="text-xs text-gray-600">Developer community</div>
+                        </div>
+                      </div>
+                      <div className="text-xs font-medium text-gray-700">DR 86</div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-white border rounded">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                        <div>
+                          <div className="font-medium text-sm">linkedin.com</div>
+                          <div className="text-xs text-gray-600">Professional articles</div>
+                        </div>
+                      </div>
+                      <div className="text-xs font-medium text-gray-700">DR 100</div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-white border rounded">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                        <div>
+                          <div className="font-medium text-sm">hashnode.com</div>
+                          <div className="text-xs text-gray-600">Developer blogging</div>
+                        </div>
+                      </div>
+                      <div className="text-xs font-medium text-gray-700">DR 75</div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 bg-white border rounded">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
+                        <div>
+                          <div className="font-medium text-sm">substack.com</div>
+                          <div className="text-xs text-gray-600">Newsletter platform</div>
+                        </div>
+                      </div>
+                      <div className="text-xs font-medium text-gray-700">DR 88</div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-xs font-medium text-gray-700">DR 96</div>
-                    <div className="text-xs text-gray-500">Premium</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-gray-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                    <div>
-                      <div className="font-medium text-sm">Dev.to</div>
-                      <div className="text-xs text-gray-600">Priority #3 • Coming soon</div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs font-medium text-gray-700">DR 86</div>
-                    <div className="text-xs text-gray-500">Tech focused</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-gray-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                    <div>
-                      <div className="font-medium text-sm">LinkedIn Articles</div>
-                      <div className="text-xs text-gray-600">Professional network</div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs font-medium text-gray-700">DR 100</div>
-                    <div className="text-xs text-gray-500">B2B focus</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-gray-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                    <div>
-                      <div className="font-medium text-sm">Hashnode</div>
-                      <div className="text-xs text-gray-600">Developer blogging</div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs font-medium text-gray-700">DR 75</div>
-                    <div className="text-xs text-gray-500">Developer</div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between p-4 border rounded-lg bg-gray-50 border-gray-200">
-                  <div className="flex items-center gap-3">
-                    <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
-                    <div>
-                      <div className="font-medium text-sm">Substack</div>
-                      <div className="text-xs text-gray-600">Newsletter platform</div>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-xs font-medium text-gray-700">DR 88</div>
-                    <div className="text-xs text-gray-500">Newsletter</div>
-                  </div>
-                </div>
-
-                {/* Coming Soon Notice */}
-                <div className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg">
-                  <p className="text-xs text-gray-500">More platforms coming soon...</p>
-                </div>
-
-                {/* Additional future platform slots */}
-                <div className="flex items-center justify-center p-4 border-2 border-dashed border-gray-300 rounded-lg opacity-50">
-                  <p className="text-xs text-gray-400">Platform slot</p>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
+
 
         {/* Form Completion Celebration */}
         <FormCompletionCelebration
@@ -757,7 +796,10 @@ const Automation = () => {
           onComplete={() => setShowCelebration(false)}
         />
 
-      </div>
+        </div>
+      </main>
+
+      <Footer />
     </div>
   );
 };

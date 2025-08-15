@@ -1,9 +1,11 @@
 import { supabase } from '@/integrations/supabase/client';
 import { getContentService, type ContentGenerationParams } from './automationContentService';
 import { getTelegraphService } from './telegraphService';
+import { workingCampaignProcessor } from './workingCampaignProcessor';
 import { ProgressStep, CampaignProgress } from '@/components/CampaignProgressTracker';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { realTimeFeedService } from './realTimeFeedService';
+// Removed campaignErrorHandler import - using simplified error handling
 
 export interface Campaign {
   id: string;
@@ -60,7 +62,47 @@ export class AutomationOrchestrator {
   private progressListeners: Map<string, (progress: CampaignProgress) => void> = new Map();
   private campaignProgressMap: Map<string, CampaignProgress> = new Map();
   private platformProgressMap: Map<string, CampaignPlatformProgress[]> = new Map();
-  
+
+  /**
+   * Validate Supabase client is available for database operations
+   */
+  private validateSupabaseClient(): boolean {
+    if (!supabase) {
+      console.error('❌ AutomationOrchestrator: Supabase client not available');
+      return false;
+    }
+
+    if (!supabase.from) {
+      console.error('❌ AutomationOrchestrator: Supabase.from method not available - using mock client?');
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Safe database operation wrapper to handle response body errors
+   */
+  private async safeDbOperation<T>(operation: () => Promise<T>, operationName: string): Promise<T | null> {
+    try {
+      return await operation();
+    } catch (error: any) {
+      if (error.message?.includes('body stream already read') ||
+          error.message?.includes('body used already')) {
+        console.warn(`⚠️ Response body error in ${operationName}, retrying...`);
+        // Wait a bit and try once more
+        await new Promise(resolve => setTimeout(resolve, 100));
+        try {
+          return await operation();
+        } catch (retryError) {
+          console.error(`❌ ${operationName} failed on retry:`, formatErrorForLogging(retryError, operationName));
+          return null;
+        }
+      }
+      throw error;
+    }
+  }
+
   /**
    * Get active publishing platforms
    */
@@ -304,17 +346,8 @@ export class AutomationOrchestrator {
       this.initializeProgress(data);
 
       // Start processing the campaign asynchronously
-      this.processCampaign(data.id).catch(error => {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        console.error('Campaign processing error:', errorMessage);
-        // Note: 'failed' is not a valid status in current schema, so we'll pause the campaign instead
-        this.updateCampaignStatus(data.id, 'paused', errorMessage);
-
-        // Update progress to show error
-        this.updateProgress(data.id, {
-          isError: true,
-          endTime: new Date()
-        });
+      this.processCampaignWithErrorHandling(data.id).catch(error => {
+        console.error('Unhandled campaign processing error:', formatErrorForLogging(error, 'createCampaign'));
       });
 
       return data;
@@ -328,9 +361,79 @@ export class AutomationOrchestrator {
   }
 
   /**
-   * Process a campaign through all steps
+   * Process a campaign with simplified error handling
+   */
+  async processCampaignWithErrorHandling(campaignId: string): Promise<void> {
+    try {
+      await this.processCampaign(campaignId);
+    } catch (error) {
+      await this.handleCampaignProcessingError(campaignId, error, 'campaign_processing');
+    }
+  }
+
+  /**
+   * Handle campaign processing errors with simplified auto-pause logic
+   */
+  private async handleCampaignProcessingError(campaignId: string, error: any, stepName: string): Promise<void> {
+    console.error(`Campaign ${campaignId} error in ${stepName}:`, formatErrorForLogging(error, stepName));
+
+    const errorMessage = formatErrorForUI(error);
+
+    // Log the error
+    await this.logActivity(campaignId, 'error', `Error in ${stepName}: ${errorMessage}`);
+
+    // Auto-pause campaign with error
+    await this.updateCampaignStatus(campaignId, 'paused', errorMessage);
+
+    // Update progress to show error
+    this.updateProgress(campaignId, {
+      isError: true,
+      endTime: new Date()
+    });
+
+    // Emit error event to live feed
+    const campaign = await this.getCampaign(campaignId);
+    if (campaign) {
+      realTimeFeedService.emitCampaignFailed(
+        campaignId,
+        campaign.name,
+        campaign.keywords[0] || 'Unknown',
+        errorMessage
+      );
+    }
+  }
+
+
+  /**
+   * Process a campaign through all steps using working processor
    */
   async processCampaign(campaignId: string): Promise<void> {
+    try {
+      // Get campaign details
+      const campaign = await this.getCampaign(campaignId);
+      if (!campaign) {
+        throw new Error('Campaign not found');
+      }
+
+      // Use the working campaign processor for reliable processing
+      const result = await workingCampaignProcessor.processCampaign(campaign);
+
+      if (!result.success) {
+        throw new Error(result.error || 'Campaign processing failed');
+      }
+
+      console.log('✅ Campaign processed successfully by working processor');
+
+    } catch (error) {
+      console.error('Campaign processing error:', formatErrorForLogging(error, 'processCampaign'));
+      throw error;
+    }
+  }
+
+  /**
+   * Original complex process campaign (keeping for reference but not used)
+   */
+  async processCampaignComplex(campaignId: string): Promise<void> {
     try {
       await this.logActivity(campaignId, 'info', 'Starting campaign processing');
 
@@ -361,11 +464,12 @@ export class AutomationOrchestrator {
       });
 
       // Emit real-time feed event for content generation
+      const { data: { user } } = await supabase.auth.getUser();
       realTimeFeedService.emitContentGenerated(
         campaignId,
         campaign.name,
         campaign.keywords[0] || '',
-        generatedContent[0]?.content?.length, // Approximate word count
+        generatedContent[0]?.wordCount || generatedContent[0]?.content?.length, // Use word count if available
         user?.id
       );
 
@@ -468,13 +572,14 @@ export class AutomationOrchestrator {
             this.markPlatformCompleted(campaignId, nextPlatform.id, publishedPage.url);
 
             // Emit real-time feed event for URL published
+            const { data: { user: currentUser } } = await supabase.auth.getUser();
             realTimeFeedService.emitUrlPublished(
               campaignId,
               campaign.name,
               campaign.keywords[0] || '',
               publishedPage.url,
               nextPlatform.name,
-              user?.id
+              currentUser?.id
             );
 
             // Update progress with published URL
@@ -496,20 +601,35 @@ export class AutomationOrchestrator {
         }
       }
 
-      // Step 7: Check for completion or auto-pause
+      // Step 7: Mark campaign as completed after successful publishing
       if (publishedLinks.length > 0) {
         this.updateStep(campaignId, 'publish-content', {
           status: 'completed',
           details: `Successfully published to ${nextPlatform.name}`
         });
 
-        // Check if we should auto-pause (all platforms completed)
-        if (this.shouldAutoPauseCampaign(campaignId)) {
-          await this.autoPauseCampaign(campaignId, 'All available platforms have been used');
-        } else {
-          // More platforms available, pause for now and can be resumed
-          await this.pauseCampaignForNextPlatform(campaignId);
-        }
+        // Complete the campaign since we've successfully published to Telegraph
+        this.updateStep(campaignId, 'complete-campaign', {
+          status: 'completed',
+          details: 'Campaign successfully completed with published content'
+        });
+
+        this.updateProgress(campaignId, {
+          isComplete: true,
+          endTime: new Date()
+        });
+
+        // Mark campaign as completed in database
+        await this.updateCampaignStatus(campaignId, 'completed');
+        await this.logActivity(campaignId, 'info', `Campaign completed successfully. Published link: ${publishedLinks[0]}`);
+
+        // Emit completion event
+        realTimeFeedService.emitCampaignCompleted(
+          campaignId,
+          campaign.name,
+          campaign.keywords[0] || '',
+          publishedLinks
+        );
       } else {
         this.updateStep(campaignId, 'publish-content', {
           status: 'error',
@@ -602,6 +722,12 @@ export class AutomationOrchestrator {
    * Get user campaigns
    */
   async getUserCampaigns(): Promise<Campaign[]> {
+    // Validate Supabase client first
+    if (!this.validateSupabaseClient()) {
+      console.warn('⚠️ AutomationOrchestrator: Supabase not properly configured, returning empty campaigns');
+      return [];
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return [];
@@ -658,8 +784,8 @@ export class AutomationOrchestrator {
    * Update campaign status
    */
   async updateCampaignStatus(
-    campaignId: string, 
-    status: Campaign['status'], 
+    campaignId: string,
+    status: Campaign['status'],
     errorMessage?: string
   ): Promise<void> {
     const updateData: any = {
@@ -671,22 +797,29 @@ export class AutomationOrchestrator {
       updateData.completed_at = new Date().toISOString();
     }
 
-    if (errorMessage) {
-      updateData.error_message = errorMessage;
+    // Note: error_message column doesn't exist in current schema
+    // Store error message in activity logs instead
+
+    const result = await this.safeDbOperation(
+      () => supabase
+        .from('automation_campaigns')
+        .update(updateData)
+        .eq('id', campaignId),
+      'updateCampaignStatus'
+    );
+
+    if (result?.error) {
+      console.error('Error updating campaign status:', {
+        message: result.error.message || 'Unknown error',
+        code: result.error.code,
+        details: result.error.details,
+        hint: result.error.hint
+      });
     }
 
-    const { error } = await supabase
-      .from('automation_campaigns')
-      .update(updateData)
-      .eq('id', campaignId);
-
-    if (error) {
-      console.error('Error updating campaign status:', {
-        message: error.message || 'Unknown error',
-        code: error.code,
-        details: error.details,
-        hint: error.hint
-      });
+    // Log error message separately if provided
+    if (errorMessage) {
+      await this.logActivity(campaignId, 'error', errorMessage);
     }
   }
 
@@ -828,11 +961,20 @@ export class AutomationOrchestrator {
       await this.updateCampaignStatus(campaignId, 'active');
       await this.logActivity(campaignId, 'info', `Campaign resumed to continue posting to ${nextPlatform.name}`);
 
+      // Emit resume event to live feed
+      const { data: { user } } = await supabase.auth.getUser();
+      realTimeFeedService.emitCampaignResumed(
+        campaignId,
+        campaign.name,
+        campaign.keywords[0] || 'Unknown',
+        `Resumed to continue posting to ${nextPlatform.name}`,
+        user?.id
+      );
+
       // Continue processing the campaign
-      this.processCampaign(campaignId).catch(error => {
+      this.processCampaignWithErrorHandling(campaignId).catch(error => {
         const errorMessage = error instanceof Error ? error.message : String(error);
         console.error('Campaign processing error:', errorMessage);
-        this.updateCampaignStatus(campaignId, 'paused', errorMessage);
       });
 
       return {
@@ -902,6 +1044,56 @@ export class AutomationOrchestrator {
   }
 
   /**
+   * Auto-pause a campaign with error information and live feed event
+   */
+  async autoPauseCampaignWithError(campaignId: string, errorMessage: string, canAutoResume: boolean = false): Promise<void> {
+    try {
+      // Get campaign details for the live feed event
+      const campaign = await this.getCampaign(campaignId);
+      const { data: { user } } = await supabase.auth.getUser();
+
+      // Update campaign with error information
+      const { error } = await supabase
+        .from('automation_campaigns')
+        .update({
+          status: 'paused',
+          error_message: errorMessage,
+          auto_pause_reason: errorMessage,
+          can_auto_resume: canAutoResume,
+          error_count: supabase.raw('COALESCE(error_count, 0) + 1'),
+          last_error_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', campaignId);
+
+      if (error) {
+        console.error('Error updating campaign with auto-pause info:', error);
+        // Fallback to basic status update
+        await this.updateCampaignStatus(campaignId, 'paused', errorMessage);
+      }
+
+      await this.logActivity(campaignId, 'error', `Campaign auto-paused: ${errorMessage}`);
+
+      // Emit auto-pause event to live feed
+      if (campaign) {
+        realTimeFeedService.emitCampaignAutoPaused(
+          campaignId,
+          campaign.name,
+          campaign.keywords[0] || 'Unknown',
+          errorMessage,
+          'auto_pause',
+          user?.id
+        );
+      }
+
+    } catch (error) {
+      console.error('Failed to auto-pause campaign:', error);
+      // Fallback to basic pause
+      await this.updateCampaignStatus(campaignId, 'paused', errorMessage);
+    }
+  }
+
+  /**
    * Pause campaign
    */
   async pauseCampaign(campaignId: string): Promise<void> {
@@ -910,11 +1102,51 @@ export class AutomationOrchestrator {
   }
 
   /**
-   * Resume campaign (uses smart resume logic)
+   * Resume a campaign with completion check
    */
   async resumeCampaign(campaignId: string): Promise<{ success: boolean; message: string }> {
-    return await this.smartResumeCampaign(campaignId);
+    try {
+      // Check if campaign exists and get its current status
+      const campaign = await this.getCampaign(campaignId);
+      if (!campaign) {
+        return {
+          success: false,
+          message: 'Campaign not found'
+        };
+      }
+
+      // Check if campaign is already completed
+      if (campaign.status === 'completed') {
+        return {
+          success: false,
+          message: 'This campaign is completed. Please create a new campaign.'
+        };
+      }
+
+      // Check if campaign has published links (indicating completion)
+      const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
+      if (campaignWithLinks?.automation_published_links && campaignWithLinks.automation_published_links.length > 0) {
+        // Mark as completed if it has published links but isn't marked as completed
+        await this.updateCampaignStatus(campaignId, 'completed');
+        await this.logActivity(campaignId, 'info', 'Campaign marked as completed - already has published content');
+
+        return {
+          success: false,
+          message: 'This campaign is completed. Please create a new campaign.'
+        };
+      }
+
+      return await this.smartResumeCampaign(campaignId);
+    } catch (error) {
+      const errorMessage = formatErrorForUI(error);
+      console.error('Error resuming campaign:', formatErrorForLogging(error, 'resumeCampaign'));
+      return {
+        success: false,
+        message: `Failed to resume campaign: ${errorMessage}`
+      };
+    }
   }
+
 
   /**
    * Delete campaign

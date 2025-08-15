@@ -76,7 +76,7 @@ const SYMBOL_REPLACEMENTS: Record<string, string> = {
   '⬛': '',
   
   // Replacement character (appears when encoding fails)
-  '�': '',
+  '\uFFFD': '',
   
   // Other geometric symbols that appear in encoding issues
   '⭘': '',

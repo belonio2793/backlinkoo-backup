@@ -446,7 +446,7 @@ function Blog() {
         console.warn('❌ Database unavailable, trying fallback:', dbError);
         try {
           posts = await ClaimableBlogService.getClaimablePosts(50);
-          console.log('��� Fallback posts loaded:', posts.length);
+          console.log('🔄 Fallback posts loaded:', posts.length);
         } catch (fallbackError) {
           console.warn('❌ Fallback also failed, using localStorage:', fallbackError);
         }

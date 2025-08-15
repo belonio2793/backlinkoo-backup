@@ -4,6 +4,8 @@
  */
 
 export class NetworkErrorHandler {
+  private static isInitialized = false;
+  private static originalFetch: typeof fetch;
   
   /**
    * Check if error is related to FullStory interference
@@ -32,7 +34,19 @@ export class NetworkErrorHandler {
            message.includes('Network request failed') ||
            message.includes('CORS') ||
            message.includes('NetworkError') ||
+           message.includes('body stream already read') ||
            error.name === 'TypeError' && message.includes('fetch');
+  }
+  
+  /**
+   * Check if error is related to response body being consumed multiple times
+   */
+  static isResponseBodyError(error: any): boolean {
+    if (!error) return false;
+    const message = error.message || '';
+    return message.includes('body stream already read') || 
+           message.includes('body used already') ||
+           message.includes('body has already been consumed');
   }
   
   /**
@@ -43,6 +57,32 @@ export class NetworkErrorHandler {
     solution: string; 
     actions: Array<{label: string, action: () => void}> 
   } {
+    
+    if (this.isResponseBodyError(error)) {
+      return {
+        message: 'Response handling error',
+        solution: 'A response was processed multiple times. This is usually a temporary issue.',
+        actions: [
+          {
+            label: 'Refresh Page',
+            action: () => window.location.reload()
+          },
+          {
+            label: 'Clear Cache',
+            action: () => {
+              if ('caches' in window) {
+                caches.keys().then(names => {
+                  names.forEach(name => caches.delete(name));
+                  window.location.reload();
+                });
+              } else {
+                window.location.reload();
+              }
+            }
+          }
+        ]
+      };
+    }
     
     if (this.isFullStoryError(error)) {
       return {
@@ -73,7 +113,7 @@ export class NetworkErrorHandler {
             label: 'Check Connection',
             action: () => {
               // Simple connectivity test
-              fetch('https://www.google.com/generate_204', { mode: 'no-cors' })
+              this.originalFetch('https://www.google.com/generate_204', { mode: 'no-cors' })
                 .then(() => alert('Internet connection is working'))
                 .catch(() => alert('No internet connection detected'));
             }
@@ -119,9 +159,17 @@ export class NetworkErrorHandler {
   }
   
   /**
-   * Initialize global error handling
+   * Initialize global error handling (safe, single initialization)
    */
   static initialize() {
+    if (this.isInitialized) {
+      console.log('⚠️ Network error handler already initialized, skipping');
+      return;
+    }
+
+    // Store original fetch before any modifications
+    this.originalFetch = window.fetch.bind(window);
+    
     // Handle unhandled promise rejections
     window.addEventListener('unhandledrejection', (event) => {
       console.error('Unhandled promise rejection:', event.reason);
@@ -144,40 +192,75 @@ export class NetworkErrorHandler {
       }
     });
     
-    // Store original fetch for safe access
-    if (!window._originalFetch) {
-      window._originalFetch = window.fetch;
-    }
-
-    // Handle fetch errors globally
+    // Enhanced fetch wrapper with better error handling
     window.fetch = async (...args) => {
       try {
         // Use the stored original fetch to avoid recursive wrapping
-        return await window._originalFetch(...args);
-      } catch (error) {
-        // Log fetch errors with context
-        console.error('Fetch error detected:', {
-          url: args[0],
-          error: error.message,
-          stack: error.stack?.substring(0, 200),
-          isFullStoryError: this.isFullStoryError(error),
-          isNetworkError: this.isNetworkError(error)
-        });
+        const response = await this.originalFetch(...args);
+        
+        // Clone the response to prevent "body stream already read" errors
+        // Only for successful responses that might be read multiple times
+        if (response.ok && response.body) {
+          const clonedResponse = response.clone();
+          // Add a flag to track if this response has been cloned
+          (clonedResponse as any)._isCloned = true;
+          return clonedResponse;
+        }
+        
+        return response;
+        
+      } catch (error: any) {
+        // Log fetch errors with context but avoid recursive logging
+        console.error('Fetch error detected:', error?.message || 'Unknown error');
 
-        // If it's a FullStory error, try to provide a cleaner error message
+        // If it's a FullStory error, provide cleaner error message
         if (this.isFullStoryError(error)) {
-          throw new Error('Network request blocked by browser analytics. Please try refreshing the page.');
+          const newError = new Error('Network request blocked by browser analytics. Please try refreshing the page.');
+          newError.name = 'NetworkBlockedError';
+          throw newError;
+        }
+
+        // If it's a response body error, provide cleaner error message
+        if (this.isResponseBodyError(error)) {
+          const newError = new Error('Response already processed. Please try again.');
+          newError.name = 'ResponseBodyError';
+          throw newError;
         }
 
         throw error;
       }
     };
     
+    this.isInitialized = true;
     console.log('✅ Network error handler initialized');
+  }
+  
+  /**
+   * Reset the error handler (for testing or if needed)
+   */
+  static reset() {
+    if (this.originalFetch && this.isInitialized) {
+      window.fetch = this.originalFetch;
+      this.isInitialized = false;
+      console.log('🔄 Network error handler reset');
+    }
+  }
+  
+  /**
+   * Get the original fetch function (useful for bypassing wrapper)
+   */
+  static getOriginalFetch(): typeof fetch {
+    return this.originalFetch || window.fetch;
   }
 }
 
-// Auto-initialize in browser environment
-if (typeof window !== 'undefined') {
+// Auto-initialize in browser environment with safety check
+if (typeof window !== 'undefined' && !window._networkErrorHandlerInitialized) {
   NetworkErrorHandler.initialize();
+  window._networkErrorHandlerInitialized = true;
+}
+
+// Make available globally for debugging
+if (typeof window !== 'undefined') {
+  (window as any).NetworkErrorHandler = NetworkErrorHandler;
 }

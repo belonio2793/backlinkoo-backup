@@ -11,6 +11,7 @@ import { GlobalErrorHandler } from "@/components/GlobalErrorHandler";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { PremiumUpgradeProvider } from "@/components/PremiumUpgradeProvider";
 import { EnhancedErrorBoundary } from "@/components/EnhancedErrorBoundary";
+import { SupabaseErrorBoundary } from "@/components/SupabaseErrorBoundary";
 import { UserFlowProvider } from "@/contexts/UserFlowContext";
 import { useSymbolCleaner } from "@/utils/symbolCleaner";
 import "@/utils/consoleSymbolCleaner"; // Load console utilities
@@ -64,7 +65,8 @@ const TextCleanerProvider = ({ children }: { children: React.ReactNode }) => {
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+    <SupabaseErrorBoundary>
+      <TooltipProvider>
       <ModalProvider>
         <UserFlowProvider>
           <SymbolCleanerProvider>
@@ -268,7 +270,8 @@ const App = () => (
           </SymbolCleanerProvider>
         </UserFlowProvider>
       </ModalProvider>
-    </TooltipProvider>
+      </TooltipProvider>
+    </SupabaseErrorBoundary>
   </QueryClientProvider>
 );
 

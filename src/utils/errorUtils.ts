@@ -37,11 +37,15 @@ export function getErrorMessage(error: any): string {
     return error.data.error;
   }
 
-  // Try toString method
-  if (typeof error.toString === 'function') {
-    const stringified = error.toString();
-    if (stringified !== '[object Object]') {
-      return stringified;
+  // Try toString method (but avoid calling it on plain objects to prevent circular refs)
+  if (typeof error.toString === 'function' && error.constructor !== Object) {
+    try {
+      const stringified = error.toString();
+      if (stringified !== '[object Object]') {
+        return stringified;
+      }
+    } catch {
+      // toString might fail or cause circular reference, skip it
     }
   }
 

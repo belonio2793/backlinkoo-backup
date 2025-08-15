@@ -56,21 +56,49 @@ export function usePremium(): PremiumStatus {
       setLoading(true);
 
       // Load user profile and status with individual error handling
-      console.log('🔄 usePremium: Getting profile...');
-      const profile = await userService.getCurrentUserProfile();
-      console.log('✅ usePremium: Profile loaded:', profile);
+      let profile = null;
+      let premiumStatus = false;
+      let adminStatus = false;
+      let limits = {
+        maxClaimedPosts: 3,
+        hasUnlimitedClaims: false,
+        hasAdvancedSEO: false,
+        hasAdvancedAnalytics: false,
+        hasPrioritySupport: false,
+        canAccessPremiumContent: false
+      };
 
-      console.log('🔄 usePremium: Checking premium status...');
-      const premiumStatus = await userService.isPremiumUser();
-      console.log('✅ usePremium: Premium status:', premiumStatus);
+      try {
+        console.log('🔄 usePremium: Getting profile...');
+        profile = await userService.getCurrentUserProfile();
+        console.log('✅ usePremium: Profile loaded:', profile);
+      } catch (error) {
+        console.warn('⚠️ usePremium: Failed to load profile:', error);
+      }
 
-      console.log('🔄 usePremium: Checking admin status...');
-      const adminStatus = await userService.isAdminUser();
-      console.log('✅ usePremium: Admin status:', adminStatus);
+      try {
+        console.log('🔄 usePremium: Checking premium status...');
+        premiumStatus = await userService.isPremiumUser();
+        console.log('✅ usePremium: Premium status:', premiumStatus);
+      } catch (error) {
+        console.warn('⚠️ usePremium: Failed to check premium status:', error);
+      }
 
-      console.log('🔄 usePremium: Getting user limits...');
-      const limits = await userService.getUserLimits();
-      console.log('✅ usePremium: User limits:', limits);
+      try {
+        console.log('🔄 usePremium: Checking admin status...');
+        adminStatus = await userService.isAdminUser();
+        console.log('✅ usePremium: Admin status:', adminStatus);
+      } catch (error) {
+        console.warn('⚠️ usePremium: Failed to check admin status:', error);
+      }
+
+      try {
+        console.log('🔄 usePremium: Getting user limits...');
+        limits = await userService.getUserLimits();
+        console.log('✅ usePremium: User limits:', limits);
+      } catch (error) {
+        console.warn('⚠️ usePremium: Failed to get user limits:', error);
+      }
 
       setUserProfile(profile);
       setIsPremium(premiumStatus);

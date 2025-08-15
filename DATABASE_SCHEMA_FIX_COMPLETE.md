@@ -155,7 +155,7 @@ If fix fails:
 3. Complete SQL script provided for database admin
 4. Fallback functionality enabled for basic operations
 
-## �� Support Information
+## 📞 Support Information
 
 For persistent issues:
 - Use the manual fix page (`/test-database-fix.html`)

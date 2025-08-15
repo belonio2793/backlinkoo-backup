@@ -13,11 +13,35 @@ export interface UserProfile {
 
 class UserService {
   /**
+   * Validate Supabase client is available
+   */
+  private validateSupabaseClient(): boolean {
+    if (!supabase) {
+      console.error('❌ userService: Supabase client not available');
+      return false;
+    }
+
+    if (!supabase.from) {
+      console.error('❌ userService: Supabase.from method not available - using mock client?');
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
    * Get current user profile with role information
    */
   async getCurrentUserProfile(): Promise<UserProfile | null> {
     try {
       console.log('🔄 userService: Getting current user...');
+
+      // Validate client first
+      if (!this.validateSupabaseClient()) {
+        console.warn('⚠️ userService: Supabase not properly configured, returning null profile');
+        return null;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         console.log('❌ userService: No authenticated user');
@@ -87,9 +111,22 @@ class UserService {
       const errorMessage = formatErrorForUI(error);
       console.error('❌ userService: Error getting current user profile:', formatErrorForLogging(error, 'getCurrentUserProfile'));
 
+      // Check for specific client issues
+      if (error.message?.includes('supabase.from is not a function')) {
+        console.error('🔧 userService: Supabase client not properly initialized');
+        console.info('💡 This usually indicates the client is using mock mode or has initialization issues');
+        return null;
+      }
+
       // Handle infinite recursion gracefully
       if (errorMessage && errorMessage.includes('infinite recursion detected in policy')) {
         console.warn('⚠️ Infinite recursion detected in RLS policy - returning null profile');
+      }
+
+      // Handle network errors
+      if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
+        console.warn('🌐 userService: Network error - returning null profile');
+        return null;
       }
 
       return null;

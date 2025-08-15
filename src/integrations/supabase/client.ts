@@ -2,6 +2,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { SecureConfig } from '../../lib/secure-config';
+import { supabaseErrorHandler } from '../../utils/supabaseErrorHandler';
 // Simplified imports without fetch workarounds
 
 // Get Supabase configuration with proper fallback
@@ -56,7 +57,7 @@ const createMockSupabaseClient = () => {
       return Promise.resolve({ data: { session: null }, error: { message: 'Mock mode: Please configure real Supabase credentials' } });
     },
     getUser: () => {
-      console.warn('��️ Mock auth getUser called');
+      console.warn('⚠️ Mock auth getUser called');
       return Promise.resolve({ data: { user: null }, error: { message: 'Mock mode: Please configure real Supabase credentials' } });
     },
     onAuthStateChange: (callback: any) => {
@@ -221,8 +222,8 @@ if (hasValidCredentials) {
   console.log('🔗 Testing Supabase connectivity...');
 }
 
-// Use mock client if credentials are missing or invalid
-export const supabase = hasValidCredentials ?
+// Create the base client
+const baseClient = hasValidCredentials ?
   createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       storage: localStorage,
@@ -235,11 +236,56 @@ export const supabase = hasValidCredentials ?
       headers: {
         'X-Client-Info': 'backlink-infinity@1.0.0',
       },
-      // SIMPLIFIED: Use native fetch directly to avoid interference
-      // Remove custom fetch wrapper that may conflict with FullStory
+      // Enhanced fetch with timeout and error handling
+      fetch: async (url, options = {}) => {
+        try {
+          // Create abort controller for timeout
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+          const response = await fetch(url, {
+            ...options,
+            signal: controller.signal,
+          });
+
+          clearTimeout(timeoutId);
+
+          // Don't clone response here to prevent body stream issues
+          // Let Supabase handle response processing
+          return response;
+
+        } catch (error: any) {
+          console.error('🌐 Supabase fetch error:', error);
+
+          if (error.name === 'AbortError') {
+            throw new Error('Network timeout - please check your connection and try again');
+          }
+          if (error.message?.includes('Failed to fetch')) {
+            throw new Error('Network connection failed - please check your internet connection');
+          }
+          if (error.message?.includes('body stream already read')) {
+            throw new Error('Response processing error - please try again');
+          }
+
+          throw error;
+        }
+      },
     },
   }) :
   createMockSupabaseClient() as any;
+
+// Create enhanced client with error handling while preserving all methods
+let enhancedClient: any;
+
+if (hasValidCredentials) {
+  enhancedClient = baseClient;
+  // Only enhance the auth client for now
+  enhancedClient.auth = supabaseErrorHandler.wrapAuthClient(baseClient.auth);
+} else {
+  enhancedClient = baseClient;
+}
+
+export const supabase = enhancedClient;
 
 // Simplified client without complex retry logic to prevent response reading issues
 
@@ -247,19 +293,48 @@ export const supabase = hasValidCredentials ?
 if (hasValidCredentials) {
   console.log('✅ Using real Supabase client with retry protection');
 
-  // Test connection in development
+  // Test connection in development with better error handling
   if (import.meta.env.DEV) {
     setTimeout(async () => {
       try {
-        console.log('🔍 Testing Supabase connection...');
-        const { data, error } = await supabase.from('blog_posts').select('id').limit(1);
-        if (error) {
-          console.warn('⚠️ Supabase connection test failed:', error.message);
-        } else {
-          console.log('✅ Supabase connection test successful');
+        console.log('🔍 Testing Supabase connectivity...');
+
+        // First check basic connectivity
+        const canConnect = await supabaseErrorHandler.checkConnectivity(SUPABASE_URL);
+        if (!canConnect) {
+          console.warn('❌ Cannot reach Supabase servers - check your internet connection');
+          return;
         }
+
+        console.log('🌐 Network connectivity OK, testing database...');
+
+        // Test database connection with retry
+        const { data, error } = await supabaseErrorHandler.retryDatabase(
+          () => supabase.from('blog_posts').select('id').limit(1),
+          'blog_posts',
+          'test_connection'
+        );
+
+        if (error) {
+          console.warn('⚠️ Database test failed:', error.message);
+          if (error.message?.includes('relation "blog_posts" does not exist')) {
+            console.info('ℹ️ Database tables may not be created yet - this is normal for new projects');
+          }
+        } else {
+          console.log('✅ Supabase database connection test successful');
+        }
+
       } catch (testError: any) {
-        console.warn('⚠️ Supabase connection test error:', testError.message);
+        console.warn('⚠️ Supabase connection test failed:', testError.message);
+
+        if (testError.message?.includes('Failed to fetch')) {
+          console.error('🌐 Network connectivity issue detected');
+          console.info('💡 Try refreshing the page or check your internet connection');
+        } else if (testError.message?.includes('timeout')) {
+          console.error('⏰ Connection timeout - Supabase may be slow or unreachable');
+        } else {
+          console.error('🔧 Possible configuration issue:', testError.message);
+        }
       }
     }, 1000);
   }

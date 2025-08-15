@@ -138,6 +138,27 @@ export class RealTimeFeedService {
   }
 
   /**
+   * Emit campaign auto-paused event (due to errors)
+   */
+  emitCampaignAutoPaused(campaignId: string, campaignName: string, keyword: string, errorMessage: string, errorType?: string, userId?: string): void {
+    this.emit({
+      type: 'campaign_paused',
+      level: 'error',
+      message: `Campaign "${keyword}" auto-paused - ${errorMessage}`,
+      campaignId,
+      campaignName,
+      userId,
+      details: {
+        keyword,
+        reason: `Auto-paused: ${errorMessage}`,
+        errorMessage,
+        errorType,
+        action: 'auto_pause'
+      }
+    });
+  }
+
+  /**
    * Emit campaign resumed event
    */
   emitCampaignResumed(campaignId: string, campaignName: string, keyword: string, reason?: string, userId?: string): void {
@@ -152,6 +173,47 @@ export class RealTimeFeedService {
         keyword,
         reason: reason || 'Manual resume',
         action: 'resume'
+      }
+    });
+  }
+
+  /**
+   * Emit campaign auto-resumed event (after error recovery)
+   */
+  emitCampaignAutoResumed(campaignId: string, campaignName: string, keyword: string, reason?: string, userId?: string): void {
+    this.emit({
+      type: 'campaign_resumed',
+      level: 'info',
+      message: `Campaign "${keyword}" auto-resumed${reason ? ` - ${reason}` : ''}`,
+      campaignId,
+      campaignName,
+      userId,
+      details: {
+        keyword,
+        reason: reason || 'Auto-resumed after error recovery',
+        action: 'auto_resume'
+      }
+    });
+  }
+
+  /**
+   * Emit campaign retry attempt event
+   */
+  emitCampaignRetry(campaignId: string, campaignName: string, keyword: string, attemptNumber: number, maxAttempts: number, stepName: string, userId?: string): void {
+    this.emit({
+      type: 'system_event',
+      level: 'info',
+      message: `Campaign "${keyword}" retrying ${stepName} (attempt ${attemptNumber}/${maxAttempts})`,
+      campaignId,
+      campaignName,
+      userId,
+      details: {
+        keyword,
+        reason: `Retry attempt ${attemptNumber} of ${maxAttempts}`,
+        action: 'retry',
+        stepName,
+        attemptNumber,
+        maxAttempts
       }
     });
   }

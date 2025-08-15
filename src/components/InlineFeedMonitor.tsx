@@ -208,7 +208,7 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2">
             <Activity className="w-4 h-4 text-blue-600" />
-            <span className="text-sm">Live Monitor</span>
+            <span className="text-lg">Live Monitor</span>
             <Badge variant="outline" className={
               activeCampaigns.length > 0 ?
                 "bg-blue-100 text-blue-700 border-blue-300" :

@@ -5,7 +5,7 @@
 
 // Common problematic characters that should be cleaned
 const PROBLEMATIC_CHARS = {
-  REPLACEMENT_CHAR: '\uFFFD', // � - Unicode replacement character
+  REPLACEMENT_CHAR: '\uFFFD', // \uFFFD - Unicode replacement character
   NULL_CHAR: '\u0000',        // Null character
   BYTE_ORDER_MARK: '\uFEFF',  // BOM (Byte Order Mark)
   ZERO_WIDTH_SPACE: '\u200B', // Zero-width space
@@ -194,7 +194,7 @@ export class AutoCleaner {
           
           if (originalValue !== cleanedValue) {
             input.value = cleanedValue;
-            console.log('🧹 Input value cleaned - removed � and other problematic chars:', { original: originalValue, cleaned: cleanedValue });
+            console.log('🧹 Input value cleaned - removed \\uFFFD and other problematic chars:', { original: originalValue, cleaned: cleanedValue });
           }
         }
       });
@@ -243,7 +243,7 @@ export class AutoCleaner {
       });
 
       if (needsCleaning) {
-        console.log('🧹 AutoCleaner: Detected � or other problematic characters, cleaning immediately...');
+        console.log('🧹 AutoCleaner: Detected \\uFFFD or other problematic characters, cleaning immediately...');
         this.runCleanup();
       }
     });
