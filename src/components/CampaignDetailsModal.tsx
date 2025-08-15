@@ -338,7 +338,7 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
         ) : campaignInfo ? (
           <div className="flex-1 overflow-hidden">
             <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
-              <TabsList className="mx-6 mt-4 grid grid-cols-4 w-fit">
+              <TabsList className="mx-6 mt-4 grid grid-cols-5 w-fit">
                 <TabsTrigger value="overview" className="flex items-center gap-2">
                   <Eye className="w-4 h-4" />
                   Overview
@@ -346,6 +346,15 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                 <TabsTrigger value="progress" className="flex items-center gap-2">
                   <Activity className="w-4 h-4" />
                   Progress
+                </TabsTrigger>
+                <TabsTrigger value="network" className="flex items-center gap-2">
+                  <Network className="w-4 h-4" />
+                  Network
+                  {campaignInfo && campaignInfo.metrics.failedRequestCount > 0 && (
+                    <Badge variant="destructive" className="ml-1 h-4 px-1 text-xs">
+                      {campaignInfo.metrics.failedRequestCount}
+                    </Badge>
+                  )}
                 </TabsTrigger>
                 <TabsTrigger value="logs" className="flex items-center gap-2">
                   <FileText className="w-4 h-4" />
