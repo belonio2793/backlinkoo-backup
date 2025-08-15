@@ -506,14 +506,6 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                                     {step.details && (
                                       <p className="text-xs text-gray-500 mt-1">{step.details}</p>
                                     )}
-                                    {step.data && (
-                                      <details className="mt-2">
-                                        <summary className="text-xs text-blue-600 cursor-pointer">View Data</summary>
-                                        <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
-                                          {JSON.stringify(step.data, null, 2)}
-                                        </pre>
-                                      </details>
-                                    )}
                                   </div>
                                 </div>
                               ))}
@@ -598,22 +590,6 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                                         <strong>Error:</strong> {request.response.error}
                                       </div>
                                     )}
-                                    {request.body && (
-                                      <details className="mt-2">
-                                        <summary className="text-xs text-blue-600 cursor-pointer">Request Body</summary>
-                                        <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
-                                          {JSON.stringify(request.body, null, 2)}
-                                        </pre>
-                                      </details>
-                                    )}
-                                    {request.response?.data && (
-                                      <details className="mt-2">
-                                        <summary className="text-xs text-blue-600 cursor-pointer">Response Data</summary>
-                                        <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
-                                          {JSON.stringify(request.response.data, null, 2)}
-                                        </pre>
-                                      </details>
-                                    )}
                                   </div>
                                 ))
                               )}
@@ -668,22 +644,6 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                                         <strong>Error:</strong> {query.error}
                                       </div>
                                     )}
-                                    {query.params && (
-                                      <details className="mt-2">
-                                        <summary className="text-xs text-blue-600 cursor-pointer">Parameters</summary>
-                                        <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
-                                          {JSON.stringify(query.params, null, 2)}
-                                        </pre>
-                                      </details>
-                                    )}
-                                    {query.result && (
-                                      <details className="mt-2">
-                                        <summary className="text-xs text-blue-600 cursor-pointer">Result</summary>
-                                        <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
-                                          {JSON.stringify(query.result, null, 2)}
-                                        </pre>
-                                      </details>
-                                    )}
                                   </div>
                                 ))
                               )}
@@ -721,14 +681,6 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                                   </div>
                                 </div>
                                 <p className="text-sm mt-1">{log.message}</p>
-                                {log.details && (
-                                  <details className="mt-2">
-                                    <summary className="text-xs text-blue-600 cursor-pointer">View Details</summary>
-                                    <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
-                                      {JSON.stringify(log.details, null, 2)}
-                                    </pre>
-                                  </details>
-                                )}
                               </div>
                             </div>
                           ))}
