@@ -810,9 +810,8 @@ export class AutomationOrchestrator {
       updateData.completed_at = new Date().toISOString();
     }
 
-    if (errorMessage) {
-      updateData.error_message = errorMessage;
-    }
+    // Note: error_message column doesn't exist in current schema
+    // Store error message in activity logs instead
 
     const result = await this.safeDbOperation(
       () => supabase
@@ -829,6 +828,11 @@ export class AutomationOrchestrator {
         details: result.error.details,
         hint: result.error.hint
       });
+    }
+
+    // Log error message separately if provided
+    if (errorMessage) {
+      await this.logActivity(campaignId, 'error', errorMessage);
     }
   }
 

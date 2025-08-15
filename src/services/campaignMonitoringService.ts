@@ -234,7 +234,6 @@ export class CampaignMonitoringService {
           .from('automation_campaigns')
           .update({
             status: 'paused',
-            error_message: errorMessage,
             updated_at: new Date().toISOString()
           })
           .eq('id', progressCheck.campaignId);
