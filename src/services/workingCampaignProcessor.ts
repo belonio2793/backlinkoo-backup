@@ -57,10 +57,29 @@ export class WorkingCampaignProcessor {
 
       if (!response.ok) {
         const errorText = await response.text();
+        const functionDuration = Date.now() - functionStartTime;
+
+        // Log the failed function call
+        campaignNetworkLogger.updateFunctionCall(
+          functionCallId,
+          null,
+          `${response.status} - ${errorText}`,
+          functionDuration
+        );
+
         throw new Error(`Server-side processing failed: ${response.status} - ${errorText}`);
       }
 
       const result = await response.json();
+      const functionDuration = Date.now() - functionStartTime;
+
+      // Log successful function call
+      campaignNetworkLogger.updateFunctionCall(
+        functionCallId,
+        result,
+        undefined,
+        functionDuration
+      );
       
       if (!result.success) {
         throw new Error(`Campaign processing failed: ${result.error}`);
