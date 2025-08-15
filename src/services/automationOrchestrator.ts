@@ -736,6 +736,8 @@ export class AutomationOrchestrator {
    * Auto-pause campaign when all platforms are completed
    */
   async autoPauseCampaign(campaignId: string, reason: string): Promise<void> {
+    const campaign = await this.getCampaign(campaignId);
+
     this.updateStep(campaignId, 'complete-campaign', {
       status: 'completed',
       details: reason
@@ -745,6 +747,20 @@ export class AutomationOrchestrator {
       isComplete: true,
       endTime: new Date()
     });
+
+    // Get published URLs for the completion event
+    const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
+    const publishedUrls = campaignWithLinks?.automation_published_links?.map(link => link.published_url) || [];
+
+    // Emit real-time feed event for campaign completion
+    if (campaign) {
+      realTimeFeedService.emitCampaignCompleted(
+        campaignId,
+        campaign.name,
+        campaign.keywords[0] || '',
+        publishedUrls
+      );
+    }
 
     await this.updateCampaignStatus(campaignId, 'completed');
     await this.logActivity(campaignId, 'info', `Campaign completed: ${reason}`);
