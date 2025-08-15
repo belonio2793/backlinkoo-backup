@@ -475,25 +475,20 @@ export class AutomationOrchestrator {
         }
       }
 
-      // Step 7: Complete campaign
+      // Step 7: Check for completion or auto-pause
       if (publishedLinks.length > 0) {
         this.updateStep(campaignId, 'publish-content', {
           status: 'completed',
-          details: `Successfully published ${publishedLinks.length} link(s)`
+          details: `Successfully published to ${nextPlatform.name}`
         });
 
-        this.updateStep(campaignId, 'complete-campaign', {
-          status: 'completed',
-          details: `Campaign completed with ${publishedLinks.length} published link(s)`
-        });
-
-        this.updateProgress(campaignId, {
-          isComplete: true,
-          endTime: new Date()
-        });
-
-        await this.updateCampaignStatus(campaignId, 'completed');
-        await this.logActivity(campaignId, 'info', `Campaign completed successfully. Published ${publishedLinks.length} links.`);
+        // Check if we should auto-pause (all platforms completed)
+        if (this.shouldAutoPauseCampaign(campaignId)) {
+          await this.autoPauseCampaign(campaignId, 'All available platforms have been used');
+        } else {
+          // More platforms available, pause for now and can be resumed
+          await this.pauseCampaignForNextPlatform(campaignId);
+        }
       } else {
         this.updateStep(campaignId, 'publish-content', {
           status: 'error',
@@ -505,9 +500,8 @@ export class AutomationOrchestrator {
           endTime: new Date()
         });
 
-        // Note: 'failed' is not a valid status in current schema, so we'll pause the campaign instead
         await this.updateCampaignStatus(campaignId, 'paused', 'No content was successfully published');
-        await this.logActivity(campaignId, 'error', 'Campaign failed: No content was successfully published');
+        await this.logActivity(campaignId, 'error', 'Campaign paused: No content was successfully published');
       }
 
     } catch (error) {
