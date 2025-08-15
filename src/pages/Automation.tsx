@@ -578,15 +578,27 @@ const Automation = () => {
               </CardContent>
                 </Card>
 
-                {/* Live Campaign Status */}
-                <LiveCampaignStatus
-                  isCreating={isCreating}
-                  lastCreatedCampaign={lastCreatedCampaign}
-                  onCampaignUpdate={(campaign) => {
-                    setLastCreatedCampaign(campaign);
-                    addStatusMessage(`Campaign "${campaign.keyword}" status updated to ${campaign.status}`, 'info');
-                  }}
-                />
+                {/* Campaign Status Summary (when not using Feed modal) */}
+                {lastCreatedCampaign && !feedModal.isOpen && (
+                  <div className="mt-6 p-4 border rounded-lg bg-blue-50 border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className="font-medium text-blue-900">Campaign Active</h4>
+                        <p className="text-sm text-blue-700">
+                          "{lastCreatedCampaign.keywords?.[0] || lastCreatedCampaign.name}" is running
+                        </p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => feedModal.openFeedForCampaign(lastCreatedCampaign)}
+                        className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                      >
+                        View Feed
+                      </Button>
+                    </div>
+                  </div>
+                )}
 
               </TabsContent>
 
