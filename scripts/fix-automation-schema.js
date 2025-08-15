@@ -243,6 +243,7 @@ async function createMissingTable(tableName) {
                 platform TEXT DEFAULT 'telegraph',
                 status TEXT DEFAULT 'active',
                 created_at TIMESTAMPTZ DEFAULT NOW(),
+                published_at TIMESTAMPTZ DEFAULT NOW(),
                 last_checked TIMESTAMPTZ DEFAULT NOW()
             );
         `,
