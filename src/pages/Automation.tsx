@@ -299,22 +299,25 @@ const Automation = () => {
   // Don't show full screen progress tracker - we'll show inline progress instead
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
-        
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold text-gray-900">Link Building Automation</h1>
-          <p className="text-lg text-gray-600">
-            Automatically generate and publish high-quality content with backlinks to your target URL
-          </p>
-          {user && (
-            <div className="flex items-center justify-center gap-2 text-sm text-green-700">
-              <CheckCircle className="w-4 h-4" />
-              <span>Signed in as {user.email}</span>
-            </div>
-          )}
-        </div>
+    <div className="min-h-screen flex flex-col">
+      <Header />
+
+      <main className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+        <div className="max-w-7xl mx-auto space-y-6">
+
+          {/* Page Header */}
+          <div className="text-center space-y-4">
+            <h1 className="text-4xl font-bold text-gray-900">Link Building Automation</h1>
+            <p className="text-lg text-gray-600">
+              Automatically generate and publish high-quality content with backlinks to your target URL
+            </p>
+            {user && (
+              <div className="flex items-center justify-center gap-2 text-sm text-green-700">
+                <CheckCircle className="w-4 h-4" />
+                <span>Signed in as {user.email}</span>
+              </div>
+            )}
+          </div>
 
         {/* Saved form data notification */}
         {hasValidSavedData(savedFormData) && !isAuthenticated && (
@@ -633,7 +636,10 @@ const Automation = () => {
           onComplete={() => setShowCelebration(false)}
         />
 
-      </div>
+        </div>
+      </main>
+
+      <Footer />
     </div>
   );
 };
