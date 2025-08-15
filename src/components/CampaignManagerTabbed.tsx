@@ -400,14 +400,23 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="activity" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
-              Campaign Activity
+              Activity
+            </TabsTrigger>
+            <TabsTrigger value="live-monitor" className="flex items-center gap-2">
+              <Target className="w-4 h-4" />
+              Live Monitor
+              {currentCampaignProgress && (
+                <Badge variant="secondary" className="ml-1 h-4 px-1 text-xs">
+                  Active
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="live-links" className="flex items-center gap-2">
               <ExternalLink className="w-4 h-4" />
-              Live Links ({getAllPublishedLinks().length})
+              Links ({getAllPublishedLinks().length})
             </TabsTrigger>
           </TabsList>
 
