@@ -256,6 +256,8 @@ if (import.meta.env.DEV) {
   console.log('  - testClientContent() - Test client-side content generation');
   console.log('  - testClientTelegraph() - Test client-side Telegraph publishing');
   console.log('  - testFullPipeline() - Test complete automation pipeline');
+  console.log('  - testAutomationPipeline() - Test complete automation: Content → Telegraph → DB');
+  console.log('  - testApiKey() - Test OpenAI API key configuration');
   console.log('  - testErrorFixes() - Test all error fixes and formatting');
   console.log('  - testRealTimeFeed() - Test real-time feed integration');
   console.log('  - testCampaignTabs() - Test campaign manager tabs and live links');
