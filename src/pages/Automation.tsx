@@ -330,7 +330,7 @@ const Automation = () => {
         )}
 
         {/* Inline Authentication */}
-        {showInlineAuth && (
+        {showInlineAuth && !isAuthenticated && (
           <div className="mb-6">
             <InlineAuthForm
               onSuccess={handleAuthSuccess}
