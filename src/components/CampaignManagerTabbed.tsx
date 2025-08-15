@@ -625,6 +625,37 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
             </div>
           </TabsContent>
 
+          {/* Live Monitor Tab */}
+          <TabsContent value="live-monitor" className="mt-6">
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Target className="w-5 h-5 text-blue-600" />
+                <h3 className="text-lg font-semibold">Live Campaign Monitor</h3>
+                {currentCampaignProgress && (
+                  <Badge variant="secondary">
+                    {currentCampaignProgress.isComplete ? 'Completed' :
+                     currentCampaignProgress.isError ? 'Error' : 'In Progress'}
+                  </Badge>
+                )}
+              </div>
+
+              {currentCampaignProgress ? (
+                <InlineProgressTracker
+                  progress={currentCampaignProgress}
+                  onRetry={onRetryProgress}
+                />
+              ) : (
+                <div className="text-center py-12 bg-gray-50 rounded-lg">
+                  <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Campaign</h3>
+                  <p className="text-gray-500 mb-4">
+                    Start a new campaign to see live progress monitoring here
+                  </p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+
           {/* Live Links Tab */}
           <TabsContent value="live-links" className="mt-6">
             <div className="space-y-4">
