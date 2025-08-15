@@ -325,11 +325,16 @@ const EnhancedRealTimeFeed: React.FC<EnhancedRealTimeFeedProps> = ({
               <h2 className="text-xl font-semibold text-gray-800">Real Time Feed</h2>
               <p className="text-sm text-gray-600">Live monitoring of campaign activities and system events</p>
             </div>
-            {activeCampaigns.length > 0 && (
-              <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-300">
-                {activeCampaigns.length} active
-              </Badge>
-            )}
+            <Badge variant="outline" className={
+              activeCampaigns.length > 0 ?
+                "bg-blue-100 text-blue-700 border-blue-300" :
+                "bg-gray-100 text-gray-600 border-gray-300"
+            }>
+              {activeCampaigns.length > 0 ?
+                `${activeCampaigns.length} active` :
+                'ready to monitor'
+              }
+            </Badge>
           </div>
           
           <div className="flex items-center gap-2">
