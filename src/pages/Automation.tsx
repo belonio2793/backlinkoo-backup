@@ -133,19 +133,10 @@ const Automation = () => {
   };
 
   const handleCreateCampaign = async () => {
-    // Check if user needs authentication first
-    if (!isAuthenticated) {
-      setNeedsAuth(true);
-      setShowInlineAuth(true);
-      saveFormData(formData);
-      addStatusMessage('Please sign in to continue with your campaign', 'info');
-      return;
-    }
-
     await smartFlow.handleCampaignAction(
       formData,
       createCampaign,
-      () => {} // Don't show auth modal - we'll handle auth inline
+      () => setShowAuthModal(true)
     );
   };
 
