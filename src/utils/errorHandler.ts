@@ -3,6 +3,8 @@
  * Provides user-friendly solutions for common network problems
  */
 
+import { responseBodyManager } from './responseBodyFix';
+
 export class NetworkErrorHandler {
   private static isInitialized = false;
   private static originalFetch: typeof fetch;
@@ -198,13 +200,10 @@ export class NetworkErrorHandler {
         // Use the stored original fetch to avoid recursive wrapping
         const response = await this.originalFetch(...args);
         
-        // Only clone if response hasn't been used and we absolutely need to
-        // Check if response has already been cloned or body consumed
-        if (response.ok && response.body && !response.bodyUsed && !(response as any)._isCloned) {
+        // Use safe response body management
+        if (response.ok && responseBodyManager.canReadBody(response)) {
           try {
-            const clonedResponse = response.clone();
-            // Add a flag to track if this response has been cloned
-            (clonedResponse as any)._isCloned = true;
+            const clonedResponse = responseBodyManager.safeClone(response);
             return clonedResponse;
           } catch (cloneError) {
             // If cloning fails, return original response
