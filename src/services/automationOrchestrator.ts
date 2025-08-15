@@ -712,6 +712,12 @@ export class AutomationOrchestrator {
    * Get user campaigns
    */
   async getUserCampaigns(): Promise<Campaign[]> {
+    // Validate Supabase client first
+    if (!this.validateSupabaseClient()) {
+      console.warn('⚠️ AutomationOrchestrator: Supabase not properly configured, returning empty campaigns');
+      return [];
+    }
+
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return [];
