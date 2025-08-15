@@ -237,7 +237,7 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
       </CardHeader>
 
       {!isMinimized && (
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-3 flex-1 flex flex-col">
           {/* Controls */}
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-3">
