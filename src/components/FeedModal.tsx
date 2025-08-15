@@ -230,16 +230,23 @@ const FeedModal: React.FC<FeedModalProps> = ({
   // If minimized, show as a small floating widget
   if (isMinimized) {
     return (
-      <div className="fixed bottom-4 right-4 z-50">
-        <Card className="w-80 shadow-lg border-2 bg-white">
+      <div className="fixed bottom-4 right-4 z-50 animate-in slide-in-from-right-4 duration-300">
+        <Card className="w-80 shadow-xl border-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:shadow-2xl transition-all duration-300 hover:scale-105">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                <CardTitle className="text-sm">Feed</CardTitle>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse shadow-lg"></div>
+                  <CardTitle className="text-sm font-semibold">Feed</CardTitle>
+                </div>
                 {activeCampaign && (
-                  <Badge variant="outline" className="text-xs">
-                    Active
+                  <Badge variant="secondary" className="text-xs bg-white/20 text-white border-white/30">
+                    {activeCampaign.status}
+                  </Badge>
+                )}
+                {activities.length > 0 && (
+                  <Badge variant="secondary" className="text-xs bg-green-500/20 text-green-100 border-green-300/30">
+                    {activities.length} activities
                   </Badge>
                 )}
               </div>
@@ -248,7 +255,7 @@ const FeedModal: React.FC<FeedModalProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={handleMinimize}
-                  className="h-6 w-6 p-0"
+                  className="h-7 w-7 p-0 hover:bg-white/20 text-white"
                 >
                   <Maximize2 className="h-3 w-3" />
                 </Button>
@@ -256,12 +263,18 @@ const FeedModal: React.FC<FeedModalProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={onClose}
-                  className="h-6 w-6 p-0"
+                  className="h-7 w-7 p-0 hover:bg-white/20 text-white"
                 >
                   <X className="h-3 w-3" />
                 </Button>
               </div>
             </div>
+            {/* Mini activity preview */}
+            {activities.length > 0 && (
+              <div className="mt-2 text-xs text-blue-100">
+                Latest: {activities[activities.length - 1]?.message.substring(0, 40)}...
+              </div>
+            )}
           </CardHeader>
         </Card>
       </div>
