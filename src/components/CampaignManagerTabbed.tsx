@@ -350,24 +350,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
       }
     });
 
-    // Add demo/example Telegraph link for demonstration
-    if (allLinks.length === 0 || import.meta.env.DEV) {
-      const demoLink = {
-        id: 'demo-link-1',
-        published_url: 'https://telegra.ph/go-high-level-implementation-a-stepbystep-approach-1755288747550',
-        platform: 'telegraph',
-        status: 'active',
-        created_at: '2024-01-15T10:30:00.000Z',
-        published_at: '2024-01-15T10:30:00.000Z',
-        campaignKeyword: 'go high level implementation',
-        campaignName: 'GoHighLevel Implementation Guide',
-        campaign_id: 'demo-campaign-1',
-        validation_status: 'validated' as const,
-        anchor_text: 'best automation tools',
-        target_url: 'https://backlinkoo.com'
-      };
-      allLinks.unshift(demoLink);
-    }
+    // Only show real published links from actual campaigns
 
     // Sort by published date (newest first)
     return allLinks.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
@@ -783,11 +766,6 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                                 >
                                   {link.platform === 'telegraph' ? 'Telegraph.ph' : link.platform}
                                 </Badge>
-                                {link.id === 'demo-link-1' && (
-                                  <Badge variant="outline" className="text-xs text-amber-600 border-amber-300">
-                                    Demo
-                                  </Badge>
-                                )}
                                 <div className={`w-2 h-2 rounded-full ${
                                   link.status === 'active' ? 'bg-green-500' :
                                   link.status === 'pending' ? 'bg-yellow-500' : 'bg-gray-400'
