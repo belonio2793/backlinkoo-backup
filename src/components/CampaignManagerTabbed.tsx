@@ -105,11 +105,11 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
       }
     };
 
-    realTimeFeedService.subscribe(handleFeedEvent);
+    const unsubscribe = realTimeFeedService.subscribe(handleFeedEvent);
 
     return () => {
       clearInterval(interval);
-      realTimeFeedService.unsubscribe(handleFeedEvent);
+      unsubscribe();
     };
   }, [toast, onStatusUpdate]);
 
@@ -740,7 +740,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                       </div>
                       <div>
                         <h4 className="font-semibold text-gray-900">Link Performance</h4>
-                        <p className="text-sm text-gray-600">Active backlinks and their status • Real-time updates</p>
+                        <p className="text-sm text-gray-600">Active backlinks and their status ��� Real-time updates</p>
                       </div>
                     </div>
                     <div className="flex gap-4 text-sm">
