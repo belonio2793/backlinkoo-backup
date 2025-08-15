@@ -325,6 +325,7 @@ export const useSmartCampaignFlow = () => {
     handleSuccessfulAuth,
     analyzeFormData,
     determineUserIntent,
+    autoFormatUrl,
     // Expose some computed properties for convenience
     isReady: !authLoading && !flowState.isProcessing,
     hasValidForm: (formData: CampaignFormData) => analyzeFormData(formData).isValid,
