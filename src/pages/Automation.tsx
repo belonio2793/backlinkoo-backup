@@ -147,8 +147,8 @@ const Automation = () => {
   const createCampaign = async () => {
     setIsCreating(true);
 
-    // Open Enhanced Feed for monitoring
-    setShowEnhancedFeed(true);
+    // Don't open Enhanced Feed popup - keep it inline
+    // setShowEnhancedFeed(true);
 
     try {
       // Ensure URL is properly formatted before creating campaign
