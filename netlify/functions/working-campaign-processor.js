@@ -91,6 +91,7 @@ exports.handler = async (event, context) => {
           keyword,
           anchorText,
           targetUrl,
+          promptUsed: blogPost.promptIndex,
           completedAt: new Date().toISOString()
         }
       }),
