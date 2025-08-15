@@ -563,7 +563,10 @@ export class AutomationOrchestrator {
               campaign_id: campaignId,
               content_id: contentRecord.id,
               platform: nextPlatform.id,
-              published_url: publishedPage.url
+              published_url: publishedPage.url,
+              anchor_text: campaign.anchor_texts[0] || '',
+              target_url: campaign.target_url,
+              status: 'active'
             });
 
           if (linkError) {
