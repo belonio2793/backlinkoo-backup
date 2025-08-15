@@ -21,6 +21,7 @@ import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
 import { useRealTimeFeedModal } from '@/hooks/useRealTimeFeedModal';
+import { useFeedModal } from '@/hooks/useFeedModal';
 
 const Automation = () => {
   const [statusMessages, setStatusMessages] = useState<Array<{message: string, type: 'success' | 'error' | 'info', id: string}>>([]);
