@@ -105,6 +105,10 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
       // Get campaign logs (mock for now, would integrate with actual logging system)
       const logs = await generateCampaignLogs(campaign, progress);
 
+      // Get network requests and database queries
+      const networkRequests = campaignNetworkLogger.getNetworkRequests(campaignId);
+      const databaseQueries = campaignNetworkLogger.getDatabaseQueries(campaignId);
+
       // Get published links
       const campaignWithLinks = await orchestrator.getCampaignWithLinks(campaignId);
       const publishedLinks = campaignWithLinks?.automation_published_links.map(link => ({
@@ -115,8 +119,8 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
         status: 'active'
       })) || [];
 
-      // Calculate metrics
-      const metrics = calculateCampaignMetrics(logs, progress);
+      // Calculate metrics including network data
+      const metrics = calculateCampaignMetrics(logs, progress, networkRequests, databaseQueries);
 
       setCampaignInfo({
         campaign,
