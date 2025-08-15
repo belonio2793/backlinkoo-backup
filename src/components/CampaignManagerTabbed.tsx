@@ -127,6 +127,11 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
     loadCampaigns(true);
   };
 
+  const handleViewDetails = (campaignId: string) => {
+    setSelectedCampaignId(campaignId);
+    setShowDetailsModal(true);
+  };
+
   const handlePauseCampaign = async (campaignId: string) => {
     setActionLoading(campaignId);
     try {
