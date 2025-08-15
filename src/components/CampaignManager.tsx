@@ -308,6 +308,15 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                 <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                 <p className="text-gray-600">No campaigns found</p>
                 <p className="text-sm text-gray-500">Create your first campaign to get started</p>
+                <div className="mt-4 p-3 bg-blue-50 rounded-lg text-left max-w-sm mx-auto">
+                  <p className="text-xs font-medium text-blue-700 mb-2">✨ New Features:</p>
+                  <ul className="text-xs text-blue-600 space-y-1">
+                    <li>• Auto-rotation across platforms</li>
+                    <li>• Smart pause/resume controls</li>
+                    <li>• Visual progress tracking</li>
+                    <li>• 1 post per platform maximum</li>
+                  </ul>
+                </div>
               </div>
             ) : (
               campaigns.map((campaign) => (
