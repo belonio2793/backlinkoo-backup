@@ -287,13 +287,13 @@ export class AutomationOrchestrator {
         contentRecords.push(data);
       }
 
-      // Step 5: Update status to publishing
+      // Step 5: Update status to remain active during publishing
       this.updateStep(campaignId, 'publish-content', {
         status: 'in_progress',
         details: 'Publishing content to Telegraph.ph...'
       });
 
-      await this.updateCampaignStatus(campaignId, 'publishing');
+      // Keep status as 'active' during publishing since 'publishing' isn't a valid status
       await this.logActivity(campaignId, 'info', 'Starting content publication');
 
       // Step 6: Publish content to Telegraph
