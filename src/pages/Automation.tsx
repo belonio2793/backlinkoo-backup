@@ -609,6 +609,32 @@ const Automation = () => {
                       </Alert>
                     )}
 
+                    {/* Campaign Monitoring Debug */}
+                    {isAuthenticated && (
+                      <div className="p-3 border rounded-lg bg-gray-50 border-gray-200">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-medium text-gray-900 text-sm">Campaign Monitoring</h4>
+                            <p className="text-xs text-gray-600">
+                              Auto-detects and pauses stuck campaigns
+                            </p>
+                          </div>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={async () => {
+                              addStatusMessage('Checking for stuck campaigns...', 'info');
+                              await campaignMonitoringService.forceCheck();
+                              addStatusMessage('Campaign monitoring check completed', 'success');
+                            }}
+                            className="text-xs px-3 py-1"
+                          >
+                            Check Now
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
                     {/* Campaign Status Summary */}
                     {lastCreatedCampaign && (
                       <div className="p-4 border rounded-lg bg-green-50 border-green-200">
