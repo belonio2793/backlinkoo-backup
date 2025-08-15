@@ -83,7 +83,7 @@ async function checkAndFixSchema() {
         console.log('3. Checking other automation tables...');
         const automationTables = [
             'automation_logs',
-            'automation_content', 
+            'automation_content',
             'automation_published_links',
             'link_placements',
             'campaign_reports'
@@ -101,6 +101,11 @@ async function checkAndFixSchema() {
                 await createMissingTable(tableName);
             } else {
                 console.log(`✅ ${tableName} table exists`);
+
+                // Special check for automation_published_links to ensure published_at column exists
+                if (tableName === 'automation_published_links') {
+                    await checkAndFixPublishedLinksTable();
+                }
             }
         }
 
