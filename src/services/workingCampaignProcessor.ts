@@ -115,6 +115,47 @@ export class WorkingCampaignProcessor {
   }
 
   /**
+   * Format campaign-specific errors with user-friendly messages
+   */
+  private formatCampaignError(error: any): string {
+    const errorMessage = formatErrorForUI(error);
+    const lowerMessage = errorMessage.toLowerCase();
+
+    // Check for analytics blocking issues
+    if (lowerMessage.includes('analytics') ||
+        lowerMessage.includes('blocked by browser') ||
+        lowerMessage.includes('fullstory') ||
+        lowerMessage.includes('network request blocked')) {
+      return 'Network request blocked by browser analytics. Please try refreshing the page.';
+    }
+
+    // Check for Telegraph-specific issues
+    if (lowerMessage.includes('telegraph') ||
+        lowerMessage.includes('createaccount') ||
+        lowerMessage.includes('createpage')) {
+      return 'Telegraph publishing temporarily unavailable. Content generated but not published yet.';
+    }
+
+    // Check for content generation issues
+    if (lowerMessage.includes('content generation') ||
+        lowerMessage.includes('openai') ||
+        lowerMessage.includes('api key')) {
+      return 'Content generation service unavailable. Using fallback content template.';
+    }
+
+    // Check for network/connectivity issues
+    if (lowerMessage.includes('fetch') ||
+        lowerMessage.includes('network') ||
+        lowerMessage.includes('connection') ||
+        lowerMessage.includes('timeout')) {
+      return 'Network connectivity issue. Please check your internet connection and try again.';
+    }
+
+    // Return original message if no specific pattern matches
+    return errorMessage;
+  }
+
+  /**
    * Generate content using available endpoints with fallbacks
    */
   private async generateContent(keyword: string, anchorText: string, targetUrl: string): Promise<string> {
