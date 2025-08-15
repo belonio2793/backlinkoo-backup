@@ -584,10 +584,10 @@ const Automation = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => feedModal.openFeedForCampaign(lastCreatedCampaign)}
+                        onClick={() => setShowEnhancedFeed(true)}
                         className="border-blue-300 text-blue-700 hover:bg-blue-100"
                       >
-                        View Feed
+                        View Enhanced Feed
                       </Button>
                     </div>
                   </div>
