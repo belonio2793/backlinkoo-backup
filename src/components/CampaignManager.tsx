@@ -332,13 +332,13 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                         {/* Platform Progress */}
                         {(() => {
                           const summary = campaignStatusSummaries.get(campaign.id);
-                          if (summary) {
+                          if (summary && summary.totalPlatforms > 0) {
                             return (
                               <div className="mt-2 p-2 bg-gray-50 rounded-md">
                                 <p className="text-xs font-medium text-gray-700 mb-1">Platform Progress</p>
                                 <div className="flex items-center gap-2 text-xs">
                                   <span className="text-gray-600">
-                                    {summary.platformsCompleted}/{summary.totalPlatforms} platforms completed
+                                    {summary.platformsCompleted || 0}/{summary.totalPlatforms} platforms completed
                                   </span>
                                   {summary.nextPlatform && (
                                     <span className="text-blue-600">
@@ -351,7 +351,7 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                                     </span>
                                   )}
                                 </div>
-                                {summary.completedPlatforms.length > 0 && (
+                                {summary.completedPlatforms && summary.completedPlatforms.length > 0 && (
                                   <div className="text-xs text-gray-500 mt-1">
                                     Completed: {summary.completedPlatforms.join(', ')}
                                   </div>
