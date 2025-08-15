@@ -266,9 +266,8 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
         <div className="mb-3">
           <h4 className="font-medium text-sm text-gray-700">Campaign Activity</h4>
         </div>
-        <ScrollArea className="h-80">
-          <div className="space-y-3">
-            {campaigns.length === 0 ? (
+        <div className="max-h-96 overflow-y-auto space-y-3">
+          {campaigns.length === 0 ? (
               <div className="text-center py-8">
                 <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                 <p className="text-gray-600">No campaigns found</p>
@@ -378,9 +377,8 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                   </div>
                 </div>
               ))
-            )}
-          </div>
-        </ScrollArea>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
