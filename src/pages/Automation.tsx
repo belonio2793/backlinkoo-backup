@@ -734,29 +734,23 @@ const Automation = () => {
           onComplete={() => setShowCelebration(false)}
         />
 
-        {/* Real Time Feed Modal */}
-        <RealTimeFeedModal
-          isVisible={realTimeFeed.isVisible}
-          activeCampaigns={realTimeFeed.activeCampaigns}
-          onClose={realTimeFeed.hideModal}
-          onMinimize={realTimeFeed.minimizeModal}
-          isMinimized={realTimeFeed.isMinimized}
+        {/* Enhanced Real Time Feed */}
+        <EnhancedRealTimeFeed
+          isOpen={showEnhancedFeed}
+          onClose={() => setShowEnhancedFeed(false)}
+          activeCampaigns={activeCampaigns}
         />
 
-        {/* Feed Modal */}
-        <FeedModal
-          isOpen={feedModal.isOpen}
-          onClose={feedModal.closeFeed}
-          activeCampaign={feedModal.activeCampaign}
-          isCreating={feedModal.isCreating}
-        />
-
-        {/* Real Time Feed Toggle Button */}
-        <RealTimeFeedToggle
-          isVisible={realTimeFeed.isVisible}
-          activeCampaignsCount={realTimeFeed.activeCampaigns.length}
-          onClick={realTimeFeed.showModal}
-        />
+        {/* Enhanced Feed Toggle Button */}
+        {activeCampaigns.length > 0 && !showEnhancedFeed && (
+          <Button
+            className="fixed bottom-4 right-4 z-40 bg-blue-600 hover:bg-blue-700 text-white shadow-lg"
+            onClick={() => setShowEnhancedFeed(true)}
+          >
+            <Activity className="h-4 w-4 mr-2" />
+            View Feed ({activeCampaigns.length})
+          </Button>
+        )}
       </div>
     </div>
   );
