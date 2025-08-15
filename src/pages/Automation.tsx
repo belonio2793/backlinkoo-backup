@@ -738,22 +738,6 @@ const Automation = () => {
           </Card>
         </div>
 
-        {/* Campaign Creation Modal */}
-        <CampaignCreationModal
-          isOpen={showCampaignModal}
-          onClose={() => setShowCampaignModal(false)}
-          formData={formData}
-          onInputChange={handleInputChange}
-          onCreateCampaign={handleCreateCampaign}
-          isCreating={isCreating}
-          isAuthenticated={isAuthenticated}
-          smartFlow={smartFlow}
-          addStatusMessage={addStatusMessage}
-          onAuthSuccess={() => {
-            addStatusMessage('Successfully signed in! Starting your campaign...', 'success');
-          }}
-          onAuthSuccessCloseModal={handleModalAuthSuccess}
-        />
 
         {/* Form Completion Celebration */}
         <FormCompletionCelebration
