@@ -172,22 +172,6 @@ const App = () => (
                 </Suspense>
               }
             />
-            <Route
-              path="/symbol-cleaner-debug"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazySymbolCleanerDebug />
-                </Suspense>
-              }
-            />
-            <Route
-              path="/verify-database"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyCampaignMetricsDBVerifier />
-                </Suspense>
-              }
-            />
 
             {/* Authentication routes */}
             <Route
