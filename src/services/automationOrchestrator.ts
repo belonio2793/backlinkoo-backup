@@ -360,7 +360,7 @@ export class AutomationOrchestrator {
   }
 
   /**
-   * Process a campaign with error handling and auto-pause
+   * Process a campaign with simplified error handling
    */
   async processCampaignWithErrorHandling(campaignId: string): Promise<void> {
     try {
@@ -371,94 +371,37 @@ export class AutomationOrchestrator {
   }
 
   /**
-   * Handle campaign processing errors with auto-pause logic
+   * Handle campaign processing errors with simplified auto-pause logic
    */
   private async handleCampaignProcessingError(campaignId: string, error: any, stepName: string): Promise<void> {
     console.error(`Campaign ${campaignId} error in ${stepName}:`, formatErrorForLogging(error, stepName));
 
-    // Get current progress snapshot
-    const currentProgress = this.buildProgressSnapshot(campaignId);
+    const errorMessage = formatErrorForUI(error);
 
-    // Handle error with auto-pause logic
-    const errorResult = await campaignErrorHandler.handleCampaignError(
-      campaignId,
-      error,
-      stepName,
-      currentProgress
-    );
+    // Log the error
+    await this.logActivity(campaignId, 'error', `Error in ${stepName}: ${errorMessage}`);
 
-    if (errorResult.shouldRetry && errorResult.retryDelay) {
-      // Schedule retry
-      await this.logActivity(campaignId, 'info',
-        `Error encountered, retrying in ${Math.round(errorResult.retryDelay / 1000)} seconds (attempt ${errorResult.errorRecord?.retry_count}/${errorResult.errorRecord?.max_retries})`
+    // Auto-pause campaign with error
+    await this.updateCampaignStatus(campaignId, 'paused', errorMessage);
+
+    // Update progress to show error
+    this.updateProgress(campaignId, {
+      isError: true,
+      endTime: new Date()
+    });
+
+    // Emit error event to live feed
+    const campaign = await this.getCampaign(campaignId);
+    if (campaign) {
+      realTimeFeedService.emitCampaignFailed(
+        campaignId,
+        campaign.name,
+        campaign.keywords[0] || 'Unknown',
+        errorMessage
       );
-
-      // Emit retry event to live feed
-      const campaign = await this.getCampaign(campaignId);
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (campaign && errorResult.errorRecord) {
-        realTimeFeedService.emitCampaignRetry(
-          campaignId,
-          campaign.name,
-          campaign.keywords[0] || 'Unknown',
-          errorResult.errorRecord.retry_count,
-          errorResult.errorRecord.max_retries,
-          stepName,
-          user?.id
-        );
-      }
-
-      setTimeout(() => {
-        this.processCampaignWithErrorHandling(campaignId).catch(retryError => {
-          console.error('Retry failed:', formatErrorForLogging(retryError, `retry_${stepName}`));
-        });
-      }, errorResult.retryDelay);
-
-    } else if (errorResult.shouldPause) {
-      // Auto-pause campaign
-      const errorMessage = formatErrorForUI(error);
-      await this.autoPauseCampaignWithError(campaignId, errorMessage, errorResult.errorRecord?.can_auto_resume);
-
-      // Update progress to show error
-      this.updateProgress(campaignId, {
-        isError: true,
-        endTime: new Date()
-      });
     }
   }
 
-  /**
-   * Build current progress snapshot
-   */
-  private buildProgressSnapshot(campaignId: string): Partial<CampaignProgressSnapshot> {
-    const progress = this.campaignProgressMap.get(campaignId);
-    const platformProgress = this.campaignPlatformProgress.get(campaignId) || {};
-
-    if (!progress) {
-      return {
-        campaign_id: campaignId,
-        current_step: 'initialization',
-        completed_steps: [],
-        platform_progress: {}
-      };
-    }
-
-    const completedSteps = progress.steps
-      .filter(step => step.status === 'completed')
-      .map(step => step.id);
-
-    const currentStep = progress.steps[progress.currentStep - 1]?.id || 'unknown';
-
-    return {
-      campaign_id: campaignId,
-      current_step: currentStep,
-      completed_steps: completedSteps,
-      platform_progress: platformProgress,
-      content_generated: completedSteps.includes('generate-content'),
-      generated_content: progress.generatedContent
-    };
-  }
 
   /**
    * Process a campaign through all steps
@@ -629,20 +572,35 @@ export class AutomationOrchestrator {
         }
       }
 
-      // Step 7: Check for completion or auto-pause
+      // Step 7: Mark campaign as completed after successful publishing
       if (publishedLinks.length > 0) {
         this.updateStep(campaignId, 'publish-content', {
           status: 'completed',
           details: `Successfully published to ${nextPlatform.name}`
         });
 
-        // Check if we should auto-pause (all platforms completed)
-        if (this.shouldAutoPauseCampaign(campaignId)) {
-          await this.autoPauseCampaign(campaignId, 'All available platforms have been used');
-        } else {
-          // More platforms available, pause for now and can be resumed
-          await this.pauseCampaignForNextPlatform(campaignId);
-        }
+        // Complete the campaign since we've successfully published to Telegraph
+        this.updateStep(campaignId, 'complete-campaign', {
+          status: 'completed',
+          details: 'Campaign successfully completed with published content'
+        });
+
+        this.updateProgress(campaignId, {
+          isComplete: true,
+          endTime: new Date()
+        });
+
+        // Mark campaign as completed in database
+        await this.updateCampaignStatus(campaignId, 'completed');
+        await this.logActivity(campaignId, 'info', `Campaign completed successfully. Published link: ${publishedLinks[0]}`);
+
+        // Emit completion event
+        realTimeFeedService.emitCampaignCompleted(
+          campaignId,
+          campaign.name,
+          campaign.keywords[0] || '',
+          publishedLinks
+        );
       } else {
         this.updateStep(campaignId, 'publish-content', {
           status: 'error',
@@ -1115,55 +1073,38 @@ export class AutomationOrchestrator {
   }
 
   /**
-   * Resume a campaign with error checking and progress restoration
+   * Resume a campaign with completion check
    */
   async resumeCampaign(campaignId: string): Promise<{ success: boolean; message: string }> {
     try {
-      // Check if campaign can be auto-resumed
-      const resumeCheck = await campaignErrorHandler.canAutoResumeCampaign(campaignId);
-
-      if (!resumeCheck.canResume) {
+      // Check if campaign exists and get its current status
+      const campaign = await this.getCampaign(campaignId);
+      if (!campaign) {
         return {
           success: false,
-          message: resumeCheck.reason || 'Campaign cannot be resumed automatically'
+          message: 'Campaign not found'
         };
       }
 
-      // Load progress snapshot to resume from correct point
-      const progressSnapshot = await campaignErrorHandler.loadProgressSnapshot(campaignId);
-      if (progressSnapshot) {
-        await this.restoreProgressFromSnapshot(campaignId, progressSnapshot);
+      // Check if campaign is already completed
+      if (campaign.status === 'completed') {
+        return {
+          success: false,
+          message: 'This campaign is completed. Please create a new campaign.'
+        };
       }
 
-      // Clear error counts for successful resume
-      const errors = await campaignErrorHandler.getCampaignErrors(campaignId);
-      for (const error of errors) {
-        campaignErrorHandler.clearErrorCount(campaignId, error.step_name, error.error_type);
-        if (!error.resolved_at) {
-          await campaignErrorHandler.resolveError(error.id);
-        }
-      }
+      // Check if campaign has published links (indicating completion)
+      const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
+      if (campaignWithLinks?.automation_published_links && campaignWithLinks.automation_published_links.length > 0) {
+        // Mark as completed if it has published links but isn't marked as completed
+        await this.updateCampaignStatus(campaignId, 'completed');
+        await this.logActivity(campaignId, 'info', 'Campaign marked as completed - already has published content');
 
-      // Apply resume delay if suggested
-      if (resumeCheck.suggestedDelay) {
-        await this.logActivity(campaignId, 'info',
-          `Resuming with ${Math.round(resumeCheck.suggestedDelay / 1000)} second delay due to rate limiting`
-        );
-        await new Promise(resolve => setTimeout(resolve, resumeCheck.suggestedDelay));
-      }
-
-      // Emit auto-resume event if this was an automatic recovery
-      const campaign = await this.getCampaign(campaignId);
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (campaign && errors.length > 0) {
-        realTimeFeedService.emitCampaignAutoResumed(
-          campaignId,
-          campaign.name,
-          campaign.keywords[0] || 'Unknown',
-          'Resumed after error recovery',
-          user?.id
-        );
+        return {
+          success: false,
+          message: 'This campaign is completed. Please create a new campaign.'
+        };
       }
 
       return await this.smartResumeCampaign(campaignId);
@@ -1177,26 +1118,6 @@ export class AutomationOrchestrator {
     }
   }
 
-  /**
-   * Restore campaign progress from snapshot
-   */
-  private async restoreProgressFromSnapshot(campaignId: string, snapshot: CampaignProgressSnapshot): Promise<void> {
-    try {
-      // Restore platform progress
-      this.campaignPlatformProgress.set(campaignId, snapshot.platform_progress || {});
-
-      // Restore campaign progress if it exists
-      const existingProgress = this.campaignProgressMap.get(campaignId);
-      if (existingProgress && snapshot.generated_content) {
-        existingProgress.generatedContent = snapshot.generated_content;
-        this.campaignProgressMap.set(campaignId, existingProgress);
-      }
-
-      await this.logActivity(campaignId, 'info', 'Progress restored from saved snapshot');
-    } catch (error) {
-      console.error('Error restoring progress from snapshot:', error);
-    }
-  }
 
   /**
    * Delete campaign
