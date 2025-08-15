@@ -320,6 +320,91 @@ export class AutomationOrchestrator {
   }
 
   /**
+   * Process a campaign with error handling and auto-pause
+   */
+  async processCampaignWithErrorHandling(campaignId: string): Promise<void> {
+    try {
+      await this.processCampaign(campaignId);
+    } catch (error) {
+      await this.handleCampaignProcessingError(campaignId, error, 'campaign_processing');
+    }
+  }
+
+  /**
+   * Handle campaign processing errors with auto-pause logic
+   */
+  private async handleCampaignProcessingError(campaignId: string, error: any, stepName: string): Promise<void> {
+    console.error(`Campaign ${campaignId} error in ${stepName}:`, formatErrorForLogging(error, stepName));
+
+    // Get current progress snapshot
+    const currentProgress = this.buildProgressSnapshot(campaignId);
+
+    // Handle error with auto-pause logic
+    const errorResult = await campaignErrorHandler.handleCampaignError(
+      campaignId,
+      error,
+      stepName,
+      currentProgress
+    );
+
+    if (errorResult.shouldRetry && errorResult.retryDelay) {
+      // Schedule retry
+      await this.logActivity(campaignId, 'info',
+        `Error encountered, retrying in ${Math.round(errorResult.retryDelay / 1000)} seconds (attempt ${errorResult.errorRecord?.retry_count}/${errorResult.errorRecord?.max_retries})`
+      );
+
+      setTimeout(() => {
+        this.processCampaignWithErrorHandling(campaignId).catch(retryError => {
+          console.error('Retry failed:', formatErrorForLogging(retryError, `retry_${stepName}`));
+        });
+      }, errorResult.retryDelay);
+
+    } else if (errorResult.shouldPause) {
+      // Auto-pause campaign
+      const errorMessage = formatErrorForUI(error);
+      await this.autoPauseCampaignWithError(campaignId, errorMessage, errorResult.errorRecord?.can_auto_resume);
+
+      // Update progress to show error
+      this.updateProgress(campaignId, {
+        isError: true,
+        endTime: new Date()
+      });
+    }
+  }
+
+  /**
+   * Build current progress snapshot
+   */
+  private buildProgressSnapshot(campaignId: string): Partial<CampaignProgressSnapshot> {
+    const progress = this.campaignProgressMap.get(campaignId);
+    const platformProgress = this.campaignPlatformProgress.get(campaignId) || {};
+
+    if (!progress) {
+      return {
+        campaign_id: campaignId,
+        current_step: 'initialization',
+        completed_steps: [],
+        platform_progress: {}
+      };
+    }
+
+    const completedSteps = progress.steps
+      .filter(step => step.status === 'completed')
+      .map(step => step.id);
+
+    const currentStep = progress.steps[progress.currentStep - 1]?.id || 'unknown';
+
+    return {
+      campaign_id: campaignId,
+      current_step: currentStep,
+      completed_steps: completedSteps,
+      platform_progress: platformProgress,
+      content_generated: completedSteps.includes('generate-content'),
+      generated_content: progress.generatedContent
+    };
+  }
+
+  /**
    * Process a campaign through all steps
    */
   async processCampaign(campaignId: string): Promise<void> {
