@@ -1062,10 +1062,87 @@ export class AutomationOrchestrator {
   }
 
   /**
-   * Resume campaign (uses smart resume logic)
+   * Resume a campaign with error checking and progress restoration
    */
   async resumeCampaign(campaignId: string): Promise<{ success: boolean; message: string }> {
-    return await this.smartResumeCampaign(campaignId);
+    try {
+      // Check if campaign can be auto-resumed
+      const resumeCheck = await campaignErrorHandler.canAutoResumeCampaign(campaignId);
+
+      if (!resumeCheck.canResume) {
+        return {
+          success: false,
+          message: resumeCheck.reason || 'Campaign cannot be resumed automatically'
+        };
+      }
+
+      // Load progress snapshot to resume from correct point
+      const progressSnapshot = await campaignErrorHandler.loadProgressSnapshot(campaignId);
+      if (progressSnapshot) {
+        await this.restoreProgressFromSnapshot(campaignId, progressSnapshot);
+      }
+
+      // Clear error counts for successful resume
+      const errors = await campaignErrorHandler.getCampaignErrors(campaignId);
+      for (const error of errors) {
+        campaignErrorHandler.clearErrorCount(campaignId, error.step_name, error.error_type);
+        if (!error.resolved_at) {
+          await campaignErrorHandler.resolveError(error.id);
+        }
+      }
+
+      // Apply resume delay if suggested
+      if (resumeCheck.suggestedDelay) {
+        await this.logActivity(campaignId, 'info',
+          `Resuming with ${Math.round(resumeCheck.suggestedDelay / 1000)} second delay due to rate limiting`
+        );
+        await new Promise(resolve => setTimeout(resolve, resumeCheck.suggestedDelay));
+      }
+
+      // Emit auto-resume event if this was an automatic recovery
+      const campaign = await this.getCampaign(campaignId);
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (campaign && errors.length > 0) {
+        realTimeFeedService.emitCampaignAutoResumed(
+          campaignId,
+          campaign.name,
+          campaign.keywords[0] || 'Unknown',
+          'Resumed after error recovery',
+          user?.id
+        );
+      }
+
+      return await this.smartResumeCampaign(campaignId);
+    } catch (error) {
+      const errorMessage = formatErrorForUI(error);
+      console.error('Error resuming campaign:', formatErrorForLogging(error, 'resumeCampaign'));
+      return {
+        success: false,
+        message: `Failed to resume campaign: ${errorMessage}`
+      };
+    }
+  }
+
+  /**
+   * Restore campaign progress from snapshot
+   */
+  private async restoreProgressFromSnapshot(campaignId: string, snapshot: CampaignProgressSnapshot): Promise<void> {
+    try {
+      // Restore platform progress
+      this.campaignPlatformProgress.set(campaignId, snapshot.platform_progress || {});
+
+      // Restore campaign progress if it exists
+      const existingProgress = this.campaignProgressMap.get(campaignId);
+      if (existingProgress && snapshot.generated_content) {
+        existingProgress.generatedContent = snapshot.generated_content;
+        this.campaignProgressMap.set(campaignId, existingProgress);
+      }
+
+      await this.logActivity(campaignId, 'info', 'Progress restored from saved snapshot');
+    } catch (error) {
+      console.error('Error restoring progress from snapshot:', error);
+    }
   }
 
   /**
