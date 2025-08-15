@@ -797,8 +797,8 @@ export class AutomationOrchestrator {
    * Update campaign status
    */
   async updateCampaignStatus(
-    campaignId: string, 
-    status: Campaign['status'], 
+    campaignId: string,
+    status: Campaign['status'],
     errorMessage?: string
   ): Promise<void> {
     const updateData: any = {
@@ -814,17 +814,20 @@ export class AutomationOrchestrator {
       updateData.error_message = errorMessage;
     }
 
-    const { error } = await supabase
-      .from('automation_campaigns')
-      .update(updateData)
-      .eq('id', campaignId);
+    const result = await this.safeDbOperation(
+      () => supabase
+        .from('automation_campaigns')
+        .update(updateData)
+        .eq('id', campaignId),
+      'updateCampaignStatus'
+    );
 
-    if (error) {
+    if (result?.error) {
       console.error('Error updating campaign status:', {
-        message: error.message || 'Unknown error',
-        code: error.code,
-        details: error.details,
-        hint: error.hint
+        message: result.error.message || 'Unknown error',
+        code: result.error.code,
+        details: result.error.details,
+        hint: result.error.hint
       });
     }
   }
