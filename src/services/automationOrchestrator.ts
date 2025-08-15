@@ -448,7 +448,13 @@ export class AutomationOrchestrator {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching user campaigns:', error);
+      console.error('Error fetching user campaigns:', {
+        message: error.message || 'Unknown error',
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        userId: user?.id
+      });
       return [];
     }
 
