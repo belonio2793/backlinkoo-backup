@@ -146,6 +146,7 @@ const Automation = () => {
 
       // Clear saved form data since campaign was created successfully
       clearFormData();
+      setHasShownRestoreMessage(false);
 
       // Reset form
       setFormData({
