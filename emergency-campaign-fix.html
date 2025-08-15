@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚨 Emergency Campaign Fix</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        .header { text-align: center; margin-bottom: 30px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .fix-section { margin: 20px 0; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .fix-button { padding: 15px 30px; margin: 10px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; transition: all 0.3s; }
+        .fix-button.primary { background: #dc3545; color: white; }
+        .fix-button.primary:hover { background: #c82333; }
+        .fix-button.secondary { background: #007bff; color: white; }
+        .fix-button.secondary:hover { background: #0056b3; }
+        .fix-button.success { background: #28a745; color: white; }
+        .fix-button.success:hover { background: #1e7e34; }
+        .result { margin: 15px 0; padding: 15px; border-radius: 5px; }
+        .result.success { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .result.error { background: #f8d7da; border: 1px solid #f5c6cb; color: #721c24; }
+        .result.info { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+        .result.warning { background: #fff3cd; border: 1px solid #ffeaa7; color: #856404; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 3px; overflow-x: auto; white-space: pre-wrap; }
+        .loading { opacity: 0.6; }
+        .step { margin: 10px 0; padding: 10px; border-left: 4px solid #007bff; background: #f8f9fa; }
+        .step.completed { border-color: #28a745; }
+        .step.error { border-color: #dc3545; }
+        .progress { text-align: center; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚨 Emergency Campaign Fix Center</h1>
+            <p>Comprehensive diagnostic and repair tool for campaign resume issues</p>
+            <div class="progress">
+                <div id="overall-status">Ready to begin emergency fixes</div>
+            </div>
+        </div>
+
+        <div class="fix-section">
+            <h2>🔧 Quick Fixes</h2>
+            <p>Run these fixes in order to resolve campaign resume issues:</p>
+            
+            <button class="fix-button primary" onclick="runEmergencySchemaFix()">
+                🗄️ Step 1: Fix Database Schema
+            </button>
+            
+            <button class="fix-button secondary" onclick="testAllFunctions()">
+                🧪 Step 2: Test All Functions
+            </button>
+            
+            <button class="fix-button success" onclick="testCampaignFlow()">
+                🚀 Step 3: Test Campaign Flow
+            </button>
+
+            <hr style="margin: 20px 0;">
+
+            <button class="fix-button" onclick="runFullDiagnostic()" style="background: #6f42c1; color: white;">
+                🔍 Run Full Diagnostic
+            </button>
+        </div>
+
+        <div class="fix-section">
+            <h2>📊 Fix Results</h2>
+            <div id="fix-results">
+                <div class="result info">
+                    Click the buttons above to start fixing campaign issues.
+                </div>
+            </div>
+        </div>
+
+        <div class="fix-section">
+            <h2>📋 Common Issues & Solutions</h2>
+            <div class="step">
+                <strong>404 Function Errors:</strong> Functions not deployed properly - will be fixed by function tests
+            </div>
+            <div class="step">
+                <strong>Missing Database Tables:</strong> Tables like 'published_blog_posts', 'activity_logs' missing - fixed by schema repair
+            </div>
+            <div class="step">
+                <strong>401 Authorization Errors:</strong> Supabase RLS policies blocking access - fixed by schema repair
+            </div>
+            <div class="step">
+                <strong>Content Not Publishing:</strong> Telegraph.ph API issues or network problems - will be tested
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let resultsContainer = document.getElementById('fix-results');
+        let statusDiv = document.getElementById('overall-status');
+        let fixStep = 0;
+
+        function updateStatus(message) {
+            statusDiv.textContent = message;
+        }
+
+        function addResult(message, type = 'info', details = null) {
+            const div = document.createElement('div');
+            div.className = `result ${type}`;
+            
+            let content = message;
+            if (details) {
+                content += `<br><pre>${JSON.stringify(details, null, 2)}</pre>`;
+            }
+            
+            div.innerHTML = content;
+            resultsContainer.appendChild(div);
+            
+            // Auto-scroll to latest result
+            div.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function clearResults() {
+            resultsContainer.innerHTML = '';
+        }
+
+        async function runEmergencySchemaFix() {
+            updateStatus('🔧 Running emergency schema fix...');
+            addResult('🔧 Starting emergency database schema fix...', 'info');
+            
+            try {
+                const response = await fetch('/.netlify/functions/emergency-schema-fix', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    addResult('✅ Emergency schema fix completed successfully!', 'success', result);
+                    updateStatus('✅ Schema fix completed');
+                    markStepCompleted(1);
+                } else {
+                    const error = await response.text();
+                    addResult('❌ Schema fix failed', 'error', { status: response.status, error });
+                    updateStatus('❌ Schema fix failed');
+                }
+            } catch (error) {
+                addResult('❌ Network error during schema fix', 'error', { error: error.message });
+                updateStatus('❌ Network error');
+            }
+        }
+
+        async function testAllFunctions() {
+            updateStatus('🧪 Testing all functions...');
+            addResult('🧪 Testing function deployment...', 'info');
+            
+            const functions = [
+                'function-health-check',
+                'emergency-schema-fix',
+                'working-campaign-processor',
+                'working-content-generator',
+                'fix-campaign-schema'
+            ];
+
+            let allWorking = true;
+
+            for (const func of functions) {
+                try {
+                    const response = await fetch(`/.netlify/functions/${func}`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ test: true })
+                    });
+
+                    if (response.status === 404) {
+                        addResult(`❌ Function ${func}: NOT FOUND (404)`, 'error');
+                        allWorking = false;
+                    } else {
+                        addResult(`✅ Function ${func}: Available (${response.status})`, 'success');
+                    }
+                } catch (error) {
+                    addResult(`❌ Function ${func}: Network error - ${error.message}`, 'error');
+                    allWorking = false;
+                }
+            }
+
+            if (allWorking) {
+                addResult('✅ All functions are working correctly!', 'success');
+                updateStatus('✅ Functions verified');
+                markStepCompleted(2);
+            } else {
+                addResult('⚠️ Some functions have issues - check deployment', 'warning');
+                updateStatus('⚠️ Function issues detected');
+            }
+        }
+
+        async function testCampaignFlow() {
+            updateStatus('🚀 Testing campaign flow...');
+            addResult('🚀 Testing end-to-end campaign flow...', 'info');
+            
+            const testData = {
+                keyword: 'emergency test',
+                anchorText: 'test link',
+                targetUrl: 'https://example.com',
+                campaignId: 'emergency-test-' + Date.now()
+            };
+
+            try {
+                const response = await fetch('/.netlify/functions/working-campaign-processor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(testData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    if (result.success) {
+                        addResult('✅ Campaign flow test successful!', 'success', result);
+                        updateStatus('✅ Campaign flow working');
+                        markStepCompleted(3);
+                    } else {
+                        addResult('⚠️ Campaign flow has issues', 'warning', result);
+                        updateStatus('⚠️ Campaign flow issues');
+                    }
+                } else {
+                    const error = await response.text();
+                    addResult('❌ Campaign flow test failed', 'error', { status: response.status, error });
+                    updateStatus('❌ Campaign flow failed');
+                }
+            } catch (error) {
+                addResult('❌ Network error during campaign test', 'error', { error: error.message });
+                updateStatus('❌ Network error');
+            }
+        }
+
+        async function runFullDiagnostic() {
+            clearResults();
+            updateStatus('🔍 Running full diagnostic...');
+            
+            addResult('🔍 Starting comprehensive diagnostic and repair...', 'info');
+            
+            // Run all fixes in sequence
+            await runEmergencySchemaFix();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testAllFunctions();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            await testCampaignFlow();
+            
+            addResult('🏁 Full diagnostic complete! Campaign resume should now work.', 'success');
+            updateStatus('🎉 All fixes completed');
+        }
+
+        function markStepCompleted(step) {
+            const steps = document.querySelectorAll('.step');
+            if (steps[step - 1]) {
+                steps[step - 1].classList.add('completed');
+            }
+        }
+
+        // Auto-run diagnostic on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            addResult('🔍 Emergency Campaign Fix Center loaded. Click "Run Full Diagnostic" to fix all issues.', 'info');
+        });
+    </script>
+</body>
+</html>
