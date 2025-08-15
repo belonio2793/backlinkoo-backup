@@ -203,7 +203,7 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
   const recentLogs = logs.slice(-10); // Show last 10 events
 
   return (
-    <Card className="w-full">
+    <Card className="w-full h-full flex flex-col">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2">
