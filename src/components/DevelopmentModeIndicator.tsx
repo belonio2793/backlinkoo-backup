@@ -23,9 +23,13 @@ export const DevelopmentModeIndicator: React.FC<DevelopmentModeIndicatorProps> =
     window.location.hostname.includes('.dev') ||
     import.meta.env.DEV;
 
-  if (!isDevelopment || !isVisible) {
-    return null;
-  }
+  // Hidden by user request
+  return null;
+
+  // Original logic (commented out):
+  // if (!isDevelopment || !isVisible) {
+  //   return null;
+  // }
 
   const handleTestProcessor = async () => {
     try {
