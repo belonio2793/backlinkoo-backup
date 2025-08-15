@@ -10,7 +10,6 @@ import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, W
 import { getOrchestrator } from '@/services/automationOrchestrator';
 import AutomationReporting from '@/components/AutomationReporting';
 import AutomationServiceStatus from '@/components/AutomationServiceStatus';
-import AutomationAuthModal from '@/components/AutomationAuthModal';
 import CampaignProgressTracker, { CampaignProgress } from '@/components/CampaignProgressTracker';
 import LiveCampaignStatus from '@/components/LiveCampaignStatus';
 import CampaignManagerTabbed from '@/components/CampaignManagerTabbed';
