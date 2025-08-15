@@ -37,6 +37,7 @@ const Automation = () => {
   const [hasShownRestoreMessage, setHasShownRestoreMessage] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastFormValidState, setLastFormValidState] = useState(false);
+  const [showEnhancedFeed, setShowEnhancedFeed] = useState(false);
 
   const [formData, setFormData] = useState({
     targetUrl: '',
