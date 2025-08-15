@@ -379,7 +379,7 @@ const Automation = () => {
           </div>
         )}
 
-        {/* Main Content - Top Row: Campaign Creation, Live Monitor, Activity */}
+        {/* Main Content - Top Row: Campaign Creation, Activity, Live Monitor */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
           {/* Campaign Creation (Left Column) */}
           <div className="lg:col-span-1">
@@ -399,9 +399,9 @@ const Automation = () => {
                 {/* Campaign Creation Card with Modal Trigger */}
                 <Card>
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
+                    <CardTitle className="flex items-center gap-2 text-lg">
                       <Target className="w-5 h-5" />
-                      Create New Campaign
+                      Create a New Campaign
                     </CardTitle>
                     <CardDescription>
                       Launch a new link building campaign with automated content generation and backlinks
@@ -481,21 +481,21 @@ const Automation = () => {
             </Tabs>
           </div>
 
-          {/* Live Monitor (Middle Column) */}
-          <div className="lg:col-span-1">
-            <InlineFeedMonitor
-              activeCampaigns={activeCampaigns}
-              isVisible={isAuthenticated || activeCampaigns.length > 0}
-            />
-          </div>
-
-          {/* Live Activity (Right Column) */}
+          {/* Activity (Middle Column) */}
           <div className="lg:col-span-1">
             {isAuthenticated && (
               <CampaignManagerTabbed
                 onStatusUpdate={(message, type) => addStatusMessage(message, type)}
               />
             )}
+          </div>
+
+          {/* Live Monitor (Right Column) */}
+          <div className="lg:col-span-1">
+            <InlineFeedMonitor
+              activeCampaigns={activeCampaigns}
+              isVisible={isAuthenticated || activeCampaigns.length > 0}
+            />
           </div>
         </div>
 
