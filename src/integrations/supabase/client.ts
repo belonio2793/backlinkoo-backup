@@ -222,8 +222,8 @@ if (hasValidCredentials) {
   console.log('🔗 Testing Supabase connectivity...');
 }
 
-// Use mock client if credentials are missing or invalid
-export const supabase = hasValidCredentials ?
+// Create the base client
+const baseClient = hasValidCredentials ?
   createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
     auth: {
       storage: localStorage,
@@ -236,11 +236,31 @@ export const supabase = hasValidCredentials ?
       headers: {
         'X-Client-Info': 'backlink-infinity@1.0.0',
       },
-      // SIMPLIFIED: Use native fetch directly to avoid interference
-      // Remove custom fetch wrapper that may conflict with FullStory
+      // Enhanced fetch with timeout and error handling
+      fetch: (url, options = {}) => {
+        return fetch(url, {
+          ...options,
+          signal: AbortSignal.timeout(30000), // 30 second timeout
+        }).catch(error => {
+          console.error('🌐 Supabase fetch error:', error);
+          if (error.name === 'TimeoutError') {
+            throw new Error('Network timeout - please check your connection and try again');
+          }
+          if (error.message?.includes('Failed to fetch')) {
+            throw new Error('Network connection failed - please check your internet connection');
+          }
+          throw error;
+        });
+      },
     },
   }) :
   createMockSupabaseClient() as any;
+
+// Wrap the client with error handling for real clients
+export const supabase = hasValidCredentials ? {
+  ...baseClient,
+  auth: supabaseErrorHandler.wrapAuthClient(baseClient.auth)
+} : baseClient;
 
 // Simplified client without complex retry logic to prevent response reading issues
 
