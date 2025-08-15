@@ -3,6 +3,7 @@ import { SimpleCampaign } from '@/integrations/supabase/types';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { realTimeFeedService } from './realTimeFeedService';
 import { campaignNetworkLogger } from './campaignNetworkLogger';
+import { responseBodyManager } from '@/utils/responseBodyFix';
 
 /**
  * Working Campaign Processor - Simplified server-side processing
@@ -60,9 +61,13 @@ export class WorkingCampaignProcessor {
         const functionDuration = Date.now() - functionStartTime;
 
         try {
-          // Clone response before consuming it
-          const errorResponse = response.clone();
-          errorText = await errorResponse.text();
+          // Use safe response cloning
+          if (responseBodyManager.canReadBody(response)) {
+            const errorResponse = responseBodyManager.safeClone(response);
+            errorText = await errorResponse.text();
+          } else {
+            errorText = `HTTP ${response.status} - ${response.statusText}`;
+          }
         } catch (cloneError) {
           console.warn('Failed to read error response:', cloneError);
           errorText = `HTTP ${response.status} - ${response.statusText}`;
@@ -81,9 +86,14 @@ export class WorkingCampaignProcessor {
 
       let result;
       try {
-        // Clone response before consuming it
-        const jsonResponse = response.clone();
-        result = await jsonResponse.json();
+        // Use safe response cloning for JSON parsing
+        if (responseBodyManager.canReadBody(response)) {
+          const jsonResponse = responseBodyManager.safeClone(response);
+          result = await jsonResponse.json();
+        } else {
+          console.warn('Response body already consumed, using fallback');
+          result = { success: false, error: 'Response body already consumed' };
+        }
       } catch (parseError) {
         console.warn('Failed to parse JSON response:', parseError);
         result = { success: false, error: 'Failed to parse server response' };
