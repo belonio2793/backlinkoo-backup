@@ -273,7 +273,7 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
           </div>
 
           {/* Feed Content */}
-          <ScrollArea ref={scrollAreaRef} className="h-48">
+          <ScrollArea ref={scrollAreaRef} className="flex-1 min-h-0">
             <div className="space-y-2 pr-2">
               {recentLogs.length === 0 ? (
                 <div className="text-center text-gray-500 py-6">
