@@ -80,6 +80,29 @@ export class AutomationOrchestrator {
   }
 
   /**
+   * Safe database operation wrapper to handle response body errors
+   */
+  private async safeDbOperation<T>(operation: () => Promise<T>, operationName: string): Promise<T | null> {
+    try {
+      return await operation();
+    } catch (error: any) {
+      if (error.message?.includes('body stream already read') ||
+          error.message?.includes('body used already')) {
+        console.warn(`⚠️ Response body error in ${operationName}, retrying...`);
+        // Wait a bit and try once more
+        await new Promise(resolve => setTimeout(resolve, 100));
+        try {
+          return await operation();
+        } catch (retryError) {
+          console.error(`❌ ${operationName} failed on retry:`, formatErrorForLogging(retryError, operationName));
+          return null;
+        }
+      }
+      throw error;
+    }
+  }
+
+  /**
    * Get active publishing platforms
    */
   getActivePlatforms(): PublishingPlatform[] {
