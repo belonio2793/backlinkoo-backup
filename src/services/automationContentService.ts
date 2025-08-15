@@ -26,13 +26,21 @@ export class AutomationContentService {
       try {
         console.log(`Generating content for keyword: ${keyword} (attempt ${attempt}/${maxRetries})`);
 
-        // Use mock content in development if OpenAI is not configured
-        const isDevelopment = import.meta.env.DEV;
-        const endpoint = isDevelopment ?
-          '/.netlify/functions/mock-automation-content' :
-          '/.netlify/functions/generate-automation-content';
+        // Determine which endpoint to use based on environment and configuration
+    const isDevelopment = import.meta.env.DEV;
+    const isTestMode = import.meta.env.MODE === 'test';
+    const mockMode = localStorage.getItem('automation-mock-mode') === 'true';
 
-        console.log(`Using endpoint: ${endpoint} (development: ${isDevelopment})`);
+    let endpoint: string;
+    if (isDevelopment || isTestMode || mockMode) {
+      // Use enhanced mock for development, testing, or when explicitly enabled
+      endpoint = '/.netlify/functions/enhanced-mock-automation';
+    } else {
+      // Use real content generation for production
+      endpoint = '/.netlify/functions/generate-automation-content';
+    }
+
+    console.log(`Using endpoint: ${endpoint} (development: ${isDevelopment}, test: ${isTestMode}, mock: ${mockMode})`);
 
         // Call Netlify function for secure content generation
         const controller = new AbortController();
