@@ -336,8 +336,8 @@ const Automation = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
-        <div className="max-w-7xl mx-auto space-y-6">
+      <main className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 px-2 py-4">
+        <div className="w-full space-y-6">
 
           {/* Page Header */}
           <div className="text-center space-y-4">
