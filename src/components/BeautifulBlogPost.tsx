@@ -971,7 +971,17 @@ export function BeautifulBlogPost() {
                 <div className="beautiful-meta flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   <span className="font-medium text-sm md:text-base">
-                    {format(new Date(blogPost.created_at), 'MMMM dd, yyyy')}
+                    {(() => {
+                      try {
+                        if (!blogPost.created_at) return 'Date unknown';
+                        const date = new Date(blogPost.created_at);
+                        if (isNaN(date.getTime())) return 'Invalid date';
+                        return format(date, 'MMMM dd, yyyy');
+                      } catch (error) {
+                        console.error('Date formatting error:', error, 'Value:', blogPost.created_at);
+                        return 'Date error';
+                      }
+                    })()}
                   </span>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
