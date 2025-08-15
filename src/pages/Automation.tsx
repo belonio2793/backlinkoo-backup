@@ -178,11 +178,8 @@ const Automation = () => {
       // Store the created campaign for live status
       setLastCreatedCampaign(campaign);
 
-      // Update Feed modal with created campaign
-      feedModal.updateActiveCampaign(campaign);
-
-      // Refresh Real Time Feed to show new campaign
-      realTimeFeed.forceRefresh();
+      // Add campaign to active campaigns for enhanced feed
+      setActiveCampaigns(prev => [...prev, campaign]);
 
       // Clear saved form data since campaign was created successfully
       clearFormData();
