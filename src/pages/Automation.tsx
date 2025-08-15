@@ -18,6 +18,8 @@ import InlineAuthForm from '@/components/InlineAuthForm';
 import InlineProgressTracker from '@/components/InlineProgressTracker';
 import InlineFeedMonitor from '@/components/InlineFeedMonitor';
 import CampaignCreationModal from '@/components/CampaignCreationModal';
+import { Header } from '@/components/Header';
+import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
