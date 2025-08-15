@@ -179,7 +179,7 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
           <div>
             <CardTitle className="flex items-center gap-2">
               <Settings className="w-5 h-5" />
-              Campaign Management
+              Activity
             </CardTitle>
             <CardDescription>
               Monitor and control your active campaigns
