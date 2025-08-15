@@ -94,8 +94,13 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
       await loadCampaigns();
       onStatusUpdate?.('Campaign paused successfully', 'success');
     } catch (error) {
-      console.error('Error pausing campaign:', error);
-      onStatusUpdate?.('Failed to pause campaign', 'error');
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error pausing campaign:', {
+        message: errorMessage,
+        campaignId,
+        error: error
+      });
+      onStatusUpdate?.(`Failed to pause campaign: ${errorMessage}`, 'error');
     } finally {
       setActionLoading(null);
     }
