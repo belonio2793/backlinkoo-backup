@@ -704,6 +704,92 @@ export class AutomationOrchestrator {
   }
 
   /**
+   * Auto-pause campaign when all platforms are completed
+   */
+  async autoPauseCampaign(campaignId: string, reason: string): Promise<void> {
+    this.updateStep(campaignId, 'complete-campaign', {
+      status: 'completed',
+      details: reason
+    });
+
+    this.updateProgress(campaignId, {
+      isComplete: true,
+      endTime: new Date()
+    });
+
+    await this.updateCampaignStatus(campaignId, 'completed');
+    await this.logActivity(campaignId, 'info', `Campaign completed: ${reason}`);
+  }
+
+  /**
+   * Pause campaign temporarily between platforms
+   */
+  async pauseCampaignForNextPlatform(campaignId: string): Promise<void> {
+    const nextPlatform = this.getNextPlatformForCampaign(campaignId);
+    const remainingPlatforms = this.getActivePlatforms().length - this.getCampaignPlatformProgress(campaignId).length;
+
+    await this.updateCampaignStatus(campaignId, 'paused');
+    await this.logActivity(campaignId, 'info',
+      `Campaign paused after publishing. ${remainingPlatforms} platform(s) remaining. Next: ${nextPlatform?.name || 'None'}`
+    );
+  }
+
+  /**
+   * Enhanced resume logic that continues platform rotation
+   */
+  async smartResumeCampaign(campaignId: string): Promise<{ success: boolean; message: string }> {
+    const nextPlatform = this.getNextPlatformForCampaign(campaignId);
+
+    if (!nextPlatform) {
+      return {
+        success: false,
+        message: 'Campaign has already posted to all available platforms'
+      };
+    }
+
+    await this.updateCampaignStatus(campaignId, 'active');
+    await this.logActivity(campaignId, 'info', `Campaign resumed to continue posting to ${nextPlatform.name}`);
+
+    // Continue processing the campaign
+    this.processCampaign(campaignId).catch(error => {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Campaign processing error:', errorMessage);
+      this.updateCampaignStatus(campaignId, 'paused', errorMessage);
+    });
+
+    return {
+      success: true,
+      message: `Campaign resumed. Will continue posting to ${nextPlatform.name}`
+    };
+  }
+
+  /**
+   * Get campaign status summary including platform progress
+   */
+  getCampaignStatusSummary(campaignId: string): {
+    platformsCompleted: number;
+    totalPlatforms: number;
+    nextPlatform: string | null;
+    completedPlatforms: string[];
+    isFullyCompleted: boolean;
+  } {
+    const activePlatforms = this.getActivePlatforms();
+    const campaignProgress = this.getCampaignPlatformProgress(campaignId);
+    const nextPlatform = this.getNextPlatformForCampaign(campaignId);
+    const completedPlatforms = campaignProgress
+      .filter(p => p.isCompleted)
+      .map(p => activePlatforms.find(ap => ap.id === p.platformId)?.name || p.platformId);
+
+    return {
+      platformsCompleted: campaignProgress.filter(p => p.isCompleted).length,
+      totalPlatforms: activePlatforms.length,
+      nextPlatform: nextPlatform?.name || null,
+      completedPlatforms,
+      isFullyCompleted: this.shouldAutoPauseCampaign(campaignId)
+    };
+  }
+
+  /**
    * Pause campaign
    */
   async pauseCampaign(campaignId: string): Promise<void> {
