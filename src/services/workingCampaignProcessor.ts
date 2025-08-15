@@ -36,7 +36,7 @@ export class WorkingCampaignProcessor {
       // Log the function call
       const functionCallId = campaignNetworkLogger.logFunctionCall(
         campaign.id,
-        'simple-campaign-processor',
+        'working-campaign-processor',
         { keyword, anchorText, targetUrl, campaignId: campaign.id },
         'content-generation'
       );
