@@ -360,6 +360,15 @@ export class AutomationOrchestrator {
         targetUrl: campaign.target_url
       });
 
+      // Emit real-time feed event for content generation
+      realTimeFeedService.emitContentGenerated(
+        campaignId,
+        campaign.name,
+        campaign.keywords[0] || '',
+        generatedContent[0]?.content?.length, // Approximate word count
+        user?.id
+      );
+
       this.updateStep(campaignId, 'generate-content', {
         status: 'completed',
         details: `Successfully generated ${generatedContent.length} piece(s) of content`
