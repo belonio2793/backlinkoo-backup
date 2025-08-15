@@ -355,6 +355,19 @@ export class WorkingCampaignProcessor {
 
     console.warn('Failed to save published link to any table - continuing without saving');
   }
+
+  /**
+   * Check if we're in development environment
+   */
+  private isDevelopmentEnvironment(): boolean {
+    return (
+      window.location.hostname === 'localhost' ||
+      window.location.hostname.includes('127.0.0.1') ||
+      window.location.hostname.includes('.netlify.app') ||
+      window.location.hostname.includes('.dev') ||
+      import.meta.env.DEV
+    );
+  }
 }
 
 // Export singleton instance
