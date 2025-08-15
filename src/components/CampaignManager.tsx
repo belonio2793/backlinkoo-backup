@@ -394,38 +394,63 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                     </div>
 
                     {/* Campaign Controls */}
-                    <div className="flex gap-2 ml-4">
-                      {campaign.status === 'paused' && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleResumeCampaign(campaign.id)}
-                          disabled={actionLoading === campaign.id}
-                          title="Resume Campaign"
-                        >
-                          {actionLoading === campaign.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Play className="w-4 h-4" />
-                          )}
-                        </Button>
-                      )}
-                      
-                      {['pending', 'generating', 'publishing'].includes(campaign.status) && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handlePauseCampaign(campaign.id)}
-                          disabled={actionLoading === campaign.id}
-                          title="Pause Campaign"
-                        >
-                          {actionLoading === campaign.id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <Pause className="w-4 h-4" />
-                          )}
-                        </Button>
-                      )}
+                    <div className="flex flex-col gap-2 ml-4">
+                      {(() => {
+                        const summary = campaignStatusSummaries.get(campaign.id);
+
+                        // Resume button for paused campaigns
+                        if (campaign.status === 'paused') {
+                          const canResume = summary?.nextPlatform;
+                          const tooltipText = canResume
+                            ? `Resume to continue posting to ${summary.nextPlatform}`
+                            : 'All available platforms have been used';
+
+                          return (
+                            <Button
+                              size="sm"
+                              variant={canResume ? "default" : "outline"}
+                              onClick={() => handleResumeCampaign(campaign.id)}
+                              disabled={actionLoading === campaign.id || !canResume}
+                              title={tooltipText}
+                              className={canResume ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+                            >
+                              {actionLoading === campaign.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <Play className="w-4 h-4 mr-1" />
+                                  {canResume ? 'Resume' : 'Complete'}
+                                </>
+                              )}
+                            </Button>
+                          );
+                        }
+
+                        // Pause button for active campaigns
+                        if (['active', 'pending', 'generating', 'publishing'].includes(campaign.status)) {
+                          return (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handlePauseCampaign(campaign.id)}
+                              disabled={actionLoading === campaign.id}
+                              title="Pause Campaign"
+                              className="border-orange-300 text-orange-700 hover:bg-orange-50"
+                            >
+                              {actionLoading === campaign.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <Pause className="w-4 h-4 mr-1" />
+                                  Pause
+                                </>
+                              )}
+                            </Button>
+                          );
+                        }
+
+                        return null;
+                      })()}
                       
                       <Button
                         size="sm"
