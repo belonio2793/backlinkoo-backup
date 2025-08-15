@@ -246,16 +246,14 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
                 <Switch
                   checked={isAutoScrollEnabled}
                   onCheckedChange={setIsAutoScrollEnabled}
-                  size="sm"
                 />
               </div>
-              
+
               <div className="flex items-center gap-1">
                 <span className="text-gray-600">Details</span>
                 <Switch
                   checked={showDetails}
                   onCheckedChange={setShowDetails}
-                  size="sm"
                 />
               </div>
             </div>
