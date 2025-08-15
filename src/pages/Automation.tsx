@@ -50,11 +50,12 @@ const Automation = () => {
 
   // Load saved form data when component mounts or when saved data changes
   useEffect(() => {
-    if (hasValidSavedData(savedFormData)) {
+    if (hasValidSavedData(savedFormData) && !hasShownRestoreMessage) {
       setFormData(savedFormData);
       addStatusMessage('Form data restored - you can continue with your campaign', 'info');
+      setHasShownRestoreMessage(true);
     }
-  }, [savedFormData, hasValidSavedData]);
+  }, [savedFormData, hasValidSavedData, hasShownRestoreMessage]);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
