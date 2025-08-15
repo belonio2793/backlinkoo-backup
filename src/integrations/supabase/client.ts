@@ -256,16 +256,15 @@ const baseClient = hasValidCredentials ?
   }) :
   createMockSupabaseClient() as any;
 
-// Wrap the client with error handling for real clients, preserving all methods
+// For now, only wrap auth to avoid breaking database methods
+// TODO: Add database error handling in a future update
 export const supabase = hasValidCredentials ?
-  Object.assign({}, baseClient, {
-    auth: supabaseErrorHandler.wrapAuthClient(baseClient.auth),
-    // Explicitly preserve critical methods
-    from: baseClient.from.bind(baseClient),
-    rpc: baseClient.rpc.bind(baseClient),
-    functions: baseClient.functions,
-    channel: baseClient.channel.bind(baseClient),
-    removeChannel: baseClient.removeChannel.bind(baseClient)
+  Object.create(baseClient, {
+    auth: {
+      value: supabaseErrorHandler.wrapAuthClient(baseClient.auth),
+      enumerable: true,
+      configurable: true
+    }
   }) : baseClient;
 
 // Simplified client without complex retry logic to prevent response reading issues
