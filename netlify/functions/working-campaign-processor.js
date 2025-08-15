@@ -47,36 +47,33 @@ exports.handler = async (event, context) => {
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Step 1: Generate 3 different blog posts using OpenAI
-    const blogPosts = await generateBlogPosts(keyword, anchorText, targetUrl);
-    console.log('✅ Generated 3 blog posts');
+    // Step 1: Generate a single blog post using randomly selected prompt
+    const blogPost = await generateSingleBlogPost(keyword, anchorText, targetUrl);
+    console.log('✅ Generated blog post using random prompt');
 
-    // Step 2: Publish each post to Telegraph and collect URLs
+    // Step 2: Publish the post to Telegraph
     const publishedUrls = [];
-    
-    for (let i = 0; i < blogPosts.length; i++) {
-      const post = blogPosts[i];
-      try {
-        const telegraphUrl = await publishToTelegraph(post.title, post.content);
-        publishedUrls.push(telegraphUrl);
-        console.log(`✅ Published post ${i + 1} to Telegraph:`, telegraphUrl);
 
-        // Validate the published URL
-        await validateTelegraphUrl(telegraphUrl);
-        console.log(`✅ Validated post ${i + 1}`);
+    try {
+      const telegraphUrl = await publishToTelegraph(blogPost.title, blogPost.content);
+      publishedUrls.push(telegraphUrl);
+      console.log(`✅ Published post to Telegraph:`, telegraphUrl);
 
-        // Save to database
-        await savePublishedLink(supabase, campaignId, telegraphUrl, post.title);
-        console.log(`✅ Saved post ${i + 1} to database`);
+      // Validate the published URL
+      await validateTelegraphUrl(telegraphUrl);
+      console.log(`✅ Validated post`);
 
-      } catch (error) {
-        console.error(`❌ Failed to publish post ${i + 1}:`, error);
-        // Continue with other posts even if one fails
-      }
+      // Save to database
+      await savePublishedLink(supabase, campaignId, telegraphUrl, blogPost.title);
+      console.log(`✅ Saved post to database`);
+
+    } catch (error) {
+      console.error(`❌ Failed to publish post:`, error);
+      throw new Error('Failed to publish post to Telegraph');
     }
 
     if (publishedUrls.length === 0) {
-      throw new Error('Failed to publish any posts to Telegraph');
+      throw new Error('Failed to publish post to Telegraph');
     }
 
     // Step 3: Update campaign status to completed
