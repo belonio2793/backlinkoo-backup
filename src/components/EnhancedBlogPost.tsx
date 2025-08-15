@@ -45,6 +45,9 @@ export function EnhancedBlogPost() {
   
   const [blogPost, setBlogPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Use premium SEO score logic
+  const { effectiveScore, isPremiumScore } = usePremiumSEOScore(blogPost);
   const [claiming, setClaiming] = useState(false);
   const [unclaiming, setUnclaiming] = useState(false);
   const [deleting, setDeleting] = useState(false);
