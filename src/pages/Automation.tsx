@@ -346,24 +346,43 @@ const Automation = () => {
                   </Alert>
                 )}
 
-                <Button 
+                <Button
                   onClick={handleCreateCampaign}
-                  disabled={isCreating}
+                  disabled={smartFlow.getButtonState(formData).disabled || isCreating}
                   className="w-full"
                   size="lg"
+                  variant={smartFlow.getButtonState(formData).variant}
                 >
-                  {isCreating ? (
+                  {(isCreating || smartFlow.getButtonState(formData).icon === 'loader') ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Creating Campaign...
+                      {smartFlow.getButtonState(formData).text}
                     </>
                   ) : (
                     <>
                       <Target className="w-4 h-4 mr-2" />
-                      {isAuthenticated ? 'Start Link Building Campaign' : 'Continue with Campaign'}
+                      {smartFlow.getButtonState(formData).text}
                     </>
                   )}
                 </Button>
+
+                {/* Smart Flow Contextual Messages */}
+                {smartFlow.getContextualMessages(formData).map((msg, index) => (
+                  <Alert key={index} className={
+                    msg.type === 'success' ? 'border-green-200 bg-green-50' :
+                    msg.type === 'warning' ? 'border-yellow-200 bg-yellow-50' :
+                    'border-blue-200 bg-blue-50'
+                  }>
+                    <Info className="h-4 w-4" />
+                    <AlertDescription className={
+                      msg.type === 'success' ? 'text-green-700' :
+                      msg.type === 'warning' ? 'text-yellow-700' :
+                      'text-blue-700'
+                    }>
+                      {msg.message}
+                    </AlertDescription>
+                  </Alert>
+                ))}
               </CardContent>
                 </Card>
 
