@@ -36,8 +36,8 @@ export class AutomationContentService {
       // Use enhanced mock for development, testing, or when explicitly enabled
       endpoint = '/.netlify/functions/enhanced-mock-automation';
     } else {
-      // Use real content generation for production
-      endpoint = '/.netlify/functions/generate-automation-content';
+      // Use working content generator for production (more reliable)
+      endpoint = '/.netlify/functions/working-content-generator';
     }
 
     console.log(`Using endpoint: ${endpoint} (development: ${isDevelopment}, test: ${isTestMode}, mock: ${mockMode})`);
