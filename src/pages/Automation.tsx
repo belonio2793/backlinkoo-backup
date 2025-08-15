@@ -282,14 +282,10 @@ const Automation = () => {
           {/* Campaign Creation (Left Column) */}
           <div className="lg:col-span-1">
             <Tabs defaultValue="create" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="create" className="flex items-center gap-2">
                   <Target className="w-4 h-4" />
                   New Campaign
-                </TabsTrigger>
-                <TabsTrigger value="reports" className="flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4" />
-                  Reporting
                 </TabsTrigger>
                 <TabsTrigger value="status" className="flex items-center gap-2">
                   <FileText className="w-4 h-4" />
