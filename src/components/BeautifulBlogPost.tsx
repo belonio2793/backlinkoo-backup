@@ -210,13 +210,22 @@ export function BeautifulBlogPost() {
       setLoading(true);
       setError(null);
 
-      console.log('Loading blog post with slug:', slug);
+      console.log('🔍 Loading blog post with slug:', slug);
 
       // First try database, if that fails, try localStorage fallback
       let post = null;
       try {
         post = await blogService.getBlogPostBySlug(slug);
-        console.log('Database query result:', post ? 'Found' : 'Not found');
+        console.log('📡 Database query result:', post ? 'Found' : 'Not found');
+        if (post) {
+          console.log('📄 Database post details:');
+          console.log('  - ID:', post.id);
+          console.log('  - Title:', post.title || 'NO TITLE');
+          console.log('  - Status:', post.status);
+          console.log('  - Content length:', post.content?.length || 0);
+          console.log('  - Created:', post.created_at);
+          console.log('  - Claimed:', post.claimed);
+        }
       } catch (dbError) {
         console.warn('Database lookup failed, trying localStorage fallback:', dbError);
         // Try to load from localStorage as fallback
