@@ -85,30 +85,33 @@ export class WorkingCampaignProcessor {
         throw new Error(`Campaign processing failed: ${result.error}`);
       }
 
-      const publishedUrl = result.data.publishedUrl;
-      
+      const publishedUrls = result.data.publishedUrls || [];
+      const totalPosts = result.data.totalPosts || publishedUrls.length;
+
       console.log('✅ Content generated and published successfully via server-side processor');
-      console.log('📤 Published successfully:', publishedUrl);
-      
+      console.log(`📤 Published ${totalPosts} posts successfully:`, publishedUrls);
+
       realTimeFeedService.emitContentGenerated(
         campaign.id,
         campaign.name,
         keyword,
-        result.data.content?.length || 0,
+        totalPosts * 500, // Approximate word count
         campaign.user_id
       );
 
-      // Step 3: Save published link to database
-      await this.savePublishedLink(campaign.id, publishedUrl);
-      
-      realTimeFeedService.emitUrlPublished(
-        campaign.id,
-        campaign.name,
-        keyword,
-        publishedUrl,
-        'Telegraph.ph',
-        campaign.user_id
-      );
+      // Step 3: Save all published links to database
+      for (const url of publishedUrls) {
+        await this.savePublishedLink(campaign.id, url);
+
+        realTimeFeedService.emitUrlPublished(
+          campaign.id,
+          campaign.name,
+          keyword,
+          url,
+          'Telegraph.ph',
+          campaign.user_id
+        );
+      }
 
       // Step 4: Mark campaign as completed
       await this.updateCampaignStatus(campaign.id, 'completed');
