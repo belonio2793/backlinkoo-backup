@@ -98,9 +98,8 @@ export class TelegraphService {
       // Convert HTML content to Telegraph format
       const telegraphContent = this.convertHtmlToTelegraphFormat(params.content);
 
-      // Use native fetch to avoid FullStory interference
-      const originalFetch = window.fetch;
-      const fetchToUse = originalFetch && typeof originalFetch === 'function' ? originalFetch : fetch;
+      // Use stored original fetch to avoid FullStory interference
+      const fetchToUse = window._originalFetch || window.fetch || fetch;
 
       const response = await fetchToUse.call(window, `${this.baseUrl}/createPage`, {
         method: 'POST',
