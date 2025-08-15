@@ -341,3 +341,4 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
 };
 
 export default CampaignManager;
+export { CampaignManager };
