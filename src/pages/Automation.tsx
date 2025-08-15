@@ -174,6 +174,9 @@ const Automation = () => {
       // Store the created campaign for live status
       setLastCreatedCampaign(campaign);
 
+      // Refresh Real Time Feed to show new campaign
+      realTimeFeed.forceRefresh();
+
       // Clear saved form data since campaign was created successfully
       clearFormData();
       setHasShownRestoreMessage(false);
