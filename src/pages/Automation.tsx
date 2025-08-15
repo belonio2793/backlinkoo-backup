@@ -757,6 +757,13 @@ const Automation = () => {
           activeCampaign={feedModal.activeCampaign}
           isCreating={feedModal.isCreating}
         />
+
+        {/* Real Time Feed Toggle Button */}
+        <RealTimeFeedToggle
+          isVisible={realTimeFeed.isVisible}
+          activeCampaignsCount={realTimeFeed.activeCampaigns.length}
+          onClick={realTimeFeed.showModal}
+        />
       </div>
     </div>
   );
