@@ -657,7 +657,7 @@ const Automation = () => {
                   Publishing Platforms
                 </CardTitle>
                 <CardDescription>
-                  Available platforms for content publication
+                  Platforms for automatic rotation (1 post per platform per campaign)
                 </CardDescription>
               </CardHeader>
               <CardContent>
