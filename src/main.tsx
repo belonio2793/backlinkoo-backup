@@ -35,7 +35,7 @@ import './utils/domLinkFixer'
 // Clear previous console errors in development
 if (import.meta.env.DEV) {
   console.clear();
-  console.log('🚀 Starting Backlinkoo application...');
+  console.log('�� Starting Backlinkoo application...');
 
   // Add helper functions to window for debugging
   (window as any).fixRLS = async () => {
@@ -249,7 +249,6 @@ if (import.meta.env.DEV) {
 
   // Import fetch test helper
   import('./utils/fetchTestHelper');
-  import('../test-automation-pipeline.js');
 
   console.log('  - disableViteProtection() - Disable fetch protection and refresh');
   console.log('  - testContentGeneration() - Test content generation functions');
