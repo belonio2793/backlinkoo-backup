@@ -613,8 +613,14 @@ export class AutomationOrchestrator {
       .eq('id', campaignId);
 
     if (error) {
-      console.error('Error deleting campaign:', error);
-      throw new Error(`Failed to delete campaign: ${error.message}`);
+      console.error('Error deleting campaign:', {
+        message: error.message || 'Unknown error',
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        campaignId
+      });
+      throw new Error(`Failed to delete campaign: ${error.message || 'Unknown database error'}`);
     }
   }
 }
