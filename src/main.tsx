@@ -227,6 +227,16 @@ if (import.meta.env.DEV) {
     }
   };
 
+  // Add real-time feed testing
+  (window as any).testRealTimeFeed = async () => {
+    try {
+      const { testRealTimeFeedIntegration } = await import('./utils/testRealTimeFeed');
+      return await testRealTimeFeedIntegration();
+    } catch (error) {
+      console.error('❌ Real-time feed test failed:', error);
+    }
+  };
+
   // Import fetch test helper
   import('./utils/fetchTestHelper');
 
