@@ -384,10 +384,15 @@ export function EnhancedBlogPost() {
                 <Eye className="h-4 w-4" />
                 <span>{blogPost.view_count}&nbsp;views</span>
               </div>
-              <div className="flex items-center gap-1">
-                <TrendingUp className="h-4 w-4" />
-                <span>SEO Score: {blogPost.seo_score}/100</span>
-              </div>
+              <SEOScoreDisplay
+                score={effectiveScore}
+                title={blogPost.title}
+                content={blogPost.content}
+                metaDescription={blogPost.meta_description || undefined}
+                targetKeyword={blogPost.keywords?.[0]}
+                showDetails={true}
+                isPremiumScore={isPremiumScore}
+              />
             </div>
 
             {/* Expiration Warning */}
