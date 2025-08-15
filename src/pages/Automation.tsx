@@ -430,9 +430,9 @@ const Automation = () => {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="create" className="space-y-6">
+              <TabsContent value="create" className="space-y-6 h-[calc(100%-3rem)]">
                 {/* Campaign Creation Card with Modal Trigger */}
-                <Card>
+                <Card className="h-full">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <Target className="w-5 h-5" />
@@ -672,7 +672,7 @@ const Automation = () => {
           </div>
 
           {/* Activity (Middle Column) */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 h-full">
             {isAuthenticated && (
               <CampaignManagerTabbed
                 onStatusUpdate={(message, type) => addStatusMessage(message, type)}
@@ -683,7 +683,7 @@ const Automation = () => {
           </div>
 
           {/* Live Monitor (Right Column) */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 h-full">
             <InlineFeedMonitor
               activeCampaigns={activeCampaigns}
               isVisible={isAuthenticated}
