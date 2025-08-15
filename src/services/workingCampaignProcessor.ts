@@ -3,6 +3,8 @@ import { SimpleCampaign } from '@/integrations/supabase/types';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { realTimeFeedService } from './realTimeFeedService';
 import { campaignNetworkLogger } from './campaignNetworkLogger';
+import { responseBodyManager } from '@/utils/responseBodyFix';
+import { developmentCampaignProcessor } from './developmentCampaignProcessor';
 
 /**
  * Working Campaign Processor - Simplified server-side processing
@@ -12,14 +14,36 @@ export class WorkingCampaignProcessor {
   
   /**
    * Process a campaign from start to finish using simplified server-side approach
+   * Automatically uses development processor in development environment
    */
   async processCampaign(campaign: SimpleCampaign): Promise<{ success: boolean; publishedUrl?: string; error?: string }> {
+    // Check if we're in development environment
+    if (this.isDevelopmentEnvironment()) {
+      console.log('🎭 Development environment detected - using development campaign processor');
+      try {
+        const result = await developmentCampaignProcessor.processCampaign(campaign);
+        return {
+          success: result.success,
+          publishedUrl: result.publishedUrls[0],
+          error: result.error
+        };
+      } catch (error) {
+        console.error('❌ Development campaign processing failed:', error);
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : String(error)
+        };
+      }
+    }
+
+    // Continue with production processing
     const keyword = campaign.keywords[0] || 'default keyword';
     const anchorText = campaign.anchor_texts[0] || 'click here';
     const targetUrl = campaign.target_url;
-    
+
     try {
       console.log(`🚀 Processing campaign: ${campaign.name}`);
+      console.log('🏭 Using production server-side processor');
 
       // Start network monitoring for this campaign
       campaignNetworkLogger.startMonitoring(campaign.id);
@@ -56,8 +80,21 @@ export class WorkingCampaignProcessor {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
+        let errorText = 'Unknown error';
         const functionDuration = Date.now() - functionStartTime;
+
+        try {
+          // Use safe response cloning
+          if (responseBodyManager.canReadBody(response)) {
+            const errorResponse = responseBodyManager.safeClone(response);
+            errorText = await errorResponse.text();
+          } else {
+            errorText = `HTTP ${response.status} - ${response.statusText}`;
+          }
+        } catch (cloneError) {
+          console.warn('Failed to read error response:', cloneError);
+          errorText = `HTTP ${response.status} - ${response.statusText}`;
+        }
 
         // Log the failed function call
         campaignNetworkLogger.updateFunctionCall(
@@ -70,7 +107,20 @@ export class WorkingCampaignProcessor {
         throw new Error(`Server-side processing failed: ${response.status} - ${errorText}`);
       }
 
-      const result = await response.json();
+      let result;
+      try {
+        // Use safe response cloning for JSON parsing
+        if (responseBodyManager.canReadBody(response)) {
+          const jsonResponse = responseBodyManager.safeClone(response);
+          result = await jsonResponse.json();
+        } else {
+          console.warn('Response body already consumed, using fallback');
+          result = { success: false, error: 'Response body already consumed' };
+        }
+      } catch (parseError) {
+        console.warn('Failed to parse JSON response:', parseError);
+        result = { success: false, error: 'Failed to parse server response' };
+      }
       const functionDuration = Date.now() - functionStartTime;
 
       // Log successful function call
@@ -327,6 +377,19 @@ export class WorkingCampaignProcessor {
     }
 
     console.warn('Failed to save published link to any table - continuing without saving');
+  }
+
+  /**
+   * Check if we're in development environment
+   */
+  private isDevelopmentEnvironment(): boolean {
+    return (
+      window.location.hostname === 'localhost' ||
+      window.location.hostname.includes('127.0.0.1') ||
+      window.location.hostname.includes('.netlify.app') ||
+      window.location.hostname.includes('.dev') ||
+      import.meta.env.DEV
+    );
   }
 }
 

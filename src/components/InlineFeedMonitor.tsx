@@ -57,7 +57,7 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
   const [logs, setLogs] = useState<RealTimeFeedLog[]>([]);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(true);
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails] = useState(true); // Always show details by default
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new logs arrive
@@ -203,7 +203,7 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
   const recentLogs = logs.slice(-10); // Show last 10 events
 
   return (
-    <Card className="w-full">
+    <Card className="w-full h-full flex flex-col">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center justify-between">
           <span className="flex items-center gap-2">
@@ -237,7 +237,7 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
       </CardHeader>
 
       {!isMinimized && (
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-3 flex-1 flex flex-col">
           {/* Controls */}
           <div className="flex items-center justify-between text-xs">
             <div className="flex items-center gap-3">
@@ -249,13 +249,6 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
                 />
               </div>
 
-              <div className="flex items-center gap-1">
-                <span className="text-gray-600">Details</span>
-                <Switch
-                  checked={showDetails}
-                  onCheckedChange={setShowDetails}
-                />
-              </div>
             </div>
 
             <div className="flex items-center gap-1">
@@ -273,7 +266,7 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
           </div>
 
           {/* Feed Content */}
-          <ScrollArea ref={scrollAreaRef} className="h-48">
+          <ScrollArea ref={scrollAreaRef} className="flex-1 min-h-0">
             <div className="space-y-2 pr-2">
               {recentLogs.length === 0 ? (
                 <div className="text-center text-gray-500 py-6">
@@ -319,7 +312,7 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
                       )}
 
                       {/* Details */}
-                      {showDetails && log.details && (
+                      {log.details && (
                         <div className="mt-2 p-2 bg-gray-50 rounded space-y-1">
                           {log.details.publishedUrl && (
                             <div className="flex items-center gap-1">

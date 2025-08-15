@@ -563,7 +563,11 @@ export class AutomationOrchestrator {
               campaign_id: campaignId,
               content_id: contentRecord.id,
               platform: nextPlatform.id,
-              published_url: publishedPage.url
+              published_url: publishedPage.url,
+              anchor_text: campaign.anchor_texts[0] || '',
+              target_url: campaign.target_url,
+              status: 'active',
+              published_at: new Date().toISOString()
             });
 
           if (linkError) {
@@ -1159,6 +1163,44 @@ export class AutomationOrchestrator {
     }
   }
 
+
+  /**
+   * Save published link to database
+   */
+  async savePublishedLink(
+    campaignId: string,
+    publishedUrl: string,
+    anchorText: string,
+    targetUrl: string,
+    platform: string = 'telegraph'
+  ): Promise<void> {
+    const { error } = await supabase
+      .from('automation_published_links')
+      .insert({
+        campaign_id: campaignId,
+        published_url: publishedUrl,
+        anchor_text: anchorText,
+        target_url: targetUrl,
+        platform: platform,
+        status: 'active',
+        published_at: new Date().toISOString()
+      });
+
+    if (error) {
+      console.error('Error saving published link:', {
+        message: error.message || 'Unknown error',
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        campaignId,
+        publishedUrl,
+        platform
+      });
+      throw new Error(`Failed to save published link: ${error.message || 'Unknown database error'}`);
+    }
+
+    console.log(`✅ Published link saved to database: ${publishedUrl}`);
+  }
 
   /**
    * Delete campaign

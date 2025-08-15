@@ -25,6 +25,8 @@ import './utils/emergencyErrorFix'
 import './utils/emergencyFetchFix'
 // Network error handler for user-friendly solutions
 import './utils/errorHandler'
+// Fix response body conflicts early
+import './utils/responseBodyFix'
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
 // Protect Vite client from FullStory interference in development
@@ -247,9 +249,32 @@ if (import.meta.env.DEV) {
     }
   };
 
+  // Add response body fix testing
+  (window as any).testResponseBodyFix = async () => {
+    try {
+      const { testResponseBodyFix } = await import('./utils/testResponseBodyFix');
+      return await testResponseBodyFix();
+    } catch (error) {
+      console.error('❌ Response body fix test failed:', error);
+    }
+  };
+
+  // Add development processor testing
+  (window as any).testDevelopmentProcessor = async () => {
+    try {
+      const { DevelopmentCampaignProcessor } = await import('./services/developmentCampaignProcessor');
+      return await DevelopmentCampaignProcessor.runTest();
+    } catch (error) {
+      console.error('❌ Development processor test failed:', error);
+    }
+  };
+
   // Import fetch test helper
   import('./utils/fetchTestHelper');
   import('./utils/automationPipelineTest');
+  import('./utils/testResponseBodyFix');
+  import('./utils/testBacklinkNotification');
+  import('./utils/testRealTimeFeedFix');
 
   console.log('  - disableViteProtection() - Disable fetch protection and refresh');
   console.log('  - testContentGeneration() - Test content generation functions');
@@ -262,6 +287,11 @@ if (import.meta.env.DEV) {
   console.log('  - testErrorFixes() - Test all error fixes and formatting');
   console.log('  - testRealTimeFeed() - Test real-time feed integration');
   console.log('  - testCampaignTabs() - Test campaign manager tabs and live links');
+  console.log('  - testResponseBodyFix() - Test response body conflict prevention');
+  console.log('  - testDevelopmentProcessor() - Test mock content + Telegraph publishing');
+  console.log('  - testBacklinkNotification() - Test single backlink notification');
+  console.log('  - testMultipleNotifications() - Test multiple backlink notifications');
+  console.log('  - testRealTimeFeedSubscription() - Test real-time feed subscription fix');
   console.log('  - fetchTest.runDiagnostics() - Test fetch and network connectivity');
 }
 

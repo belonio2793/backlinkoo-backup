@@ -315,6 +315,61 @@ export class RealTimeFeedService {
   }
 
   /**
+   * Emit campaign created event
+   */
+  emitCampaignCreated(campaignId: string, campaignName: string, keyword: string, targetUrl: string, userId?: string): void {
+    this.emit({
+      type: 'campaign_created',
+      level: 'success',
+      message: `New campaign created: "${keyword}"`,
+      campaignId,
+      campaignName,
+      userId,
+      details: {
+        keyword,
+        targetUrl,
+        action: 'create'
+      }
+    });
+  }
+
+  /**
+   * Emit campaign deleted event
+   */
+  emitCampaignDeleted(campaignId: string, campaignName: string, keyword: string, userId?: string): void {
+    this.emit({
+      type: 'user_action',
+      level: 'warning',
+      message: `Campaign "${keyword}" deleted`,
+      campaignId,
+      campaignName,
+      userId,
+      details: {
+        keyword,
+        action: 'delete'
+      }
+    });
+  }
+
+  /**
+   * Emit campaign started event
+   */
+  emitCampaignStarted(campaignId: string, campaignName: string, keyword: string, userId?: string): void {
+    this.emit({
+      type: 'campaign_started',
+      level: 'info',
+      message: `Campaign "${keyword}" started`,
+      campaignId,
+      campaignName,
+      userId,
+      details: {
+        keyword,
+        action: 'start'
+      }
+    });
+  }
+
+  /**
    * Emit user action event
    */
   emitUserAction(action: string, message: string, userId?: string, campaignId?: string): void {

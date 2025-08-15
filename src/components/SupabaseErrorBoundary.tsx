@@ -140,14 +140,6 @@ export class SupabaseErrorBoundary extends Component<Props, State> {
                   </Alert>
                 )}
 
-                {error && (
-                  <details className="text-xs text-gray-500">
-                    <summary className="cursor-pointer">Technical Details</summary>
-                    <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto">
-                      {error.message}
-                    </pre>
-                  </details>
-                )}
               </CardContent>
             </Card>
           </div>
@@ -186,15 +178,6 @@ export class SupabaseErrorBoundary extends Component<Props, State> {
                 </Button>
               </div>
 
-              {error && (
-                <details className="text-xs text-gray-500">
-                  <summary className="cursor-pointer">Error Details</summary>
-                  <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto">
-                    {error.message}
-                    {error.stack && '\n\n' + error.stack}
-                  </pre>
-                </details>
-              )}
             </CardContent>
           </Card>
         </div>
@@ -209,7 +192,7 @@ export class SupabaseErrorBoundary extends Component<Props, State> {
 export const useSupabaseErrorHandler = () => {
   const handleSupabaseError = (error: any) => {
     if (error?.message?.includes('Failed to fetch')) {
-      console.error('�� Network error detected:', error);
+      console.error('Network error detected:', error);
       throw new Error('Network connection failed - please check your internet connection and try again');
     }
     

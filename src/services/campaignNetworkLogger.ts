@@ -1,3 +1,5 @@
+import { responseBodyManager } from '@/utils/responseBodyFix';
+
 export interface NetworkRequest {
   id: string;
   campaignId: string;
@@ -104,20 +106,29 @@ export class CampaignNetworkLogger {
         const response = await this.originalFetch.call(window, input, init);
         const duration = Date.now() - startTime;
 
-        // Clone response to read body without consuming it
-        const clonedResponse = response.clone();
+        // Safely handle response body reading
         let responseData;
         let responseError;
+        let clonedResponse;
 
         try {
-          const contentType = response.headers.get('content-type');
-          if (contentType?.includes('application/json')) {
-            responseData = await clonedResponse.json();
+          // Use safe response body management
+          if (responseBodyManager.canReadBody(response)) {
+            clonedResponse = responseBodyManager.safeClone(response);
+            const contentType = response.headers.get('content-type');
+            if (contentType?.includes('application/json')) {
+              responseData = await clonedResponse.json();
+            } else {
+              responseData = await clonedResponse.text();
+            }
           } else {
-            responseData = await clonedResponse.text();
+            // Response already used, just log metadata
+            responseData = `[Response body already consumed - status: ${response.status}]`;
           }
         } catch (error) {
           responseError = `Failed to parse response: ${error}`;
+          responseData = `[Parse error - status: ${response.status}]`;
+          console.warn('Network logger failed to parse response:', error);
         }
 
         // Complete request log
@@ -134,8 +145,13 @@ export class CampaignNetworkLogger {
           duration
         } as NetworkRequest;
 
-        this.logNetworkRequest(completeRequest);
+        try {
+          this.logNetworkRequest(completeRequest);
+        } catch (logError) {
+          console.warn('Failed to log network request:', logError);
+        }
 
+        // Return the original response (not the clone)
         return response;
       } catch (error) {
         const duration = Date.now() - startTime;
@@ -152,7 +168,11 @@ export class CampaignNetworkLogger {
           duration
         } as NetworkRequest;
 
-        this.logNetworkRequest(failedRequest);
+        try {
+          this.logNetworkRequest(failedRequest);
+        } catch (logError) {
+          console.warn('Failed to log failed request:', logError);
+        }
 
         throw error;
       }

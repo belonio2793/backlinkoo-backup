@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { getOrchestrator, type Campaign } from '@/services/automationOrchestrator';
+import { realTimeFeedService } from '@/services/realTimeFeedService';
 import { CampaignProgress, ProgressStep } from './CampaignProgressTracker';
 import { campaignNetworkLogger, NetworkRequest, DatabaseQuery } from '@/services/campaignNetworkLogger';
 
@@ -155,20 +156,36 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
 
   const generateCampaignLogs = async (campaign: Campaign, progress?: CampaignProgress): Promise<CampaignLog[]> => {
     const logs: CampaignLog[] = [];
-    
-    // Campaign creation
-    logs.push({
-      id: '1',
-      timestamp: new Date(campaign.created_at),
-      level: 'success',
-      step: 'initialization',
-      message: 'Campaign created successfully',
-      details: {
-        targetUrl: campaign.target_url,
-        keywords: campaign.keywords,
-        anchorTexts: campaign.anchor_texts
-      }
-    });
+
+    // Get real-time events specific to this campaign
+    const campaignEvents = realTimeFeedService.getHistory()
+      .filter(event => event.campaignId === campaign.id)
+      .map(event => ({
+        id: event.id,
+        timestamp: event.timestamp,
+        level: event.level as 'info' | 'warning' | 'error' | 'success',
+        step: event.type,
+        message: event.message,
+        details: event.details
+      }));
+
+    logs.push(...campaignEvents);
+
+    // Add campaign creation event if no events exist
+    if (logs.length === 0) {
+      logs.push({
+        id: '1',
+        timestamp: new Date(campaign.created_at),
+        level: 'success',
+        step: 'initialization',
+        message: 'Campaign created successfully',
+        details: {
+          targetUrl: campaign.target_url,
+          keywords: campaign.keywords,
+          anchorTexts: campaign.anchor_texts
+        }
+      });
+    }
 
     // Add progress-based logs
     if (progress) {
@@ -507,12 +524,10 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                                       <p className="text-xs text-gray-500 mt-1">{step.details}</p>
                                     )}
                                     {step.data && (
-                                      <details className="mt-2">
-                                        <summary className="text-xs text-blue-600 cursor-pointer">View Data</summary>
-                                        <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
-                                          {JSON.stringify(step.data, null, 2)}
-                                        </pre>
-                                      </details>
+                                      <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                                        <div className="font-medium text-gray-700 mb-1">Step Data:</div>
+                                        <div className="text-gray-600">{JSON.stringify(step.data, null, 2)}</div>
+                                      </div>
                                     )}
                                   </div>
                                 </div>
@@ -599,20 +614,16 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                                       </div>
                                     )}
                                     {request.body && (
-                                      <details className="mt-2">
-                                        <summary className="text-xs text-blue-600 cursor-pointer">Request Body</summary>
-                                        <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
-                                          {JSON.stringify(request.body, null, 2)}
-                                        </pre>
-                                      </details>
+                                      <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
+                                        <div className="font-medium text-blue-700 mb-1">Request Body:</div>
+                                        <div className="text-blue-600">{JSON.stringify(request.body, null, 2)}</div>
+                                      </div>
                                     )}
                                     {request.response?.data && (
-                                      <details className="mt-2">
-                                        <summary className="text-xs text-blue-600 cursor-pointer">Response Data</summary>
-                                        <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
-                                          {JSON.stringify(request.response.data, null, 2)}
-                                        </pre>
-                                      </details>
+                                      <div className="mt-2 p-2 bg-green-50 rounded text-xs">
+                                        <div className="font-medium text-green-700 mb-1">Response Data:</div>
+                                        <div className="text-green-600">{JSON.stringify(request.response.data, null, 2)}</div>
+                                      </div>
                                     )}
                                   </div>
                                 ))
@@ -669,20 +680,16 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                                       </div>
                                     )}
                                     {query.params && (
-                                      <details className="mt-2">
-                                        <summary className="text-xs text-blue-600 cursor-pointer">Parameters</summary>
-                                        <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
-                                          {JSON.stringify(query.params, null, 2)}
-                                        </pre>
-                                      </details>
+                                      <div className="mt-2 p-2 bg-blue-50 rounded text-xs">
+                                        <div className="font-medium text-blue-700 mb-1">Parameters:</div>
+                                        <div className="text-blue-600">{JSON.stringify(query.params, null, 2)}</div>
+                                      </div>
                                     )}
                                     {query.result && (
-                                      <details className="mt-2">
-                                        <summary className="text-xs text-blue-600 cursor-pointer">Result</summary>
-                                        <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
-                                          {JSON.stringify(query.result, null, 2)}
-                                        </pre>
-                                      </details>
+                                      <div className="mt-2 p-2 bg-green-50 rounded text-xs">
+                                        <div className="font-medium text-green-700 mb-1">Result:</div>
+                                        <div className="text-green-600">{JSON.stringify(query.result, null, 2)}</div>
+                                      </div>
                                     )}
                                   </div>
                                 ))
@@ -722,12 +729,10 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                                 </div>
                                 <p className="text-sm mt-1">{log.message}</p>
                                 {log.details && (
-                                  <details className="mt-2">
-                                    <summary className="text-xs text-blue-600 cursor-pointer">View Details</summary>
-                                    <pre className="text-xs bg-gray-100 p-2 rounded mt-1 overflow-x-auto">
-                                      {JSON.stringify(log.details, null, 2)}
-                                    </pre>
-                                  </details>
+                                  <div className="mt-2 p-2 bg-gray-50 rounded text-xs">
+                                    <div className="font-medium text-gray-700 mb-1">Log Details:</div>
+                                    <div className="text-gray-600">{JSON.stringify(log.details, null, 2)}</div>
+                                  </div>
                                 )}
                               </div>
                             </div>

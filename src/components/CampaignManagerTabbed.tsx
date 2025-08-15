@@ -5,14 +5,14 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Play, 
-  Pause, 
-  Trash2, 
-  ExternalLink, 
-  Target, 
-  CheckCircle, 
-  Clock, 
+import {
+  Play,
+  Pause,
+  Trash2,
+  ExternalLink,
+  Target,
+  CheckCircle,
+  Clock,
   AlertCircle,
   FileText,
   Settings,
@@ -23,7 +23,8 @@ import {
   Globe,
   Calendar,
   Eye,
-  Copy
+  Copy,
+  Edit3
 } from 'lucide-react';
 import { getOrchestrator, type Campaign } from '@/services/automationOrchestrator';
 import { realTimeFeedService } from '@/services/realTimeFeedService';
@@ -65,10 +66,10 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  // Auto-switch to live monitor when a campaign progress starts
+  // Auto-switch to activity tab when a campaign progress starts
   useEffect(() => {
     if (currentCampaignProgress && !currentCampaignProgress.isComplete && !currentCampaignProgress.isError) {
-      setActiveTab('live-monitor');
+      setActiveTab('activity');
     }
   }, [currentCampaignProgress]);
   const orchestrator = getOrchestrator();
@@ -77,11 +78,40 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
 
   useEffect(() => {
     loadCampaigns();
-    
+
     // Auto-refresh every 10 seconds
     const interval = setInterval(loadCampaigns, 10000);
-    return () => clearInterval(interval);
-  }, []);
+
+    // Real-time feed integration for instant updates
+    const handleFeedEvent = (event: any) => {
+      // Force refresh campaigns when events occur
+      if (['campaign_created', 'campaign_completed', 'campaign_failed', 'url_published'].includes(event.type)) {
+        console.log('📡 Real-time event received, refreshing campaigns:', event.type);
+
+        // Show toast notification for URL published events
+        if (event.type === 'url_published') {
+          toast({
+            title: "New Backlink Published!",
+            description: `Published "${event.keyword}" to ${event.platform}`,
+            duration: 5000,
+          });
+
+          // Update parent status
+          onStatusUpdate?.(`New backlink published: ${event.url}`, 'success');
+        }
+
+        // Refresh campaigns to show new data
+        loadCampaigns();
+      }
+    };
+
+    const unsubscribe = realTimeFeedService.subscribe(handleFeedEvent);
+
+    return () => {
+      clearInterval(interval);
+      unsubscribe();
+    };
+  }, [toast, onStatusUpdate]);
 
   const loadCampaigns = async (showRefreshing = false) => {
     try {
@@ -253,11 +283,11 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
       await orchestrator.deleteCampaign(campaignId);
       
       // Emit real-time feed event
-      realTimeFeedService.emitUserAction(
-        'delete_campaign',
-        `Campaign "${keyword}" deleted successfully`,
-        user?.id,
-        campaignId
+      realTimeFeedService.emitCampaignDeleted(
+        campaignId,
+        keyword,
+        keyword,
+        user?.id
       );
       
       await loadCampaigns();
@@ -336,7 +366,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
   // Get all published links sorted by date
   const getAllPublishedLinks = () => {
     const allLinks: Array<PublishedLink & { campaignKeyword: string; campaignName: string }> = [];
-    
+
     campaigns.forEach(campaign => {
       if (campaign.automation_published_links?.length > 0) {
         campaign.automation_published_links.forEach(link => {
@@ -348,7 +378,9 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
         });
       }
     });
-    
+
+    // Only show real published links from actual campaigns
+
     // Sort by published date (newest first)
     return allLinks.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
   };
@@ -370,7 +402,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
 
   return (
     <>
-    <Card>
+    <Card className="h-full flex flex-col">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -393,7 +425,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 flex flex-col">
         {/* Summary Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="text-center p-3 bg-blue-50 rounded-lg">
@@ -415,20 +447,11 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col">
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="activity" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
               Activity
-            </TabsTrigger>
-            <TabsTrigger value="live-monitor" className="flex items-center gap-2">
-              <Target className="w-4 h-4" />
-              Live Monitor
-              {currentCampaignProgress && (
-                <Badge variant="secondary" className="ml-1 h-4 px-1 text-xs">
-                  Active
-                </Badge>
-              )}
             </TabsTrigger>
             <TabsTrigger value="live-links" className="flex items-center gap-2">
               <ExternalLink className="w-4 h-4" />
@@ -437,8 +460,8 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
           </TabsList>
 
           {/* Campaign Activity Tab */}
-          <TabsContent value="activity" className="mt-6 space-y-4">
-            <div className="max-h-96 overflow-y-auto space-y-3">
+          <TabsContent value="activity" className="mt-6 space-y-4 flex-1 flex flex-col">
+            <div className="flex-1 overflow-y-auto space-y-3 min-h-0">
               {campaigns.length === 0 ? (
                   <div className="text-center py-8">
                     <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
@@ -651,39 +674,8 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
             </div>
           </TabsContent>
 
-          {/* Live Monitor Tab */}
-          <TabsContent value="live-monitor" className="mt-6">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Target className="w-5 h-5 text-blue-600" />
-                <h3 className="text-lg font-semibold">Live Campaign Monitor</h3>
-                {currentCampaignProgress && (
-                  <Badge variant="secondary">
-                    {currentCampaignProgress.isComplete ? 'Completed' :
-                     currentCampaignProgress.isError ? 'Error' : 'In Progress'}
-                  </Badge>
-                )}
-              </div>
-
-              {currentCampaignProgress ? (
-                <InlineProgressTracker
-                  progress={currentCampaignProgress}
-                  onRetry={onRetryProgress}
-                />
-              ) : (
-                <div className="text-center py-12 bg-gray-50 rounded-lg">
-                  <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Active Campaign</h3>
-                  <p className="text-gray-500 mb-4">
-                    Start a new campaign to see live progress monitoring here
-                  </p>
-                </div>
-              )}
-            </div>
-          </TabsContent>
-
           {/* Live Links Tab */}
-          <TabsContent value="live-links" className="mt-6">
+          <TabsContent value="live-links" className="mt-6 flex-1 flex flex-col">
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -695,78 +687,204 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                 </Badge>
               </div>
 
-              {getAllPublishedLinks().length === 0 ? (
-                <div className="text-center py-12 bg-gray-50 rounded-lg">
-                  <Link className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Published Links Yet</h3>
-                  <p className="text-gray-500 mb-4">
-                    Your published links will appear here once campaigns start completing
-                  </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setActiveTab('activity')}
-                  >
-                    <Target className="w-4 h-4 mr-2" />
-                    View Campaign Activity
-                  </Button>
-                </div>
-              ) : (
-                <ScrollArea className="h-80 border rounded-lg bg-white">
-                  <div className="p-4 space-y-3">
-                    {getAllPublishedLinks().map((link) => (
-                      <div 
-                        key={link.id} 
-                        className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border hover:bg-gray-100 transition-colors"
-                      >
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge variant="outline" className="text-xs">
-                              {link.platform}
-                            </Badge>
-                            <span className="font-medium text-gray-900 truncate">
-                              {link.campaignKeyword}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 text-sm text-gray-600 mb-1">
-                            <Calendar className="w-3 h-3" />
-                            <span>{new Date(link.published_at).toLocaleDateString()}</span>
-                          </div>
-                          <div className="text-sm">
-                            <a
-                              href={link.published_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-blue-600 hover:underline font-mono text-xs truncate block max-w-md"
-                              title={link.published_url}
-                            >
-                              {link.published_url}
-                            </a>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 ml-4">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => copyToClipboard(link.published_url)}
-                            title="Copy URL"
-                          >
-                            <Copy className="w-3 h-3" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => window.open(link.published_url, '_blank')}
-                            title="Open Link"
-                          >
-                            <Eye className="w-3 h-3" />
-                          </Button>
-                        </div>
+              <div className="space-y-4">
+                {/* Links Header with Stats */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-100 rounded-lg relative">
+                        <Globe className="w-5 h-5 text-blue-600" />
+                        {getAllPublishedLinks().length > 0 && (
+                          <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-pulse" title="Live updates active" />
+                        )}
                       </div>
-                    ))}
+                      <div>
+                        <h4 className="font-semibold text-gray-900">Link Performance</h4>
+                        <p className="text-sm text-gray-600">Active backlinks and their status • Real-time updates</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-4 text-sm">
+                      <div className="text-center">
+                        <div className="font-bold text-green-600">{getAllPublishedLinks().filter(l => l.status === 'active').length}</div>
+                        <div className="text-gray-500">Active</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-bold text-blue-600">{getAllPublishedLinks().length}</div>
+                        <div className="text-gray-500">Total</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="font-bold text-purple-600">{campaigns.filter(c => c.status === 'active').length}</div>
+                        <div className="text-gray-500">Running</div>
+                      </div>
+                    </div>
                   </div>
-                </ScrollArea>
-              )}
+                </div>
+
+                {/* Enhanced Links List with Full-Scale UI */}
+                <div className="border rounded-lg bg-white overflow-hidden">
+                  <div className="bg-gray-50 px-4 py-3 border-b">
+                    <div className="flex items-center justify-between">
+                      <h5 className="font-medium text-gray-900">Published Backlinks</h5>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">
+                          {getAllPublishedLinks().length} Links
+                        </Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const urls = getAllPublishedLinks().map(l => l.published_url).join('\n');
+                            copyToClipboard(urls);
+                          }}
+                          className="text-xs"
+                        >
+                          <Copy className="w-3 h-3 mr-1" />
+                          Copy All
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <ScrollArea className="max-h-96">
+                    <div className="divide-y divide-gray-100">
+                      {getAllPublishedLinks().map((link, index) => (
+                        <div
+                          key={link.id}
+                          className="p-4 hover:bg-gray-50 transition-colors group"
+                        >
+                          {/* Link Header */}
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge
+                                  variant={link.platform === 'telegraph' ? 'default' : 'secondary'}
+                                  className="text-xs font-medium"
+                                >
+                                  {link.platform === 'telegraph' ? 'Telegraph.ph' : link.platform}
+                                </Badge>
+                                <div className={`w-2 h-2 rounded-full ${
+                                  link.status === 'active' ? 'bg-green-500' :
+                                  link.status === 'pending' ? 'bg-yellow-500' : 'bg-gray-400'
+                                }`} title={`Status: ${link.status}`} />
+                              </div>
+
+                              <h6 className="font-medium text-gray-900 mb-1 line-clamp-1">
+                                {link.campaignKeyword}
+                              </h6>
+
+                              <div className="flex items-center gap-4 text-sm text-gray-500 mb-2">
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="w-3 h-3" />
+                                  <span>{new Date(link.published_at).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                  })}</span>
+                                </div>
+                                {link.anchor_text && (
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-xs">Anchor:</span>
+                                    <code className="bg-gray-100 px-1 rounded text-xs">{link.anchor_text}</code>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-1 ml-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => copyToClipboard(link.published_url)}
+                                title="Copy URL"
+                                className="h-8 w-8 p-0"
+                              >
+                                <Copy className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => window.open(link.published_url, '_blank')}
+                                title="Open Link"
+                                className="h-8 w-8 p-0"
+                              >
+                                <Eye className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => window.open(link.published_url + '/edit', '_blank')}
+                                title="Edit on Telegraph"
+                                className="h-8 w-8 p-0"
+                              >
+                                <Edit3 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Full URL Display */}
+                          <div className="bg-gray-50 rounded-lg p-3 border">
+                            <div className="flex items-center justify-between">
+                              <a
+                                href={link.published_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:text-blue-800 hover:underline font-mono text-sm flex-1 truncate transition-colors"
+                                title={link.published_url}
+                              >
+                                {link.published_url}
+                              </a>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => window.open(link.published_url, '_blank')}
+                                className="ml-3 h-8 text-xs"
+                              >
+                                <ExternalLink className="w-3 h-3 mr-1" />
+                                Open
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* Performance Metrics (if available) */}
+                          {link.validation_status && (
+                            <div className="mt-3 flex items-center gap-4 text-xs text-gray-500">
+                              <div className="flex items-center gap-1">
+                                <div className={`w-1.5 h-1.5 rounded-full ${
+                                  link.validation_status === 'validated' ? 'bg-green-500' :
+                                  link.validation_status === 'pending' ? 'bg-yellow-500' : 'bg-red-500'
+                                }`} />
+                                <span className="capitalize">{link.validation_status}</span>
+                              </div>
+                              {link.target_url && (
+                                <div>Target: <span className="font-mono">{link.target_url}</span></div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+
+                  {getAllPublishedLinks().length === 0 && (
+                    <div className="p-8 text-center">
+                      <Link className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                      <h6 className="font-medium text-gray-900 mb-2">No Published Links Yet</h6>
+                      <p className="text-sm text-gray-500 mb-4">
+                        Published backlinks will appear here after campaigns complete
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setActiveTab('activity')}
+                      >
+                        <Target className="w-4 h-4 mr-2" />
+                        View Campaign Activity
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </TabsContent>
         </Tabs>
