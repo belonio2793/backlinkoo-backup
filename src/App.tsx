@@ -251,14 +251,6 @@ const App = () => (
               }
             />
             <Route
-              path="/premium-upgrade-test"
-              element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyPremiumUpgradeTest />
-                </Suspense>
-              }
-            />
-            <Route
               path="/debug/auth-errors"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
