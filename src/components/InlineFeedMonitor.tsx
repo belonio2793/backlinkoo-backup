@@ -57,7 +57,7 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
   const [logs, setLogs] = useState<RealTimeFeedLog[]>([]);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(true);
-  const [showDetails, setShowDetails] = useState(false);
+  const [showDetails] = useState(true); // Always show details by default
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new logs arrive
@@ -249,13 +249,6 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
                 />
               </div>
 
-              <div className="flex items-center gap-1">
-                <span className="text-gray-600">Details</span>
-                <Switch
-                  checked={showDetails}
-                  onCheckedChange={setShowDetails}
-                />
-              </div>
             </div>
 
             <div className="flex items-center gap-1">
@@ -319,7 +312,7 @@ const InlineFeedMonitor: React.FC<InlineFeedMonitorProps> = ({
                       )}
 
                       {/* Details */}
-                      {showDetails && log.details && (
+                      {log.details && (
                         <div className="mt-2 p-2 bg-gray-50 rounded space-y-1">
                           {log.details.publishedUrl && (
                             <div className="flex items-center gap-1">
