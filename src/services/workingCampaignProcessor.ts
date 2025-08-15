@@ -197,10 +197,26 @@ export class WorkingCampaignProcessor {
    * Update campaign status in database
    */
   private async updateCampaignStatus(campaignId: string, status: string): Promise<void> {
+    const queryStartTime = Date.now();
+
     const { error } = await supabase
       .from('campaigns')
       .update({ status })
       .eq('id', campaignId);
+
+    const queryDuration = Date.now() - queryStartTime;
+
+    // Log the database query
+    campaignNetworkLogger.logDatabaseQuery(campaignId, {
+      operation: 'update',
+      table: 'campaigns',
+      query: `UPDATE campaigns SET status = '${status}' WHERE id = '${campaignId}'`,
+      params: { status, campaignId },
+      result: error ? null : { success: true },
+      error: error ? error.message : undefined,
+      duration: queryDuration,
+      step: 'database-update'
+    });
 
     if (error) {
       console.error('Failed to update campaign status:', error);
