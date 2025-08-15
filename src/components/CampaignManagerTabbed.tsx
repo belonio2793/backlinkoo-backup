@@ -5,14 +5,14 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Play, 
-  Pause, 
-  Trash2, 
-  ExternalLink, 
-  Target, 
-  CheckCircle, 
-  Clock, 
+import {
+  Play,
+  Pause,
+  Trash2,
+  ExternalLink,
+  Target,
+  CheckCircle,
+  Clock,
   AlertCircle,
   FileText,
   Settings,
@@ -23,7 +23,8 @@ import {
   Globe,
   Calendar,
   Eye,
-  Copy
+  Copy,
+  Edit3
 } from 'lucide-react';
 import { getOrchestrator, type Campaign } from '@/services/automationOrchestrator';
 import { realTimeFeedService } from '@/services/realTimeFeedService';
