@@ -92,12 +92,11 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
         if (event.type === 'url_published') {
           toast({
             title: "New Backlink Published!",
-            description: `Published "${event.keyword}" to ${event.platform}`,
+            description: `Published "${event.details?.keyword || event.keyword || 'content'}" to ${event.details?.platform || event.platform || 'platform'}`,
             duration: 5000,
           });
 
-          // Update parent status
-          onStatusUpdate?.(`New backlink published: ${event.url}`, 'success');
+          // Note: Don't create duplicate status messages - BacklinkNotification handles popup notifications
         }
 
         // Refresh campaigns to show new data
@@ -212,44 +211,62 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
       const campaign = campaigns.find(c => c.id === campaignId);
       const keyword = campaign?.keywords?.[0] || campaign?.name || 'Unknown';
       const campaignName = campaign?.name || `Campaign for ${keyword}`;
-      
-      const result = await orchestrator.resumeCampaign(campaignId);
-      
-      if (result.success) {
-        // Emit real-time feed event
-        realTimeFeedService.emitCampaignResumed(
-          campaignId,
-          campaignName,
-          keyword,
-          'Resumed by user',
-          user?.id
-        );
-        
-        onStatusUpdate?.(result.message, 'success');
-      } else {
-        // For completion messages, use info instead of error
-        const messageType = result.message.includes('completed') ? 'info' : 'error';
-        
-        // Emit appropriate event based on result
-        if (result.message.includes('completed')) {
-          realTimeFeedService.emitUserAction(
-            'resume_campaign_completed',
-            `Campaign already completed: ${result.message}`,
-            user?.id,
-            campaignId
+
+      // Check if campaign is completed
+      const isCompleted = campaign?.status === 'completed';
+
+      // Check published links to determine true completion status
+      const campaignWithLinks = await orchestrator.getCampaignWithLinks(campaignId);
+      const hasPublishedLinks = campaignWithLinks?.automation_published_links &&
+                               campaignWithLinks.automation_published_links.length > 0;
+
+      // If completed, show warning but proceed with forced resume
+      if (isCompleted || hasPublishedLinks) {
+        const publishedCount = campaignWithLinks?.automation_published_links?.length || 0;
+        const warningMessage = `⚠️ Campaign "${keyword}" was completed with ${publishedCount} published link(s). Checking for new opportunities...`;
+
+        onStatusUpdate?.(warningMessage, 'warning');
+
+        // Force resume by calling smartResumeCampaign directly
+        const result = await orchestrator.smartResumeCampaign(campaignId);
+
+        if (result.success) {
+          realTimeFeedService.emitCampaignResumed(
+            campaignId,
+            campaignName,
+            keyword,
+            'Force resumed completed campaign',
+            user?.id
           );
+
+          onStatusUpdate?.(`Campaign restarted: ${result.message}`, 'success');
         } else {
-          realTimeFeedService.emitUserAction(
-            'resume_campaign_failed',
-            result.message,
-            user?.id,
-            campaignId
-          );
+          // Check if it's because no more platforms are available
+          if (result.message.includes('No available platforms') || result.message.includes('platforms have been used')) {
+            onStatusUpdate?.(`✅ Campaign "${keyword}" has completed all available platforms. Consider enabling more platforms or creating a new campaign.`, 'info');
+          } else {
+            onStatusUpdate?.(result.message, 'warning');
+          }
         }
-        
-        onStatusUpdate?.(result.message, messageType);
+      } else {
+        // Normal resume for non-completed campaigns
+        const result = await orchestrator.resumeCampaign(campaignId);
+
+        if (result.success) {
+          realTimeFeedService.emitCampaignResumed(
+            campaignId,
+            campaignName,
+            keyword,
+            'Resumed by user',
+            user?.id
+          );
+
+          onStatusUpdate?.(result.message, 'success');
+        } else {
+          onStatusUpdate?.(result.message, 'error');
+        }
       }
-      
+
       await loadCampaigns();
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -258,7 +275,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
         campaignId,
         error: error
       });
-      
+
       // Emit error event to feed
       realTimeFeedService.emitUserAction(
         'resume_campaign_failed',
@@ -266,7 +283,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
         user?.id,
         campaignId
       );
-      
+
       onStatusUpdate?.(`Failed to resume campaign: ${errorMessage}`, 'error');
     } finally {
       setActionLoading(null);
@@ -558,37 +575,12 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                         <div className="flex flex-col gap-2 ml-4">
                           {(() => {
                             const summary = campaignStatusSummaries.get(campaign.id);
+                            const isActive = ['active', 'pending', 'generating', 'publishing'].includes(campaign.status);
+                            const isPaused = campaign.status === 'paused';
+                            const isCompleted = campaign.status === 'completed';
 
-                            // Resume button for paused campaigns
-                            if (campaign.status === 'paused') {
-                              const canResume = summary?.nextPlatform;
-                              const tooltipText = canResume
-                                ? `Resume to continue posting to ${summary.nextPlatform}`
-                                : 'All available platforms have been used';
-
-                              return (
-                                <Button
-                                  size="sm"
-                                  variant={canResume ? "default" : "outline"}
-                                  onClick={() => handleResumeCampaign(campaign.id)}
-                                  disabled={actionLoading === campaign.id || !canResume}
-                                  title={tooltipText}
-                                  className={canResume ? "bg-green-600 hover:bg-green-700 text-white" : ""}
-                                >
-                                  {actionLoading === campaign.id ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    <>
-                                      <Play className="w-4 h-4 mr-1" />
-                                      {canResume ? 'Resume' : 'Complete'}
-                                    </>
-                                  )}
-                                </Button>
-                              );
-                            }
-
-                            // Pause button for active campaigns
-                            if (['active', 'pending', 'generating', 'publishing'].includes(campaign.status)) {
+                            // Always show pause button for active campaigns
+                            if (isActive) {
                               return (
                                 <Button
                                   size="sm"
@@ -604,6 +596,37 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                                     <>
                                       <Pause className="w-4 h-4 mr-1" />
                                       Pause
+                                    </>
+                                  )}
+                                </Button>
+                              );
+                            }
+
+                            // Always show resume button for paused or completed campaigns
+                            if (isPaused || isCompleted) {
+                              const hasNextPlatform = summary?.nextPlatform;
+                              const buttonText = isCompleted ? 'Re-run' : hasNextPlatform ? 'Resume' : 'Re-run';
+                              const tooltipText = isCompleted
+                                ? 'Campaign completed - click to check for new opportunities or re-run'
+                                : hasNextPlatform
+                                  ? `Resume to continue posting to ${summary.nextPlatform}`
+                                  : 'No more platforms available - click to check for new opportunities';
+
+                              return (
+                                <Button
+                                  size="sm"
+                                  variant="default"
+                                  onClick={() => handleResumeCampaign(campaign.id)}
+                                  disabled={actionLoading === campaign.id}
+                                  title={tooltipText}
+                                  className={isCompleted ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-green-600 hover:bg-green-700 text-white"}
+                                >
+                                  {actionLoading === campaign.id ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                  ) : (
+                                    <>
+                                      <Play className="w-4 h-4 mr-1" />
+                                      {buttonText}
                                     </>
                                   )}
                                 </Button>

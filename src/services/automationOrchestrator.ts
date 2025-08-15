@@ -942,7 +942,7 @@ export class AutomationOrchestrator {
   }
 
   /**
-   * Enhanced resume logic that continues platform rotation
+   * Enhanced resume logic that continues platform rotation and handles completed campaigns
    */
   async smartResumeCampaign(campaignId: string): Promise<{ success: boolean; message: string }> {
     try {
@@ -955,15 +955,43 @@ export class AutomationOrchestrator {
         };
       }
 
-      // Check if campaign is already completed
-      if (campaign.status === 'completed') {
-        return {
-          success: false,
-          message: 'Campaign is already completed'
-        };
-      }
+      // Get campaign with published links to check real completion status
+      const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
+      const publishedLinks = campaignWithLinks?.automation_published_links || [];
+      const isCompleted = campaign.status === 'completed';
 
+      // Check for next available platform
       const nextPlatform = this.getNextPlatformForCampaign(campaignId);
+
+      if (isCompleted && !nextPlatform) {
+        // Check if there are any new platforms available that weren't used
+        const activePlatforms = this.getActivePlatforms();
+        const usedPlatformIds = publishedLinks.map(link => link.platform);
+        const unusedPlatforms = activePlatforms.filter(platform => !usedPlatformIds.includes(platform.id));
+
+        if (unusedPlatforms.length > 0) {
+          // Reset campaign to allow using new platforms
+          await this.updateCampaignStatus(campaignId, 'active');
+          await this.logActivity(campaignId, 'info', `Campaign restarted - found ${unusedPlatforms.length} unused platform(s): ${unusedPlatforms.map(p => p.name).join(', ')}`);
+
+          // Continue processing
+          this.processCampaignWithErrorHandling(campaignId).catch(error => {
+            const errorMessage = error instanceof Error ? error.message : String(error);
+            console.error('Campaign processing error:', errorMessage);
+          });
+
+          return {
+            success: true,
+            message: `Campaign restarted to use ${unusedPlatforms.length} new platform(s): ${unusedPlatforms.map(p => p.name).join(', ')}`
+          };
+        } else {
+          // All platforms have been used
+          return {
+            success: false,
+            message: `Campaign has completed all ${activePlatforms.length} available platform(s). Consider enabling more platforms or creating a new campaign.`
+          };
+        }
+      }
 
       if (!nextPlatform) {
         // Mark as completed if all platforms are done
@@ -974,8 +1002,10 @@ export class AutomationOrchestrator {
         };
       }
 
+      // Resume normal processing
       await this.updateCampaignStatus(campaignId, 'active');
-      await this.logActivity(campaignId, 'info', `Campaign resumed to continue posting to ${nextPlatform.name}`);
+      const actionType = isCompleted ? 'restarted' : 'resumed';
+      await this.logActivity(campaignId, 'info', `Campaign ${actionType} to continue posting to ${nextPlatform.name}`);
 
       // Emit resume event to live feed
       const { data: { user } } = await supabase.auth.getUser();
@@ -983,7 +1013,7 @@ export class AutomationOrchestrator {
         campaignId,
         campaign.name,
         campaign.keywords[0] || 'Unknown',
-        `Resumed to continue posting to ${nextPlatform.name}`,
+        `${actionType} to continue posting to ${nextPlatform.name}`,
         user?.id
       );
 
@@ -995,7 +1025,7 @@ export class AutomationOrchestrator {
 
       return {
         success: true,
-        message: `Campaign resumed. Will continue posting to ${nextPlatform.name}`
+        message: `Campaign ${actionType}. Will continue posting to ${nextPlatform.name}`
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);

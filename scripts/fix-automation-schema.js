@@ -83,7 +83,7 @@ async function checkAndFixSchema() {
         console.log('3. Checking other automation tables...');
         const automationTables = [
             'automation_logs',
-            'automation_content', 
+            'automation_content',
             'automation_published_links',
             'link_placements',
             'campaign_reports'
@@ -101,6 +101,11 @@ async function checkAndFixSchema() {
                 await createMissingTable(tableName);
             } else {
                 console.log(`✅ ${tableName} table exists`);
+
+                // Special check for automation_published_links to ensure published_at column exists
+                if (tableName === 'automation_published_links') {
+                    await checkAndFixPublishedLinksTable();
+                }
             }
         }
 
@@ -204,6 +209,45 @@ async function addMissingColumns(missingColumns) {
     }
 }
 
+async function checkAndFixPublishedLinksTable() {
+    console.log('4a. Checking automation_published_links table structure...');
+
+    try {
+        // Check if published_at column exists
+        const { data: columns, error: columnsError } = await supabase
+            .from('information_schema.columns')
+            .select('column_name')
+            .eq('table_name', 'automation_published_links')
+            .eq('table_schema', 'public')
+            .eq('column_name', 'published_at');
+
+        if (columnsError) {
+            console.error('❌ Error checking published_at column:', columnsError.message);
+            return false;
+        }
+
+        if (!columns || columns.length === 0) {
+            console.log('⚠️ published_at column missing from automation_published_links. Adding...');
+
+            const sql = `ALTER TABLE automation_published_links ADD COLUMN IF NOT EXISTS published_at TIMESTAMPTZ DEFAULT NOW();`;
+
+            const { error } = await supabase.rpc('exec_sql', { query: sql });
+            if (error) {
+                console.warn('⚠️ Error adding published_at column:', error.message);
+            } else {
+                console.log('✅ Added published_at column to automation_published_links');
+            }
+        } else {
+            console.log('✅ published_at column exists in automation_published_links');
+        }
+
+        return true;
+    } catch (error) {
+        console.error('❌ Error checking automation_published_links structure:', error.message);
+        return false;
+    }
+}
+
 async function createMissingTable(tableName) {
     const tableDefinitions = {
         'automation_logs': `
@@ -243,6 +287,7 @@ async function createMissingTable(tableName) {
                 platform TEXT DEFAULT 'telegraph',
                 status TEXT DEFAULT 'active',
                 created_at TIMESTAMPTZ DEFAULT NOW(),
+                published_at TIMESTAMPTZ DEFAULT NOW(),
                 last_checked TIMESTAMPTZ DEFAULT NOW()
             );
         `,

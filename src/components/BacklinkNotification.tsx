@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Globe, ExternalLink, X, CheckCircle } from 'lucide-react';
-import { realTimeFeedService, type FeedEvent } from '@/services/realTimeFeedService';
+import { realTimeFeedService, type RealTimeFeedEvent } from '@/services/realTimeFeedService';
 
 interface BacklinkNotificationProps {
   isVisible?: boolean;
@@ -30,15 +30,15 @@ export const BacklinkNotification: React.FC<BacklinkNotificationProps> = ({
   useEffect(() => {
     if (!isVisible) return;
 
-    const handleNewEvent = (event: FeedEvent) => {
+    const handleNewEvent = (event: RealTimeFeedEvent) => {
       // Listen for URL published events
       if (event.type === 'url_published') {
         const notification: NotificationData = {
           id: `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           campaignName: event.campaignName || 'Campaign',
-          keyword: event.keyword || 'Unknown',
-          publishedUrl: event.url || '',
-          platform: event.platform || 'Telegraph',
+          keyword: event.details?.keyword || 'Unknown',
+          publishedUrl: event.details?.publishedUrl || '',
+          platform: event.details?.platform || 'Telegraph',
           timestamp: new Date()
         };
 
