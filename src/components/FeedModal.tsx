@@ -59,6 +59,8 @@ const FeedModal: React.FC<FeedModalProps> = ({
   const [isMinimized, setIsMinimized] = useState(false);
   const [activities, setActivities] = useState<FeedActivity[]>([]);
   const [isAutoScrollEnabled, setIsAutoScrollEnabled] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [lastViewedActivityId, setLastViewedActivityId] = useState<string | null>(null);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   // Auto-scroll to bottom when new activities arrive
