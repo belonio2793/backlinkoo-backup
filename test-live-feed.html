@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Live Feed Auto-Pause/Resume Test</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif; 
+      max-width: 800px; 
+      margin: 0 auto; 
+      padding: 20px; 
+    }
+    .event { 
+      padding: 10px; 
+      margin: 5px 0; 
+      border-left: 4px solid #ccc; 
+      background: #f9f9f9; 
+    }
+    .event.error { border-left-color: #ef4444; }
+    .event.warning { border-left-color: #f59e0b; }
+    .event.success { border-left-color: #10b981; }
+    .event.info { border-left-color: #3b82f6; }
+    .timestamp { 
+      font-size: 0.8em; 
+      color: #666; 
+      float: right; 
+    }
+    .details { 
+      font-size: 0.9em; 
+      color: #555; 
+      margin-top: 5px; 
+    }
+    .action-type {
+      background: #e5e7eb;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.8em;
+      margin-left: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Live Feed Auto-Pause/Resume Test</h1>
+  <p>This page will show live events from campaigns, including auto-pause and auto-resume events.</p>
+  
+  <div>
+    <button onclick="testAutoPause()">Test Auto-Pause Event</button>
+    <button onclick="testAutoResume()">Test Auto-Resume Event</button>
+    <button onclick="testRetry()">Test Retry Event</button>
+    <button onclick="clearEvents()">Clear Events</button>
+  </div>
+  
+  <h2>Live Events:</h2>
+  <div id="events"></div>
+
+  <script>
+    const eventsContainer = document.getElementById('events');
+    let eventCount = 0;
+
+    // Mock real-time feed service for testing
+    const mockRealTimeFeedService = {
+      events: [],
+      listeners: new Set(),
+      
+      emit(event) {
+        event.id = 'test-' + (++eventCount);
+        event.timestamp = new Date();
+        this.events.push(event);
+        this.listeners.forEach(listener => listener(event));
+      },
+      
+      subscribe(listener) {
+        this.listeners.add(listener);
+        return () => this.listeners.delete(listener);
+      },
+      
+      emitCampaignAutoPaused(campaignId, campaignName, keyword, errorMessage, errorType, userId) {
+        this.emit({
+          type: 'campaign_paused',
+          level: 'error',
+          message: `Campaign "${keyword}" auto-paused - ${errorMessage}`,
+          campaignId,
+          campaignName,
+          userId,
+          details: {
+            keyword,
+            reason: `Auto-paused: ${errorMessage}`,
+            errorMessage,
+            errorType,
+            action: 'auto_pause'
+          }
+        });
+      },
+      
+      emitCampaignAutoResumed(campaignId, campaignName, keyword, reason, userId) {
+        this.emit({
+          type: 'campaign_resumed',
+          level: 'info',
+          message: `Campaign "${keyword}" auto-resumed${reason ? ` - ${reason}` : ''}`,
+          campaignId,
+          campaignName,
+          userId,
+          details: {
+            keyword,
+            reason: reason || 'Auto-resumed after error recovery',
+            action: 'auto_resume'
+          }
+        });
+      },
+      
+      emitCampaignRetry(campaignId, campaignName, keyword, attemptNumber, maxAttempts, stepName, userId) {
+        this.emit({
+          type: 'system_event',
+          level: 'info',
+          message: `Campaign "${keyword}" retrying ${stepName} (attempt ${attemptNumber}/${maxAttempts})`,
+          campaignId,
+          campaignName,
+          userId,
+          details: {
+            keyword,
+            reason: `Retry attempt ${attemptNumber} of ${maxAttempts}`,
+            action: 'retry',
+            stepName,
+            attemptNumber,
+            maxAttempts
+          }
+        });
+      }
+    };
+
+    // Subscribe to events
+    mockRealTimeFeedService.subscribe(event => {
+      const eventDiv = document.createElement('div');
+      eventDiv.className = `event ${event.level}`;
+      
+      const timestamp = event.timestamp.toLocaleTimeString();
+      const actionType = event.details?.action || event.type;
+      
+      eventDiv.innerHTML = `
+        <div class="timestamp">${timestamp}</div>
+        <strong>${event.message}</strong>
+        <span class="action-type">${actionType}</span>
+        ${event.details ? `<div class="details">Details: ${JSON.stringify(event.details, null, 2)}</div>` : ''}
+      `;
+      
+      eventsContainer.insertBefore(eventDiv, eventsContainer.firstChild);
+    });
+
+    // Test functions
+    function testAutoPause() {
+      mockRealTimeFeedService.emitCampaignAutoPaused(
+        'test-campaign-1',
+        'Test Campaign',
+        'digital marketing',
+        'Network connection failed after 5 retries',
+        'network',
+        'test-user'
+      );
+    }
+
+    function testAutoResume() {
+      mockRealTimeFeedService.emitCampaignAutoResumed(
+        'test-campaign-1',
+        'Test Campaign',
+        'digital marketing',
+        'Network connectivity restored',
+        'test-user'
+      );
+    }
+
+    function testRetry() {
+      mockRealTimeFeedService.emitCampaignRetry(
+        'test-campaign-1',
+        'Test Campaign',
+        'digital marketing',
+        2,
+        3,
+        'content-generation',
+        'test-user'
+      );
+    }
+
+    function clearEvents() {
+      eventsContainer.innerHTML = '';
+    }
+
+    // Add some initial test events
+    setTimeout(() => {
+      mockRealTimeFeedService.emit({
+        type: 'system_event',
+        level: 'info',
+        message: 'Live monitoring system initialized',
+        details: { action: 'system_init' }
+      });
+    }, 1000);
+  </script>
+</body>
+</html>
