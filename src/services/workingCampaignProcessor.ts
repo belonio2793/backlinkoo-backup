@@ -296,7 +296,8 @@ export class WorkingCampaignProcessor {
    * Save published link to database with fallback table names
    */
   private async savePublishedLink(campaignId: string, url: string): Promise<void> {
-    const tableNames = ['published_links', 'automation_published_links', 'published_blog_posts'];
+    // Use automation-specific table (separate from blog service)
+    const tableNames = ['automation_published_links'];
 
     for (const tableName of tableNames) {
       try {
