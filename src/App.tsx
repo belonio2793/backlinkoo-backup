@@ -404,7 +404,6 @@ const App = () => (
           </SymbolCleanerProvider>
         </UserFlowProvider>
       </ModalProvider>
-      <DraggableEnvironmentSwitcher />
     </TooltipProvider>
   </QueryClientProvider>
 );
