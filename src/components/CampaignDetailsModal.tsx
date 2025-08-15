@@ -95,7 +95,7 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
       }
 
       // Get campaign progress
-      const progress = orchestrator.campaignProgressMap.get(campaignId);
+      const progress = orchestrator.getCampaignProgress(campaignId);
 
       // Get campaign logs (mock for now, would integrate with actual logging system)
       const logs = await generateCampaignLogs(campaign, progress);
