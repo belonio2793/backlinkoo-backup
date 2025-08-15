@@ -353,6 +353,22 @@ export class AutomationOrchestrator {
         `Error encountered, retrying in ${Math.round(errorResult.retryDelay / 1000)} seconds (attempt ${errorResult.errorRecord?.retry_count}/${errorResult.errorRecord?.max_retries})`
       );
 
+      // Emit retry event to live feed
+      const campaign = await this.getCampaign(campaignId);
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (campaign && errorResult.errorRecord) {
+        realTimeFeedService.emitCampaignRetry(
+          campaignId,
+          campaign.name,
+          campaign.keywords[0] || 'Unknown',
+          errorResult.errorRecord.retry_count,
+          errorResult.errorRecord.max_retries,
+          stepName,
+          user?.id
+        );
+      }
+
       setTimeout(() => {
         this.processCampaignWithErrorHandling(campaignId).catch(retryError => {
           console.error('Retry failed:', formatErrorForLogging(retryError, `retry_${stepName}`));
