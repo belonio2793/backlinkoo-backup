@@ -197,6 +197,28 @@ export class RealTimeFeedService {
   }
 
   /**
+   * Emit campaign retry attempt event
+   */
+  emitCampaignRetry(campaignId: string, campaignName: string, keyword: string, attemptNumber: number, maxAttempts: number, stepName: string, userId?: string): void {
+    this.emit({
+      type: 'system_event',
+      level: 'info',
+      message: `Campaign "${keyword}" retrying ${stepName} (attempt ${attemptNumber}/${maxAttempts})`,
+      campaignId,
+      campaignName,
+      userId,
+      details: {
+        keyword,
+        reason: `Retry attempt ${attemptNumber} of ${maxAttempts}`,
+        action: 'retry',
+        stepName,
+        attemptNumber,
+        maxAttempts
+      }
+    });
+  }
+
+  /**
    * Emit campaign created event
    */
   emitCampaignCreated(campaignId: string, campaignName: string, keyword: string, targetUrl: string, userId?: string): void {
