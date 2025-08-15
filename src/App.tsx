@@ -379,6 +379,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/enhanced-feed-demo"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyEnhancedFeedDemo />
+                </Suspense>
+              }
+            />
 
             {/* 404 Catch-all route */}
             <Route
