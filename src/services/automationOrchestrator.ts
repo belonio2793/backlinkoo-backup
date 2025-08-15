@@ -467,6 +467,16 @@ export class AutomationOrchestrator {
             // Mark platform as completed
             this.markPlatformCompleted(campaignId, nextPlatform.id, publishedPage.url);
 
+            // Emit real-time feed event for URL published
+            realTimeFeedService.emitUrlPublished(
+              campaignId,
+              campaign.name,
+              campaign.keywords[0] || '',
+              publishedPage.url,
+              nextPlatform.name,
+              user?.id
+            );
+
             // Update progress with published URL
             this.updateProgress(campaignId, {
               publishedUrls: [...(this.campaignProgressMap.get(campaignId)?.publishedUrls || []), publishedPage.url]
