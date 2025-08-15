@@ -27,6 +27,9 @@ export class SimpleContentFormatter {
       .replace(/^[\s\n]*\*?\*?Call to Action:\*?\*?[\s\n]*/gmi, '')
       .replace(/^[\s\n]*\*?\*?Strategic Backlink Placement:\*?\*?[\s\n]*/gmi, '')
       .replace(/^[\s\n]*\*?\*?Strategic backlink placement:\*?\*?[\s\n]*/gmi, '')
+      // Remove meta text about content structure
+      .replace(/---[\s\S]*?This content piece follows[\s\S]*?on the topic\.[\s\n]*/gi, '')
+      .replace(/---[\s\S]*?outlined structure and requirements[\s\S]*?\.[\s\n]*/gi, '')
       // Clean up line breaks
       .replace(/\r\n/g, '\n')
       .replace(/\r/g, '\n');
@@ -47,7 +50,10 @@ export class SimpleContentFormatter {
       });
     }
 
-    // Step 3: Convert basic markdown to HTML
+    // Step 3: Fix numbered lists before markdown conversion
+    formattedContent = this.fixNumberedLists(formattedContent);
+
+    // Step 4: Convert basic markdown to HTML
     formattedContent = this.convertBasicMarkdown(formattedContent);
 
     // Step 4: Wrap content in paragraphs
