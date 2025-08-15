@@ -34,9 +34,6 @@ const Automation = () => {
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastFormValidState, setLastFormValidState] = useState(false);
 
-  // State for inline components
-  const [showInlineAuth, setShowInlineAuth] = useState(false);
-  const [needsAuth, setNeedsAuth] = useState(false);
   const [formData, setFormData] = useState({
     targetUrl: '',
     keyword: '',
