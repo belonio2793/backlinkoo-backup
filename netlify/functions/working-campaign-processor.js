@@ -1,6 +1,7 @@
 /**
  * Working Campaign Processor - Simplified content generation + Telegraph publishing
- * Generates 3 blog posts with different prompts and publishes to Telegraph
+ * Randomly selects one of 3 prompts to generate a single blog post and publishes to Telegraph
+ * This prevents content footprints and allows rotation across different platforms
  */
 
 const { createClient } = require('@supabase/supabase-js');
