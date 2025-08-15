@@ -173,11 +173,8 @@ const Automation = () => {
     }
   };
 
-  const handleAuthSuccess = () => {
-    // After successful authentication, create the campaign
-    if (hasValidSavedData(savedFormData)) {
-      createCampaign();
-    }
+  const handleAuthSuccess = async () => {
+    await smartFlow.handleSuccessfulAuth(createCampaign);
   };
 
   const handleAuthModalClose = () => {
