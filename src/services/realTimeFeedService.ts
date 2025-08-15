@@ -178,6 +178,25 @@ export class RealTimeFeedService {
   }
 
   /**
+   * Emit campaign auto-resumed event (after error recovery)
+   */
+  emitCampaignAutoResumed(campaignId: string, campaignName: string, keyword: string, reason?: string, userId?: string): void {
+    this.emit({
+      type: 'campaign_resumed',
+      level: 'info',
+      message: `Campaign "${keyword}" auto-resumed${reason ? ` - ${reason}` : ''}`,
+      campaignId,
+      campaignName,
+      userId,
+      details: {
+        keyword,
+        reason: reason || 'Auto-resumed after error recovery',
+        action: 'auto_resume'
+      }
+    });
+  }
+
+  /**
    * Emit campaign created event
    */
   emitCampaignCreated(campaignId: string, campaignName: string, keyword: string, targetUrl: string, userId?: string): void {
