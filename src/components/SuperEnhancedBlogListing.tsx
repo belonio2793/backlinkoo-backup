@@ -12,6 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { blogService } from '@/services/blogService';
 import { BlogDataDebugger } from '@/components/BlogDataDebugger';
+import { SEOScoreDisplay } from '@/components/SEOScoreDisplay';
+import { usePremiumSEOScore } from '@/hooks/usePremiumSEOScore';
 import { 
   Clock, 
   Eye, 
