@@ -56,8 +56,16 @@ const Automation = () => {
       setFormData(savedFormData);
       addStatusMessage('Form data restored - you can continue with your campaign', 'info');
       setHasShownRestoreMessage(true);
+
+      // Update smart flow with restored data
+      smartFlow.updateFlowState(savedFormData);
     }
-  }, [savedFormData, hasValidSavedData, hasShownRestoreMessage]);
+  }, [savedFormData, hasValidSavedData, hasShownRestoreMessage, smartFlow]);
+
+  // Initialize smart flow on mount
+  useEffect(() => {
+    smartFlow.updateFlowState(formData);
+  }, []);
 
   const handleInputChange = (field: string, value: string) => {
     const newFormData = { ...formData, [field]: value };
