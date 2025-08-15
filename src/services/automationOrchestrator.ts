@@ -1182,7 +1182,8 @@ export class AutomationOrchestrator {
         anchor_text: anchorText,
         target_url: targetUrl,
         platform: platform,
-        status: 'active'
+        status: 'active',
+        published_at: new Date().toISOString()
       });
 
     if (error) {
