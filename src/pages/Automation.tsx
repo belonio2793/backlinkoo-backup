@@ -622,6 +622,7 @@ const Automation = () => {
           onAuthSuccess={() => {
             addStatusMessage('Successfully signed in! Starting your campaign...', 'success');
           }}
+          onAuthSuccessCloseModal={handleModalAuthSuccess}
         />
 
         {/* Form Completion Celebration */}
