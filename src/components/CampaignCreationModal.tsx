@@ -539,43 +539,52 @@ const CampaignCreationModal: React.FC<CampaignCreationModalProps> = ({
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-3 pt-4 border-t">
-          <Button
-            variant="outline"
-            onClick={onClose}
-            disabled={isCreating}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={onCreateCampaign}
-            disabled={(smartFlow.getButtonState(formData).disabled || isCreating) && isAuthenticated}
-            className="transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
-            variant={smartFlow.getButtonState(formData).variant}
-          >
-            <div className="flex items-center justify-center transition-all duration-200">
-              {(isCreating || smartFlow.getButtonState(formData).icon === 'loader') ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  <span className="animate-pulse">{smartFlow.getButtonState(formData).text}</span>
-                </>
-              ) : (
-                <>
-                  <Target className={`w-4 h-4 mr-2 transition-transform duration-200 ${
-                    smartFlow.hasValidForm(formData) ? 'rotate-0' : 'rotate-45'
-                  }`} />
-                  <span>{smartFlow.getButtonState(formData).text}</span>
-                </>
-              )}
+        {!showAuth && (
+          <>
+            <div className="flex justify-end gap-3 pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={onClose}
+                disabled={isCreating || isAuthLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={handleCreateCampaignClick}
+                disabled={(smartFlow.getButtonState(formData).disabled || isCreating) && isAuthenticated}
+                className="transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
+                variant={smartFlow.getButtonState(formData).variant}
+              >
+                <div className="flex items-center justify-center transition-all duration-200">
+                  {(isCreating || smartFlow.getButtonState(formData).icon === 'loader') ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <span className="animate-pulse">{smartFlow.getButtonState(formData).text}</span>
+                    </>
+                  ) : (
+                    <>
+                      <Target className={`w-4 h-4 mr-2 transition-transform duration-200 ${
+                        smartFlow.hasValidForm(formData) ? 'rotate-0' : 'rotate-45'
+                      }`} />
+                      <span>
+                        {!isAuthenticated && smartFlow.hasValidForm(formData)
+                          ? 'Sign In & Create Campaign'
+                          : smartFlow.getButtonState(formData).text
+                        }
+                      </span>
+                    </>
+                  )}
+                </div>
+              </Button>
             </div>
-          </Button>
-        </div>
 
-        {/* Button description */}
-        {smartFlow.getButtonState(formData).description && (
-          <p className="text-xs text-gray-500 text-center mt-2">
-            {smartFlow.getButtonState(formData).description}
-          </p>
+            {/* Button description */}
+            {smartFlow.getButtonState(formData).description && (
+              <p className="text-xs text-gray-500 text-center mt-2">
+                {smartFlow.getButtonState(formData).description}
+              </p>
+            )}
+          </>
         )}
       </DialogContent>
     </Dialog>
