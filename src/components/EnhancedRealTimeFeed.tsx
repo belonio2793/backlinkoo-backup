@@ -35,6 +35,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { getOrchestrator, type Campaign } from '@/services/automationOrchestrator';
+import { realTimeFeedService, type RealTimeFeedEvent } from '@/services/realTimeFeedService';
 
 interface RealTimeFeedLog {
   id: string;
@@ -113,80 +114,84 @@ const EnhancedRealTimeFeed: React.FC<EnhancedRealTimeFeedProps> = ({
     });
   };
 
-  // Simulate real-time activities
+  // Subscribe to real-time feed service
+  useEffect(() => {
+    if (!isOpen) return;
+
+    console.log('📡 EnhancedRealTimeFeed: Subscribing to real-time events');
+
+    // Subscribe to real-time feed events
+    const unsubscribe = realTimeFeedService.subscribe((event: RealTimeFeedEvent) => {
+      // Convert RealTimeFeedEvent to RealTimeFeedLog format
+      addLog({
+        type: event.type,
+        level: event.level,
+        message: event.message,
+        campaignId: event.campaignId,
+        campaignName: event.campaignName,
+        details: event.details
+      });
+    });
+
+    // Initial logs for active campaigns (only if we don't have history)
+    if (logs.length === 0) {
+      activeCampaigns.forEach(campaign => {
+        addLog({
+          type: 'campaign_started',
+          level: 'info',
+          message: `Monitoring campaign "${campaign.keywords?.[0] || campaign.name}"`,
+          campaignId: campaign.id,
+          campaignName: campaign.name,
+          details: {
+            targetUrl: campaign.target_url,
+            keyword: campaign.keywords?.[0],
+            anchorText: campaign.anchor_texts?.[0]
+          }
+        });
+      });
+    }
+
+    return () => {
+      console.log('📡 EnhancedRealTimeFeed: Unsubscribing from real-time events');
+      unsubscribe();
+    };
+  }, [isOpen, activeCampaigns.length]); // Changed dependency to avoid re-subscribing too often
+
+  // Simulate ongoing activities (keep for demo purposes, but reduce frequency)
   useEffect(() => {
     if (!isOpen || activeCampaigns.length === 0) return;
 
     const intervals: NodeJS.Timeout[] = [];
 
-    // Initial logs for active campaigns
-    activeCampaigns.forEach(campaign => {
-      addLog({
-        type: 'campaign_started',
-        level: 'info',
-        message: `Monitoring campaign "${campaign.keywords?.[0] || campaign.name}"`,
-        campaignId: campaign.id,
-        campaignName: campaign.name,
-        details: {
-          targetUrl: campaign.target_url,
-          keyword: campaign.keywords?.[0],
-          anchorText: campaign.anchor_texts?.[0]
-        }
-      });
-    });
-
-    // Simulate ongoing activities
+    // Simulate ongoing activities for active campaigns (less frequent)
     activeCampaigns.forEach(campaign => {
       if (campaign.status === 'active') {
         const interval = setInterval(() => {
           const activities = [
             {
-              type: 'content_generated' as const,
-              level: 'success' as const,
-              message: `AI content generated successfully`,
-              details: { 
-                wordCount: Math.floor(Math.random() * 500 + 800),
-                keyword: campaign.keywords?.[0]
-              }
-            },
-            {
-              type: 'url_published' as const,
-              level: 'success' as const,
-              message: `Content published to high-authority platform`,
-              details: { 
-                publishedUrl: `https://telegra.ph/${campaign.keywords?.[0]?.toLowerCase().replace(/\s+/g, '-')}-${Date.now().toString().slice(-6)}`,
-                keyword: campaign.keywords?.[0]
-              }
+              type: 'system_event' as const,
+              level: 'info' as const,
+              message: `SEO optimization progress for "${campaign.keywords?.[0] || 'campaign'}"`,
             },
             {
               type: 'system_event' as const,
               level: 'info' as const,
-              message: `SEO optimization and indexing completed`,
-            },
-            {
-              type: 'system_event' as const,
-              level: 'info' as const,
-              message: `Backlink integration verified and active`,
-            },
-            {
-              type: 'user_action' as const,
-              level: 'info' as const,
-              message: `Campaign metrics updated`,
+              message: `Monitoring backlink health for "${campaign.keywords?.[0] || 'campaign'}"`,
             }
           ];
 
           const randomActivity = activities[Math.floor(Math.random() * activities.length)];
-          
+
           addLog({
             ...randomActivity,
             campaignId: campaign.id,
             campaignName: campaign.name,
             details: {
-              ...randomActivity.details,
+              keyword: campaign.keywords?.[0],
               targetUrl: campaign.target_url
             }
           });
-        }, Math.random() * 20000 + 15000); // Random interval between 15-35 seconds
+        }, Math.random() * 60000 + 60000); // Random interval between 60-120 seconds (less frequent)
 
         intervals.push(interval);
       }
@@ -197,14 +202,21 @@ const EnhancedRealTimeFeed: React.FC<EnhancedRealTimeFeedProps> = ({
     };
   }, [isOpen, activeCampaigns]);
 
-  // Initialize with welcome message
+  // Initialize with welcome message (only if no events from service)
   useEffect(() => {
     if (isOpen && logs.length === 0) {
-      addLog({
-        type: 'system_event',
-        level: 'info',
-        message: 'Real Time Feed initialized • Live monitoring of campaign activities and system events'
-      });
+      // Wait a bit to see if we get events from the service
+      const timer = setTimeout(() => {
+        if (logs.length === 0) {
+          addLog({
+            type: 'system_event',
+            level: 'info',
+            message: 'Real Time Feed initialized • Live monitoring of campaign activities and system events'
+          });
+        }
+      }, 500);
+
+      return () => clearTimeout(timer);
     }
   }, [isOpen]);
 
