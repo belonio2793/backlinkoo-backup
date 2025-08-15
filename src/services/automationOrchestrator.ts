@@ -497,7 +497,12 @@ export class AutomationOrchestrator {
       .eq('id', campaignId);
 
     if (error) {
-      console.error('Error updating campaign status:', error);
+      console.error('Error updating campaign status:', {
+        message: error.message || 'Unknown error',
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
     }
   }
 
