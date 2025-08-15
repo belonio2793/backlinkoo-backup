@@ -58,7 +58,7 @@ export class WorkingCampaignProcessor {
       realTimeFeedService.emitSystemEvent(`Publishing content to Telegraph.ph`, 'info');
       
       const publishedUrl = await this.publishToTelegraph(keyword, content, anchorText, targetUrl);
-      console.log('✅ Published successfully:', publishedUrl);
+      console.log('�� Published successfully:', publishedUrl);
 
       // Step 4: Save published link to database
       await this.savePublishedLink(campaign.id, publishedUrl);
@@ -225,31 +225,6 @@ export class WorkingCampaignProcessor {
 
     console.log('✅ Successfully published to Telegraph:', result.url);
     return result.url;
-
-    const pageResponse = await fetch('https://api.telegra.ph/createPage', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        access_token: accessToken,
-        title,
-        author_name: 'Automated Content',
-        content: telegraphContent
-      })
-    });
-
-    if (!pageResponse.ok) {
-      throw new Error(`Failed to create Telegraph page: ${pageResponse.status}`);
-    }
-
-    const pageData = await pageResponse.json();
-    
-    if (!pageData.ok) {
-      throw new Error(`Telegraph page creation failed: ${pageData.error}`);
-    }
-
-    return `https://telegra.ph/${pageData.result.path}`;
   }
 
   /**
