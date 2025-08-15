@@ -772,6 +772,18 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
                               </div>
                               <div className="text-sm text-gray-600">Links Published</div>
                             </div>
+                            <div className="text-center p-3 bg-cyan-50 rounded-lg">
+                              <div className="text-2xl font-bold text-cyan-600">
+                                {campaignInfo.metrics.requestCount}
+                              </div>
+                              <div className="text-sm text-gray-600">Total Requests</div>
+                            </div>
+                            <div className="text-center p-3 bg-orange-50 rounded-lg">
+                              <div className="text-2xl font-bold text-orange-600">
+                                {campaignInfo.networkRequests.filter(r => r.type === 'function').length}
+                              </div>
+                              <div className="text-sm text-gray-600">Function Calls</div>
+                            </div>
                           </div>
                         </CardContent>
                       </Card>
