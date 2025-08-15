@@ -26,8 +26,8 @@ const Automation = () => {
   const { isAuthenticated, isLoading: authLoading, user } = useAuthState();
   const { savedFormData, saveFormData, clearFormData, hasValidSavedData } = useCampaignFormPersistence();
   const smartFlow = useSmartCampaignFlow();
-  const realTimeFeed = useRealTimeFeedModal();
-  const feedModal = useFeedModal();
+  const [showEnhancedFeed, setShowEnhancedFeed] = useState(false);
+  const [activeCampaigns, setActiveCampaigns] = useState<any[]>([]);
 
   const [isCreating, setIsCreating] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
