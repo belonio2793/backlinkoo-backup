@@ -1032,52 +1032,44 @@ export function BeautifulBlogPost() {
                   dangerouslySetInnerHTML={{
                     __html: (() => {
                       try {
-                        let content = blogPost.content || '';
+                        const content = blogPost.content || '';
 
-                        if (!content || content.length === 0) {
-                          return '<div style="padding: 20px; text-align: center; color: #ef4444;"><h3>Content Error</h3><p>This blog post appears to have no content. Try running <code>fixEmptyBlogPost()</code> in the browser console to fix this issue.</p></div>';
+                        if (!content || content.trim().length === 0) {
+                          return '<div style="padding: 20px; text-align: center; color: #ef4444;"><h3>Content Error</h3><p>This blog post appears to have no content.</p></div>';
                         }
 
-                        // NEW: Auto-detect and repair malformed content
-                        const repairResult = RobustContentProcessor.autoDetectAndRepair(content, {
-                          primaryKeyword: blogPost.title,
+                        // Process content with robust processor
+                        const result = RobustBlogProcessor.processIfNeeded(content, blogPost.title, {
+                          removeTitle: true,
                           targetUrl: blogPost.target_url,
-                          anchorText: blogPost.anchor_text
+                          anchorText: blogPost.anchor_text,
+                          keyword: blogPost.keyword
                         });
 
-                        if (repairResult.wasRepaired) {
-                          console.log('🔧 Content was automatically repaired:', repairResult.issues);
+                        // Log processing results for debugging
+                        if (result.wasProcessed) {
+                          console.log('✅ Blog content processed successfully:', {
+                            issues: result.issues,
+                            warnings: result.warnings
+                          });
                         }
 
-                        let processedContent = repairResult.content;
-
-                        // Apply enhanced cleaning only if content wasn't severely malformed
-                        if (!repairResult.wasRepaired || repairResult.issues.length < 3) {
-                          const cleanedContent = EnhancedBlogCleaner.cleanContent(processedContent, blogPost.title);
-
-                          if (cleanedContent && cleanedContent.length > 0) {
-                            processedContent = cleanedContent;
-                          }
+                        if (result.warnings.length > 0) {
+                          console.warn('⚠️ Blog content warnings:', result.warnings);
                         }
 
-                        // Use simplified formatter only if not already well-formatted HTML
-                        if (!processedContent.includes('<h1>') && !processedContent.includes('<h2>')) {
-                          const formattedContent = SimpleContentFormatter.formatBlogContent(processedContent, blogPost.title);
-
-                          // Validate the formatted content
-                          const validation = SimpleContentFormatter.validateContent(formattedContent);
-                          if (validation.isValid) {
-                            processedContent = formattedContent;
-                          }
-                        }
-
-                        return processedContent;
+                        return result.content;
                       } catch (formatError) {
-                        console.error('💥 Content formatting failed:', formatError);
-                        // Return raw content as emergency fallback
+                        console.error('💥 Content processing failed:', formatError);
+                        // Return cleaned raw content as emergency fallback
                         const rawContent = blogPost.content || '';
                         if (rawContent) {
-                          return `<div style="padding: 20px;"><h3>Content Processing Error</h3><pre style="white-space: pre-wrap; font-family: inherit;">${rawContent}</pre></div>`;
+                          // Basic HTML escape for safety
+                          const escapedContent = rawContent
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/\n/g, '<br>');
+                          return `<div style="padding: 20px;"><h3>Content Processing Error</h3><div style="white-space: pre-wrap; font-family: inherit; color: #666;">${escapedContent}</div></div>`;
                         }
                         return '<div style="padding: 20px; color: #ef4444;">Content could not be loaded or processed.</div>';
                       }
