@@ -889,7 +889,7 @@ export function BeautifulBlogPost() {
           {/* Article Header */}
           <header className="text-center mb-12">
             {blogPost.meta_description && (
-              <p className="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed">
+              <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
                 {blogPost.meta_description}
               </p>
             )}
