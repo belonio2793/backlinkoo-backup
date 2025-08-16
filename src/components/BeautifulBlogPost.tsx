@@ -962,31 +962,35 @@ export function BeautifulBlogPost() {
           <KeywordsSection keywords={blogPost.keywords} />
 
           {/* Engagement Section */}
-          <Card className="mt-12 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-            <CardContent className="p-8 text-center">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Enjoyed this article?
-              </h3>
-              <p className="text-gray-600 mb-6 text-lg">
-                Share it with your network and help others discover great content!
-              </p>
-              <div className="flex justify-center gap-4">
-                <Button 
-                  onClick={handleShare} 
-                  variant="outline" 
-                  className="rounded-full px-6"
-                >
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Share Article
-                </Button>
-                <Button 
-                  onClick={handleCopyLink} 
-                  variant="outline" 
-                  className="rounded-full px-6"
-                >
-                  <Copy className="mr-2 h-4 w-4" />
-                  Copy Link
-                </Button>
+          <Card className="mt-16 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-blue-200 shadow-xl">
+            <CardContent className="p-12 text-center">
+              <div className="max-w-2xl mx-auto">
+                <h3 className="text-3xl font-bold text-gray-900 mb-6 tracking-tight">
+                  Enjoyed this article?
+                </h3>
+                <p className="text-gray-600 mb-10 text-xl leading-relaxed font-light">
+                  Share it with your network and help others discover great content!
+                </p>
+                <div className="flex justify-center gap-6">
+                  <Button
+                    onClick={handleShare}
+                    variant="outline"
+                    size="lg"
+                    className="rounded-full px-8 py-3 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400 transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    <Share2 className="mr-3 h-5 w-5" />
+                    Share Article
+                  </Button>
+                  <Button
+                    onClick={handleCopyLink}
+                    variant="outline"
+                    size="lg"
+                    className="rounded-full px-8 py-3 border-indigo-300 text-indigo-700 hover:bg-indigo-50 hover:border-indigo-400 transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    <Copy className="mr-3 h-5 w-5" />
+                    Copy Link
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
