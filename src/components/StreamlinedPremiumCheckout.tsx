@@ -136,11 +136,28 @@ export function StreamlinedPremiumCheckout({
       if (result.success && result.url) {
         // Redirect to payment provider
         toast({
-          title: "Redirecting to Payment",
-          description: "Opening secure Stripe checkout...",
+          title: "Opening Secure Checkout",
+          description: "Complete your payment in the new window that just opened.",
         });
 
-        window.location.href = result.url;
+        // Open in new window
+        const checkoutWindow = window.open(
+          result.url,
+          'stripe-checkout',
+          'width=800,height=600,scrollbars=yes,resizable=yes,location=yes,status=yes'
+        );
+
+        if (!checkoutWindow) {
+          // Popup blocked - fallback to current window
+          toast({
+            title: "Popup Blocked",
+            description: "Redirecting in current window...",
+          });
+          window.location.href = result.url;
+        } else {
+          // Close modal since checkout is opening
+          onClose();
+        }
         return;
       }
 
