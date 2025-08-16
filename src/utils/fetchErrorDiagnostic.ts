@@ -224,10 +224,27 @@ export class FetchErrorDiagnostic {
 // Make available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).FetchErrorDiagnostic = FetchErrorDiagnostic;
-  
+
+  // Add helpful console commands
+  (window as any).debugFetchErrors = () => {
+    console.log('🔍 Fetch Error Debug Commands:');
+    console.log('');
+    console.log('📊 FetchErrorDiagnostic.getErrorReport() - View error analysis');
+    console.log('🏥 FetchErrorDiagnostic.runDiagnostics() - Test connections');
+    console.log('🗑️ FetchErrorDiagnostic.clearLog() - Clear error log');
+    console.log('');
+    console.log('Current status:');
+    const analysis = FetchErrorDiagnostic.analyzeErrors();
+    console.log(`- Total errors logged: ${analysis.totalErrors}`);
+    console.log(`- Online status: ${navigator.onLine ? '✅' : '❌'}`);
+    console.log('');
+    console.log('Run any command above to debug further!');
+  };
+
   // Auto-run diagnostics if there are recent errors
   setTimeout(() => {
     if (FetchErrorDiagnostic.analyzeErrors().totalErrors > 0) {
+      console.log('⚠️ Fetch errors detected! Run debugFetchErrors() for help.');
       console.log(FetchErrorDiagnostic.getErrorReport());
     }
   }, 5000);
