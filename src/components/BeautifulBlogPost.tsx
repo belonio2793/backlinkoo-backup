@@ -116,7 +116,7 @@ export function BeautifulBlogPost() {
           console.log('No blog post loaded to test');
         }
       };
-      (window as any).RobustBlogProcessor = RobustBlogProcessor;
+      (window as any).BlogAutoAdjustmentService = BlogAutoAdjustmentService;
     }
   }, [blogPost]);
 
