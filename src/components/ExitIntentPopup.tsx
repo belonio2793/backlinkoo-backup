@@ -154,21 +154,21 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
             </div>
           </div>
 
-          {/* Action buttons with enhanced styling */}
-          <div className="space-y-3 pt-2">
+          {/* Action buttons with enhanced styling - horizontal layout */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Button
               onClick={handleCreateAccount}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
+              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
             >
-              <Zap className="h-5 w-5 mr-3" />
+              <Zap className="h-5 w-5 mr-2" />
               Save This Content Forever
-              <Sparkles className="h-4 w-4 ml-3" />
+              <Sparkles className="h-4 w-4 ml-2" />
             </Button>
 
             <Button
               variant="ghost"
               onClick={handleClose}
-              className="w-full text-gray-500 hover:text-gray-700 hover:bg-gray-50 font-medium py-3 rounded-xl transition-all duration-200"
+              className="sm:w-auto text-gray-500 hover:text-gray-700 hover:bg-gray-50 font-medium py-3 px-6 rounded-xl transition-all duration-200"
             >
               I'll risk losing my content
             </Button>
