@@ -66,7 +66,91 @@ const ContentProcessor = ({
   anchorText, 
   targetUrl 
 }: ContentProcessorProps) => {
-  
+
+  // Function to improve sentence structure and break up run-on sentences
+  const improveSentenceStructure = useCallback((text: string): string[] => {
+    if (!text || text.trim().length === 0) return [];
+
+    // Clean up the text first
+    let cleanText = text
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .trim();
+
+    // Split on major sentence delimiters while preserving them
+    const sentences = cleanText.split(/([.!?]+\s+)/).filter(Boolean);
+
+    // Reconstruct sentences and group them intelligently
+    const reconstructedSentences: string[] = [];
+    let currentSentence = '';
+
+    for (let i = 0; i < sentences.length; i += 2) {
+      const sentenceText = sentences[i] || '';
+      const delimiter = sentences[i + 1] || '';
+
+      const fullSentence = sentenceText + delimiter;
+
+      // If current sentence is getting too long (>200 chars), start a new paragraph
+      if (currentSentence.length > 0 && (currentSentence.length + fullSentence.length) > 200) {
+        reconstructedSentences.push(currentSentence.trim());
+        currentSentence = fullSentence;
+      } else {
+        currentSentence += fullSentence;
+      }
+
+      // If we've accumulated 2-3 sentences or reached a natural break, end the paragraph
+      const sentenceCount = (currentSentence.match(/[.!?]/g) || []).length;
+      if (sentenceCount >= 3 ||
+          (sentenceCount >= 2 && currentSentence.length > 150) ||
+          fullSentence.includes(':') || // Break after colons (often introduce new concepts)
+          /\b(However|Moreover|Furthermore|In addition|Therefore|Consequently|For example|For instance)\b/i.test(fullSentence)) {
+
+        if (currentSentence.trim().length > 0) {
+          reconstructedSentences.push(currentSentence.trim());
+          currentSentence = '';
+        }
+      }
+    }
+
+    // Add any remaining content
+    if (currentSentence.trim().length > 0) {
+      reconstructedSentences.push(currentSentence.trim());
+    }
+
+    // Post-process to handle special cases
+    return reconstructedSentences
+      .map(paragraph => {
+        // Break up extremely long paragraphs (>400 chars) at logical points
+        if (paragraph.length > 400) {
+          // Try to split at transitional phrases or after examples
+          const breakPoints = [
+            /(\. )(However|Moreover|Furthermore|In addition|Additionally|Meanwhile|Therefore|Consequently)/g,
+            /(\. )(For example|For instance|In fact|Indeed|Specifically)/g,
+            /(\. )(This|These|Such|That approach|This method|This technique)/g
+          ];
+
+          for (const breakPoint of breakPoints) {
+            if (breakPoint.test(paragraph)) {
+              return paragraph.split(breakPoint).filter(Boolean);
+            }
+          }
+
+          // If no logical break point, split roughly in the middle at a sentence boundary
+          const midPoint = Math.floor(paragraph.length / 2);
+          const nearestSentenceEnd = paragraph.indexOf('. ', midPoint);
+          if (nearestSentenceEnd > midPoint && nearestSentenceEnd < paragraph.length - 50) {
+            return [
+              paragraph.substring(0, nearestSentenceEnd + 1).trim(),
+              paragraph.substring(nearestSentenceEnd + 2).trim()
+            ];
+          }
+        }
+
+        return paragraph;
+      })
+      .flat()
+      .filter(p => p.trim().length > 0);
+  }, []);
+
   const processContent = useCallback((rawContent: string) => {
     if (!rawContent) return [];
 
