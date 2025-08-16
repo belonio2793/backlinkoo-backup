@@ -4,6 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
+import { applyBeautifulContentStructure } from '@/utils/forceBeautifulContentStructure';
 
 interface CampaignBlogRequest {
   campaignId: string;
