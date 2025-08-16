@@ -64,9 +64,24 @@ import { processBlogContent } from '@/utils/markdownProcessor';
 type BlogPost = Tables<'blog_posts'>;
 
 // Enhanced utility function to parse AI-generated text into structured JSX
-function formatContent(raw: string) {
+function formatContent(raw: string, title?: string) {
+  // Remove the title from the beginning of content if it appears there
+  let cleanedContent = raw;
+
+  if (title) {
+    const titleClean = title.replace(/^\*\*([^*]+)\*\*$/, '$1').trim();
+    const titleEscaped = titleClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    // Remove title from start of content (various formats)
+    cleanedContent = cleanedContent
+      .replace(new RegExp(`^\\s*\\*\\*?${titleEscaped}\\*?\\*?\\s*`, 'i'), '')
+      .replace(new RegExp(`^\\s*${titleEscaped}\\s*`, 'i'), '')
+      .replace(new RegExp(`^\\s*#{1,6}\\s*${titleEscaped}\\s*`, 'i'), '')
+      .replace(new RegExp(`^\\s*#{1,6}\\s*\\*\\*?${titleEscaped}\\*?\\*?\\s*`, 'i'), '');
+  }
+
   // Clean the content first - remove link placement syntax and fix formatting
-  let cleanedContent = raw
+  cleanedContent = cleanedContent
     .replace(/Natural Link Integration:\s*/gi, '')
     .replace(/Link Placement:\s*/gi, '')
     .replace(/Anchor Text:\s*/gi, '')
@@ -83,10 +98,12 @@ function formatContent(raw: string) {
     .replace(/\*+$/gm, '') // Remove trailing asterisks
     .replace(/^\*+(?!\*)/gm, '') // Remove leading single asterisks that aren't part of ** bold syntax
     .replace(/\*+\s*\*+/g, '**') // Fix multiple asterisks to proper bold syntax
-    // Fix broken URLs in markdown links (space in URL)
+    // Fix broken URLs in markdown links (comprehensive space handling)
     .replace(/\]\(([^)]*)\s+([^)]*)\)/g, ']($1$2)') // Remove spaces in URLs
-    .replace(/https:\s*\/\//g, 'https://') // Fix broken https: // patterns
-    .replace(/\]\(https:\s*\/\//g, '](https://') // Fix https: // in markdown links specifically
+    .replace(/\]\(\s*([^)]*)\s*\)/g, ']($1)') // Remove spaces around URLs in brackets
+    .replace(/https?\s*:\s*\/\//gi, 'https://') // Fix broken https: // patterns (improved regex)
+    .replace(/\]\(https?\s*:\s*\/\//gi, '](https://') // Fix https: // in markdown links specifically
+    .replace(/www\s*\./gi, 'www.') // Fix broken www. patterns
     // Clean up common artifacts
     .replace(/\*{3,}/g, '**') // Replace multiple asterisks with proper bold syntax
     .replace(/\s+\*\s+$/gm, '') // Remove trailing single asterisks with spaces
@@ -103,80 +120,127 @@ function formatContent(raw: string) {
         .replace(/^\*+(?!\*)/, '') // Remove leading single asterisks
         .trim();
 
-      // Convert **text** to bold (handle edge cases)
-      processedText = processedText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      // Convert **text** to bold and handle special patterns
+      processedText = processedText
+        // Handle "Data Point:**" and "Expert Insight:**" patterns - bold without asterisks
+        .replace(/\b(Data Point|Expert Insight):\*\*/g, '<strong>$1:</strong>')
+        // Convert standard **text** to bold
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        // Handle remaining single asterisks that might be formatting artifacts
+        .replace(/\s+\*\s*$/, '') // Remove trailing single asterisks
+        .replace(/\*+$/, ''); // Remove any remaining trailing asterisks
 
-      // Handle remaining single asterisks that might be formatting artifacts
-      processedText = processedText.replace(/\s+\*\s*$/, ''); // Remove trailing single asterisks
-
-      // Convert markdown links [text](url) to HTML links
-      processedText = processedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
+      // Convert markdown links [text](url) to HTML links with proper anchor text
+      processedText = processedText.replace(/\[([^\]]+)\]\(([^)\s]*\s*[^)]*)\)/g, (match, linkText, url) => {
         // Clean up the URL and text
-        const cleanText = linkText.trim();
+        let cleanText = linkText.trim();
         let cleanUrl = url.trim();
-        // Fix common URL issues
+
+        // Fix the specific Backlinkoo link issue
+        if (cleanUrl.includes('backlinkoo.com') && cleanText.toLowerCase().includes('backlinkoo')) {
+          cleanText = 'Weebly SEO';
+        }
+
+        // Fix common URL issues - handle broken URLs like "https: //" with any amount of space
+        cleanUrl = cleanUrl.replace(/https?\s*:\s*\/\//g, 'https://');
+        cleanUrl = cleanUrl.replace(/www\s*\./g, 'www.');
+
         if (cleanUrl && !cleanUrl.match(/^https?:\/\//)) {
           cleanUrl = cleanUrl.startsWith('//') ? 'https:' + cleanUrl : 'https://' + cleanUrl;
         }
+
+        // Remove all spaces from URLs
+        cleanUrl = cleanUrl.replace(/\s+/g, '');
+
         return `<a href="${cleanUrl}" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
       });
 
-      // Convert plain URLs to links if they're not already in markdown
-      if (!processedText.includes('<a ') && /https?:\/\/\S+/.test(processedText)) {
-        processedText = processedText.replace(/(https?:\/\/[^\s<>"']+)/g, '<a href="$1" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">$1</a>');
-      }
+      // Convert plain URLs to links automatically (improved pattern)
+      processedText = processedText.replace(/((?:https?\s*:\s*\/\/|www\s*\.)\S+)/g, (match) => {
+        // Skip if already inside a link
+        if (processedText.indexOf('<a ') !== -1 && processedText.indexOf('</a>') > processedText.indexOf('<a ')) {
+          return match;
+        }
+
+        let cleanUrl = match.replace(/https?\s*:\s*\/\//g, 'https://').replace(/www\s*\./g, 'www.').replace(/\s+/g, '');
+        if (!cleanUrl.match(/^https?:\/\//)) {
+          cleanUrl = 'https://' + cleanUrl;
+        }
+
+        return `<a href="${cleanUrl}" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>`;
+      });
 
       return processedText;
     };
 
-    // Enhanced section heading detection
+    // Enhanced section heading detection - CONSISTENT FONT SIZE
     if (/^(Section|Step|Chapter|Part|Stage|Phase)\s*\d+/i.test(line) ||
         /^\d+\.\s+[A-Z]/.test(line) ||
         /^(Section|Step|Chapter|Part)\s*\d+\s*[-–—]\s*/.test(line)) {
       const processedContent = processLineContent(line);
       return (
-        <h2 key={i} className="beautiful-prose text-3xl font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
+        <h2 key={i} className="beautiful-prose text-2xl font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
       );
     }
 
-    // Enhanced Key Insights / Highlights detection
+    // Enhanced Key Insights / Highlights detection - CONSISTENT FONT SIZE
     if (/^(Key Insights|Pro Tip|Conclusion|Summary|Overview|Benefits|Important|Essential|Critical|Best Practices|Implementation)/i.test(line)) {
       const processedContent = processLineContent(line);
       return (
-        <h3 key={i} className="beautiful-prose text-2xl font-semibold text-black mb-4 mt-8" dangerouslySetInnerHTML={{ __html: processedContent }} />
+        <h3 key={i} className="beautiful-prose text-2xl font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
       );
     }
 
-    // Enhanced bullet point detection
-    if (/^[-*•·➤►▶→✓✔]\s+/.test(line)) {
+    // Detect specific section headers that should be italicized, not list items (check this FIRST)
+    // Only italicize if they're standalone headers (short lines) or don't have descriptive text after the colon
+    const italicizedSections = /^(Title Tags and Meta Descriptions|Heading Structure|Keyword Research|Content Optimization|Weebly SEO Settings|Insights from Case Studies):/i;
+    if (italicizedSections.test(line)) {
+      // Check if it's a standalone header (short) or has minimal descriptive text
+      const afterColon = line.split(':')[1]?.trim() || '';
+      const isStandaloneHeader = afterColon.length < 10; // Short or no description means it's a header
+
+      if (isStandaloneHeader) {
+        const processedContent = processLineContent(line);
+        return (
+          <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
+            <em dangerouslySetInnerHTML={{ __html: processedContent }} />
+          </p>
+        );
+      }
+      // If it has longer descriptive text, let it fall through to be processed as regular content
+    }
+
+    // Enhanced bullet point detection (but exclude italicized sections)
+    if (/^[-*•·➤►▶→✓✔]\s+/.test(line) && !italicizedSections.test(line)) {
       const items = line
         .split(/[-*•·➤►▶→✓✔]\s+/)
         .filter(Boolean)
         .map((item, idx) => {
           const processedItem = processLineContent(item.trim());
           return (
-            <li key={idx} className="beautiful-prose relative pl-8 text-lg leading-relaxed text-gray-700 mb-2" dangerouslySetInnerHTML={{ __html: processedItem }} />
+            <li key={idx} className="beautiful-prose relative pl-6 text-lg leading-relaxed text-gray-700 mb-3" dangerouslySetInnerHTML={{ __html: processedItem }} />
           );
         });
-      return <ul key={i} className="beautiful-prose space-y-4 my-8">{items}</ul>;
+      return <ul key={i} className="beautiful-prose list-disc space-y-2 my-6 ml-6">{items}</ul>;
     }
 
-    // Enhanced numbered list detection
+    // Convert numbered items to regular bullet points for better readability
     if (/^\d+\.\s/.test(line)) {
       const content = line.replace(/^\d+\.\s/, '').trim();
       const processedContent = processLineContent(content);
       return (
-        <div key={i} className="beautiful-prose space-y-4 my-8">
-          <ol className="list-decimal ml-6">
-            <li className="beautiful-prose relative pl-2 text-lg leading-relaxed text-gray-700 mb-2" dangerouslySetInnerHTML={{ __html: processedContent }} />
-          </ol>
+        <div key={i} className="beautiful-prose my-6">
+          <ul className="beautiful-prose list-disc space-y-2 ml-6">
+            <li className="beautiful-prose relative pl-2 text-lg leading-relaxed text-gray-700" dangerouslySetInnerHTML={{ __html: processedContent }} />
+          </ul>
         </div>
       );
     }
 
-    // Detect inline label: value pairs (but exclude link syntax)
+    // Detect inline label: value pairs (but exclude link syntax and italicized sections)
     if (/^.+?:/.test(line) &&
-        !/^(Natural Link Integration|Link Placement|Anchor Text|URL Integration|Link Strategy|Backlink Placement|Internal Link|External Link):/i.test(line)) {
+        !/^(Natural Link Integration|Link Placement|Anchor Text|URL Integration|Link Strategy|Backlink Placement|Internal Link|External Link):/i.test(line) &&
+        !italicizedSections.test(line)) {
       const [label, ...rest] = line.split(":");
       const processedLabel = processLineContent(label.trim());
       const processedRest = processLineContent(rest.join(":").trim());
@@ -976,18 +1040,18 @@ export function BeautifulBlogPost() {
         if (isLikelyHeading && !isTitle) {
           htmlContent += `<h2>${para}</h2>\n\n`;
         }
-        // Check if it's a numbered list item
+        // Convert numbered list items to bullet lists for better readability
         else if (para.match(/^\d+\./)) {
-          // If this is the start of a list, open <ol>
+          // If this is the start of a list, open <ul>
           if (i === 0 || !paragraphs[i-1].match(/^\d+\./)) {
-            htmlContent += '<ol>\n';
+            htmlContent += '<ul>\n';
           }
           const listContent = para.replace(/^\d+\.\s*/, '');
           htmlContent += `<li>${listContent}</li>\n`;
 
-          // If next paragraph is not a list item, close </ol>
+          // If next paragraph is not a list item, close </ul>
           if (i === paragraphs.length - 1 || !paragraphs[i+1].match(/^\d+\./)) {
-            htmlContent += '</ol>\n\n';
+            htmlContent += '</ul>\n\n';
           }
         }
         // Check if it's a bullet point (expanded patterns)
@@ -1032,7 +1096,7 @@ export function BeautifulBlogPost() {
         if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
-        return `<h2 class="beautiful-prose text-3xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h2>`;
+        return `<h2 class="beautiful-prose text-2xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h2>`;
       })
       .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
@@ -1042,7 +1106,7 @@ export function BeautifulBlogPost() {
         if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
-        return `<h3 class="beautiful-prose text-2xl font-semibold text-black mb-4 mt-8"${attrs}>${cleanText}</h3>`;
+        return `<h3 class="beautiful-prose text-2xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h3>`;
       });
 
     // Step 5: Enhanced paragraphs with beautiful typography
@@ -1053,13 +1117,13 @@ export function BeautifulBlogPost() {
         return `<p class="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6"${attrs}>${cleanText}</p>`;
       });
 
-    // Step 6: Beautiful lists with premium styling
+    // Step 6: Beautiful lists with premium styling - consistent bullet points
     formattedContent = formattedContent
-      .replace(/<ul([^>]*)>/gi, '<ul class="beautiful-prose space-y-4 my-8"$1>')
-      .replace(/<ol([^>]*)>/gi, '<ol class="beautiful-prose space-y-4 my-8"$1>')
+      .replace(/<ul([^>]*)>/gi, '<ul class="beautiful-prose list-disc space-y-3 my-6 ml-6"$1>')
+      .replace(/<ol([^>]*)>/gi, '<ul class="beautiful-prose list-disc space-y-3 my-6 ml-6"$1>') // Convert ol to ul for consistency
       .replace(/<li([^>]*)>(.*?)<\/li>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
-        return `<li class="beautiful-prose relative pl-8 text-lg leading-relaxed text-gray-700"${attrs}>${cleanText}</li>`;
+        return `<li class="beautiful-prose relative pl-2 text-lg leading-relaxed text-gray-700"${attrs}>${cleanText}</li>`;
       });
 
     // Step 7: Enhanced links with beautiful styling and improved anchor text
@@ -1151,8 +1215,8 @@ export function BeautifulBlogPost() {
       .replace(/>\s+</g, '><')
       .replace(/(<\/h[1-6]>)\s*(<p)/gi, '$1\n\n$2')
       .replace(/(<\/p>)\s*(<h[1-6])/gi, '$1\n\n$2')
-      .replace(/(<\/ul>|<\/ol>)\s*(<p)/gi, '$1\n\n$2')
-      .replace(/(<\/p>)\s*(<ul>|<ol>)/gi, '$1\n\n$2')
+      .replace(/(<\/ul>)\s*(<p)/gi, '$1\n\n$2')
+      .replace(/(<\/p>)\s*(<ul>)/gi, '$1\n\n$2')
       .trim();
 
     return formattedContent;
@@ -1314,9 +1378,9 @@ export function BeautifulBlogPost() {
         </Button>
       </div>
 
-      {/* Navigation Bar */}
+      {/* Navigation Bar - Mid-wide range for better blog layout */}
       <div className="beautiful-nav sticky top-16 z-30 border-b border-gray-200/50 bg-white/80 backdrop-blur-md">
-        <div className="max-w-5xl mx-auto px-6 py-4">
+        <div className="max-w-4xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
@@ -1352,8 +1416,8 @@ export function BeautifulBlogPost() {
         <div className="w-full">
           <article className="w-full">
 
-            {/* Article Header */}
-            <header className="text-center mb-16 relative max-w-5xl mx-auto px-6 pt-12">
+            {/* Article Header - Mid-wide range for better readability */}
+            <header className="text-center mb-16 relative max-w-4xl mx-auto px-6 pt-12">
 
 
               {/* Status Badges */}
@@ -1589,9 +1653,9 @@ export function BeautifulBlogPost() {
 
 
 
-            {/* Article Content */}
+            {/* Article Content - Mid-wide range for better readability */}
             <div className="prose prose-lg max-w-none mt-8">
-              <div className="beautiful-card max-w-5xl mx-auto pt-6 px-6 pb-8 md:pt-8 md:px-12 md:pb-12 lg:px-16">
+              <div className="beautiful-card max-w-4xl mx-auto pt-6 px-6 pb-8 md:pt-8 md:px-12 md:pb-12 lg:px-16">
                 <div
                   className="beautiful-blog-content beautiful-prose modern-blog-content article-content max-w-none"
                   style={{
@@ -1648,7 +1712,7 @@ export function BeautifulBlogPost() {
                       console.log('⚡ Using new formatContent function for better structure');
 
                       // Use new formatContent function for better parsing
-                      const formattedContent = formatContent(content);
+                      const formattedContent = formatContent(content, memoizedBlogTitle);
 
                       const processingTime = performance.now() - processingStart;
 
@@ -1689,7 +1753,7 @@ export function BeautifulBlogPost() {
 
             {/* Keywords Section */}
             {blogPost.keywords && blogPost.keywords.length > 0 && (
-              <div className="mt-12 p-8 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200 max-w-5xl mx-auto">
+              <div className="mt-12 p-8 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200 max-w-4xl mx-auto">
                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-purple-600" />
                   Keywords & Topics
@@ -1709,7 +1773,7 @@ export function BeautifulBlogPost() {
             )}
 
             {/* Engagement Section */}
-            <div className="mt-16 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 max-w-5xl mx-auto">
+            <div className="mt-16 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 max-w-4xl mx-auto">
               <div className="text-center">
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">
                   Enjoyed this article?
@@ -1731,7 +1795,7 @@ export function BeautifulBlogPost() {
             </div>
 
             {/* Premium Upgrade CTA Section */}
-            <div className="mt-12 p-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border border-purple-200 max-w-5xl mx-auto">
+            <div className="mt-12 p-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border border-purple-200 max-w-4xl mx-auto">
               <div className="text-center">
                 <div className="flex items-center justify-center mb-4">
                   <Crown className="h-8 w-8 text-purple-600 mr-3" />
@@ -1790,7 +1854,7 @@ export function BeautifulBlogPost() {
             </div>
 
             {/* Post Information Section */}
-            <div className="mt-12 space-y-6 max-w-5xl mx-auto px-6">
+            <div className="mt-12 space-y-6 max-w-4xl mx-auto px-6">
               {/* ENHANCED EXPIRATION WARNING WITH KILLER DELETION ALERT */}
               {!blogPost.claimed && blogPost.expires_at && (
                 <div className="space-y-4">
