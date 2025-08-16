@@ -22,13 +22,27 @@ exports.handler = async (event, context) => {
     };
   }
 
+  // Allow GET for health checks
+  if (event.httpMethod === 'GET') {
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        success: true,
+        message: 'working-content-generator is running',
+        timestamp: new Date().toISOString(),
+        openai_configured: !!process.env.OPENAI_API_KEY
+      }),
+    };
+  }
+
   if (event.httpMethod !== 'POST') {
     return {
       statusCode: 405,
       headers,
-      body: JSON.stringify({ 
-        success: false, 
-        error: 'Method not allowed' 
+      body: JSON.stringify({
+        success: false,
+        error: 'Method not allowed'
       }),
     };
   }
