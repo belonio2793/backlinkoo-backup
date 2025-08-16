@@ -3,6 +3,7 @@ import { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/type
 import { blogPersistenceService } from './blogPersistenceService';
 import { SEOAnalyzer } from './seoAnalyzer';
 import { formatErrorForUI } from '@/utils/errorUtils';
+import { applyBeautifulContentStructure } from '@/utils/forceBeautifulContentStructure';
 
 export type BlogPost = Tables<'blog_posts'>;
 export type CreateBlogPost = TablesInsert<'blog_posts'>;
@@ -52,11 +53,15 @@ export class BlogService {
       // If database doesn't have trigger, fallback to service-level generation
       const customSlug = data.customSlug || null; // Let database trigger handle it first
 
+    // AUTOMATICALLY apply beautiful content structure to all new blog posts
+    console.log('🎨 Applying beautiful content structure to new blog post...');
+    const beautifulContent = applyBeautifulContentStructure(data.content, data.title);
+
     const blogPostData: CreateBlogPost = {
       user_id: userId || null,
       title: data.title,
       slug: customSlug, // null triggers database slug generation
-      content: data.content,
+      content: beautifulContent, // Use beautifully formatted content
       target_url: data.targetUrl,
       anchor_text: data.anchorText,
       // published_url will be set after database generates slug

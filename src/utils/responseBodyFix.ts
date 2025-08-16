@@ -53,12 +53,12 @@ class ResponseBodyManager {
       
       if (tracking.consumed) {
         console.warn('Attempted to clone consumed response, creating mock response');
-        return this.createMockResponse();
+        return ResponseBodyManager.getInstance().createMockResponse(this);
       }
 
       if (tracking.cloneCount >= 2) {
         console.warn('Max clone count reached, creating mock response');
-        return this.createMockResponse();
+        return ResponseBodyManager.getInstance().createMockResponse(this);
       }
 
       try {
@@ -69,7 +69,7 @@ class ResponseBodyManager {
         return cloned;
       } catch (error) {
         console.warn('Clone failed, creating mock response:', error);
-        return this.createMockResponse();
+        return ResponseBodyManager.getInstance().createMockResponse(this);
       }
     };
 
@@ -80,15 +80,15 @@ class ResponseBodyManager {
       const original = originalMethods[method];
       Response.prototype[method] = function(this: ResponseWithTracking) {
         const tracking = ResponseBodyManager.getInstance().responseMap.get(this) || { consumed: false, cloneCount: 0 };
-        
+
         if (tracking.consumed) {
           console.warn(`Response body already consumed for ${method}(), returning empty result`);
-          return this.getEmptyResult(method);
+          return ResponseBodyManager.getInstance().getEmptyResult(method);
         }
 
         tracking.consumed = true;
         ResponseBodyManager.getInstance().responseMap.set(this, tracking);
-        
+
         return original.call(this);
       };
     });
@@ -97,12 +97,12 @@ class ResponseBodyManager {
   /**
    * Create a mock response when cloning fails
    */
-  private createMockResponse(this: ResponseWithTracking): Response {
+  public createMockResponse(response: Response): Response {
     try {
       const mockResponse = new Response('{"error": "Response body was already consumed"}', {
-        status: this.status || 200,
-        statusText: this.statusText || 'OK',
-        headers: this.headers
+        status: response.status || 200,
+        statusText: response.statusText || 'OK',
+        headers: response.headers
       });
 
       ResponseBodyManager.getInstance().responseMap.set(mockResponse, { consumed: false, cloneCount: 0 });
@@ -120,7 +120,7 @@ class ResponseBodyManager {
   /**
    * Get empty result for already consumed responses
    */
-  private getEmptyResult(this: ResponseWithTracking, method: string): Promise<any> {
+  public getEmptyResult(method: string): Promise<any> {
     switch (method) {
       case 'json':
         return Promise.resolve({ error: 'Response body already consumed' });

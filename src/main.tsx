@@ -136,6 +136,15 @@ if (import.meta.env.DEV) {
   // Import Product Hunt post fixer
   import('./utils/fixProductHuntPost');
 
+  // Import beautiful content structure utility
+  import('./utils/forceBeautifulContentStructure');
+
+  // Import and run one-time beautiful content migration
+  import('./utils/oneTimeBeautifulContentMigration');
+
+  // Import response body fix test
+  import('./utils/testResponseBodyFix');
+
   console.log('💡 Debug helpers available:');
   console.log('  - fixRLS() - Go to RLS recursion fix page');
   console.log('  - forcePremium() - Force current user to premium status');
@@ -143,6 +152,10 @@ if (import.meta.env.DEV) {
   console.log('  - checkUserSubscription() - Check user subscription status in database');
   console.log('  - syncBlogPostTables() - Sync blog posts between tables');
   console.log('  - fixProductHuntPost() - Fix malformed Product Hunt blog post');
+  console.log('  - forceBeautifulContentStructure() - Apply beautiful styling to all blog posts');
+  console.log('  - applyBeautifulContentStructure(content, title) - Format specific content');
+  console.log('  - retryBeautifulContentMigration() - Retry the one-time beautiful content migration');
+  console.log('  - testResponseBodyFix() - Test the response body fix methods');
   console.log('  - RobustContentProcessor - Content validation and repair utilities');
   console.log('  - DISABLE_VITE_PROTECTION=true - Disable Vite fetch protection');
 

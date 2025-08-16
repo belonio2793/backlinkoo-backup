@@ -8,6 +8,7 @@ import { blogService, type BlogPostGenerationData } from './blogService';
 import { slugGenerationService } from './slugGenerationService';
 import { openAIOnlyContentGenerator } from './openAIOnlyContentGenerator';
 import { useAuth } from '@/hooks/useAuth';
+import { applyBeautifulContentStructure } from '@/utils/forceBeautifulContentStructure';
 
 export interface BlogCreationRequest {
   targetUrl: string;
@@ -314,9 +315,13 @@ Generate high-quality, engaging content that ranks well and provides real value 
     // Process contextual links
     const contextualLinks = this.extractContextualLinks(aiContent.content, request.targetUrl);
 
+    // Apply beautiful content structure automatically
+    console.log('🎨 Applying beautiful content structure in enhanced workflow...');
+    const beautifulContent = applyBeautifulContentStructure(aiContent.content, title);
+
     return {
       title: title.substring(0, 60), // SEO-friendly title length
-      content: aiContent.content,
+      content: beautifulContent, // Use beautifully formatted content
       wordCount,
       readingTime,
       seoScore,
