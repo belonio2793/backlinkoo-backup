@@ -248,5 +248,5 @@ export default async (req: Request, context: Context) => {
 };
 
 export const config: Config = {
-  path: "/api/create-subscription"
+  path: "/.netlify/functions/create-subscription"
 };
