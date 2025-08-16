@@ -103,7 +103,12 @@ Return only the body content as clean, valid HTML that displays correctly withou
         },
         {
           role: 'user',
-          content: `${enhancedPrompt}\n\nIMPORTANT: Make sure to naturally include the anchor text "${anchor_text}" within the article content in a way that makes sense contextually. The anchor text should appear as part of the natural flow of the article.`
+          content: `${enhancedPrompt}\n\nIMPORTANT:
+1. Return ONLY clean HTML content (no title, no markdown, no malformed HTML)
+2. Include the anchor text "${anchor_text}" naturally as: <a href="${target_url}" target="_blank" rel="noopener noreferrer">${anchor_text}</a>
+3. Use proper HTML structure: <h2>, <h3>, <p>, <ul>/<ol>, <li>
+4. NO markdown symbols or HTML entities that break display
+5. Content must display correctly without any post-processing`
         }
       ],
       max_tokens: max_tokens,
