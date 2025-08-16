@@ -405,10 +405,21 @@ Recommendation: ${needsAdjustment.length > 0 ?
     try {
       // Quick quality check
       const metrics = BlogQualityMonitor.analyzeContent(content, post?.target_url);
-      
-      if (metrics.qualityScore >= 70 && !metrics.hasMalformedPatterns) {
-        return content; // Content is fine, return as-is
+
+      // Always process content that doesn't have HTML tags (markdown conversion)
+      const hasHtmlTags = /<[^>]+>/.test(content);
+      const needsProcessing = !hasHtmlTags || metrics.qualityScore < 70 || metrics.hasMalformedPatterns;
+
+      if (!needsProcessing) {
+        return content; // Content is fine HTML and good quality, return as-is
       }
+
+      console.log('🔄 Auto-adjusting content for display:', {
+        hasHtmlTags,
+        qualityScore: metrics.qualityScore,
+        hasMalformedPatterns: metrics.hasMalformedPatterns,
+        needsProcessing
+      });
 
       // Apply lightweight fixes for display
       let adjusted = content;
@@ -418,7 +429,7 @@ Recommendation: ${needsAdjustment.length > 0 ?
         adjusted = LinkAttributeFixer.fixMalformedLinks(adjusted);
       }
 
-      // Fix malformed patterns without heavy processing
+      // Fix malformed patterns and convert markdown to HTML
       adjusted = this.fixDisplayIssues(adjusted);
 
       return adjusted;
