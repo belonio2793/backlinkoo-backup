@@ -168,46 +168,16 @@ function formatContent(raw: string) {
 
     // Enhanced link detection with markdown support
     if (/https?:\/\//.test(line) || /\[.*?\]\(.*?\)/.test(line)) {
-      // Handle markdown links [text](url)
-      if (/\[.*?\]\(.*?\)/.test(line)) {
-        const processedLine = line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
-          // Clean up the anchor text
-          const cleanText = text.replace(/^(Natural Link Integration|Link Placement|Anchor Text|URL Integration):\s*/gi, '').trim();
-          // Ensure URL is properly formatted
-          let cleanUrl = url.trim();
-          if (cleanUrl && !cleanUrl.match(/^https?:\/\//)) {
-            cleanUrl = cleanUrl.startsWith('//') ? 'https:' + cleanUrl : 'https://' + cleanUrl;
-          }
-          return `<a href="${cleanUrl}" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
-        });
-
-        return (
-          <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6" dangerouslySetInnerHTML={{ __html: processedLine }} />
-        );
-      } else {
-        // Handle plain URLs
-        const urlMatch = line.match(/https?:\/\/\S+/);
-        const url = urlMatch?.[0] || "#";
-        return (
-          <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
-            <a
-              href={url}
-              className="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {line}
-            </a>
-          </p>
-        );
-      }
+      const processedLine = processLineContent(line);
+      return (
+        <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6" dangerouslySetInnerHTML={{ __html: processedLine }} />
+      );
     }
 
-    // Default: render as paragraph
+    // Default: render as paragraph with processed content
+    const processedLine = processLineContent(line);
     return (
-      <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
-        {line}
-      </p>
+      <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6" dangerouslySetInnerHTML={{ __html: processedLine }} />
     );
   });
 }
