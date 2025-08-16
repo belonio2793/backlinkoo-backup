@@ -235,109 +235,93 @@ export class BlogService {
   }
 
   /**
-   * Get blog post by slug with stream-safe error handling
+   * Get blog post by slug with complete stream isolation
    */
   async getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
     console.log('🔍 [BlogService] Fetching blog post by slug:', slug);
 
-    try {
-      // Try published_blog_posts first (where most new posts are saved)
-      const { data, error } = await supabase
-        .from('published_blog_posts')
-        .select('*')
-        .eq('slug', slug)
-        .eq('status', 'published')
-        .single();
+    // Create multiple isolated approaches to avoid stream conflicts
+    const approaches = [
+      () => this.fetchWithIsolatedClient(slug, 'published_blog_posts'),
+      () => this.fetchWithIsolatedClient(slug, 'blog_posts'),
+      () => this.fetchWithBasicQuery(slug, 'published_blog_posts'),
+      () => this.fetchWithBasicQuery(slug, 'blog_posts')
+    ];
 
-      // If not found in published_blog_posts, try blog_posts as fallback
-      if (error && error.code === 'PGRST116') {
-        console.log('🔄 [BlogService] Not found in published_blog_posts, trying blog_posts...');
+    for (let i = 0; i < approaches.length; i++) {
+      try {
+        console.log(`🔄 [BlogService] Trying approach ${i + 1}/${approaches.length}`);
+        const result = await approaches[i]();
 
-        try {
-          const { data: fallbackData, error: fallbackError } = await supabase
-            .from('blog_posts')
-            .select('*')
-            .eq('slug', slug)
-            .eq('status', 'published')
-            .single();
-
-          if (fallbackError) {
-            if (fallbackError.code === 'PGRST116') {
-              console.log('❌ [BlogService] Blog post not found in either table');
-              return null; // No rows found in either table
-            }
-
-            // Safe error logging without exposing Response objects
-            const safeErrorInfo = {
-              message: this.getSafeErrorMessage(fallbackError),
-              code: fallbackError?.code,
-              table: 'blog_posts'
-            };
-            console.error('❌ [BlogService] Error fetching from blog_posts:', safeErrorInfo);
-            throw new Error(`Failed to fetch blog post: ${safeErrorInfo.message}`);
-          }
-
-          console.log('✅ [BlogService] Found in blog_posts table');
-          // Increment view count in the correct table
-          await this.incrementViewCount(slug, 'blog_posts');
-          return fallbackData;
-        } catch (fallbackError: any) {
-          // Handle stream errors gracefully
-          if (this.isStreamError(fallbackError)) {
-            console.warn('⚠️ [BlogService] Stream error in fallback, returning null');
-            return null;
-          }
-          throw fallbackError;
+        if (result) {
+          console.log(`✅ [BlogService] Success with approach ${i + 1}`);
+          // Increment view count in background (don't await to avoid blocking)
+          this.incrementViewCount(slug, i < 2 ? 'published_blog_posts' : 'blog_posts').catch(() => {});
+          return result;
         }
-      }
+      } catch (error: any) {
+        console.warn(`⚠️ [BlogService] Approach ${i + 1} failed:`, this.getSafeErrorMessage(error));
 
-      if (error) {
-        // Safe error logging without exposing Response objects
-        const safeErrorInfo = {
-          message: this.getSafeErrorMessage(error),
-          code: error?.code,
-          table: 'published_blog_posts'
-        };
-        console.error('❌ [BlogService] Error fetching from published_blog_posts:', safeErrorInfo);
-        throw new Error(`Failed to fetch blog post: ${safeErrorInfo.message}`);
-      }
-
-      console.log('✅ [BlogService] Found in published_blog_posts table');
-      // Increment view count in the correct table
-      await this.incrementViewCount(slug, 'published_blog_posts');
-      return data;
-
-    } catch (error: any) {
-      // Handle stream errors at the top level
-      if (this.isStreamError(error)) {
-        console.warn('⚠️ [BlogService] Stream error detected, attempting recovery');
-        // Try one more time with a fresh connection
-        try {
-          const { data: retryData, error: retryError } = await supabase
-            .from('published_blog_posts')
-            .select('id, slug, title, content, status, created_at, updated_at, view_count')
-            .eq('slug', slug)
-            .eq('status', 'published')
-            .single();
-
-          if (retryError && retryError.code === 'PGRST116') {
-            return null;
-          }
-
-          if (retryError) {
-            console.error('❌ [BlogService] Retry also failed:', this.getSafeErrorMessage(retryError));
-            return null;
-          }
-
-          return retryData as BlogPost;
-        } catch (retryError) {
-          console.error('❌ [BlogService] Recovery attempt failed');
+        // If this is the last approach, return null instead of throwing
+        if (i === approaches.length - 1) {
+          console.error('❌ [BlogService] All approaches failed, returning null');
           return null;
         }
       }
-
-      throw error;
     }
+
+    return null;
+  }
+
+  /**
+   * Fetch using isolated client approach
+   */
+  private async fetchWithIsolatedClient(slug: string, tableName: string): Promise<BlogPost | null> {
+    const { data, error } = await supabase
+      .from(tableName)
+      .select('*')
+      .eq('slug', slug)
+      .eq('status', 'published')
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // Not found
+      }
+      throw new Error(this.getSafeErrorMessage(error));
+    }
+
+    return data;
+  }
+
+  /**
+   * Fetch using basic query with minimal fields
+   */
+  private async fetchWithBasicQuery(slug: string, tableName: string): Promise<BlogPost | null> {
+    const { data, error } = await supabase
+      .from(tableName)
+      .select('id, slug, title, content, status, created_at, updated_at, user_id, target_url, published_url, view_count, seo_score, reading_time, word_count, author_name, tags, category, is_trial_post, expires_at, anchor_text, is_claimed, claimed_by, claimed_at')
+      .eq('slug', slug)
+      .eq('status', 'published')
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null; // Not found
+      }
+      throw new Error(this.getSafeErrorMessage(error));
+    }
+
+    // Map to expected format if needed
+    return {
+      ...data,
+      // Ensure compatibility with both table schemas
+      claimed: data.is_claimed || false,
+      meta_description: data.meta_description || '',
+      excerpt: data.excerpt || '',
+      keywords: data.keywords || [],
+      published_at: data.published_at || data.created_at
+    } as BlogPost;
   }
 
   /**
