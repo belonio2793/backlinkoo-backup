@@ -297,6 +297,15 @@ const ContentProcessor = ({
 
   // Helper function to process text content (links, bold, italic, etc.)
   const processTextContent = useCallback((text: string, index: number) => {
+    // Filter out duplicate title if it appears in text content
+    if (title) {
+      const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const titlePattern = new RegExp(`^\\s*${escapedTitle}\\s*$`, 'i');
+      if (titlePattern.test(text.trim())) {
+        return null; // Return null to filter out this text entirely
+      }
+    }
+
     // Process markdown links first
     let processedText = text.replace(
       /\[([^\]]+)\]\(([^)]+)\)/g,
