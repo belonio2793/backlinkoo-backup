@@ -430,20 +430,87 @@ Recommendation: ${needsAdjustment.length > 0 ?
   }
 
   /**
-   * Helper: Fix critical display issues without heavy processing
+   * Helper: Fix critical display issues and convert markdown to HTML
    */
   private static fixDisplayIssues(content: string): string {
-    return content
-      // Fix broken bold patterns like **E**nhanced
-      .replace(/\*\*([A-Z])\*\*([a-z])/g, '**$1$2')
-      // Fix malformed headings like ## &lt;h2&gt;Title
-      .replace(/##\s*&lt;\s*h(\d+)\s*&gt;\s*([^<\n]+)/gi, '<h$1>$2</h$1>')
-      // Fix HTML entities in basic text
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&amp;/g, '&')
-      // Remove malformed HTML comments
-      .replace(/<!--[\s\S]*?-->/g, '');
+    let fixed = content;
+
+    // First, fix broken bold patterns like **E**nhanced
+    fixed = fixed.replace(/\*\*([A-Z])\*\*([a-z])/g, '**$1$2');
+
+    // Fix malformed headings like ## &lt;h2&gt;Title
+    fixed = fixed.replace(/##\s*&lt;\s*h(\d+)\s*&gt;\s*([^<\n]+)/gi, '<h$1>$2</h$1>');
+
+    // Fix HTML entities in basic text
+    fixed = fixed.replace(/&lt;/g, '<');
+    fixed = fixed.replace(/&gt;/g, '>');
+    fixed = fixed.replace(/&amp;/g, '&');
+
+    // Remove malformed HTML comments
+    fixed = fixed.replace(/<!--[\s\S]*?-->/g, '');
+
+    // CRITICAL: Convert basic markdown to HTML if content doesn't already have HTML tags
+    const hasHtmlTags = /<[^>]+>/.test(fixed);
+    if (!hasHtmlTags) {
+      console.log('🔄 Converting markdown to HTML for display');
+
+      // Convert markdown headings to HTML
+      fixed = fixed
+        // Convert ### to h3
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        // Convert ## to h2
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        // Convert # to h1
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+
+        // Convert **bold** to <strong>
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+
+        // Convert *italic* to <em>
+        .replace(/\*([^*]+)\*/g, '<em>$1</em>')
+
+        // Convert [link](url) to <a>
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;">$1</a>')
+
+        // Convert plain URLs to links
+        .replace(/(^|[^<"'])(https?:\/\/[^\s<>"']+)/gi, '$1<a href="$2" target="_blank" rel="noopener" style="color:#2563eb;text-decoration:underline;">$2</a>')
+
+        // Convert line breaks to paragraphs
+        .split('\n\n')
+        .filter(para => para.trim())
+        .map(para => {
+          const trimmed = para.trim();
+          // Don't wrap headings in paragraphs
+          if (trimmed.startsWith('<h')) {
+            return trimmed;
+          }
+          // Handle list items
+          if (trimmed.includes('\n- ') || trimmed.includes('\n* ')) {
+            const listItems = trimmed.split(/\n[*-]\s+/).filter(item => item.trim());
+            const firstPart = listItems.shift() || '';
+            const items = listItems.map(item => `<li>${item.trim()}</li>`).join('\n');
+            return (firstPart ? `<p>${firstPart}</p>\n` : '') + `<ul>\n${items}\n</ul>`;
+          }
+          // Handle numbered lists
+          if (/\n\d+\.\s+/.test(trimmed)) {
+            const parts = trimmed.split(/\n\d+\.\s+/);
+            const firstPart = parts.shift() || '';
+            const items = parts.map(item => `<li>${item.trim()}</li>`).join('\n');
+            return (firstPart ? `<p>${firstPart}</p>\n` : '') + `<ol>\n${items}\n</ol>`;
+          }
+          // Regular paragraph
+          return `<p>${trimmed}</p>`;
+        })
+        .join('\n\n');
+    } else if (hasHtmlTags && /<h[1-6][^>]*>.*?<\/h[1-6]>/.test(fixed)) {
+      // Content has HTML but may have mixed markdown headings - fix those
+      fixed = fixed
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>');
+    }
+
+    return fixed;
   }
 }
 
