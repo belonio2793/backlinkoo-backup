@@ -1213,6 +1213,9 @@ export function BeautifulBlogPost() {
                             anchor_text: blogPost.anchor_text
                           });
                         }
+
+                        // FORCE BEAUTIFUL CONTENT STRUCTURE: Apply beautiful formatting to ALL posts
+                        finalContent = applyBeautifulContentStructure(finalContent, blogPost.title);
                         // Variables are already defined above as finalContent and securityInfo
 
                         // Log processing results for debugging
