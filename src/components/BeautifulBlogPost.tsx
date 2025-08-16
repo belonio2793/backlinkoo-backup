@@ -1107,6 +1107,7 @@ const BeautifulBlogPost = () => {
       </div>
     </TooltipProvider>
   );
-}
+};
 
+export { BeautifulBlogPost };
 export default BeautifulBlogPost;
