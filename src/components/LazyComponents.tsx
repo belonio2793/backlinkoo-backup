@@ -26,7 +26,7 @@ export const LazyBeautifulBlogPost = lazy(() =>
   import('@/components/BeautifulBlogPostWrapper')
     .then(module => {
       console.log('✅ BeautifulBlogPostWrapper module loaded:', module);
-      return { default: module.default || module.BeautifulBlogPost };
+      return { default: module.default || module.BeautifulBlogPostWrapper };
     })
     .catch(error => {
       console.error('❌ Failed to load BeautifulBlogPostWrapper:', error);
