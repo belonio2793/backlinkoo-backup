@@ -729,7 +729,7 @@ export function BeautifulBlogPost() {
         return `<p class="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6"${attrs}>${cleanText}</p>`;
       });
 
-    // Step 4: Beautiful lists with premium styling
+    // Step 6: Beautiful lists with premium styling
     formattedContent = formattedContent
       .replace(/<ul([^>]*)>/gi, '<ul class="beautiful-prose space-y-4 my-8"$1>')
       .replace(/<ol([^>]*)>/gi, '<ol class="beautiful-prose space-y-4 my-8"$1>')
@@ -738,7 +738,7 @@ export function BeautifulBlogPost() {
         return `<li class="beautiful-prose relative pl-8 text-lg leading-relaxed text-gray-700"${attrs}>${cleanText}</li>`;
       });
 
-    // Step 5: Enhanced links with beautiful styling
+    // Step 7: Enhanced links with beautiful styling
     formattedContent = formattedContent.replace(
       /<a([^>]*?)href="([^"]*)"([^>]*?)>(.*?)<\/a>/gi,
       (match, preAttrs, href, postAttrs, text) => {
