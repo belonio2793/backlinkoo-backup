@@ -605,41 +605,81 @@ export function BeautifulBlogPost() {
 
     let formattedContent = content;
 
-    // If content doesn't have proper HTML structure, convert it
-    if (!formattedContent.includes('<p>') && !formattedContent.includes('<h1>') && !formattedContent.includes('<h2>')) {
-      // Convert plain text to proper HTML structure
-      const lines = formattedContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    // Step 1: Clean up malformed content first
+    formattedContent = formattedContent
+      // Remove problematic markers
+      .replace(/\*{2,}/g, '') // Remove ** markers
+      .replace(/_{2,}/g, '') // Remove __ markers
+      .replace(/\bH[1-6]:\s*/gi, '')
+      .replace(/Title:\s*/gi, '')
+      .replace(/Hook Introduction:\s*/gi, '')
+      // Clean up excessive whitespace
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+
+    // Step 2: Convert markdown-style formatting to HTML if needed
+    if (!formattedContent.includes('<p>') && !formattedContent.includes('<h1>')) {
+      // Convert **text** to <strong>text</strong>
+      formattedContent = formattedContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+      // Split into paragraphs and process
+      const paragraphs = formattedContent.split(/\n\s*\n/).filter(p => p.trim().length > 0);
 
       let htmlContent = '';
-      for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
+      for (let i = 0; i < paragraphs.length; i++) {
+        const para = paragraphs[i].trim();
 
-        // Check if line looks like a heading
-        if (line.length < 100 && (
-          line.includes('Ultimate Guide') ||
-          line.includes('Introduction') ||
-          line.includes('Chapter') ||
-          line.includes('Section') ||
-          line.match(/^\d+\./) ||
-          line.match(/^[A-Z][^.!?]*[.!?]*$/) && line.split(' ').length < 10
+        // Skip empty or invalid content
+        if (!para || para === '****' || para.match(/^\*+$/)) {
+          continue;
+        }
+
+        // Check if it's a heading (short line with title-like content)
+        if (para.length < 120 && (
+          para.includes('Guide') ||
+          para.includes('Introduction') ||
+          para.includes('Facebook') ||
+          para.includes('Conclusion') ||
+          para.includes('Strategy') ||
+          (para.split(' ').length <= 8 && para.charAt(0).toUpperCase() === para.charAt(0))
         )) {
-          htmlContent += `<h2>${line}</h2>\n\n`;
-        } else {
-          // Regular paragraph
-          htmlContent += `<p>${line}</p>\n\n`;
+          htmlContent += `<h2>${para}</h2>\n\n`;
+        }
+        // Check if it's a numbered list item
+        else if (para.match(/^\d+\./)) {
+          // If this is the start of a list, open <ol>
+          if (i === 0 || !paragraphs[i-1].match(/^\d+\./)) {
+            htmlContent += '<ol>\n';
+          }
+          const listContent = para.replace(/^\d+\.\s*/, '');
+          htmlContent += `<li>${listContent}</li>\n`;
+
+          // If next paragraph is not a list item, close </ol>
+          if (i === paragraphs.length - 1 || !paragraphs[i+1].match(/^\d+\./)) {
+            htmlContent += '</ol>\n\n';
+          }
+        }
+        // Check if it's a bullet point
+        else if (para.match(/^[•·\-\*]\s/)) {
+          // If this is the start of a list, open <ul>
+          if (i === 0 || !paragraphs[i-1].match(/^[•·\-\*]\s/)) {
+            htmlContent += '<ul>\n';
+          }
+          const listContent = para.replace(/^[•·\-\*]\s*/, '');
+          htmlContent += `<li>${listContent}</li>\n`;
+
+          // If next paragraph is not a list item, close </ul>
+          if (i === paragraphs.length - 1 || !paragraphs[i+1].match(/^[•·\-\*]\s/)) {
+            htmlContent += '</ul>\n\n';
+          }
+        }
+        // Regular paragraph
+        else {
+          htmlContent += `<p>${para}</p>\n\n`;
         }
       }
       formattedContent = htmlContent;
     }
-
-    // Step 1: Clean up malformed content and artifacts
-    formattedContent = formattedContent
-      .replace(/\bH[1-6]:\s*/gi, '')
-      .replace(/Title:\s*/gi, '')
-      .replace(/Hook Introduction:\s*/gi, '')
-      .replace(/["=]{2,}/g, '')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
 
     // Step 2: Apply premium HTML structure with beautiful classes
     formattedContent = formattedContent
