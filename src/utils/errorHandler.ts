@@ -303,4 +303,15 @@ if (typeof window !== 'undefined' && !window._networkErrorHandlerInitialized) {
 // Make available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).NetworkErrorHandler = NetworkErrorHandler;
+
+  // Add utility functions to manage fetch wrapper
+  (window as any).disableFetchWrapper = () => {
+    localStorage.setItem('disable-fetch-wrapper', 'true');
+    console.log('🚫 Fetch wrapper will be disabled on next page load. Refresh the page.');
+  };
+
+  (window as any).enableFetchWrapper = () => {
+    localStorage.removeItem('disable-fetch-wrapper');
+    console.log('✅ Fetch wrapper will be enabled on next page load. Refresh the page.');
+  };
 }
