@@ -143,12 +143,11 @@ function formatContent(raw: string) {
     // Enhanced numbered list detection
     if (/^\d+\.\s/.test(line)) {
       const content = line.replace(/^\d+\.\s/, '').trim();
+      const processedContent = processLineContent(content);
       return (
         <div key={i} className="beautiful-prose space-y-4 my-8">
           <ol className="list-decimal ml-6">
-            <li className="beautiful-prose relative pl-2 text-lg leading-relaxed text-gray-700 mb-2">
-              {content}
-            </li>
+            <li className="beautiful-prose relative pl-2 text-lg leading-relaxed text-gray-700 mb-2" dangerouslySetInnerHTML={{ __html: processedContent }} />
           </ol>
         </div>
       );
@@ -158,9 +157,11 @@ function formatContent(raw: string) {
     if (/^.+?:/.test(line) &&
         !/^(Natural Link Integration|Link Placement|Anchor Text|URL Integration|Link Strategy|Backlink Placement|Internal Link|External Link):/i.test(line)) {
       const [label, ...rest] = line.split(":");
+      const processedLabel = processLineContent(label.trim());
+      const processedRest = processLineContent(rest.join(":").trim());
       return (
         <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
-          <strong className="font-bold text-gray-900">{label.trim()}:</strong> {rest.join(":").trim()}
+          <span dangerouslySetInnerHTML={{ __html: `<strong>${processedLabel}:</strong> ${processedRest}` }} />
         </p>
       );
     }
@@ -1466,7 +1467,7 @@ export function BeautifulBlogPost() {
                         <div className="space-y-1">
                           <p className="font-semibold">Unclaimed</p>
                           <p className="text-sm">This post is unclaimed and anyone can take ownership of it.</p>
-                          <p className="text-xs text-gray-400">��️ May be deleted if not claimed soon</p>
+                          <p className="text-xs text-gray-400">⚠️ May be deleted if not claimed soon</p>
                         </div>
                       </TooltipContent>
                     </Tooltip>
