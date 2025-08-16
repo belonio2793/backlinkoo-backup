@@ -908,13 +908,34 @@ export function BeautifulBlogPost() {
         return `<li class="beautiful-prose relative pl-8 text-lg leading-relaxed text-gray-700"${attrs}>${cleanText}</li>`;
       });
 
-    // Step 7: Enhanced links with beautiful styling
+    // Step 7: Enhanced links with beautiful styling and improved anchor text
     formattedContent = formattedContent.replace(
       /<a([^>]*?)href="([^"]*)"([^>]*?)>(.*?)<\/a>/gi,
       (match, preAttrs, href, postAttrs, text) => {
-        const isExternal = href.startsWith('http');
+        // Clean up anchor text - remove any remaining link syntax
+        let cleanText = text
+          .replace(/^(Natural Link Integration|Link Placement|Anchor Text|URL Integration|Link Strategy|Backlink Placement|Internal Link|External Link):\s*/gi, '')
+          .trim();
+
+        // If anchor text is empty or just whitespace, use a portion of the URL
+        if (!cleanText || cleanText.length === 0) {
+          try {
+            const url = new URL(href);
+            cleanText = url.hostname.replace('www.', '') || href;
+          } catch {
+            cleanText = href;
+          }
+        }
+
+        // Ensure URL is properly formatted
+        let cleanHref = href.trim();
+        if (cleanHref && !cleanHref.match(/^https?:\/\//) && !cleanHref.startsWith('/')) {
+          cleanHref = cleanHref.startsWith('//') ? 'https:' + cleanHref : 'https://' + cleanHref;
+        }
+
+        const isExternal = cleanHref.startsWith('http');
         const targetAttr = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
-        return `<a class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600"${preAttrs}href="${href}"${postAttrs}${targetAttr}>${text}</a>`;
+        return `<a class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600"${preAttrs}href="${cleanHref}"${postAttrs}${targetAttr}>${cleanText}</a>`;
       }
     );
 
