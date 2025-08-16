@@ -1943,3 +1943,5 @@ export function BeautifulBlogPost() {
     </TooltipProvider>
   );
 }
+
+export default BeautifulBlogPost;
