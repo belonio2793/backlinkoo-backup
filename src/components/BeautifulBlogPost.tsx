@@ -119,7 +119,7 @@ export function BeautifulBlogPost() {
             const result = await EmergencyDatabaseSetup.setupDatabase();
 
             if (result.success) {
-              console.log('✅ Database setup completed, retrying blog load...');
+              console.log('�� Database setup completed, retrying blog load...');
               toast({
                 title: "Blog Post Created",
                 description: "The missing blog post has been created. Reloading...",
@@ -1053,7 +1053,7 @@ export function BeautifulBlogPost() {
           <article className="w-full">
 
             {/* Article Header */}
-            <header className="text-center mb-16 relative max-w-4xl mx-auto px-6 pt-12">
+            <header className="text-center mb-16 relative max-w-5xl mx-auto px-6 pt-12">
 
 
               {/* Status Badges */}
