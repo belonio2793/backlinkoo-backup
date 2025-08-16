@@ -1119,12 +1119,12 @@ export function BeautifulBlogPost() {
                         }
 
                         // Final safety check after processing
-                        if (!result.content || result.content.trim().length === 0) {
-                          console.error('❌ Content became empty after processing! Using original.');
-                          return content; // Return original unprocessed content
+                        if (!finalContent || finalContent.trim().length === 0) {
+                          console.error('Content became empty after processing! Using fallback.');
+                          return '<div style="padding: 20px; color: #ef4444;">Content processing error. Please contact support.</div>';
                         }
 
-                        return result.content;
+                        return finalContent;
                       } catch (formatError) {
                         console.error('💥 Content processing failed:', formatError);
                         // Return cleaned raw content as emergency fallback
