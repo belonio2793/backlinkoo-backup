@@ -760,14 +760,21 @@ export function BeautifulBlogPost() {
       '<p class="beautiful-prose$1 beautiful-first-paragraph"$2>$3</p>'
     );
 
-    // Step 10: Ensure proper spacing and structure
+    // Step 10: Final cleanup - remove problematic content patterns
     formattedContent = formattedContent
+      // Remove empty or invalid headings
+      .replace(/<h[1-6][^>]*>\s*\*+\s*<\/h[1-6]>/gi, '')
+      .replace(/<h[1-6][^>]*>\s*<\/h[1-6]>/gi, '')
+      .replace(/<h[1-6][^>]*>\s*\d+\.\s*<\/h[1-6]>/gi, '')
+      // Remove empty paragraphs
+      .replace(/<p[^>]*>\s*<\/p>/gi, '')
+      .replace(/<p[^>]*>\s*\*+\s*<\/p>/gi, '')
+      // Fix spacing
       .replace(/>\s+</g, '><')
       .replace(/(<\/h[1-6]>)\s*(<p)/gi, '$1\n\n$2')
       .replace(/(<\/p>)\s*(<h[1-6])/gi, '$1\n\n$2')
       .replace(/(<\/ul>|<\/ol>)\s*(<p)/gi, '$1\n\n$2')
       .replace(/(<\/p>)\s*(<ul>|<ol>)/gi, '$1\n\n$2')
-      .replace(/<p[^>]*>\s*<\/p>/gi, '')
       .trim();
 
     return formattedContent;
@@ -1415,7 +1422,7 @@ export function BeautifulBlogPost() {
                       return (
                         <div className="max-w-2xl mx-auto bg-red-600 text-white p-4 rounded-lg animate-pulse border-4 border-yellow-400">
                           <div className="text-center font-black text-lg">
-                            💀 CRITICAL: LESS THAN 1 HOUR REMAINING! ⚠️⚠️⚠️
+                            💀 CRITICAL: LESS THAN 1 HOUR REMAINING! ⚠️⚠️⚠��
                           </div>
                           <div className="text-center text-sm mt-2">
                             Your content is entering the DEATH ZONE!
