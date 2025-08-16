@@ -1117,7 +1117,7 @@ export function BeautifulBlogPost() {
             )}
 
             {/* Engagement Section */}
-            <div className="mt-16 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200">
+            <div className="mt-16 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 max-w-5xl mx-auto">
               <div className="text-center">
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">
                   Enjoyed this article?
@@ -1170,7 +1170,7 @@ export function BeautifulBlogPost() {
                 </div>
                 <Button
                   onClick={(e) => {
-                    console.log('���� Premium button clicked!', { showPaymentModal, e });
+                    console.log('🚀 Premium button clicked!', { showPaymentModal, e });
                     e.stopPropagation();
                     e.preventDefault();
                     setShowPaymentModal(true);
