@@ -1096,7 +1096,7 @@ export function BeautifulBlogPost() {
         if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
-        return `<h2 class="beautiful-prose text-3xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h2>`;
+        return `<h2 class="beautiful-prose text-2xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h2>`;
       })
       .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
@@ -1106,7 +1106,7 @@ export function BeautifulBlogPost() {
         if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
-        return `<h3 class="beautiful-prose text-2xl font-semibold text-black mb-4 mt-8"${attrs}>${cleanText}</h3>`;
+        return `<h3 class="beautiful-prose text-2xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h3>`;
       });
 
     // Step 5: Enhanced paragraphs with beautiful typography
