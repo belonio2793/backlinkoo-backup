@@ -41,6 +41,7 @@ const LazyPrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const LazyNotFound = lazy(() => import("./pages/NotFound"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
+import BlogGenerationFixTestPage from "./pages/BlogGenerationFixTest";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -249,6 +250,16 @@ const App = () => (
               element={
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazyPrivacyPolicy />
+                </Suspense>
+              }
+            />
+
+            {/* Debug and test routes */}
+            <Route
+              path="/debug/blog-fix"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <BlogGenerationFixTestPage />
                 </Suspense>
               }
             />

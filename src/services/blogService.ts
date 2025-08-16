@@ -15,6 +15,7 @@ export interface BlogPostGenerationData {
   content: string;
   targetUrl: string;
   anchorText?: string;
+  primaryKeyword?: string;
   wordCount: number;
   readingTime: number;
   seoScore: number;
@@ -58,14 +59,23 @@ export class BlogService {
     console.log('🎨 Applying beautiful content structure to new blog post...');
     const beautifulContent = applyBeautifulContentStructure(data.content, data.title);
 
+    // Generate a temporary slug for published_url if not provided
+    const tempSlug = customSlug || this.generateSlug(data.title);
+
+    // Get base URL for published_url (handle both client and server side)
+    const baseUrl = typeof window !== 'undefined'
+      ? window.location.origin
+      : 'https://backlink-infinity.netlify.app'; // Use production URL as fallback
+
     const blogPostData: CreateBlogPost = {
       user_id: userId || null,
       title: data.title,
       slug: customSlug, // null triggers database slug generation
       content: beautifulContent, // Use beautifully formatted content
       target_url: data.targetUrl,
-      anchor_text: data.anchorText,
-      // published_url will be set after database generates slug
+      anchor_text: data.anchorText || data.title || 'Learn More', // Default anchor text if not provided
+      keyword: data.primaryKeyword || this.extractKeywordFromTitle(data.title), // Extract keyword from title if not provided
+      published_url: `${baseUrl}/blog/${tempSlug}`, // Set published URL with temporary slug
       status: 'published',
       is_trial_post: isTrialPost,
       expires_at: isTrialPost ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null,
@@ -94,7 +104,7 @@ export class BlogService {
     }
 
     // For trial posts, attempt normal creation
-    console.log('🔓 Attempting blog post creation...');
+    console.log('��� Attempting blog post creation...');
 
     // Remove any custom id field to let database auto-generate UUID
     const { id: _, ...cleanBlogPostData } = blogPostData as any;
@@ -619,6 +629,23 @@ export class BlogService {
   private generateFeaturedImage(keyword: string): string {
     const encodedKeyword = encodeURIComponent(keyword);
     return `https://images.unsplash.com/1600x900/?${encodedKeyword}&auto=format&fit=crop`;
+  }
+
+  /**
+   * Extract keyword from title if not provided
+   */
+  private extractKeywordFromTitle(title: string): string {
+    // Remove common stop words and get meaningful keywords
+    const stopWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'up', 'about', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'among', 'since', 'without', 'towards'];
+
+    const words = title
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '') // Remove punctuation
+      .split(/\s+/)
+      .filter(word => word.length > 2 && !stopWords.includes(word));
+
+    // Return the first meaningful word or fallback to first word of title
+    return words[0] || title.split(' ')[0] || 'blog';
   }
 
   /**
