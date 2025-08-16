@@ -119,7 +119,7 @@ export function BeautifulBlogPost() {
             const result = await EmergencyDatabaseSetup.setupDatabase();
 
             if (result.success) {
-              console.log('�� Database setup completed, retrying blog load...');
+              console.log('✅ Database setup completed, retrying blog load...');
               toast({
                 title: "Blog Post Created",
                 description: "The missing blog post has been created. Reloading...",
@@ -1016,7 +1016,7 @@ export function BeautifulBlogPost() {
 
       {/* Navigation Bar */}
       <div className="beautiful-nav sticky top-16 z-30 border-b border-gray-200/50 bg-white/80 backdrop-blur-md">
-        <div className="container mx-auto px-6 py-4">
+        <div className="max-w-5xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
