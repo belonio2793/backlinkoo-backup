@@ -1040,18 +1040,18 @@ export function BeautifulBlogPost() {
         if (isLikelyHeading && !isTitle) {
           htmlContent += `<h2>${para}</h2>\n\n`;
         }
-        // Check if it's a numbered list item
+        // Convert numbered list items to bullet lists for better readability
         else if (para.match(/^\d+\./)) {
-          // If this is the start of a list, open <ol>
+          // If this is the start of a list, open <ul>
           if (i === 0 || !paragraphs[i-1].match(/^\d+\./)) {
-            htmlContent += '<ol>\n';
+            htmlContent += '<ul>\n';
           }
           const listContent = para.replace(/^\d+\.\s*/, '');
           htmlContent += `<li>${listContent}</li>\n`;
 
-          // If next paragraph is not a list item, close </ol>
+          // If next paragraph is not a list item, close </ul>
           if (i === paragraphs.length - 1 || !paragraphs[i+1].match(/^\d+\./)) {
-            htmlContent += '</ol>\n\n';
+            htmlContent += '</ul>\n\n';
           }
         }
         // Check if it's a bullet point (expanded patterns)
