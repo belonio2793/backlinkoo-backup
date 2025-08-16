@@ -302,16 +302,16 @@ export function PremiumPlanPopup({
   };
 
   const renderPlanSelection = () => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="text-center space-y-3">
+      <div className="text-center space-y-2">
         <div className="flex items-center justify-center gap-2">
-          <Crown className="h-8 w-8 text-yellow-500" />
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <Crown className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500" />
+          <h2 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             Premium Plan
           </h2>
         </div>
-        <p className="text-muted-foreground">
+        <p className="text-sm sm:text-base text-muted-foreground">
           Choose your plan and unlock unlimited SEO potential
         </p>
       </div>
