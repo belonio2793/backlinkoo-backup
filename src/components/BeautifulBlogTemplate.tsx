@@ -36,6 +36,8 @@ import { blogService } from '@/services/blogService';
 import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 import { processBlogContent } from '@/utils/markdownProcessor';
+import { BlogAutoAdjustmentService } from '@/services/blogAutoAdjustmentService';
+import { BlogQualityMonitor } from '@/utils/blogQualityMonitor';
 
 type BlogPost = Tables<'blog_posts'>;
 
