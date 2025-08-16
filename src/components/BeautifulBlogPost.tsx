@@ -674,14 +674,20 @@ export function BeautifulBlogPost() {
       .replace(/\n{3,}/g, '\n\n')
       .trim();
 
-    // Step 2: Convert markdown formatting to HTML before other processing
+    // Step 2: Enhanced markdown formatting to HTML conversion
     formattedContent = formattedContent
       // Convert markdown links [text](url) to HTML
       .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
-      // Convert italic text *text* to <em>text</em>
-      .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
+      // Convert markdown headings (### heading) to HTML
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      // Convert italic text *text* to <em>text</em> (single asterisks)
+      .replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '<em>$1</em>')
       // Convert italic text _text_ to <em>text</em>
-      .replace(/_([^_\n]+)_/g, '<em>$1</em>');
+      .replace(/(?<!_)_([^_\n]+)_(?!_)/g, '<em>$1</em>')
+      // Convert inline code `code` to <code>code</code>
+      .replace(/`([^`]+)`/g, '<code>$1</code>');
 
     // Step 2.5: Remove duplicate title if it appears in content
     if (title) {
