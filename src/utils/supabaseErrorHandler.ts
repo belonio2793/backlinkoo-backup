@@ -42,6 +42,11 @@ export class SupabaseErrorHandler {
   private isRetryableError(error: any): boolean {
     if (!error) return false;
 
+    // Never retry body stream errors - they are not recoverable
+    if (error.message?.includes('body stream already read')) return false;
+    if (error.message?.includes('body used already')) return false;
+    if (error.message?.includes('Response body stream already read')) return false;
+
     // Network connectivity errors
     if (error.message?.includes('Failed to fetch')) return true;
     if (error.message?.includes('NetworkError')) return true;
