@@ -18,6 +18,7 @@ import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
 import "@/utils/emergencyDisable"; // Load emergency disable utilities
 // import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
+import { LazyBeautifulBlogPost } from "@/components/LazyComponents";
 import Index from "./pages/Index";
 
 const LazyBlogCommentsSystem = lazy(() => import("./pages/BlogCommentsSystem"));
