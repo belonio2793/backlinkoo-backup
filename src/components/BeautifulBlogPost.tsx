@@ -45,8 +45,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { usePremiumSEOScore } from '@/hooks/usePremiumSEOScore';
 import { blogService } from '@/services/blogService';
-import { ContentFormatter } from '@/utils/contentFormatter';
-import { SimpleContentFormatter } from '@/utils/simpleContentFormatter';
+import { RobustBlogProcessor } from '@/utils/robustBlogProcessor';
+import { BlogProcessorTester } from '@/utils/testBlogProcessor';
 import BlogErrorBoundary from '@/components/BlogErrorBoundary';
 import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
@@ -103,6 +103,21 @@ export function BeautifulBlogPost() {
       loadBlogPost(slug);
     }
   }, [slug]);
+
+  // Add testing utilities to window for debugging
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).testBlogProcessor = () => BlogProcessorTester.runAllTests();
+      (window as any).testCurrentBlogPost = () => {
+        if (blogPost?.content) {
+          BlogProcessorTester.testCustomContent(blogPost.content, blogPost.title);
+        } else {
+          console.log('No blog post loaded to test');
+        }
+      };
+      (window as any).RobustBlogProcessor = RobustBlogProcessor;
+    }
+  }, [blogPost]);
 
   useEffect(() => {
     if (user) {
@@ -773,11 +788,11 @@ export function BeautifulBlogPost() {
       {/* Hero Section */}
       <div className="beautiful-blog-hero relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-purple-600/5 to-pink-600/5" />
-        <div className="container mx-auto px-6 py-16">
-          <article className="max-w-4xl mx-auto">
+        <div className="w-full">
+          <article className="w-full">
             
             {/* Article Header */}
-            <header className="text-center mb-16 relative">
+            <header className="text-center mb-16 relative max-w-4xl mx-auto px-6">
 
 
               {/* Status Badges */}
@@ -1018,7 +1033,7 @@ export function BeautifulBlogPost() {
 
             {/* Article Content */}
             <div className="prose prose-lg max-w-none mt-8">
-              <div className="beautiful-card pt-6 px-6 pb-8 md:pt-8 md:px-12 md:pb-12 lg:px-16">
+              <div className="beautiful-card max-w-6xl mx-auto pt-6 px-6 pb-8 md:pt-8 md:px-12 md:pb-12 lg:px-16">
                 <div
                   className="beautiful-blog-content beautiful-prose modern-blog-content article-content prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-black prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-strong:font-bold prose-strong:text-gray-900 prose-img:rounded-lg prose-img:shadow-lg"
                   style={{
@@ -1033,52 +1048,44 @@ export function BeautifulBlogPost() {
                   dangerouslySetInnerHTML={{
                     __html: (() => {
                       try {
-                        let content = blogPost.content || '';
+                        const content = blogPost.content || '';
 
-                        if (!content || content.length === 0) {
-                          return '<div style="padding: 20px; text-align: center; color: #ef4444;"><h3>Content Error</h3><p>This blog post appears to have no content. Try running <code>fixEmptyBlogPost()</code> in the browser console to fix this issue.</p></div>';
+                        if (!content || content.trim().length === 0) {
+                          return '<div style="padding: 20px; text-align: center; color: #ef4444;"><h3>Content Error</h3><p>This blog post appears to have no content.</p></div>';
                         }
 
-                        // NEW: Auto-detect and repair malformed content
-                        const repairResult = RobustContentProcessor.autoDetectAndRepair(content, {
-                          primaryKeyword: blogPost.title,
+                        // Process content with robust processor
+                        const result = RobustBlogProcessor.processIfNeeded(content, blogPost.title, {
+                          removeTitle: true,
                           targetUrl: blogPost.target_url,
-                          anchorText: blogPost.anchor_text
+                          anchorText: blogPost.anchor_text,
+                          keyword: blogPost.keyword
                         });
 
-                        if (repairResult.wasRepaired) {
-                          console.log('🔧 Content was automatically repaired:', repairResult.issues);
+                        // Log processing results for debugging
+                        if (result.wasProcessed) {
+                          console.log('✅ Blog content processed successfully:', {
+                            issues: result.issues,
+                            warnings: result.warnings
+                          });
                         }
 
-                        let processedContent = repairResult.content;
-
-                        // Apply enhanced cleaning only if content wasn't severely malformed
-                        if (!repairResult.wasRepaired || repairResult.issues.length < 3) {
-                          const cleanedContent = EnhancedBlogCleaner.cleanContent(processedContent, blogPost.title);
-
-                          if (cleanedContent && cleanedContent.length > 0) {
-                            processedContent = cleanedContent;
-                          }
+                        if (result.warnings.length > 0) {
+                          console.warn('⚠️ Blog content warnings:', result.warnings);
                         }
 
-                        // Use simplified formatter only if not already well-formatted HTML
-                        if (!processedContent.includes('<h1>') && !processedContent.includes('<h2>')) {
-                          const formattedContent = SimpleContentFormatter.formatBlogContent(processedContent, blogPost.title);
-
-                          // Validate the formatted content
-                          const validation = SimpleContentFormatter.validateContent(formattedContent);
-                          if (validation.isValid) {
-                            processedContent = formattedContent;
-                          }
-                        }
-
-                        return processedContent;
+                        return result.content;
                       } catch (formatError) {
-                        console.error('💥 Content formatting failed:', formatError);
-                        // Return raw content as emergency fallback
+                        console.error('💥 Content processing failed:', formatError);
+                        // Return cleaned raw content as emergency fallback
                         const rawContent = blogPost.content || '';
                         if (rawContent) {
-                          return `<div style="padding: 20px;"><h3>Content Processing Error</h3><pre style="white-space: pre-wrap; font-family: inherit;">${rawContent}</pre></div>`;
+                          // Basic HTML escape for safety
+                          const escapedContent = rawContent
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/\n/g, '<br>');
+                          return `<div style="padding: 20px;"><h3>Content Processing Error</h3><div style="white-space: pre-wrap; font-family: inherit; color: #666;">${escapedContent}</div></div>`;
                         }
                         return '<div style="padding: 20px; color: #ef4444;">Content could not be loaded or processed.</div>';
                       }
@@ -1090,7 +1097,7 @@ export function BeautifulBlogPost() {
 
             {/* Keywords Section */}
             {blogPost.keywords && blogPost.keywords.length > 0 && (
-              <div className="mt-12 p-8 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200">
+              <div className="mt-12 p-8 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200 max-w-4xl mx-auto">
                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-purple-600" />
                   Keywords & Topics
@@ -1110,7 +1117,7 @@ export function BeautifulBlogPost() {
             )}
 
             {/* Engagement Section */}
-            <div className="mt-16 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200">
+            <div className="mt-16 p-8 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-200 max-w-5xl mx-auto">
               <div className="text-center">
                 <h3 className="text-2xl font-bold text-gray-900 mb-4">
                   Enjoyed this article?
@@ -1132,7 +1139,7 @@ export function BeautifulBlogPost() {
             </div>
 
             {/* Premium Upgrade CTA Section */}
-            <div className="mt-12 p-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border border-purple-200">
+            <div className="mt-12 p-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border border-purple-200 max-w-4xl mx-auto">
               <div className="text-center">
                 <div className="flex items-center justify-center mb-4">
                   <Crown className="h-8 w-8 text-purple-600 mr-3" />
@@ -1191,7 +1198,7 @@ export function BeautifulBlogPost() {
             </div>
 
             {/* Post Information Section */}
-            <div className="mt-12 space-y-6">
+            <div className="mt-12 space-y-6 max-w-4xl mx-auto px-6">
               {/* ENHANCED EXPIRATION WARNING WITH KILLER DELETION ALERT */}
               {!blogPost.claimed && blogPost.expires_at && (
                 <div className="space-y-4">

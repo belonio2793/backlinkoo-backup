@@ -253,7 +253,7 @@ const Index = () => {
     <div className="min-h-screen bg-background font-light">
       {/* Header */}
       <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="w-full px-4 sm:px-6 py-2">
+        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
               <Infinity className="h-4 w-4 text-primary" />
@@ -332,7 +332,7 @@ const Index = () => {
 
       {/* Free Blog Generator - Top Feature */}
       <section id="blog-generator" className="py-12 sm:py-16 md:py-24 px-4 md:px-6 bg-gradient-to-br from-slate-50 to-blue-50/30">
-        <div className="w-full px-4 md:px-0">
+        <div className="w-full max-w-6xl mx-auto px-4 md:px-0">
           {/* Optional: Advanced Generator Toggle (Hidden by default) */}
 
 
@@ -385,7 +385,7 @@ const Index = () => {
       {/* Backlink ∞ Automation - Coming Soon Section */}
       <section className="py-16 px-4 md:px-6 bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5"></div>
-        <div className="relative max-w-7xl mx-auto">
+        <div className="relative max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <div className="flex items-center justify-center gap-3 mb-6">
               <div className="relative">
@@ -572,7 +572,7 @@ const Index = () => {
       {/* Trial Conversion Section */}
       {showTrialUpgrade && (
         <section className="py-12 px-6 bg-gradient-to-br from-amber-50 to-orange-50">
-          <div className="w-full px-6">
+          <div className="w-full max-w-6xl mx-auto px-6">
             <TrialConversionBanner
               onUpgrade={() => {
                 setShowInlineAuth(true);
@@ -587,7 +587,7 @@ const Index = () => {
       {/* Inline Authentication Section - Show for guests or trial upgrades */}
       {(!user && authChecked) || showInlineAuth ? (
         <section className="py-16 px-6 bg-gradient-to-br from-blue-50 to-indigo-50" id="inline-auth">
-          <div className="w-full px-6">
+          <div className="w-full max-w-6xl mx-auto px-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
               {/* Left side - Value proposition */}
               <div>
@@ -657,7 +657,7 @@ const Index = () => {
         className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
-        <div className="w-full text-center relative z-10 px-6">
+        <div className="w-full max-w-6xl mx-auto text-center relative z-10 px-6">
           <RotatingTagline />
           
           <AnimatedHeadline
@@ -702,7 +702,7 @@ const Index = () => {
 
       {/* Features Grid */}
       <section className="py-12 sm:py-16 md:py-24 px-4 md:px-6 bg-muted/30">
-        <div className="w-full px-4 md:px-0">
+        <div className="w-full max-w-6xl mx-auto px-4 md:px-0">
           <div className="text-center mb-16">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light mb-6 tracking-tight">Why Professionals Choose Us</h2>
             <p className="text-base sm:text-lg md:text-xl text-muted-foreground max-w-6xl mx-auto leading-relaxed font-light">
@@ -726,7 +726,7 @@ const Index = () => {
 
       {/* Service Sections */}
       <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6">
-        <div className="w-full space-y-16 sm:space-y-24 md:space-y-32">
+        <div className="w-full max-w-6xl mx-auto space-y-16 sm:space-y-24 md:space-y-32">
           
           {/* Dashboard Overview */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
@@ -964,7 +964,7 @@ const Index = () => {
         className="relative py-24 px-0 md:px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
-        <div className="w-full relative z-10 px-4 md:px-6">
+        <div className="w-full max-w-6xl mx-auto relative z-10 px-4 md:px-6">
           <div className="text-center mb-16">
             <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light mb-6 tracking-tight text-gray-900">Starter Packages</h2>
             <p className="text-base sm:text-lg md:text-xl text-gray-700 max-w-6xl mx-auto leading-relaxed font-light">
@@ -1093,7 +1093,7 @@ const Index = () => {
         className="relative py-24 px-0 md:px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
-        <div className="w-full text-center relative z-10 px-4 md:px-6">
+        <div className="w-full max-w-6xl mx-auto text-center relative z-10 px-4 md:px-6">
           <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight text-gray-900">
             Ready to Dominate Search Results?
           </h2>
