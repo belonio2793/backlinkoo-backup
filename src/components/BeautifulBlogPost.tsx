@@ -89,23 +89,40 @@ function formatContent(raw: string) {
   const lines = cleanedContent.split(/\n+/).map(l => l.trim()).filter(Boolean);
 
   return lines.map((line, i) => {
+    // Process each line to handle bold text and markdown links
+    const processLineContent = (text: string) => {
+      // Convert **text** to bold
+      text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+      // Convert markdown links [text](url) to HTML links
+      text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
+        // Clean up the URL and text
+        const cleanText = linkText.trim();
+        let cleanUrl = url.trim();
+        if (cleanUrl && !cleanUrl.match(/^https?:\/\//)) {
+          cleanUrl = cleanUrl.startsWith('//') ? 'https:' + cleanUrl : 'https://' + cleanUrl;
+        }
+        return `<a href="${cleanUrl}" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
+      });
+
+      return text;
+    };
+
     // Enhanced section heading detection
     if (/^(Section|Step|Chapter|Part|Stage|Phase)\s*\d+/i.test(line) ||
         /^\d+\.\s+[A-Z]/.test(line) ||
         /^(Section|Step|Chapter|Part)\s*\d+\s*[-–—]\s*/.test(line)) {
+      const processedContent = processLineContent(line);
       return (
-        <h2 key={i} className="beautiful-prose text-3xl font-bold text-black mb-6 mt-12">
-          {line}
-        </h2>
+        <h2 key={i} className="beautiful-prose text-3xl font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
       );
     }
 
     // Enhanced Key Insights / Highlights detection
     if (/^(Key Insights|Pro Tip|Conclusion|Summary|Overview|Benefits|Important|Essential|Critical|Best Practices|Implementation)/i.test(line)) {
+      const processedContent = processLineContent(line);
       return (
-        <h3 key={i} className="beautiful-prose text-2xl font-semibold text-black mb-4 mt-8">
-          {line}
-        </h3>
+        <h3 key={i} className="beautiful-prose text-2xl font-semibold text-black mb-4 mt-8" dangerouslySetInnerHTML={{ __html: processedContent }} />
       );
     }
 
