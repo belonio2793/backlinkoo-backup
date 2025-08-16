@@ -204,11 +204,46 @@ export class NetworkErrorHandler {
     // Enhanced fetch wrapper with better error handling
     window.fetch = async (...args) => {
       try {
-        const [url] = args;
+        const [url, options] = args;
 
         // Don't interfere with module loading (dynamic imports)
         if (url && typeof url === 'string' && (url.includes('.tsx') || url.includes('.ts') || url.includes('.js'))) {
           return await this.originalFetch(...args);
+        }
+
+        // Check for problematic requests that commonly fail
+        if (url && typeof url === 'string') {
+          // Skip Supabase requests if credentials are invalid
+          if (url.includes('.supabase.co') && localStorage.getItem('supabase_connection_failed') === 'true') {
+            console.warn('🚫 Skipping Supabase request due to previous connection failure:', url.substring(0, 50));
+            throw new Error('Supabase connection previously failed. Please check your configuration.');
+          }
+
+          // Add timeout for all external requests
+          if (!options || !options.signal) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+              controller.abort();
+              console.warn('⏰ Request timeout for:', url.substring(0, 50));
+            }, 15000); // 15 second timeout
+
+            const modifiedOptions = {
+              ...options,
+              signal: controller.signal
+            };
+
+            try {
+              const response = await this.originalFetch(url, modifiedOptions);
+              clearTimeout(timeoutId);
+              return response;
+            } catch (timeoutError: any) {
+              clearTimeout(timeoutId);
+              if (timeoutError.name === 'AbortError') {
+                throw new Error(`Request timeout: ${url.substring(0, 50)}... took too long to respond`);
+              }
+              throw timeoutError;
+            }
+          }
         }
 
         // Use the stored original fetch to avoid recursive wrapping
