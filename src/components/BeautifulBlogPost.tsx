@@ -1386,7 +1386,7 @@ export function BeautifulBlogPost() {
 
             {/* Keywords Section */}
             {blogPost.keywords && blogPost.keywords.length > 0 && (
-              <div className="mt-12 p-8 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200 max-w-4xl mx-auto">
+              <div className="mt-12 p-8 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200 max-w-5xl mx-auto">
                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-purple-600" />
                   Keywords & Topics
