@@ -96,7 +96,7 @@ Format the response as a complete article with proper markdown formatting.`;
       messages: [
         {
           role: 'system',
-          content: 'You are a professional content writer specializing in link building automation. Create high-quality, engaging articles that naturally incorporate the provided anchor text as a hyperlink. The content should be informative, well-structured, provide real value to readers, and seamlessly integrate the anchor text within the context. Ensure the anchor text appears naturally in the content flow.'
+          content: 'You are a professional content writer specializing in creating clean, well-formatted HTML content. Generate articles with proper HTML structure using semantic tags. CRITICAL: Return only clean HTML content - no markdown, no malformed HTML entities, no broken formatting. Use <h2> for major sections, <h3> for subsections, <p> for paragraphs, and proper HTML lists. Never mix markdown syntax with HTML tags.'
         },
         {
           role: 'user',
