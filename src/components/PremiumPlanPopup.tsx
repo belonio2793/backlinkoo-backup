@@ -317,45 +317,45 @@ export function PremiumPlanPopup({
       </div>
 
       {/* Plan Options */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         {Object.entries(plans).map(([key, plan]) => (
-          <Card 
+          <Card
             key={key}
             className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
               selectedPlan === key ? 'ring-2 ring-blue-500 bg-blue-50' : ''
             }`}
             onClick={() => setSelectedPlan(key as 'monthly' | 'yearly')}
           >
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="capitalize">{key} Plan</CardTitle>
+                <CardTitle className="text-base sm:text-lg capitalize">{key} Plan</CardTitle>
                 {plan.popular && (
-                  <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
-                    🔥 Most Popular
+                  <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs">
+                    🔥 Popular
                   </Badge>
                 )}
               </div>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold">${plan.price}</span>
-                <span className="text-muted-foreground">per {plan.period}</span>
+            <CardContent className="space-y-2 sm:space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
+                <span className="text-2xl sm:text-3xl font-bold">${plan.price}</span>
+                <span className="text-sm text-muted-foreground">per {plan.period}</span>
                 {plan.originalPrice && (
-                  <span className="text-sm text-muted-foreground line-through">
+                  <span className="text-xs sm:text-sm text-muted-foreground line-through">
                     ${plan.originalPrice}
                   </span>
                 )}
               </div>
-              
+
               {plan.savings && (
-                <div className="text-sm text-green-600 font-medium">
-                  Save ${plan.savings} per year ({plan.discount}% off)
+                <div className="text-xs sm:text-sm text-green-600 font-medium">
+                  Save ${plan.savings}/year ({plan.discount}% off)
                 </div>
               )}
-              
+
               {key === 'yearly' && (
-                <div className="text-sm text-blue-600">
-                  That's just ${(plan.price / 12).toFixed(0)}/month!
+                <div className="text-xs sm:text-sm text-blue-600">
+                  Just ${(plan.price / 12).toFixed(0)}/month!
                 </div>
               )}
             </CardContent>
