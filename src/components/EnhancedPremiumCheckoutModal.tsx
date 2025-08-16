@@ -127,16 +127,32 @@ export function EnhancedPremiumCheckoutModal({
       );
 
       if (result.success && result.url) {
-        // Redirect to Stripe checkout
+        // Open Stripe checkout in new window
         toast({
-          title: "Redirecting to Payment",
-          description: "You'll be redirected to complete your payment securely.",
+          title: "Opening Secure Checkout",
+          description: "Complete your payment in the new window that just opened.",
         });
 
-        // Small delay to show the toast before redirect
-        setTimeout(() => {
-          window.location.href = result.url;
-        }, 1000);
+        // Open in new window with proper features
+        const checkoutWindow = window.open(
+          result.url,
+          'stripe-checkout',
+          'width=800,height=600,scrollbars=yes,resizable=yes,location=yes,status=yes'
+        );
+
+        if (!checkoutWindow) {
+          // Popup blocked - fallback to current window
+          toast({
+            title: "Popup Blocked",
+            description: "Redirecting in current window...",
+          });
+          setTimeout(() => {
+            window.location.href = result.url;
+          }, 1000);
+        } else {
+          // Close modal since checkout is opening
+          onClose();
+        }
       } else {
         throw new Error(result.error || 'Failed to create subscription');
       }

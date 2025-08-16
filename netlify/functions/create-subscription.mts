@@ -42,20 +42,26 @@ async function getClientIP(request: Request): Promise<string> {
   return forwarded?.split(',')[0]?.trim() || realIP || cfConnectingIP || 'unknown';
 }
 
-// Define pricing for dynamic product creation
+// Define pricing with predefined Stripe price IDs (use environment variables in production)
 const PRICING_CONFIG = {
   monthly: {
     price: 29,
     originalPrice: 49,
     interval: 'month' as const,
-    discount: 41
+    discount: 41,
+    priceId: process.env.STRIPE_MONTHLY_PRICE_ID || 'price_monthly_fallback',
+    productName: 'Premium SEO Tools - Monthly',
+    description: 'Access to unlimited backlinks, SEO academy, analytics, and priority support - monthly billing'
   },
   yearly: {
     price: 290,
     originalPrice: 588,
     interval: 'year' as const,
     discount: 51,
-    savings: 298
+    savings: 298,
+    priceId: process.env.STRIPE_YEARLY_PRICE_ID || 'price_yearly_fallback',
+    productName: 'Premium SEO Tools - Yearly',
+    description: 'Access to unlimited backlinks, SEO academy, analytics, and priority support - yearly billing (save $298!)'
   }
 };
 
@@ -91,38 +97,50 @@ async function createStripeSubscription(
     }
   }
 
-  // Create dynamic product and price
-  const product = await stripe.products.create({
-    name: `Premium SEO Tools - ${subscriptionData.plan.charAt(0).toUpperCase() + subscriptionData.plan.slice(1)}`,
-    description: `Access to all premium SEO tools and features - ${subscriptionData.plan} billing`,
-    metadata: {
-      plan: subscriptionData.plan,
-      features: JSON.stringify([
-        'Unlimited Backlinks',
-        'Complete SEO Academy (50+ Lessons)',
-        'Advanced Analytics & Reports',
-        'Priority 24/7 Support',
-        'White-Hat Guarantee',
-        'Custom Campaign Strategies',
-        'Professional Certifications',
-        'API Access & Integrations'
-      ])
-    }
-  });
+  // Use predefined price ID or create dynamic price as fallback
+  let priceId = planConfig.priceId;
 
-  const price = await stripe.prices.create({
-    product: product.id,
-    unit_amount: planConfig.price * 100, // Convert to cents
-    currency: 'usd',
-    recurring: {
-      interval: planConfig.interval,
-    },
-    metadata: {
-      plan: subscriptionData.plan,
-      originalPrice: planConfig.originalPrice.toString(),
-      discount: planConfig.discount.toString()
-    }
-  });
+  // If using fallback price IDs, create the product and price
+  if (priceId.includes('fallback')) {
+    console.log('Creating dynamic product and price for', subscriptionData.plan);
+
+    const product = await stripe.products.create({
+      name: planConfig.productName,
+      description: planConfig.description,
+      metadata: {
+        plan: subscriptionData.plan,
+        type: 'subscription',
+        features: JSON.stringify([
+          'Unlimited Backlinks',
+          'Complete SEO Academy (50+ Lessons)',
+          'Advanced Analytics & Reports',
+          'Priority 24/7 Support',
+          'White-Hat Guarantee',
+          'Custom Campaign Strategies',
+          'Professional Certifications',
+          'API Access & Integrations'
+        ])
+      }
+    });
+
+    const price = await stripe.prices.create({
+      product: product.id,
+      unit_amount: planConfig.price * 100, // Convert to cents
+      currency: 'usd',
+      recurring: {
+        interval: planConfig.interval,
+      },
+      metadata: {
+        plan: subscriptionData.plan,
+        originalPrice: planConfig.originalPrice.toString(),
+        discount: planConfig.discount.toString()
+      }
+    });
+
+    priceId = price.id;
+  } else {
+    console.log('Using predefined price ID:', priceId);
+  }
 
   // Create checkout session
   const session = await stripe.checkout.sessions.create({
@@ -130,7 +148,7 @@ async function createStripeSubscription(
     customer_email: customerId ? undefined : email,
     line_items: [
       {
-        price: price.id,
+        price: priceId,
         quantity: 1,
       },
     ],
@@ -141,8 +159,8 @@ async function createStripeSubscription(
       email,
       plan: subscriptionData.plan,
       isGuest: subscriptionData.isGuest ? 'true' : 'false',
-      productId: product.id,
-      priceId: price.id
+      priceId: priceId,
+      description: planConfig.description
     },
     subscription_data: {
       metadata: {
@@ -248,5 +266,5 @@ export default async (req: Request, context: Context) => {
 };
 
 export const config: Config = {
-  path: "/api/create-subscription"
+  path: "/.netlify/functions/create-subscription"
 };

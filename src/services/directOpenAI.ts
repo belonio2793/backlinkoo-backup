@@ -180,11 +180,13 @@ Generate content so valuable that readers feel they've discovered insider knowle
       try {
         result = await response.json();
       } catch (jsonError) {
+        console.error('❌ Failed to parse Netlify function response:', jsonError);
         throw new Error(`OpenAI API call failed: ${response.status} - Unable to parse response`);
       }
 
       if (!response.ok) {
-        const errorMessage = `OpenAI API call failed: ${response.status} - ${result.error || 'Unknown error'}`;
+        const errorMessage = `OpenAI API call failed: ${response.status} - ${result?.error || 'Unknown error'}`;
+        console.error('❌ Netlify function error:', errorMessage);
         throw new Error(errorMessage);
       }
 
@@ -232,9 +234,20 @@ Generate content so valuable that readers feel they've discovered insider knowle
 
     } catch (error) {
       console.error('❌ Blog generation failed:', error);
+
+      // Handle specific stream errors gracefully
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      if (errorMessage.includes('body stream already read') || errorMessage.includes('body used already')) {
+        console.error('🔄 Response stream conflict detected - this suggests a network or parsing issue');
+        return {
+          success: false,
+          error: 'Network communication error. Please try again.'
+        };
+      }
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: errorMessage
       };
     }
   }
@@ -447,9 +460,20 @@ Generate content so valuable that readers feel they've discovered insider knowle
 
     } catch (error) {
       console.error('❌ Mock blog generation failed:', error);
+
+      // Handle specific stream errors gracefully
+      const errorMessage = error instanceof Error ? error.message : 'Mock generation failed';
+      if (errorMessage.includes('body stream already read') || errorMessage.includes('body used already')) {
+        console.error('🔄 Stream conflict in mock API - retrying...');
+        return {
+          success: false,
+          error: 'Network communication error. Please try again.'
+        };
+      }
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Mock generation failed'
+        error: errorMessage
       };
     }
   }

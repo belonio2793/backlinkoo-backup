@@ -114,7 +114,7 @@ export class BlogService {
           .insert(cleanBlogPostData);
         console.log('✅ [BlogService] Also saved to blog_posts for compatibility');
       } catch (backupError) {
-        console.warn('⚠️ [BlogService] Backup save to blog_posts failed:', backupError);
+        console.warn('⚠️ [BlogService] Backup save to blog_posts failed:', this.getSafeErrorMessage(backupError));
       }
 
     } catch (networkError: any) {
@@ -147,7 +147,9 @@ export class BlogService {
               .from('blog_posts')
               .insert(retryData);
           } catch (backupError) {
-            console.warn('���️ [BlogService] Backup retry save to blog_posts failed:', backupError);
+            // Handle stream errors gracefully
+            const errorMessage = this.getSafeErrorMessage(backupError);
+            console.warn('⚠️ [BlogService] Backup retry save to blog_posts failed:', errorMessage);
           }
 
         } catch (networkError: any) {
@@ -178,7 +180,7 @@ export class BlogService {
                   .from('blog_posts')
                   .insert(finalData);
               } catch (backupError) {
-                console.warn('⚠️ [BlogService] Backup final save to blog_posts failed:', backupError);
+                console.warn('⚠️ [BlogService] Backup final save to blog_posts failed:', this.getSafeErrorMessage(backupError));
               }
             } catch (networkError: any) {
               console.error('❌ Network error during final retry:', networkError);
@@ -251,7 +253,7 @@ export class BlogService {
 
     for (let i = 0; i < approaches.length; i++) {
       try {
-        console.log(`🔄 [BlogService] Trying approach ${i + 1}/${approaches.length}`);
+        console.log(`��� [BlogService] Trying approach ${i + 1}/${approaches.length}`);
         const result = await approaches[i]();
 
         if (result) {

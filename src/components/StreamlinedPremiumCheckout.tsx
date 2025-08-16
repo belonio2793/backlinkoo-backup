@@ -136,11 +136,28 @@ export function StreamlinedPremiumCheckout({
       if (result.success && result.url) {
         // Redirect to payment provider
         toast({
-          title: "Redirecting to Payment",
-          description: "Opening secure Stripe checkout...",
+          title: "Opening Secure Checkout",
+          description: "Complete your payment in the new window that just opened.",
         });
 
-        window.location.href = result.url;
+        // Open in new window
+        const checkoutWindow = window.open(
+          result.url,
+          'stripe-checkout',
+          'width=800,height=600,scrollbars=yes,resizable=yes,location=yes,status=yes'
+        );
+
+        if (!checkoutWindow) {
+          // Popup blocked - fallback to current window
+          toast({
+            title: "Popup Blocked",
+            description: "Redirecting in current window...",
+          });
+          window.location.href = result.url;
+        } else {
+          // Close modal since checkout is opening
+          onClose();
+        }
         return;
       }
 
@@ -152,7 +169,18 @@ export function StreamlinedPremiumCheckout({
 
         if (fallbackResult.success) {
           if (fallbackResult.url && !fallbackResult.usedFallback) {
-            window.location.href = fallbackResult.url;
+            // Open fallback URL in new window too
+            const fallbackWindow = window.open(
+              fallbackResult.url,
+              'stripe-checkout-fallback',
+              'width=800,height=600,scrollbars=yes,resizable=yes,location=yes,status=yes'
+            );
+
+            if (!fallbackWindow) {
+              window.location.href = fallbackResult.url;
+            } else {
+              onClose();
+            }
             return;
           } else if (fallbackResult.usedFallback) {
             // Direct upgrade via fallback

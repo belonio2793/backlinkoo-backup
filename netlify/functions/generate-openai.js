@@ -166,31 +166,48 @@ Create content so valuable that readers feel they've discovered a hidden gem. Th
       })
     });
 
+    // Read response body once and handle both success and error cases
+    let data;
+    try {
+      data = await response.json();
+    } catch (jsonError) {
+      console.error('❌ Failed to parse OpenAI response as JSON:', jsonError);
+      return {
+        statusCode: 500,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          success: false,
+          error: 'Failed to parse OpenAI response',
+          provider: 'openai'
+        })
+      };
+    }
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
       let errorMessage = `OpenAI API error: ${response.status}`;
-      
-      if (errorData.error?.message) {
-        errorMessage += ` - ${errorData.error.message}`;
+
+      if (data?.error?.message) {
+        errorMessage += ` - ${data.error.message}`;
       }
 
       console.error('❌ OpenAI API error:', errorMessage);
-      
+
       return {
         statusCode: response.status,
         headers: {
           'Access-Control-Allow-Origin': '*',
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
-          success: false, 
+        body: JSON.stringify({
+          success: false,
           error: errorMessage,
           provider: 'openai'
         })
       };
     }
-
-    const data = await response.json();
 
     if (!data.choices || data.choices.length === 0) {
       return {
