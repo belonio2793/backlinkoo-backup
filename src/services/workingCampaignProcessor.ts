@@ -79,20 +79,17 @@ export class WorkingCampaignProcessor {
         })
       });
 
+      // Clone response immediately to avoid consumption conflicts
+      const responseClone = response.clone();
+      const functionDuration = Date.now() - functionStartTime;
+
       if (!response.ok) {
         let errorText = 'Unknown error';
-        const functionDuration = Date.now() - functionStartTime;
 
         try {
-          // Use safe response cloning
-          if (responseBodyManager.canReadBody(response)) {
-            const errorResponse = responseBodyManager.safeClone(response);
-            errorText = await errorResponse.text();
-          } else {
-            errorText = `HTTP ${response.status} - ${response.statusText}`;
-          }
-        } catch (cloneError) {
-          console.warn('Failed to read error response:', cloneError);
+          errorText = await responseClone.text();
+        } catch (readError) {
+          console.warn('Failed to read error response:', readError);
           errorText = `HTTP ${response.status} - ${response.statusText}`;
         }
 
@@ -109,17 +106,17 @@ export class WorkingCampaignProcessor {
 
       let result;
       try {
-        // Use safe response cloning for JSON parsing
-        if (responseBodyManager.canReadBody(response)) {
-          const jsonResponse = responseBodyManager.safeClone(response);
-          result = await jsonResponse.json();
-        } else {
-          console.warn('Response body already consumed, using fallback');
-          result = { success: false, error: 'Response body already consumed' };
-        }
+        result = await response.json();
       } catch (parseError) {
-        console.warn('Failed to parse JSON response:', parseError);
-        result = { success: false, error: 'Failed to parse server response' };
+        console.warn('Failed to parse JSON response, trying text:', parseError);
+        try {
+          // If JSON parsing fails, try reading as text
+          const textResponse = await responseClone.text();
+          result = { success: false, error: `Invalid JSON response: ${textResponse}` };
+        } catch (textError) {
+          console.warn('Failed to read response as text:', textError);
+          result = { success: false, error: 'Failed to parse server response' };
+        }
       }
       const functionDuration = Date.now() - functionStartTime;
 
