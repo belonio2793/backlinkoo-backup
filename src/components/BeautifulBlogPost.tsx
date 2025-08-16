@@ -787,13 +787,13 @@ export function BeautifulBlogPost() {
       </div>
 
       {/* Hero Section */}
-      <div className="beautiful-blog-hero relative overflow-hidden">
+      <div className="beautiful-blog-hero relative overflow-hidden pt-8">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-purple-600/5 to-pink-600/5" />
         <div className="w-full">
           <article className="w-full">
-            
+
             {/* Article Header */}
-            <header className="text-center mb-16 relative max-w-4xl mx-auto px-6">
+            <header className="text-center mb-16 relative max-w-4xl mx-auto px-6 pt-12">
 
 
               {/* Status Badges */}
@@ -1354,7 +1354,7 @@ export function BeautifulBlogPost() {
                   </div>
                   <ul className="space-y-2 text-sm">
                     <li>• This post will return to the claimable pool for 24 hours</li>
-                    <li>• Other users will be able to claim it during this time</li>
+                    <li>��� Other users will be able to claim it during this time</li>
                     <li>• If not reclaimed, it will be automatically deleted</li>
                     <li>• You can reclaim it yourself if it's still available</li>
                   </ul>
