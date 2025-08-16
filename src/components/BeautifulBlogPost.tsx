@@ -130,18 +130,29 @@ function formatContent(raw: string, title?: string) {
         .replace(/\s+\*\s*$/, '') // Remove trailing single asterisks
         .replace(/\*+$/, ''); // Remove any remaining trailing asterisks
 
-      // Convert markdown links [text](url) to HTML links with proper anchor text
+      // Enhanced markdown links processing with intelligent anchor text optimization
       processedText = processedText.replace(/\[([^\]]+)\]\(([^)\s]*\s*[^)]*)\)/g, (match, linkText, url) => {
         // Clean up the URL and text
         let cleanText = linkText.trim();
         let cleanUrl = url.trim();
 
-        // Fix the specific Backlinkoo link issue
+        // Enhanced anchor text optimization
         if (cleanUrl.includes('backlinkoo.com') && cleanText.toLowerCase().includes('backlinkoo')) {
           cleanText = 'Weebly SEO';
         }
 
-        // Fix common URL issues - handle broken URLs like "https: //" with any amount of space
+        // Optimize generic anchor text for better SEO and user experience
+        if (cleanText.toLowerCase() === 'click here' || cleanText.toLowerCase() === 'here' || cleanText.toLowerCase() === 'link') {
+          try {
+            const urlObj = new URL(cleanUrl.startsWith('http') ? cleanUrl : 'https://' + cleanUrl);
+            const domain = urlObj.hostname.replace('www.', '');
+            cleanText = domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1);
+          } catch {
+            cleanText = 'Visit Website';
+          }
+        }
+
+        // Fix common URL formatting issues
         cleanUrl = cleanUrl.replace(/https?\s*:\s*\/\//g, 'https://');
         cleanUrl = cleanUrl.replace(/www\s*\./g, 'www.');
 
@@ -152,7 +163,8 @@ function formatContent(raw: string, title?: string) {
         // Remove all spaces from URLs
         cleanUrl = cleanUrl.replace(/\s+/g, '');
 
-        return `<a href="${cleanUrl}" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
+        // Enhanced link styling with improved accessibility
+        return `<a href="${cleanUrl}" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" target="_blank" rel="noopener noreferrer" aria-label="Visit ${cleanText} (opens in new tab)">${cleanText}</a>`;
       });
 
       // Convert plain URLs to links automatically (improved pattern)
