@@ -598,6 +598,117 @@ export function BeautifulBlogPost() {
       .trim();
   };
 
+  // Apply beautiful content structure formatting
+  const applyBeautifulContentStructure = (content: string, title: string = '') => {
+    if (!content) return '';
+
+    let formattedContent = content;
+
+    // Step 1: Clean up malformed content and artifacts
+    formattedContent = formattedContent
+      .replace(/^(Introduction|Section \d+|Conclusion|Call-to-Action):\s*/gim, '')
+      .replace(/^(Hook Introduction|Summary|Overview):\s*/gim, '')
+      .replace(/\bH[1-6]:\s*/gi, '')
+      .replace(/Title:\s*/gi, '')
+      .replace(/Hook Introduction:\s*/gi, '')
+      .replace(/^#+\s*/gm, '')
+      .replace(/^>\s*/gm, '')
+      .replace(/["=]{2,}/g, '')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+
+    // Step 2: Apply premium HTML structure with beautiful classes
+    formattedContent = formattedContent
+      .replace(/<h1([^>]*)>(.*?)<\/h1>/gi, (match, attrs, text) => {
+        const cleanText = text.trim();
+        return `<h1 class="beautiful-prose text-4xl md:text-5xl font-black mb-8 leading-tight text-black"${attrs}>${cleanText}</h1>`;
+      })
+      .replace(/<h2([^>]*)>(.*?)<\/h2>/gi, (match, attrs, text) => {
+        const cleanText = text.trim();
+        return `<h2 class="beautiful-prose text-3xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h2>`;
+      })
+      .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, (match, attrs, text) => {
+        const cleanText = text.trim();
+        return `<h3 class="beautiful-prose text-2xl font-semibold text-black mb-4 mt-8"${attrs}>${cleanText}</h3>`;
+      });
+
+    // Step 3: Enhanced paragraphs with beautiful typography
+    formattedContent = formattedContent
+      .replace(/<p([^>]*)>(.*?)<\/p>/gi, (match, attrs, text) => {
+        const cleanText = text.trim();
+        if (cleanText.length === 0) return '';
+        return `<p class="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6"${attrs}>${cleanText}</p>`;
+      });
+
+    // Step 4: Beautiful lists with premium styling
+    formattedContent = formattedContent
+      .replace(/<ul([^>]*)>/gi, '<ul class="beautiful-prose space-y-4 my-8"$1>')
+      .replace(/<ol([^>]*)>/gi, '<ol class="beautiful-prose space-y-4 my-8"$1>')
+      .replace(/<li([^>]*)>(.*?)<\/li>/gi, (match, attrs, text) => {
+        const cleanText = text.trim();
+        return `<li class="beautiful-prose relative pl-8 text-lg leading-relaxed text-gray-700"${attrs}>${cleanText}</li>`;
+      });
+
+    // Step 5: Enhanced links with beautiful styling
+    formattedContent = formattedContent.replace(
+      /<a([^>]*?)href="([^"]*)"([^>]*?)>(.*?)<\/a>/gi,
+      (match, preAttrs, href, postAttrs, text) => {
+        const isExternal = href.startsWith('http');
+        const targetAttr = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
+        return `<a class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600"${preAttrs}href="${href}"${postAttrs}${targetAttr}>${text}</a>`;
+      }
+    );
+
+    // Step 6: Beautiful blockquotes
+    formattedContent = formattedContent.replace(
+      /<blockquote([^>]*)>(.*?)<\/blockquote>/gis,
+      (match, attrs, text) => {
+        const cleanText = text.trim();
+        return `<blockquote class="beautiful-prose border-l-4 border-blue-500 pl-6 py-4 my-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-r-lg italic text-xl text-gray-700"${attrs}>${cleanText}</blockquote>`;
+      }
+    );
+
+    // Step 7: Enhanced images with beautiful wrapper
+    formattedContent = formattedContent.replace(
+      /<img([^>]*?)src="([^"]*)"([^>]*?)>/gi,
+      (match, preAttrs, src, postAttrs) => {
+        const altMatch = match.match(/alt="([^"]*)"/);
+        const alt = altMatch ? altMatch[1] : '';
+
+        return `<div class="beautiful-prose my-8">
+          <img class="rounded-lg shadow-lg w-full h-auto"${preAttrs}src="${src}"${postAttrs} loading="lazy">
+          ${alt ? `<div class="text-center text-sm text-gray-500 mt-2 italic">${alt}</div>` : ''}
+        </div>`;
+      }
+    );
+
+    // Step 8: Enhanced code blocks
+    formattedContent = formattedContent.replace(
+      /<code([^>]*)>(.*?)<\/code>/gi,
+      (match, attrs, text) => {
+        return `<code class="beautiful-prose bg-gradient-to-r from-blue-100 to-purple-100 text-purple-800 px-3 py-1 rounded-lg font-mono text-sm"${attrs}>${text}</code>`;
+      }
+    );
+
+    // Step 9: Apply drop cap to first paragraph
+    formattedContent = formattedContent.replace(
+      /<p class="beautiful-prose([^"]*)"([^>]*)>(.*?)<\/p>/,
+      '<p class="beautiful-prose$1 beautiful-first-paragraph"$2>$3</p>'
+    );
+
+    // Step 10: Ensure proper spacing and structure
+    formattedContent = formattedContent
+      .replace(/>\s+</g, '><')
+      .replace(/(<\/h[1-6]>)\s*(<p)/gi, '$1\n\n$2')
+      .replace(/(<\/p>)\s*(<h[1-6])/gi, '$1\n\n$2')
+      .replace(/(<\/ul>|<\/ol>)\s*(<p)/gi, '$1\n\n$2')
+      .replace(/(<\/p>)\s*(<ul>|<ol>)/gi, '$1\n\n$2')
+      .replace(/<p[^>]*>\s*<\/p>/gi, '')
+      .trim();
+
+    return formattedContent;
+  };
+
   const autoRemoveTitlesFromContent = (content: string, pageTitle: string) => {
     if (!content) return '';
 
