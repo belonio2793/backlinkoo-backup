@@ -694,14 +694,22 @@ export function BeautifulBlogPost() {
       formattedContent = htmlContent;
     }
 
-    // Step 2: Apply premium HTML structure with beautiful classes
+    // Step 4: Apply premium HTML structure with beautiful classes and remove duplicate titles
     formattedContent = formattedContent
       .replace(/<h1([^>]*)>(.*?)<\/h1>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
+        // Skip if this heading matches the blog title (remove duplicate)
+        if (title && cleanText.toLowerCase() === title.toLowerCase()) {
+          return '';
+        }
         return `<h1 class="beautiful-prose text-4xl md:text-5xl font-black mb-8 leading-tight text-black"${attrs}>${cleanText}</h1>`;
       })
       .replace(/<h2([^>]*)>(.*?)<\/h2>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
+        // Skip if this heading matches the blog title (remove duplicate)
+        if (title && cleanText.toLowerCase() === title.toLowerCase()) {
+          return '';
+        }
         return `<h2 class="beautiful-prose text-3xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h2>`;
       })
       .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, (match, attrs, text) => {
