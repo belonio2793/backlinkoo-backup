@@ -288,13 +288,14 @@ const baseClient = hasValidCredentials ?
   }) :
   createMockSupabaseClient() as any;
 
-// Create enhanced client with error handling while preserving all methods
+// Create enhanced client with minimal interference to prevent stream conflicts
 let enhancedClient: any;
 
 if (hasValidCredentials) {
   enhancedClient = baseClient;
-  // Only enhance the auth client for now
-  enhancedClient.auth = supabaseErrorHandler.wrapAuthClient(baseClient.auth);
+  // Temporarily disable auth enhancement to prevent stream conflicts
+  // enhancedClient.auth = supabaseErrorHandler.wrapAuthClient(baseClient.auth);
+  console.log('📡 [Supabase] Using raw client to prevent stream conflicts');
 } else {
   enhancedClient = baseClient;
 }
