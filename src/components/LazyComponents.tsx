@@ -22,7 +22,48 @@ export const LazyBlogPostView = lazy(() => import('@/pages/BlogPost').then(modul
 export const LazyEnhancedBlogListing = lazy(() => import('@/components/EnhancedBlogListing').then(module => ({ default: module.EnhancedBlogListing })));
 export const LazySuperEnhancedBlogListing = lazy(() => import('@/components/SuperEnhancedBlogListing').then(module => ({ default: module.SuperEnhancedBlogListing })));
 export const LazyEnhancedBlogPost = lazy(() => import('@/components/EnhancedBlogPost').then(module => ({ default: module.EnhancedBlogPost })));
-export const LazyBeautifulBlogPost = lazy(() => import('@/components/BeautifulBlogPost').then(module => ({ default: module.BeautifulBlogPost })));
+export const LazyBeautifulBlogPost = lazy(() =>
+  import('@/components/BeautifulBlogPost')
+    .then(module => {
+      console.log('✅ BeautifulBlogPost module loaded successfully');
+      // Make sure we return the component correctly
+      const component = module.BeautifulBlogPost || module.default;
+      if (!component) {
+        throw new Error('BeautifulBlogPost component not found in module');
+      }
+      return { default: component };
+    })
+    .catch(error => {
+      console.error('❌ Failed to load BeautifulBlogPost:', error);
+      // Import emergency component as fallback
+      return import('@/components/EmergencyBlogPost')
+        .then(emergencyModule => {
+          console.log('✅ Loaded emergency component as fallback');
+          return { default: emergencyModule.EmergencyBlogPost || emergencyModule.default };
+        })
+        .catch(emergencyError => {
+          console.error('❌ Failed to load emergency component:', emergencyError);
+          // Final fallback - return a simple component
+          return {
+            default: () => (
+              <div className="min-h-screen flex items-center justify-center">
+                <div className="text-center p-8">
+                  <h2 className="text-2xl font-bold text-red-600 mb-4">Module Loading Error</h2>
+                  <p className="text-gray-600 mb-4">Failed to load blog post component</p>
+                  <p className="text-sm text-gray-500 mb-4">Error: {error.message}</p>
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+                  >
+                    Refresh Page
+                  </button>
+                </div>
+              </div>
+            )
+          };
+        });
+    })
+);
 export const LazyBeautifulBlogTemplate = lazy(() => import('@/components/BeautifulBlogTemplate').then(module => ({ default: module.BeautifulBlogTemplate })));
 export const LazyBlogValidator = lazy(() => import('@/pages/BlogValidator'));
 

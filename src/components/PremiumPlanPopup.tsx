@@ -302,60 +302,60 @@ export function PremiumPlanPopup({
   };
 
   const renderPlanSelection = () => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="text-center space-y-3">
+      <div className="text-center space-y-2">
         <div className="flex items-center justify-center gap-2">
-          <Crown className="h-8 w-8 text-yellow-500" />
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <Crown className="h-6 w-6 sm:h-8 sm:w-8 text-yellow-500" />
+          <h2 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
             Premium Plan
           </h2>
         </div>
-        <p className="text-muted-foreground">
+        <p className="text-sm sm:text-base text-muted-foreground">
           Choose your plan and unlock unlimited SEO potential
         </p>
       </div>
 
       {/* Plan Options */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
         {Object.entries(plans).map(([key, plan]) => (
-          <Card 
+          <Card
             key={key}
             className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
               selectedPlan === key ? 'ring-2 ring-blue-500 bg-blue-50' : ''
             }`}
             onClick={() => setSelectedPlan(key as 'monthly' | 'yearly')}
           >
-            <CardHeader className="pb-3">
+            <CardHeader className="pb-2 sm:pb-3">
               <div className="flex items-center justify-between">
-                <CardTitle className="capitalize">{key} Plan</CardTitle>
+                <CardTitle className="text-base sm:text-lg capitalize">{key} Plan</CardTitle>
                 {plan.popular && (
-                  <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white">
-                    🔥 Most Popular
+                  <Badge className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs">
+                    🔥 Popular
                   </Badge>
                 )}
               </div>
             </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-baseline gap-2">
-                <span className="text-3xl font-bold">${plan.price}</span>
-                <span className="text-muted-foreground">per {plan.period}</span>
+            <CardContent className="space-y-2 sm:space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-2">
+                <span className="text-2xl sm:text-3xl font-bold">${plan.price}</span>
+                <span className="text-sm text-muted-foreground">per {plan.period}</span>
                 {plan.originalPrice && (
-                  <span className="text-sm text-muted-foreground line-through">
+                  <span className="text-xs sm:text-sm text-muted-foreground line-through">
                     ${plan.originalPrice}
                   </span>
                 )}
               </div>
-              
+
               {plan.savings && (
-                <div className="text-sm text-green-600 font-medium">
-                  Save ${plan.savings} per year ({plan.discount}% off)
+                <div className="text-xs sm:text-sm text-green-600 font-medium">
+                  Save ${plan.savings}/year ({plan.discount}% off)
                 </div>
               )}
-              
+
               {key === 'yearly' && (
-                <div className="text-sm text-blue-600">
-                  That's just ${(plan.price / 12).toFixed(0)}/month!
+                <div className="text-xs sm:text-sm text-blue-600">
+                  Just ${(plan.price / 12).toFixed(0)}/month!
                 </div>
               )}
             </CardContent>
@@ -363,27 +363,32 @@ export function PremiumPlanPopup({
         ))}
       </div>
 
-      {/* Features List */}
-      <div className="space-y-3">
-        <h3 className="font-semibold">What's Included:</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {features.map((feature, index) => (
-            <div key={index} className="flex items-center gap-2 text-sm">
-              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+      {/* Features List - Compact */}
+      <div className="space-y-2">
+        <h3 className="text-sm sm:text-base font-semibold">What's Included:</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2">
+          {features.slice(0, 6).map((feature, index) => (
+            <div key={index} className="flex items-center gap-2 text-xs sm:text-sm">
+              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 flex-shrink-0" />
               <span>{feature.text}</span>
             </div>
           ))}
         </div>
+        {features.length > 6 && (
+          <div className="text-xs text-muted-foreground text-center">
+            +{features.length - 6} more premium features
+          </div>
+        )}
       </div>
 
       {/* Continue Button */}
-      <Button 
+      <Button
         onClick={handleContinueWithPlan}
         className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-        size="lg"
+        size="default"
       >
         Continue with {selectedPlan} Plan
-        <ArrowRight className="ml-2 h-4 w-4" />
+        <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
       </Button>
     </div>
   );
@@ -539,54 +544,54 @@ export function PremiumPlanPopup({
   );
 
   const renderCheckout = () => (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Plan Summary */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center gap-2">
-          <Crown className="h-5 w-5 text-yellow-500" />
-          <h3 className="text-lg font-semibold">Premium Plan</h3>
+          <Crown className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+          <h3 className="text-base sm:text-lg font-semibold">Premium Plan</h3>
         </div>
-        
-        <Card className="p-4 bg-gradient-to-br from-purple-50 to-blue-50">
-          <div className="space-y-3">
+
+        <Card className="p-3 sm:p-4 bg-gradient-to-br from-purple-50 to-blue-50">
+          <div className="space-y-2 sm:space-y-3">
             <div className="flex items-center justify-between">
-              <span className="font-medium capitalize">{selectedPlan} Plan</span>
-              <Badge variant="secondary">
-                {plans[selectedPlan].popular ? 'Most Popular' : 'Best Value'}
+              <span className="text-sm sm:text-base font-medium capitalize">{selectedPlan} Plan</span>
+              <Badge variant="secondary" className="text-xs">
+                {plans[selectedPlan].popular ? 'Popular' : 'Value'}
               </Badge>
             </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold">${plans[selectedPlan].price}</span>
-              <span className="text-muted-foreground">per {plans[selectedPlan].period}</span>
+
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+              <span className="text-xl sm:text-2xl font-bold">${plans[selectedPlan].price}</span>
+              <span className="text-sm text-muted-foreground">per {plans[selectedPlan].period}</span>
             </div>
-            
+
             {plans[selectedPlan].savings && (
-              <div className="text-sm text-green-600">
-                Save ${plans[selectedPlan].savings} per year
+              <div className="text-xs sm:text-sm text-green-600">
+                Save ${plans[selectedPlan].savings}/year
               </div>
             )}
           </div>
         </Card>
 
         <div className="space-y-2">
-          <h4 className="font-medium">Features Included:</h4>
-          <div className="space-y-1">
+          <h4 className="text-sm font-medium">Key Features:</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
             {features.slice(0, 4).map((feature, index) => (
-              <div key={index} className="flex items-center gap-2 text-sm">
-                {feature.icon}
-                <span>{feature.text}</span>
+              <div key={index} className="flex items-center gap-2 text-xs sm:text-sm">
+                <div className="text-green-500">{feature.icon}</div>
+                <span className="truncate">{feature.text}</span>
               </div>
             ))}
-            <div className="text-sm text-muted-foreground">
-              ...and {features.length - 4} more features
-            </div>
+          </div>
+          <div className="text-xs text-muted-foreground text-center">
+            +{features.length - 4} more features
           </div>
         </div>
       </div>
 
       {/* Payment Form */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {/* Authenticated User Indicator */}
         {isAuthenticated && user && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-3">
@@ -752,22 +757,22 @@ export function PremiumPlanPopup({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+        <DialogHeader className="pb-2">
           <div className="flex items-center justify-between">
             <DialogTitle className="sr-only">Premium Plan Upgrade</DialogTitle>
             <Button
               variant="ghost"
               size="sm"
               onClick={handleClose}
-              className="h-6 w-6 p-0"
+              className="h-6 w-6 p-0 absolute top-2 right-2 z-10"
             >
               <X className="h-4 w-4" />
             </Button>
           </div>
         </DialogHeader>
-        
-        <div className="pt-2">
+
+        <div className="overflow-y-auto">
           {getStepContent()}
         </div>
       </DialogContent>

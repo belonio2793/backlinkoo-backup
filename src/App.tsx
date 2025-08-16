@@ -18,6 +18,7 @@ import "@/utils/consoleSymbolCleaner"; // Load console utilities
 import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
 import "@/utils/emergencyDisable"; // Load emergency disable utilities
 // import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
+import { LazyBeautifulBlogPost } from "@/components/LazyComponents";
 import Index from "./pages/Index";
 
 const LazyBlogCommentsSystem = lazy(() => import("./pages/BlogCommentsSystem"));
@@ -28,7 +29,7 @@ const LazyBlog = lazy(() => import("./pages/Blog"));
 const LazyDashboard = lazy(() => import("./pages/Dashboard"));
 const LazyAutomation = lazy(() => import("./pages/Automation"));
 const LazyLogin = lazy(() => import("./pages/Login"));
-const LazyBeautifulBlogPost = lazy(() => import("./components/BeautifulBlogPost").then(module => ({ default: module.BeautifulBlogPost })));
+// Removed - using LazyBeautifulBlogPost from LazyComponents instead
 const LazyAuthCallback = lazy(() => import("./pages/AuthCallback"));
 const LazyEmailConfirmation = lazy(() => import("./pages/EmailConfirmation"));
 const LazyPasswordReset = lazy(() => import("./pages/PasswordReset"));

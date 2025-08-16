@@ -71,7 +71,12 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
     const isComponentError = error.message.includes('Loading chunk') ||
                             error.message.includes('is not defined') ||
                             error.message.includes('lazy') ||
-                            error.message.includes('Cannot resolve module');
+                            error.message.includes('Cannot resolve module') ||
+                            error.message.includes('Failed to fetch dynamically imported module');
+
+    // Network blocked errors (analytics interference)
+    const isNetworkBlockedError = error.name === 'NetworkBlockedError' ||
+                                 error.message.includes('Network request blocked by browser analytics');
 
     // Blog system errors
     const isBlogError = error.message.includes('blog') ||
@@ -80,7 +85,7 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
                        error.stack?.includes('blog');
 
     // For recoverable errors, don't show error state
-    if (isExtensionError || isAuthError || isDatabaseError || isComponentError || isRouteError || isBlogError) {
+    if (isExtensionError || isAuthError || isDatabaseError || isComponentError || isRouteError || isBlogError || isNetworkBlockedError) {
       console.warn('Recoverable error - not showing error UI:', error.message);
       return;
     }

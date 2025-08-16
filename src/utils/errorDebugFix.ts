@@ -60,13 +60,23 @@ export class ErrorDebugFix {
     Object.prototype.valueOf = function() {
       // If this is being converted to string and would result in [object Object]
       if (this && typeof this === 'object' && this.constructor === Object) {
-        // Try to extract meaningful information
-        if (this.message) return this.message;
-        if (this.error) return this.error;
-        if (this.details) return this.details;
-        
-        // Return formatted error
-        return formatErrorForUI(this);
+        try {
+          // Try to extract meaningful information safely
+          if (this.message && typeof this.message === 'string') return this.message;
+          if (this.error && typeof this.error === 'string') return this.error;
+          if (this.details && typeof this.details === 'string') return this.details;
+
+          // Safe formatted error with error handling
+          try {
+            return formatErrorForUI(this);
+          } catch (formatError) {
+            // If formatting fails, return a safe fallback
+            return '[Error: Unable to format object]';
+          }
+        } catch (extractError) {
+          // If anything fails in extraction, return safe fallback
+          return '[Error: Object conversion failed]';
+        }
       }
       return originalValueOf.call(this);
     };

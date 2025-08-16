@@ -8,14 +8,24 @@
  * Extracts a readable error message from various error types
  */
 export function getErrorMessage(error: any): string {
-  if (!error) {
-    return 'Unknown error occurred';
-  }
+  try {
+    if (!error) {
+      return 'Unknown error occurred';
+    }
 
-  // If it's already a string, return it
-  if (typeof error === 'string') {
-    return error;
-  }
+    // Handle Symbol errors specifically
+    if (typeof error === 'symbol') {
+      try {
+        return error.toString();
+      } catch {
+        return '[Symbol error - cannot convert to string]';
+      }
+    }
+
+    // If it's already a string, return it
+    if (typeof error === 'string') {
+      return error;
+    }
 
   // Try to get the message property
   if (error.message && typeof error.message === 'string') {
@@ -70,7 +80,15 @@ export function getErrorMessage(error: any): string {
         const parts = meaningfulKeys.map(key => {
           const value = error[key];
           if (typeof value === 'object') return `${key}: [object]`;
-          return `${key}: ${value}`;
+          if (typeof value === 'symbol') return `${key}: [symbol]`;
+          if (typeof value === 'function') return `${key}: [function]`;
+          if (typeof value === 'undefined') return `${key}: undefined`;
+          // Safe string conversion
+          try {
+            return `${key}: ${String(value)}`;
+          } catch (conversionError) {
+            return `${key}: [unconvertible]`;
+          }
         });
         return `Error: ${parts.join(', ')}`;
       }
@@ -87,8 +105,13 @@ export function getErrorMessage(error: any): string {
     }
   }
 
-  // Final fallback
-  return 'Unknown error occurred';
+    // Final fallback
+    return 'Unknown error occurred';
+  } catch (processingError) {
+    // If there's any error in processing (like Symbol conversion), return safe fallback
+    console.warn('Error processing error message:', processingError);
+    return 'Error occurred (processing failed)';
+  }
 }
 
 /**
@@ -107,19 +130,26 @@ export function logError(context: string, error: any): void {
  * Creates a user-friendly error message for display
  */
 export function formatErrorForUser(error: any, context?: string): string {
-  const message = getErrorMessage(error);
+  try {
+    const message = getErrorMessage(error);
 
-  // Remove technical details that users don't need to see
-  const cleanMessage = message
-    .replace(/^Error: /, '')
-    .replace(/\n.*$/s, '') // Remove stack traces
-    .replace(/at [^(]*\([^)]*\)/g, ''); // Remove function references
+    // Remove technical details that users don't need to see
+    const cleanMessage = message
+      .replace(/^Error: /, '')
+      .replace(/\n.*$/s, '') // Remove stack traces
+      .replace(/at [^(]*\([^)]*\)/g, ''); // Remove function references
 
-  if (context) {
-    return `${context}: ${cleanMessage}`;
+    if (context) {
+      return `${context}: ${cleanMessage}`;
+    }
+
+    return cleanMessage;
+  } catch (formatError) {
+    // If there's any error in formatting (like Symbol conversion), return safe fallback
+    console.warn('Error formatting user error message:', formatError);
+    const safeContext = context ? `${context}: ` : '';
+    return `${safeContext}An error occurred (formatting failed)`;
   }
-
-  return cleanMessage;
 }
 
 /**

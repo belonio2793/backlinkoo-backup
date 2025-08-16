@@ -14,15 +14,15 @@ export class NetworkErrorHandler {
    */
   static isFullStoryError(error: any): boolean {
     if (!error) return false;
-    
+
     const message = error.message || '';
     const stack = error.stack || '';
-    
+
+    // Only consider it a FullStory error if there's explicit evidence in the stack trace
     return stack.includes('fullstory') ||
            stack.includes('edge.fullstory.com') ||
            stack.includes('fs.js') ||
-           (message.includes('Failed to fetch') && 
-            (stack.includes('fullstory') || document.querySelector('script[src*="fullstory"]')));
+           stack.includes('fullstory.com');
   }
   
   /**
@@ -169,6 +169,13 @@ export class NetworkErrorHandler {
       return;
     }
 
+    // Check if fetch wrapper should be disabled (escape hatch)
+    if (window.localStorage?.getItem('disable-fetch-wrapper') === 'true') {
+      console.log('🚫 Fetch wrapper disabled via localStorage flag');
+      this.isInitialized = true;
+      return;
+    }
+
     // Store original fetch before any modifications
     this.originalFetch = window.fetch.bind(window);
     
@@ -197,11 +204,19 @@ export class NetworkErrorHandler {
     // Enhanced fetch wrapper with better error handling
     window.fetch = async (...args) => {
       try {
+        const [url] = args;
+
+        // Don't interfere with module loading (dynamic imports)
+        if (url && typeof url === 'string' && (url.includes('.tsx') || url.includes('.ts') || url.includes('.js'))) {
+          return await this.originalFetch(...args);
+        }
+
         // Use the stored original fetch to avoid recursive wrapping
         const response = await this.originalFetch(...args);
-        
-        // Use safe response body management
-        if (response.ok && responseBodyManager.canReadBody(response)) {
+
+        // Use safe response body management for API calls only
+        if (response.ok && responseBodyManager.canReadBody(response) && url && typeof url === 'string' &&
+            (url.includes('/api/') || url.includes('supabase') || url.includes('functions'))) {
           try {
             const clonedResponse = responseBodyManager.safeClone(response);
             return clonedResponse;
@@ -211,18 +226,31 @@ export class NetworkErrorHandler {
             return response;
           }
         }
-        
+
         return response;
-        
+
       } catch (error: any) {
+        const [url] = args;
+
+        // Don't interfere with module loading errors
+        if (url && typeof url === 'string' && (url.includes('.tsx') || url.includes('.ts') || url.includes('.js'))) {
+          throw error;
+        }
+
         // Log fetch errors with context but avoid recursive logging
         console.error('Fetch error detected:', error?.message || 'Unknown error');
 
-        // If it's a FullStory error, provide cleaner error message
+        // Only treat as FullStory error if there's explicit evidence
         if (this.isFullStoryError(error)) {
-          const newError = new Error('Network request blocked by browser analytics. Please try refreshing the page.');
-          newError.name = 'NetworkBlockedError';
-          throw newError;
+          console.warn('🌐 FullStory interference detected, retrying request...');
+          // Try once more with original fetch before giving up
+          try {
+            return await this.originalFetch(...args);
+          } catch (retryError) {
+            const newError = new Error('Network request blocked by browser analytics. Please try refreshing the page.');
+            newError.name = 'NetworkBlockedError';
+            throw newError;
+          }
         }
 
         // If it's a response body error, provide cleaner error message
@@ -261,11 +289,29 @@ export class NetworkErrorHandler {
 
 // Auto-initialize in browser environment with safety check
 if (typeof window !== 'undefined' && !window._networkErrorHandlerInitialized) {
-  NetworkErrorHandler.initialize();
-  window._networkErrorHandlerInitialized = true;
+  // Delay initialization to avoid interfering with module loading
+  setTimeout(() => {
+    try {
+      NetworkErrorHandler.initialize();
+      window._networkErrorHandlerInitialized = true;
+    } catch (error) {
+      console.warn('Failed to initialize NetworkErrorHandler:', error);
+    }
+  }, 1000);
 }
 
 // Make available globally for debugging
 if (typeof window !== 'undefined') {
   (window as any).NetworkErrorHandler = NetworkErrorHandler;
+
+  // Add utility functions to manage fetch wrapper
+  (window as any).disableFetchWrapper = () => {
+    localStorage.setItem('disable-fetch-wrapper', 'true');
+    console.log('🚫 Fetch wrapper will be disabled on next page load. Refresh the page.');
+  };
+
+  (window as any).enableFetchWrapper = () => {
+    localStorage.removeItem('disable-fetch-wrapper');
+    console.log('✅ Fetch wrapper will be enabled on next page load. Refresh the page.');
+  };
 }

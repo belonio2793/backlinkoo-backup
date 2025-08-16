@@ -1,132 +1,107 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, RefreshCw, Bug } from 'lucide-react';
+import { AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
-  onError?: (error: Error, errorInfo: ErrorInfo) => void;
-  title?: string;
-  description?: string;
 }
 
 interface State {
   hasError: boolean;
   error?: Error;
-  errorInfo?: ErrorInfo;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { hasError: false };
-  }
+  public state: State = {
+    hasError: false
+  };
 
-  static getDerivedStateFromError(error: Error): State {
+  public static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
-    this.setState({
-      error,
-      errorInfo
-    });
-
-    // Call the optional error handler
-    this.props.onError?.(error, errorInfo);
   }
 
-  handleReset = () => {
-    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
+  private handleRetry = () => {
+    this.setState({ hasError: false, error: undefined });
   };
 
-  render() {
+  private handleRefresh = () => {
+    window.location.reload();
+  };
+
+  public render() {
     if (this.state.hasError) {
-      // Custom fallback UI
       if (this.props.fallback) {
         return this.props.fallback;
       }
 
-      // Default error UI
       return (
-        <Card className="w-full max-w-2xl mx-auto border-red-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-red-700">
-              <AlertTriangle className="h-5 w-5" />
-              {this.props.title || 'Component Error'}
-            </CardTitle>
-            <CardDescription>
-              {this.props.description || 'Something went wrong while rendering this component.'}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert variant="destructive">
-              <Bug className="h-4 w-4" />
-              <AlertDescription>
-                <div className="space-y-2">
-                  <div className="font-medium">Error Details:</div>
-                  <div className="text-sm font-mono bg-red-50 p-2 rounded border">
-                    {this.state.error?.message || 'Unknown error occurred'}
-                  </div>
-                  {this.state.error?.name && (
-                    <div className="text-xs text-red-600">
-                      Error Type: {this.state.error.name}
-                    </div>
-                  )}
-                </div>
-              </AlertDescription>
-            </Alert>
+        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+          <div className="max-w-md w-full mx-auto p-8 bg-white rounded-lg shadow-lg text-center">
+            <div className="flex justify-center mb-4">
+              <AlertTriangle className="h-12 w-12 text-red-500" />
+            </div>
+            
+            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+              Something went wrong
+            </h2>
+            
+            <p className="text-gray-600 mb-6">
+              We encountered an error while loading this page. This might be due to network issues or browser analytics blocking the request.
+            </p>
 
-            <div className="flex gap-2">
-              <Button 
-                onClick={this.handleReset}
+            {this.state.error?.name === 'NetworkBlockedError' && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+                <p className="text-sm text-amber-800">
+                  <strong>Network Blocked:</strong> Your browser's analytics blocker may be interfering with the page. 
+                  Try disabling ad blockers or analytics blockers for this site.
+                </p>
+              </div>
+            )}
+
+            {this.state.error?.message.includes('Failed to fetch dynamically imported module') && (
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p className="text-sm text-blue-800">
+                  <strong>Module Loading Error:</strong> There was an issue loading page components. 
+                  This usually resolves with a page refresh.
+                </p>
+              </div>
+            )}
+            
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Button
+                onClick={this.handleRetry}
+                variant="outline"
                 className="flex items-center gap-2"
               >
                 <RefreshCw className="h-4 w-4" />
                 Try Again
               </Button>
               
-              <Button 
-                variant="outline"
-                onClick={() => window.location.reload()}
+              <Button
+                onClick={this.handleRefresh}
                 className="flex items-center gap-2"
               >
                 <RefreshCw className="h-4 w-4" />
-                Reload Page
+                Refresh Page
               </Button>
             </div>
 
-            {process.env.NODE_ENV === 'development' && this.state.errorInfo && (
-              <details className="mt-4">
-                <summary className="cursor-pointer text-sm font-medium text-gray-600 hover:text-gray-800">
-                  Development Details (Click to expand)
-                </summary>
-                <div className="mt-2 text-xs font-mono bg-gray-100 p-3 rounded border max-h-40 overflow-auto">
-                  <div className="mb-2">
-                    <strong>Component Stack:</strong>
-                  </div>
-                  <pre className="whitespace-pre-wrap">
-                    {this.state.errorInfo.componentStack}
-                  </pre>
-                  {this.state.error?.stack && (
-                    <>
-                      <div className="mt-3 mb-2">
-                        <strong>Error Stack:</strong>
-                      </div>
-                      <pre className="whitespace-pre-wrap">
-                        {this.state.error.stack}
-                      </pre>
-                    </>
-                  )}
-                </div>
-              </details>
-            )}
-          </CardContent>
-        </Card>
+            <div className="mt-6 pt-4 border-t border-gray-200">
+              <p className="text-xs text-gray-500">
+                If this problem persists, try opening the browser console (F12) and running:
+                <br />
+                <code className="bg-gray-100 px-2 py-1 rounded text-xs">disableFetchWrapper()</code>
+                <br />
+                Then refresh the page.
+              </p>
+            </div>
+          </div>
+        </div>
       );
     }
 
@@ -134,18 +109,4 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 }
 
-// HOC version for easier usage
-export function withErrorBoundary<T extends object>(
-  Component: React.ComponentType<T>,
-  errorBoundaryProps?: Omit<Props, 'children'>
-) {
-  const WrappedComponent = (props: T) => (
-    <ErrorBoundary {...errorBoundaryProps}>
-      <Component {...props} />
-    </ErrorBoundary>
-  );
-
-  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`;
-  
-  return WrappedComponent;
-}
+export default ErrorBoundary;

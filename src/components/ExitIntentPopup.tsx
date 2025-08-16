@@ -55,7 +55,7 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg bg-gradient-to-br from-white via-white to-blue-50/20 shadow-2xl border-0 rounded-2xl overflow-hidden animate-slide-up">
+      <Card className="w-full max-w-4xl bg-gradient-to-br from-white via-white to-blue-50/20 shadow-2xl border-0 rounded-2xl overflow-hidden animate-slide-up">
         {/* Header with gradient background */}
         <CardHeader className="relative text-center pb-6 bg-gradient-to-br from-red-500 via-orange-500 to-amber-500 text-white">
           <Button
@@ -101,8 +101,8 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
             </p>
 
             {/* Enhanced time remaining box */}
-            <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-400 rounded-xl p-5 mb-6 shadow-sm">
-              <div className="flex items-center justify-center gap-3 text-amber-800 mb-3">
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-400 rounded-xl p-4 mb-6 shadow-sm">
+              <div className="flex items-center justify-center gap-3 text-amber-800 mb-2">
                 <div className="h-8 w-8 bg-amber-100 rounded-full flex items-center justify-center">
                   <Clock className="h-4 w-4 text-amber-600" />
                 </div>
@@ -114,7 +114,7 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
             </div>
           </div>
 
-          {/* Benefits section with modern design */}
+          {/* Benefits section with modern design - 2 column layout for wider display */}
           <div className="space-y-4">
             <div className="text-center">
               <h4 className="font-bold text-gray-900 text-lg flex items-center justify-center gap-2">
@@ -123,7 +123,7 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
               </h4>
             </div>
 
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="flex items-center gap-4 p-3 bg-green-50 rounded-xl border border-green-100 hover:bg-green-100 transition-colors">
                 <div className="h-8 w-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
                   <CheckCircle className="h-4 w-4 text-white" />
@@ -154,21 +154,21 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
             </div>
           </div>
 
-          {/* Action buttons with enhanced styling */}
-          <div className="space-y-3 pt-2">
+          {/* Action buttons with enhanced styling - horizontal layout */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
             <Button
               onClick={handleCreateAccount}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
+              className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02]"
             >
-              <Zap className="h-5 w-5 mr-3" />
+              <Zap className="h-5 w-5 mr-2" />
               Save This Content Forever
-              <Sparkles className="h-4 w-4 ml-3" />
+              <Sparkles className="h-4 w-4 ml-2" />
             </Button>
 
             <Button
               variant="ghost"
               onClick={handleClose}
-              className="w-full text-gray-500 hover:text-gray-700 hover:bg-gray-50 font-medium py-3 rounded-xl transition-all duration-200"
+              className="sm:w-auto text-gray-500 hover:text-gray-700 hover:bg-gray-50 font-medium py-3 px-6 rounded-xl transition-all duration-200"
             >
               I'll risk losing my content
             </Button>

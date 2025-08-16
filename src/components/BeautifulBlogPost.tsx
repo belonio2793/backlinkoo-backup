@@ -54,12 +54,13 @@ import { maskEmail } from '@/utils/emailMasker';
 import { SEOScoreDisplay } from '@/components/SEOScoreDisplay';
 import { KillerDeletionWarning } from '@/components/KillerDeletionWarning';
 import { ExitIntentPopup } from '@/components/ExitIntentPopup';
-import { BlogContentCleaner } from '@/utils/blogContentCleaner';
-import { BlogAutoAdjustmentService } from '@/services/blogAutoAdjustmentService';
-import { BlogQualityMonitor } from '@/utils/blogQualityMonitor';
+// Temporarily removed potentially problematic imports for debugging
+// import { BlogContentCleaner } from '@/utils/blogContentCleaner';
+// import { BlogAutoAdjustmentService } from '@/services/blogAutoAdjustmentService';
+// import { BlogQualityMonitor } from '@/utils/blogQualityMonitor';
 import { EnhancedBlogCleaner } from '@/utils/enhancedBlogCleaner';
-import { processBlogContent } from '@/utils/markdownProcessor';
-import { RobustContentProcessor } from '@/utils/robustContentProcessor';
+// import { processBlogContent } from '@/utils/markdownProcessor';
+// import { RobustContentProcessor } from '@/utils/robustContentProcessor';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -169,7 +170,7 @@ export function BeautifulBlogPost() {
           console.log('No blog post loaded to test');
         }
       };
-      (window as any).BlogAutoAdjustmentService = BlogAutoAdjustmentService;
+      // (window as any).BlogAutoAdjustmentService = BlogAutoAdjustmentService;
     }
   }, [blogPost]);
 
@@ -658,11 +659,15 @@ export function BeautifulBlogPost() {
 
     let formattedContent = content;
 
-    // Step 1: Clean up malformed content first
+    // Step 1: Convert markdown formatting to HTML first, then clean up malformed content
     formattedContent = formattedContent
-      // Remove problematic markers
-      .replace(/\*{2,}/g, '') // Remove ** markers
-      .replace(/_{2,}/g, '') // Remove __ markers
+      // Convert **text** to <strong>text</strong> before removing other ** markers
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      // Convert __text__ to <strong>text</strong>
+      .replace(/__([^_]+)__/g, '<strong>$1</strong>')
+      // Remove remaining problematic markers
+      .replace(/\*{2,}/g, '') // Remove remaining ** markers
+      .replace(/_{2,}/g, '') // Remove remaining __ markers
       .replace(/\bH[1-6]:\s*/gi, '')
       .replace(/Title:\s*/gi, '')
       .replace(/Hook Introduction:\s*/gi, '')
@@ -670,17 +675,48 @@ export function BeautifulBlogPost() {
       .replace(/\n{3,}/g, '\n\n')
       .trim();
 
-    // Step 2: Remove duplicate title if it appears in content
+    // Step 2: Enhanced markdown formatting to HTML conversion
+    formattedContent = formattedContent
+      // Convert markdown links [text](url) to HTML
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+      // Convert markdown headings (### heading) to HTML
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      // Convert italic text *text* to <em>text</em> (single asterisks)
+      .replace(/(?<!\*)\*([^*\n]+)\*(?!\*)/g, '<em>$1</em>')
+      // Convert italic text _text_ to <em>text</em>
+      .replace(/(?<!_)_([^_\n]+)_(?!_)/g, '<em>$1</em>')
+      // Convert inline code `code` to <code>code</code>
+      .replace(/`([^`]+)`/g, '<code>$1</code>');
+
+    // Step 2.5: Comprehensive duplicate title removal
     if (title) {
       const titleClean = title.toLowerCase().trim();
-      // Remove title from start of content if it matches
-      formattedContent = formattedContent.replace(new RegExp(`^\\s*${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i'), '');
-      formattedContent = formattedContent.replace(new RegExp(`^\\s*<h[1-6][^>]*>\\s*${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*</h[1-6]>\\s*`, 'i'), '');
+      const titleEscaped = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      // Remove title from start of content if it matches (plain text)
+      formattedContent = formattedContent.replace(new RegExp(`^\\s*${titleEscaped}\\s*`, 'i'), '');
+
+      // Remove title wrapped in any heading tags
+      formattedContent = formattedContent.replace(new RegExp(`^\\s*<h[1-6][^>]*>\\s*${titleEscaped}\\s*</h[1-6]>\\s*`, 'i'), '');
+
+      // Remove title wrapped in strong tags
+      formattedContent = formattedContent.replace(new RegExp(`^\\s*<strong>\\s*${titleEscaped}\\s*</strong>\\s*`, 'i'), '');
+
+      // Remove title wrapped in heading tags with strong tags inside
+      formattedContent = formattedContent.replace(new RegExp(`^\\s*<h[1-6][^>]*>\\s*<strong>\\s*${titleEscaped}\\s*</strong>\\s*</h[1-6]>\\s*`, 'i'), '');
+
+      // Remove title anywhere in content that appears as a standalone heading
+      formattedContent = formattedContent.replace(new RegExp(`\\n\\s*<h[1-6][^>]*>\\s*(?:<strong>\\s*)?${titleEscaped}(?:\\s*</strong>)?\\s*</h[1-6]>\\s*\\n`, 'gi'), '\n\n');
+
+      // Remove title as standalone paragraph
+      formattedContent = formattedContent.replace(new RegExp(`\\n\\s*<p[^>]*>\\s*(?:<strong>\\s*)?${titleEscaped}(?:\\s*</strong>)?\\s*</p>\\s*\\n`, 'gi'), '\n\n');
     }
 
-    // Step 3: Convert markdown-style formatting to HTML if needed
-    if (!formattedContent.includes('<p>') && !formattedContent.includes('<h1>')) {
-      // Convert **text** to <strong>text</strong>
+    // Step 3: Convert remaining markdown-style formatting to HTML if needed
+    if (!formattedContent.includes('<p>')) {
+      // Convert remaining **text** to <strong>text</strong> (if not already converted)
       formattedContent = formattedContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
       // Split into paragraphs and process
@@ -696,19 +732,28 @@ export function BeautifulBlogPost() {
         }
 
         // Skip if this paragraph matches the blog title (duplicate title removal)
-        if (title && para.toLowerCase().trim() === title.toLowerCase().trim()) {
+        // Remove HTML tags for comparison
+        const paraTextOnly = para.replace(/<[^>]*>/g, '').trim();
+        if (title && (para.toLowerCase().trim() === title.toLowerCase().trim() || paraTextOnly.toLowerCase() === title.toLowerCase().trim())) {
           continue;
         }
 
-        // Check if it's a heading (short line with title-like content)
-        if (para.length < 120 && (
-          para.includes('Guide') ||
-          para.includes('Introduction') ||
-          para.includes('Facebook') ||
+        // Check if it's a heading (short line with title-like content) but NOT the blog title
+        const paraTextOnly = para.replace(/<[^>]*>/g, '').trim();
+        const isLikelyHeading = para.length < 120 && (
+          (para.includes('Introduction') && !para.includes('Hook Introduction')) ||
           para.includes('Conclusion') ||
           para.includes('Strategy') ||
+          para.includes('Step ') ||
+          para.includes('Chapter ') ||
           (para.split(' ').length <= 8 && para.charAt(0).toUpperCase() === para.charAt(0))
-        )) {
+        );
+
+        // Don't convert to heading if it matches the title or is too similar
+        const isTitle = title && (paraTextOnly.toLowerCase() === title.toLowerCase() ||
+                                 para.toLowerCase().trim() === title.toLowerCase().trim());
+
+        if (isLikelyHeading && !isTitle) {
           htmlContent += `<h2>${para}</h2>\n\n`;
         }
         // Check if it's a numbered list item
@@ -725,17 +770,17 @@ export function BeautifulBlogPost() {
             htmlContent += '</ol>\n\n';
           }
         }
-        // Check if it's a bullet point
-        else if (para.match(/^[•·\-\*]\s/)) {
+        // Check if it's a bullet point (expanded patterns)
+        else if (para.match(/^[•·\-\*]\s/) || para.match(/^\*\s/) || para.match(/^-\s/)) {
           // If this is the start of a list, open <ul>
-          if (i === 0 || !paragraphs[i-1].match(/^[•·\-\*]\s/)) {
+          if (i === 0 || !paragraphs[i-1].match(/^[•·\-\*]\s/) && !paragraphs[i-1].match(/^\*\s/) && !paragraphs[i-1].match(/^-\s/)) {
             htmlContent += '<ul>\n';
           }
-          const listContent = para.replace(/^[•·\-\*]\s*/, '');
+          const listContent = para.replace(/^[•·\-\*]\s*/, '').replace(/^\*\s*/, '').replace(/^-\s*/, '');
           htmlContent += `<li>${listContent}</li>\n`;
 
           // If next paragraph is not a list item, close </ul>
-          if (i === paragraphs.length - 1 || !paragraphs[i+1].match(/^[•·\-\*]\s/)) {
+          if (i === paragraphs.length - 1 || (!paragraphs[i+1].match(/^[•·\-\*]\s/) && !paragraphs[i+1].match(/^\*\s/) && !paragraphs[i+1].match(/^-\s/))) {
             htmlContent += '</ul>\n\n';
           }
         }
@@ -751,24 +796,30 @@ export function BeautifulBlogPost() {
     formattedContent = formattedContent
       .replace(/<h1([^>]*)>(.*?)<\/h1>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
+        // Remove HTML tags from heading text for comparison
+        const textOnly = cleanText.replace(/<[^>]*>/g, '').trim();
         // Skip if this heading matches the blog title (remove duplicate)
-        if (title && cleanText.toLowerCase() === title.toLowerCase()) {
+        if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
         return `<h1 class="beautiful-prose text-4xl md:text-5xl font-black mb-8 leading-tight text-black"${attrs}>${cleanText}</h1>`;
       })
       .replace(/<h2([^>]*)>(.*?)<\/h2>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
+        // Remove HTML tags from heading text for comparison
+        const textOnly = cleanText.replace(/<[^>]*>/g, '').trim();
         // Skip if this heading matches the blog title (remove duplicate)
-        if (title && cleanText.toLowerCase() === title.toLowerCase()) {
+        if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
         return `<h2 class="beautiful-prose text-3xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h2>`;
       })
       .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
+        // Remove HTML tags from heading text for comparison
+        const textOnly = cleanText.replace(/<[^>]*>/g, '').trim();
         // Skip if this heading matches the blog title (remove duplicate)
-        if (title && cleanText.toLowerCase() === title.toLowerCase()) {
+        if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
         return `<h3 class="beautiful-prose text-2xl font-semibold text-black mb-4 mt-8"${attrs}>${cleanText}</h3>`;
@@ -838,7 +889,15 @@ export function BeautifulBlogPost() {
       '<p class="beautiful-prose$1 beautiful-first-paragraph"$2>$3</p>'
     );
 
-    // Step 12: Final cleanup - remove problematic content patterns
+    // Step 12: Final cleanup - remove problematic content patterns and duplicate titles
+    if (title) {
+      const titleEscaped = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Final pass to remove any remaining title duplicates
+      formattedContent = formattedContent
+        .replace(new RegExp(`<h[1-6][^>]*>\\s*(?:<[^>]*>\\s*)*${titleEscaped}(?:\\s*<[^>]*>)*\\s*</h[1-6]>`, 'gi'), '')
+        .replace(new RegExp(`<p[^>]*>\\s*(?:<[^>]*>\\s*)*${titleEscaped}(?:\\s*<[^>]*>)*\\s*</p>`, 'gi'), '');
+    }
+
     formattedContent = formattedContent
       // Remove empty or invalid headings
       .replace(/<h[1-6][^>]*>\s*\*+\s*<\/h[1-6]>/gi, '')
@@ -1885,3 +1944,5 @@ export function BeautifulBlogPost() {
     </TooltipProvider>
   );
 }
+
+export default BeautifulBlogPost;
