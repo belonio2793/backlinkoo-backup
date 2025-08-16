@@ -120,7 +120,7 @@ class ResponseBodyManager {
   /**
    * Get empty result for already consumed responses
    */
-  private getEmptyResult(this: ResponseWithTracking, method: string): Promise<any> {
+  public getEmptyResult(method: string): Promise<any> {
     switch (method) {
       case 'json':
         return Promise.resolve({ error: 'Response body already consumed' });
