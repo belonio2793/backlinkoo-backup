@@ -227,8 +227,24 @@ export function PremiumPlanPopup({
 
       if (result.success) {
         if (result.url && !result.usedFallback) {
-          // Redirect to Stripe checkout
-          window.location.href = result.url;
+          // Open Stripe checkout in new window
+          const checkoutWindow = window.open(
+            result.url,
+            'stripe-checkout',
+            'width=800,height=600,scrollbars=yes,resizable=yes,location=yes,status=yes'
+          );
+
+          if (!checkoutWindow) {
+            // Popup blocked - fallback to current window
+            toast({
+              title: "Popup Blocked",
+              description: "Redirecting in current window...",
+            });
+            window.location.href = result.url;
+          } else {
+            // Close modal since checkout is opening
+            onClose();
+          }
         } else {
           // Fallback activation or direct upgrade
           setCurrentStep('success');
