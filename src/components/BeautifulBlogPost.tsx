@@ -296,7 +296,7 @@ export function BeautifulBlogPost() {
     }
   };
 
-  const loadBlogPost = async (slug: string) => {
+  const loadBlogPost = useCallback(async (slug: string) => {
     try {
       setLoading(true);
       setError(null);
@@ -377,7 +377,7 @@ export function BeautifulBlogPost() {
         setLoading(false);
       }
     }
-  };
+  }, [isMounted, toast]);
 
   const handleClaimPost = async () => {
     if (!user) {
