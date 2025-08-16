@@ -707,8 +707,22 @@ export function BeautifulBlogPost() {
 
     // Step 2: Enhanced markdown formatting to HTML conversion
     formattedContent = formattedContent
-      // Convert markdown links [text](url) to HTML
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+      // Enhanced link processing - Convert markdown links [text](url) to HTML
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+        // Clean up the anchor text - remove any link placement syntax
+        const cleanText = text
+          .replace(/^(Natural Link Integration|Link Placement|Anchor Text|URL Integration):\s*/gi, '')
+          .trim();
+
+        // Ensure URL is properly formatted
+        let cleanUrl = url.trim();
+        if (cleanUrl && !cleanUrl.match(/^https?:\/\//)) {
+          cleanUrl = cleanUrl.startsWith('//') ? 'https:' + cleanUrl : 'https://' + cleanUrl;
+        }
+
+        return `<a href="${cleanUrl}">${cleanText}</a>`;
+      })
+
       // Convert markdown headings (### heading) to HTML
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
       .replace(/^## (.+)$/gm, '<h2>$1</h2>')
