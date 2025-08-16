@@ -22,7 +22,17 @@ export const LazyBlogPostView = lazy(() => import('@/pages/BlogPost').then(modul
 export const LazyEnhancedBlogListing = lazy(() => import('@/components/EnhancedBlogListing').then(module => ({ default: module.EnhancedBlogListing })));
 export const LazySuperEnhancedBlogListing = lazy(() => import('@/components/SuperEnhancedBlogListing').then(module => ({ default: module.SuperEnhancedBlogListing })));
 export const LazyEnhancedBlogPost = lazy(() => import('@/components/EnhancedBlogPost').then(module => ({ default: module.EnhancedBlogPost })));
-export const LazyBeautifulBlogPost = lazy(() => import('@/components/BeautifulBlogPost').then(module => ({ default: module.BeautifulBlogPost })));
+export const LazyBeautifulBlogPost = lazy(() =>
+  import('@/components/BeautifulBlogPost')
+    .then(module => {
+      console.log('✅ BeautifulBlogPost module loaded:', module);
+      return { default: module.BeautifulBlogPost || module.default };
+    })
+    .catch(error => {
+      console.error('❌ Failed to load BeautifulBlogPost:', error);
+      throw error;
+    })
+);
 export const LazyBeautifulBlogTemplate = lazy(() => import('@/components/BeautifulBlogTemplate').then(module => ({ default: module.BeautifulBlogTemplate })));
 export const LazyBlogValidator = lazy(() => import('@/pages/BlogValidator'));
 
