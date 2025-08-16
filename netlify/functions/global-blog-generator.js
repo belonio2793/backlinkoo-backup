@@ -513,12 +513,30 @@ exports.handler = async (event, context) => {
       content = aiResult.content;
       aiProvider = aiResult.provider;
 
+      // Ensure hyperlink is present in AI content
+      if (!content.includes(targetUrl)) {
+        console.log('⚠️ AI content missing target URL, adding hyperlink...');
+        const anchorText = anchorText || primaryKeyword;
+        const hyperlink = `<a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchorText}</a>`;
+        // Insert hyperlink in a natural way
+        content = content.replace(
+          new RegExp(`\\b${primaryKeyword}\\b`, 'i'),
+          hyperlink
+        );
+      }
+
       // Generate enhanced SEO metadata for AI content
       seoMeta = generateEnhancedSEOMetadata(request, aiResult.content);
     } else {
       console.log('⚠️ AI generation failed, using template content');
       content = generateContextualContent(request);
       seoMeta = generateSEOMetadata(request);
+
+      // Ensure template content is not empty
+      if (!content || content.trim().length === 0) {
+        console.log('⚠️ Template content also empty, using fallback...');
+        content = generateFallbackContent(request);
+      }
     }
     const blogPost = {
       id: crypto.randomUUID(),
@@ -561,9 +579,17 @@ exports.handler = async (event, context) => {
           .replace(/&lt;\s*\/\s*p\s*&gt;/gi, '')
       };
 
+      // Save to both tables for compatibility
       const { error: dbError } = await supabase
-        .from('published_blog_posts')
+        .from('blog_posts')
         .insert([cleanedBlogPost]);
+
+      // Also save to published_blog_posts for backward compatibility
+      await supabase
+        .from('published_blog_posts')
+        .insert([cleanedBlogPost])
+        .then(() => console.log('✅ Also saved to published_blog_posts'))
+        .catch(err => console.warn('⚠️ Published_blog_posts insert failed:', err));
 
       if (dbError) {
         console.warn('Database insert failed:', dbError);
