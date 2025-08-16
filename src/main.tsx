@@ -41,7 +41,7 @@ if (import.meta.env.DEV) {
 
   // Add helper functions to window for debugging
   (window as any).fixRLS = async () => {
-    console.log('��� Applying RLS fix directly...');
+    console.log('🔧 Applying RLS fix directly...');
     try {
       const response = await fetch('/.netlify/functions/fix-rls-recursion', {
         method: 'POST',
@@ -141,6 +141,9 @@ if (import.meta.env.DEV) {
   console.log('  - forcePremium() - Force current user to premium status');
   console.log('  - forceSignOut() - Force sign out and redirect to home');
   console.log('  - checkUserSubscription() - Check user subscription status in database');
+  console.log('  - syncBlogPostTables() - Sync blog posts between tables');
+  console.log('  - fixProductHuntPost() - Fix malformed Product Hunt blog post');
+  console.log('  - RobustContentProcessor - Content validation and repair utilities');
   console.log('  - DISABLE_VITE_PROTECTION=true - Disable Vite fetch protection');
 
   // Add helper to disable fetch protection
