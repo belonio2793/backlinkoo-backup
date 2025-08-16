@@ -311,6 +311,68 @@ const generateContextualContent = (request) => {
   return sections.join('');
 };
 
+// Fallback content generation when both AI and template fail
+const generateFallbackContent = (request) => {
+  const { primaryKeyword, targetUrl, anchorText } = request;
+  const anchor = anchorText || primaryKeyword;
+
+  return `
+<h1>${primaryKeyword}: Essential Guide for Success</h1>
+
+<p>In today's competitive digital landscape, understanding ${primaryKeyword} is crucial for achieving sustainable growth and success.</p>
+
+<h2>Understanding ${primaryKeyword}</h2>
+
+<p>${primaryKeyword} represents a fundamental approach to building lasting success in your industry. By implementing proven strategies and best practices, businesses can achieve remarkable results.</p>
+
+<h3>Key Benefits</h3>
+
+<ul>
+<li><strong>Improved Performance:</strong> Strategic implementation leads to measurable improvements</li>
+<li><strong>Competitive Advantage:</strong> Stay ahead of industry trends and competitors</li>
+<li><strong>Sustainable Growth:</strong> Build foundations for long-term success</li>
+<li><strong>Enhanced ROI:</strong> Maximize return on investment through optimized approaches</li>
+</ul>
+
+<h2>Best Practices for ${primaryKeyword}</h2>
+
+<p>Successful ${primaryKeyword} implementation requires careful planning and execution. Industry leaders consistently follow these proven approaches:</p>
+
+<h3>Strategic Planning</h3>
+
+<p>Begin with a comprehensive analysis of your current situation and desired outcomes. This foundation ensures all subsequent efforts align with your business objectives.</p>
+
+<h3>Implementation Strategy</h3>
+
+<p>Execute your ${primaryKeyword} strategy systematically, monitoring progress and adjusting as needed. Professional tools and resources, such as those available through <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a>, can significantly accelerate your success.</p>
+
+<h2>Measuring Success</h2>
+
+<p>Track key performance indicators to ensure your ${primaryKeyword} efforts deliver the expected results. Regular monitoring allows for timely adjustments and optimizations.</p>
+
+<h3>Common Metrics</h3>
+
+<ul>
+<li>Performance improvements over baseline</li>
+<li>Cost reduction and efficiency gains</li>
+<li>User satisfaction and engagement</li>
+<li>Return on investment (ROI)</li>
+</ul>
+
+<h2>Getting Started</h2>
+
+<p>Ready to implement ${primaryKeyword} strategies for your business? Start with a clear understanding of your goals and available resources.</p>
+
+<p>For comprehensive guidance and proven solutions, explore the expert resources available at <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a>. Our platform provides the tools and insights needed to achieve your ${primaryKeyword} objectives.</p>
+
+<h2>Conclusion</h2>
+
+<p>${primaryKeyword} success requires the right combination of strategy, tools, and execution. By following proven methodologies and leveraging expert resources, businesses can achieve exceptional results and sustainable growth.</p>
+
+<p>Take the first step toward ${primaryKeyword} excellence today and discover why thousands of businesses trust our proven approach to drive their success.</p>
+`;
+};
+
 // Generate SEO-optimized metadata
 const generateSEOMetadata = (request) => {
   const { primaryKeyword, userLocation } = request;
