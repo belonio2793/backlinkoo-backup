@@ -131,11 +131,12 @@ function formatContent(raw: string) {
       const items = line
         .split(/[-*•·➤►▶→✓✔]\s+/)
         .filter(Boolean)
-        .map((item, idx) => (
-          <li key={idx} className="beautiful-prose relative pl-8 text-lg leading-relaxed text-gray-700 mb-2">
-            {item.trim()}
-          </li>
-        ));
+        .map((item, idx) => {
+          const processedItem = processLineContent(item.trim());
+          return (
+            <li key={idx} className="beautiful-prose relative pl-8 text-lg leading-relaxed text-gray-700 mb-2" dangerouslySetInnerHTML={{ __html: processedItem }} />
+          );
+        });
       return <ul key={i} className="beautiful-prose space-y-4 my-8">{items}</ul>;
     }
 
@@ -1465,7 +1466,7 @@ export function BeautifulBlogPost() {
                         <div className="space-y-1">
                           <p className="font-semibold">Unclaimed</p>
                           <p className="text-sm">This post is unclaimed and anyone can take ownership of it.</p>
-                          <p className="text-xs text-gray-400">⚠️ May be deleted if not claimed soon</p>
+                          <p className="text-xs text-gray-400">��️ May be deleted if not claimed soon</p>
                         </div>
                       </TooltipContent>
                     </Tooltip>
