@@ -935,19 +935,27 @@ export function BeautifulBlogPost() {
           </header>
 
           {/* Article Content */}
-          <div className="prose prose-lg max-w-none">
-            <Card className="p-6 md:p-10 lg:p-12 border-0 shadow-lg bg-white/50 backdrop-blur-sm">
-              <div className="max-w-none">
-                <ContentProcessor
-                  content={blogPost.content || ''}
-                  title={cleanTitle}
-                  targetKeyword={blogPost.keywords?.[0]}
-                  anchorText={blogPost.anchor_text}
-                  targetUrl={blogPost.target_url}
-                />
+          <main className="mb-16">
+            <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm overflow-hidden">
+              <div className="relative">
+                {/* Content Wrapper */}
+                <div className="px-8 md:px-12 lg:px-16 py-12 md:py-16">
+                  <div className="max-w-none prose prose-xl prose-slate prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:text-blue-800 prose-strong:text-gray-900 prose-li:text-gray-700">
+                    <ContentProcessor
+                      content={blogPost.content || ''}
+                      title={cleanTitle}
+                      targetKeyword={blogPost.keywords?.[0]}
+                      anchorText={blogPost.anchor_text}
+                      targetUrl={blogPost.target_url}
+                    />
+                  </div>
+                </div>
+
+                {/* Subtle gradient overlay for depth */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue-50/10 pointer-events-none" />
               </div>
             </Card>
-          </div>
+          </main>
 
           {/* Keywords Section */}
           <KeywordsSection keywords={blogPost.keywords} />
