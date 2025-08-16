@@ -116,17 +116,24 @@ Create premium, viral-worthy content that positions this as the definitive resou
 
       prompt += `
 
-💻 ENHANCED OUTPUT FORMAT:
-Return the content as well-structured HTML using semantic tags:
-- <h1> for the main title (include primary keyword "${request.keyword}")
-- <h2> for major sections with compelling, benefit-driven headlines
-- <h3> for subsections and detailed breakdowns
-- <p> for paragraphs with proper spacing and flow
-- <ul>/<ol> and <li> for actionable lists and frameworks
-- <strong> for key concepts and important phrases
-- <em> for emphasis and transitional elements
-- <blockquote> for highlighted insights, quotes, or key takeaways
-- <a href="${request.targetUrl}" target="_blank" rel="noopener noreferrer">${request.anchorText}</a> for the strategic backlink
+💻 CLEAN HTML OUTPUT FORMAT:
+Return ONLY the body content as clean, well-structured HTML (no <html>, <head>, or <body> tags):
+
+REQUIRED HTML STRUCTURE:
+- <h2> for major sections (NO H1 - title will be added separately)
+- <h3> for subsections
+- <p> for all paragraphs (never leave text unwrapped)
+- <ul>/<ol> and <li> for lists
+- <strong> for key concepts (use sparingly)
+- <a href="${request.targetUrl}" target="_blank" rel="noopener noreferrer">${request.anchorText}</a> for the backlink
+
+CRITICAL FORMATTING RULES:
+- Use proper HTML tags only - NO markdown symbols (**, ##, etc.)
+- Every paragraph must be wrapped in <p></p> tags
+- NO malformed patterns like **Text**more text - use <strong>Text</strong> more text
+- NO HTML entities (&lt;, &gt;, &amp;) unless absolutely necessary
+- NO title repetition in content (title handled separately)
+- Clean, readable HTML that displays properly without processing
 
 🎨 CONTENT EXCELLENCE STANDARDS:
 - Every paragraph must provide immediate value
