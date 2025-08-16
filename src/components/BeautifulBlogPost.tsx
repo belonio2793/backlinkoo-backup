@@ -1080,12 +1080,19 @@ export function BeautifulBlogPost() {
                         }
 
                         // Process content with robust processor - DISABLE title removal to prevent content loss
-                        const result = RobustBlogProcessor.processIfNeeded(content, blogPost.title, {
-                          removeTitle: false, // CRITICAL: Don't remove title to prevent content loss
-                          targetUrl: blogPost.target_url,
-                          anchorText: blogPost.anchor_text,
-                          keyword: blogPost.keyword
+                        // Auto-adjust content using our advanced auto-adjustment system
+                        const qualityMetrics = BlogQualityMonitor.analyzeContent(content, blogPost.target_url);
+                        const adjustedContent = BlogAutoAdjustmentService.adjustContentForDisplay(content, {
+                          title: blogPost.title,
+                          target_url: blogPost.target_url,
+                          anchor_text: blogPost.anchor_text
                         });
+                        const result = {
+                          content: adjustedContent,
+                          wasProcessed: adjustedContent !== content,
+                          issues: qualityMetrics.issues,
+                          warnings: qualityMetrics.warnings
+                        };
 
                         // Log processing results for debugging
                         console.log('���� Blog content processing result:', {
