@@ -1651,9 +1651,9 @@ export function BeautifulBlogPost() {
 
 
 
-            {/* Article Content */}
+            {/* Article Content - Mid-wide range for better readability */}
             <div className="prose prose-lg max-w-none mt-8">
-              <div className="beautiful-card max-w-5xl mx-auto pt-6 px-6 pb-8 md:pt-8 md:px-12 md:pb-12 lg:px-16">
+              <div className="beautiful-card max-w-4xl mx-auto pt-6 px-6 pb-8 md:pt-8 md:px-12 md:pb-12 lg:px-16">
                 <div
                   className="beautiful-blog-content beautiful-prose modern-blog-content article-content max-w-none"
                   style={{
