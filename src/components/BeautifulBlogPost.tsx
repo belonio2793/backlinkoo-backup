@@ -178,14 +178,22 @@ function formatContent(raw: string, title?: string) {
     }
 
     // Detect specific section headers that should be italicized, not list items (check this FIRST)
+    // Only italicize if they're standalone headers (short lines) or don't have descriptive text after the colon
     const italicizedSections = /^(Title Tags and Meta Descriptions|Heading Structure|Keyword Research|Content Optimization|Weebly SEO Settings|Insights from Case Studies):/i;
     if (italicizedSections.test(line)) {
-      const processedContent = processLineContent(line);
-      return (
-        <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
-          <em dangerouslySetInnerHTML={{ __html: processedContent }} />
-        </p>
-      );
+      // Check if it's a standalone header (short) or has minimal descriptive text
+      const afterColon = line.split(':')[1]?.trim() || '';
+      const isStandaloneHeader = afterColon.length < 10; // Short or no description means it's a header
+
+      if (isStandaloneHeader) {
+        const processedContent = processLineContent(line);
+        return (
+          <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
+            <em dangerouslySetInnerHTML={{ __html: processedContent }} />
+          </p>
+        );
+      }
+      // If it has longer descriptive text, let it fall through to be processed as regular content
     }
 
     // Enhanced bullet point detection (but exclude italicized sections)
