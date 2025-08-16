@@ -715,7 +715,9 @@ export function BeautifulBlogPost() {
         }
 
         // Skip if this paragraph matches the blog title (duplicate title removal)
-        if (title && para.toLowerCase().trim() === title.toLowerCase().trim()) {
+        // Remove HTML tags for comparison
+        const paraTextOnly = para.replace(/<[^>]*>/g, '').trim();
+        if (title && (para.toLowerCase().trim() === title.toLowerCase().trim() || paraTextOnly.toLowerCase() === title.toLowerCase().trim())) {
           continue;
         }
 
