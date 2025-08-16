@@ -1438,11 +1438,17 @@ export function BeautifulBlogPost() {
                           .replace(/on\w+\s*=/gi, '');
                         // Variables are already defined above as finalContent and securityInfo
 
-                        // Log processing results for debugging
-                        console.log('Blog content processing result:', {
+                        // Enhanced logging with performance metrics
+                        console.log('✅ Blog content processing complete:', {
                           originalLength: content.length,
                           finalLength: finalContent.length,
                           hasStructure: finalContent.includes('<h1>') || finalContent.includes('<h2>') || finalContent.includes('<p>'),
+                          processingTimeMs: Math.round(processingTime * 100) / 100,
+                          efficiency: Math.round((content.length / processingTime) * 100) / 100 + ' chars/ms',
+                          compressionRatio: Math.round((finalContent.length / content.length) * 100) + '%',
+                          hasImages: finalContent.includes('<img'),
+                          hasLinks: finalContent.includes('<a '),
+                          hasLists: finalContent.includes('<ul') || finalContent.includes('<ol'),
                           processedSuccessfully: true
                         });
 
