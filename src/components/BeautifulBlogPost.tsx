@@ -274,8 +274,15 @@ function formatContent(raw: string, title?: string) {
       );
     }
 
-    // Default: render as paragraph with processed content
-    const processedLine = processLineContent(line);
+    // Default: render as paragraph with processed content and additional cleanup
+    let processedLine = processLineContent(line);
+
+    // Additional cleanup for specific content patterns
+    processedLine = processedLine
+      .replace(/\s*at\s*\[Backlinkoo\]\([^)]*\)/gi, '') // Remove redundant "at [Backlinkoo](url)"
+      .replace(/\s*\.\s*This valuable resource/gi, '. This valuable resource') // Clean up spacing
+      .trim();
+
     return (
       <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6" dangerouslySetInnerHTML={{ __html: processedLine }} />
     );
