@@ -658,11 +658,15 @@ export function BeautifulBlogPost() {
 
     let formattedContent = content;
 
-    // Step 1: Clean up malformed content first
+    // Step 1: Convert markdown formatting to HTML first, then clean up malformed content
     formattedContent = formattedContent
-      // Remove problematic markers
-      .replace(/\*{2,}/g, '') // Remove ** markers
-      .replace(/_{2,}/g, '') // Remove __ markers
+      // Convert **text** to <strong>text</strong> before removing other ** markers
+      .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+      // Convert __text__ to <strong>text</strong>
+      .replace(/__([^_]+)__/g, '<strong>$1</strong>')
+      // Remove remaining problematic markers
+      .replace(/\*{2,}/g, '') // Remove remaining ** markers
+      .replace(/_{2,}/g, '') // Remove remaining __ markers
       .replace(/\bH[1-6]:\s*/gi, '')
       .replace(/Title:\s*/gi, '')
       .replace(/Hook Introduction:\s*/gi, '')
@@ -1599,7 +1603,7 @@ export function BeautifulBlogPost() {
                   </div>
                   <ul className="space-y-2 text-sm">
                     <li>• This post will return to the claimable pool for 24 hours</li>
-                    <li>���� Other users will be able to claim it during this time</li>
+                    <li>��� Other users will be able to claim it during this time</li>
                     <li>• If not reclaimed, it will be automatically deleted</li>
                     <li>• You can reclaim it yourself if it's still available</li>
                   </ul>
