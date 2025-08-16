@@ -1,0 +1,78 @@
+/**
+ * Network Debugging Utility
+ * Add this script to help debug and resolve network issues
+ */
+
+// Function to disable fetch wrapper if it's causing issues
+window.fixNetworkIssues = function() {
+  console.log('🔧 Attempting to fix network issues...');
+  
+  // Disable fetch wrapper
+  localStorage.setItem('disable-fetch-wrapper', 'true');
+  console.log('✅ Fetch wrapper disabled');
+  
+  // Clear any cached modules
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+      for(let registration of registrations) {
+        registration.unregister();
+        console.log('🧹 Service worker unregistered');
+      }
+    });
+  }
+  
+  // Clear relevant cache
+  if ('caches' in window) {
+    caches.keys().then(function(names) {
+      names.forEach(function(name) {
+        caches.delete(name);
+      });
+      console.log('🧹 Cache cleared');
+    });
+  }
+  
+  console.log('🔄 Please refresh the page now');
+  
+  // Auto-refresh after 2 seconds
+  setTimeout(() => {
+    window.location.reload();
+  }, 2000);
+};
+
+// Function to re-enable fetch wrapper
+window.enableNetworkWrapper = function() {
+  console.log('🔧 Re-enabling network wrapper...');
+  localStorage.removeItem('disable-fetch-wrapper');
+  console.log('✅ Network wrapper will be enabled on next page load');
+  console.log('🔄 Please refresh the page');
+};
+
+// Function to check current network status
+window.checkNetworkStatus = function() {
+  console.log('🔍 Network Status Check:');
+  console.log('- Fetch wrapper disabled:', localStorage.getItem('disable-fetch-wrapper') === 'true');
+  console.log('- Online status:', navigator.onLine);
+  console.log('- User agent:', navigator.userAgent);
+  
+  // Test basic fetch
+  fetch(window.location.href + '?test=1')
+    .then(response => {
+      console.log('✅ Basic fetch test passed');
+    })
+    .catch(error => {
+      console.log('❌ Basic fetch test failed:', error.message);
+    });
+};
+
+// Auto-run network status check
+setTimeout(() => {
+  console.log('🌐 Network debugging utilities loaded:');
+  console.log('- Run fixNetworkIssues() to disable fetch wrapper');
+  console.log('- Run enableNetworkWrapper() to re-enable wrapper');
+  console.log('- Run checkNetworkStatus() to check current status');
+  
+  // Auto-check if there are issues
+  if (localStorage.getItem('disable-fetch-wrapper') === 'true') {
+    console.log('ℹ️ Fetch wrapper is currently disabled');
+  }
+}, 1000);
