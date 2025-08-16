@@ -697,13 +697,10 @@ export function BeautifulBlogPost() {
       formattedContent = formattedContent.replace(new RegExp(`^\\s*<h[1-6][^>]*>\\s*${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*</h[1-6]>\\s*`, 'i'), '');
     }
 
-    // Step 3: Convert markdown-style formatting to HTML if needed
-    if (!formattedContent.includes('<p>') && !formattedContent.includes('<h1>')) {
-      // Convert **text** to <strong>text</strong>
+    // Step 3: Convert remaining markdown-style formatting to HTML if needed
+    if (!formattedContent.includes('<p>')) {
+      // Convert remaining **text** to <strong>text</strong> (if not already converted)
       formattedContent = formattedContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-
-      // Convert markdown links [text](url) to <a> tags
-      formattedContent = formattedContent.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
 
       // Split into paragraphs and process
       const paragraphs = formattedContent.split(/\n\s*\n/).filter(p => p.trim().length > 0);
