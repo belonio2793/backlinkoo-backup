@@ -62,34 +62,39 @@ export async function runOneTimeBeautifulContentMigration(): Promise<void> {
       const batchPromises = batch.map(async (post) => {
         try {
           const originalContent = post.content || '';
-          
+
           // Apply beautiful content structure
           const beautifulContent = applyBeautifulContentStructure(originalContent, post.title);
-          
+
           // Only update if content actually changed
           if (beautifulContent !== originalContent) {
-            const { error: updateError } = await supabase
-              .from('blog_posts')
-              .update({
-                content: beautifulContent,
-                updated_at: new Date().toISOString()
-              })
-              .eq('id', post.id);
+            try {
+              const { error: updateError } = await supabase
+                .from('blog_posts')
+                .update({
+                  content: beautifulContent,
+                  updated_at: new Date().toISOString()
+                })
+                .eq('id', post.id);
 
-            if (updateError) {
-              console.error(`❌ Failed to update post ${post.id}:`, updateError.message);
-              return { success: false };
+              if (updateError) {
+                console.error(`❌ Failed to update post ${post.id} (${post.title?.substring(0, 30)}):`, updateError.message);
+                return { success: false, error: updateError.message };
+              }
+
+              console.log(`✅ Migrated: "${post.title?.substring(0, 50)}..."`);
+              return { success: true };
+            } catch (updateError: any) {
+              console.error(`❌ Network error updating post ${post.id}:`, updateError.message);
+              return { success: false, error: updateError.message };
             }
-
-            console.log(`✅ Migrated: "${post.title?.substring(0, 50)}..."`);
-            return { success: true };
           } else {
             console.log(`⏭️ Skipped: "${post.title?.substring(0, 50)}..." (no changes needed)`);
             return { success: true };
           }
         } catch (error: any) {
           console.error(`💥 Error processing post ${post.id}:`, error.message);
-          return { success: false };
+          return { success: false, error: error.message };
         }
       });
 
