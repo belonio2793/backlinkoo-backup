@@ -102,7 +102,7 @@ export function ProductionBlogGenerator() {
                 </div>
                 <div>
                   <CardTitle className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                    Create Your First Backlink For Free (Basic)
+                    Create a Permanent Backlink (Basic)
                   </CardTitle>
                   <p className="text-gray-600 mt-2">
                     Zero external dependencies • Instant generation • Production ready
