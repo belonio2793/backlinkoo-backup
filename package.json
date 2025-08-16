@@ -35,7 +35,8 @@
     "check:schema": "node check-schema-structure.js",
     "test:campaign": "node test-campaign-creation.js",
     "test:fix": "node test-campaign-fix.js",
-    "test:final": "node final-campaign-test.js"
+    "test:final": "node final-campaign-test.js",
+    "force:beautiful": "node scripts/force-beautiful-content-structure.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
