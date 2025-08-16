@@ -92,6 +92,27 @@ export function BeautifulBlogPost() {
   // Use premium SEO score logic
   const { effectiveScore, isPremiumScore } = usePremiumSEOScore(blogPost);
 
+  // Memoize expensive calculations for performance
+  const memoizedBlogTitle = useMemo(() => {
+    return blogPost ? EnhancedBlogCleaner.cleanTitle(blogPost.title) : '';
+  }, [blogPost?.title]);
+
+  const memoizedReadingTime = useMemo(() => {
+    return blogPost?.reading_time || 0;
+  }, [blogPost?.reading_time]);
+
+  const memoizedFormattedDate = useMemo(() => {
+    try {
+      if (!blogPost?.created_at) return 'Date unknown';
+      const date = new Date(blogPost.created_at);
+      if (isNaN(date.getTime())) return 'Invalid date';
+      return format(date, 'MMMM dd, yyyy');
+    } catch (error) {
+      console.error('Date formatting error:', error, 'Value:', blogPost?.created_at);
+      return 'Date error';
+    }
+  }, [blogPost?.created_at]);
+
   // Cleanup component mount flag on unmount
   useEffect(() => {
     return () => {
@@ -1557,7 +1578,7 @@ export function BeautifulBlogPost() {
                       return (
                         <div className="max-w-2xl mx-auto bg-red-600 text-white p-4 rounded-lg animate-pulse border-4 border-yellow-400">
                           <div className="text-center font-black text-lg">
-                            ��� CRITICAL: LESS THAN 1 HOUR REMAINING! ⚠️⚠️⚠️
+                            💀 CRITICAL: LESS THAN 1 HOUR REMAINING! ⚠️⚠️⚠️
                           </div>
                           <div className="text-center text-sm mt-2">
                             Your content is entering the DEATH ZONE!
