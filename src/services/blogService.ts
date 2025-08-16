@@ -100,10 +100,22 @@ export class BlogService {
 
     let result;
     try {
+      // Primary save to published_blog_posts table
       result = await supabase
-        .from('blog_posts')
+        .from('published_blog_posts')
         .insert(cleanBlogPostData)
         .select();
+
+      // Also save to blog_posts for backward compatibility
+      try {
+        await supabase
+          .from('blog_posts')
+          .insert(cleanBlogPostData);
+        console.log('✅ [BlogService] Also saved to blog_posts for compatibility');
+      } catch (backupError) {
+        console.warn('⚠️ [BlogService] Backup save to blog_posts failed:', backupError);
+      }
+
     } catch (networkError: any) {
       console.error('❌ Network error during blog post creation:', networkError);
       throw new Error(`Network error: ${networkError.message || 'Failed to connect to database'}`);
