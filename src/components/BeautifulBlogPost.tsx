@@ -170,7 +170,7 @@ export function BeautifulBlogPost() {
           console.log('No blog post loaded to test');
         }
       };
-      (window as any).BlogAutoAdjustmentService = BlogAutoAdjustmentService;
+      // (window as any).BlogAutoAdjustmentService = BlogAutoAdjustmentService;
     }
   }, [blogPost]);
 
