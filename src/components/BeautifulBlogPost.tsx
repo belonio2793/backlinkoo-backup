@@ -63,13 +63,30 @@ import { processBlogContent } from '@/utils/markdownProcessor';
 
 type BlogPost = Tables<'blog_posts'>;
 
-// Utility function to parse AI-generated text into structured JSX
+// Enhanced utility function to parse AI-generated text into structured JSX
 function formatContent(raw: string) {
-  const lines = raw.split(/\n+/).map(l => l.trim()).filter(Boolean);
+  // Clean the content first - remove link placement syntax
+  const cleanedContent = raw
+    .replace(/Natural Link Integration:\s*/gi, '')
+    .replace(/Link Placement:\s*/gi, '')
+    .replace(/Anchor Text:\s*/gi, '')
+    .replace(/URL Integration:\s*/gi, '')
+    .replace(/Link Strategy:\s*/gi, '')
+    .replace(/Backlink Placement:\s*/gi, '')
+    .replace(/Internal Link:\s*/gi, '')
+    .replace(/External Link:\s*/gi, '')
+    .replace(/Content Section:\s*/gi, '')
+    .replace(/Blog Section:\s*/gi, '')
+    .replace(/Article Part:\s*/gi, '')
+    .replace(/Content Block:\s*/gi, '');
+
+  const lines = cleanedContent.split(/\n+/).map(l => l.trim()).filter(Boolean);
 
   return lines.map((line, i) => {
-    // Detect section headings
-    if (/^(Section|Step|Chapter)\s*\d+/i.test(line)) {
+    // Enhanced section heading detection
+    if (/^(Section|Step|Chapter|Part|Stage|Phase)\s*\d+/i.test(line) ||
+        /^\d+\.\s+[A-Z]/.test(line) ||
+        /^(Section|Step|Chapter|Part)\s*\d+\s*[-–—]\s*/.test(line)) {
       return (
         <h2 key={i} className="beautiful-prose text-3xl font-bold text-black mb-6 mt-12">
           {line}
@@ -77,8 +94,8 @@ function formatContent(raw: string) {
       );
     }
 
-    // Detect Key Insights / Highlights
-    if (/^(Key Insights|Pro Tip|Conclusion|Summary)/i.test(line)) {
+    // Enhanced Key Insights / Highlights detection
+    if (/^(Key Insights|Pro Tip|Conclusion|Summary|Overview|Benefits|Important|Essential|Critical|Best Practices|Implementation)/i.test(line)) {
       return (
         <h3 key={i} className="beautiful-prose text-2xl font-semibold text-black mb-4 mt-8">
           {line}
@@ -86,21 +103,36 @@ function formatContent(raw: string) {
       );
     }
 
-    // Detect bullet-like lines starting with dash or asterisk
-    if (/^[-*]\s+/.test(line)) {
+    // Enhanced bullet point detection
+    if (/^[-*•·➤►▶→✓✔]\s+/.test(line)) {
       const items = line
-        .split(/[-*]\s+/)
+        .split(/[-*•·➤►▶→✓✔]\s+/)
         .filter(Boolean)
         .map((item, idx) => (
           <li key={idx} className="beautiful-prose relative pl-8 text-lg leading-relaxed text-gray-700 mb-2">
-            {item}
+            {item.trim()}
           </li>
         ));
       return <ul key={i} className="beautiful-prose space-y-4 my-8">{items}</ul>;
     }
 
-    // Detect inline label: value pairs (e.g. "Keyword Research: ...")
-    if (/^.+?:/.test(line)) {
+    // Enhanced numbered list detection
+    if (/^\d+\.\s/.test(line)) {
+      const content = line.replace(/^\d+\.\s/, '').trim();
+      return (
+        <div key={i} className="beautiful-prose space-y-4 my-8">
+          <ol className="list-decimal ml-6">
+            <li className="beautiful-prose relative pl-2 text-lg leading-relaxed text-gray-700 mb-2">
+              {content}
+            </li>
+          </ol>
+        </div>
+      );
+    }
+
+    // Detect inline label: value pairs (but exclude link syntax)
+    if (/^.+?:/.test(line) &&
+        !/^(Natural Link Integration|Link Placement|Anchor Text|URL Integration|Link Strategy|Backlink Placement|Internal Link|External Link):/i.test(line)) {
       const [label, ...rest] = line.split(":");
       return (
         <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
@@ -109,22 +141,41 @@ function formatContent(raw: string) {
       );
     }
 
-    // Detect links and format them nicely
-    if (/https?:\/\//.test(line)) {
-      const urlMatch = line.match(/https?:\/\/\S+/);
-      const url = urlMatch?.[0] || "#";
-      return (
-        <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
-          <a
-            href={url}
-            className="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {line}
-          </a>
-        </p>
-      );
+    // Enhanced link detection with markdown support
+    if (/https?:\/\//.test(line) || /\[.*?\]\(.*?\)/.test(line)) {
+      // Handle markdown links [text](url)
+      if (/\[.*?\]\(.*?\)/.test(line)) {
+        const processedLine = line.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+          // Clean up the anchor text
+          const cleanText = text.replace(/^(Natural Link Integration|Link Placement|Anchor Text|URL Integration):\s*/gi, '').trim();
+          // Ensure URL is properly formatted
+          let cleanUrl = url.trim();
+          if (cleanUrl && !cleanUrl.match(/^https?:\/\//)) {
+            cleanUrl = cleanUrl.startsWith('//') ? 'https:' + cleanUrl : 'https://' + cleanUrl;
+          }
+          return `<a href="${cleanUrl}" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
+        });
+
+        return (
+          <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6" dangerouslySetInnerHTML={{ __html: processedLine }} />
+        );
+      } else {
+        // Handle plain URLs
+        const urlMatch = line.match(/https?:\/\/\S+/);
+        const url = urlMatch?.[0] || "#";
+        return (
+          <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
+            <a
+              href={url}
+              className="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {line}
+            </a>
+          </p>
+        );
+      }
     }
 
     // Default: render as paragraph
