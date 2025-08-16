@@ -249,7 +249,7 @@ const Index = () => {
     <div className="min-h-screen bg-background font-light">
       {/* Header */}
       <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
-        <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-2">
+        <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 py-2">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
               <Infinity className="h-4 w-4 text-primary" />
