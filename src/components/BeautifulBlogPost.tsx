@@ -1132,7 +1132,7 @@ export function BeautifulBlogPost() {
         if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
-        return `<h1 class="beautiful-prose text-lg font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h1>`;
+        return `<p class="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6"${attrs}>${cleanText}</p>`;
       })
       .replace(/<h2([^>]*)>(.*?)<\/h2>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
