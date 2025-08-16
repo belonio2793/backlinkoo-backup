@@ -681,7 +681,7 @@ export function BeautifulBlogPost() {
 
     // Step 1: Remove link placement syntax and clean up content
     formattedContent = formattedContent
-      // Hide link placement syntax
+      // Hide link placement syntax and content generation artifacts
       .replace(/Natural Link Integration:\s*/gi, '')
       .replace(/Link Placement:\s*/gi, '')
       .replace(/Anchor Text:\s*/gi, '')
@@ -690,6 +690,10 @@ export function BeautifulBlogPost() {
       .replace(/Backlink Placement:\s*/gi, '')
       .replace(/Internal Link:\s*/gi, '')
       .replace(/External Link:\s*/gi, '')
+      .replace(/Content Section:\s*/gi, '')
+      .replace(/Blog Section:\s*/gi, '')
+      .replace(/Article Part:\s*/gi, '')
+      .replace(/Content Block:\s*/gi, '')
 
       // Convert **text** to <strong>text</strong> before removing other ** markers
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
@@ -1310,7 +1314,7 @@ export function BeautifulBlogPost() {
                         <div className="space-y-1">
                           <p className="font-semibold">Unclaimed</p>
                           <p className="text-sm">This post is unclaimed and anyone can take ownership of it.</p>
-                          <p className="text-xs text-gray-400">⚠️ May be deleted if not claimed soon</p>
+                          <p className="text-xs text-gray-400">���️ May be deleted if not claimed soon</p>
                         </div>
                       </TooltipContent>
                     </Tooltip>
