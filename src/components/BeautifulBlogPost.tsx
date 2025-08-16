@@ -166,11 +166,36 @@ const ContentProcessor = ({
       .replace(/\n{3,}/g, '\n\n')
       .trim();
 
-    // Remove duplicate title at the beginning
+    // Enhanced title removal - remove duplicate titles anywhere in content
     if (title) {
-      const titlePattern = new RegExp(`^\\s*${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i');
-      cleanContent = cleanContent.replace(titlePattern, '');
+      const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      // Remove title at the beginning of content
+      const titleAtStartPattern = new RegExp(`^\\s*${escapedTitle}\\s*`, 'i');
+      cleanContent = cleanContent.replace(titleAtStartPattern, '');
+
+      // Remove title as a standalone line anywhere in content
+      const titleStandalonePattern = new RegExp(`^\\s*${escapedTitle}\\s*$`, 'gim');
+      cleanContent = cleanContent.replace(titleStandalonePattern, '');
+
+      // Remove title wrapped in bold markdown (**title**)
+      const titleBoldPattern = new RegExp(`\\*\\*\\s*${escapedTitle}\\s*\\*\\*`, 'gi');
+      cleanContent = cleanContent.replace(titleBoldPattern, '');
+
+      // Remove title as a heading (# title)
+      const titleHeadingPattern = new RegExp(`^#+\\s*${escapedTitle}\\s*$`, 'gim');
+      cleanContent = cleanContent.replace(titleHeadingPattern, '');
+
+      // Remove title if it appears as the first strong element in a paragraph
+      const titleFirstStrongPattern = new RegExp(`^\\s*${escapedTitle}\\s*`, 'i');
+      cleanContent = cleanContent.replace(titleFirstStrongPattern, '');
     }
+
+    // Clean up any remaining empty lines or whitespace
+    cleanContent = cleanContent
+      .replace(/\n\s*\n\s*\n/g, '\n\n') // Remove multiple empty lines
+      .replace(/^\s+|\s+$/g, '') // Trim whitespace
+      .trim();
 
     // Split into lines first to better detect lists
     const lines = cleanContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
@@ -192,12 +217,16 @@ const ContentProcessor = ({
         }
 
         elements.push(
-          <ol key={`numbered-list-${i}`} className="mb-6 ml-6 space-y-2 list-decimal list-outside">
-            {listItems.map((item, idx) => (
-              <li key={idx} className="text-lg leading-7 text-gray-700 pl-3" style={{ textAlign: 'justify' }}>
-                {processTextContent(item, idx + i)}
-              </li>
-            ))}
+          <ol key={`numbered-list-${i}`} className="mb-10 ml-8 space-y-4 list-decimal list-outside">
+            {listItems.map((item, idx) => {
+              const processedContent = processTextContent(item, idx + i);
+              // Only render list item if content is not null
+              return processedContent !== null ? (
+                <li key={idx} className="text-lg leading-7 text-gray-700 pl-4 font-normal" style={{ textAlign: 'justify', letterSpacing: '0.005em' }}>
+                  {processedContent}
+                </li>
+              ) : null;
+            }).filter(Boolean)}
           </ol>
         );
 
@@ -217,12 +246,16 @@ const ContentProcessor = ({
         }
 
         elements.push(
-          <ul key={`bullet-list-${i}`} className="mb-6 ml-6 space-y-2 list-disc list-outside">
-            {listItems.map((item, idx) => (
-              <li key={idx} className="text-lg leading-7 text-gray-700 pl-3" style={{ textAlign: 'justify' }}>
-                {processTextContent(item, idx + i)}
-              </li>
-            ))}
+          <ul key={`bullet-list-${i}`} className="mb-10 ml-8 space-y-4 list-disc list-outside">
+            {listItems.map((item, idx) => {
+              const processedContent = processTextContent(item, idx + i);
+              // Only render list item if content is not null
+              return processedContent !== null ? (
+                <li key={idx} className="text-lg leading-7 text-gray-700 pl-4 font-normal" style={{ textAlign: 'justify', letterSpacing: '0.005em' }}>
+                  {processedContent}
+                </li>
+              ) : null;
+            }).filter(Boolean)}
           </ul>
         );
 
@@ -253,19 +286,18 @@ const ContentProcessor = ({
         const improvedParagraphs = improveSentenceStructure(paragraphContent);
 
         improvedParagraphs.forEach((paragraph, idx) => {
-          elements.push(
-            <div
-              key={`paragraph-${i}-${idx}`}
-              className="mb-4 text-lg leading-7 text-gray-700 max-w-none break-words"
-              style={{
-                textAlign: 'justify',
-                textJustify: 'inter-word',
-                hyphens: 'auto'
-              }}
-            >
-              {processTextContent(paragraph, i + idx)}
-            </div>
-          );
+          const processedContent = processTextContent(paragraph, i + idx);
+          // Only render if content is not null (not filtered out)
+          if (processedContent !== null) {
+            elements.push(
+              <div
+                key={`paragraph-${i}-${idx}`}
+                className="beautiful-prose-paragraph max-w-none break-words"
+              >
+                {processedContent}
+              </div>
+            );
+          }
         });
       }
 
@@ -277,6 +309,15 @@ const ContentProcessor = ({
 
   // Helper function to process text content (links, bold, italic, etc.)
   const processTextContent = useCallback((text: string, index: number) => {
+    // Filter out duplicate title if it appears in text content
+    if (title) {
+      const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const titlePattern = new RegExp(`^\\s*${escapedTitle}\\s*$`, 'i');
+      if (titlePattern.test(text.trim())) {
+        return null; // Return null to filter out this text entirely
+      }
+    }
+
     // Process markdown links first
     let processedText = text.replace(
       /\[([^\]]+)\]\(([^)]+)\)/g,
@@ -284,7 +325,7 @@ const ContentProcessor = ({
         const cleanUrl = url.trim().startsWith('http') ? url.trim() : `https://${url.trim()}`;
         const cleanText = linkText.trim();
 
-        return `<a href="${cleanUrl}" class="text-blue-600 hover:text-blue-800 font-medium underline decoration-2 underline-offset-2 transition-colors duration-200" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
+        return `<a href="${cleanUrl}" class="text-blue-600 hover:text-blue-800 font-semibold underline decoration-2 underline-offset-4 transition-all duration-200 hover:decoration-3 hover:text-blue-700 bg-blue-50/30 hover:bg-blue-50/50 px-1 py-0.5 rounded" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
       }
     );
 
@@ -300,16 +341,16 @@ const ContentProcessor = ({
     }
 
     // Handle bold text
-    processedText = processedText.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>');
+    processedText = processedText.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-gray-900 bg-gray-50/50 px-1 py-0.5 rounded">$1</strong>');
 
     // Handle italic text
-    processedText = processedText.replace(/\*([^*]+)\*/g, '<em class="italic">$1</em>');
+    processedText = processedText.replace(/\*([^*]+)\*/g, '<em class="italic text-gray-800 font-medium">$1</em>');
 
     return <span dangerouslySetInnerHTML={{ __html: processedText }} />;
   }, [targetKeyword, anchorText, targetUrl]);
 
   return (
-    <div className="prose prose-lg prose-slate max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:text-blue-800 prose-strong:text-gray-900 prose-li:text-gray-700">
+    <div className="prose prose-xl prose-slate max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-p:font-light prose-a:text-blue-600 prose-a:no-underline hover:prose-a:text-blue-800 prose-strong:text-gray-900 prose-li:text-gray-700 prose-li:font-light">
       {processContent(content)}
     </div>
   );
@@ -515,18 +556,18 @@ const KeywordsSection = ({ keywords }: { keywords?: string[] }) => {
   if (!keywords?.length) return null;
 
   return (
-    <Card className="mt-12 max-w-4xl mx-auto">
-      <CardContent className="p-8">
-        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-purple-600" />
+    <Card className="mt-16 max-w-4xl mx-auto border-0 shadow-lg bg-gradient-to-r from-purple-50/50 via-white to-blue-50/50">
+      <CardContent className="p-10">
+        <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center justify-center gap-3">
+          <Sparkles className="h-6 w-6 text-purple-600" />
           Keywords & Topics
         </h3>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-4 justify-center">
           {keywords.map((keyword, index) => (
-            <Badge 
-              key={index} 
+            <Badge
+              key={index}
               variant="outline"
-              className="px-4 py-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded-full"
+              className="px-6 py-3 bg-white/80 border-purple-200 text-gray-700 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 rounded-full text-sm font-medium shadow-sm hover:shadow-md"
             >
               {keyword}
             </Badge>
@@ -820,7 +861,7 @@ export function BeautifulBlogPost() {
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      <div className="beautiful-blog-wrapper min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
         
         {/* Reading Progress */}
         <ReadingProgress />
@@ -873,7 +914,7 @@ export function BeautifulBlogPost() {
         </div>
 
         {/* Article Container */}
-        <article className="max-w-4xl mx-auto px-6 py-12">
+        <article className="max-w-5xl mx-auto px-6 py-16 lg:px-8">
           
           {/* Status Badge */}
           <StatusBadge
@@ -887,79 +928,109 @@ export function BeautifulBlogPost() {
           />
 
           {/* Article Header */}
-          <header className="text-center mb-12">
-            {blogPost.meta_description && (
-              <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
-                {blogPost.meta_description}
-              </p>
-            )}
+          <header className="text-center mb-16">
+            {/* Main Title - Prominently displayed on its own line */}
+            <div className="mb-12">
+              <h1 className="beautiful-main-title beautiful-blog-title mb-6">
+                {cleanTitle}
+              </h1>
 
-            {/* Meta Information */}
-            <div className="flex flex-wrap items-center justify-center gap-6 text-gray-500 mb-8">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <time dateTime={blogPost.created_at}>{formattedDate}</time>
+              {/* Subtitle/Meta Description */}
+              {blogPost.meta_description && (
+                <div className="max-w-3xl mx-auto">
+                  <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
+                    {blogPost.meta_description}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Meta Information Bar */}
+            <div className="max-w-2xl mx-auto">
+              <div className="flex flex-wrap items-center justify-center gap-8 text-gray-500 py-4 border-t border-b border-gray-200/50">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <time dateTime={blogPost.created_at} className="text-gray-700">
+                    {formattedDate}
+                  </time>
+                </div>
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Clock className="h-4 w-4 text-green-600" />
+                  <span className="text-gray-700">{readingTime} min read</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Eye className="h-4 w-4 text-purple-600" />
+                  <span className="text-gray-700">SEO Optimized</span>
+                </div>
+                <SEOScoreDisplay
+                  score={effectiveScore}
+                  title={blogPost.title}
+                  content={blogPost.content}
+                  metaDescription={blogPost.meta_description || undefined}
+                  targetKeyword={blogPost.keywords?.[0]}
+                  showDetails={true}
+                  isPremiumScore={isPremiumScore}
+                />
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                <span>{readingTime} min read</span>
-              </div>
-              <SEOScoreDisplay
-                score={effectiveScore}
-                title={blogPost.title}
-                content={blogPost.content}
-                metaDescription={blogPost.meta_description || undefined}
-                targetKeyword={blogPost.keywords?.[0]}
-                showDetails={true}
-                isPremiumScore={isPremiumScore}
-              />
             </div>
           </header>
 
           {/* Article Content */}
-          <div className="prose prose-lg max-w-none">
-            <Card className="p-6 md:p-10 lg:p-12 border-0 shadow-lg bg-white/50 backdrop-blur-sm">
-              <div className="max-w-none">
-                <ContentProcessor
-                  content={blogPost.content || ''}
-                  title={cleanTitle}
-                  targetKeyword={blogPost.keywords?.[0]}
-                  anchorText={blogPost.anchor_text}
-                  targetUrl={blogPost.target_url}
-                />
+          <main className="mb-16">
+            <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm overflow-hidden">
+              <div className="relative">
+                {/* Content Wrapper */}
+                <div className="px-8 md:px-12 lg:px-16 py-12 md:py-16 beautiful-blog-content">
+                  <div className="max-w-none prose prose-lg prose-slate beautiful-prose prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:text-blue-800 prose-strong:text-gray-900 prose-li:text-gray-700">
+                    <ContentProcessor
+                      content={blogPost.content || ''}
+                      title={cleanTitle}
+                      targetKeyword={blogPost.keywords?.[0]}
+                      anchorText={blogPost.anchor_text}
+                      targetUrl={blogPost.target_url}
+                    />
+                  </div>
+                </div>
+
+                {/* Subtle gradient overlay for depth */}
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue-50/10 pointer-events-none" />
               </div>
             </Card>
-          </div>
+          </main>
 
           {/* Keywords Section */}
           <KeywordsSection keywords={blogPost.keywords} />
 
           {/* Engagement Section */}
-          <Card className="mt-12 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
-            <CardContent className="p-8 text-center">
-              <h3 className="text-2xl font-bold text-gray-900 mb-4">
-                Enjoyed this article?
-              </h3>
-              <p className="text-gray-600 mb-6 text-lg">
-                Share it with your network and help others discover great content!
-              </p>
-              <div className="flex justify-center gap-4">
-                <Button 
-                  onClick={handleShare} 
-                  variant="outline" 
-                  className="rounded-full px-6"
-                >
-                  <Share2 className="mr-2 h-4 w-4" />
-                  Share Article
-                </Button>
-                <Button 
-                  onClick={handleCopyLink} 
-                  variant="outline" 
-                  className="rounded-full px-6"
-                >
-                  <Copy className="mr-2 h-4 w-4" />
-                  Copy Link
-                </Button>
+          <Card className="mt-16 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-blue-200 shadow-xl">
+            <CardContent className="p-12 text-center">
+              <div className="max-w-2xl mx-auto">
+                <h3 className="text-3xl font-bold text-gray-900 mb-6 tracking-tight">
+                  Enjoyed this article?
+                </h3>
+                <p className="text-gray-600 mb-10 text-xl leading-relaxed font-light">
+                  Share it with your network and help others discover great content!
+                </p>
+                <div className="flex justify-center gap-6">
+                  <Button
+                    onClick={handleShare}
+                    variant="outline"
+                    size="lg"
+                    className="rounded-full px-8 py-3 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400 transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    <Share2 className="mr-3 h-5 w-5" />
+                    Share Article
+                  </Button>
+                  <Button
+                    onClick={handleCopyLink}
+                    variant="outline"
+                    size="lg"
+                    className="rounded-full px-8 py-3 border-indigo-300 text-indigo-700 hover:bg-indigo-50 hover:border-indigo-400 transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    <Copy className="mr-3 h-5 w-5" />
+                    Copy Link
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
