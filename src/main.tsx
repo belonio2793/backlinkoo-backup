@@ -136,6 +136,9 @@ if (import.meta.env.DEV) {
   // Import Product Hunt post fixer
   import('./utils/fixProductHuntPost');
 
+  // Import beautiful content structure utility
+  import('./utils/forceBeautifulContentStructure');
+
   console.log('💡 Debug helpers available:');
   console.log('  - fixRLS() - Go to RLS recursion fix page');
   console.log('  - forcePremium() - Force current user to premium status');
