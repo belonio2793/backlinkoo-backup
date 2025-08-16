@@ -224,15 +224,15 @@ function formatContent(raw: string, title?: string) {
       return <ul key={i} className="beautiful-prose list-disc space-y-2 my-6 ml-6">{items}</ul>;
     }
 
-    // Enhanced numbered list detection
+    // Convert numbered items to regular bullet points for better readability
     if (/^\d+\.\s/.test(line)) {
       const content = line.replace(/^\d+\.\s/, '').trim();
       const processedContent = processLineContent(content);
       return (
-        <div key={i} className="beautiful-prose space-y-4 my-8">
-          <ol className="list-decimal ml-6">
-            <li className="beautiful-prose relative pl-2 text-lg leading-relaxed text-gray-700 mb-2" dangerouslySetInnerHTML={{ __html: processedContent }} />
-          </ol>
+        <div key={i} className="beautiful-prose my-6">
+          <ul className="beautiful-prose list-disc space-y-2 ml-6">
+            <li className="beautiful-prose relative pl-2 text-lg leading-relaxed text-gray-700" dangerouslySetInnerHTML={{ __html: processedContent }} />
+          </ul>
         </div>
       );
     }
