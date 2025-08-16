@@ -99,6 +99,50 @@ export function BeautifulBlogPost() {
     };
   }, []);
 
+  // Setup database table if missing
+  useEffect(() => {
+    const setupDatabaseIfNeeded = async () => {
+      try {
+        // Test if published_blog_posts table exists by trying a simple query
+        const { error } = await supabase
+          .from('published_blog_posts')
+          .select('id')
+          .limit(1);
+
+        // If table doesn't exist, set it up
+        if (error && (error.code === '42P01' || error.message?.includes('does not exist'))) {
+          console.log('🔧 published_blog_posts table missing, setting up...');
+
+          try {
+            const response = await fetch('/.netlify/functions/setup-published-blog-posts', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'setup' })
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+              console.log('✅ Database setup completed, retrying blog load...');
+              // Retry loading the blog post after setup
+              if (slug) {
+                setTimeout(() => loadBlogPost(slug), 1000);
+              }
+            } else {
+              console.error('❌ Database setup failed:', result.error);
+            }
+          } catch (setupError) {
+            console.error('❌ Failed to setup database:', setupError);
+          }
+        }
+      } catch (err) {
+        console.warn('Database check failed:', err);
+      }
+    };
+
+    setupDatabaseIfNeeded();
+  }, [slug]);
+
   useEffect(() => {
     if (slug) {
       loadBlogPost(slug);
