@@ -24,10 +24,6 @@ import { PricingModal } from "@/components/PricingModal";
 import { ToastAction } from "@/components/ui/toast";
 
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
-import { HomepageBlogGenerator } from "@/components/HomepageBlogGenerator";
-import { ProductionBlogGenerator } from "@/components/ProductionBlogGenerator";
-import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
-import { OpenAIGenerator } from "@/components/OpenAIGenerator";
 import { BlogForm } from "@/components/blog/BlogForm";
 import { RotatingTagline } from "@/components/RotatingTagline";
 import { RotatingStats } from "@/components/RotatingStats";
@@ -67,7 +63,6 @@ const Index = () => {
   // Waitlist state
   const [waitlistEmail, setWaitlistEmail] = useState('');
 
-  const [useProductionGenerator, setUseProductionGenerator] = useState(false);
   const [showTrialUpgrade, setShowTrialUpgrade] = useState(false);
   const [showInlineAuth, setShowInlineAuth] = useState(false);
 
