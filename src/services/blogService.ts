@@ -4,6 +4,7 @@ import { blogPersistenceService } from './blogPersistenceService';
 import { SEOAnalyzer } from './seoAnalyzer';
 import { formatErrorForUI } from '@/utils/errorUtils';
 import { applyBeautifulContentStructure } from '@/utils/forceBeautifulContentStructure';
+import { emergencyBlogService } from './emergencyBlogService';
 
 export type BlogPost = Tables<'blog_posts'>;
 export type CreateBlogPost = TablesInsert<'blog_posts'>;
