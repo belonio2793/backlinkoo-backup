@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import { blogPublisher } from '@/services/blogPublisher';
 import { processBlogContent } from '@/utils/markdownProcessor';
+import { BlogAutoAdjustmentService } from '@/services/blogAutoAdjustmentService';
+import { BlogQualityMonitor } from '@/utils/blogQualityMonitor';
 import {
   Eye,
   Code,
