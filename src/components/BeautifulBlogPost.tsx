@@ -1102,12 +1102,7 @@ export function BeautifulBlogPost() {
                             anchor_text: blogPost.anchor_text
                           });
                         }
-                        const result = {
-                          content: adjustedContent,
-                          wasProcessed: adjustedContent !== content,
-                          issues: qualityMetrics.issues,
-                          warnings: qualityMetrics.warnings
-                        };
+                        // Variables are already defined above as finalContent and securityInfo
 
                         // Log processing results for debugging
                         console.log('���� Blog content processing result:', {
