@@ -374,9 +374,20 @@ const EnhancedContentProcessor = ({
     ));
   };
 
-  // Process text content with enhanced link handling
+  // Process text content with comprehensive markdown and HTML handling
   const processTextContent = useCallback((text: string, elementId: string) => {
     let processedText = text;
+
+    // Clean up any remaining HTML artifacts
+    processedText = processedText
+      .replace(/<\/?div[^>]*>/gi, '') // Remove div tags
+      .replace(/<\/?span[^>]*>/gi, '') // Remove span tags
+      .replace(/<br\s*\/?>/gi, ' ') // Convert br tags to spaces
+      .replace(/&nbsp;/gi, ' ') // Convert non-breaking spaces
+      .replace(/&amp;/gi, '&') // Convert HTML entities
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>')
+      .replace(/&quot;/gi, '"');
 
     // Process existing markdown links first
     processedText = processedText.replace(
@@ -384,6 +395,17 @@ const EnhancedContentProcessor = ({
       (match, linkText, url) => {
         const cleanUrl = url.trim().startsWith('http') ? url.trim() : `https://${url.trim()}`;
         return `<a href="${cleanUrl}" class="inline-link text-blue-600 hover:text-blue-800 font-semibold underline decoration-2 underline-offset-2 transition-colors duration-200 bg-blue-50/30 hover:bg-blue-50/50 px-1 py-0.5 rounded" target="_blank" rel="noopener noreferrer">${linkText.trim()}</a>`;
+      }
+    );
+
+    // Process inline code first (to preserve it from other formatting)
+    const codeBlocks: string[] = [];
+    processedText = processedText.replace(
+      /`([^`]+)`/g,
+      (match, code) => {
+        const index = codeBlocks.length;
+        codeBlocks.push(`<code class="bg-gray-100 text-purple-700 px-2 py-1 rounded text-sm font-mono">${code}</code>`);
+        return `__CODE_BLOCK_${index}__`;
       }
     );
 
@@ -398,17 +420,33 @@ const EnhancedContentProcessor = ({
       }
     }
 
-    // Process bold text
+    // Process bold text with multiple patterns
+    processedText = processedText
+      .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>')
+      .replace(/__([^_]+)__/g, '<strong class="font-bold text-gray-900">$1</strong>');
+
+    // Process italic text with multiple patterns
+    processedText = processedText
+      .replace(/\*([^*]+)\*/g, '<em class="italic text-gray-800 font-medium">$1</em>')
+      .replace(/_([^_]+)_/g, '<em class="italic text-gray-800 font-medium">$1</em>');
+
+    // Process strikethrough text
     processedText = processedText.replace(
-      /\*\*([^*]+)\*\*/g, 
-      '<strong class="font-bold text-gray-900">$1</strong>'
+      /~~([^~]+)~~/g,
+      '<del class="line-through text-gray-500">$1</del>'
     );
 
-    // Process italic text
-    processedText = processedText.replace(
-      /\*([^*]+)\*/g, 
-      '<em class="italic text-gray-800 font-medium">$1</em>'
-    );
+    // Restore code blocks
+    codeBlocks.forEach((code, index) => {
+      processedText = processedText.replace(`__CODE_BLOCK_${index}__`, code);
+    });
+
+    // Clean up excessive whitespace and formatting artifacts
+    processedText = processedText
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .replace(/\s*([.!?])\s*/g, '$1 ') // Fix punctuation spacing
+      .replace(/([.!?])([A-Z])/g, '$1 $2') // Add space after sentence ending
+      .trim();
 
     return <span dangerouslySetInnerHTML={{ __html: processedText }} />;
   }, [targetKeyword, anchorText, targetUrl]);
