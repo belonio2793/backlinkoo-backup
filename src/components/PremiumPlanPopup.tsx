@@ -546,46 +546,46 @@ export function PremiumPlanPopup({
   const renderCheckout = () => (
     <div className="space-y-4 sm:space-y-6">
       {/* Plan Summary */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         <div className="flex items-center gap-2">
-          <Crown className="h-5 w-5 text-yellow-500" />
-          <h3 className="text-lg font-semibold">Premium Plan</h3>
+          <Crown className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
+          <h3 className="text-base sm:text-lg font-semibold">Premium Plan</h3>
         </div>
-        
-        <Card className="p-4 bg-gradient-to-br from-purple-50 to-blue-50">
-          <div className="space-y-3">
+
+        <Card className="p-3 sm:p-4 bg-gradient-to-br from-purple-50 to-blue-50">
+          <div className="space-y-2 sm:space-y-3">
             <div className="flex items-center justify-between">
-              <span className="font-medium capitalize">{selectedPlan} Plan</span>
-              <Badge variant="secondary">
-                {plans[selectedPlan].popular ? 'Most Popular' : 'Best Value'}
+              <span className="text-sm sm:text-base font-medium capitalize">{selectedPlan} Plan</span>
+              <Badge variant="secondary" className="text-xs">
+                {plans[selectedPlan].popular ? 'Popular' : 'Value'}
               </Badge>
             </div>
-            
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold">${plans[selectedPlan].price}</span>
-              <span className="text-muted-foreground">per {plans[selectedPlan].period}</span>
+
+            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2">
+              <span className="text-xl sm:text-2xl font-bold">${plans[selectedPlan].price}</span>
+              <span className="text-sm text-muted-foreground">per {plans[selectedPlan].period}</span>
             </div>
-            
+
             {plans[selectedPlan].savings && (
-              <div className="text-sm text-green-600">
-                Save ${plans[selectedPlan].savings} per year
+              <div className="text-xs sm:text-sm text-green-600">
+                Save ${plans[selectedPlan].savings}/year
               </div>
             )}
           </div>
         </Card>
 
         <div className="space-y-2">
-          <h4 className="font-medium">Features Included:</h4>
-          <div className="space-y-1">
+          <h4 className="text-sm font-medium">Key Features:</h4>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
             {features.slice(0, 4).map((feature, index) => (
-              <div key={index} className="flex items-center gap-2 text-sm">
-                {feature.icon}
-                <span>{feature.text}</span>
+              <div key={index} className="flex items-center gap-2 text-xs sm:text-sm">
+                <div className="text-green-500">{feature.icon}</div>
+                <span className="truncate">{feature.text}</span>
               </div>
             ))}
-            <div className="text-sm text-muted-foreground">
-              ...and {features.length - 4} more features
-            </div>
+          </div>
+          <div className="text-xs text-muted-foreground text-center">
+            +{features.length - 4} more features
           </div>
         </div>
       </div>
