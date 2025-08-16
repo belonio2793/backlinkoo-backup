@@ -735,17 +735,17 @@ export function BeautifulBlogPost() {
             htmlContent += '</ol>\n\n';
           }
         }
-        // Check if it's a bullet point
-        else if (para.match(/^[•·\-\*]\s/)) {
+        // Check if it's a bullet point (expanded patterns)
+        else if (para.match(/^[•·\-\*]\s/) || para.match(/^\*\s/) || para.match(/^-\s/)) {
           // If this is the start of a list, open <ul>
-          if (i === 0 || !paragraphs[i-1].match(/^[•·\-\*]\s/)) {
+          if (i === 0 || !paragraphs[i-1].match(/^[•·\-\*]\s/) && !paragraphs[i-1].match(/^\*\s/) && !paragraphs[i-1].match(/^-\s/)) {
             htmlContent += '<ul>\n';
           }
-          const listContent = para.replace(/^[•·\-\*]\s*/, '');
+          const listContent = para.replace(/^[•·\-\*]\s*/, '').replace(/^\*\s*/, '').replace(/^-\s*/, '');
           htmlContent += `<li>${listContent}</li>\n`;
 
           // If next paragraph is not a list item, close </ul>
-          if (i === paragraphs.length - 1 || !paragraphs[i+1].match(/^[•·\-\*]\s/)) {
+          if (i === paragraphs.length - 1 || (!paragraphs[i+1].match(/^[•·\-\*]\s/) && !paragraphs[i+1].match(/^\*\s/) && !paragraphs[i+1].match(/^-\s/))) {
             htmlContent += '</ul>\n\n';
           }
         }
