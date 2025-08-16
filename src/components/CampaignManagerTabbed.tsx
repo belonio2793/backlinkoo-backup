@@ -65,6 +65,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
   const [activeTab, setActiveTab] = useState('activity');
   const [selectedCampaignId, setSelectedCampaignId] = useState<string | null>(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [shownToastUrls, setShownToastUrls] = useState<Set<string>>(new Set());
 
   // Auto-switch to activity tab when a campaign progress starts
   useEffect(() => {
@@ -90,11 +91,18 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
 
         // Show toast notification for URL published events
         if (event.type === 'url_published') {
-          toast({
-            title: "New Backlink Published!",
-            description: `Published "${event.details?.keyword || event.keyword || 'content'}" to ${event.details?.platform || event.platform || 'platform'}`,
-            duration: 3000, // Shorter duration - just a few seconds
-          });
+          const publishedUrl = event.details?.publishedUrl;
+
+          // Only show toast if we haven't shown it for this URL already
+          if (publishedUrl && !shownToastUrls.has(publishedUrl)) {
+            setShownToastUrls(prev => new Set([...prev, publishedUrl]));
+
+            toast({
+              title: "New Backlink Published!",
+              description: `Published "${event.details?.keyword || event.keyword || 'content'}" to ${event.details?.platform || event.platform || 'platform'}`,
+              duration: 3000, // Shorter duration - just a few seconds
+            });
+          }
 
           // Note: Don't create duplicate status messages - BacklinkNotification handles popup notifications
         }
