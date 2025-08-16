@@ -188,13 +188,13 @@ function formatContent(raw: string, title?: string) {
       return processedText;
     };
 
-    // Enhanced section heading detection - CONSISTENT FONT SIZE
+    // Enhanced section heading detection - SAME FONT SIZE AS PARAGRAPHS
     if (/^(Section|Step|Chapter|Part|Stage|Phase)\s*\d+/i.test(line) ||
         /^\d+\.\s+[A-Z]/.test(line) ||
         /^(Section|Step|Chapter|Part)\s*\d+\s*[-–—]\s*/.test(line)) {
       const processedContent = processLineContent(line);
       return (
-        <h2 key={i} className="beautiful-prose text-lg font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
+        <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6" dangerouslySetInnerHTML={{ __html: processedContent }} />
       );
     }
 
