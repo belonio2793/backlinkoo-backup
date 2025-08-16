@@ -175,25 +175,37 @@ export const BlogErrorBoundary: React.FC<BlogErrorBoundaryProps> = ({
             )}
 
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
-              <Button
-                onClick={() => navigate('/blog')}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Blog
-              </Button>
-              
-              {onRetry && (
-                <Button
-                  onClick={onRetry}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Try Again
-                </Button>
-              )}
-            </div>
+          <Button
+            onClick={() => navigate('/blog')}
+            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Blog
+          </Button>
+
+          {errorType === 'database' && (
+            <Button
+              onClick={handleDatabaseFix}
+              disabled={isFixingDatabase}
+              variant="destructive"
+              className="flex-1"
+            >
+              <Database className={`mr-2 h-4 w-4 ${isFixingDatabase ? 'animate-spin' : ''}`} />
+              {isFixingDatabase ? 'Fixing Database...' : 'Fix Database'}
+            </Button>
+          )}
+
+          {onRetry && (
+            <Button
+              onClick={onRetry}
+              variant="outline"
+              className="flex-1"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Try Again
+            </Button>
+          )}
+        </div>
 
             {errorType === 'not_found' && (
               <div className="text-center pt-4">
