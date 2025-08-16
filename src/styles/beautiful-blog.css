@@ -222,9 +222,10 @@
 /* Enhanced prose styling for content */
 .beautiful-prose {
   color: rgb(55, 65, 81);
-  line-height: 1.8;
-  font-weight: 300;
-  letter-spacing: 0.01em;
+  line-height: 1.7;
+  font-weight: 400;
+  letter-spacing: 0.005em;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
 }
 
 /* Professional paragraph styling */
