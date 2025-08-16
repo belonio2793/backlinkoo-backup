@@ -1016,7 +1016,7 @@ export function BeautifulBlogPost() {
 
       {/* Navigation Bar */}
       <div className="beautiful-nav sticky top-16 z-30 border-b border-gray-200/50 bg-white/80 backdrop-blur-md">
-        <div className="container mx-auto px-6 py-4">
+        <div className="max-w-5xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
@@ -1053,7 +1053,7 @@ export function BeautifulBlogPost() {
           <article className="w-full">
 
             {/* Article Header */}
-            <header className="text-center mb-16 relative max-w-4xl mx-auto px-6 pt-12">
+            <header className="text-center mb-16 relative max-w-5xl mx-auto px-6 pt-12">
 
 
               {/* Status Badges */}
@@ -1247,7 +1247,7 @@ export function BeautifulBlogPost() {
 
               {/* Meta Description */}
               {blogPost.meta_description && (
-                <p className="beautiful-blog-subtitle text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed max-w-3xl mx-auto">
+                <p className="beautiful-blog-subtitle text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed max-w-4xl mx-auto">
                   {blogPost.meta_description}
                 </p>
               )}
@@ -1294,7 +1294,7 @@ export function BeautifulBlogPost() {
 
             {/* Article Content */}
             <div className="prose prose-lg max-w-none mt-8">
-              <div className="beautiful-card max-w-6xl mx-auto pt-6 px-6 pb-8 md:pt-8 md:px-12 md:pb-12 lg:px-16">
+              <div className="beautiful-card max-w-5xl mx-auto pt-6 px-6 pb-8 md:pt-8 md:px-12 md:pb-12 lg:px-16">
                 <div
                   className="beautiful-blog-content beautiful-prose modern-blog-content article-content prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-black prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-strong:font-bold prose-strong:text-gray-900 prose-img:rounded-lg prose-img:shadow-lg"
                   style={{
@@ -1386,7 +1386,7 @@ export function BeautifulBlogPost() {
 
             {/* Keywords Section */}
             {blogPost.keywords && blogPost.keywords.length > 0 && (
-              <div className="mt-12 p-8 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200 max-w-4xl mx-auto">
+              <div className="mt-12 p-8 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200 max-w-5xl mx-auto">
                 <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-purple-600" />
                   Keywords & Topics
@@ -1428,7 +1428,7 @@ export function BeautifulBlogPost() {
             </div>
 
             {/* Premium Upgrade CTA Section */}
-            <div className="mt-12 p-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border border-purple-200 max-w-4xl mx-auto">
+            <div className="mt-12 p-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border border-purple-200 max-w-5xl mx-auto">
               <div className="text-center">
                 <div className="flex items-center justify-center mb-4">
                   <Crown className="h-8 w-8 text-purple-600 mr-3" />
@@ -1487,7 +1487,7 @@ export function BeautifulBlogPost() {
             </div>
 
             {/* Post Information Section */}
-            <div className="mt-12 space-y-6 max-w-4xl mx-auto px-6">
+            <div className="mt-12 space-y-6 max-w-5xl mx-auto px-6">
               {/* ENHANCED EXPIRATION WARNING WITH KILLER DELETION ALERT */}
               {!blogPost.claimed && blogPost.expires_at && (
                 <div className="space-y-4">

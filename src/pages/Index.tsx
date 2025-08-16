@@ -21,12 +21,9 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PricingModal } from "@/components/PricingModal";
+import { ToastAction } from "@/components/ui/toast";
 
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
-import { HomepageBlogGenerator } from "@/components/HomepageBlogGenerator";
-import { ProductionBlogGenerator } from "@/components/ProductionBlogGenerator";
-import { GlobalBlogGenerator } from "@/components/GlobalBlogGenerator";
-import { OpenAIGenerator } from "@/components/OpenAIGenerator";
 import { BlogForm } from "@/components/blog/BlogForm";
 import { RotatingTagline } from "@/components/RotatingTagline";
 import { RotatingStats } from "@/components/RotatingStats";
@@ -66,7 +63,6 @@ const Index = () => {
   // Waitlist state
   const [waitlistEmail, setWaitlistEmail] = useState('');
 
-  const [useProductionGenerator, setUseProductionGenerator] = useState(false);
   const [showTrialUpgrade, setShowTrialUpgrade] = useState(false);
   const [showInlineAuth, setShowInlineAuth] = useState(false);
 
@@ -343,39 +339,44 @@ const Index = () => {
             <BlogForm
               onContentGenerated={(blogPost) => {
                 setUser(user); // Refresh state
-                toast({
-                  title: "Success! 🎉",
-                  description: `Your blog post "${blogPost.title}" is now live at ${blogPost.blogUrl}`,
-                });
-                // Navigate to the specific blog post after a short delay
-                setTimeout(() => {
-                  if (blogPost.blogUrl) {
-                    try {
-                      // Check if it's already a relative path
-                      if (blogPost.blogUrl.startsWith('/')) {
-                        navigate(blogPost.blogUrl);
-                      } else {
-                        // Try to extract the path from absolute URL
-                        const blogPath = new URL(blogPost.blogUrl).pathname;
-                        navigate(blogPath);
-                      }
-                    } catch (error) {
-                      console.warn('Invalid blogUrl format:', blogPost.blogUrl, error);
-                      // Fallback to slug if URL parsing fails
-                      if (blogPost.metadata?.slug) {
-                        navigate(`/blog/${blogPost.metadata.slug}`);
-                      } else {
-                        navigate('/blog');
-                      }
-                    }
-                  } else if (blogPost.metadata?.slug) {
-                    // Fallback to slug-based navigation
-                    navigate(`/blog/${blogPost.metadata.slug}`);
+
+                // Get the full blog URL
+                let fullBlogUrl = '';
+                if (blogPost.blogUrl) {
+                  if (blogPost.blogUrl.startsWith('http')) {
+                    fullBlogUrl = blogPost.blogUrl;
+                  } else if (blogPost.blogUrl.startsWith('/')) {
+                    fullBlogUrl = `${window.location.origin}${blogPost.blogUrl}`;
                   } else {
-                    // Final fallback to general blog page
-                    navigate('/blog');
+                    fullBlogUrl = `${window.location.origin}/blog/${blogPost.blogUrl}`;
                   }
-                }, 2000);
+                } else if (blogPost.metadata?.slug) {
+                  fullBlogUrl = `${window.location.origin}/blog/${blogPost.metadata.slug}`;
+                }
+
+                // Show success notification with action to open in new window
+                toast({
+                  title: "🎉 Blog Post Published!",
+                  description: `"${blogPost.title}" is now live and will open in a new window`,
+                  action: (
+                    <ToastAction
+                      altText="Open blog post in new window"
+                      onClick={() => window.open(fullBlogUrl, '_blank')}
+                      className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
+                    >
+                      Open Blog Post
+                    </ToastAction>
+                  ),
+                  duration: 8000, // Show for 8 seconds
+                });
+
+                // Open the blog post in a new window after a short delay
+                setTimeout(() => {
+                  if (fullBlogUrl) {
+                    console.log('Opening blog post in new window:', fullBlogUrl);
+                    window.open(fullBlogUrl, '_blank');
+                  }
+                }, 1500);
               }}
             />
           </div>
