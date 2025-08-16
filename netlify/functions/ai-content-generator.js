@@ -74,18 +74,21 @@ export const handler = async (event, context) => {
       };
     }
 
-    // Enhanced prompt for better content generation
+    // Enhanced prompt for clean HTML generation
     const enhancedPrompt = `${prompt}
 
-Please ensure the article:
-- Is exactly around ${word_count} words
-- Has a compelling title
-- Is well-structured with clear headings
-- Includes the anchor text "${anchor_text}" naturally linked to ${target_url}
-- Is informative and engaging
-- Uses markdown formatting for better readability
+CRITICAL OUTPUT REQUIREMENTS:
+- Generate clean HTML content (NO <html>, <head>, or <body> tags)
+- Use <h2> for major sections, <h3> for subsections
+- Wrap ALL text in proper <p> tags (never leave text unwrapped)
+- Use <ul>/<ol> and <li> for lists
+- Include anchor text "${anchor_text}" as: <a href="${target_url}" target="_blank" rel="noopener noreferrer">${anchor_text}</a>
+- Target approximately ${word_count} words
+- NO markdown syntax (**, ##, etc.) - use proper HTML tags only
+- NO HTML entities like &lt; or &gt; unless absolutely necessary
+- NO malformed patterns or broken formatting
 
-Format the response as a complete article with proper markdown formatting.`;
+Return only the body content as clean, valid HTML that displays correctly without any additional processing.`;
 
     console.log('🚀 Sending request to OpenAI...');
 
