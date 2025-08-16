@@ -36,6 +36,22 @@ export function BlogPreview({ content }: BlogPreviewProps) {
   const [isPublishing, setIsPublishing] = useState(false);
   const { toast } = useToast();
 
+  // Auto-adjust content for display with quality metrics
+  const { adjustedContent, qualityMetrics, wasAdjusted } = useMemo(() => {
+    if (!content?.content) {
+      return { adjustedContent: null, qualityMetrics: null, wasAdjusted: false };
+    }
+
+    const metrics = BlogQualityMonitor.analyzeContent(content.content, content.targetUrl);
+    const adjusted = BlogAutoAdjustmentService.adjustContentForDisplay(content.content, content);
+
+    return {
+      adjustedContent: adjusted,
+      qualityMetrics: metrics,
+      wasAdjusted: adjusted !== content.content
+    };
+  }, [content]);
+
   if (!content) {
     return (
       <Card>
