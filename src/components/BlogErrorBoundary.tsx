@@ -13,14 +13,51 @@ interface BlogErrorBoundaryProps {
   showDebugInfo?: boolean;
 }
 
-export const BlogErrorBoundary: React.FC<BlogErrorBoundaryProps> = ({ 
-  error, 
-  slug, 
+export const BlogErrorBoundary: React.FC<BlogErrorBoundaryProps> = ({
+  error,
+  slug,
   onRetry,
-  showDebugInfo = false 
+  showDebugInfo = false
 }) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isFixingDatabase, setIsFixingDatabase] = useState(false);
   const errorMessage = typeof error === 'string' ? error : error.message;
+
+  const handleDatabaseFix = async () => {
+    setIsFixingDatabase(true);
+    try {
+      const { EmergencyDatabaseSetup } = await import('@/utils/emergencyDatabaseSetup');
+      const result = await EmergencyDatabaseSetup.setupDatabase();
+
+      if (result.success) {
+        toast({
+          title: "Database Fixed",
+          description: "Blog database has been initialized. Reloading page...",
+        });
+
+        // Reload the page after a short delay
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        toast({
+          title: "Fix Failed",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (setupError) {
+      console.error('Database fix failed:', setupError);
+      toast({
+        title: "Emergency Fix Failed",
+        description: "Could not fix database. Please contact support.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsFixingDatabase(false);
+    }
+  };
 
   const getErrorType = (message: string) => {
     if (message.includes('not found') || message.includes('404')) {
