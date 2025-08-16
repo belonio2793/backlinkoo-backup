@@ -59,6 +59,9 @@ export class BlogService {
     console.log('🎨 Applying beautiful content structure to new blog post...');
     const beautifulContent = applyBeautifulContentStructure(data.content, data.title);
 
+    // Generate a temporary slug for published_url if not provided
+    const tempSlug = customSlug || this.generateSlug(data.title);
+
     const blogPostData: CreateBlogPost = {
       user_id: userId || null,
       title: data.title,
@@ -67,7 +70,7 @@ export class BlogService {
       target_url: data.targetUrl,
       anchor_text: data.anchorText || data.title || 'Learn More', // Default anchor text if not provided
       keyword: data.primaryKeyword || this.extractKeywordFromTitle(data.title), // Extract keyword from title if not provided
-      // published_url will be set after database generates slug
+      published_url: `${window.location.origin}/blog/${tempSlug}`, // Set published URL with temporary slug
       status: 'published',
       is_trial_post: isTrialPost,
       expires_at: isTrialPost ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null,
