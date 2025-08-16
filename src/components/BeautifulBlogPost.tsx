@@ -94,6 +94,9 @@ function formatContent(raw: string, title?: string) {
     .replace(/Blog Section:\s*/gi, '')
     .replace(/Article Part:\s*/gi, '')
     .replace(/Content Block:\s*/gi, '')
+    // Enhanced Backlinkoo link processing and redundancy removal
+    .replace(/\s*at\s*\[Backlinkoo\]\([^)]*\)/gi, '') // Remove "at [Backlinkoo](url)" redundancy
+    .replace(/\[Backlinkoo\]\(([^)]*)\)/gi, '[Weebly SEO]($1)') // Convert Backlinkoo anchor text to Weebly SEO
     // Fix malformed asterisk patterns
     .replace(/\*+$/gm, '') // Remove trailing asterisks
     .replace(/^\*+(?!\*)/gm, '') // Remove leading single asterisks that aren't part of ** bold syntax
@@ -130,18 +133,29 @@ function formatContent(raw: string, title?: string) {
         .replace(/\s+\*\s*$/, '') // Remove trailing single asterisks
         .replace(/\*+$/, ''); // Remove any remaining trailing asterisks
 
-      // Convert markdown links [text](url) to HTML links with proper anchor text
-      processedText = processedText.replace(/\[([^\]]+)\]\(([^)\s]*\s*[^)]*)\)/g, (match, linkText, url) => {
+      // Enhanced markdown links processing with intelligent anchor text optimization
+      processedText = processedText.replace(/\[([^\]]+)\]\(([^)]*)\)/g, (match, linkText, url) => {
         // Clean up the URL and text
         let cleanText = linkText.trim();
         let cleanUrl = url.trim();
 
-        // Fix the specific Backlinkoo link issue
-        if (cleanUrl.includes('backlinkoo.com') && cleanText.toLowerCase().includes('backlinkoo')) {
+        // Enhanced anchor text optimization for Backlinkoo - always use "Weebly SEO"
+        if (cleanUrl.includes('backlinkoo.com') || cleanText.toLowerCase().includes('backlinkoo')) {
           cleanText = 'Weebly SEO';
         }
 
-        // Fix common URL issues - handle broken URLs like "https: //" with any amount of space
+        // Optimize generic anchor text for better SEO and user experience
+        if (cleanText.toLowerCase() === 'click here' || cleanText.toLowerCase() === 'here' || cleanText.toLowerCase() === 'link') {
+          try {
+            const urlObj = new URL(cleanUrl.startsWith('http') ? cleanUrl : 'https://' + cleanUrl);
+            const domain = urlObj.hostname.replace('www.', '');
+            cleanText = domain.split('.')[0].charAt(0).toUpperCase() + domain.split('.')[0].slice(1);
+          } catch {
+            cleanText = 'Visit Website';
+          }
+        }
+
+        // Fix common URL formatting issues - handle broken URLs with spaces
         cleanUrl = cleanUrl.replace(/https?\s*:\s*\/\//g, 'https://');
         cleanUrl = cleanUrl.replace(/www\s*\./g, 'www.');
 
@@ -152,7 +166,8 @@ function formatContent(raw: string, title?: string) {
         // Remove all spaces from URLs
         cleanUrl = cleanUrl.replace(/\s+/g, '');
 
-        return `<a href="${cleanUrl}" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
+        // Enhanced link styling with improved accessibility
+        return `<a href="${cleanUrl}" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" target="_blank" rel="noopener noreferrer" aria-label="Visit ${cleanText} (opens in new tab)">${cleanText}</a>`;
       });
 
       // Convert plain URLs to links automatically (improved pattern)
@@ -173,21 +188,21 @@ function formatContent(raw: string, title?: string) {
       return processedText;
     };
 
-    // Enhanced section heading detection - CONSISTENT FONT SIZE
+    // Enhanced section heading detection - SAME FONT SIZE AS PARAGRAPHS
     if (/^(Section|Step|Chapter|Part|Stage|Phase)\s*\d+/i.test(line) ||
         /^\d+\.\s+[A-Z]/.test(line) ||
         /^(Section|Step|Chapter|Part)\s*\d+\s*[-–—]\s*/.test(line)) {
       const processedContent = processLineContent(line);
       return (
-        <h2 key={i} className="beautiful-prose text-2xl font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
+        <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6" dangerouslySetInnerHTML={{ __html: processedContent }} />
       );
     }
 
-    // Enhanced Key Insights / Highlights detection - CONSISTENT FONT SIZE
+    // Enhanced Key Insights / Highlights detection - SAME FONT SIZE AS PARAGRAPHS
     if (/^(Key Insights|Pro Tip|Conclusion|Summary|Overview|Benefits|Important|Essential|Critical|Best Practices|Implementation)/i.test(line)) {
       const processedContent = processLineContent(line);
       return (
-        <h3 key={i} className="beautiful-prose text-2xl font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
+        <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6" dangerouslySetInnerHTML={{ __html: processedContent }} />
       );
     }
 
@@ -259,8 +274,15 @@ function formatContent(raw: string, title?: string) {
       );
     }
 
-    // Default: render as paragraph with processed content
-    const processedLine = processLineContent(line);
+    // Default: render as paragraph with processed content and additional cleanup
+    let processedLine = processLineContent(line);
+
+    // Additional cleanup for specific content patterns
+    processedLine = processedLine
+      .replace(/\s*at\s*\[Backlinkoo\]\([^)]*\)/gi, '') // Remove redundant "at [Backlinkoo](url)"
+      .replace(/\s*\.\s*This valuable resource/gi, '. This valuable resource') // Clean up spacing
+      .trim();
+
     return (
       <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6" dangerouslySetInnerHTML={{ __html: processedLine }} />
     );
@@ -521,16 +543,40 @@ export function BeautifulBlogPost() {
           console.log('  - Created:', post.created_at);
           console.log('  - Claimed:', post.claimed);
         }
-      } catch (dbError) {
+      } catch (dbError: any) {
         console.warn('Database lookup failed, trying localStorage fallback:', dbError);
+
+        // Check if this is a FullStory-related fetch error
+        if (dbError?.message?.includes('Failed to fetch') ||
+            dbError?.stack?.includes('fullstory') ||
+            dbError?.stack?.includes('fs.js')) {
+          console.warn('🛡️ FullStory interference detected during blog post load');
+
+          // Try to restore original fetch and retry once
+          if ((window as any).restoreOriginalFetch) {
+            try {
+              (window as any).restoreOriginalFetch();
+              console.log('🔄 Retrying with restored fetch...');
+              post = await blogService.getBlogPostBySlug(slug);
+              if (post) {
+                console.log('✅ Retry successful after fetch restoration');
+              }
+            } catch (retryError) {
+              console.warn('⚠️ Retry after fetch restoration also failed:', retryError);
+            }
+          }
+        }
+
         // Try to load from localStorage as fallback
-        const localStoragePost = localStorage.getItem(`blog_post_${slug}`);
-        if (localStoragePost) {
-          try {
-            post = JSON.parse(localStoragePost);
-            console.log('Loaded from localStorage fallback');
-          } catch (parseError) {
-            console.error('Failed to parse localStorage data:', parseError);
+        if (!post) {
+          const localStoragePost = localStorage.getItem(`blog_post_${slug}`);
+          if (localStoragePost) {
+            try {
+              post = JSON.parse(localStoragePost);
+              console.log('✅ Loaded from localStorage fallback');
+            } catch (parseError) {
+              console.error('❌ Failed to parse localStorage data:', parseError);
+            }
           }
         }
       }
@@ -1038,7 +1084,7 @@ export function BeautifulBlogPost() {
                                  para.toLowerCase().trim() === title.toLowerCase().trim());
 
         if (isLikelyHeading && !isTitle) {
-          htmlContent += `<h2>${para}</h2>\n\n`;
+          htmlContent += `<p>${para}</p>\n\n`;
         }
         // Convert numbered list items to bullet lists for better readability
         else if (para.match(/^\d+\./)) {
@@ -1086,7 +1132,7 @@ export function BeautifulBlogPost() {
         if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
-        return `<h1 class="beautiful-prose text-4xl md:text-5xl font-black mb-8 leading-tight text-black"${attrs}>${cleanText}</h1>`;
+        return `<p class="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6"${attrs}>${cleanText}</p>`;
       })
       .replace(/<h2([^>]*)>(.*?)<\/h2>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
@@ -1096,7 +1142,7 @@ export function BeautifulBlogPost() {
         if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
-        return `<h2 class="beautiful-prose text-2xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h2>`;
+        return `<p class="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6"${attrs}>${cleanText}</p>`;
       })
       .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
@@ -1106,7 +1152,7 @@ export function BeautifulBlogPost() {
         if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
-        return `<h3 class="beautiful-prose text-2xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h3>`;
+        return `<p class="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6"${attrs}>${cleanText}</p>`;
       });
 
     // Step 5: Enhanced paragraphs with beautiful typography

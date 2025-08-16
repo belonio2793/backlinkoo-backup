@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import './styles/mobile-payment-fix.css'
+// Enhanced FullStory fix - must load FIRST
+import './utils/fullstoryFix'
 // Unified error handler - fixes all [object Object] displays
 import './utils/unifiedErrorHandler'
 // Campaign-specific error handling
@@ -202,11 +204,38 @@ if (import.meta.env.DEV) {
   (window as any).fixFetchErrors = async () => {
     console.log('🚨 Applying emergency fetch fix...');
     try {
+      // First try the enhanced FullStory fix
+      if ((window as any).restoreOriginalFetch) {
+        (window as any).restoreOriginalFetch();
+        console.log('✅ Original fetch restored via FullStory fix');
+      }
+
       const { emergencyDisableFetchProtection } = await import('./utils/emergencyFetchFix');
       emergencyDisableFetchProtection();
       console.log('✅ Fetch protection disabled - try your request again');
     } catch (error) {
       console.error('❌ Failed to apply fetch fix:', error);
+    }
+  };
+
+  // Add FullStory-specific fix helper
+  (window as any).fixFullStoryErrors = () => {
+    console.log('🛡️ Applying FullStory-specific fix...');
+    try {
+      if ((window as any).restoreOriginalFetch) {
+        (window as any).restoreOriginalFetch();
+        console.log('✅ Original fetch restored');
+      } else {
+        console.warn('⚠️ restoreOriginalFetch not available - loading fix...');
+        import('./utils/fullstoryFix').then(() => {
+          if ((window as any).restoreOriginalFetch) {
+            (window as any).restoreOriginalFetch();
+            console.log('✅ Original fetch restored after import');
+          }
+        });
+      }
+    } catch (error) {
+      console.error('❌ Failed to apply FullStory fix:', error);
     }
   };
 
@@ -303,6 +332,7 @@ if (import.meta.env.DEV) {
   console.log('  - disableViteProtection() - Disable fetch protection and refresh');
   console.log('  - testContentGeneration() - Test content generation functions');
   console.log('  - fixFetchErrors() - Emergency fix for fetch protection issues');
+  console.log('  - fixFullStoryErrors() - Fix FullStory fetch interference specifically');
   console.log('  - testClientContent() - Test client-side content generation');
   console.log('  - testClientTelegraph() - Test client-side Telegraph publishing');
   console.log('  - testFullPipeline() - Test complete automation pipeline');
