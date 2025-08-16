@@ -242,10 +242,10 @@
 
 /* Enhanced title hierarchy */
 .beautiful-main-title {
-  font-size: clamp(2.5rem, 5vw, 4rem);
-  font-weight: 900;
-  letter-spacing: -0.035em;
-  line-height: 0.9;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  line-height: 1.1;
   color: rgb(17, 24, 39);
   text-rendering: optimizeLegibility;
   margin-bottom: 1.5rem;
@@ -253,13 +253,13 @@
 
 @media (min-width: 768px) {
   .beautiful-main-title {
-    font-size: clamp(3rem, 6vw, 5rem);
+    font-size: clamp(2rem, 4.5vw, 3rem);
   }
 }
 
 @media (min-width: 1024px) {
   .beautiful-main-title {
-    font-size: clamp(3.5rem, 7vw, 6rem);
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
   }
 }
 
