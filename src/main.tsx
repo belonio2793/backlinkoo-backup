@@ -41,7 +41,7 @@ if (import.meta.env.DEV) {
 
   // Add helper functions to window for debugging
   (window as any).fixRLS = async () => {
-    console.log('🔧 Applying RLS fix directly...');
+    console.log('��� Applying RLS fix directly...');
     try {
       const response = await fetch('/.netlify/functions/fix-rls-recursion', {
         method: 'POST',
@@ -132,6 +132,9 @@ if (import.meta.env.DEV) {
 
   // Import blog sync utility
   import('./utils/syncBlogPostTables');
+
+  // Import Product Hunt post fixer
+  import('./utils/fixProductHuntPost');
 
   console.log('💡 Debug helpers available:');
   console.log('  - fixRLS() - Go to RLS recursion fix page');
