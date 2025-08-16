@@ -670,7 +670,10 @@ export function BeautifulBlogPost() {
       .replace(/\n{3,}/g, '\n\n')
       .trim();
 
-    // Step 2: Remove duplicate title if it appears in content
+    // Step 2: Convert markdown links to HTML before other processing
+    formattedContent = formattedContent.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
+    // Step 2.5: Remove duplicate title if it appears in content
     if (title) {
       const titleClean = title.toLowerCase().trim();
       // Remove title from start of content if it matches
@@ -1596,7 +1599,7 @@ export function BeautifulBlogPost() {
                   </div>
                   <ul className="space-y-2 text-sm">
                     <li>• This post will return to the claimable pool for 24 hours</li>
-                    <li>��� Other users will be able to claim it during this time</li>
+                    <li>���� Other users will be able to claim it during this time</li>
                     <li>• If not reclaimed, it will be automatically deleted</li>
                     <li>• You can reclaim it yourself if it's still available</li>
                   </ul>
