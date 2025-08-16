@@ -14,15 +14,15 @@ export class NetworkErrorHandler {
    */
   static isFullStoryError(error: any): boolean {
     if (!error) return false;
-    
+
     const message = error.message || '';
     const stack = error.stack || '';
-    
+
+    // Only consider it a FullStory error if there's explicit evidence in the stack trace
     return stack.includes('fullstory') ||
            stack.includes('edge.fullstory.com') ||
            stack.includes('fs.js') ||
-           (message.includes('Failed to fetch') && 
-            (stack.includes('fullstory') || document.querySelector('script[src*="fullstory"]')));
+           stack.includes('fullstory.com');
   }
   
   /**
