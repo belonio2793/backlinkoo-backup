@@ -732,7 +732,13 @@ export function BeautifulBlogPost() {
       // Convert italic text _text_ to <em>text</em>
       .replace(/(?<!_)_([^_\n]+)_(?!_)/g, '<em>$1</em>')
       // Convert inline code `code` to <code>code</code>
-      .replace(/`([^`]+)`/g, '<code>$1</code>');
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+
+      // Convert plain URLs to clickable links (simple approach)
+      .replace(/\b(https?:\/\/[^\s<>"']+)/gi, (match, url) => {
+        // Only convert if not already inside a tag
+        return `<a href="${url}">${url}</a>`;
+      });
 
     // Step 2.5: Comprehensive duplicate title removal
     if (title) {
