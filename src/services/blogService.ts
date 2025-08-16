@@ -288,7 +288,7 @@ export class BlogService {
               return emergencyResult as BlogPost;
             }
           } catch (emergencyError) {
-            console.error('�� [BlogService] Emergency service also failed:', this.getSafeErrorMessage(emergencyError));
+            console.error('❌ [BlogService] Emergency service also failed:', this.getSafeErrorMessage(emergencyError));
           }
 
           console.error('❌ [BlogService] All methods failed, returning null');
@@ -325,9 +325,55 @@ export class BlogService {
    * Fetch using basic query with minimal fields
    */
   private async fetchWithBasicQuery(slug: string, tableName: string): Promise<BlogPost | null> {
+    // Try with all fields first, fallback to minimal if column missing
+    try {
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('id, slug, title, content, status, created_at, updated_at, user_id, target_url, published_url, view_count, seo_score, reading_time, word_count, author_name, tags, category, is_trial_post, expires_at, anchor_text, is_claimed, claimed_by, claimed_at, keyword, meta_description, excerpt, keywords, published_at')
+        .eq('slug', slug)
+        .eq('status', 'published')
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return null; // Not found
+        }
+        // If column doesn't exist, try minimal query
+        if (error.message?.includes('column') && error.message?.includes('does not exist')) {
+          return await this.fetchWithMinimalFields(slug, tableName);
+        }
+        throw new Error(this.getSafeErrorMessage(error));
+      }
+
+      // Map to expected format if needed
+      return {
+        ...data,
+        // Ensure compatibility with both table schemas
+        claimed: data.is_claimed || false,
+        meta_description: data.meta_description || '',
+        excerpt: data.excerpt || '',
+        keywords: data.keywords || [],
+        keyword: data.keyword || this.extractKeywordFromTitle(data.title || ''),
+        published_at: data.published_at || data.created_at
+      } as BlogPost;
+
+    } catch (error: any) {
+      // If column error, try minimal fields
+      if (error.message?.includes('column') || error.message?.includes('keyword')) {
+        console.warn(`Column error in ${tableName}, trying minimal fields:`, this.getSafeErrorMessage(error));
+        return await this.fetchWithMinimalFields(slug, tableName);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch with only essential fields to handle missing columns
+   */
+  private async fetchWithMinimalFields(slug: string, tableName: string): Promise<BlogPost | null> {
     const { data, error } = await supabase
       .from(tableName)
-      .select('id, slug, title, content, status, created_at, updated_at, user_id, target_url, published_url, view_count, seo_score, reading_time, word_count, author_name, tags, category, is_trial_post, expires_at, anchor_text, is_claimed, claimed_by, claimed_at')
+      .select('id, slug, title, content, status, created_at, user_id, target_url, view_count, is_trial_post, expires_at, anchor_text')
       .eq('slug', slug)
       .eq('status', 'published')
       .single();
@@ -339,15 +385,27 @@ export class BlogService {
       throw new Error(this.getSafeErrorMessage(error));
     }
 
-    // Map to expected format if needed
+    // Map to expected format with safe defaults
     return {
       ...data,
-      // Ensure compatibility with both table schemas
-      claimed: data.is_claimed || false,
-      meta_description: data.meta_description || '',
-      excerpt: data.excerpt || '',
-      keywords: data.keywords || [],
-      published_at: data.published_at || data.created_at
+      // Safe defaults for missing columns
+      claimed: false,
+      meta_description: '',
+      excerpt: '',
+      keywords: [],
+      keyword: this.extractKeywordFromTitle(data.title || ''),
+      published_at: data.created_at,
+      updated_at: data.created_at,
+      published_url: data.published_url || `/blog/${data.slug}`,
+      seo_score: 0,
+      reading_time: 0,
+      word_count: 0,
+      author_name: 'Backlink ∞',
+      tags: [],
+      category: 'General',
+      is_claimed: false,
+      claimed_by: null,
+      claimed_at: null
     } as BlogPost;
   }
 
