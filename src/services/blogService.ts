@@ -531,25 +531,64 @@ export class BlogService {
    */
   async getRecentBlogPosts(limit: number = 10): Promise<BlogPost[]> {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-        .limit(limit);
+      // Try published_blog_posts first, then fallback to blog_posts
+      let data, error;
 
-      if (error) {
-        // Handle third-party interference gracefully
-        if (error.message?.includes('Third-party script interference')) {
-          console.warn('⚠️ Third-party interference detected in getRecentBlogPosts, returning empty array');
-          return [];
+      try {
+        const result = await supabase
+          .from('published_blog_posts')
+          .select('*')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+          .limit(limit);
+
+        data = result.data;
+        error = result.error;
+
+        if (error && error.message?.includes('relation') && error.message?.includes('does not exist')) {
+          throw new Error('Table not found, trying fallback');
         }
-        throw new Error(`Failed to fetch recent blog posts: ${error.message}`);
+      } catch (tableError: any) {
+        console.warn('⚠️ published_blog_posts table issue, trying blog_posts:', this.getSafeErrorMessage(tableError));
+
+        const fallbackResult = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+          .limit(limit);
+
+        data = fallbackResult.data;
+        error = fallbackResult.error;
       }
 
-      return data || [];
+      if (error) {
+        // Handle specific database errors gracefully
+        if (error.message?.includes('Third-party script interference') ||
+            error.message?.includes('column') ||
+            error.message?.includes('keyword')) {
+          console.warn('⚠️ Database issue detected in getRecentBlogPosts, returning empty array:', this.getSafeErrorMessage(error));
+          return [];
+        }
+
+        // For other errors, still return empty array to prevent crashes
+        console.warn('⚠️ Database error in getRecentBlogPosts:', this.getSafeErrorMessage(error));
+        return [];
+      }
+
+      return (data || []).map(post => ({
+        ...post,
+        // Ensure safe defaults for potentially missing fields
+        keyword: post.keyword || this.extractKeywordFromTitle(post.title || ''),
+        meta_description: post.meta_description || '',
+        excerpt: post.excerpt || '',
+        keywords: post.keywords || [],
+        published_at: post.published_at || post.created_at,
+        claimed: post.is_claimed || post.claimed || false
+      })) as BlogPost[];
+
     } catch (networkError: any) {
-      console.warn('⚠️ Network error in getRecentBlogPosts:', networkError.message);
+      console.warn('⚠️ Network error in getRecentBlogPosts:', this.getSafeErrorMessage(networkError));
       // Return empty array instead of throwing to prevent cascade failures
       return [];
     }
