@@ -111,28 +111,43 @@ export function BeautifulBlogPost() {
 
         // If table doesn't exist, set it up
         if (error && (error.code === '42P01' || error.message?.includes('does not exist'))) {
-          console.log('🔧 published_blog_posts table missing, setting up...');
+          console.log('���� published_blog_posts table missing, setting up...');
 
           try {
-            const response = await fetch('/.netlify/functions/setup-published-blog-posts', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action: 'setup' })
-            });
-
-            const result = await response.json();
+            // Import and run emergency setup
+            const { EmergencyDatabaseSetup } = await import('@/utils/emergencyDatabaseSetup');
+            const result = await EmergencyDatabaseSetup.setupDatabase();
 
             if (result.success) {
               console.log('✅ Database setup completed, retrying blog load...');
+              toast({
+                title: "Database Setup Complete",
+                description: "Blog post database has been initialized. Reloading...",
+              });
+
               // Retry loading the blog post after setup
               if (slug) {
-                setTimeout(() => loadBlogPost(slug), 1000);
+                setTimeout(() => {
+                  setLoading(true);
+                  setError(null);
+                  loadBlogPost(slug);
+                }, 1000);
               }
             } else {
-              console.error('❌ Database setup failed:', result.error);
+              console.error('❌ Database setup failed:', result.message);
+              toast({
+                title: "Setup Failed",
+                description: result.message,
+                variant: "destructive",
+              });
             }
           } catch (setupError) {
             console.error('❌ Failed to setup database:', setupError);
+            toast({
+              title: "Emergency Setup Failed",
+              description: "Could not initialize database. Please try refreshing the page.",
+              variant: "destructive",
+            });
           }
         }
       } catch (err) {
@@ -141,7 +156,7 @@ export function BeautifulBlogPost() {
     };
 
     setupDatabaseIfNeeded();
-  }, [slug]);
+  }, [slug, toast]);
 
   useEffect(() => {
     if (slug) {
