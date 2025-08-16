@@ -282,8 +282,15 @@ export class NetworkErrorHandler {
 
 // Auto-initialize in browser environment with safety check
 if (typeof window !== 'undefined' && !window._networkErrorHandlerInitialized) {
-  NetworkErrorHandler.initialize();
-  window._networkErrorHandlerInitialized = true;
+  // Delay initialization to avoid interfering with module loading
+  setTimeout(() => {
+    try {
+      NetworkErrorHandler.initialize();
+      window._networkErrorHandlerInitialized = true;
+    } catch (error) {
+      console.warn('Failed to initialize NetworkErrorHandler:', error);
+    }
+  }, 1000);
 }
 
 // Make available globally for debugging
