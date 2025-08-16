@@ -147,7 +147,9 @@ export class BlogService {
               .from('blog_posts')
               .insert(retryData);
           } catch (backupError) {
-            console.warn('���️ [BlogService] Backup retry save to blog_posts failed:', backupError);
+            // Handle stream errors gracefully
+            const errorMessage = this.getSafeErrorMessage(backupError);
+            console.warn('⚠️ [BlogService] Backup retry save to blog_posts failed:', errorMessage);
           }
 
         } catch (networkError: any) {
