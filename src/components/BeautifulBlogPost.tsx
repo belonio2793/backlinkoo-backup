@@ -1391,7 +1391,12 @@ export function BeautifulBlogPost() {
                           slug: blogPost.slug,
                           contentLength: content.length,
                           isEmpty: !content || content.trim().length === 0,
-                          contentPreview: content.substring(0, 100)
+                          contentPreview: content.substring(0, 100),
+                          hasHtmlTags: content.includes('<'),
+                          performance: {
+                            timestamp: Date.now(),
+                            memoryUsage: (performance as any)?.memory?.usedJSHeapSize || 'unavailable'
+                          }
                         });
 
                         if (!content || content.trim().length === 0) {
