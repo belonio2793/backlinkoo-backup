@@ -222,7 +222,7 @@ const ContentProcessor = ({
               const processedContent = processTextContent(item, idx + i);
               // Only render list item if content is not null
               return processedContent !== null ? (
-                <li key={idx} className="text-xl leading-8 text-gray-700 pl-4 font-light" style={{ textAlign: 'justify', letterSpacing: '0.01em' }}>
+                <li key={idx} className="text-lg leading-7 text-gray-700 pl-4 font-normal" style={{ textAlign: 'justify', letterSpacing: '0.005em' }}>
                   {processedContent}
                 </li>
               ) : null;
@@ -251,7 +251,7 @@ const ContentProcessor = ({
               const processedContent = processTextContent(item, idx + i);
               // Only render list item if content is not null
               return processedContent !== null ? (
-                <li key={idx} className="text-xl leading-8 text-gray-700 pl-4 font-light" style={{ textAlign: 'justify', letterSpacing: '0.01em' }}>
+                <li key={idx} className="text-lg leading-7 text-gray-700 pl-4 font-normal" style={{ textAlign: 'justify', letterSpacing: '0.005em' }}>
                   {processedContent}
                 </li>
               ) : null;
