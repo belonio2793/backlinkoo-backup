@@ -314,20 +314,88 @@ export function BlogPreview({ content }: BlogPreviewProps) {
         </CardContent>
       </Card>
 
+      {/* Content Quality Indicator */}
+      {qualityMetrics && (
+        <Card className="mb-4">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className={`w-3 h-3 rounded-full ${
+                    qualityMetrics.qualityScore >= 80 ? 'bg-green-500' :
+                    qualityMetrics.qualityScore >= 60 ? 'bg-blue-500' :
+                    qualityMetrics.qualityScore >= 40 ? 'bg-yellow-500' : 'bg-red-500'
+                  }`} />
+                  <span className="text-sm font-medium">
+                    Quality Score: {qualityMetrics.qualityScore}/100
+                  </span>
+                </div>
+                {wasAdjusted && (
+                  <Badge variant="secondary" className="flex items-center gap-1">
+                    <Zap className="h-3 w-3" />
+                    Auto-Adjusted
+                  </Badge>
+                )}
+              </div>
+
+              {qualityMetrics.issues.length > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {qualityMetrics.issues.length} issue(s) detected
+                  </span>
+                  {qualityMetrics.hasMalformedPatterns && (
+                    <Badge variant="destructive" className="text-xs">
+                      Malformed
+                    </Badge>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {qualityMetrics.issues.length > 0 && (
+              <div className="mt-2 text-xs text-muted-foreground">
+                Issues: {qualityMetrics.issues.slice(0, 2).join(', ')}
+                {qualityMetrics.issues.length > 2 && ` (+${qualityMetrics.issues.length - 2} more)`}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Content Preview */}
       <Card>
         <CardHeader>
-          <CardTitle>Content {viewMode === 'preview' ? 'Preview' : 'HTML Source'}</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Content {viewMode === 'preview' ? 'Preview' : 'HTML Source'}</CardTitle>
+            <div className="flex gap-2">
+              <Button
+                variant={viewMode === 'preview' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('preview')}
+              >
+                <Eye className="h-4 w-4 mr-2" />
+                Preview
+              </Button>
+              <Button
+                variant={viewMode === 'html' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('html')}
+              >
+                <Code className="h-4 w-4 mr-2" />
+                HTML
+              </Button>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           {viewMode === 'preview' ? (
             <div
               className="prose max-w-none blog-content prose-strong:font-bold prose-strong:text-foreground [&_strong]:font-bold"
-              dangerouslySetInnerHTML={{ __html: processBlogContent(content.content) }}
+              dangerouslySetInnerHTML={{ __html: processBlogContent(adjustedContent || content.content) }}
             />
           ) : (
             <pre className="bg-gray-50 p-4 rounded text-sm overflow-x-auto whitespace-pre-wrap">
-              {content.content}
+              {adjustedContent || content.content}
             </pre>
           )}
         </CardContent>
