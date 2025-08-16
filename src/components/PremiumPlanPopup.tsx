@@ -382,13 +382,13 @@ export function PremiumPlanPopup({
       </div>
 
       {/* Continue Button */}
-      <Button 
+      <Button
         onClick={handleContinueWithPlan}
         className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
-        size="lg"
+        size="default"
       >
         Continue with {selectedPlan} Plan
-        <ArrowRight className="ml-2 h-4 w-4" />
+        <ArrowRight className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
       </Button>
     </div>
   );
