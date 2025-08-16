@@ -10,6 +10,7 @@ import { contentModerationService } from '@/services/contentModerationService';
 import { adminAuditLogger } from '@/services/adminAuditLogger';
 import { adminBlogOverrideService } from '@/services/adminBlogOverrideService';
 import { ExcerptCleaner } from '@/utils/excerptCleaner';
+import { ForceBeautifulContentButton } from '@/components/ForceBeautifulContentButton';
 import {
   Calendar,
   Clock,
