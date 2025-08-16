@@ -22,10 +22,11 @@ interface NotificationData {
   timestamp: Date;
 }
 
-export const BacklinkNotification: React.FC<BacklinkNotificationProps> = ({ 
-  isVisible = true 
+export const BacklinkNotification: React.FC<BacklinkNotificationProps> = ({
+  isVisible = true
 }) => {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
+  const [shownUrls, setShownUrls] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!isVisible) return;
@@ -50,6 +51,15 @@ export const BacklinkNotification: React.FC<BacklinkNotificationProps> = ({
           return;
         }
 
+        // Check if we've already shown a notification for this URL
+        if (shownUrls.has(publishedUrl)) {
+          console.log('📡 BacklinkNotification: Skipping duplicate notification for URL:', publishedUrl);
+          return;
+        }
+
+        // Add URL to shown set
+        setShownUrls(prev => new Set([...prev, publishedUrl]));
+
         const notification: NotificationData = {
           id: `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
           campaignName: event.campaignName || 'Campaign',
@@ -67,10 +77,10 @@ export const BacklinkNotification: React.FC<BacklinkNotificationProps> = ({
 
         setNotifications(prev => [notification, ...prev.slice(0, 2)]); // Keep max 3 notifications
 
-        // Auto-remove after 8 seconds
+        // Auto-remove after 4 seconds - shorter duration as requested
         setTimeout(() => {
           setNotifications(prev => prev.filter(n => n.id !== notification.id));
-        }, 8000);
+        }, 4000);
       }
     };
 

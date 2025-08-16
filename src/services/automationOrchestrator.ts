@@ -1066,6 +1066,47 @@ export class AutomationOrchestrator {
   /**
    * Get campaign status summary including platform progress
    */
+  async syncPlatformProgressFromDatabase(campaignId: string): Promise<void> {
+    try {
+      // Get published links from database
+      const { data: publishedLinks, error } = await supabase
+        .from('automation_published_links')
+        .select('*')
+        .eq('campaign_id', campaignId);
+
+      if (error) {
+        console.warn('Error fetching published links for platform sync:', error);
+        return;
+      }
+
+      const activePlatforms = this.getActivePlatforms();
+
+      // Mark each published link's platform as completed
+      for (const link of publishedLinks || []) {
+        const platform = activePlatforms.find(p =>
+          p.name.toLowerCase() === link.platform.toLowerCase() ||
+          p.id.toLowerCase() === link.platform.toLowerCase() ||
+          (link.platform === 'telegraph' && p.id === 'telegraph')
+        );
+
+        if (platform) {
+          // Check if already marked as completed
+          const existingProgress = this.getCampaignPlatformProgress(campaignId);
+          const alreadyCompleted = existingProgress.some(p =>
+            p.platformId === platform.id && p.isCompleted
+          );
+
+          if (!alreadyCompleted) {
+            console.log(`🔄 Auto-syncing platform progress: ${platform.name} completed for campaign ${campaignId}`);
+            this.markPlatformCompleted(campaignId, platform.id, link.published_url);
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Error syncing platform progress from database:', error);
+    }
+  }
+
   getCampaignStatusSummary(campaignId: string): {
     platformsCompleted: number;
     totalPlatforms: number;
@@ -1074,7 +1115,14 @@ export class AutomationOrchestrator {
     isFullyCompleted: boolean;
   } {
     const activePlatforms = this.getActivePlatforms();
-    const campaignProgress = this.getCampaignPlatformProgress(campaignId);
+    let campaignProgress = this.getCampaignPlatformProgress(campaignId);
+
+    // If no progress tracked and this looks like a completed campaign, try to sync from database
+    if (campaignProgress.length === 0) {
+      // Trigger async sync but don't wait for it to avoid blocking the UI
+      this.syncPlatformProgressFromDatabase(campaignId).catch(console.error);
+    }
+
     const nextPlatform = this.getNextPlatformForCampaign(campaignId);
     const completedPlatforms = campaignProgress
       .filter(p => p.isCompleted)

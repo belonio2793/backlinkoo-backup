@@ -1,77 +1,85 @@
-// Debug script to check blog post
-const slug = 'unlocking-the-power-of-forum-profile-backlinks-a-definitive-guide-me9uwo9p';
+/**
+ * Debug script to check the specific blog post content
+ */
 
-console.log('🔍 Debugging blog post:', slug);
+import { supabase } from './src/integrations/supabase/client.js';
 
-// Check if we can access Supabase
+const slug = 'unleashing-the-power-of-product-hunt-your-ultimate-guide-to-launch-success-medpmz1l';
+
 async function debugBlogPost() {
   try {
-    // Import Supabase client
-    const { supabase } = await import('./src/integrations/supabase/client.ts');
+    console.log('🔍 Checking blog post:', slug);
     
-    console.log('📡 Testing database connection...');
-    
-    // Check if the specific post exists
-    console.log('🔍 Looking for specific slug:', slug);
-    const { data: specificPost, error: specificError } = await supabase
+    // Check if the post exists in database
+    const { data: post, error } = await supabase
       .from('blog_posts')
       .select('*')
-      .eq('slug', slug);
+      .eq('slug', slug)
+      .single();
     
-    if (specificError) {
-      console.error('❌ Error querying specific post:', specificError);
+    if (error) {
+      console.error('❌ Error fetching post:', error);
+      
+      if (error.code === 'PGRST116') {
+        console.log('📝 Post does not exist in database');
+      }
+      return;
+    }
+    
+    console.log('✅ Post found in database');
+    console.log('📊 Post details:');
+    console.log('  - Title:', post.title);
+    console.log('  - Slug:', post.slug);
+    console.log('  - Status:', post.status);
+    console.log('  - Content length:', post.content ? post.content.length : 0);
+    console.log('  - Is trial post:', post.is_trial_post);
+    console.log('  - Target URL:', post.target_url);
+    console.log('  - Anchor text:', post.anchor_text);
+    console.log('  - SEO score:', post.seo_score);
+    console.log('  - Word count:', post.word_count);
+    console.log('  - Reading time:', post.reading_time);
+    console.log('  - Created at:', post.created_at);
+    console.log('  - Updated at:', post.updated_at);
+    
+    if (!post.content || post.content.trim().length === 0) {
+      console.log('⚠️ ISSUE FOUND: Post has no content!');
     } else {
-      console.log('📄 Specific post results:', specificPost?.length || 0, 'posts found');
-      if (specificPost && specificPost.length > 0) {
-        const post = specificPost[0];
-        console.log('📝 Post details:');
-        console.log('  - Title:', post.title?.substring(0, 50) + '...');
-        console.log('  - Status:', post.status);
-        console.log('  - Content length:', post.content?.length || 0);
-        console.log('  - Created:', post.created_at);
-        console.log('  - Has content:', !!post.content);
-        console.log('  - Content preview:', post.content?.substring(0, 100) + '...');
+      console.log('📄 Content preview (first 500 chars):');
+      console.log(post.content.substring(0, 500) + '...');
+      
+      // Check for hyperlinks in content
+      const hasLinks = post.content.includes('http') || post.content.includes('<a') || post.content.includes('[');
+      console.log('🔗 Contains links:', hasLinks);
+      
+      if (!hasLinks && post.target_url) {
+        console.log('⚠️ ISSUE FOUND: No hyperlinks found in content but target_url exists:', post.target_url);
       }
     }
     
-    // Check for similar posts
-    console.log('🔍 Looking for similar posts...');
-    const { data: similarPosts, error: similarError } = await supabase
-      .from('blog_posts')
-      .select('slug, title, status, created_at')
-      .ilike('slug', '%forum-profile-backlinks%')
-      .limit(5);
-    
-    if (similarError) {
-      console.error('❌ Error querying similar posts:', similarError);
-    } else {
-      console.log('🔎 Similar posts found:', similarPosts?.length || 0);
-      similarPosts?.forEach(post => {
-        console.log(`  - ${post.slug} (${post.status})`);
-      });
-    }
-    
-    // Check all recent posts to see what's in the database
-    console.log('📋 Recent posts in database...');
-    const { data: recentPosts, error: recentError } = await supabase
-      .from('blog_posts')
-      .select('slug, title, status, created_at, content')
-      .order('created_at', { ascending: false })
-      .limit(10);
-    
-    if (recentError) {
-      console.error('❌ Error querying recent posts:', recentError);
-    } else {
-      console.log('📚 Recent posts found:', recentPosts?.length || 0);
-      recentPosts?.forEach((post, index) => {
-        console.log(`  ${index + 1}. ${post.slug} (${post.status}) - Content: ${post.content?.length || 0} chars`);
-      });
+    // Check for formatting issues
+    if (post.content) {
+      const hasHeadings = post.content.includes('#') || post.content.includes('<h');
+      const hasParagraphs = post.content.includes('\n\n') || post.content.includes('<p>');
+      const hasLists = post.content.includes('-') || post.content.includes('1.') || post.content.includes('<li>');
+      
+      console.log('📝 Content formatting:');
+      console.log('  - Has headings:', hasHeadings);
+      console.log('  - Has paragraphs:', hasParagraphs);
+      console.log('  - Has lists:', hasLists);
+      
+      if (!hasHeadings && !hasParagraphs) {
+        console.log('⚠️ ISSUE FOUND: Poor content structure - no headings or paragraph breaks');
+      }
     }
     
   } catch (error) {
-    console.error('💥 Debug script failed:', error);
+    console.error('💥 Unexpected error:', error);
   }
 }
 
 // Run the debug
-debugBlogPost();
+debugBlogPost().then(() => {
+  console.log('\n✅ Blog post debug complete');
+}).catch(err => {
+  console.error('❌ Fatal error:', err);
+});

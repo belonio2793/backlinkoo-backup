@@ -58,6 +58,7 @@ import { ExitIntentPopup } from '@/components/ExitIntentPopup';
 import { BlogContentCleaner } from '@/utils/blogContentCleaner';
 import { EnhancedBlogCleaner } from '@/utils/enhancedBlogCleaner';
 import { processBlogContent } from '@/utils/markdownProcessor';
+import { RobustContentProcessor } from '@/utils/robustContentProcessor';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -1038,26 +1039,40 @@ export function BeautifulBlogPost() {
                           return '<div style="padding: 20px; text-align: center; color: #ef4444;"><h3>Content Error</h3><p>This blog post appears to have no content. Try running <code>fixEmptyBlogPost()</code> in the browser console to fix this issue.</p></div>';
                         }
 
-                        // First apply enhanced cleaning to remove titles and call-to-action text
-                        const cleanedContent = EnhancedBlogCleaner.cleanContent(content, blogPost.title);
+                        // NEW: Auto-detect and repair malformed content
+                        const repairResult = RobustContentProcessor.autoDetectAndRepair(content, {
+                          primaryKeyword: blogPost.title,
+                          targetUrl: blogPost.target_url,
+                          anchorText: blogPost.anchor_text
+                        });
 
-                        if (!cleanedContent || cleanedContent.length === 0) {
-                          const formattedOriginal = SimpleContentFormatter.formatBlogContent(content, blogPost.title);
-                          return formattedOriginal || `<p>${content}</p>`;
+                        if (repairResult.wasRepaired) {
+                          console.log('🔧 Content was automatically repaired:', repairResult.issues);
                         }
 
-                        // Then use simplified formatter for HTML structure
-                        const formattedContent = SimpleContentFormatter.formatBlogContent(cleanedContent, blogPost.title);
+                        let processedContent = repairResult.content;
 
-                        // Validate the formatted content
-                        const validation = SimpleContentFormatter.validateContent(formattedContent);
-                        if (!validation.isValid) {
-                          console.warn('Content validation failed:', validation.errors);
-                          const fallback = `<p>${cleanedContent.replace(/\n\n/g, '</p><p>')}</p>`;
-                          return fallback;
+                        // Apply enhanced cleaning only if content wasn't severely malformed
+                        if (!repairResult.wasRepaired || repairResult.issues.length < 3) {
+                          const cleanedContent = EnhancedBlogCleaner.cleanContent(processedContent, blogPost.title);
+
+                          if (cleanedContent && cleanedContent.length > 0) {
+                            processedContent = cleanedContent;
+                          }
                         }
 
-                        return formattedContent;
+                        // Use simplified formatter only if not already well-formatted HTML
+                        if (!processedContent.includes('<h1>') && !processedContent.includes('<h2>')) {
+                          const formattedContent = SimpleContentFormatter.formatBlogContent(processedContent, blogPost.title);
+
+                          // Validate the formatted content
+                          const validation = SimpleContentFormatter.validateContent(formattedContent);
+                          if (validation.isValid) {
+                            processedContent = formattedContent;
+                          }
+                        }
+
+                        return processedContent;
                       } catch (formatError) {
                         console.error('💥 Content formatting failed:', formatError);
                         // Return raw content as emergency fallback

@@ -130,11 +130,20 @@ if (import.meta.env.DEV) {
   // Import blog post fix utility
   import('./utils/fixEmptyBlogPost');
 
+  // Import blog sync utility
+  import('./utils/syncBlogPostTables');
+
+  // Import Product Hunt post fixer
+  import('./utils/fixProductHuntPost');
+
   console.log('💡 Debug helpers available:');
   console.log('  - fixRLS() - Go to RLS recursion fix page');
   console.log('  - forcePremium() - Force current user to premium status');
   console.log('  - forceSignOut() - Force sign out and redirect to home');
   console.log('  - checkUserSubscription() - Check user subscription status in database');
+  console.log('  - syncBlogPostTables() - Sync blog posts between tables');
+  console.log('  - fixProductHuntPost() - Fix malformed Product Hunt blog post');
+  console.log('  - RobustContentProcessor - Content validation and repair utilities');
   console.log('  - DISABLE_VITE_PROTECTION=true - Disable Vite fetch protection');
 
   // Add helper to disable fetch protection
