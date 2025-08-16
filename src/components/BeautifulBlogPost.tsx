@@ -405,14 +405,15 @@ export function BeautifulBlogPost() {
             body: JSON.stringify({ slug })
           });
 
-          const responseText = await response.text();
-          console.log('📡 API Response:', { status: response.status, body: responseText });
+          console.log('📡 API Response Status:', response.status);
 
           if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${responseText}`);
+            const errorText = await response.text();
+            console.log('📡 API Error:', errorText);
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
           }
 
-          const result = JSON.parse(responseText);
+          const result = await response.json();
           if (result.success) {
             toast({
               title: "Post Deleted",
