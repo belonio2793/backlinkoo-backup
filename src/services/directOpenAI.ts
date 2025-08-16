@@ -234,9 +234,20 @@ Generate content so valuable that readers feel they've discovered insider knowle
 
     } catch (error) {
       console.error('❌ Blog generation failed:', error);
+
+      // Handle specific stream errors gracefully
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      if (errorMessage.includes('body stream already read') || errorMessage.includes('body used already')) {
+        console.error('🔄 Response stream conflict detected - this suggests a network or parsing issue');
+        return {
+          success: false,
+          error: 'Network communication error. Please try again.'
+        };
+      }
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error occurred'
+        error: errorMessage
       };
     }
   }
