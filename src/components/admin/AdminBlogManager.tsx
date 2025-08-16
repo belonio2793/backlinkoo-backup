@@ -405,7 +405,6 @@ export function AdminBlogManager() {
             <p className="text-gray-600">Manage all generated blog posts and backlinks</p>
           </div>
           <div className="flex gap-2">
-            <ForceBeautifulContentButton />
             <Button onClick={verifySyncStatus} variant="outline" size="sm">
               <RefreshCw className="mr-2 h-4 w-4" />
               Verify Sync
