@@ -78,14 +78,16 @@ export class BlogService {
       published_url: `${baseUrl}/blog/${tempSlug}`, // Set published URL with temporary slug
       status: 'published',
       is_trial_post: isTrialPost,
-      expires_at: isTrialPost ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null,
+      expires_at: isTrialPost ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : undefined, // Use undefined instead of null for timestamp
       view_count: 0,
       seo_score: data.seoScore,
       reading_time: data.readingTime,
       word_count: data.wordCount,
       author_name: 'Backlink ∞ ',
       tags: this.generateTags(data.title, data.targetUrl),
-      category: this.categorizeContent(data.title)
+      category: this.categorizeContent(data.title),
+      published_at: new Date().toISOString(), // Ensure published_at is always set
+      created_at: new Date().toISOString() // Ensure created_at is always set
     };
 
     // If this is a claimed post (has userId and not trial), use maximum persistence
@@ -286,7 +288,7 @@ export class BlogService {
               return emergencyResult as BlogPost;
             }
           } catch (emergencyError) {
-            console.error('❌ [BlogService] Emergency service also failed:', this.getSafeErrorMessage(emergencyError));
+            console.error('�� [BlogService] Emergency service also failed:', this.getSafeErrorMessage(emergencyError));
           }
 
           console.error('❌ [BlogService] All methods failed, returning null');
