@@ -657,7 +657,7 @@ const Index = () => {
         className="relative py-16 sm:py-24 md:py-32 px-4 sm:px-6 bg-white"
         style={{ backgroundColor: '#ffffff' }}
       >
-        <div className="w-full text-center relative z-10 px-6">
+        <div className="w-full max-w-6xl mx-auto text-center relative z-10 px-6">
           <RotatingTagline />
           
           <AnimatedHeadline
