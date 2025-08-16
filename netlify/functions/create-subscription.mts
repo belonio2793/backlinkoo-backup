@@ -42,20 +42,26 @@ async function getClientIP(request: Request): Promise<string> {
   return forwarded?.split(',')[0]?.trim() || realIP || cfConnectingIP || 'unknown';
 }
 
-// Define pricing for dynamic product creation
+// Define pricing with predefined Stripe price IDs (use environment variables in production)
 const PRICING_CONFIG = {
   monthly: {
     price: 29,
     originalPrice: 49,
     interval: 'month' as const,
-    discount: 41
+    discount: 41,
+    priceId: process.env.STRIPE_MONTHLY_PRICE_ID || 'price_monthly_fallback',
+    productName: 'Premium SEO Tools - Monthly',
+    description: 'Access to unlimited backlinks, SEO academy, analytics, and priority support - monthly billing'
   },
   yearly: {
     price: 290,
     originalPrice: 588,
     interval: 'year' as const,
     discount: 51,
-    savings: 298
+    savings: 298,
+    priceId: process.env.STRIPE_YEARLY_PRICE_ID || 'price_yearly_fallback',
+    productName: 'Premium SEO Tools - Yearly',
+    description: 'Access to unlimited backlinks, SEO academy, analytics, and priority support - yearly billing (save $298!)'
   }
 };
 
