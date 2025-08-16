@@ -112,23 +112,27 @@ export class CampaignNetworkLogger {
         let clonedResponse;
 
         try {
-          // Use safe response body management
-          if (responseBodyManager.canReadBody(response)) {
-            clonedResponse = responseBodyManager.safeClone(response);
-            const contentType = response.headers.get('content-type');
-            if (contentType?.includes('application/json')) {
-              responseData = await clonedResponse.json();
-            } else {
-              responseData = await clonedResponse.text();
+          // Clone response immediately to avoid consumption conflicts
+          clonedResponse = response.clone();
+
+          // Always attempt to read as text first to avoid conflicts
+          const responseText = await clonedResponse.text();
+
+          // Try to parse as JSON if it looks like JSON
+          const contentType = response.headers.get('content-type');
+          if (contentType?.includes('application/json') && responseText.trim().startsWith('{')) {
+            try {
+              responseData = JSON.parse(responseText);
+            } catch (parseError) {
+              responseData = responseText; // Fall back to text if JSON parsing fails
             }
           } else {
-            // Response already used, just log metadata
-            responseData = `[Response body already consumed - status: ${response.status}]`;
+            responseData = responseText;
           }
         } catch (error) {
-          responseError = `Failed to parse response: ${error}`;
-          responseData = `[Parse error - status: ${response.status}]`;
-          console.warn('Network logger failed to parse response:', error);
+          responseError = `Failed to read response: ${error}`;
+          responseData = `[Read error - status: ${response.status}]`;
+          console.warn('Network logger failed to read response:', error);
         }
 
         // Complete request log
