@@ -1117,13 +1117,13 @@ export function BeautifulBlogPost() {
         return `<p class="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6"${attrs}>${cleanText}</p>`;
       });
 
-    // Step 6: Beautiful lists with premium styling
+    // Step 6: Beautiful lists with premium styling - consistent bullet points
     formattedContent = formattedContent
-      .replace(/<ul([^>]*)>/gi, '<ul class="beautiful-prose space-y-4 my-8"$1>')
-      .replace(/<ol([^>]*)>/gi, '<ol class="beautiful-prose space-y-4 my-8"$1>')
+      .replace(/<ul([^>]*)>/gi, '<ul class="beautiful-prose list-disc space-y-3 my-6 ml-6"$1>')
+      .replace(/<ol([^>]*)>/gi, '<ul class="beautiful-prose list-disc space-y-3 my-6 ml-6"$1>') // Convert ol to ul for consistency
       .replace(/<li([^>]*)>(.*?)<\/li>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
-        return `<li class="beautiful-prose relative pl-8 text-lg leading-relaxed text-gray-700"${attrs}>${cleanText}</li>`;
+        return `<li class="beautiful-prose relative pl-2 text-lg leading-relaxed text-gray-700"${attrs}>${cleanText}</li>`;
       });
 
     // Step 7: Enhanced links with beautiful styling and improved anchor text
