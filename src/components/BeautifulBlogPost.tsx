@@ -605,15 +605,38 @@ export function BeautifulBlogPost() {
 
     let formattedContent = content;
 
+    // If content doesn't have proper HTML structure, convert it
+    if (!formattedContent.includes('<p>') && !formattedContent.includes('<h1>') && !formattedContent.includes('<h2>')) {
+      // Convert plain text to proper HTML structure
+      const lines = formattedContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+
+      let htmlContent = '';
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+
+        // Check if line looks like a heading
+        if (line.length < 100 && (
+          line.includes('Ultimate Guide') ||
+          line.includes('Introduction') ||
+          line.includes('Chapter') ||
+          line.includes('Section') ||
+          line.match(/^\d+\./) ||
+          line.match(/^[A-Z][^.!?]*[.!?]*$/) && line.split(' ').length < 10
+        )) {
+          htmlContent += `<h2>${line}</h2>\n\n`;
+        } else {
+          // Regular paragraph
+          htmlContent += `<p>${line}</p>\n\n`;
+        }
+      }
+      formattedContent = htmlContent;
+    }
+
     // Step 1: Clean up malformed content and artifacts
     formattedContent = formattedContent
-      .replace(/^(Introduction|Section \d+|Conclusion|Call-to-Action):\s*/gim, '')
-      .replace(/^(Hook Introduction|Summary|Overview):\s*/gim, '')
       .replace(/\bH[1-6]:\s*/gi, '')
       .replace(/Title:\s*/gi, '')
       .replace(/Hook Introduction:\s*/gi, '')
-      .replace(/^#+\s*/gm, '')
-      .replace(/^>\s*/gm, '')
       .replace(/["=]{2,}/g, '')
       .replace(/\n{3,}/g, '\n\n')
       .trim();
