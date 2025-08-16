@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertTriangle, RefreshCw, ArrowLeft, Bug } from 'lucide-react';
+import { AlertTriangle, RefreshCw, ArrowLeft, Bug, Database } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 
 interface BlogErrorBoundaryProps {
   error: Error | string;
@@ -12,14 +13,51 @@ interface BlogErrorBoundaryProps {
   showDebugInfo?: boolean;
 }
 
-export const BlogErrorBoundary: React.FC<BlogErrorBoundaryProps> = ({ 
-  error, 
-  slug, 
+export const BlogErrorBoundary: React.FC<BlogErrorBoundaryProps> = ({
+  error,
+  slug,
   onRetry,
-  showDebugInfo = false 
+  showDebugInfo = false
 }) => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [isFixingDatabase, setIsFixingDatabase] = useState(false);
   const errorMessage = typeof error === 'string' ? error : error.message;
+
+  const handleDatabaseFix = async () => {
+    setIsFixingDatabase(true);
+    try {
+      const { EmergencyDatabaseSetup } = await import('@/utils/emergencyDatabaseSetup');
+      const result = await EmergencyDatabaseSetup.setupDatabase();
+
+      if (result.success) {
+        toast({
+          title: "Database Fixed",
+          description: "Blog database has been initialized. Reloading page...",
+        });
+
+        // Reload the page after a short delay
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        toast({
+          title: "Fix Failed",
+          description: result.message,
+          variant: "destructive",
+        });
+      }
+    } catch (setupError) {
+      console.error('Database fix failed:', setupError);
+      toast({
+        title: "Emergency Fix Failed",
+        description: "Could not fix database. Please contact support.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsFixingDatabase(false);
+    }
+  };
 
   const getErrorType = (message: string) => {
     if (message.includes('not found') || message.includes('404')) {
@@ -137,25 +175,37 @@ export const BlogErrorBoundary: React.FC<BlogErrorBoundaryProps> = ({
             )}
 
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
-              <Button
-                onClick={() => navigate('/blog')}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Blog
-              </Button>
-              
-              {onRetry && (
-                <Button
-                  onClick={onRetry}
-                  variant="outline"
-                  className="flex-1"
-                >
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Try Again
-                </Button>
-              )}
-            </div>
+          <Button
+            onClick={() => navigate('/blog')}
+            className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Blog
+          </Button>
+
+          {errorType === 'database' && (
+            <Button
+              onClick={handleDatabaseFix}
+              disabled={isFixingDatabase}
+              variant="destructive"
+              className="flex-1"
+            >
+              <Database className={`mr-2 h-4 w-4 ${isFixingDatabase ? 'animate-spin' : ''}`} />
+              {isFixingDatabase ? 'Fixing Database...' : 'Fix Database'}
+            </Button>
+          )}
+
+          {onRetry && (
+            <Button
+              onClick={onRetry}
+              variant="outline"
+              className="flex-1"
+            >
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Try Again
+            </Button>
+          )}
+        </div>
 
             {errorType === 'not_found' && (
               <div className="text-center pt-4">

@@ -585,7 +585,7 @@ export function HomepageBlogGenerator() {
             />
           </Badge>
           <h2 className="text-4xl md:text-5xl font-light mb-6 tracking-tight bg-gradient-to-r from-gray-900 via-blue-800 to-purple-800 bg-clip-text text-transparent">
-            Create Your First Backlink For Free
+            Create a Permanent Backlink
           </h2>
           <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed font-light">
             Enter your URL and keyword to generate a high-quality blog post with a natural backlink.

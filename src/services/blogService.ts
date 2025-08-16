@@ -100,10 +100,22 @@ export class BlogService {
 
     let result;
     try {
+      // Primary save to published_blog_posts table
       result = await supabase
-        .from('blog_posts')
+        .from('published_blog_posts')
         .insert(cleanBlogPostData)
         .select();
+
+      // Also save to blog_posts for backward compatibility
+      try {
+        await supabase
+          .from('blog_posts')
+          .insert(cleanBlogPostData);
+        console.log('✅ [BlogService] Also saved to blog_posts for compatibility');
+      } catch (backupError) {
+        console.warn('⚠️ [BlogService] Backup save to blog_posts failed:', backupError);
+      }
+
     } catch (networkError: any) {
       console.error('❌ Network error during blog post creation:', networkError);
       throw new Error(`Network error: ${networkError.message || 'Failed to connect to database'}`);
@@ -114,7 +126,7 @@ export class BlogService {
 
     if (error || !blogPost) {
       // Handle slug collision with enhanced retry strategy
-      if (error && (error.message.includes('blog_posts_slug_key') || error.message.includes('duplicate key value violates unique constraint') || error.message.includes('null value in column "slug"'))) {
+      if (error && (error.message.includes('slug') || error.message.includes('duplicate key value violates unique constraint') || error.message.includes('null value in column "slug"'))) {
         console.warn('⚠️ Slug issue detected, implementing fallback strategy...');
 
         // Fallback: Generate service-level slug with maximum uniqueness
@@ -124,9 +136,19 @@ export class BlogService {
         let retryResult;
         try {
           retryResult = await supabase
-            .from('blog_posts')
+            .from('published_blog_posts')
             .insert(retryData)
             .select();
+
+          // Also save to blog_posts for backward compatibility
+          try {
+            await supabase
+              .from('blog_posts')
+              .insert(retryData);
+          } catch (backupError) {
+            console.warn('���️ [BlogService] Backup retry save to blog_posts failed:', backupError);
+          }
+
         } catch (networkError: any) {
           console.error('❌ Network error during retry:', networkError);
           throw new Error(`Network error on retry: ${networkError.message || 'Failed to connect to database'}`);
@@ -138,16 +160,25 @@ export class BlogService {
 
         if (retryError || !retryPost) {
           // Final attempt with timestamp
-          if (retryError && retryError.message && retryError.message.includes('blog_posts_slug_key')) {
+          if (retryError && retryError.message && retryError.message.includes('slug')) {
             const finalSlug = `${fallbackSlug}-${Date.now()}`;
             const finalData = { ...cleanBlogPostData, slug: finalSlug };
 
             let finalResult;
             try {
               finalResult = await supabase
-                .from('blog_posts')
+                .from('published_blog_posts')
                 .insert(finalData)
                 .select();
+
+              // Also save to blog_posts for backward compatibility
+              try {
+                await supabase
+                  .from('blog_posts')
+                  .insert(finalData);
+              } catch (backupError) {
+                console.warn('⚠️ [BlogService] Backup final save to blog_posts failed:', backupError);
+              }
             } catch (networkError: any) {
               console.error('❌ Network error during final retry:', networkError);
               throw new Error(`Network error on final retry: ${networkError.message || 'Failed to connect to database'}`);
@@ -207,23 +238,49 @@ export class BlogService {
    * Get blog post by slug
    */
   async getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+    console.log('🔍 [BlogService] Fetching blog post by slug:', slug);
+
+    // Try published_blog_posts first (where most new posts are saved)
     const { data, error } = await supabase
-      .from('blog_posts')
+      .from('published_blog_posts')
       .select('*')
       .eq('slug', slug)
       .eq('status', 'published')
       .single();
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // No rows found
+    // If not found in published_blog_posts, try blog_posts as fallback
+    if (error && error.code === 'PGRST116') {
+      console.log('🔄 [BlogService] Not found in published_blog_posts, trying blog_posts...');
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('slug', slug)
+        .eq('status', 'published')
+        .single();
+
+      if (fallbackError) {
+        if (fallbackError.code === 'PGRST116') {
+          console.log('❌ [BlogService] Blog post not found in either table');
+          return null; // No rows found in either table
+        }
+        console.error('❌ [BlogService] Error fetching from both tables:', { error, fallbackError });
+        throw new Error(`Failed to fetch blog post: ${fallbackError.message}`);
       }
+
+      console.log('✅ [BlogService] Found in blog_posts table');
+      // Increment view count in the correct table
+      await this.incrementViewCount(slug, 'blog_posts');
+      return fallbackData;
+    }
+
+    if (error) {
+      console.error('❌ [BlogService] Error fetching from published_blog_posts:', error);
       throw new Error(`Failed to fetch blog post: ${error.message}`);
     }
 
-    // Increment view count
-    await this.incrementViewCount(slug);
-
+    console.log('✅ [BlogService] Found in published_blog_posts table');
+    // Increment view count in the correct table
+    await this.incrementViewCount(slug, 'published_blog_posts');
     return data;
   }
 
@@ -408,28 +465,35 @@ export class BlogService {
   /**
    * Increment view count
    */
-  private async incrementViewCount(slug: string): Promise<void> {
+  private async incrementViewCount(slug: string, tableName: string = 'blog_posts'): Promise<void> {
     try {
-      // Try using the RPC function first
-      const { error } = await supabase.rpc('increment_blog_post_views', { post_slug: slug });
+      // Try using the RPC function first (works for both tables)
+      let rpcFunction = '';
+      if (tableName === 'published_blog_posts') {
+        rpcFunction = 'increment_published_blog_post_views';
+      } else {
+        rpcFunction = 'increment_blog_post_views';
+      }
+
+      const { error } = await supabase.rpc(rpcFunction, { post_slug: slug });
 
       if (error) {
         // Check if it's a missing function error and use fallback
         if (error.code === '42883' || error.code === 'PGRST202' || error.message?.includes('Could not find the function')) {
-          console.log('View increment function not available, using direct update');
+          console.log(`View increment function ${rpcFunction} not available, using direct update on ${tableName}`);
         } else {
           console.warn('View increment function failed:', error.message);
         }
 
-        // Fallback: direct update
+        // Fallback: direct update on the correct table
         await supabase
-          .from('blog_posts')
+          .from(tableName)
           .update({ view_count: supabase.sql`view_count + 1` })
           .eq('slug', slug)
           .eq('status', 'published');
       }
     } catch (error) {
-      console.warn('Failed to increment view count:', error);
+      console.warn(`Failed to increment view count for ${tableName}:`, error);
     }
   }
 

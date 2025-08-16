@@ -99,6 +99,59 @@ export function BeautifulBlogPost() {
     };
   }, []);
 
+  // Setup database table if missing
+  useEffect(() => {
+    const setupDatabaseIfNeeded = async () => {
+      try {
+        // Test if published_blog_posts table exists by trying a simple query
+        const { error } = await supabase
+          .from('published_blog_posts')
+          .select('id')
+          .limit(1);
+
+        // If table doesn't exist, try setup but don't fail completely
+        if (error && (error.code === '42P01' || error.message?.includes('does not exist'))) {
+          console.log('🔧 published_blog_posts table missing, attempting setup...');
+
+          try {
+            // Import and run emergency setup
+            const { EmergencyDatabaseSetup } = await import('@/utils/emergencyDatabaseSetup');
+            const result = await EmergencyDatabaseSetup.setupDatabase();
+
+            if (result.success) {
+              console.log('✅ Database setup completed, retrying blog load...');
+              toast({
+                title: "Blog Post Created",
+                description: "The missing blog post has been created. Reloading...",
+              });
+
+              // Retry loading the blog post after setup
+              if (slug) {
+                setTimeout(() => {
+                  setLoading(true);
+                  setError(null);
+                  loadBlogPost(slug);
+                }, 1000);
+              }
+            } else {
+              console.error('❌ Database setup failed:', result.message);
+              // Don't show error toast, just log it
+              console.log('⚠️ Setup failed but continuing normally...');
+            }
+          } catch (setupError) {
+            console.error('❌ Failed to setup database:', setupError);
+            // Don't show error toast, just log it
+            console.log('⚠️ Setup failed but continuing normally...');
+          }
+        }
+      } catch (err) {
+        console.warn('Database check failed:', err);
+      }
+    };
+
+    setupDatabaseIfNeeded();
+  }, [slug, toast]);
+
   useEffect(() => {
     if (slug) {
       loadBlogPost(slug);

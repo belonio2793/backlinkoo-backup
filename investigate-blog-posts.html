@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Posts Investigation</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        .section { margin-bottom: 30px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        .section h2 { margin-top: 0; color: #333; }
+        .table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        .table th, .table td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+        .table th { background-color: #f2f2f2; font-weight: bold; }
+        .table tr:nth-child(even) { background-color: #f9f9f9; }
+        .error { color: red; font-weight: bold; }
+        .success { color: green; font-weight: bold; }
+        .warning { color: orange; font-weight: bold; }
+        .loading { color: blue; font-style: italic; }
+        .code { background: #f4f4f4; padding: 10px; border-radius: 4px; margin: 10px 0; font-family: monospace; }
+        button { background: #007cba; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; margin: 5px; }
+        button:hover { background: #005a87; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 15px 0; }
+        .stat-card { background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; }
+        .stat-number { font-size: 24px; font-weight: bold; color: #007cba; }
+        .stat-label { font-size: 14px; color: #666; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Blog Posts Investigation</h1>
+        <p>This tool will help us understand what happened to the blog posts by checking both database tables.</p>
+        
+        <div class="section">
+            <h2>Database Connection</h2>
+            <button onclick="initializeSupabase()">Initialize Connection</button>
+            <div id="connection-status" class="loading">Not connected</div>
+        </div>
+
+        <div class="section">
+            <h2>Statistics Overview</h2>
+            <div id="stats-container" class="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="blog-posts-count">-</div>
+                    <div class="stat-label">blog_posts table</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="published-blog-posts-count">-</div>
+                    <div class="stat-label">published_blog_posts table</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-count">-</div>
+                    <div class="stat-label">Total Blog Posts</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="missing-count">-</div>
+                    <div class="stat-label">Missing from published_blog_posts</div>
+                </div>
+            </div>
+            <button onclick="updateStats()">Refresh Statistics</button>
+        </div>
+
+        <div class="section">
+            <h2>blog_posts Table Contents</h2>
+            <button onclick="loadBlogPosts()">Load blog_posts Data</button>
+            <div id="blog-posts-result">Click "Load blog_posts Data" to see contents</div>
+        </div>
+
+        <div class="section">
+            <h2>published_blog_posts Table Contents</h2>
+            <button onclick="loadPublishedBlogPosts()">Load published_blog_posts Data</button>
+            <div id="published-blog-posts-result">Click "Load published_blog_posts Data" to see contents</div>
+        </div>
+
+        <div class="section">
+            <h2>Migration Tools</h2>
+            <button onclick="migrateAllPosts()">Migrate All Posts to published_blog_posts</button>
+            <button onclick="createMissingPosts()">Create Missing Specific Posts</button>
+            <div id="migration-result">Migration results will appear here</div>
+        </div>
+
+        <div class="section">
+            <h2>Other Blog Tables</h2>
+            <button onclick="checkOtherTables()">Check for Other Blog Tables</button>
+            <div id="other-tables-result">Click to check for ai_generated_posts and other blog tables</div>
+        </div>
+    </div>
+
+    <script>
+        let supabase;
+        const SUPABASE_URL = 'https://dfhanacsmsvvkpunurnp.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzUzMjY3NzEsImV4cCI6MjA1MDkwMjc3MX0.Q0rDrRnxNBCBBumM7hqb4r9FGxU2Cxjhd2NNnRMOHM4';
+
+        function initializeSupabase() {
+            try {
+                supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                document.getElementById('connection-status').innerHTML = '<span class="success">✅ Connected to Supabase</span>';
+                updateStats();
+            } catch (error) {
+                document.getElementById('connection-status').innerHTML = '<span class="error">❌ Connection failed: ' + error.message + '</span>';
+            }
+        }
+
+        async function updateStats() {
+            if (!supabase) {
+                initializeSupabase();
+                return;
+            }
+
+            try {
+                // Count blog_posts
+                const { count: blogPostsCount, error: blogPostsError } = await supabase
+                    .from('blog_posts')
+                    .select('*', { count: 'exact', head: true });
+
+                // Count published_blog_posts
+                const { count: publishedBlogPostsCount, error: publishedBlogPostsError } = await supabase
+                    .from('published_blog_posts')
+                    .select('*', { count: 'exact', head: true });
+
+                document.getElementById('blog-posts-count').textContent = blogPostsError ? 'Error' : (blogPostsCount || 0);
+                document.getElementById('published-blog-posts-count').textContent = publishedBlogPostsError ? 'Error' : (publishedBlogPostsCount || 0);
+                
+                const total = (blogPostsCount || 0) + (publishedBlogPostsCount || 0);
+                const missing = (blogPostsCount || 0) - (publishedBlogPostsCount || 0);
+                
+                document.getElementById('total-count').textContent = total;
+                document.getElementById('missing-count').textContent = Math.max(0, missing);
+
+            } catch (error) {
+                console.error('Error updating stats:', error);
+            }
+        }
+
+        async function loadBlogPosts() {
+            if (!supabase) {
+                initializeSupabase();
+                return;
+            }
+
+            document.getElementById('blog-posts-result').innerHTML = '<div class="loading">Loading blog_posts data...</div>';
+
+            try {
+                const { data, error } = await supabase
+                    .from('blog_posts')
+                    .select('id, slug, title, status, created_at, user_id, claimed, is_trial_post')
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+
+                if (error) {
+                    document.getElementById('blog-posts-result').innerHTML = '<div class="error">❌ Error: ' + error.message + '</div>';
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    document.getElementById('blog-posts-result').innerHTML = '<div class="warning">⚠️ No blog posts found in blog_posts table</div>';
+                    return;
+                }
+
+                let html = '<div class="success">✅ Found ' + data.length + ' blog posts in blog_posts table</div>';
+                html += '<table class="table"><tr><th>Slug</th><th>Title</th><th>Status</th><th>Created</th><th>User ID</th><th>Claimed</th><th>Trial</th></tr>';
+                
+                data.forEach(post => {
+                    html += '<tr>';
+                    html += '<td>' + (post.slug || 'N/A') + '</td>';
+                    html += '<td>' + (post.title || 'N/A').substring(0, 50) + '...</td>';
+                    html += '<td>' + (post.status || 'N/A') + '</td>';
+                    html += '<td>' + (post.created_at ? new Date(post.created_at).toLocaleDateString() : 'N/A') + '</td>';
+                    html += '<td>' + (post.user_id ? post.user_id.substring(0, 8) + '...' : 'None') + '</td>';
+                    html += '<td>' + (post.claimed ? 'Yes' : 'No') + '</td>';
+                    html += '<td>' + (post.is_trial_post ? 'Yes' : 'No') + '</td>';
+                    html += '</tr>';
+                });
+                
+                html += '</table>';
+                document.getElementById('blog-posts-result').innerHTML = html;
+
+            } catch (error) {
+                document.getElementById('blog-posts-result').innerHTML = '<div class="error">❌ Error: ' + error.message + '</div>';
+            }
+        }
+
+        async function loadPublishedBlogPosts() {
+            if (!supabase) {
+                initializeSupabase();
+                return;
+            }
+
+            document.getElementById('published-blog-posts-result').innerHTML = '<div class="loading">Loading published_blog_posts data...</div>';
+
+            try {
+                const { data, error } = await supabase
+                    .from('published_blog_posts')
+                    .select('id, slug, title, status, created_at, user_id, is_claimed, is_trial_post')
+                    .order('created_at', { ascending: false })
+                    .limit(50);
+
+                if (error) {
+                    document.getElementById('published-blog-posts-result').innerHTML = '<div class="error">❌ Error: ' + error.message + '</div>';
+                    return;
+                }
+
+                if (!data || data.length === 0) {
+                    document.getElementById('published-blog-posts-result').innerHTML = '<div class="warning">⚠️ No blog posts found in published_blog_posts table</div>';
+                    return;
+                }
+
+                let html = '<div class="success">✅ Found ' + data.length + ' blog posts in published_blog_posts table</div>';
+                html += '<table class="table"><tr><th>Slug</th><th>Title</th><th>Status</th><th>Created</th><th>User ID</th><th>Claimed</th><th>Trial</th></tr>';
+                
+                data.forEach(post => {
+                    html += '<tr>';
+                    html += '<td>' + (post.slug || 'N/A') + '</td>';
+                    html += '<td>' + (post.title || 'N/A').substring(0, 50) + '...</td>';
+                    html += '<td>' + (post.status || 'N/A') + '</td>';
+                    html += '<td>' + (post.created_at ? new Date(post.created_at).toLocaleDateString() : 'N/A') + '</td>';
+                    html += '<td>' + (post.user_id ? post.user_id.substring(0, 8) + '...' : 'None') + '</td>';
+                    html += '<td>' + (post.is_claimed ? 'Yes' : 'No') + '</td>';
+                    html += '<td>' + (post.is_trial_post ? 'Yes' : 'No') + '</td>';
+                    html += '</tr>';
+                });
+                
+                html += '</table>';
+                document.getElementById('published-blog-posts-result').innerHTML = html;
+
+            } catch (error) {
+                document.getElementById('published-blog-posts-result').innerHTML = '<div class="error">❌ Error: ' + error.message + '</div>';
+            }
+        }
+
+        async function checkOtherTables() {
+            if (!supabase) {
+                initializeSupabase();
+                return;
+            }
+
+            document.getElementById('other-tables-result').innerHTML = '<div class="loading">Checking other blog tables...</div>';
+
+            let html = '<h3>Other Blog Tables:</h3>';
+
+            // Check ai_generated_posts
+            try {
+                const { count: aiPostsCount, error: aiPostsError } = await supabase
+                    .from('ai_generated_posts')
+                    .select('*', { count: 'exact', head: true });
+
+                if (aiPostsError) {
+                    html += '<div class="error">❌ ai_generated_posts: ' + aiPostsError.message + '</div>';
+                } else {
+                    html += '<div class="success">✅ ai_generated_posts: ' + (aiPostsCount || 0) + ' posts found</div>';
+                    
+                    if (aiPostsCount > 0) {
+                        const { data: aiPosts } = await supabase
+                            .from('ai_generated_posts')
+                            .select('slug, title, created_at')
+                            .order('created_at', { ascending: false })
+                            .limit(10);
+                        
+                        if (aiPosts && aiPosts.length > 0) {
+                            html += '<table class="table"><tr><th>Slug</th><th>Title</th><th>Created</th></tr>';
+                            aiPosts.forEach(post => {
+                                html += '<tr>';
+                                html += '<td>' + (post.slug || 'N/A') + '</td>';
+                                html += '<td>' + (post.title || 'N/A').substring(0, 40) + '...</td>';
+                                html += '<td>' + (post.created_at ? new Date(post.created_at).toLocaleDateString() : 'N/A') + '</td>';
+                                html += '</tr>';
+                            });
+                            html += '</table>';
+                        }
+                    }
+                }
+            } catch (error) {
+                html += '<div class="error">❌ Error checking ai_generated_posts: ' + error.message + '</div>';
+            }
+
+            document.getElementById('other-tables-result').innerHTML = html;
+        }
+
+        async function migrateAllPosts() {
+            if (!supabase) {
+                initializeSupabase();
+                return;
+            }
+
+            document.getElementById('migration-result').innerHTML = '<div class="loading">Starting migration...</div>';
+
+            try {
+                // Get all posts from blog_posts
+                const { data: blogPosts, error: fetchError } = await supabase
+                    .from('blog_posts')
+                    .select('*');
+
+                if (fetchError) {
+                    document.getElementById('migration-result').innerHTML = '<div class="error">❌ Error fetching blog posts: ' + fetchError.message + '</div>';
+                    return;
+                }
+
+                if (!blogPosts || blogPosts.length === 0) {
+                    document.getElementById('migration-result').innerHTML = '<div class="warning">⚠️ No blog posts found to migrate</div>';
+                    return;
+                }
+
+                let html = '<div class="success">✅ Found ' + blogPosts.length + ' posts to migrate</div>';
+                let successCount = 0;
+                let errorCount = 0;
+
+                for (const post of blogPosts) {
+                    try {
+                        // Map blog_posts columns to published_blog_posts columns
+                        const mappedPost = {
+                            slug: post.slug,
+                            title: post.title,
+                            content: post.content,
+                            meta_description: post.meta_description,
+                            excerpt: post.excerpt,
+                            keywords: post.keywords || [],
+                            target_url: post.target_url || 'https://example.com',
+                            published_url: post.published_url || 'https://backlinkoo.com/blog/' + post.slug,
+                            status: post.status || 'published',
+                            is_trial_post: post.is_trial_post || false,
+                            view_count: post.view_count || 0,
+                            seo_score: post.seo_score || 0,
+                            reading_time: post.reading_time || 5,
+                            word_count: post.word_count || 500,
+                            author_name: post.author_name || 'Backlinkoo Team',
+                            tags: post.tags || [],
+                            category: post.category || 'General',
+                            anchor_text: post.anchor_text,
+                            is_claimed: post.claimed || false,
+                            claimed_by: post.user_id,
+                            user_id: post.user_id,
+                            created_at: post.created_at,
+                            updated_at: post.updated_at,
+                            published_at: post.published_at || post.created_at
+                        };
+
+                        const { error: insertError } = await supabase
+                            .from('published_blog_posts')
+                            .insert([mappedPost]);
+
+                        if (insertError) {
+                            console.error('Error migrating post:', post.slug, insertError);
+                            errorCount++;
+                        } else {
+                            successCount++;
+                        }
+                    } catch (error) {
+                        console.error('Error processing post:', post.slug, error);
+                        errorCount++;
+                    }
+                }
+
+                html += '<div class="success">✅ Successfully migrated: ' + successCount + ' posts</div>';
+                if (errorCount > 0) {
+                    html += '<div class="error">❌ Failed to migrate: ' + errorCount + ' posts</div>';
+                }
+
+                document.getElementById('migration-result').innerHTML = html;
+                updateStats();
+
+            } catch (error) {
+                document.getElementById('migration-result').innerHTML = '<div class="error">❌ Migration error: ' + error.message + '</div>';
+            }
+        }
+
+        async function createMissingPosts() {
+            if (!supabase) {
+                initializeSupabase();
+                return;
+            }
+
+            document.getElementById('migration-result').innerHTML = '<div class="loading">Creating missing specific posts...</div>';
+
+            const missingPosts = [
+                {
+                    slug: 'the-ultimate-guide-to-skibidi-your-definitive-resource-me2neu4l',
+                    title: 'The Ultimate Guide to Skibidi: Your Definitive Resource',
+                    target_url: 'https://example.com'
+                },
+                {
+                    slug: 'unleashing-the-power-of-product-hunt-your-ultimate-guide-to-launching-success-medqw6lg',
+                    title: 'Unleashing the Power of Product Hunt: Your Ultimate Guide to Launching Success',
+                    target_url: 'https://example.com'
+                }
+            ];
+
+            let html = '<div class="success">Creating ' + missingPosts.length + ' missing posts...</div>';
+            let successCount = 0;
+            let errorCount = 0;
+
+            for (const postData of missingPosts) {
+                try {
+                    const blogPost = {
+                        slug: postData.slug,
+                        title: postData.title,
+                        content: '<div class="beautiful-prose"><h1>' + postData.title + '</h1><p>This is a sample blog post created automatically.</p></div>',
+                        meta_description: 'A comprehensive guide on ' + postData.title.toLowerCase(),
+                        excerpt: 'Learn everything you need to know about this topic.',
+                        keywords: ['guide', 'tutorial', 'tips'],
+                        target_url: postData.target_url,
+                        published_url: 'https://backlinkoo.com/blog/' + postData.slug,
+                        status: 'published',
+                        is_trial_post: false,
+                        view_count: 0,
+                        seo_score: 75,
+                        reading_time: 5,
+                        word_count: 500,
+                        author_name: 'Backlinkoo Team',
+                        tags: ['Tutorial', 'Guide'],
+                        category: 'General',
+                        is_claimed: false
+                    };
+
+                    const { error } = await supabase
+                        .from('published_blog_posts')
+                        .insert([blogPost]);
+
+                    if (error) {
+                        console.error('Error creating post:', postData.slug, error);
+                        errorCount++;
+                    } else {
+                        successCount++;
+                    }
+                } catch (error) {
+                    console.error('Error processing post:', postData.slug, error);
+                    errorCount++;
+                }
+            }
+
+            html += '<div class="success">✅ Successfully created: ' + successCount + ' posts</div>';
+            if (errorCount > 0) {
+                html += '<div class="error">❌ Failed to create: ' + errorCount + ' posts</div>';
+            }
+
+            document.getElementById('migration-result').innerHTML = html;
+            updateStats();
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            initializeSupabase();
+        };
+    </script>
+</body>
+</html>

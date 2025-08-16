@@ -132,6 +132,105 @@ export type Database = {
         }
         Relationships: []
       }
+      published_blog_posts: {
+        Row: {
+          id: string
+          user_id: string | null
+          title: string
+          slug: string
+          content: string
+          excerpt: string | null
+          meta_description: string | null
+          keywords: string[]
+          tags: string[]
+          category: string
+          target_url: string
+          published_url: string
+          anchor_text: string | null
+          status: string
+          is_trial_post: boolean
+          is_claimed: boolean
+          claimed_by: string | null
+          claimed_at: string | null
+          expires_at: string | null
+          view_count: number
+          seo_score: number
+          contextual_links: Json
+          reading_time: number
+          word_count: number
+          featured_image: string | null
+          author_name: string
+          author_avatar: string | null
+          created_at: string
+          updated_at: string
+          published_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          title: string
+          slug: string
+          content: string
+          excerpt?: string | null
+          meta_description?: string | null
+          keywords?: string[]
+          tags?: string[]
+          category?: string
+          target_url: string
+          published_url: string
+          anchor_text?: string | null
+          status?: string
+          is_trial_post?: boolean
+          is_claimed?: boolean
+          claimed_by?: string | null
+          claimed_at?: string | null
+          expires_at?: string | null
+          view_count?: number
+          seo_score?: number
+          contextual_links?: Json
+          reading_time?: number
+          word_count?: number
+          featured_image?: string | null
+          author_name?: string
+          author_avatar?: string | null
+          created_at?: string
+          updated_at?: string
+          published_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          title?: string
+          slug?: string
+          content?: string
+          excerpt?: string | null
+          meta_description?: string | null
+          keywords?: string[]
+          tags?: string[]
+          category?: string
+          target_url?: string
+          published_url?: string
+          anchor_text?: string | null
+          status?: string
+          is_trial_post?: boolean
+          is_claimed?: boolean
+          claimed_by?: string | null
+          claimed_at?: string | null
+          expires_at?: string | null
+          view_count?: number
+          seo_score?: number
+          contextual_links?: Json
+          reading_time?: number
+          word_count?: number
+          featured_image?: string | null
+          author_name?: string
+          author_avatar?: string | null
+          created_at?: string
+          updated_at?: string
+          published_at?: string | null
+        }
+        Relationships: []
+      }
       campaigns: {
         Row: {
           completed_backlinks: string[] | null
