@@ -523,7 +523,11 @@ function Blog() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+    <FetchErrorBoundary
+      context="loading blog posts"
+      onRetry={() => window.location.reload()}
+    >
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
       {/* Header */}
       <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
@@ -964,7 +968,8 @@ function Blog() {
           });
         }}
       />
-    </div>
+      </div>
+    </FetchErrorBoundary>
   );
 }
 
