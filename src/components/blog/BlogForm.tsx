@@ -226,18 +226,6 @@ export function BlogForm({ onContentGenerated }: BlogFormProps) {
             </Button>
           </div>
 
-          {/* Estimated Time and Account Prompt - Enhanced warning */}
-          <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl shadow-inner">
-            <div className="text-center">
-              <p className="text-sm font-semibold text-amber-800 mb-1">
-                ⏱️ Estimated time: 30-60 seconds
-              </p>
-              <p className="text-xs text-amber-700">
-                <span className="font-semibold">Warning:</span> You will be redirected to your blog post.
-                Create an account to prevent it from being deleted in 24 hours!
-              </p>
-            </div>
-          </div>
 
       {/* Bottom decorative elements */}
       <div className="flex justify-center pt-2">
