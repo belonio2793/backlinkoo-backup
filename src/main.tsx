@@ -332,6 +332,7 @@ if (import.meta.env.DEV) {
   console.log('  - disableViteProtection() - Disable fetch protection and refresh');
   console.log('  - testContentGeneration() - Test content generation functions');
   console.log('  - fixFetchErrors() - Emergency fix for fetch protection issues');
+  console.log('  - fixFullStoryErrors() - Fix FullStory fetch interference specifically');
   console.log('  - testClientContent() - Test client-side content generation');
   console.log('  - testClientTelegraph() - Test client-side Telegraph publishing');
   console.log('  - testFullPipeline() - Test complete automation pipeline');
