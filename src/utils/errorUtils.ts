@@ -70,7 +70,15 @@ export function getErrorMessage(error: any): string {
         const parts = meaningfulKeys.map(key => {
           const value = error[key];
           if (typeof value === 'object') return `${key}: [object]`;
-          return `${key}: ${value}`;
+          if (typeof value === 'symbol') return `${key}: [symbol]`;
+          if (typeof value === 'function') return `${key}: [function]`;
+          if (typeof value === 'undefined') return `${key}: undefined`;
+          // Safe string conversion
+          try {
+            return `${key}: ${String(value)}`;
+          } catch (conversionError) {
+            return `${key}: [unconvertible]`;
+          }
         });
         return `Error: ${parts.join(', ')}`;
       }
