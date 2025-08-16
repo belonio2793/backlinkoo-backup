@@ -768,14 +768,37 @@ export function BeautifulBlogPost() {
           continue;
         }
 
-        // Check if it's a heading (short line with title-like content) but NOT the blog title
-        const isLikelyHeading = para.length < 120 && (
+        // Enhanced heading detection - Check if it's a heading (short line with title-like content) but NOT the blog title
+        const isLikelyHeading = para.length < 150 && (
+          // Section patterns
+          para.match(/^Section\s+\d+:/i) ||
+          para.match(/^Part\s+\d+:/i) ||
+          para.match(/^Chapter\s+\d+:/i) ||
+          para.match(/^\d+\.\s+[A-Z]/i) ||
+          para.match(/^Step\s+\d+:/i) ||
+
+          // Common heading patterns
           (para.includes('Introduction') && !para.includes('Hook Introduction')) ||
           para.includes('Conclusion') ||
           para.includes('Strategy') ||
-          para.includes('Step ') ||
-          para.includes('Chapter ') ||
-          (para.split(' ').length <= 8 && para.charAt(0).toUpperCase() === para.charAt(0))
+          para.includes('Overview') ||
+          para.includes('Summary') ||
+          para.includes('Benefits') ||
+          para.includes('Advantages') ||
+          para.includes('Implementation') ||
+          para.includes('Best Practices') ||
+          para.includes('Key Points') ||
+          para.includes('Important') ||
+          para.includes('Essential') ||
+          para.includes('Critical') ||
+
+          // Short capitalized lines (likely headings)
+          (para.split(' ').length <= 10 &&
+           para.charAt(0).toUpperCase() === para.charAt(0) &&
+           para.split(' ').every(word => word.length > 2 ? word.charAt(0).toUpperCase() === word.charAt(0) : true)) ||
+
+          // Lines ending with colon (section headers)
+          (para.endsWith(':') && para.split(' ').length <= 8 && para.charAt(0).toUpperCase() === para.charAt(0))
         );
 
         // Don't convert to heading if it matches the title or is too similar
