@@ -1152,7 +1152,7 @@ export function BeautifulBlogPost() {
         if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
-        return `<h3 class="beautiful-prose text-lg font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h3>`;
+        return `<p class="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6"${attrs}>${cleanText}</p>`;
       });
 
     // Step 5: Enhanced paragraphs with beautiful typography
