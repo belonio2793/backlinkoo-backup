@@ -130,6 +130,9 @@ if (import.meta.env.DEV) {
   // Import blog post fix utility
   import('./utils/fixEmptyBlogPost');
 
+  // Import blog sync utility
+  import('./utils/syncBlogPostTables');
+
   console.log('💡 Debug helpers available:');
   console.log('  - fixRLS() - Go to RLS recursion fix page');
   console.log('  - forcePremium() - Force current user to premium status');
