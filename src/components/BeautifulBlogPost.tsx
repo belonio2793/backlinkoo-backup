@@ -100,8 +100,8 @@ function formatContent(raw: string, title?: string) {
     .replace(/\*+\s*\*+/g, '**') // Fix multiple asterisks to proper bold syntax
     // Fix broken URLs in markdown links (space in URL)
     .replace(/\]\(([^)]*)\s+([^)]*)\)/g, ']($1$2)') // Remove spaces in URLs
-    .replace(/https:\s*\/\//g, 'https://') // Fix broken https: // patterns
-    .replace(/\]\(https:\s*\/\//g, '](https://') // Fix https: // in markdown links specifically
+    .replace(/https?:\s+\/\//g, 'https://') // Fix broken https: // patterns (improved regex)
+    .replace(/\]\(https?:\s+\/\//g, '](https://') // Fix https: // in markdown links specifically
     // Clean up common artifacts
     .replace(/\*{3,}/g, '**') // Replace multiple asterisks with proper bold syntax
     .replace(/\s+\*\s+$/gm, '') // Remove trailing single asterisks with spaces
@@ -129,7 +129,7 @@ function formatContent(raw: string, title?: string) {
         .replace(/\*+$/, ''); // Remove any remaining trailing asterisks
 
       // Convert markdown links [text](url) to HTML links with proper anchor text
-      processedText = processedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
+      processedText = processedText.replace(/\[([^\]]+)\]\(([^)\s]+)\s*\)/g, (match, linkText, url) => {
         // Clean up the URL and text
         let cleanText = linkText.trim();
         let cleanUrl = url.trim();
@@ -139,7 +139,8 @@ function formatContent(raw: string, title?: string) {
           cleanText = 'Weebly SEO';
         }
 
-        // Fix common URL issues
+        // Fix common URL issues - handle broken URLs like "https: //"
+        cleanUrl = cleanUrl.replace(/https?:\s+\/\//g, 'https://');
         if (cleanUrl && !cleanUrl.match(/^https?:\/\//)) {
           cleanUrl = cleanUrl.startsWith('//') ? 'https:' + cleanUrl : 'https://' + cleanUrl;
         }
@@ -176,8 +177,19 @@ function formatContent(raw: string, title?: string) {
       );
     }
 
-    // Enhanced bullet point detection
-    if (/^[-*•·➤►▶→✓✔]\s+/.test(line)) {
+    // Detect specific section headers that should be italicized, not list items (check this FIRST)
+    const italicizedSections = /^(Title Tags and Meta Descriptions|Heading Structure|Keyword Research|Content Optimization|Weebly SEO Settings|Insights from Case Studies):/i;
+    if (italicizedSections.test(line)) {
+      const processedContent = processLineContent(line);
+      return (
+        <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
+          <em dangerouslySetInnerHTML={{ __html: processedContent }} />
+        </p>
+      );
+    }
+
+    // Enhanced bullet point detection (but exclude italicized sections)
+    if (/^[-*•·➤►▶→✓✔]\s+/.test(line) && !italicizedSections.test(line)) {
       const items = line
         .split(/[-*•·➤►▶→✓✔]\s+/)
         .filter(Boolean)
@@ -200,17 +212,6 @@ function formatContent(raw: string, title?: string) {
             <li className="beautiful-prose relative pl-2 text-lg leading-relaxed text-gray-700 mb-2" dangerouslySetInnerHTML={{ __html: processedContent }} />
           </ol>
         </div>
-      );
-    }
-
-    // Detect specific section headers that should be italicized, not list items
-    const italicizedSections = /^(Title Tags and Meta Descriptions|Heading Structure|Keyword Research|Content Optimization|Weebly SEO Settings|Insights from Case Studies):/i;
-    if (italicizedSections.test(line)) {
-      const processedContent = processLineContent(line);
-      return (
-        <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
-          <em dangerouslySetInnerHTML={{ __html: processedContent }} />
-        </p>
       );
     }
 
