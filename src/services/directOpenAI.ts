@@ -180,11 +180,13 @@ Generate content so valuable that readers feel they've discovered insider knowle
       try {
         result = await response.json();
       } catch (jsonError) {
+        console.error('❌ Failed to parse Netlify function response:', jsonError);
         throw new Error(`OpenAI API call failed: ${response.status} - Unable to parse response`);
       }
 
       if (!response.ok) {
-        const errorMessage = `OpenAI API call failed: ${response.status} - ${result.error || 'Unknown error'}`;
+        const errorMessage = `OpenAI API call failed: ${response.status} - ${result?.error || 'Unknown error'}`;
+        console.error('❌ Netlify function error:', errorMessage);
         throw new Error(errorMessage);
       }
 
