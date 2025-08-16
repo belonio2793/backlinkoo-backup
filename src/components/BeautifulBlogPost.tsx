@@ -563,7 +563,7 @@ const EnhancedStatusBadge = ({
 };
 
 // Main Component
-export function BeautifulBlogPost() {
+const BeautifulBlogPost = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -1107,6 +1107,7 @@ export function BeautifulBlogPost() {
       </div>
     </TooltipProvider>
   );
-}
+};
 
+export { BeautifulBlogPost };
 export default BeautifulBlogPost;

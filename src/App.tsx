@@ -21,6 +21,8 @@ import "@/utils/emergencyDisable"; // Load emergency disable utilities
 import { LazyBeautifulBlogPost } from "@/components/LazyComponents";
 import Index from "./pages/Index";
 
+const LazyEmergencyBlogPost = lazy(() => import("./components/EmergencyBlogPost"));
+
 const LazyBlogCommentsSystem = lazy(() => import("./pages/BlogCommentsSystem"));
 const LazyBacklinkReport = lazy(() => import("./pages/BacklinkReport"));
 const LazyRecursiveDiscoveryDashboard = lazy(() => import("./pages/RecursiveDiscoveryDashboard"));
