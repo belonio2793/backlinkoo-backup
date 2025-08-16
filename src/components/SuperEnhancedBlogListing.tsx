@@ -119,42 +119,84 @@ export function SuperEnhancedBlogListing() {
       console.log(`🔄 Loading posts with filterType: ${filterType}`);
       let blogPosts: BlogPost[] = [];
 
-      switch (filterType) {
-        case 'claimable':
-          console.log('🔍 Fetching claimable posts...');
-          blogPosts = await EnhancedBlogClaimService.getClaimablePosts(50);
-          console.log(`✅ Found ${blogPosts.length} claimable posts`);
-          break;
-        case 'claimed':
-          console.log('🔍 Fetching claimed posts...');
-          const allPosts = await blogService.getRecentBlogPosts(50);
-          blogPosts = allPosts.filter(post => post.claimed);
-          console.log(`✅ Found ${blogPosts.length} claimed posts out of ${allPosts.length} total`);
-          break;
-        case 'my-posts':
-          if (user) {
-            console.log(`🔍 Fetching posts for user: ${user.id}`);
-            blogPosts = await EnhancedBlogClaimService.getUserClaimedPosts(user.id);
-            console.log(`✅ Found ${blogPosts.length} user posts`);
-          }
-          break;
-        default:
-          console.log('🔍 Fetching recent blog posts...');
-          blogPosts = await blogService.getRecentBlogPosts(50);
-          console.log(`✅ Found ${blogPosts.length} recent posts`);
+      // Set a timeout to prevent infinite loading
+      const timeoutId = setTimeout(() => {
+        console.warn('⚠️ Loading timeout reached, setting posts to empty array');
+        setPosts([]);
+        setLoading(false);
+      }, 15000); // 15 second timeout
+
+      try {
+        switch (filterType) {
+          case 'claimable':
+            console.log('🔍 Fetching claimable posts...');
+            try {
+              blogPosts = await EnhancedBlogClaimService.getClaimablePosts(50);
+              console.log(`✅ Found ${blogPosts.length} claimable posts`);
+            } catch (claimableError: any) {
+              console.warn('⚠️ Claimable posts service failed, trying fallback:', claimableError.message);
+              const allPosts = await blogService.getRecentBlogPosts(50);
+              blogPosts = allPosts.filter(post => !post.claimed && post.is_trial_post);
+            }
+            break;
+          case 'claimed':
+            console.log('🔍 Fetching claimed posts...');
+            const allPosts = await blogService.getRecentBlogPosts(50);
+            blogPosts = allPosts.filter(post => post.claimed);
+            console.log(`✅ Found ${blogPosts.length} claimed posts out of ${allPosts.length} total`);
+            break;
+          case 'my-posts':
+            if (user) {
+              console.log(`🔍 Fetching posts for user: ${user.id}`);
+              try {
+                blogPosts = await EnhancedBlogClaimService.getUserClaimedPosts(user.id);
+                console.log(`✅ Found ${blogPosts.length} user posts`);
+              } catch (userPostsError: any) {
+                console.warn('⚠️ User posts service failed, trying fallback:', userPostsError.message);
+                const allPosts = await blogService.getRecentBlogPosts(50);
+                blogPosts = allPosts.filter(post => post.user_id === user.id);
+              }
+            }
+            break;
+          default:
+            console.log('🔍 Fetching recent blog posts...');
+            blogPosts = await blogService.getRecentBlogPosts(50);
+            console.log(`✅ Found ${blogPosts.length} recent posts`);
+        }
+
+        clearTimeout(timeoutId);
+        console.log('📝 Setting posts state...');
+        setPosts(blogPosts);
+        console.log('✅ Posts loaded successfully');
+
+      } catch (serviceError: any) {
+        clearTimeout(timeoutId);
+        console.warn('⚠️ Service error, using fallback approach:', serviceError.message);
+
+        // Fallback: try to get any posts from blogService
+        try {
+          const fallbackPosts = await blogService.getRecentBlogPosts(20);
+          setPosts(fallbackPosts);
+          console.log(`🔄 Fallback successful: ${fallbackPosts.length} posts loaded`);
+        } catch (fallbackError: any) {
+          console.error('❌ Fallback also failed:', fallbackError.message);
+          setPosts([]);
+        }
       }
 
-      console.log('📝 Setting posts state...');
-      setPosts(blogPosts);
-      console.log('✅ Posts loaded successfully');
     } catch (error: any) {
       console.error('❌ Failed to load posts:', error);
-      toast({
-        title: "Error Loading Posts",
-        description: `Failed to load blog posts: ${error.message}`,
-        variant: "destructive"
-      });
-      // Set empty array to stop loading state
+
+      // Only show error toast in development or for network errors
+      if (import.meta.env.DEV || error.message?.includes('network') || error.message?.includes('fetch')) {
+        toast({
+          title: "Loading Issue",
+          description: "Some posts may not be visible. Please try refreshing the page.",
+          variant: "destructive"
+        });
+      }
+
+      // Always set empty array to stop loading state
       setPosts([]);
     } finally {
       setLoading(false);
