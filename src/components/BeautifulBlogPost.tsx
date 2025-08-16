@@ -1338,19 +1338,12 @@ export function BeautifulBlogPost() {
               <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-gray-500 mb-8">
                 <div className="beautiful-meta flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <span className="font-medium text-sm md:text-base">
-                    {(() => {
-                      try {
-                        if (!blogPost.created_at) return 'Date unknown';
-                        const date = new Date(blogPost.created_at);
-                        if (isNaN(date.getTime())) return 'Invalid date';
-                        return format(date, 'MMMM dd, yyyy');
-                      } catch (error) {
-                        console.error('Date formatting error:', error, 'Value:', blogPost.created_at);
-                        return 'Date error';
-                      }
-                    })()}
-                  </span>
+                  <time
+                    className="font-medium text-sm md:text-base"
+                    dateTime={blogPost.created_at}
+                  >
+                    {memoizedFormattedDate}
+                  </time>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <Clock className="h-4 w-4" />
