@@ -1452,10 +1452,36 @@ export function BeautifulBlogPost() {
                           processedSuccessfully: true
                         });
 
-                        // Final safety check after processing
+                        // Final safety check with enhanced fallback
                         if (!finalContent || finalContent.trim().length === 0) {
-                          console.error('Content became empty after processing! Using fallback.');
-                          return '<div style="padding: 20px; color: #ef4444;">Content processing error. Please contact support.</div>';
+                          console.error('⚠️ Content became empty after processing! Using enhanced fallback.');
+                          // Try basic markdown processing as emergency fallback
+                          try {
+                            const emergencyContent = processBlogContent(content);
+                            if (emergencyContent && emergencyContent.trim().length > 0) {
+                              console.log('🔄 Emergency content processing succeeded');
+                              return emergencyContent;
+                            }
+                          } catch (emergencyError) {
+                            console.error('Emergency processing also failed:', emergencyError);
+                          }
+
+                          // Ultimate fallback: return sanitized raw content
+                          const sanitizedContent = content
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/\n/g, '<br>')
+                            .trim();
+
+                          return `
+                            <div style="padding: 20px; border: 2px solid #f59e0b; border-radius: 8px; background: #fef3c7;">
+                              <h3 style="color: #d97706; margin-bottom: 12px;">⚠️ Content Processing Issue</h3>
+                              <p style="color: #92400e; margin-bottom: 12px;">The content couldn't be processed properly. Showing raw content below:</p>
+                              <div style="background: white; padding: 16px; border-radius: 4px; font-family: monospace; white-space: pre-wrap;">
+                                ${sanitizedContent}
+                              </div>
+                            </div>
+                          `;
                         }
 
                         return finalContent;
@@ -1688,7 +1714,7 @@ export function BeautifulBlogPost() {
                   </div>
                   <ul className="space-y-2 text-sm">
                     <li>• This post will return to the claimable pool for 24 hours</li>
-                    <li>��� Other users will be able to claim it during this time</li>
+                    <li>���� Other users will be able to claim it during this time</li>
                     <li>• If not reclaimed, it will be automatically deleted</li>
                     <li>• You can reclaim it yourself if it's still available</li>
                   </ul>
