@@ -881,7 +881,15 @@ export function BeautifulBlogPost() {
       '<p class="beautiful-prose$1 beautiful-first-paragraph"$2>$3</p>'
     );
 
-    // Step 12: Final cleanup - remove problematic content patterns
+    // Step 12: Final cleanup - remove problematic content patterns and duplicate titles
+    if (title) {
+      const titleEscaped = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Final pass to remove any remaining title duplicates
+      formattedContent = formattedContent
+        .replace(new RegExp(`<h[1-6][^>]*>\\s*(?:<[^>]*>\\s*)*${titleEscaped}(?:\\s*<[^>]*>)*\\s*</h[1-6]>`, 'gi'), '')
+        .replace(new RegExp(`<p[^>]*>\\s*(?:<[^>]*>\\s*)*${titleEscaped}(?:\\s*<[^>]*>)*\\s*</p>`, 'gi'), '');
+    }
+
     formattedContent = formattedContent
       // Remove empty or invalid headings
       .replace(/<h[1-6][^>]*>\s*\*+\s*<\/h[1-6]>/gi, '')
