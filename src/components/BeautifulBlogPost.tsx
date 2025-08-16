@@ -792,7 +792,7 @@ export function BeautifulBlogPost() {
           <article className="w-full">
             
             {/* Article Header */}
-            <header className="text-center mb-16 relative">
+            <header className="text-center mb-16 relative max-w-4xl mx-auto px-6">
 
 
               {/* Status Badges */}
