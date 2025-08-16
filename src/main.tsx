@@ -151,6 +151,7 @@ if (import.meta.env.DEV) {
   console.log('  - fixProductHuntPost() - Fix malformed Product Hunt blog post');
   console.log('  - forceBeautifulContentStructure() - Apply beautiful styling to all blog posts');
   console.log('  - applyBeautifulContentStructure(content, title) - Format specific content');
+  console.log('  - retryBeautifulContentMigration() - Retry the one-time beautiful content migration');
   console.log('  - RobustContentProcessor - Content validation and repair utilities');
   console.log('  - DISABLE_VITE_PROTECTION=true - Disable Vite fetch protection');
 
