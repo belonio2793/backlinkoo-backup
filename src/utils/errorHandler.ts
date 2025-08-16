@@ -237,8 +237,15 @@ export class NetworkErrorHandler {
           throw error;
         }
 
-        // Log fetch errors with context but avoid recursive logging
-        console.error('Fetch error detected:', error?.message || 'Unknown error');
+        // Log fetch errors with enhanced debugging context
+        const errorMsg = error?.message || 'Unknown error';
+        const errorUrl = typeof url === 'string' ? url.substring(0, 100) : 'Unknown URL';
+        console.error('Fetch error detected:', {
+          message: errorMsg,
+          url: errorUrl,
+          type: error?.name || 'Unknown',
+          stack: error?.stack ? error.stack.substring(0, 200) + '...' : 'No stack'
+        });
 
         // Only treat as FullStory error if there's explicit evidence
         if (this.isFullStoryError(error)) {
