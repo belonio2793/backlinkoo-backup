@@ -770,24 +770,30 @@ export function BeautifulBlogPost() {
     formattedContent = formattedContent
       .replace(/<h1([^>]*)>(.*?)<\/h1>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
+        // Remove HTML tags from heading text for comparison
+        const textOnly = cleanText.replace(/<[^>]*>/g, '').trim();
         // Skip if this heading matches the blog title (remove duplicate)
-        if (title && cleanText.toLowerCase() === title.toLowerCase()) {
+        if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
         return `<h1 class="beautiful-prose text-4xl md:text-5xl font-black mb-8 leading-tight text-black"${attrs}>${cleanText}</h1>`;
       })
       .replace(/<h2([^>]*)>(.*?)<\/h2>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
+        // Remove HTML tags from heading text for comparison
+        const textOnly = cleanText.replace(/<[^>]*>/g, '').trim();
         // Skip if this heading matches the blog title (remove duplicate)
-        if (title && cleanText.toLowerCase() === title.toLowerCase()) {
+        if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
         return `<h2 class="beautiful-prose text-3xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h2>`;
       })
       .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
+        // Remove HTML tags from heading text for comparison
+        const textOnly = cleanText.replace(/<[^>]*>/g, '').trim();
         // Skip if this heading matches the blog title (remove duplicate)
-        if (title && cleanText.toLowerCase() === title.toLowerCase()) {
+        if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
         return `<h3 class="beautiful-prose text-2xl font-semibold text-black mb-4 mt-8"${attrs}>${cleanText}</h3>`;
