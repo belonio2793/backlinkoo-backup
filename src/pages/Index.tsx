@@ -343,39 +343,48 @@ const Index = () => {
             <BlogForm
               onContentGenerated={(blogPost) => {
                 setUser(user); // Refresh state
-                toast({
-                  title: "Success! 🎉",
-                  description: `Your blog post "${blogPost.title}" is now live at ${blogPost.blogUrl}`,
-                });
-                // Navigate to the specific blog post after a short delay
-                setTimeout(() => {
-                  if (blogPost.blogUrl) {
-                    try {
-                      // Check if it's already a relative path
-                      if (blogPost.blogUrl.startsWith('/')) {
-                        navigate(blogPost.blogUrl);
-                      } else {
-                        // Try to extract the path from absolute URL
-                        const blogPath = new URL(blogPost.blogUrl).pathname;
-                        navigate(blogPath);
-                      }
-                    } catch (error) {
-                      console.warn('Invalid blogUrl format:', blogPost.blogUrl, error);
-                      // Fallback to slug if URL parsing fails
-                      if (blogPost.metadata?.slug) {
-                        navigate(`/blog/${blogPost.metadata.slug}`);
-                      } else {
-                        navigate('/blog');
-                      }
-                    }
-                  } else if (blogPost.metadata?.slug) {
-                    // Fallback to slug-based navigation
-                    navigate(`/blog/${blogPost.metadata.slug}`);
+
+                // Get the full blog URL
+                let fullBlogUrl = '';
+                if (blogPost.blogUrl) {
+                  if (blogPost.blogUrl.startsWith('http')) {
+                    fullBlogUrl = blogPost.blogUrl;
+                  } else if (blogPost.blogUrl.startsWith('/')) {
+                    fullBlogUrl = `${window.location.origin}${blogPost.blogUrl}`;
                   } else {
-                    // Final fallback to general blog page
-                    navigate('/blog');
+                    fullBlogUrl = `${window.location.origin}/blog/${blogPost.blogUrl}`;
                   }
-                }, 2000);
+                } else if (blogPost.metadata?.slug) {
+                  fullBlogUrl = `${window.location.origin}/blog/${blogPost.metadata.slug}`;
+                }
+
+                // Show success notification with clickable link
+                toast({
+                  title: "🎉 Blog Post Published!",
+                  description: (
+                    <div className="space-y-2">
+                      <p className="font-medium">"{blogPost.title}" is now live!</p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">Live URL:</span>
+                        <button
+                          onClick={() => window.open(fullBlogUrl, '_blank')}
+                          className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
+                        >
+                          Click to open blog post
+                        </button>
+                      </div>
+                    </div>
+                  ),
+                  duration: 8000, // Show for 8 seconds
+                });
+
+                // Open the blog post in a new window after a short delay
+                setTimeout(() => {
+                  if (fullBlogUrl) {
+                    console.log('Opening blog post in new window:', fullBlogUrl);
+                    window.open(fullBlogUrl, '_blank');
+                  }
+                }, 1500);
               }}
             />
           </div>
