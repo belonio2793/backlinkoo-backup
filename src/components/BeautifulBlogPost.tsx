@@ -64,9 +64,24 @@ import { processBlogContent } from '@/utils/markdownProcessor';
 type BlogPost = Tables<'blog_posts'>;
 
 // Enhanced utility function to parse AI-generated text into structured JSX
-function formatContent(raw: string) {
+function formatContent(raw: string, title?: string) {
+  // Remove the title from the beginning of content if it appears there
+  let cleanedContent = raw;
+
+  if (title) {
+    const titleClean = title.replace(/^\*\*([^*]+)\*\*$/, '$1').trim();
+    const titleEscaped = titleClean.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    // Remove title from start of content (various formats)
+    cleanedContent = cleanedContent
+      .replace(new RegExp(`^\\s*\\*\\*?${titleEscaped}\\*?\\*?\\s*`, 'i'), '')
+      .replace(new RegExp(`^\\s*${titleEscaped}\\s*`, 'i'), '')
+      .replace(new RegExp(`^\\s*#{1,6}\\s*${titleEscaped}\\s*`, 'i'), '')
+      .replace(new RegExp(`^\\s*#{1,6}\\s*\\*\\*?${titleEscaped}\\*?\\*?\\s*`, 'i'), '');
+  }
+
   // Clean the content first - remove link placement syntax and fix formatting
-  let cleanedContent = raw
+  cleanedContent = cleanedContent
     .replace(/Natural Link Integration:\s*/gi, '')
     .replace(/Link Placement:\s*/gi, '')
     .replace(/Anchor Text:\s*/gi, '')
@@ -103,21 +118,35 @@ function formatContent(raw: string) {
         .replace(/^\*+(?!\*)/, '') // Remove leading single asterisks
         .trim();
 
-      // Convert **text** to bold (handle edge cases)
-      processedText = processedText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      // Convert **text** to bold and handle special patterns
+      processedText = processedText
+        // Handle "Data Point:**" and "Expert Insight:**" patterns - bold without asterisks
+        .replace(/\b(Data Point|Expert Insight):\*\*/g, '<strong>$1:</strong>')
+        // Convert standard **text** to bold
+        .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+        // Handle remaining single asterisks that might be formatting artifacts
+        .replace(/\s+\*\s*$/, '') // Remove trailing single asterisks
+        .replace(/\*+$/, ''); // Remove any remaining trailing asterisks
 
-      // Handle remaining single asterisks that might be formatting artifacts
-      processedText = processedText.replace(/\s+\*\s*$/, ''); // Remove trailing single asterisks
-
-      // Convert markdown links [text](url) to HTML links
+      // Convert markdown links [text](url) to HTML links with proper anchor text
       processedText = processedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
         // Clean up the URL and text
-        const cleanText = linkText.trim();
+        let cleanText = linkText.trim();
         let cleanUrl = url.trim();
+
+        // Fix the specific Backlinkoo link issue
+        if (cleanUrl.includes('backlinkoo.com') && cleanText.toLowerCase().includes('backlinkoo')) {
+          cleanText = 'Weebly SEO';
+        }
+
         // Fix common URL issues
         if (cleanUrl && !cleanUrl.match(/^https?:\/\//)) {
           cleanUrl = cleanUrl.startsWith('//') ? 'https:' + cleanUrl : 'https://' + cleanUrl;
         }
+
+        // Remove spaces from URLs
+        cleanUrl = cleanUrl.replace(/\s+/g, '');
+
         return `<a href="${cleanUrl}" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
       });
 
@@ -174,9 +203,21 @@ function formatContent(raw: string) {
       );
     }
 
-    // Detect inline label: value pairs (but exclude link syntax)
+    // Detect specific section headers that should be italicized, not list items
+    const italicizedSections = /^(Title Tags and Meta Descriptions|Heading Structure|Keyword Research|Content Optimization|Weebly SEO Settings|Insights from Case Studies):/i;
+    if (italicizedSections.test(line)) {
+      const processedContent = processLineContent(line);
+      return (
+        <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
+          <em dangerouslySetInnerHTML={{ __html: processedContent }} />
+        </p>
+      );
+    }
+
+    // Detect inline label: value pairs (but exclude link syntax and italicized sections)
     if (/^.+?:/.test(line) &&
-        !/^(Natural Link Integration|Link Placement|Anchor Text|URL Integration|Link Strategy|Backlink Placement|Internal Link|External Link):/i.test(line)) {
+        !/^(Natural Link Integration|Link Placement|Anchor Text|URL Integration|Link Strategy|Backlink Placement|Internal Link|External Link):/i.test(line) &&
+        !italicizedSections.test(line)) {
       const [label, ...rest] = line.split(":");
       const processedLabel = processLineContent(label.trim());
       const processedRest = processLineContent(rest.join(":").trim());
@@ -1648,7 +1689,7 @@ export function BeautifulBlogPost() {
                       console.log('⚡ Using new formatContent function for better structure');
 
                       // Use new formatContent function for better parsing
-                      const formattedContent = formatContent(content);
+                      const formattedContent = formatContent(content, blogPost.title);
 
                       const processingTime = performance.now() - processingStart;
 
