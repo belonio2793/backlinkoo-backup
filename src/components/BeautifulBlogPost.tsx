@@ -59,8 +59,7 @@ import { ExitIntentPopup } from '@/components/ExitIntentPopup';
 // import { BlogAutoAdjustmentService } from '@/services/blogAutoAdjustmentService';
 // import { BlogQualityMonitor } from '@/utils/blogQualityMonitor';
 import { EnhancedBlogCleaner } from '@/utils/enhancedBlogCleaner';
-// import { processBlogContent } from '@/utils/markdownProcessor';
-// import { RobustContentProcessor } from '@/utils/robustContentProcessor';
+import { processBlogContent } from '@/utils/markdownProcessor';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -544,7 +543,7 @@ export function BeautifulBlogPost() {
         if (result.success) {
           setBlogPost(result.post!);
           toast({
-            title: "Success! 🎉",
+            title: "Success! ��",
             description: "You've successfully claimed this post!",
           });
         } else {
@@ -780,7 +779,7 @@ export function BeautifulBlogPost() {
           htmlContent += `<li>${listContent}</li>\n`;
 
           // If next paragraph is not a list item, close </ul>
-          if (i === paragraphs.length - 1 || (!paragraphs[i+1].match(/^[•·\-\*]\s/) && !paragraphs[i+1].match(/^\*\s/) && !paragraphs[i+1].match(/^-\s/))) {
+          if (i === paragraphs.length - 1 || (!paragraphs[i+1].match(/^[•��\-\*]\s/) && !paragraphs[i+1].match(/^\*\s/) && !paragraphs[i+1].match(/^-\s/))) {
             htmlContent += '</ul>\n\n';
           }
         }
