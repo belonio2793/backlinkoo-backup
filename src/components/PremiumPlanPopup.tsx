@@ -591,7 +591,7 @@ export function PremiumPlanPopup({
       </div>
 
       {/* Payment Form */}
-      <div className="space-y-4">
+      <div className="space-y-3 sm:space-y-4">
         {/* Authenticated User Indicator */}
         {isAuthenticated && user && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-3">
