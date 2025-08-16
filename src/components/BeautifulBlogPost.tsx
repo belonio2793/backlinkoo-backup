@@ -63,6 +63,79 @@ import { processBlogContent } from '@/utils/markdownProcessor';
 
 type BlogPost = Tables<'blog_posts'>;
 
+// Utility function to parse AI-generated text into structured JSX
+function formatContent(raw: string) {
+  const lines = raw.split(/\n+/).map(l => l.trim()).filter(Boolean);
+
+  return lines.map((line, i) => {
+    // Detect section headings
+    if (/^(Section|Step|Chapter)\s*\d+/i.test(line)) {
+      return (
+        <h2 key={i} className="beautiful-prose text-3xl font-bold text-black mb-6 mt-12">
+          {line}
+        </h2>
+      );
+    }
+
+    // Detect Key Insights / Highlights
+    if (/^(Key Insights|Pro Tip|Conclusion|Summary)/i.test(line)) {
+      return (
+        <h3 key={i} className="beautiful-prose text-2xl font-semibold text-black mb-4 mt-8">
+          {line}
+        </h3>
+      );
+    }
+
+    // Detect bullet-like lines starting with dash or asterisk
+    if (/^[-*]\s+/.test(line)) {
+      const items = line
+        .split(/[-*]\s+/)
+        .filter(Boolean)
+        .map((item, idx) => (
+          <li key={idx} className="beautiful-prose relative pl-8 text-lg leading-relaxed text-gray-700 mb-2">
+            {item}
+          </li>
+        ));
+      return <ul key={i} className="beautiful-prose space-y-4 my-8">{items}</ul>;
+    }
+
+    // Detect inline label: value pairs (e.g. "Keyword Research: ...")
+    if (/^.+?:/.test(line)) {
+      const [label, ...rest] = line.split(":");
+      return (
+        <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
+          <strong className="font-bold text-gray-900">{label.trim()}:</strong> {rest.join(":").trim()}
+        </p>
+      );
+    }
+
+    // Detect links and format them nicely
+    if (/https?:\/\//.test(line)) {
+      const urlMatch = line.match(/https?:\/\/\S+/);
+      const url = urlMatch?.[0] || "#";
+      return (
+        <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
+          <a
+            href={url}
+            className="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {line}
+          </a>
+        </p>
+      );
+    }
+
+    // Default: render as paragraph
+    return (
+      <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
+        {line}
+      </p>
+    );
+  });
+}
+
 export function BeautifulBlogPost() {
   const { slug } = useParams();
   const navigate = useNavigate();
