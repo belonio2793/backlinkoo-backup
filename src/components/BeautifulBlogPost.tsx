@@ -104,6 +104,21 @@ export function BeautifulBlogPost() {
     }
   }, [slug]);
 
+  // Add testing utilities to window for debugging
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      (window as any).testBlogProcessor = () => BlogProcessorTester.runAllTests();
+      (window as any).testCurrentBlogPost = () => {
+        if (blogPost?.content) {
+          BlogProcessorTester.testCustomContent(blogPost.content, blogPost.title);
+        } else {
+          console.log('No blog post loaded to test');
+        }
+      };
+      (window as any).RobustBlogProcessor = RobustBlogProcessor;
+    }
+  }, [blogPost]);
+
   useEffect(() => {
     if (user) {
       processClaimIntent();
