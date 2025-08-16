@@ -45,7 +45,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { usePremiumSEOScore } from '@/hooks/usePremiumSEOScore';
 import { blogService } from '@/services/blogService';
-import { RobustBlogProcessor } from '@/utils/robustBlogProcessor';
 import { BlogProcessorTester } from '@/utils/testBlogProcessor';
 import BlogErrorBoundary from '@/components/BlogErrorBoundary';
 import { format } from 'date-fns';
