@@ -314,24 +314,6 @@ export class RealTimeFeedService {
     });
   }
 
-  /**
-   * Emit campaign created event
-   */
-  emitCampaignCreated(campaignId: string, campaignName: string, keyword: string, targetUrl: string, userId?: string): void {
-    this.emit({
-      type: 'campaign_created',
-      level: 'success',
-      message: `New campaign created: "${keyword}"`,
-      campaignId,
-      campaignName,
-      userId,
-      details: {
-        keyword,
-        targetUrl,
-        action: 'create'
-      }
-    });
-  }
 
   /**
    * Emit campaign deleted event
