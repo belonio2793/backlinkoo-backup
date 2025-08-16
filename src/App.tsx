@@ -265,6 +265,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/test/blog-generation"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyBlogGenerationTest />
+                </Suspense>
+              }
+            />
 
             {/* 404 Catch-all route */}
             <Route
