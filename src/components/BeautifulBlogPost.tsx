@@ -44,6 +44,7 @@ import BlogErrorBoundary from '@/components/BlogErrorBoundary';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { usePremiumSEOScore } from '@/hooks/usePremiumSEOScore';
 import { maskEmail } from '@/utils/emailMasker';
+import { EnhancedBlogCleaner } from '@/utils/enhancedBlogCleaner';
 
 // Styles
 import '../styles/beautiful-blog.css';
