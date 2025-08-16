@@ -80,15 +80,15 @@ class ResponseBodyManager {
       const original = originalMethods[method];
       Response.prototype[method] = function(this: ResponseWithTracking) {
         const tracking = ResponseBodyManager.getInstance().responseMap.get(this) || { consumed: false, cloneCount: 0 };
-        
+
         if (tracking.consumed) {
           console.warn(`Response body already consumed for ${method}(), returning empty result`);
-          return this.getEmptyResult(method);
+          return ResponseBodyManager.getInstance().getEmptyResult(method);
         }
 
         tracking.consumed = true;
         ResponseBodyManager.getInstance().responseMap.set(this, tracking);
-        
+
         return original.call(this);
       };
     });
