@@ -787,13 +787,13 @@ export function BeautifulBlogPost() {
       </div>
 
       {/* Hero Section */}
-      <div className="beautiful-blog-hero relative overflow-hidden">
+      <div className="beautiful-blog-hero relative overflow-hidden pt-8">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-600/5 via-purple-600/5 to-pink-600/5" />
         <div className="w-full">
           <article className="w-full">
-            
+
             {/* Article Header */}
-            <header className="text-center mb-16 relative max-w-4xl mx-auto px-6">
+            <header className="text-center mb-16 relative max-w-4xl mx-auto px-6 pt-12">
 
 
               {/* Status Badges */}
@@ -1079,40 +1079,52 @@ export function BeautifulBlogPost() {
                         }
 
                         // Process content with robust processor - DISABLE title removal to prevent content loss
-                        // Auto-adjust content using our advanced auto-adjustment system
-                        const qualityMetrics = BlogQualityMonitor.analyzeContent(content, blogPost.target_url);
-                        const adjustedContent = BlogAutoAdjustmentService.adjustContentForDisplay(content, {
-                          title: blogPost.title,
-                          target_url: blogPost.target_url,
-                          anchor_text: blogPost.anchor_text
-                        });
-                        const result = {
-                          content: adjustedContent,
-                          wasProcessed: adjustedContent !== content,
-                          issues: qualityMetrics.issues,
-                          warnings: qualityMetrics.warnings
-                        };
+                        // SECURITY FIRST: Use the secure HTML processor
+                        const secureHtmlResult = BlogContentSecurityProcessor.createSecureHTML(content, blogPost.title);
+
+                        // Log security results
+                        if (secureHtmlResult.securityInfo.securityIssues.length > 0) {
+                          console.warn('🔒 Security processing applied:', {
+                            riskLevel: secureHtmlResult.securityInfo.riskLevel,
+                            issues: secureHtmlResult.securityInfo.securityIssues,
+                            fixes: secureHtmlResult.securityInfo.fixes
+                          });
+                        }
+
+                        // Apply additional quality processing if needed
+                        let finalContent = secureHtmlResult.__html;
+                        const qualityMetrics = BlogQualityMonitor.analyzeContent(finalContent, blogPost.target_url);
+
+                        if (qualityMetrics.qualityScore < 70 || qualityMetrics.hasMalformedPatterns) {
+                          finalContent = BlogAutoAdjustmentService.adjustContentForDisplay(finalContent, {
+                            title: blogPost.title,
+                            target_url: blogPost.target_url,
+                            anchor_text: blogPost.anchor_text
+                          });
+                        }
+                        // Variables are already defined above as finalContent and securityInfo
 
                         // Log processing results for debugging
                         console.log('���� Blog content processing result:', {
-                          wasProcessed: result.wasProcessed,
+                          securityProcessed: secureHtmlResult.securityInfo.wasProcessed,
+                          securityRisk: secureHtmlResult.securityInfo.riskLevel,
+                          qualityScore: qualityMetrics.qualityScore,
                           originalLength: content.length,
-                          processedLength: result.content.length,
-                          issues: result.issues,
-                          warnings: result.warnings
+                          finalLength: finalContent.length,
+                          securityIssues: secureHtmlResult.securityInfo.securityIssues
                         });
 
-                        if (result.warnings.length > 0) {
-                          console.warn('⚠️ Blog content warnings:', result.warnings);
+                        if (secureHtmlResult.securityInfo.securityIssues.length > 0) {
+                          console.warn('Security issues detected:', secureHtmlResult.securityInfo.securityIssues);
                         }
 
                         // Final safety check after processing
-                        if (!result.content || result.content.trim().length === 0) {
-                          console.error('❌ Content became empty after processing! Using original.');
-                          return content; // Return original unprocessed content
+                        if (!finalContent || finalContent.trim().length === 0) {
+                          console.error('Content became empty after processing! Using fallback.');
+                          return '<div style="padding: 20px; color: #ef4444;">Content processing error. Please contact support.</div>';
                         }
 
-                        return result.content;
+                        return finalContent;
                       } catch (formatError) {
                         console.error('💥 Content processing failed:', formatError);
                         // Return cleaned raw content as emergency fallback
@@ -1342,7 +1354,7 @@ export function BeautifulBlogPost() {
                   </div>
                   <ul className="space-y-2 text-sm">
                     <li>• This post will return to the claimable pool for 24 hours</li>
-                    <li>• Other users will be able to claim it during this time</li>
+                    <li>��� Other users will be able to claim it during this time</li>
                     <li>• If not reclaimed, it will be automatically deleted</li>
                     <li>• You can reclaim it yourself if it's still available</li>
                   </ul>

@@ -10,6 +10,7 @@ import { RobustContentProcessor } from '@/utils/robustContentProcessor';
 import { BlogQualityMonitor } from '@/utils/blogQualityMonitor';
 import { SimpleContentFormatter } from '@/utils/simpleContentFormatter';
 import { LinkAttributeFixer } from '@/utils/linkAttributeFixer';
+import { BlogContentSecurityProcessor } from '@/utils/blogContentSecurityProcessor';
 import { BlogService } from './blogService';
 import type { BlogPost } from './blogService';
 
@@ -42,7 +43,7 @@ export class BlogAutoAdjustmentService {
    * Auto-detect and fix malformed content in a single blog post
    */
   static async autoAdjustBlogPost(
-    blogPost: BlogPost, 
+    blogPost: BlogPost,
     options: {
       forceAdjustment?: boolean;
       preserveOriginal?: boolean;
@@ -50,13 +51,31 @@ export class BlogAutoAdjustmentService {
     } = {}
   ): Promise<AdjustmentResult> {
     const { forceAdjustment = false, preserveOriginal = true, updateDatabase = true } = options;
-    
+
     console.log(`🔍 Auto-adjusting blog post: ${blogPost.slug}`);
-    
+
     const originalContent = blogPost.content || '';
     let adjustedContent = originalContent;
     const adjustments: string[] = [];
     const issues: string[] = [];
+
+    // SECURITY FIRST: Apply security processing before any other adjustments
+    const securityResult = BlogContentSecurityProcessor.processContent(originalContent, blogPost.title);
+    if (securityResult.riskLevel === 'critical' || securityResult.riskLevel === 'high') {
+      adjustedContent = securityResult.content;
+      issues.push(...securityResult.securityIssues);
+      adjustments.push(...securityResult.fixes);
+      adjustments.push(`Applied security processing (${securityResult.riskLevel} risk level)`);
+
+      console.warn('🔒 Security issues detected and fixed:', {
+        riskLevel: securityResult.riskLevel,
+        issues: securityResult.securityIssues,
+        fixes: securityResult.fixes
+      });
+    } else if (securityResult.wasProcessed) {
+      adjustedContent = securityResult.content;
+      adjustments.push('Applied preventive security measures');
+    }
 
     // Step 1: Initial quality assessment
     const initialMetrics = BlogQualityMonitor.analyzeContent(originalContent, blogPost.target_url);
@@ -403,6 +422,18 @@ Recommendation: ${needsAdjustment.length > 0 ?
     if (!content) return '';
 
     try {
+      // SECURITY FIRST: Always perform security check
+      const securityCheck = BlogContentSecurityProcessor.quickSecurityCheck(content);
+      if (!securityCheck.isSafe || securityCheck.riskLevel === 'high' || securityCheck.riskLevel === 'critical') {
+        console.warn('🔒 Security risk detected in display content, applying full security processing:', {
+          riskLevel: securityCheck.riskLevel,
+          issues: securityCheck.issues
+        });
+
+        const securityResult = BlogContentSecurityProcessor.processContent(content, post?.title);
+        content = securityResult.content;
+      }
+
       // Quick quality check
       const metrics = BlogQualityMonitor.analyzeContent(content, post?.target_url);
 
