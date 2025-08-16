@@ -311,6 +311,45 @@ const generateContextualContent = (request) => {
   return sections.join('');
 };
 
+// Validate and repair content to prevent malformed HTML
+const validateAndRepairContent = (content, request) => {
+  const { primaryKeyword, targetUrl, anchorText } = request;
+
+  // Check for common malformation patterns
+  const issues = [];
+
+  if (content.includes('</strong> //')) {
+    issues.push('Broken URL in strong tag');
+    content = content.replace(/href="([^"]*)<\/strong>\s*([^"]*)">/, 'href="$1$2">');
+  }
+
+  if (content.match(/<strong><strong>/g)) {
+    issues.push('Nested strong tags');
+    content = content.replace(/<strong><strong>/g, '<strong>');
+    content = content.replace(/<\/strong><\/strong>/g, '</strong>');
+  }
+
+  if (content.match(/<\/strong>\s*<strong>/g)) {
+    issues.push('Adjacent strong tags');
+    content = content.replace(/<\/strong>\s*<strong>/g, ' ');
+  }
+
+  // Ensure proper heading structure
+  if (!content.includes('<h1>') && !content.includes('<h2>')) {
+    // Convert first strong element to h1 if it looks like a title
+    content = content.replace(/^<strong>([^<]*?):<\/strong>/, '<h1>$1</h1>');
+  }
+
+  // Fix broken URLs
+  content = content.replace(/href="https:\s*\/\/([^"]*)">/, 'href="https://$1">');
+
+  if (issues.length > 0) {
+    console.log('🔧 Content validation found and fixed issues:', issues);
+  }
+
+  return content;
+};
+
 // Fallback content generation when both AI and template fail
 const generateFallbackContent = (request) => {
   const { primaryKeyword, targetUrl, anchorText } = request;
@@ -578,14 +617,17 @@ exports.handler = async (event, context) => {
       // Ensure hyperlink is present in AI content
       if (!content.includes(targetUrl)) {
         console.log('⚠️ AI content missing target URL, adding hyperlink...');
-        const anchorText = anchorText || primaryKeyword;
-        const hyperlink = `<a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchorText}</a>`;
+        const anchor = anchorText || primaryKeyword;
+        const hyperlink = `<a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a>`;
         // Insert hyperlink in a natural way
         content = content.replace(
           new RegExp(`\\b${primaryKeyword}\\b`, 'i'),
           hyperlink
         );
       }
+
+      // Validate and repair content structure
+      content = validateAndRepairContent(content, { primaryKeyword, targetUrl, anchorText });
 
       // Generate enhanced SEO metadata for AI content
       seoMeta = generateEnhancedSEOMetadata(request, aiResult.content);
