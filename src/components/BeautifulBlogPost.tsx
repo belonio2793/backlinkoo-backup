@@ -4,6 +4,7 @@ import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { blogService } from '@/services/blogService';
+import { enhancedBlogContentGenerator } from '@/services/enhancedBlogContentGenerator';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -28,7 +29,7 @@ import {
   ArrowLeft, Share2, Copy, Calendar, Clock, Eye, Bookmark, Heart,
   Crown, Trash2, CheckCircle2, Timer, User, AlertTriangle,
   ExternalLink, Sparkles, Target, TrendingUp, Zap, Globe,
-  ShieldCheck, XCircle, MessageCircle
+  ShieldCheck, XCircle, MessageCircle, RefreshCw, Wand2
 } from 'lucide-react';
 
 // Other Components
@@ -42,7 +43,6 @@ import BlogErrorBoundary from '@/components/BlogErrorBoundary';
 // Services
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { usePremiumSEOScore } from '@/hooks/usePremiumSEOScore';
-import { EnhancedBlogCleaner } from '@/utils/enhancedBlogCleaner';
 import { maskEmail } from '@/utils/emailMasker';
 
 // Styles
@@ -50,308 +50,367 @@ import '../styles/beautiful-blog.css';
 
 type BlogPost = Tables<'blog_posts'>;
 
-interface ContentProcessorProps {
+interface EnhancedContentProcessorProps {
   content: string;
   title: string;
   targetKeyword?: string;
   anchorText?: string;
   targetUrl?: string;
+  onRegenerateContent?: () => void;
 }
 
-// Modern Content Processor with proper link handling
-const ContentProcessor = ({ 
+// Enhanced Content Processor with smart link handling and regeneration capabilities
+const EnhancedContentProcessor = ({ 
   content, 
   title, 
   targetKeyword, 
   anchorText, 
-  targetUrl 
-}: ContentProcessorProps) => {
+  targetUrl,
+  onRegenerateContent
+}: EnhancedContentProcessorProps) => {
 
-  // Function to improve sentence structure and break up run-on sentences
-  const improveSentenceStructure = useCallback((text: string): string[] => {
-    if (!text || text.trim().length === 0) return [];
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
-    // Clean up the text first
-    let cleanText = text
-      .replace(/\s+/g, ' ') // Normalize whitespace
-      .trim();
-
-    // Split on major sentence delimiters while preserving them
-    const sentences = cleanText.split(/([.!?]+\s+)/).filter(Boolean);
-
-    // Reconstruct sentences and group them intelligently
-    const reconstructedSentences: string[] = [];
-    let currentSentence = '';
-
-    for (let i = 0; i < sentences.length; i += 2) {
-      const sentenceText = sentences[i] || '';
-      const delimiter = sentences[i + 1] || '';
-
-      const fullSentence = sentenceText + delimiter;
-
-      // If current sentence is getting too long (>200 chars), start a new paragraph
-      if (currentSentence.length > 0 && (currentSentence.length + fullSentence.length) > 200) {
-        reconstructedSentences.push(currentSentence.trim());
-        currentSentence = fullSentence;
-      } else {
-        currentSentence += fullSentence;
-      }
-
-      // If we've accumulated 2-3 sentences or reached a natural break, end the paragraph
-      const sentenceCount = (currentSentence.match(/[.!?]/g) || []).length;
-      if (sentenceCount >= 3 ||
-          (sentenceCount >= 2 && currentSentence.length > 150) ||
-          fullSentence.includes(':') || // Break after colons (often introduce new concepts)
-          /\b(However|Moreover|Furthermore|In addition|Therefore|Consequently|For example|For instance)\b/i.test(fullSentence)) {
-
-        if (currentSentence.trim().length > 0) {
-          reconstructedSentences.push(currentSentence.trim());
-          currentSentence = '';
-        }
-      }
-    }
-
-    // Add any remaining content
-    if (currentSentence.trim().length > 0) {
-      reconstructedSentences.push(currentSentence.trim());
-    }
-
-    // Post-process to handle special cases
-    return reconstructedSentences
-      .map(paragraph => {
-        // Break up extremely long paragraphs (>400 chars) at logical points
-        if (paragraph.length > 400) {
-          // Try to split at transitional phrases or after examples
-          const breakPoints = [
-            /(\. )(However|Moreover|Furthermore|In addition|Additionally|Meanwhile|Therefore|Consequently)/g,
-            /(\. )(For example|For instance|In fact|Indeed|Specifically)/g,
-            /(\. )(This|These|Such|That approach|This method|This technique)/g
-          ];
-
-          for (const breakPoint of breakPoints) {
-            if (breakPoint.test(paragraph)) {
-              return paragraph.split(breakPoint).filter(Boolean);
-            }
-          }
-
-          // If no logical break point, split roughly in the middle at a sentence boundary
-          const midPoint = Math.floor(paragraph.length / 2);
-          const nearestSentenceEnd = paragraph.indexOf('. ', midPoint);
-          if (nearestSentenceEnd > midPoint && nearestSentenceEnd < paragraph.length - 50) {
-            return [
-              paragraph.substring(0, nearestSentenceEnd + 1).trim(),
-              paragraph.substring(nearestSentenceEnd + 2).trim()
-            ];
-          }
-        }
-
-        return paragraph;
-      })
-      .flat()
-      .filter(p => p.trim().length > 0);
-  }, []);
-
+  // Enhanced content processing with better structure and formatting
   const processContent = useCallback((rawContent: string) => {
-    if (!rawContent) return [];
+    if (!rawContent || rawContent.trim().length === 0) {
+      return [
+        <div key="empty-content" className="text-center py-12">
+          <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Content Not Available</h3>
+          <p className="text-gray-600 mb-6">This blog post appears to have empty content.</p>
+          {onRegenerateContent && (
+            <Button 
+              onClick={() => handleContentRegeneration()}
+              disabled={isRegenerating}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              {isRegenerating ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Regenerating...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="h-4 w-4 mr-2" />
+                  Regenerate Content
+                </>
+              )}
+            </Button>
+          )}
+        </div>
+      ];
+    }
 
     // Clean and normalize content
     let cleanContent = rawContent
+      // Remove metadata prefixes
       .replace(/Natural Link Integration:\s*/gi, '')
       .replace(/Link Placement:\s*/gi, '')
       .replace(/Anchor Text:\s*/gi, '')
       .replace(/URL Integration:\s*/gi, '')
       .replace(/Link Strategy:\s*/gi, '')
       .replace(/Backlink Placement:\s*/gi, '')
-      .replace(/^\s*\*+\s*$|^\s*#+\s*$/gm, '') // Remove markdown artifacts
+      // Remove markdown artifacts
+      .replace(/^\s*\*+\s*$|^\s*#+\s*$/gm, '')
+      // Normalize line breaks
       .replace(/\n{3,}/g, '\n\n')
       .trim();
 
-    // Enhanced title removal - remove duplicate titles anywhere in content
+    // Enhanced title removal - prevent title duplication
     if (title) {
       const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      
+      // Remove various forms of title duplication
+      const titlePatterns = [
+        new RegExp(`^\\s*${escapedTitle}\\s*`, 'i'),           // At start
+        new RegExp(`^\\s*${escapedTitle}\\s*$`, 'gim'),       // As standalone line
+        new RegExp(`\\*\\*\\s*${escapedTitle}\\s*\\*\\*`, 'gi'), // Bold markdown
+        new RegExp(`^#+\\s*${escapedTitle}\\s*$`, 'gim'),     // As heading
+        new RegExp(`<h[1-6][^>]*>\\s*${escapedTitle}\\s*<\\/h[1-6]>`, 'gi'), // HTML headings
+      ];
 
-      // Remove title at the beginning of content
-      const titleAtStartPattern = new RegExp(`^\\s*${escapedTitle}\\s*`, 'i');
-      cleanContent = cleanContent.replace(titleAtStartPattern, '');
-
-      // Remove title as a standalone line anywhere in content
-      const titleStandalonePattern = new RegExp(`^\\s*${escapedTitle}\\s*$`, 'gim');
-      cleanContent = cleanContent.replace(titleStandalonePattern, '');
-
-      // Remove title wrapped in bold markdown (**title**)
-      const titleBoldPattern = new RegExp(`\\*\\*\\s*${escapedTitle}\\s*\\*\\*`, 'gi');
-      cleanContent = cleanContent.replace(titleBoldPattern, '');
-
-      // Remove title as a heading (# title)
-      const titleHeadingPattern = new RegExp(`^#+\\s*${escapedTitle}\\s*$`, 'gim');
-      cleanContent = cleanContent.replace(titleHeadingPattern, '');
-
-      // Remove title if it appears as the first strong element in a paragraph
-      const titleFirstStrongPattern = new RegExp(`^\\s*${escapedTitle}\\s*`, 'i');
-      cleanContent = cleanContent.replace(titleFirstStrongPattern, '');
+      titlePatterns.forEach(pattern => {
+        cleanContent = cleanContent.replace(pattern, '');
+      });
     }
 
-    // Clean up any remaining empty lines or whitespace
+    // Final cleanup
     cleanContent = cleanContent
-      .replace(/\n\s*\n\s*\n/g, '\n\n') // Remove multiple empty lines
-      .replace(/^\s+|\s+$/g, '') // Trim whitespace
+      .replace(/\n\s*\n\s*\n/g, '\n\n')
+      .replace(/^\s+|\s+$/g, '')
       .trim();
 
-    // Split into lines first to better detect lists
-    const lines = cleanContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    // Process content into structured elements
+    return parseContentIntoElements(cleanContent);
+  }, [title, targetKeyword, anchorText, targetUrl, onRegenerateContent, isRegenerating]);
+
+  // Parse content into well-structured React elements
+  const parseContentIntoElements = useCallback((content: string) => {
+    const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     const elements: React.ReactNode[] = [];
-    let i = 0;
+    let currentIndex = 0;
 
-    while (i < lines.length) {
-      const line = lines[i];
+    while (currentIndex < lines.length) {
+      const line = lines[currentIndex];
 
-      // Detect numbered lists (1. 2. 3. etc.)
+      // Handle numbered lists
       if (/^\d+\.\s/.test(line)) {
-        const listItems: string[] = [];
-        let j = i;
-
-        // Collect all consecutive numbered list items
-        while (j < lines.length && /^\d+\.\s/.test(lines[j])) {
-          listItems.push(lines[j].replace(/^\d+\.\s/, '').trim());
-          j++;
-        }
-
-        elements.push(
-          <ol key={`numbered-list-${i}`} className="mb-10 ml-8 space-y-4 list-decimal list-outside">
-            {listItems.map((item, idx) => {
-              const processedContent = processTextContent(item, idx + i);
-              // Only render list item if content is not null
-              return processedContent !== null ? (
-                <li key={idx} className="text-lg leading-7 text-gray-700 pl-4 font-normal" style={{ textAlign: 'justify', letterSpacing: '0.005em' }}>
-                  {processedContent}
-                </li>
-              ) : null;
-            }).filter(Boolean)}
-          </ol>
-        );
-
-        i = j;
+        const listItems = extractConsecutiveItems(lines, currentIndex, /^\d+\.\s/);
+        elements.push(createNumberedList(listItems.items, currentIndex));
+        currentIndex = listItems.nextIndex;
         continue;
       }
 
-      // Detect bullet point lists (- • * etc.)
+      // Handle bullet point lists
       if (/^[-•*]\s/.test(line)) {
-        const listItems: string[] = [];
-        let j = i;
-
-        // Collect all consecutive bullet point items
-        while (j < lines.length && /^[-•*]\s/.test(lines[j])) {
-          listItems.push(lines[j].replace(/^[-•*]\s/, '').trim());
-          j++;
-        }
-
-        elements.push(
-          <ul key={`bullet-list-${i}`} className="mb-10 ml-8 space-y-4 list-disc list-outside">
-            {listItems.map((item, idx) => {
-              const processedContent = processTextContent(item, idx + i);
-              // Only render list item if content is not null
-              return processedContent !== null ? (
-                <li key={idx} className="text-lg leading-7 text-gray-700 pl-4 font-normal" style={{ textAlign: 'justify', letterSpacing: '0.005em' }}>
-                  {processedContent}
-                </li>
-              ) : null;
-            }).filter(Boolean)}
-          </ul>
-        );
-
-        i = j;
+        const listItems = extractConsecutiveItems(lines, currentIndex, /^[-•*]\s/);
+        elements.push(createBulletList(listItems.items, currentIndex));
+        currentIndex = listItems.nextIndex;
         continue;
       }
 
-      // Detect multi-line content blocks (collect until empty line or list)
-      const paragraphLines: string[] = [];
-      let j = i;
-
-      while (j < lines.length &&
-             !/^\d+\.\s/.test(lines[j]) &&
-             !/^[-•*]\s/.test(lines[j]) &&
-             lines[j].trim() !== '') {
-        paragraphLines.push(lines[j]);
-        j++;
-
-        // If we hit an empty line, break (but include it as paragraph end)
-        if (j < lines.length && lines[j].trim() === '') {
-          j++; // Skip the empty line
-          break;
-        }
+      // Handle headings (HTML or Markdown)
+      if (/^<h[1-6]/.test(line) || /^#{1,6}\s/.test(line)) {
+        elements.push(createHeading(line, currentIndex));
+        currentIndex++;
+        continue;
       }
 
-      if (paragraphLines.length > 0) {
-        const paragraphContent = paragraphLines.join(' ');
-        const improvedParagraphs = improveSentenceStructure(paragraphContent);
-
-        improvedParagraphs.forEach((paragraph, idx) => {
-          const processedContent = processTextContent(paragraph, i + idx);
-          // Only render if content is not null (not filtered out)
-          if (processedContent !== null) {
-            elements.push(
-              <div
-                key={`paragraph-${i}-${idx}`}
-                className="beautiful-prose-paragraph max-w-none break-words"
-              >
-                {processedContent}
-              </div>
-            );
-          }
-        });
+      // Handle regular paragraphs (collect multiple lines)
+      const paragraphLines = collectParagraphLines(lines, currentIndex);
+      if (paragraphLines.lines.length > 0) {
+        elements.push(createParagraph(paragraphLines.lines.join(' '), paragraphLines.nextIndex));
+        currentIndex = paragraphLines.nextIndex;
+        continue;
       }
 
-      i = j;
+      currentIndex++;
     }
 
-    return elements;
-  }, [title, targetKeyword, anchorText, targetUrl]);
+    return elements.length > 0 ? elements : [
+      <div key="no-content" className="text-center py-8 text-gray-500">
+        <p>No content could be processed for display.</p>
+      </div>
+    ];
+  }, []);
 
-  // Helper function to process text content (links, bold, italic, etc.)
-  const processTextContent = useCallback((text: string, index: number) => {
-    // Filter out duplicate title if it appears in text content
-    if (title) {
-      const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const titlePattern = new RegExp(`^\\s*${escapedTitle}\\s*$`, 'i');
-      if (titlePattern.test(text.trim())) {
-        return null; // Return null to filter out this text entirely
+  // Extract consecutive list items
+  const extractConsecutiveItems = (lines: string[], startIndex: number, pattern: RegExp) => {
+    const items: string[] = [];
+    let currentIndex = startIndex;
+
+    while (currentIndex < lines.length && pattern.test(lines[currentIndex])) {
+      const cleanItem = lines[currentIndex].replace(pattern, '').trim();
+      if (cleanItem.length > 0) {
+        items.push(cleanItem);
+      }
+      currentIndex++;
+    }
+
+    return { items, nextIndex: currentIndex };
+  };
+
+  // Collect paragraph lines until list or heading
+  const collectParagraphLines = (lines: string[], startIndex: number) => {
+    const paragraphLines: string[] = [];
+    let currentIndex = startIndex;
+
+    while (currentIndex < lines.length &&
+           !/^\d+\.\s/.test(lines[currentIndex]) &&
+           !/^[-•*]\s/.test(lines[currentIndex]) &&
+           !/^<h[1-6]/.test(lines[currentIndex]) &&
+           !/^#{1,6}\s/.test(lines[currentIndex])) {
+      
+      if (lines[currentIndex].trim().length > 0) {
+        paragraphLines.push(lines[currentIndex]);
+      }
+      currentIndex++;
+
+      // Break on empty line (paragraph boundary)
+      if (currentIndex < lines.length && lines[currentIndex].trim() === '') {
+        currentIndex++; // Skip the empty line
+        break;
       }
     }
 
-    // Process markdown links first
-    let processedText = text.replace(
+    return { lines: paragraphLines, nextIndex: currentIndex };
+  };
+
+  // Create numbered list element
+  const createNumberedList = (items: string[], index: number) => (
+    <ol key={`numbered-list-${index}`} className="mb-8 ml-6 space-y-3 list-decimal list-outside">
+      {items.map((item, idx) => (
+        <li key={idx} className="text-lg leading-7 text-gray-700 pl-3 font-normal">
+          {processTextContent(item, `${index}-${idx}`)}
+        </li>
+      ))}
+    </ol>
+  );
+
+  // Create bullet list element
+  const createBulletList = (items: string[], index: number) => (
+    <ul key={`bullet-list-${index}`} className="mb-8 ml-6 space-y-3 list-disc list-outside">
+      {items.map((item, idx) => (
+        <li key={idx} className="text-lg leading-7 text-gray-700 pl-3 font-normal">
+          {processTextContent(item, `${index}-${idx}`)}
+        </li>
+      ))}
+    </ul>
+  );
+
+  // Create heading element
+  const createHeading = (line: string, index: number) => {
+    // Extract heading text and level
+    let headingText = line;
+    let level = 3; // Default to h3
+
+    if (line.startsWith('<h')) {
+      const match = line.match(/<h([1-6])[^>]*>(.*?)<\/h[1-6]>/);
+      if (match) {
+        level = parseInt(match[1]) + 1; // Shift down one level
+        headingText = match[2];
+      }
+    } else if (line.startsWith('#')) {
+      const hashes = line.match(/^#+/)?.[0].length || 1;
+      level = Math.min(hashes + 2, 6); // Shift down by 2, max h6
+      headingText = line.replace(/^#+\s*/, '');
+    }
+
+    const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
+
+    return (
+      <HeadingTag 
+        key={`heading-${index}`} 
+        className={`font-bold text-gray-900 mt-8 mb-4 tracking-tight ${
+          level === 3 ? 'text-2xl' : 
+          level === 4 ? 'text-xl' : 
+          level === 5 ? 'text-lg' : 'text-base'
+        }`}
+      >
+        {processTextContent(headingText, `heading-${index}`)}
+      </HeadingTag>
+    );
+  };
+
+  // Create paragraph element with smart text breaking
+  const createParagraph = (text: string, index: number) => {
+    // Break long paragraphs intelligently
+    const sentences = text.split(/([.!?]+\s+)/).filter(Boolean);
+    const paragraphs: string[] = [];
+    let currentParagraph = '';
+
+    for (let i = 0; i < sentences.length; i += 2) {
+      const sentence = sentences[i] || '';
+      const delimiter = sentences[i + 1] || '';
+      const fullSentence = sentence + delimiter;
+
+      if (currentParagraph.length > 0 && (currentParagraph.length + fullSentence.length) > 300) {
+        paragraphs.push(currentParagraph.trim());
+        currentParagraph = fullSentence;
+      } else {
+        currentParagraph += fullSentence;
+      }
+
+      // End paragraph after 2-3 sentences if reasonable length
+      const sentenceCount = (currentParagraph.match(/[.!?]/g) || []).length;
+      if (sentenceCount >= 3 || (sentenceCount >= 2 && currentParagraph.length > 200)) {
+        paragraphs.push(currentParagraph.trim());
+        currentParagraph = '';
+      }
+    }
+
+    if (currentParagraph.trim().length > 0) {
+      paragraphs.push(currentParagraph.trim());
+    }
+
+    return paragraphs.map((paragraph, idx) => (
+      <div
+        key={`paragraph-${index}-${idx}`}
+        className="mb-6 text-lg leading-8 text-gray-700 font-normal"
+        style={{ textAlign: 'justify', lineHeight: '1.75' }}
+      >
+        {processTextContent(paragraph, `${index}-${idx}`)}
+      </div>
+    ));
+  };
+
+  // Process text content with enhanced link handling
+  const processTextContent = useCallback((text: string, elementId: string) => {
+    let processedText = text;
+
+    // Process existing markdown links first
+    processedText = processedText.replace(
       /\[([^\]]+)\]\(([^)]+)\)/g,
       (match, linkText, url) => {
         const cleanUrl = url.trim().startsWith('http') ? url.trim() : `https://${url.trim()}`;
-        const cleanText = linkText.trim();
-
-        return `<a href="${cleanUrl}" class="text-blue-600 hover:text-blue-800 font-semibold underline decoration-2 underline-offset-4 transition-all duration-200 hover:decoration-3 hover:text-blue-700 bg-blue-50/30 hover:bg-blue-50/50 px-1 py-0.5 rounded" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
+        return `<a href="${cleanUrl}" class="inline-link text-blue-600 hover:text-blue-800 font-semibold underline decoration-2 underline-offset-2 transition-colors duration-200 bg-blue-50/30 hover:bg-blue-50/50 px-1 py-0.5 rounded" target="_blank" rel="noopener noreferrer">${linkText.trim()}</a>`;
       }
     );
 
-    // Handle special anchor text insertion for target keyword (only for middle content)
-    if (targetKeyword && anchorText && targetUrl && index % 5 === 2) { // Every 5th element around middle
+    // Smart anchor text insertion (only for specific elements to avoid over-linking)
+    if (targetKeyword && anchorText && targetUrl && shouldInsertAnchorText(elementId)) {
       const keywordRegex = new RegExp(`\\b${targetKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
       if (keywordRegex.test(processedText) && !processedText.includes(targetUrl)) {
         processedText = processedText.replace(
           keywordRegex,
-          `<a href="${targetUrl}" class="text-blue-600 hover:text-blue-800 font-semibold underline decoration-2 underline-offset-2 transition-colors duration-200" target="_blank" rel="noopener noreferrer">${anchorText}</a>`
+          `<a href="${targetUrl}" class="anchor-link text-blue-600 hover:text-blue-800 font-semibold underline decoration-2 underline-offset-2 transition-colors duration-200" target="_blank" rel="noopener noreferrer">${anchorText}</a>`
         );
       }
     }
 
-    // Handle bold text
-    processedText = processedText.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-gray-900 bg-gray-50/50 px-1 py-0.5 rounded">$1</strong>');
+    // Process bold text
+    processedText = processedText.replace(
+      /\*\*([^*]+)\*\*/g, 
+      '<strong class="font-bold text-gray-900">$1</strong>'
+    );
 
-    // Handle italic text
-    processedText = processedText.replace(/\*([^*]+)\*/g, '<em class="italic text-gray-800 font-medium">$1</em>');
+    // Process italic text
+    processedText = processedText.replace(
+      /\*([^*]+)\*/g, 
+      '<em class="italic text-gray-800 font-medium">$1</em>'
+    );
 
     return <span dangerouslySetInnerHTML={{ __html: processedText }} />;
   }, [targetKeyword, anchorText, targetUrl]);
 
+  // Determine if anchor text should be inserted in this element
+  const shouldInsertAnchorText = (elementId: string): boolean => {
+    // Insert anchor text in middle elements to appear natural
+    const numericPart = elementId.split('-').pop();
+    const elementNumber = parseInt(numericPart || '0');
+    
+    // Insert in elements that are likely in the middle of content
+    return elementNumber % 7 === 3 || elementNumber % 11 === 5;
+  };
+
+  // Handle content regeneration
+  const handleContentRegeneration = async () => {
+    if (!targetKeyword || !anchorText || !targetUrl) return;
+
+    setIsRegenerating(true);
+    try {
+      const result = await enhancedBlogContentGenerator.generateContent({
+        keyword: targetKeyword,
+        anchorText,
+        targetUrl
+      });
+
+      if (result.success && onRegenerateContent) {
+        onRegenerateContent();
+      }
+    } catch (error) {
+      console.error('Content regeneration failed:', error);
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
   return (
-    <div className="prose prose-xl prose-slate max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-p:font-light prose-a:text-blue-600 prose-a:no-underline hover:prose-a:text-blue-800 prose-strong:text-gray-900 prose-li:text-gray-700 prose-li:font-light">
-      {processContent(content)}
+    <div className="prose prose-xl prose-slate max-w-none">
+      <div className="space-y-1">
+        {processContent(content)}
+      </div>
     </div>
   );
 };
@@ -380,73 +439,15 @@ const ReadingProgress = () => {
   );
 };
 
-// Floating Action Bar Component
-const FloatingActionBar = ({ 
-  onBookmark, 
-  onLike, 
-  onShare, 
-  isBookmarked = false, 
-  isLiked = false 
-}: {
-  onBookmark: () => void;
-  onLike: () => void;
-  onShare: () => void;
-  isBookmarked?: boolean;
-  isLiked?: boolean;
-}) => (
-  <div className="hidden lg:flex fixed right-6 top-1/2 transform -translate-y-1/2 z-40 flex-col space-y-4">
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onBookmark}
-          className="w-12 h-12 rounded-full bg-white/90 border border-gray-200 shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 backdrop-blur-sm"
-        >
-          <Bookmark className={`h-5 w-5 ${isBookmarked ? 'fill-blue-600 text-blue-600' : 'text-gray-600'}`} />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent side="left">Bookmark</TooltipContent>
-    </Tooltip>
-
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onLike}
-          className="w-12 h-12 rounded-full bg-white/90 border border-gray-200 shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 backdrop-blur-sm"
-        >
-          <Heart className={`h-5 w-5 ${isLiked ? 'fill-red-500 text-red-500' : 'text-gray-600'}`} />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent side="left">Like</TooltipContent>
-    </Tooltip>
-
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onShare}
-          className="w-12 h-12 rounded-full bg-white/90 border border-gray-200 shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-300 backdrop-blur-sm"
-        >
-          <Share2 className="h-5 w-5 text-gray-600" />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent side="left">Share</TooltipContent>
-    </Tooltip>
-  </div>
-);
-
-// Status Badge Component
-const StatusBadge = ({ 
+// Enhanced Status Badge Component
+const EnhancedStatusBadge = ({ 
   blogPost, 
   user, 
   authorEmail, 
   onClaim, 
   onUnclaim, 
   onDelete,
+  onRegenerate,
   claiming = false 
 }: {
   blogPost: BlogPost;
@@ -455,6 +456,7 @@ const StatusBadge = ({
   onClaim: () => void;
   onUnclaim: () => void;
   onDelete: () => void;
+  onRegenerate: () => void;
   claiming?: boolean;
 }) => {
   const isOwnPost = blogPost.user_id === user?.id;
@@ -481,6 +483,15 @@ const StatusBadge = ({
         
         {isOwnPost && (
           <div className="flex gap-2">
+            <Button
+              onClick={onRegenerate}
+              variant="outline"
+              size="sm"
+              className="rounded-full border-blue-300 text-blue-700 hover:bg-blue-50"
+            >
+              <Wand2 className="h-4 w-4 mr-2" />
+              Regenerate
+            </Button>
             {canUnclaim && (
               <Button
                 onClick={onUnclaim}
@@ -551,75 +562,6 @@ const StatusBadge = ({
   );
 };
 
-// Keywords Section Component
-const KeywordsSection = ({ keywords }: { keywords?: string[] }) => {
-  if (!keywords?.length) return null;
-
-  return (
-    <Card className="mt-16 max-w-4xl mx-auto border-0 shadow-lg bg-gradient-to-r from-purple-50/50 via-white to-blue-50/50">
-      <CardContent className="p-10">
-        <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center justify-center gap-3">
-          <Sparkles className="h-6 w-6 text-purple-600" />
-          Keywords & Topics
-        </h3>
-        <div className="flex flex-wrap gap-4 justify-center">
-          {keywords.map((keyword, index) => (
-            <Badge
-              key={index}
-              variant="outline"
-              className="px-6 py-3 bg-white/80 border-purple-200 text-gray-700 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 rounded-full text-sm font-medium shadow-sm hover:shadow-md"
-            >
-              {keyword}
-            </Badge>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-};
-
-// Premium CTA Component
-const PremiumCTA = ({ onUpgrade }: { onUpgrade: () => void }) => (
-  <Card className="mt-12 max-w-4xl mx-auto bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
-    <CardContent className="p-8 text-center">
-      <div className="flex items-center justify-center mb-4">
-        <Crown className="h-8 w-8 text-purple-600 mr-3" />
-        <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-          Unlock Premium Features
-        </h3>
-      </div>
-      <p className="text-gray-700 mb-6 text-lg leading-relaxed">
-        Get unlimited access to premium blog content, advanced SEO tools, and exclusive features.
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="p-4 bg-white/60 rounded-lg border border-purple-100">
-          <Sparkles className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-          <h4 className="font-semibold text-gray-900 mb-1">Unlimited Content</h4>
-          <p className="text-sm text-gray-600">Access all premium blog posts</p>
-        </div>
-        <div className="p-4 bg-white/60 rounded-lg border border-purple-100">
-          <TrendingUp className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-          <h4 className="font-semibold text-gray-900 mb-1">Advanced Analytics</h4>
-          <p className="text-sm text-gray-600">Detailed performance insights</p>
-        </div>
-        <div className="p-4 bg-white/60 rounded-lg border border-purple-100">
-          <Target className="h-6 w-6 text-purple-600 mx-auto mb-2" />
-          <h4 className="font-semibold text-gray-900 mb-1">Priority Support</h4>
-          <p className="text-sm text-gray-600">24/7 expert assistance</p>
-        </div>
-      </div>
-      <Button
-        onClick={onUpgrade}
-        className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-semibold rounded-full px-8 py-4 text-lg transition-all duration-300 hover:scale-105"
-        size="lg"
-      >
-        <Crown className="h-5 w-5 mr-2" />
-        Upgrade to Premium
-      </Button>
-    </CardContent>
-  </Card>
-);
-
 // Main Component
 export function BeautifulBlogPost() {
   const { slug } = useParams();
@@ -637,14 +579,19 @@ export function BeautifulBlogPost() {
   const [showUnclaimDialog, setShowUnclaimDialog] = useState(false);
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
 
   // Computed values
   const { effectiveScore, isPremiumScore } = usePremiumSEOScore(blogPost);
   
   const cleanTitle = useMemo(() => {
-    return blogPost ? EnhancedBlogCleaner.cleanTitle(blogPost.title) : '';
+    if (!blogPost?.title) return '';
+    
+    // Enhanced title cleaning
+    return blogPost.title
+      .replace(/^h\d+[-\s]*/, '') // Remove h1-, h2-, etc. prefixes
+      .replace(/[-\s]*[a-z0-9]{8}$/, '') // Remove random suffixes
+      .replace(/\s+/g, ' ')
+      .trim();
   }, [blogPost?.title]);
 
   const readingTime = useMemo(() => {
@@ -660,7 +607,7 @@ export function BeautifulBlogPost() {
     }
   }, [blogPost?.created_at]);
 
-  // Load blog post
+  // Load blog post with enhanced error handling
   const loadBlogPost = useCallback(async (slug: string) => {
     try {
       setLoading(true);
@@ -706,7 +653,52 @@ export function BeautifulBlogPost() {
     }
   }, [slug, loadBlogPost]);
 
-  // Handlers
+  // Handle content regeneration
+  const handleContentRegeneration = async () => {
+    if (!blogPost || !blogPost.keywords?.[0] || !blogPost.anchor_text || !blogPost.target_url) {
+      toast({
+        title: "Cannot Regenerate",
+        description: "Missing required information for content regeneration",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const result = await enhancedBlogContentGenerator.generateContent({
+        keyword: blogPost.keywords[0],
+        anchorText: blogPost.anchor_text,
+        targetUrl: blogPost.target_url,
+        userId: user?.id
+      });
+
+      if (result.success) {
+        // Update the blog post with new content
+        const updatedPost = await blogService.updateBlogPost(blogPost.id, {
+          content: result.content,
+          title: result.title,
+          word_count: result.wordCount
+        });
+
+        setBlogPost(updatedPost);
+        
+        toast({
+          title: "Content Regenerated! ✨",
+          description: "The blog post has been updated with fresh content",
+        });
+      } else {
+        throw new Error(result.error || 'Content regeneration failed');
+      }
+    } catch (error: any) {
+      toast({
+        title: "Regeneration Failed",
+        description: error.message || 'Unable to regenerate content',
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Handle claim
   const handleClaim = async () => {
     if (!user) {
       setShowClaimModal(true);
@@ -868,15 +860,6 @@ export function BeautifulBlogPost() {
         
         <Header />
 
-        {/* Floating Action Bar */}
-        <FloatingActionBar
-          onBookmark={() => setIsBookmarked(!isBookmarked)}
-          onLike={() => setIsLiked(!isLiked)}
-          onShare={handleShare}
-          isBookmarked={isBookmarked}
-          isLiked={isLiked}
-        />
-
         {/* Navigation Bar */}
         <div className="sticky top-16 z-30 border-b border-gray-200/50 bg-white/80 backdrop-blur-md">
           <div className="max-w-4xl mx-auto px-6 py-4">
@@ -916,26 +899,25 @@ export function BeautifulBlogPost() {
         {/* Article Container */}
         <article className="max-w-5xl mx-auto px-6 py-16 lg:px-8">
           
-          {/* Status Badge */}
-          <StatusBadge
+          {/* Enhanced Status Badge */}
+          <EnhancedStatusBadge
             blogPost={blogPost}
             user={user}
             authorEmail={authorEmail}
             onClaim={handleClaim}
             onUnclaim={() => setShowUnclaimDialog(true)}
             onDelete={() => setShowDeleteDialog(true)}
+            onRegenerate={handleContentRegeneration}
             claiming={claiming}
           />
 
           {/* Article Header */}
           <header className="text-center mb-16">
-            {/* Main Title - Prominently displayed on its own line */}
             <div className="mb-12">
-              <h1 className="beautiful-main-title beautiful-blog-title mb-6">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6 tracking-tight">
                 {cleanTitle}
               </h1>
 
-              {/* Subtitle/Meta Description */}
               {blogPost.meta_description && (
                 <div className="max-w-3xl mx-auto">
                   <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
@@ -945,7 +927,7 @@ export function BeautifulBlogPost() {
               )}
             </div>
 
-            {/* Meta Information Bar */}
+            {/* Meta Information */}
             <div className="max-w-2xl mx-auto">
               <div className="flex flex-wrap items-center justify-center gap-8 text-gray-500 py-4 border-t border-b border-gray-200/50">
                 <div className="flex items-center gap-2 text-sm font-medium">
@@ -977,29 +959,45 @@ export function BeautifulBlogPost() {
 
           {/* Article Content */}
           <main className="mb-16">
-            <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm overflow-hidden">
+            <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm overflow-hidden">
               <div className="relative">
-                {/* Content Wrapper */}
-                <div className="px-8 md:px-12 lg:px-16 py-12 md:py-16 beautiful-blog-content">
-                  <div className="max-w-none prose prose-lg prose-slate beautiful-prose prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:text-blue-800 prose-strong:text-gray-900 prose-li:text-gray-700">
-                    <ContentProcessor
-                      content={blogPost.content || ''}
-                      title={cleanTitle}
-                      targetKeyword={blogPost.keywords?.[0]}
-                      anchorText={blogPost.anchor_text}
-                      targetUrl={blogPost.target_url}
-                    />
-                  </div>
+                <div className="px-8 md:px-12 lg:px-16 py-12 md:py-16">
+                  <EnhancedContentProcessor
+                    content={blogPost.content || ''}
+                    title={cleanTitle}
+                    targetKeyword={blogPost.keywords?.[0]}
+                    anchorText={blogPost.anchor_text}
+                    targetUrl={blogPost.target_url}
+                    onRegenerateContent={handleContentRegeneration}
+                  />
                 </div>
-
-                {/* Subtle gradient overlay for depth */}
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue-50/10 pointer-events-none" />
               </div>
             </Card>
           </main>
 
           {/* Keywords Section */}
-          <KeywordsSection keywords={blogPost.keywords} />
+          {blogPost.keywords?.length && (
+            <Card className="mt-16 max-w-4xl mx-auto border-0 shadow-lg bg-gradient-to-r from-purple-50/50 via-white to-blue-50/50">
+              <CardContent className="p-10">
+                <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center justify-center gap-3">
+                  <Sparkles className="h-6 w-6 text-purple-600" />
+                  Keywords & Topics
+                </h3>
+                <div className="flex flex-wrap gap-4 justify-center">
+                  {blogPost.keywords.map((keyword, index) => (
+                    <Badge
+                      key={index}
+                      variant="outline"
+                      className="px-6 py-3 bg-white/80 border-purple-200 text-gray-700 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 rounded-full text-sm font-medium shadow-sm hover:shadow-md"
+                    >
+                      {keyword}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Engagement Section */}
           <Card className="mt-16 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-blue-200 shadow-xl">
@@ -1016,7 +1014,7 @@ export function BeautifulBlogPost() {
                     onClick={handleShare}
                     variant="outline"
                     size="lg"
-                    className="rounded-full px-8 py-3 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400 transition-all duration-200 shadow-md hover:shadow-lg"
+                    className="rounded-full px-8 py-3 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400"
                   >
                     <Share2 className="mr-3 h-5 w-5" />
                     Share Article
@@ -1025,7 +1023,7 @@ export function BeautifulBlogPost() {
                     onClick={handleCopyLink}
                     variant="outline"
                     size="lg"
-                    className="rounded-full px-8 py-3 border-indigo-300 text-indigo-700 hover:bg-indigo-50 hover:border-indigo-400 transition-all duration-200 shadow-md hover:shadow-lg"
+                    className="rounded-full px-8 py-3 border-indigo-300 text-indigo-700 hover:bg-indigo-50 hover:border-indigo-400"
                   >
                     <Copy className="mr-3 h-5 w-5" />
                     Copy Link
@@ -1034,9 +1032,6 @@ export function BeautifulBlogPost() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Premium CTA */}
-          <PremiumCTA onUpgrade={() => setShowPaymentModal(true)} />
 
         </article>
 
