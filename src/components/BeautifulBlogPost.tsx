@@ -94,6 +94,9 @@ function formatContent(raw: string, title?: string) {
     .replace(/Blog Section:\s*/gi, '')
     .replace(/Article Part:\s*/gi, '')
     .replace(/Content Block:\s*/gi, '')
+    // Enhanced Backlinkoo link processing and redundancy removal
+    .replace(/\s*at\s*\[Backlinkoo\]\([^)]*\)/gi, '') // Remove "at [Backlinkoo](url)" redundancy
+    .replace(/\[Backlinkoo\]\(([^)]*)\)/gi, '[Weebly SEO]($1)') // Convert Backlinkoo anchor text to Weebly SEO
     // Fix malformed asterisk patterns
     .replace(/\*+$/gm, '') // Remove trailing asterisks
     .replace(/^\*+(?!\*)/gm, '') // Remove leading single asterisks that aren't part of ** bold syntax
@@ -1860,7 +1863,7 @@ export function BeautifulBlogPost() {
                   <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
                 <p className="mt-4 text-sm text-gray-500">
-                  ��� Join thousands of users already growing their online presence
+                  ✨ Join thousands of users already growing their online presence
                 </p>
               </div>
             </div>
