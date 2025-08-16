@@ -124,19 +124,26 @@ export function logError(context: string, error: any): void {
  * Creates a user-friendly error message for display
  */
 export function formatErrorForUser(error: any, context?: string): string {
-  const message = getErrorMessage(error);
+  try {
+    const message = getErrorMessage(error);
 
-  // Remove technical details that users don't need to see
-  const cleanMessage = message
-    .replace(/^Error: /, '')
-    .replace(/\n.*$/s, '') // Remove stack traces
-    .replace(/at [^(]*\([^)]*\)/g, ''); // Remove function references
+    // Remove technical details that users don't need to see
+    const cleanMessage = message
+      .replace(/^Error: /, '')
+      .replace(/\n.*$/s, '') // Remove stack traces
+      .replace(/at [^(]*\([^)]*\)/g, ''); // Remove function references
 
-  if (context) {
-    return `${context}: ${cleanMessage}`;
+    if (context) {
+      return `${context}: ${cleanMessage}`;
+    }
+
+    return cleanMessage;
+  } catch (formatError) {
+    // If there's any error in formatting (like Symbol conversion), return safe fallback
+    console.warn('Error formatting user error message:', formatError);
+    const safeContext = context ? `${context}: ` : '';
+    return `${safeContext}An error occurred (formatting failed)`;
   }
-
-  return cleanMessage;
 }
 
 /**
