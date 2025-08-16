@@ -129,7 +129,7 @@ function formatContent(raw: string, title?: string) {
         .replace(/\*+$/, ''); // Remove any remaining trailing asterisks
 
       // Convert markdown links [text](url) to HTML links with proper anchor text
-      processedText = processedText.replace(/\[([^\]]+)\]\(([^)\s]+)\s*\)/g, (match, linkText, url) => {
+      processedText = processedText.replace(/\[([^\]]+)\]\(([^)\s]*\s*[^)]*)\)/g, (match, linkText, url) => {
         // Clean up the URL and text
         let cleanText = linkText.trim();
         let cleanUrl = url.trim();
@@ -139,41 +139,53 @@ function formatContent(raw: string, title?: string) {
           cleanText = 'Weebly SEO';
         }
 
-        // Fix common URL issues - handle broken URLs like "https: //"
-        cleanUrl = cleanUrl.replace(/https?:\s+\/\//g, 'https://');
+        // Fix common URL issues - handle broken URLs like "https: //" with any amount of space
+        cleanUrl = cleanUrl.replace(/https?\s*:\s*\/\//g, 'https://');
+        cleanUrl = cleanUrl.replace(/www\s*\./g, 'www.');
+
         if (cleanUrl && !cleanUrl.match(/^https?:\/\//)) {
           cleanUrl = cleanUrl.startsWith('//') ? 'https:' + cleanUrl : 'https://' + cleanUrl;
         }
 
-        // Remove spaces from URLs
+        // Remove all spaces from URLs
         cleanUrl = cleanUrl.replace(/\s+/g, '');
 
         return `<a href="${cleanUrl}" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
       });
 
-      // Convert plain URLs to links if they're not already in markdown
-      if (!processedText.includes('<a ') && /https?:\/\/\S+/.test(processedText)) {
-        processedText = processedText.replace(/(https?:\/\/[^\s<>"']+)/g, '<a href="$1" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">$1</a>');
-      }
+      // Convert plain URLs to links automatically (improved pattern)
+      processedText = processedText.replace(/((?:https?\s*:\s*\/\/|www\s*\.)\S+)/g, (match) => {
+        // Skip if already inside a link
+        if (processedText.indexOf('<a ') !== -1 && processedText.indexOf('</a>') > processedText.indexOf('<a ')) {
+          return match;
+        }
+
+        let cleanUrl = match.replace(/https?\s*:\s*\/\//g, 'https://').replace(/www\s*\./g, 'www.').replace(/\s+/g, '');
+        if (!cleanUrl.match(/^https?:\/\//)) {
+          cleanUrl = 'https://' + cleanUrl;
+        }
+
+        return `<a href="${cleanUrl}" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">${cleanUrl}</a>`;
+      });
 
       return processedText;
     };
 
-    // Enhanced section heading detection
+    // Enhanced section heading detection - CONSISTENT FONT SIZE
     if (/^(Section|Step|Chapter|Part|Stage|Phase)\s*\d+/i.test(line) ||
         /^\d+\.\s+[A-Z]/.test(line) ||
         /^(Section|Step|Chapter|Part)\s*\d+\s*[-–—]\s*/.test(line)) {
       const processedContent = processLineContent(line);
       return (
-        <h2 key={i} className="beautiful-prose text-3xl font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
+        <h2 key={i} className="beautiful-prose text-2xl font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
       );
     }
 
-    // Enhanced Key Insights / Highlights detection
+    // Enhanced Key Insights / Highlights detection - CONSISTENT FONT SIZE
     if (/^(Key Insights|Pro Tip|Conclusion|Summary|Overview|Benefits|Important|Essential|Critical|Best Practices|Implementation)/i.test(line)) {
       const processedContent = processLineContent(line);
       return (
-        <h3 key={i} className="beautiful-prose text-2xl font-semibold text-black mb-4 mt-8" dangerouslySetInnerHTML={{ __html: processedContent }} />
+        <h3 key={i} className="beautiful-prose text-2xl font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
       );
     }
 
@@ -204,10 +216,10 @@ function formatContent(raw: string, title?: string) {
         .map((item, idx) => {
           const processedItem = processLineContent(item.trim());
           return (
-            <li key={idx} className="beautiful-prose relative pl-8 text-lg leading-relaxed text-gray-700 mb-2" dangerouslySetInnerHTML={{ __html: processedItem }} />
+            <li key={idx} className="beautiful-prose relative pl-6 text-lg leading-relaxed text-gray-700 mb-3" dangerouslySetInnerHTML={{ __html: processedItem }} />
           );
         });
-      return <ul key={i} className="beautiful-prose space-y-4 my-8">{items}</ul>;
+      return <ul key={i} className="beautiful-prose list-disc space-y-2 my-6 ml-6">{items}</ul>;
     }
 
     // Enhanced numbered list detection
@@ -1364,9 +1376,9 @@ export function BeautifulBlogPost() {
         </Button>
       </div>
 
-      {/* Navigation Bar */}
+      {/* Navigation Bar - Mid-wide range for better blog layout */}
       <div className="beautiful-nav sticky top-16 z-30 border-b border-gray-200/50 bg-white/80 backdrop-blur-md">
-        <div className="max-w-5xl mx-auto px-6 py-4">
+        <div className="max-w-4xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <Button
               variant="ghost"
@@ -1402,8 +1414,8 @@ export function BeautifulBlogPost() {
         <div className="w-full">
           <article className="w-full">
 
-            {/* Article Header */}
-            <header className="text-center mb-16 relative max-w-5xl mx-auto px-6 pt-12">
+            {/* Article Header - Mid-wide range for better readability */}
+            <header className="text-center mb-16 relative max-w-4xl mx-auto px-6 pt-12">
 
 
               {/* Status Badges */}
