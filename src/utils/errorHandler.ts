@@ -302,6 +302,32 @@ export class NetworkErrorHandler {
           throw newError;
         }
 
+        // Handle specific network error types with recovery suggestions
+        if (this.isNetworkError(error)) {
+          const errorUrl = typeof url === 'string' ? url : 'unknown';
+
+          // Mark Supabase connection as failed if it's a Supabase URL
+          if (errorUrl.includes('.supabase.co')) {
+            localStorage.setItem('supabase_connection_failed', 'true');
+            console.error('🔌 Supabase connection failed - marking for skip on future requests');
+
+            // Clear the flag after 30 seconds to allow retry
+            setTimeout(() => {
+              localStorage.removeItem('supabase_connection_failed');
+              console.log('🔄 Supabase connection flag cleared - allowing retries');
+            }, 30000);
+          }
+
+          // Provide more specific error message based on URL
+          if (errorUrl.includes('supabase')) {
+            throw new Error('Database connection failed. Please check your internet connection or try refreshing the page.');
+          } else if (errorUrl.includes('functions') || errorUrl.includes('api')) {
+            throw new Error('API service temporarily unavailable. Please try again in a moment.');
+          } else {
+            throw new Error(`Network request failed: ${error.message || 'Connection error'}`);
+          }
+        }
+
         throw error;
       }
     };
