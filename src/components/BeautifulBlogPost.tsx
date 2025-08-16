@@ -832,7 +832,7 @@ export function BeautifulBlogPost() {
           htmlContent += `<li>${listContent}</li>\n`;
 
           // If next paragraph is not a list item, close </ul>
-          if (i === paragraphs.length - 1 || (!paragraphs[i+1].match(/^[��·\-\*]\s/) && !paragraphs[i+1].match(/^\*\s/) && !paragraphs[i+1].match(/^-\s/))) {
+          if (i === paragraphs.length - 1 || (!paragraphs[i+1].match(/^[•·\-\*]\s/) && !paragraphs[i+1].match(/^\*\s/) && !paragraphs[i+1].match(/^-\s/))) {
             htmlContent += '</ul>\n\n';
           }
         }
