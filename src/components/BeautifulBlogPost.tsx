@@ -217,9 +217,9 @@ const ContentProcessor = ({
         }
 
         elements.push(
-          <ul key={`bullet-list-${i}`} className="mb-6 ml-6 space-y-2 list-disc list-outside">
+          <ul key={`bullet-list-${i}`} className="mb-10 ml-8 space-y-4 list-disc list-outside">
             {listItems.map((item, idx) => (
-              <li key={idx} className="text-lg leading-7 text-gray-700 pl-3" style={{ textAlign: 'justify' }}>
+              <li key={idx} className="text-xl leading-8 text-gray-700 pl-4 font-light" style={{ textAlign: 'justify', letterSpacing: '0.01em' }}>
                 {processTextContent(item, idx + i)}
               </li>
             ))}
