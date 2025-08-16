@@ -195,9 +195,7 @@ async function processBlogPost(post: any) {
       .from('blog_posts')
       .update({
         content: beautifulContent,
-        updated_at: new Date().toISOString(),
-        // Store original content for backup
-        original_content: originalContent
+        updated_at: new Date().toISOString()
       })
       .eq('id', post.id);
 
