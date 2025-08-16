@@ -1114,8 +1114,8 @@ export function BeautifulBlogPost() {
                           securityIssues: secureHtmlResult.securityInfo.securityIssues
                         });
 
-                        if (result.warnings.length > 0) {
-                          console.warn('⚠️ Blog content warnings:', result.warnings);
+                        if (secureHtmlResult.securityInfo.securityIssues.length > 0) {
+                          console.warn('Security issues detected:', secureHtmlResult.securityInfo.securityIssues);
                         }
 
                         // Final safety check after processing
