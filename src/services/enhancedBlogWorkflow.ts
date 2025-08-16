@@ -8,6 +8,7 @@ import { blogService, type BlogPostGenerationData } from './blogService';
 import { slugGenerationService } from './slugGenerationService';
 import { openAIOnlyContentGenerator } from './openAIOnlyContentGenerator';
 import { useAuth } from '@/hooks/useAuth';
+import { applyBeautifulContentStructure } from '@/utils/forceBeautifulContentStructure';
 
 export interface BlogCreationRequest {
   targetUrl: string;
