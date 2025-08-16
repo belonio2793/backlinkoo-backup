@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blog Content Debug Tool</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .code { background: #f5f5f5; padding: 10px; border-radius: 3px; font-family: monospace; white-space: pre-wrap; }
+        .result { margin-top: 10px; padding: 10px; border-left: 4px solid #4CAF50; background: #f9f9f9; }
+        .issue { border-left-color: #f44336; background: #fff5f5; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Blog Content Formatting Debug Tool</h1>
+    
+    <div class="test-section">
+        <h2>Current Page Analysis</h2>
+        <button onclick="analyzePage()">Analyze Current Blog Page</button>
+        <div id="page-analysis"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Content Patterns</h2>
+        <button onclick="testPatterns()">Test All Patterns</button>
+        <div id="pattern-results"></div>
+    </div>
+    
+    <script>
+        function analyzePage() {
+            const analysisDiv = document.getElementById('page-analysis');
+            
+            if (!window.parent.document.querySelector('.beautiful-blog-content')) {
+                analysisDiv.innerHTML = '<div class="result issue">No blog content found. Make sure you\'re on a blog post page.</div>';
+                return;
+            }
+            
+            const content = window.parent.document.querySelector('.beautiful-blog-content');
+            const html = content.innerHTML;
+            
+            // Analyze different elements
+            const analysis = {
+                italicElements: content.querySelectorAll('em').length,
+                bulletPoints: content.querySelectorAll('li').length,
+                boldElements: content.querySelectorAll('strong').length,
+                links: content.querySelectorAll('a').length,
+                paragraphs: content.querySelectorAll('p').length
+            };
+            
+            // Check for specific issues
+            const issues = [];
+            
+            // Check for section headers in bullets
+            content.querySelectorAll('li').forEach(li => {
+                const text = li.textContent || '';
+                if (text.match(/^(Title Tags and Meta Descriptions|Heading Structure|Keyword Research|Content Optimization|Weebly SEO Settings|Insights from Case Studies):/i)) {
+                    issues.push(`Section header in bullet: "${text.substring(0, 50)}..."`);
+                }
+            });
+            
+            // Check for visible asterisks
+            const textContent = content.textContent || '';
+            const asterisks = textContent.match(/\*+/g);
+            if (asterisks) {
+                issues.push(`Visible asterisks found: ${asterisks.length} instances`);
+            }
+            
+            // Check Backlinkoo links
+            content.querySelectorAll('a[href*="backlinkoo"]').forEach(link => {
+                const text = link.textContent || '';
+                const href = link.href;
+                if (!text.includes('Weebly SEO')) {
+                    issues.push(`Backlinkoo link has wrong text: "${text}" (should be "Weebly SEO")`);
+                }
+                if (href.includes(' ')) {
+                    issues.push(`Backlinkoo link has spaces in URL: ${href}`);
+                }
+            });
+            
+            let html_output = `
+                <div class="result">
+                    <h3>Element Count Analysis</h3>
+                    <ul>
+                        <li>Italic elements (em): ${analysis.italicElements}</li>
+                        <li>Bullet points (li): ${analysis.bulletPoints}</li>
+                        <li>Bold elements (strong): ${analysis.boldElements}</li>
+                        <li>Links (a): ${analysis.links}</li>
+                        <li>Paragraphs (p): ${analysis.paragraphs}</li>
+                    </ul>
+                </div>
+            `;
+            
+            if (issues.length > 0) {
+                html_output += `
+                    <div class="result issue">
+                        <h3>Issues Found (${issues.length})</h3>
+                        <ul>
+                            ${issues.map(issue => `<li>${issue}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            } else {
+                html_output += `
+                    <div class="result">
+                        <h3>✅ No Issues Found!</h3>
+                        <p>All formatting appears to be correct.</p>
+                    </div>
+                `;
+            }
+            
+            analysisDiv.innerHTML = html_output;
+        }
+        
+        function testPatterns() {
+            const resultsDiv = document.getElementById('pattern-results');
+            
+            const testPatterns = [
+                {
+                    name: 'Standalone Section Header',
+                    pattern: /^(Title Tags and Meta Descriptions|Heading Structure|Keyword Research|Content Optimization|Weebly SEO Settings|Insights from Case Studies):/i,
+                    input: 'Title Tags and Meta Descriptions:',
+                    expected: 'Should be italicized'
+                },
+                {
+                    name: 'Descriptive Section Content',
+                    pattern: /^(Title Tags and Meta Descriptions|Heading Structure|Keyword Research|Content Optimization|Weebly SEO Settings|Insights from Case Studies):/i,
+                    input: 'Weebly SEO Settings: Explore Weebly\'s built-in SEO settings to customize your website\'s meta tags, URLs, and more for optimal search performance.',
+                    expected: 'Should NOT be italicized (has long description)'
+                },
+                {
+                    name: 'Data Point Pattern',
+                    pattern: /\b(Data Point|Expert Insight):\*\*/g,
+                    input: 'Data Point:** According to recent studies',
+                    expected: 'Should become: <strong>Data Point:</strong> According to recent studies'
+                },
+                {
+                    name: 'Backlinkoo Link',
+                    pattern: /\[([^\]]+)\]\(([^)]+)\)/g,
+                    input: '[Backlinkoo](https: //backlinkoo.com)',
+                    expected: 'Should become: <a href="https://backlinkoo.com">Weebly SEO</a>'
+                }
+            ];
+            
+            let html_output = '';
+            
+            testPatterns.forEach(test => {
+                const matches = test.input.match(test.pattern);
+                const afterColon = test.input.split(':')[1]?.trim() || '';
+                const isStandaloneHeader = afterColon.length < 10;
+                
+                html_output += `
+                    <div class="result">
+                        <h3>${test.name}</h3>
+                        <div class="code">Input: ${test.input}</div>
+                        <p><strong>Expected:</strong> ${test.expected}</p>
+                        <p><strong>Pattern Match:</strong> ${matches ? 'Yes' : 'No'}</p>
+                        ${test.name.includes('Section') ? `<p><strong>Is Standalone Header:</strong> ${isStandaloneHeader}</p>` : ''}
+                    </div>
+                `;
+            });
+            
+            resultsDiv.innerHTML = html_output;
+        }
+        
+        // Auto-run analysis if we can detect a blog page
+        if (window.parent && window.parent.document.querySelector('.beautiful-blog-content')) {
+            setTimeout(() => {
+                console.log('🔄 Auto-running page analysis...');
+                analyzePage();
+            }, 1000);
+        }
+    </script>
+</body>
+</html>
