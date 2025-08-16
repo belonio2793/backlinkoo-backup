@@ -874,7 +874,7 @@ export function BeautifulBlogPost() {
         </div>
 
         {/* Article Container */}
-        <article className="max-w-4xl mx-auto px-6 py-12">
+        <article className="max-w-5xl mx-auto px-6 py-16 lg:px-8">
           
           {/* Status Badge */}
           <StatusBadge
