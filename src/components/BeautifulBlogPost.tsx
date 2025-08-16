@@ -65,8 +65,8 @@ type BlogPost = Tables<'blog_posts'>;
 
 // Enhanced utility function to parse AI-generated text into structured JSX
 function formatContent(raw: string) {
-  // Clean the content first - remove link placement syntax
-  const cleanedContent = raw
+  // Clean the content first - remove link placement syntax and fix formatting
+  let cleanedContent = raw
     .replace(/Natural Link Integration:\s*/gi, '')
     .replace(/Link Placement:\s*/gi, '')
     .replace(/Anchor Text:\s*/gi, '')
@@ -78,7 +78,13 @@ function formatContent(raw: string) {
     .replace(/Content Section:\s*/gi, '')
     .replace(/Blog Section:\s*/gi, '')
     .replace(/Article Part:\s*/gi, '')
-    .replace(/Content Block:\s*/gi, '');
+    .replace(/Content Block:\s*/gi, '')
+    // Fix malformed asterisk patterns
+    .replace(/\*+$/gm, '') // Remove trailing asterisks
+    .replace(/^\*+/gm, '') // Remove leading asterisks that aren't bullet points
+    // Fix broken URLs in markdown links (space in URL)
+    .replace(/\]\(([^)]*)\s+([^)]*)\)/g, ']($1$2)') // Remove spaces in URLs
+    .replace(/https:\s*\/\//g, 'https://'); // Fix broken https: // patterns
 
   const lines = cleanedContent.split(/\n+/).map(l => l.trim()).filter(Boolean);
 
