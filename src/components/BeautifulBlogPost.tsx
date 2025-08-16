@@ -1000,7 +1000,7 @@ export function BeautifulBlogPost() {
         const isLikelyHeading = para.length < 150 && (
           // Section patterns (enhanced to catch more variations)
           para.match(/^Section\s+\d+:/i) ||
-          para.match(/^Section\s+\d+\s*[-–—]\s*/i) ||
+          para.match(/^Section\s+\d+\s*[-��—]\s*/i) ||
           para.match(/^Part\s+\d+:/i) ||
           para.match(/^Chapter\s+\d+:/i) ||
           para.match(/^\d+\.\s+[A-Z]/i) ||
@@ -1086,7 +1086,7 @@ export function BeautifulBlogPost() {
         if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
-        return `<h1 class="beautiful-prose text-4xl md:text-5xl font-black mb-8 leading-tight text-black"${attrs}>${cleanText}</h1>`;
+        return `<h1 class="beautiful-prose text-2xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h1>`;
       })
       .replace(/<h2([^>]*)>(.*?)<\/h2>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
