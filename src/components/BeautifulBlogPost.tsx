@@ -247,11 +247,15 @@ const ContentProcessor = ({
 
         elements.push(
           <ul key={`bullet-list-${i}`} className="mb-10 ml-8 space-y-4 list-disc list-outside">
-            {listItems.map((item, idx) => (
-              <li key={idx} className="text-xl leading-8 text-gray-700 pl-4 font-light" style={{ textAlign: 'justify', letterSpacing: '0.01em' }}>
-                {processTextContent(item, idx + i)}
-              </li>
-            ))}
+            {listItems.map((item, idx) => {
+              const processedContent = processTextContent(item, idx + i);
+              // Only render list item if content is not null
+              return processedContent !== null ? (
+                <li key={idx} className="text-xl leading-8 text-gray-700 pl-4 font-light" style={{ textAlign: 'justify', letterSpacing: '0.01em' }}>
+                  {processedContent}
+                </li>
+              ) : null;
+            }).filter(Boolean)}
           </ul>
         );
 
