@@ -64,7 +64,8 @@ export class BlogService {
       slug: customSlug, // null triggers database slug generation
       content: beautifulContent, // Use beautifully formatted content
       target_url: data.targetUrl,
-      anchor_text: data.anchorText,
+      anchor_text: data.anchorText || data.title || 'Learn More', // Default anchor text if not provided
+      keyword: data.primaryKeyword || this.extractKeywordFromTitle(data.title), // Extract keyword from title if not provided
       // published_url will be set after database generates slug
       status: 'published',
       is_trial_post: isTrialPost,
