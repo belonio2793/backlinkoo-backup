@@ -97,38 +97,50 @@ async function createStripeSubscription(
     }
   }
 
-  // Create dynamic product and price
-  const product = await stripe.products.create({
-    name: `Premium SEO Tools - ${subscriptionData.plan.charAt(0).toUpperCase() + subscriptionData.plan.slice(1)}`,
-    description: `Access to all premium SEO tools and features - ${subscriptionData.plan} billing`,
-    metadata: {
-      plan: subscriptionData.plan,
-      features: JSON.stringify([
-        'Unlimited Backlinks',
-        'Complete SEO Academy (50+ Lessons)',
-        'Advanced Analytics & Reports',
-        'Priority 24/7 Support',
-        'White-Hat Guarantee',
-        'Custom Campaign Strategies',
-        'Professional Certifications',
-        'API Access & Integrations'
-      ])
-    }
-  });
+  // Use predefined price ID or create dynamic price as fallback
+  let priceId = planConfig.priceId;
 
-  const price = await stripe.prices.create({
-    product: product.id,
-    unit_amount: planConfig.price * 100, // Convert to cents
-    currency: 'usd',
-    recurring: {
-      interval: planConfig.interval,
-    },
-    metadata: {
-      plan: subscriptionData.plan,
-      originalPrice: planConfig.originalPrice.toString(),
-      discount: planConfig.discount.toString()
-    }
-  });
+  // If using fallback price IDs, create the product and price
+  if (priceId.includes('fallback')) {
+    console.log('Creating dynamic product and price for', subscriptionData.plan);
+
+    const product = await stripe.products.create({
+      name: planConfig.productName,
+      description: planConfig.description,
+      metadata: {
+        plan: subscriptionData.plan,
+        type: 'subscription',
+        features: JSON.stringify([
+          'Unlimited Backlinks',
+          'Complete SEO Academy (50+ Lessons)',
+          'Advanced Analytics & Reports',
+          'Priority 24/7 Support',
+          'White-Hat Guarantee',
+          'Custom Campaign Strategies',
+          'Professional Certifications',
+          'API Access & Integrations'
+        ])
+      }
+    });
+
+    const price = await stripe.prices.create({
+      product: product.id,
+      unit_amount: planConfig.price * 100, // Convert to cents
+      currency: 'usd',
+      recurring: {
+        interval: planConfig.interval,
+      },
+      metadata: {
+        plan: subscriptionData.plan,
+        originalPrice: planConfig.originalPrice.toString(),
+        discount: planConfig.discount.toString()
+      }
+    });
+
+    priceId = price.id;
+  } else {
+    console.log('Using predefined price ID:', priceId);
+  }
 
   // Create checkout session
   const session = await stripe.checkout.sessions.create({
