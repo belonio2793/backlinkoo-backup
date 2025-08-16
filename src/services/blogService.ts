@@ -146,7 +146,7 @@ export class BlogService {
               .from('blog_posts')
               .insert(retryData);
           } catch (backupError) {
-            console.warn('⚠️ [BlogService] Backup retry save to blog_posts failed:', backupError);
+            console.warn('���️ [BlogService] Backup retry save to blog_posts failed:', backupError);
           }
 
         } catch (networkError: any) {
@@ -160,16 +160,25 @@ export class BlogService {
 
         if (retryError || !retryPost) {
           // Final attempt with timestamp
-          if (retryError && retryError.message && retryError.message.includes('blog_posts_slug_key')) {
+          if (retryError && retryError.message && retryError.message.includes('slug')) {
             const finalSlug = `${fallbackSlug}-${Date.now()}`;
             const finalData = { ...cleanBlogPostData, slug: finalSlug };
 
             let finalResult;
             try {
               finalResult = await supabase
-                .from('blog_posts')
+                .from('published_blog_posts')
                 .insert(finalData)
                 .select();
+
+              // Also save to blog_posts for backward compatibility
+              try {
+                await supabase
+                  .from('blog_posts')
+                  .insert(finalData);
+              } catch (backupError) {
+                console.warn('⚠️ [BlogService] Backup final save to blog_posts failed:', backupError);
+              }
             } catch (networkError: any) {
               console.error('❌ Network error during final retry:', networkError);
               throw new Error(`Network error on final retry: ${networkError.message || 'Failed to connect to database'}`);
