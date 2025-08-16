@@ -285,7 +285,7 @@ const ContentProcessor = ({
         const cleanUrl = url.trim().startsWith('http') ? url.trim() : `https://${url.trim()}`;
         const cleanText = linkText.trim();
 
-        return `<a href="${cleanUrl}" class="text-blue-600 hover:text-blue-800 font-medium underline decoration-2 underline-offset-2 transition-colors duration-200" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
+        return `<a href="${cleanUrl}" class="text-blue-600 hover:text-blue-800 font-semibold underline decoration-2 underline-offset-4 transition-all duration-200 hover:decoration-3 hover:text-blue-700 bg-blue-50/30 hover:bg-blue-50/50 px-1 py-0.5 rounded" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
       }
     );
 
