@@ -103,8 +103,11 @@ const EnhancedContentProcessor = ({
       ];
     }
 
-    // Enhanced content cleaning with comprehensive formatting fixes
-    let cleanContent = rawContent
+    // Use EnhancedBlogCleaner for comprehensive content cleaning
+    let cleanContent = EnhancedBlogCleaner.cleanContent(rawContent, title);
+
+    // Additional formatting improvements specific to display
+    cleanContent = cleanContent
       // Remove metadata and AI-generated prefixes
       .replace(/Natural Link Integration:\s*/gi, '')
       .replace(/Link Placement:\s*/gi, '')
@@ -112,14 +115,6 @@ const EnhancedContentProcessor = ({
       .replace(/URL Integration:\s*/gi, '')
       .replace(/Link Strategy:\s*/gi, '')
       .replace(/Backlink Placement:\s*/gi, '')
-      .replace(/Call to Action:\s*/gi, '')
-      .replace(/Introduction:\s*/gi, '')
-      .replace(/Conclusion:\s*/gi, '')
-      .replace(/Summary:\s*/gi, '')
-      // Remove section markers and artifacts
-      .replace(/^\s*\*+\s*$|^\s*#+\s*$/gm, '')
-      .replace(/^\s*-+\s*$|^\s*=+\s*$/gm, '')
-      .replace(/^\s*_{3,}\s*$/gm, '')
       // Fix common formatting issues
       .replace(/\*\s+/g, '* ') // Fix bullet point spacing
       .replace(/\d+\.\s+/g, (match) => match.replace(/\s+/g, ' ')) // Fix numbered list spacing
