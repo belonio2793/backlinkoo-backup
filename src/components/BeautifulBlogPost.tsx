@@ -683,6 +683,9 @@ export function BeautifulBlogPost() {
       // Convert **text** to <strong>text</strong>
       formattedContent = formattedContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
+      // Convert markdown links [text](url) to <a> tags
+      formattedContent = formattedContent.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+
       // Split into paragraphs and process
       const paragraphs = formattedContent.split(/\n\s*\n/).filter(p => p.trim().length > 0);
 
