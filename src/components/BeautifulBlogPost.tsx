@@ -1079,13 +1079,29 @@ export function BeautifulBlogPost() {
                         }
 
                         // Process content with robust processor - DISABLE title removal to prevent content loss
-                        // Auto-adjust content using our advanced auto-adjustment system
-                        const qualityMetrics = BlogQualityMonitor.analyzeContent(content, blogPost.target_url);
-                        const adjustedContent = BlogAutoAdjustmentService.adjustContentForDisplay(content, {
-                          title: blogPost.title,
-                          target_url: blogPost.target_url,
-                          anchor_text: blogPost.anchor_text
-                        });
+                        // SECURITY FIRST: Use the secure HTML processor
+                        const secureHtmlResult = BlogContentSecurityProcessor.createSecureHTML(content, blogPost.title);
+
+                        // Log security results
+                        if (secureHtmlResult.securityInfo.securityIssues.length > 0) {
+                          console.warn('🔒 Security processing applied:', {
+                            riskLevel: secureHtmlResult.securityInfo.riskLevel,
+                            issues: secureHtmlResult.securityInfo.securityIssues,
+                            fixes: secureHtmlResult.securityInfo.fixes
+                          });
+                        }
+
+                        // Apply additional quality processing if needed
+                        let finalContent = secureHtmlResult.__html;
+                        const qualityMetrics = BlogQualityMonitor.analyzeContent(finalContent, blogPost.target_url);
+
+                        if (qualityMetrics.qualityScore < 70 || qualityMetrics.hasMalformedPatterns) {
+                          finalContent = BlogAutoAdjustmentService.adjustContentForDisplay(finalContent, {
+                            title: blogPost.title,
+                            target_url: blogPost.target_url,
+                            anchor_text: blogPost.anchor_text
+                          });
+                        }
                         const result = {
                           content: adjustedContent,
                           wasProcessed: adjustedContent !== content,
