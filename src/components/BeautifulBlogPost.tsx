@@ -1,4 +1,4 @@
-import { useState, useEffect, startTransition } from 'react';
+import { useState, useEffect, startTransition, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/beautiful-blog.css';
 import '../styles/blog-template.css';
@@ -59,10 +59,149 @@ import { ExitIntentPopup } from '@/components/ExitIntentPopup';
 // import { BlogAutoAdjustmentService } from '@/services/blogAutoAdjustmentService';
 // import { BlogQualityMonitor } from '@/utils/blogQualityMonitor';
 import { EnhancedBlogCleaner } from '@/utils/enhancedBlogCleaner';
-// import { processBlogContent } from '@/utils/markdownProcessor';
-// import { RobustContentProcessor } from '@/utils/robustContentProcessor';
+import { processBlogContent } from '@/utils/markdownProcessor';
 
 type BlogPost = Tables<'blog_posts'>;
+
+// Enhanced utility function to parse AI-generated text into structured JSX
+function formatContent(raw: string) {
+  // Clean the content first - remove link placement syntax and fix formatting
+  let cleanedContent = raw
+    .replace(/Natural Link Integration:\s*/gi, '')
+    .replace(/Link Placement:\s*/gi, '')
+    .replace(/Anchor Text:\s*/gi, '')
+    .replace(/URL Integration:\s*/gi, '')
+    .replace(/Link Strategy:\s*/gi, '')
+    .replace(/Backlink Placement:\s*/gi, '')
+    .replace(/Internal Link:\s*/gi, '')
+    .replace(/External Link:\s*/gi, '')
+    .replace(/Content Section:\s*/gi, '')
+    .replace(/Blog Section:\s*/gi, '')
+    .replace(/Article Part:\s*/gi, '')
+    .replace(/Content Block:\s*/gi, '')
+    // Fix malformed asterisk patterns
+    .replace(/\*+$/gm, '') // Remove trailing asterisks
+    .replace(/^\*+(?!\*)/gm, '') // Remove leading single asterisks that aren't part of ** bold syntax
+    .replace(/\*+\s*\*+/g, '**') // Fix multiple asterisks to proper bold syntax
+    // Fix broken URLs in markdown links (space in URL)
+    .replace(/\]\(([^)]*)\s+([^)]*)\)/g, ']($1$2)') // Remove spaces in URLs
+    .replace(/https:\s*\/\//g, 'https://') // Fix broken https: // patterns
+    .replace(/\]\(https:\s*\/\//g, '](https://') // Fix https: // in markdown links specifically
+    // Clean up common artifacts
+    .replace(/\*{3,}/g, '**') // Replace multiple asterisks with proper bold syntax
+    .replace(/\s+\*\s+$/gm, '') // Remove trailing single asterisks with spaces
+    .replace(/^\s*\*\s*$/gm, ''); // Remove lines with just asterisks
+
+  const lines = cleanedContent.split(/\n+/).map(l => l.trim()).filter(Boolean);
+
+  return lines.map((line, i) => {
+    // Process each line to handle bold text and markdown links
+    const processLineContent = (text: string) => {
+      // Clean up the text first
+      let processedText = text
+        .replace(/\*+$/, '') // Remove trailing asterisks
+        .replace(/^\*+(?!\*)/, '') // Remove leading single asterisks
+        .trim();
+
+      // Convert **text** to bold (handle edge cases)
+      processedText = processedText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+      // Handle remaining single asterisks that might be formatting artifacts
+      processedText = processedText.replace(/\s+\*\s*$/, ''); // Remove trailing single asterisks
+
+      // Convert markdown links [text](url) to HTML links
+      processedText = processedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
+        // Clean up the URL and text
+        const cleanText = linkText.trim();
+        let cleanUrl = url.trim();
+        // Fix common URL issues
+        if (cleanUrl && !cleanUrl.match(/^https?:\/\//)) {
+          cleanUrl = cleanUrl.startsWith('//') ? 'https:' + cleanUrl : 'https://' + cleanUrl;
+        }
+        return `<a href="${cleanUrl}" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
+      });
+
+      // Convert plain URLs to links if they're not already in markdown
+      if (!processedText.includes('<a ') && /https?:\/\/\S+/.test(processedText)) {
+        processedText = processedText.replace(/(https?:\/\/[^\s<>"']+)/g, '<a href="$1" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">$1</a>');
+      }
+
+      return processedText;
+    };
+
+    // Enhanced section heading detection
+    if (/^(Section|Step|Chapter|Part|Stage|Phase)\s*\d+/i.test(line) ||
+        /^\d+\.\s+[A-Z]/.test(line) ||
+        /^(Section|Step|Chapter|Part)\s*\d+\s*[-–—]\s*/.test(line)) {
+      const processedContent = processLineContent(line);
+      return (
+        <h2 key={i} className="beautiful-prose text-3xl font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
+      );
+    }
+
+    // Enhanced Key Insights / Highlights detection
+    if (/^(Key Insights|Pro Tip|Conclusion|Summary|Overview|Benefits|Important|Essential|Critical|Best Practices|Implementation)/i.test(line)) {
+      const processedContent = processLineContent(line);
+      return (
+        <h3 key={i} className="beautiful-prose text-2xl font-semibold text-black mb-4 mt-8" dangerouslySetInnerHTML={{ __html: processedContent }} />
+      );
+    }
+
+    // Enhanced bullet point detection
+    if (/^[-*•·➤►▶→✓✔]\s+/.test(line)) {
+      const items = line
+        .split(/[-*•·➤►▶→✓✔]\s+/)
+        .filter(Boolean)
+        .map((item, idx) => {
+          const processedItem = processLineContent(item.trim());
+          return (
+            <li key={idx} className="beautiful-prose relative pl-8 text-lg leading-relaxed text-gray-700 mb-2" dangerouslySetInnerHTML={{ __html: processedItem }} />
+          );
+        });
+      return <ul key={i} className="beautiful-prose space-y-4 my-8">{items}</ul>;
+    }
+
+    // Enhanced numbered list detection
+    if (/^\d+\.\s/.test(line)) {
+      const content = line.replace(/^\d+\.\s/, '').trim();
+      const processedContent = processLineContent(content);
+      return (
+        <div key={i} className="beautiful-prose space-y-4 my-8">
+          <ol className="list-decimal ml-6">
+            <li className="beautiful-prose relative pl-2 text-lg leading-relaxed text-gray-700 mb-2" dangerouslySetInnerHTML={{ __html: processedContent }} />
+          </ol>
+        </div>
+      );
+    }
+
+    // Detect inline label: value pairs (but exclude link syntax)
+    if (/^.+?:/.test(line) &&
+        !/^(Natural Link Integration|Link Placement|Anchor Text|URL Integration|Link Strategy|Backlink Placement|Internal Link|External Link):/i.test(line)) {
+      const [label, ...rest] = line.split(":");
+      const processedLabel = processLineContent(label.trim());
+      const processedRest = processLineContent(rest.join(":").trim());
+      return (
+        <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
+          <span dangerouslySetInnerHTML={{ __html: `<strong>${processedLabel}:</strong> ${processedRest}` }} />
+        </p>
+      );
+    }
+
+    // Enhanced link detection with markdown support
+    if (/https?:\/\//.test(line) || /\[.*?\]\(.*?\)/.test(line)) {
+      const processedLine = processLineContent(line);
+      return (
+        <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6" dangerouslySetInnerHTML={{ __html: processedLine }} />
+      );
+    }
+
+    // Default: render as paragraph with processed content
+    const processedLine = processLineContent(line);
+    return (
+      <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6" dangerouslySetInnerHTML={{ __html: processedLine }} />
+    );
+  });
+}
 
 export function BeautifulBlogPost() {
   const { slug } = useParams();
@@ -92,6 +231,27 @@ export function BeautifulBlogPost() {
 
   // Use premium SEO score logic
   const { effectiveScore, isPremiumScore } = usePremiumSEOScore(blogPost);
+
+  // Memoize expensive calculations for performance
+  const memoizedBlogTitle = useMemo(() => {
+    return blogPost ? EnhancedBlogCleaner.cleanTitle(blogPost.title) : '';
+  }, [blogPost?.title]);
+
+  const memoizedReadingTime = useMemo(() => {
+    return blogPost?.reading_time || 0;
+  }, [blogPost?.reading_time]);
+
+  const memoizedFormattedDate = useMemo(() => {
+    try {
+      if (!blogPost?.created_at) return 'Date unknown';
+      const date = new Date(blogPost.created_at);
+      if (isNaN(date.getTime())) return 'Invalid date';
+      return format(date, 'MMMM dd, yyyy');
+    } catch (error) {
+      console.error('Date formatting error:', error, 'Value:', blogPost?.created_at);
+      return 'Date error';
+    }
+  }, [blogPost?.created_at]);
 
   // Cleanup component mount flag on unmount
   useEffect(() => {
@@ -276,7 +436,7 @@ export function BeautifulBlogPost() {
     }
   };
 
-  const loadBlogPost = async (slug: string) => {
+  const loadBlogPost = useCallback(async (slug: string) => {
     try {
       setLoading(true);
       setError(null);
@@ -357,7 +517,7 @@ export function BeautifulBlogPost() {
         setLoading(false);
       }
     }
-  };
+  }, [isMounted, toast]);
 
   const handleClaimPost = async () => {
     if (!user) {
@@ -569,7 +729,7 @@ export function BeautifulBlogPost() {
     }, 1000);
   };
 
-  const copyToClipboard = async () => {
+  const copyToClipboard = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
       toast({
@@ -602,7 +762,7 @@ export function BeautifulBlogPost() {
         });
       }
     }
-  };
+  }, [toast]);
 
   const sharePost = async () => {
     if (navigator.share) {
@@ -659,8 +819,22 @@ export function BeautifulBlogPost() {
 
     let formattedContent = content;
 
-    // Step 1: Convert markdown formatting to HTML first, then clean up malformed content
+    // Step 1: Remove link placement syntax and clean up content
     formattedContent = formattedContent
+      // Hide link placement syntax and content generation artifacts
+      .replace(/Natural Link Integration:\s*/gi, '')
+      .replace(/Link Placement:\s*/gi, '')
+      .replace(/Anchor Text:\s*/gi, '')
+      .replace(/URL Integration:\s*/gi, '')
+      .replace(/Link Strategy:\s*/gi, '')
+      .replace(/Backlink Placement:\s*/gi, '')
+      .replace(/Internal Link:\s*/gi, '')
+      .replace(/External Link:\s*/gi, '')
+      .replace(/Content Section:\s*/gi, '')
+      .replace(/Blog Section:\s*/gi, '')
+      .replace(/Article Part:\s*/gi, '')
+      .replace(/Content Block:\s*/gi, '')
+
       // Convert **text** to <strong>text</strong> before removing other ** markers
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
       // Convert __text__ to <strong>text</strong>
@@ -677,8 +851,22 @@ export function BeautifulBlogPost() {
 
     // Step 2: Enhanced markdown formatting to HTML conversion
     formattedContent = formattedContent
-      // Convert markdown links [text](url) to HTML
-      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+      // Enhanced link processing - Convert markdown links [text](url) to HTML
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, text, url) => {
+        // Clean up the anchor text - remove any link placement syntax
+        const cleanText = text
+          .replace(/^(Natural Link Integration|Link Placement|Anchor Text|URL Integration):\s*/gi, '')
+          .trim();
+
+        // Ensure URL is properly formatted
+        let cleanUrl = url.trim();
+        if (cleanUrl && !cleanUrl.match(/^https?:\/\//)) {
+          cleanUrl = cleanUrl.startsWith('//') ? 'https:' + cleanUrl : 'https://' + cleanUrl;
+        }
+
+        return `<a href="${cleanUrl}">${cleanText}</a>`;
+      })
+
       // Convert markdown headings (### heading) to HTML
       .replace(/^### (.+)$/gm, '<h3>$1</h3>')
       .replace(/^## (.+)$/gm, '<h2>$1</h2>')
@@ -688,7 +876,13 @@ export function BeautifulBlogPost() {
       // Convert italic text _text_ to <em>text</em>
       .replace(/(?<!_)_([^_\n]+)_(?!_)/g, '<em>$1</em>')
       // Convert inline code `code` to <code>code</code>
-      .replace(/`([^`]+)`/g, '<code>$1</code>');
+      .replace(/`([^`]+)`/g, '<code>$1</code>')
+
+      // Convert plain URLs to clickable links (simple approach)
+      .replace(/\b(https?:\/\/[^\s<>"']+)/gi, (match, url) => {
+        // Only convert if not already inside a tag
+        return `<a href="${url}">${url}</a>`;
+      });
 
     // Step 2.5: Comprehensive duplicate title removal
     if (title) {
@@ -738,15 +932,41 @@ export function BeautifulBlogPost() {
           continue;
         }
 
-        // Check if it's a heading (short line with title-like content) but NOT the blog title
-        const paraTextOnly = para.replace(/<[^>]*>/g, '').trim();
-        const isLikelyHeading = para.length < 120 && (
+        // Enhanced heading detection - Check if it's a heading (short line with title-like content) but NOT the blog title
+        const isLikelyHeading = para.length < 150 && (
+          // Section patterns (enhanced to catch more variations)
+          para.match(/^Section\s+\d+:/i) ||
+          para.match(/^Section\s+\d+\s*[-–—]\s*/i) ||
+          para.match(/^Part\s+\d+:/i) ||
+          para.match(/^Chapter\s+\d+:/i) ||
+          para.match(/^\d+\.\s+[A-Z]/i) ||
+          para.match(/^Step\s+\d+:/i) ||
+          para.match(/^\d+\)\s+[A-Z]/i) ||
+          para.match(/^Stage\s+\d+:/i) ||
+          para.match(/^Phase\s+\d+:/i) ||
+
+          // Common heading patterns
           (para.includes('Introduction') && !para.includes('Hook Introduction')) ||
           para.includes('Conclusion') ||
           para.includes('Strategy') ||
-          para.includes('Step ') ||
-          para.includes('Chapter ') ||
-          (para.split(' ').length <= 8 && para.charAt(0).toUpperCase() === para.charAt(0))
+          para.includes('Overview') ||
+          para.includes('Summary') ||
+          para.includes('Benefits') ||
+          para.includes('Advantages') ||
+          para.includes('Implementation') ||
+          para.includes('Best Practices') ||
+          para.includes('Key Points') ||
+          para.includes('Important') ||
+          para.includes('Essential') ||
+          para.includes('Critical') ||
+
+          // Short capitalized lines (likely headings)
+          (para.split(' ').length <= 10 &&
+           para.charAt(0).toUpperCase() === para.charAt(0) &&
+           para.split(' ').every(word => word.length > 2 ? word.charAt(0).toUpperCase() === word.charAt(0) : true)) ||
+
+          // Lines ending with colon (section headers)
+          (para.endsWith(':') && para.split(' ').length <= 8 && para.charAt(0).toUpperCase() === para.charAt(0))
         );
 
         // Don't convert to heading if it matches the title or is too similar
@@ -842,13 +1062,34 @@ export function BeautifulBlogPost() {
         return `<li class="beautiful-prose relative pl-8 text-lg leading-relaxed text-gray-700"${attrs}>${cleanText}</li>`;
       });
 
-    // Step 7: Enhanced links with beautiful styling
+    // Step 7: Enhanced links with beautiful styling and improved anchor text
     formattedContent = formattedContent.replace(
       /<a([^>]*?)href="([^"]*)"([^>]*?)>(.*?)<\/a>/gi,
       (match, preAttrs, href, postAttrs, text) => {
-        const isExternal = href.startsWith('http');
+        // Clean up anchor text - remove any remaining link syntax
+        let cleanText = text
+          .replace(/^(Natural Link Integration|Link Placement|Anchor Text|URL Integration|Link Strategy|Backlink Placement|Internal Link|External Link):\s*/gi, '')
+          .trim();
+
+        // If anchor text is empty or just whitespace, use a portion of the URL
+        if (!cleanText || cleanText.length === 0) {
+          try {
+            const url = new URL(href);
+            cleanText = url.hostname.replace('www.', '') || href;
+          } catch {
+            cleanText = href;
+          }
+        }
+
+        // Ensure URL is properly formatted
+        let cleanHref = href.trim();
+        if (cleanHref && !cleanHref.match(/^https?:\/\//) && !cleanHref.startsWith('/')) {
+          cleanHref = cleanHref.startsWith('//') ? 'https:' + cleanHref : 'https://' + cleanHref;
+        }
+
+        const isExternal = cleanHref.startsWith('http');
         const targetAttr = isExternal ? ' target="_blank" rel="noopener noreferrer"' : '';
-        return `<a class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600"${preAttrs}href="${href}"${postAttrs}${targetAttr}>${text}</a>`;
+        return `<a class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600"${preAttrs}href="${cleanHref}"${postAttrs}${targetAttr}>${cleanText}</a>`;
       }
     );
 
@@ -1299,9 +1540,13 @@ export function BeautifulBlogPost() {
                 )}
               </div>
 
-              {/* Title */}
-              <h1 className="beautiful-blog-title text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight break-words">
-                {EnhancedBlogCleaner.cleanTitle(blogPost.title)}
+              {/* Title with enhanced styling and accessibility */}
+              <h1
+                className="beautiful-blog-title text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight break-words bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent"
+                role="heading"
+                aria-level={1}
+              >
+                {memoizedBlogTitle}
               </h1>
 
               {/* Meta Description */}
@@ -1315,23 +1560,16 @@ export function BeautifulBlogPost() {
               <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6 text-gray-500 mb-8">
                 <div className="beautiful-meta flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
-                  <span className="font-medium text-sm md:text-base">
-                    {(() => {
-                      try {
-                        if (!blogPost.created_at) return 'Date unknown';
-                        const date = new Date(blogPost.created_at);
-                        if (isNaN(date.getTime())) return 'Invalid date';
-                        return format(date, 'MMMM dd, yyyy');
-                      } catch (error) {
-                        console.error('Date formatting error:', error, 'Value:', blogPost.created_at);
-                        return 'Date error';
-                      }
-                    })()}
-                  </span>
+                  <time
+                    className="font-medium text-sm md:text-base"
+                    dateTime={blogPost.created_at}
+                  >
+                    {memoizedFormattedDate}
+                  </time>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  <span className="font-medium text-sm md:text-base">{blogPost.reading_time || 0} min read</span>
+                  <span className="font-medium text-sm md:text-base">{memoizedReadingTime} min read</span>
                 </div>
                 <div className="beautiful-meta flex items-center gap-2">
                   <SEOScoreDisplay
@@ -1355,7 +1593,7 @@ export function BeautifulBlogPost() {
             <div className="prose prose-lg max-w-none mt-8">
               <div className="beautiful-card max-w-5xl mx-auto pt-6 px-6 pb-8 md:pt-8 md:px-12 md:pb-12 lg:px-16">
                 <div
-                  className="beautiful-blog-content beautiful-prose modern-blog-content article-content prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-black prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-strong:font-bold prose-strong:text-gray-900 prose-img:rounded-lg prose-img:shadow-lg"
+                  className="beautiful-blog-content beautiful-prose modern-blog-content article-content max-w-none"
                   style={{
                     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
                     lineHeight: '1.8',
@@ -1365,81 +1603,87 @@ export function BeautifulBlogPost() {
                     wordBreak: 'break-word',
                     overflowWrap: 'break-word'
                   }}
-                  dangerouslySetInnerHTML={{
-                    __html: (() => {
-                      try {
-                        const content = blogPost.content || '';
+                >
+                  {(() => {
+                    try {
+                      const content = blogPost.content || '';
 
-                        console.log('🔍 BeautifulBlogPost content debug:', {
+                      console.log('🔍 BeautifulBlogPost content debug:', {
+                        postId: blogPost.id,
+                        slug: blogPost.slug,
+                        contentLength: content.length,
+                        isEmpty: !content || content.trim().length === 0,
+                        contentPreview: content.substring(0, 100),
+                        hasHtmlTags: content.includes('<'),
+                        performance: {
+                          timestamp: Date.now(),
+                          memoryUsage: (performance as any)?.memory?.usedJSHeapSize || 'unavailable'
+                        }
+                      });
+
+                      if (!content || content.trim().length === 0) {
+                        console.error('❌ Blog post has no content:', {
                           postId: blogPost.id,
                           slug: blogPost.slug,
-                          contentLength: content.length,
-                          isEmpty: !content || content.trim().length === 0,
-                          contentPreview: content.substring(0, 100)
+                          title: blogPost.title
                         });
 
-                        if (!content || content.trim().length === 0) {
-                          console.error('❌ Blog post has no content:', {
-                            postId: blogPost.id,
-                            slug: blogPost.slug,
-                            title: blogPost.title
-                          });
-
-                          return `
-                            <div style="padding: 40px; text-align: center; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; margin: 20px 0;">
-                              <h3 style="color: #dc2626; margin-bottom: 16px;">Content Error</h3>
-                              <p style="color: #7f1d1d; margin-bottom: 16px;">This blog post appears to have no content in the database.</p>
-                              <details style="text-align: left; background: white; padding: 16px; border-radius: 4px; border: 1px solid #f3f4f6;">
-                                <summary style="cursor: pointer; font-weight: 600; color: #374151;">Debug Information</summary>
-                                <pre style="margin-top: 8px; font-size: 12px; color: #6b7280;">Post ID: ${blogPost.id}\nSlug: ${blogPost.slug}\nTitle: ${blogPost.title || 'No title'}\nStatus: ${blogPost.status || 'unknown'}\nCreated: ${blogPost.created_at || 'unknown'}</pre>
-                              </details>
-                            </div>
-                          `;
-                        }
-
-                        // SIMPLIFIED PROCESSING: Apply beautiful formatting directly to preserve structure
-                        let finalContent = applyBeautifulContentStructure(content, blogPost.title);
-
-                        // Basic security check only - remove scripts and dangerous elements
-                        finalContent = finalContent
-                          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-                          .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-                          .replace(/javascript:/gi, '')
-                          .replace(/on\w+\s*=/gi, '');
-                        // Variables are already defined above as finalContent and securityInfo
-
-                        // Log processing results for debugging
-                        console.log('Blog content processing result:', {
-                          originalLength: content.length,
-                          finalLength: finalContent.length,
-                          hasStructure: finalContent.includes('<h1>') || finalContent.includes('<h2>') || finalContent.includes('<p>'),
-                          processedSuccessfully: true
-                        });
-
-                        // Final safety check after processing
-                        if (!finalContent || finalContent.trim().length === 0) {
-                          console.error('Content became empty after processing! Using fallback.');
-                          return '<div style="padding: 20px; color: #ef4444;">Content processing error. Please contact support.</div>';
-                        }
-
-                        return finalContent;
-                      } catch (formatError) {
-                        console.error('💥 Content processing failed:', formatError);
-                        // Return cleaned raw content as emergency fallback
-                        const rawContent = blogPost.content || '';
-                        if (rawContent) {
-                          // Basic HTML escape for safety
-                          const escapedContent = rawContent
-                            .replace(/</g, '&lt;')
-                            .replace(/>/g, '&gt;')
-                            .replace(/\n/g, '<br>');
-                          return `<div style="padding: 20px;"><h3>Content Processing Error</h3><div style="white-space: pre-wrap; font-family: inherit; color: #666;">${escapedContent}</div></div>`;
-                        }
-                        return '<div style="padding: 20px; color: #ef4444;">Content could not be loaded or processed.</div>';
+                        return (
+                          <div style={{ padding: '40px', textAlign: 'center', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', margin: '20px 0' }}>
+                            <h3 style={{ color: '#dc2626', marginBottom: '16px' }}>Content Error</h3>
+                            <p style={{ color: '#7f1d1d', marginBottom: '16px' }}>This blog post appears to have no content in the database.</p>
+                            <details style={{ textAlign: 'left', background: 'white', padding: '16px', borderRadius: '4px', border: '1px solid #f3f4f6' }}>
+                              <summary style={{ cursor: 'pointer', fontWeight: 600, color: '#374151' }}>Debug Information</summary>
+                              <pre style={{ marginTop: '8px', fontSize: '12px', color: '#6b7280' }}>
+                                {`Post ID: ${blogPost.id}\nSlug: ${blogPost.slug}\nTitle: ${blogPost.title || 'No title'}\nStatus: ${blogPost.status || 'unknown'}\nCreated: ${blogPost.created_at || 'unknown'}`}
+                              </pre>
+                            </details>
+                          </div>
+                        );
                       }
-                    })()
-                  }}
-                />
+
+                      // Enhanced processing with performance monitoring
+                      const processingStart = performance.now();
+
+                      console.log('⚡ Using new formatContent function for better structure');
+
+                      // Use new formatContent function for better parsing
+                      const formattedContent = formatContent(content);
+
+                      const processingTime = performance.now() - processingStart;
+
+                      console.log('✅ New content formatting complete:', {
+                        originalLength: content.length,
+                        processingTimeMs: Math.round(processingTime * 100) / 100,
+                        elementsGenerated: formattedContent.length,
+                        efficiency: Math.round((content.length / processingTime) * 100) / 100 + ' chars/ms',
+                        processedSuccessfully: true
+                      });
+
+                      return formattedContent;
+
+                    } catch (formatError) {
+                      console.error('💥 Content formatting failed:', formatError);
+
+                      // Fallback to basic paragraph rendering
+                      const rawContent = blogPost.content || '';
+                      if (rawContent) {
+                        const lines = rawContent.split('\n').filter(line => line.trim().length > 0);
+                        return lines.map((line, i) => (
+                          <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
+                            {line}
+                          </p>
+                        ));
+                      }
+
+                      return (
+                        <div style={{ padding: '20px', color: '#ef4444' }}>
+                          Content could not be loaded or processed.
+                        </div>
+                      );
+                    }
+                  })()}
+                </div>
               </div>
             </div>
 
@@ -1652,7 +1896,7 @@ export function BeautifulBlogPost() {
                   </div>
                   <ul className="space-y-2 text-sm">
                     <li>• This post will return to the claimable pool for 24 hours</li>
-                    <li>��� Other users will be able to claim it during this time</li>
+                    <li>���� Other users will be able to claim it during this time</li>
                     <li>• If not reclaimed, it will be automatically deleted</li>
                     <li>• You can reclaim it yourself if it's still available</li>
                   </ul>
