@@ -113,20 +113,37 @@ export class RobustBlogProcessor {
       }
     }
 
-    // Remove duplicate title at the beginning (if title is provided)
-    if (title && options.removeTitle !== false) {
+    // SAFE title removal - only remove if we're confident it's a duplicate
+    if (title && options.removeTitle === true) {
       const cleanTitle = title.replace(/[*#]/g, '').trim();
       const originalLength = cleanContent.length;
-      
-      // Remove various title patterns at the beginning
-      cleanContent = cleanContent
-        .replace(new RegExp(`^\\s*#+\\s*${this.escapeRegex(cleanTitle)}\\s*\n?`, 'i'), '')
-        .replace(new RegExp(`^\\s*\\*\\*${this.escapeRegex(cleanTitle)}\\*\\*\\s*\n?`, 'i'), '')
-        .replace(new RegExp(`^\\s*${this.escapeRegex(cleanTitle)}\\s*\n?`, 'i'), '');
 
-      if (cleanContent.length !== originalLength) {
-        issues.push('Removed duplicate title');
-        wasProcessed = true;
+      // Only remove title if it's clearly at the beginning and matches exactly
+      const titlePatterns = [
+        new RegExp(`^\\s*<h1[^>]*>\\s*${this.escapeRegex(cleanTitle)}\\s*</h1>\\s*\n?`, 'i'),
+        new RegExp(`^\\s*#+\\s*${this.escapeRegex(cleanTitle)}\\s*\n`, 'i'),
+        new RegExp(`^\\s*\\*\\*${this.escapeRegex(cleanTitle)}\\*\\*\\s*\n`, 'i')
+      ];
+
+      // Test each pattern and only remove if it matches at the very beginning
+      for (const pattern of titlePatterns) {
+        if (pattern.test(cleanContent)) {
+          const newContent = cleanContent.replace(pattern, '');
+          // Safety check: only apply if it doesn't remove too much content
+          if (newContent.trim().length > originalLength * 0.8) {
+            cleanContent = newContent;
+            issues.push('Removed duplicate title');
+            wasProcessed = true;
+            break; // Only remove once
+          }
+        }
+      }
+
+      // Extra safety: if content became too short, restore it
+      if (cleanContent.trim().length < 100 && originalLength > 500) {
+        console.warn('Title removal removed too much content, restoring original');
+        cleanContent = content;
+        warnings.push('Title removal was too aggressive, kept original content');
       }
     }
 
@@ -366,6 +383,17 @@ export class RobustBlogProcessor {
    * Process content only if needed (performance optimization)
    */
   static processIfNeeded(content: string, title?: string, options: ProcessingOptions = {}): ProcessingResult {
+    // Critical safety check - never process empty content
+    if (!content || content.trim().length === 0) {
+      console.error('RobustBlogProcessor: Received empty content!');
+      return {
+        content: content || '',
+        wasProcessed: false,
+        issues: ['Empty content received'],
+        warnings: ['Content was empty, no processing performed']
+      };
+    }
+
     if (!this.needsProcessing(content)) {
       return {
         content,
@@ -375,6 +403,19 @@ export class RobustBlogProcessor {
       };
     }
 
-    return this.process(content, title, options);
+    const result = this.process(content, title, options);
+
+    // Final safety check - if processing made content empty, return original
+    if (!result.content || result.content.trim().length === 0) {
+      console.error('RobustBlogProcessor: Processing resulted in empty content, returning original');
+      return {
+        content,
+        wasProcessed: false,
+        issues: ['Processing resulted in empty content'],
+        warnings: ['Returned original content to prevent data loss']
+      };
+    }
+
+    return result;
   }
 }
