@@ -726,7 +726,7 @@ const Index = () => {
 
       {/* Service Sections */}
       <section className="py-12 sm:py-16 md:py-20 px-4 sm:px-6">
-        <div className="w-full space-y-16 sm:space-y-24 md:space-y-32">
+        <div className="w-full max-w-6xl mx-auto space-y-16 sm:space-y-24 md:space-y-32">
           
           {/* Dashboard Overview */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 items-center">
