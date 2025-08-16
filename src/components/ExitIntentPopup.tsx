@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { X, Shield, Clock, Zap, CheckCircle } from 'lucide-react';
+import { X, Shield, Clock, Zap, CheckCircle, Star, Sparkles, Timer } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthModal } from '@/contexts/ModalContext';
 
