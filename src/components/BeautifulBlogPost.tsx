@@ -679,8 +679,18 @@ export function BeautifulBlogPost() {
 
     let formattedContent = content;
 
-    // Step 1: Convert markdown formatting to HTML first, then clean up malformed content
+    // Step 1: Remove link placement syntax and clean up content
     formattedContent = formattedContent
+      // Hide link placement syntax
+      .replace(/Natural Link Integration:\s*/gi, '')
+      .replace(/Link Placement:\s*/gi, '')
+      .replace(/Anchor Text:\s*/gi, '')
+      .replace(/URL Integration:\s*/gi, '')
+      .replace(/Link Strategy:\s*/gi, '')
+      .replace(/Backlink Placement:\s*/gi, '')
+      .replace(/Internal Link:\s*/gi, '')
+      .replace(/External Link:\s*/gi, '')
+
       // Convert **text** to <strong>text</strong> before removing other ** markers
       .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
       // Convert __text__ to <strong>text</strong>
