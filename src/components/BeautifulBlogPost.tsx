@@ -1526,7 +1526,7 @@ export function BeautifulBlogPost() {
             <div className="prose prose-lg max-w-none mt-8">
               <div className="beautiful-card max-w-5xl mx-auto pt-6 px-6 pb-8 md:pt-8 md:px-12 md:pb-12 lg:px-16">
                 <div
-                  className="beautiful-blog-content beautiful-prose modern-blog-content article-content prose prose-xl max-w-none prose-headings:font-bold prose-headings:text-black prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl prose-p:text-gray-700 prose-p:leading-relaxed prose-p:mb-6 prose-li:text-gray-700 prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-6 prose-blockquote:italic prose-strong:font-bold prose-strong:text-gray-900 prose-img:rounded-lg prose-img:shadow-lg"
+                  className="beautiful-blog-content beautiful-prose modern-blog-content article-content max-w-none"
                   style={{
                     fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
                     lineHeight: '1.8',
@@ -1536,127 +1536,87 @@ export function BeautifulBlogPost() {
                     wordBreak: 'break-word',
                     overflowWrap: 'break-word'
                   }}
-                  dangerouslySetInnerHTML={{
-                    __html: (() => {
-                      try {
-                        const content = blogPost.content || '';
+                >
+                  {(() => {
+                    try {
+                      const content = blogPost.content || '';
 
-                        console.log('🔍 BeautifulBlogPost content debug:', {
+                      console.log('🔍 BeautifulBlogPost content debug:', {
+                        postId: blogPost.id,
+                        slug: blogPost.slug,
+                        contentLength: content.length,
+                        isEmpty: !content || content.trim().length === 0,
+                        contentPreview: content.substring(0, 100),
+                        hasHtmlTags: content.includes('<'),
+                        performance: {
+                          timestamp: Date.now(),
+                          memoryUsage: (performance as any)?.memory?.usedJSHeapSize || 'unavailable'
+                        }
+                      });
+
+                      if (!content || content.trim().length === 0) {
+                        console.error('❌ Blog post has no content:', {
                           postId: blogPost.id,
                           slug: blogPost.slug,
-                          contentLength: content.length,
-                          isEmpty: !content || content.trim().length === 0,
-                          contentPreview: content.substring(0, 100),
-                          hasHtmlTags: content.includes('<'),
-                          performance: {
-                            timestamp: Date.now(),
-                            memoryUsage: (performance as any)?.memory?.usedJSHeapSize || 'unavailable'
-                          }
+                          title: blogPost.title
                         });
 
-                        if (!content || content.trim().length === 0) {
-                          console.error('❌ Blog post has no content:', {
-                            postId: blogPost.id,
-                            slug: blogPost.slug,
-                            title: blogPost.title
-                          });
-
-                          return `
-                            <div style="padding: 40px; text-align: center; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; margin: 20px 0;">
-                              <h3 style="color: #dc2626; margin-bottom: 16px;">Content Error</h3>
-                              <p style="color: #7f1d1d; margin-bottom: 16px;">This blog post appears to have no content in the database.</p>
-                              <details style="text-align: left; background: white; padding: 16px; border-radius: 4px; border: 1px solid #f3f4f6;">
-                                <summary style="cursor: pointer; font-weight: 600; color: #374151;">Debug Information</summary>
-                                <pre style="margin-top: 8px; font-size: 12px; color: #6b7280;">Post ID: ${blogPost.id}\nSlug: ${blogPost.slug}\nTitle: ${blogPost.title || 'No title'}\nStatus: ${blogPost.status || 'unknown'}\nCreated: ${blogPost.created_at || 'unknown'}</pre>
-                              </details>
-                            </div>
-                          `;
-                        }
-
-                        // Enhanced processing with performance monitoring
-                        const processingStart = performance.now();
-                        let finalContent = applyBeautifulContentStructure(content, blogPost.title);
-                        const processingTime = performance.now() - processingStart;
-
-                        console.log('⚡ Content processing performance:', {
-                          processingTimeMs: Math.round(processingTime * 100) / 100,
-                          contentSizeKB: Math.round((content.length / 1024) * 100) / 100,
-                          outputSizeKB: Math.round((finalContent.length / 1024) * 100) / 100,
-                          efficiency: Math.round((content.length / processingTime) * 100) / 100 + ' chars/ms'
-                        });
-
-                        // Basic security check only - remove scripts and dangerous elements
-                        finalContent = finalContent
-                          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-                          .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-                          .replace(/javascript:/gi, '')
-                          .replace(/on\w+\s*=/gi, '');
-                        // Variables are already defined above as finalContent and securityInfo
-
-                        // Enhanced logging with performance metrics
-                        console.log('✅ Blog content processing complete:', {
-                          originalLength: content.length,
-                          finalLength: finalContent.length,
-                          hasStructure: finalContent.includes('<h1>') || finalContent.includes('<h2>') || finalContent.includes('<p>'),
-                          processingTimeMs: Math.round(processingTime * 100) / 100,
-                          efficiency: Math.round((content.length / processingTime) * 100) / 100 + ' chars/ms',
-                          compressionRatio: Math.round((finalContent.length / content.length) * 100) + '%',
-                          hasImages: finalContent.includes('<img'),
-                          hasLinks: finalContent.includes('<a '),
-                          hasLists: finalContent.includes('<ul') || finalContent.includes('<ol'),
-                          processedSuccessfully: true
-                        });
-
-                        // Final safety check with enhanced fallback
-                        if (!finalContent || finalContent.trim().length === 0) {
-                          console.error('⚠️ Content became empty after processing! Using enhanced fallback.');
-                          // Try basic markdown processing as emergency fallback
-                          try {
-                            const emergencyContent = processBlogContent(content);
-                            if (emergencyContent && emergencyContent.trim().length > 0) {
-                              console.log('🔄 Emergency content processing succeeded');
-                              return emergencyContent;
-                            }
-                          } catch (emergencyError) {
-                            console.error('Emergency processing also failed:', emergencyError);
-                          }
-
-                          // Ultimate fallback: return sanitized raw content
-                          const sanitizedContent = content
-                            .replace(/</g, '&lt;')
-                            .replace(/>/g, '&gt;')
-                            .replace(/\n/g, '<br>')
-                            .trim();
-
-                          return `
-                            <div style="padding: 20px; border: 2px solid #f59e0b; border-radius: 8px; background: #fef3c7;">
-                              <h3 style="color: #d97706; margin-bottom: 12px;">⚠️ Content Processing Issue</h3>
-                              <p style="color: #92400e; margin-bottom: 12px;">The content couldn't be processed properly. Showing raw content below:</p>
-                              <div style="background: white; padding: 16px; border-radius: 4px; font-family: monospace; white-space: pre-wrap;">
-                                ${sanitizedContent}
-                              </div>
-                            </div>
-                          `;
-                        }
-
-                        return finalContent;
-                      } catch (formatError) {
-                        console.error('💥 Content processing failed:', formatError);
-                        // Return cleaned raw content as emergency fallback
-                        const rawContent = blogPost.content || '';
-                        if (rawContent) {
-                          // Basic HTML escape for safety
-                          const escapedContent = rawContent
-                            .replace(/</g, '&lt;')
-                            .replace(/>/g, '&gt;')
-                            .replace(/\n/g, '<br>');
-                          return `<div style="padding: 20px;"><h3>Content Processing Error</h3><div style="white-space: pre-wrap; font-family: inherit; color: #666;">${escapedContent}</div></div>`;
-                        }
-                        return '<div style="padding: 20px; color: #ef4444;">Content could not be loaded or processed.</div>';
+                        return (
+                          <div style={{ padding: '40px', textAlign: 'center', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', margin: '20px 0' }}>
+                            <h3 style={{ color: '#dc2626', marginBottom: '16px' }}>Content Error</h3>
+                            <p style={{ color: '#7f1d1d', marginBottom: '16px' }}>This blog post appears to have no content in the database.</p>
+                            <details style={{ textAlign: 'left', background: 'white', padding: '16px', borderRadius: '4px', border: '1px solid #f3f4f6' }}>
+                              <summary style={{ cursor: 'pointer', fontWeight: 600, color: '#374151' }}>Debug Information</summary>
+                              <pre style={{ marginTop: '8px', fontSize: '12px', color: '#6b7280' }}>
+                                {`Post ID: ${blogPost.id}\nSlug: ${blogPost.slug}\nTitle: ${blogPost.title || 'No title'}\nStatus: ${blogPost.status || 'unknown'}\nCreated: ${blogPost.created_at || 'unknown'}`}
+                              </pre>
+                            </details>
+                          </div>
+                        );
                       }
-                    })()
-                  }}
-                />
+
+                      // Enhanced processing with performance monitoring
+                      const processingStart = performance.now();
+
+                      console.log('⚡ Using new formatContent function for better structure');
+
+                      // Use new formatContent function for better parsing
+                      const formattedContent = formatContent(content);
+
+                      const processingTime = performance.now() - processingStart;
+
+                      console.log('✅ New content formatting complete:', {
+                        originalLength: content.length,
+                        processingTimeMs: Math.round(processingTime * 100) / 100,
+                        elementsGenerated: formattedContent.length,
+                        efficiency: Math.round((content.length / processingTime) * 100) / 100 + ' chars/ms',
+                        processedSuccessfully: true
+                      });
+
+                      return formattedContent;
+
+                    } catch (formatError) {
+                      console.error('💥 Content formatting failed:', formatError);
+
+                      // Fallback to basic paragraph rendering
+                      const rawContent = blogPost.content || '';
+                      if (rawContent) {
+                        const lines = rawContent.split('\n').filter(line => line.trim().length > 0);
+                        return lines.map((line, i) => (
+                          <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6">
+                            {line}
+                          </p>
+                        ));
+                      }
+
+                      return (
+                        <div style={{ padding: '20px', color: '#ef4444' }}>
+                          Content could not be loaded or processed.
+                        </div>
+                      );
+                    }
+                  })()}
+                </div>
               </div>
             </div>
 
