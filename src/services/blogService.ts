@@ -588,7 +588,19 @@ export class BlogService {
       })) as BlogPost[];
 
     } catch (networkError: any) {
-      console.warn('⚠️ Network error in getRecentBlogPosts:', this.getSafeErrorMessage(networkError));
+      const errorMsg = this.getSafeErrorMessage(networkError);
+      console.warn('⚠️ Network error in getRecentBlogPosts:', errorMsg);
+
+      // Special handling for fetch failures
+      if (errorMsg.includes('Failed to fetch') || errorMsg.includes('fetch')) {
+        console.warn('🔌 Database connection issue detected in blog service');
+        // Show user-friendly message in development
+        if (import.meta.env.DEV) {
+          console.info('💡 Blog posts may not load due to database connection issues');
+          console.info('🔧 Check your Supabase configuration in environment variables');
+        }
+      }
+
       // Return empty array instead of throwing to prevent cascade failures
       return [];
     }
