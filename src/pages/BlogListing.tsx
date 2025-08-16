@@ -8,7 +8,7 @@ import { blogService } from '@/services/blogService';
 import { SimplifiedClaimService } from '@/services/simplifiedClaimService';
 import { UnifiedClaimService } from '@/services/unifiedClaimService';
 import { supabase } from '@/integrations/supabase/client';
-import { DatabaseSetup } from '@/utils/databaseSetup';
+import { initializeDatabase } from '@/utils/databaseSetup';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { PricingModal } from '@/components/PricingModal';
@@ -43,7 +43,7 @@ export function BlogListing() {
 
   const initializeAndLoadPosts = async () => {
     // Initialize database with sample data if needed
-    await DatabaseSetup.initializeDatabase();
+    await initializeDatabase();
     // Then load the posts
     loadPosts();
   };
