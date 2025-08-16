@@ -148,7 +148,7 @@ async function createStripeSubscription(
     customer_email: customerId ? undefined : email,
     line_items: [
       {
-        price: price.id,
+        price: priceId,
         quantity: 1,
       },
     ],
