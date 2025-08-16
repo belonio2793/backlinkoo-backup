@@ -142,6 +142,7 @@ setTimeout(() => {
   console.log('- Run enableNetworkWrapper() to re-enable wrapper');
   console.log('- Run checkNetworkStatus() to check current status');
   console.log('- Run testSymbolErrors() to test Symbol error handling');
+  console.log('- Run testLazyComponents() to test React.lazy setup');
 
   // Auto-check if there are issues
   if (localStorage.getItem('disable-fetch-wrapper') === 'true') {
