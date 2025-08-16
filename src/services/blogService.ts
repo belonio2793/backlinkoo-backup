@@ -624,6 +624,23 @@ export class BlogService {
   }
 
   /**
+   * Extract keyword from title if not provided
+   */
+  private extractKeywordFromTitle(title: string): string {
+    // Remove common stop words and get meaningful keywords
+    const stopWords = ['the', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 'of', 'with', 'by', 'from', 'up', 'about', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'between', 'among', 'since', 'without', 'towards'];
+
+    const words = title
+      .toLowerCase()
+      .replace(/[^\w\s]/g, '') // Remove punctuation
+      .split(/\s+/)
+      .filter(word => word.length > 2 && !stopWords.includes(word));
+
+    // Return the first meaningful word or fallback to first word of title
+    return words[0] || title.split(' ')[0] || 'blog';
+  }
+
+  /**
    * Clean up expired trial posts
    */
   async cleanupExpiredTrialPosts(): Promise<number> {
