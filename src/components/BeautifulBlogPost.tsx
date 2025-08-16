@@ -45,7 +45,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { usePremiumSEOScore } from '@/hooks/usePremiumSEOScore';
 import { blogService } from '@/services/blogService';
-import { RobustBlogProcessor } from '@/utils/robustBlogProcessor';
 import { BlogProcessorTester } from '@/utils/testBlogProcessor';
 import BlogErrorBoundary from '@/components/BlogErrorBoundary';
 import { format } from 'date-fns';
@@ -56,6 +55,8 @@ import { SEOScoreDisplay } from '@/components/SEOScoreDisplay';
 import { KillerDeletionWarning } from '@/components/KillerDeletionWarning';
 import { ExitIntentPopup } from '@/components/ExitIntentPopup';
 import { BlogContentCleaner } from '@/utils/blogContentCleaner';
+import { BlogAutoAdjustmentService } from '@/services/blogAutoAdjustmentService';
+import { BlogQualityMonitor } from '@/utils/blogQualityMonitor';
 import { EnhancedBlogCleaner } from '@/utils/enhancedBlogCleaner';
 import { processBlogContent } from '@/utils/markdownProcessor';
 import { RobustContentProcessor } from '@/utils/robustContentProcessor';
@@ -115,7 +116,7 @@ export function BeautifulBlogPost() {
           console.log('No blog post loaded to test');
         }
       };
-      (window as any).RobustBlogProcessor = RobustBlogProcessor;
+      (window as any).BlogAutoAdjustmentService = BlogAutoAdjustmentService;
     }
   }, [blogPost]);
 
@@ -1078,12 +1079,19 @@ export function BeautifulBlogPost() {
                         }
 
                         // Process content with robust processor - DISABLE title removal to prevent content loss
-                        const result = RobustBlogProcessor.processIfNeeded(content, blogPost.title, {
-                          removeTitle: false, // CRITICAL: Don't remove title to prevent content loss
-                          targetUrl: blogPost.target_url,
-                          anchorText: blogPost.anchor_text,
-                          keyword: blogPost.keyword
+                        // Auto-adjust content using our advanced auto-adjustment system
+                        const qualityMetrics = BlogQualityMonitor.analyzeContent(content, blogPost.target_url);
+                        const adjustedContent = BlogAutoAdjustmentService.adjustContentForDisplay(content, {
+                          title: blogPost.title,
+                          target_url: blogPost.target_url,
+                          anchor_text: blogPost.anchor_text
                         });
+                        const result = {
+                          content: adjustedContent,
+                          wasProcessed: adjustedContent !== content,
+                          issues: qualityMetrics.issues,
+                          warnings: qualityMetrics.warnings
+                        };
 
                         // Log processing results for debugging
                         console.log('���� Blog content processing result:', {

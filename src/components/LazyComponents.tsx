@@ -24,6 +24,7 @@ export const LazySuperEnhancedBlogListing = lazy(() => import('@/components/Supe
 export const LazyEnhancedBlogPost = lazy(() => import('@/components/EnhancedBlogPost').then(module => ({ default: module.EnhancedBlogPost })));
 export const LazyBeautifulBlogPost = lazy(() => import('@/components/BeautifulBlogPost').then(module => ({ default: module.BeautifulBlogPost })));
 export const LazyBeautifulBlogTemplate = lazy(() => import('@/components/BeautifulBlogTemplate').then(module => ({ default: module.BeautifulBlogTemplate })));
+export const LazyBlogValidator = lazy(() => import('@/pages/BlogValidator'));
 
 export const LazyTrialDashboard = lazy(() => import('@/pages/TrialDashboard').then(module => ({ default: module.TrialDashboard })));
 export const LazyAIContentTest = lazy(() => import('@/pages/AIContentTest'));

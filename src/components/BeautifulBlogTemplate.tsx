@@ -36,6 +36,8 @@ import { blogService } from '@/services/blogService';
 import { format } from 'date-fns';
 import type { Tables } from '@/integrations/supabase/types';
 import { processBlogContent } from '@/utils/markdownProcessor';
+import { BlogAutoAdjustmentService } from '@/services/blogAutoAdjustmentService';
+import { BlogQualityMonitor } from '@/utils/blogQualityMonitor';
 
 type BlogPost = Tables<'blog_posts'>;
 
@@ -174,12 +176,21 @@ export function BeautifulBlogTemplate() {
     return toc;
   };
 
-  // Process content to handle markdown and add IDs to headings
+  // Process content with auto-adjustment and add IDs to headings
   const processContent = (content: string) => {
-    // First process markdown formatting (including bold text)
-    const markdownProcessed = processBlogContent(content);
+    console.log('🔍 BeautifulBlogTemplate: Processing content with auto-adjustment');
 
-    // Then add IDs to headings for table of contents
+    // First apply auto-adjustment for display (handles markdown conversion and fixes)
+    const autoAdjusted = BlogAutoAdjustmentService.adjustContentForDisplay(content, {
+      title: blogPost?.title,
+      target_url: blogPost?.target_url,
+      anchor_text: blogPost?.anchor_text
+    });
+
+    // Then process with markdown processor as fallback if needed
+    const markdownProcessed = processBlogContent(autoAdjusted);
+
+    // Finally add IDs to headings for table of contents
     return markdownProcessed.replace(/<h([2-6])([^>]*)>([^<]+)<\/h[2-6]>/g, (match, level, attrs, text) => {
       const id = text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
       return `<h${level}${attrs} id="${id}">${text}</h${level}>`;

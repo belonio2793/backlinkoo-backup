@@ -76,7 +76,8 @@ import {
   LazyEdgeFunctionDiagnostic,
   LazyRouteSyncTest,
   LazyEmailAuthenticationAudit,
-  LazyEmailDiagnostic
+  LazyEmailDiagnostic,
+  LazyBlogValidator
 } from './LazyComponents';
 
 // Loading component for better UX
@@ -132,6 +133,7 @@ export const OptimizedAppWrapper = () => {
           <Route path="/blog" element={<LazySuperEnhancedBlogListing />} />
           <Route path="/blog/create" element={<LazyBlogCreation />} />
           <Route path="/blog/seo-generator" element={<LazySEOOptimizedBlogGenerator />} />
+          <Route path="/blog/validator" element={<LazyBlogValidator />} />
           <Route path="/blog/:slug" element={<LazyBeautifulBlogPost />} />
           <Route path="/article/:slug" element={<LazyBeautifulBlogTemplate />} />
 
