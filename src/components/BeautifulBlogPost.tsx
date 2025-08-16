@@ -304,7 +304,7 @@ const ContentProcessor = ({
   }, [targetKeyword, anchorText, targetUrl]);
 
   return (
-    <div className="prose prose-lg max-w-none">
+    <div className="prose prose-lg prose-slate max-w-none prose-headings:font-bold prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:text-blue-800 prose-strong:text-gray-900 prose-li:text-gray-700">
       {processContent(content)}
     </div>
   );
