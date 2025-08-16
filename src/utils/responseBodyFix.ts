@@ -97,12 +97,12 @@ class ResponseBodyManager {
   /**
    * Create a mock response when cloning fails
    */
-  private createMockResponse(this: ResponseWithTracking): Response {
+  public createMockResponse(response: Response): Response {
     try {
       const mockResponse = new Response('{"error": "Response body was already consumed"}', {
-        status: this.status || 200,
-        statusText: this.statusText || 'OK',
-        headers: this.headers
+        status: response.status || 200,
+        statusText: response.statusText || 'OK',
+        headers: response.headers
       });
 
       ResponseBodyManager.getInstance().responseMap.set(mockResponse, { consumed: false, cloneCount: 0 });
