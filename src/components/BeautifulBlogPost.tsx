@@ -815,7 +815,7 @@ export function BeautifulBlogPost() {
 
   return (
     <TooltipProvider delayDuration={300}>
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      <div className="beautiful-blog-wrapper min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
         
         {/* Reading Progress */}
         <ReadingProgress />
