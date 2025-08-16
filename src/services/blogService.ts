@@ -3,6 +3,7 @@ import { Tables, TablesInsert, TablesUpdate } from '@/integrations/supabase/type
 import { blogPersistenceService } from './blogPersistenceService';
 import { SEOAnalyzer } from './seoAnalyzer';
 import { formatErrorForUI } from '@/utils/errorUtils';
+import { applyBeautifulContentStructure } from '@/utils/forceBeautifulContentStructure';
 
 export type BlogPost = Tables<'blog_posts'>;
 export type CreateBlogPost = TablesInsert<'blog_posts'>;
