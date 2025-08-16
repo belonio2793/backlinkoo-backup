@@ -10,29 +10,34 @@ export class EmergencyDatabaseSetup {
     try {
       console.log('🔧 Emergency database setup starting...');
 
-      // First, try to create the published_blog_posts table
-      const tableSetupResult = await this.createPublishedBlogPostsTable();
-      if (!tableSetupResult.success) {
-        return tableSetupResult;
-      }
+      // Skip table creation and go directly to creating the blog post
+      // This will work if the table exists, and fail gracefully if it doesn't
+      console.log('⚠️ Skipping table creation, attempting direct blog post creation...');
 
-      // Then create the missing blog post
+      // Try to create the missing blog post directly
       const blogPostResult = await this.createMissingBlogPost();
       if (!blogPostResult.success) {
+        // If it fails due to missing table, we'll return a more specific message
+        if (blogPostResult.message.includes('does not exist') || blogPostResult.message.includes('42P01')) {
+          return {
+            success: false,
+            message: 'Database table does not exist. Please contact support to initialize the database.'
+          };
+        }
         return blogPostResult;
       }
 
       console.log('✅ Emergency database setup completed successfully');
-      return { 
-        success: true, 
-        message: 'Database setup completed and blog post created' 
+      return {
+        success: true,
+        message: 'Blog post created successfully'
       };
 
     } catch (error) {
       console.error('❌ Emergency database setup failed:', error);
-      return { 
-        success: false, 
-        message: `Setup failed: ${error.message}` 
+      return {
+        success: false,
+        message: `Setup failed: ${error.message}`
       };
     }
   }
