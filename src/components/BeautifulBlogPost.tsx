@@ -198,11 +198,11 @@ function formatContent(raw: string, title?: string) {
       );
     }
 
-    // Enhanced Key Insights / Highlights detection - CONSISTENT FONT SIZE
+    // Enhanced Key Insights / Highlights detection - SAME FONT SIZE AS PARAGRAPHS
     if (/^(Key Insights|Pro Tip|Conclusion|Summary|Overview|Benefits|Important|Essential|Critical|Best Practices|Implementation)/i.test(line)) {
       const processedContent = processLineContent(line);
       return (
-        <h3 key={i} className="beautiful-prose text-lg font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
+        <p key={i} className="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6" dangerouslySetInnerHTML={{ __html: processedContent }} />
       );
     }
 
