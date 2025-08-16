@@ -12,6 +12,15 @@ export function getErrorMessage(error: any): string {
     return 'Unknown error occurred';
   }
 
+  // Handle Symbol errors specifically
+  if (typeof error === 'symbol') {
+    try {
+      return error.toString();
+    } catch {
+      return '[Symbol error - cannot convert to string]';
+    }
+  }
+
   // If it's already a string, return it
   if (typeof error === 'string') {
     return error;
