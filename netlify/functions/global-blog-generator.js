@@ -315,6 +315,13 @@ const generateContextualContent = (request) => {
 const validateAndRepairContent = (content, request) => {
   const { primaryKeyword, targetUrl, anchorText } = request;
 
+  if (!content || content.trim().length === 0) {
+    console.error('validateAndRepairContent: received empty content!');
+    return content;
+  }
+
+  const originalLength = content.length;
+
   // Check for common malformation patterns
   const issues = [];
 
@@ -334,17 +341,46 @@ const validateAndRepairContent = (content, request) => {
     content = content.replace(/<\/strong>\s*<strong>/g, ' ');
   }
 
-  // Ensure proper heading structure
-  if (!content.includes('<h1>') && !content.includes('<h2>')) {
+  // SAFE: Only add heading structure if content genuinely lacks it
+  const hasHeadings = content.includes('<h1>') || content.includes('<h2>') ||
+                      content.includes('# ') || content.includes('## ');
+
+  if (!hasHeadings) {
     // Convert first strong element to h1 if it looks like a title
-    content = content.replace(/^<strong>([^<]*?):<\/strong>/, '<h1>$1</h1>');
+    const titleMatch = content.match(/^<strong>([^<]*?):<\/strong>/);
+    if (titleMatch) {
+      content = content.replace(/^<strong>([^<]*?):<\/strong>/, '<h1>$1</h1>');
+      issues.push('Added missing title heading');
+    }
   }
 
-  // Fix broken URLs
+  // Fix broken URLs with more precision
   content = content.replace(/href="https:\s*\/\/([^"]*)">/, 'href="https://$1">');
 
+  // Fix malformed HTML entities more carefully
+  content = content
+    .replace(/&lt;\s*h[1-6]\s*&gt;/gi, '') // Remove malformed heading tags
+    .replace(/&lt;\s*\/\s*h[1-6]\s*&gt;/gi, '') // Remove malformed closing heading tags
+    .replace(/&lt;\s*p\s*&gt;/gi, '') // Remove malformed p tags
+    .replace(/&lt;\s*\/\s*p\s*&gt;/gi, ''); // Remove malformed closing p tags
+
+  // Validate that we didn't accidentally remove all content
+  if (content.trim().length === 0 && originalLength > 0) {
+    console.error('CRITICAL: Content validation removed all content! Restoring original.');
+    return request.originalContent || generateFallbackContent(request);
+  }
+
+  // Warn if content was significantly reduced
+  if (content.length < originalLength * 0.5 && originalLength > 100) {
+    console.warn('Content validation removed significant content:', {
+      original: originalLength,
+      final: content.length,
+      percentLost: Math.round(((originalLength - content.length) / originalLength) * 100)
+    });
+  }
+
   if (issues.length > 0) {
-    console.log('🔧 Content validation found and fixed issues:', issues);
+    console.log('Content validation found and fixed issues:', issues);
   }
 
   return content;
