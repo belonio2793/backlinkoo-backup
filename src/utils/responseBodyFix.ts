@@ -53,12 +53,12 @@ class ResponseBodyManager {
       
       if (tracking.consumed) {
         console.warn('Attempted to clone consumed response, creating mock response');
-        return this.createMockResponse();
+        return ResponseBodyManager.getInstance().createMockResponse(this);
       }
 
       if (tracking.cloneCount >= 2) {
         console.warn('Max clone count reached, creating mock response');
-        return this.createMockResponse();
+        return ResponseBodyManager.getInstance().createMockResponse(this);
       }
 
       try {
@@ -69,7 +69,7 @@ class ResponseBodyManager {
         return cloned;
       } catch (error) {
         console.warn('Clone failed, creating mock response:', error);
-        return this.createMockResponse();
+        return ResponseBodyManager.getInstance().createMockResponse(this);
       }
     };
 
