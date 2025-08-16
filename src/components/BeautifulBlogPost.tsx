@@ -1,4 +1,4 @@
-import { useState, useEffect, startTransition } from 'react';
+import { useState, useEffect, startTransition, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import '../styles/beautiful-blog.css';
 import '../styles/blog-template.css';
@@ -1557,7 +1557,7 @@ export function BeautifulBlogPost() {
                       return (
                         <div className="max-w-2xl mx-auto bg-red-600 text-white p-4 rounded-lg animate-pulse border-4 border-yellow-400">
                           <div className="text-center font-black text-lg">
-                            💀 CRITICAL: LESS THAN 1 HOUR REMAINING! ⚠️⚠️⚠️
+                            ��� CRITICAL: LESS THAN 1 HOUR REMAINING! ⚠️⚠️⚠️
                           </div>
                           <div className="text-center text-sm mt-2">
                             Your content is entering the DEATH ZONE!
