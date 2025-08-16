@@ -118,7 +118,6 @@ export class WorkingCampaignProcessor {
           result = { success: false, error: 'Failed to parse server response' };
         }
       }
-      const functionDuration = Date.now() - functionStartTime;
 
       // Log successful function call
       campaignNetworkLogger.updateFunctionCall(
