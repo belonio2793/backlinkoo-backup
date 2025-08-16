@@ -1106,11 +1106,12 @@ export function BeautifulBlogPost() {
 
                         // Log processing results for debugging
                         console.log('���� Blog content processing result:', {
-                          wasProcessed: result.wasProcessed,
+                          securityProcessed: secureHtmlResult.securityInfo.wasProcessed,
+                          securityRisk: secureHtmlResult.securityInfo.riskLevel,
+                          qualityScore: qualityMetrics.qualityScore,
                           originalLength: content.length,
-                          processedLength: result.content.length,
-                          issues: result.issues,
-                          warnings: result.warnings
+                          finalLength: finalContent.length,
+                          securityIssues: secureHtmlResult.securityInfo.securityIssues
                         });
 
                         if (result.warnings.length > 0) {
