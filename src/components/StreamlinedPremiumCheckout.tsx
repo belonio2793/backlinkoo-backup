@@ -169,7 +169,18 @@ export function StreamlinedPremiumCheckout({
 
         if (fallbackResult.success) {
           if (fallbackResult.url && !fallbackResult.usedFallback) {
-            window.location.href = fallbackResult.url;
+            // Open fallback URL in new window too
+            const fallbackWindow = window.open(
+              fallbackResult.url,
+              'stripe-checkout-fallback',
+              'width=800,height=600,scrollbars=yes,resizable=yes,location=yes,status=yes'
+            );
+
+            if (!fallbackWindow) {
+              window.location.href = fallbackResult.url;
+            } else {
+              onClose();
+            }
             return;
           } else if (fallbackResult.usedFallback) {
             // Direct upgrade via fallback
