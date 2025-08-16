@@ -75,13 +75,49 @@ window.checkNetworkStatus = function() {
     });
 };
 
+// Function to test Symbol error handling
+window.testSymbolErrors = function() {
+  console.log('🧪 Testing Symbol error handling...');
+
+  try {
+    // Create various problematic objects
+    const symbolError = Symbol('test-error');
+    const objectWithSymbol = {
+      message: 'Error with symbol',
+      [Symbol.iterator]: function*() { yield 1; },
+      [Symbol('test')]: 'value'
+    };
+
+    // Test string conversion (this was causing the original error)
+    try {
+      const result1 = String(symbolError);
+      console.log('✅ Symbol to string conversion works:', result1);
+    } catch (e) {
+      console.log('❌ Symbol to string conversion failed:', e.message);
+    }
+
+    // Test template literal conversion (this was the main issue)
+    try {
+      const result2 = `Error: ${symbolError}`;
+      console.log('✅ Symbol template literal works:', result2);
+    } catch (e) {
+      console.log('❌ Symbol template literal failed:', e.message);
+    }
+
+    console.log('🧪 Symbol error test complete');
+  } catch (error) {
+    console.log('❌ Symbol error test failed:', error.message);
+  }
+};
+
 // Auto-run network status check
 setTimeout(() => {
   console.log('🌐 Network debugging utilities loaded:');
   console.log('- Run fixNetworkIssues() to disable fetch wrapper');
   console.log('- Run enableNetworkWrapper() to re-enable wrapper');
   console.log('- Run checkNetworkStatus() to check current status');
-  
+  console.log('- Run testSymbolErrors() to test Symbol error handling');
+
   // Auto-check if there are issues
   if (localStorage.getItem('disable-fetch-wrapper') === 'true') {
     console.log('ℹ️ Fetch wrapper is currently disabled');
