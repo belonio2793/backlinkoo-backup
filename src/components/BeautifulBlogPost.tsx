@@ -166,11 +166,36 @@ const ContentProcessor = ({
       .replace(/\n{3,}/g, '\n\n')
       .trim();
 
-    // Remove duplicate title at the beginning
+    // Enhanced title removal - remove duplicate titles anywhere in content
     if (title) {
-      const titlePattern = new RegExp(`^\\s*${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i');
-      cleanContent = cleanContent.replace(titlePattern, '');
+      const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      // Remove title at the beginning of content
+      const titleAtStartPattern = new RegExp(`^\\s*${escapedTitle}\\s*`, 'i');
+      cleanContent = cleanContent.replace(titleAtStartPattern, '');
+
+      // Remove title as a standalone line anywhere in content
+      const titleStandalonePattern = new RegExp(`^\\s*${escapedTitle}\\s*$`, 'gim');
+      cleanContent = cleanContent.replace(titleStandalonePattern, '');
+
+      // Remove title wrapped in bold markdown (**title**)
+      const titleBoldPattern = new RegExp(`\\*\\*\\s*${escapedTitle}\\s*\\*\\*`, 'gi');
+      cleanContent = cleanContent.replace(titleBoldPattern, '');
+
+      // Remove title as a heading (# title)
+      const titleHeadingPattern = new RegExp(`^#+\\s*${escapedTitle}\\s*$`, 'gim');
+      cleanContent = cleanContent.replace(titleHeadingPattern, '');
+
+      // Remove title if it appears as the first strong element in a paragraph
+      const titleFirstStrongPattern = new RegExp(`^\\s*${escapedTitle}\\s*`, 'i');
+      cleanContent = cleanContent.replace(titleFirstStrongPattern, '');
     }
+
+    // Clean up any remaining empty lines or whitespace
+    cleanContent = cleanContent
+      .replace(/\n\s*\n\s*\n/g, '\n\n') // Remove multiple empty lines
+      .replace(/^\s+|\s+$/g, '') // Trim whitespace
+      .trim();
 
     // Split into lines first to better detect lists
     const lines = cleanContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
