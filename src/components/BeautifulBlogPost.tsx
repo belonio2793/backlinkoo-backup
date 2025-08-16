@@ -794,12 +794,16 @@ export function BeautifulBlogPost() {
 
         // Enhanced heading detection - Check if it's a heading (short line with title-like content) but NOT the blog title
         const isLikelyHeading = para.length < 150 && (
-          // Section patterns
+          // Section patterns (enhanced to catch more variations)
           para.match(/^Section\s+\d+:/i) ||
+          para.match(/^Section\s+\d+\s*[-–—]\s*/i) ||
           para.match(/^Part\s+\d+:/i) ||
           para.match(/^Chapter\s+\d+:/i) ||
           para.match(/^\d+\.\s+[A-Z]/i) ||
           para.match(/^Step\s+\d+:/i) ||
+          para.match(/^\d+\)\s+[A-Z]/i) ||
+          para.match(/^Stage\s+\d+:/i) ||
+          para.match(/^Phase\s+\d+:/i) ||
 
           // Common heading patterns
           (para.includes('Introduction') && !para.includes('Hook Introduction')) ||
@@ -1314,7 +1318,7 @@ export function BeautifulBlogPost() {
                         <div className="space-y-1">
                           <p className="font-semibold">Unclaimed</p>
                           <p className="text-sm">This post is unclaimed and anyone can take ownership of it.</p>
-                          <p className="text-xs text-gray-400">���️ May be deleted if not claimed soon</p>
+                          <p className="text-xs text-gray-400">⚠️ May be deleted if not claimed soon</p>
                         </div>
                       </TooltipContent>
                     </Tooltip>
