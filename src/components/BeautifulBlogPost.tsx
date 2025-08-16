@@ -1428,7 +1428,7 @@ export function BeautifulBlogPost() {
             </div>
 
             {/* Premium Upgrade CTA Section */}
-            <div className="mt-12 p-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border border-purple-200 max-w-4xl mx-auto">
+            <div className="mt-12 p-8 bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl border border-purple-200 max-w-5xl mx-auto">
               <div className="text-center">
                 <div className="flex items-center justify-center mb-4">
                   <Crown className="h-8 w-8 text-purple-600 mr-3" />
