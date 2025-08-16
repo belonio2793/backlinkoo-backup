@@ -1225,18 +1225,12 @@ export function BeautifulBlogPost() {
                         // Variables are already defined above as finalContent and securityInfo
 
                         // Log processing results for debugging
-                        console.log('���� Blog content processing result:', {
-                          securityProcessed: secureHtmlResult.securityInfo.wasProcessed,
-                          securityRisk: secureHtmlResult.securityInfo.riskLevel,
-                          qualityScore: qualityMetrics.qualityScore,
+                        console.log('Blog content processing result:', {
                           originalLength: content.length,
                           finalLength: finalContent.length,
-                          securityIssues: secureHtmlResult.securityInfo.securityIssues
+                          hasStructure: finalContent.includes('<h1>') || finalContent.includes('<h2>') || finalContent.includes('<p>'),
+                          processedSuccessfully: true
                         });
-
-                        if (secureHtmlResult.securityInfo.securityIssues.length > 0) {
-                          console.warn('Security issues detected:', secureHtmlResult.securityInfo.securityIssues);
-                        }
 
                         // Final safety check after processing
                         if (!finalContent || finalContent.trim().length === 0) {
@@ -1392,7 +1386,7 @@ export function BeautifulBlogPost() {
                       return (
                         <div className="max-w-2xl mx-auto bg-orange-600 text-white p-4 rounded-lg animate-pulse">
                           <div className="text-center font-bold">
-                            ⚠️ WARNING: Content expires in {hours} hours!
+                            ⚠�� WARNING: Content expires in {hours} hours!
                           </div>
                         </div>
                       );
