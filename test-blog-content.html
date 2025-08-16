@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blog Content Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; }
+        .error { color: red; }
+        .success { color: green; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>Blog Content Database Test</h1>
+    <button onclick="checkContent()">Check Blog Content</button>
+    <div id="results"></div>
+
+    <script>
+        async function checkContent() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Checking...</p>';
+            
+            try {
+                const response = await fetch('/.netlify/functions/check-blog-content');
+                const data = await response.json();
+                
+                let html = '<h2>Results:</h2>';
+                
+                // Display specific posts
+                html += '<h3>Specific Problem Posts:</h3>';
+                for (const [slug, result] of Object.entries(data.specificPosts)) {
+                    html += `<div style="margin: 10px 0; padding: 10px; border: 1px solid #ccc;">`;
+                    html += `<strong>Slug:</strong> ${slug}<br>`;
+                    
+                    if (result.found) {
+                        html += `<span class="success">✓ Found in database</span><br>`;
+                        html += `<strong>Title:</strong> ${result.title}<br>`;
+                        html += `<strong>Status:</strong> ${result.status}<br>`;
+                        html += `<strong>Content Length:</strong> ${result.contentLength}<br>`;
+                        html += `<strong>Is Empty:</strong> <span class="${result.isEmpty ? 'error' : 'success'}">${result.isEmpty ? 'YES' : 'NO'}</span><br>`;
+                        
+                        if (result.isEmpty) {
+                            html += `<span class="error">⚠️ CONTENT IS EMPTY - This explains the "Content Error"</span><br>`;
+                        } else {
+                            html += `<strong>Has HTML:</strong> ${result.hasHTML}<br>`;
+                            html += `<strong>Has Markdown:</strong> ${result.hasMarkdown}<br>`;
+                            html += `<strong>Preview:</strong><br><pre>${result.contentPreview}</pre>`;
+                        }
+                    } else {
+                        html += `<span class="error">✗ Not found</span><br>`;
+                        html += `<strong>Error:</strong> ${result.error}<br>`;
+                    }
+                    html += '</div>';
+                }
+                
+                // Display recent posts summary
+                if (data.recentPosts && !data.recentPosts.error) {
+                    html += '<h3>Recent Posts Summary:</h3>';
+                    html += `<p>Total recent posts: ${data.recentPosts.total}</p>`;
+                    html += `<p>Posts with empty content: <span class="${data.recentPosts.emptyCount > 0 ? 'error' : 'success'}">${data.recentPosts.emptyCount}</span></p>`;
+                    
+                    if (data.recentPosts.emptyCount > 0) {
+                        html += '<h4>Empty Posts:</h4>';
+                        data.recentPosts.posts.forEach(post => {
+                            if (post.isEmpty) {
+                                html += `<div style="padding: 5px; border-left: 3px solid red; margin: 5px 0;">`;
+                                html += `${post.slug} - "${post.title}" (${post.contentLength} chars)`;
+                                html += '</div>';
+                            }
+                        });
+                    }
+                } else if (data.recentPosts?.error) {
+                    html += `<h3 class="error">Recent Posts Error: ${data.recentPosts.error}</h3>`;
+                }
+                
+                resultsDiv.innerHTML = html;
+                
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+        
+        // Auto-run on page load
+        window.onload = checkContent;
+    </script>
+</body>
+</html>

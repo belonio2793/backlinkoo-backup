@@ -315,6 +315,13 @@ const generateContextualContent = (request) => {
 const validateAndRepairContent = (content, request) => {
   const { primaryKeyword, targetUrl, anchorText } = request;
 
+  if (!content || content.trim().length === 0) {
+    console.error('validateAndRepairContent: received empty content!');
+    return content;
+  }
+
+  const originalLength = content.length;
+
   // Check for common malformation patterns
   const issues = [];
 
@@ -334,79 +341,147 @@ const validateAndRepairContent = (content, request) => {
     content = content.replace(/<\/strong>\s*<strong>/g, ' ');
   }
 
-  // Ensure proper heading structure
-  if (!content.includes('<h1>') && !content.includes('<h2>')) {
+  // SAFE: Only add heading structure if content genuinely lacks it
+  const hasHeadings = content.includes('<h1>') || content.includes('<h2>') ||
+                      content.includes('# ') || content.includes('## ');
+
+  if (!hasHeadings) {
     // Convert first strong element to h1 if it looks like a title
-    content = content.replace(/^<strong>([^<]*?):<\/strong>/, '<h1>$1</h1>');
+    const titleMatch = content.match(/^<strong>([^<]*?):<\/strong>/);
+    if (titleMatch) {
+      content = content.replace(/^<strong>([^<]*?):<\/strong>/, '<h1>$1</h1>');
+      issues.push('Added missing title heading');
+    }
   }
 
-  // Fix broken URLs
+  // Fix broken URLs with more precision
   content = content.replace(/href="https:\s*\/\/([^"]*)">/, 'href="https://$1">');
 
+  // Fix malformed HTML entities more carefully
+  content = content
+    .replace(/&lt;\s*h[1-6]\s*&gt;/gi, '') // Remove malformed heading tags
+    .replace(/&lt;\s*\/\s*h[1-6]\s*&gt;/gi, '') // Remove malformed closing heading tags
+    .replace(/&lt;\s*p\s*&gt;/gi, '') // Remove malformed p tags
+    .replace(/&lt;\s*\/\s*p\s*&gt;/gi, ''); // Remove malformed closing p tags
+
+  // Validate that we didn't accidentally remove all content
+  if (content.trim().length === 0 && originalLength > 0) {
+    console.error('CRITICAL: Content validation removed all content! Restoring original.');
+    return request.originalContent || generateFallbackContent(request);
+  }
+
+  // Warn if content was significantly reduced
+  if (content.length < originalLength * 0.5 && originalLength > 100) {
+    console.warn('Content validation removed significant content:', {
+      original: originalLength,
+      final: content.length,
+      percentLost: Math.round(((originalLength - content.length) / originalLength) * 100)
+    });
+  }
+
   if (issues.length > 0) {
-    console.log('🔧 Content validation found and fixed issues:', issues);
+    console.log('Content validation found and fixed issues:', issues);
   }
 
   return content;
 };
 
-// Fallback content generation when both AI and template fail
+// Enhanced fallback content generation with multiple quality levels
 const generateFallbackContent = (request) => {
-  const { primaryKeyword, targetUrl, anchorText } = request;
+  const { primaryKeyword, targetUrl, anchorText, userLocation, additionalContext } = request;
   const anchor = anchorText || primaryKeyword;
+  const industry = additionalContext?.industry || 'business';
+  const contentTone = additionalContext?.contentTone || 'professional';
+  const currentYear = new Date().getFullYear();
+  const locationContext = userLocation ? ` in ${userLocation}` : '';
+
+  console.log('🆘 Generating emergency fallback content for:', primaryKeyword);
 
   return `
-<h1>${primaryKeyword}: Essential Guide for Success</h1>
+<h1>${primaryKeyword}: Complete ${currentYear} Guide</h1>
 
-<p>In today's competitive digital landscape, understanding ${primaryKeyword} is crucial for achieving sustainable growth and success.</p>
+<p>Understanding ${primaryKeyword} is essential for success in today's competitive${locationContext} market. This comprehensive guide provides the insights and strategies you need to excel in ${industry}.</p>
 
-<h2>Understanding ${primaryKeyword}</h2>
+<h2>What is ${primaryKeyword}?</h2>
 
-<p>${primaryKeyword} represents a fundamental approach to building lasting success in your industry. By implementing proven strategies and best practices, businesses can achieve remarkable results.</p>
+<p>${primaryKeyword} represents a fundamental approach to achieving sustainable growth and competitive advantage${locationContext}. By implementing proven strategies and best practices, ${industry} professionals can unlock significant opportunities for success.</p>
 
-<h3>Key Benefits</h3>
+<h3>Key Benefits of ${primaryKeyword}</h3>
 
 <ul>
-<li><strong>Improved Performance:</strong> Strategic implementation leads to measurable improvements</li>
-<li><strong>Competitive Advantage:</strong> Stay ahead of industry trends and competitors</li>
-<li><strong>Sustainable Growth:</strong> Build foundations for long-term success</li>
-<li><strong>Enhanced ROI:</strong> Maximize return on investment through optimized approaches</li>
+<li><strong>Improved Performance:</strong> Strategic implementation leads to measurable improvements in results</li>
+<li><strong>Competitive Edge:</strong> Stay ahead of industry trends and outperform competitors</li>
+<li><strong>Cost Efficiency:</strong> Optimize resources and maximize return on investment</li>
+<li><strong>Scalable Growth:</strong> Build foundations that support long-term expansion</li>
 </ul>
 
-<h2>Best Practices for ${primaryKeyword}</h2>
+<h2>Essential ${primaryKeyword} Strategies</h2>
 
-<p>Successful ${primaryKeyword} implementation requires careful planning and execution. Industry leaders consistently follow these proven approaches:</p>
+<p>Successful ${primaryKeyword} implementation requires a systematic approach. Industry leaders${locationContext} consistently follow these proven methodologies:</p>
 
-<h3>Strategic Planning</h3>
+<h3>1. Strategic Planning</h3>
 
-<p>Begin with a comprehensive analysis of your current situation and desired outcomes. This foundation ensures all subsequent efforts align with your business objectives.</p>
+<p>Begin with comprehensive analysis of your current position and desired outcomes. This foundation ensures all subsequent efforts align with your business objectives and market conditions${locationContext}.</p>
 
-<h3>Implementation Strategy</h3>
+<h3>2. Best Practice Implementation</h3>
 
-<p>Execute your ${primaryKeyword} strategy systematically, monitoring progress and adjusting as needed. Professional tools and resources, such as those available through <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a>, can significantly accelerate your success.</p>
+<p>Deploy proven ${primaryKeyword} strategies that have delivered results for similar organizations. Focus on methodologies that offer the highest impact and align with your specific ${industry} needs.</p>
 
-<h2>Measuring Success</h2>
+<h3>3. Continuous Optimization</h3>
 
-<p>Track key performance indicators to ensure your ${primaryKeyword} efforts deliver the expected results. Regular monitoring allows for timely adjustments and optimizations.</p>
+<p>Monitor performance metrics and adjust strategies based on real-world results. This iterative approach ensures sustained improvement and adaptation to changing market conditions.</p>
 
-<h3>Common Metrics</h3>
+<h2>Advanced ${primaryKeyword} Techniques</h2>
+
+<p>Once you've mastered the fundamentals, advanced techniques can unlock even greater potential:</p>
+
+<h3>Technology Integration</h3>
+
+<p>Leverage cutting-edge tools and platforms to enhance your ${primaryKeyword} capabilities. Professional solutions, such as those available through <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a>, provide the infrastructure needed for enterprise-scale success.</p>
+
+<h3>Data-Driven Decision Making</h3>
+
+<p>Utilize analytics and performance data to guide your ${primaryKeyword} strategy. This approach ensures decisions are based on evidence rather than assumptions.</p>
+
+<h2>Measuring ${primaryKeyword} Success</h2>
+
+<p>Effective measurement is crucial for validating your ${primaryKeyword} efforts and identifying areas for improvement:</p>
+
+<h3>Key Performance Indicators</h3>
 
 <ul>
-<li>Performance improvements over baseline</li>
+<li>Performance improvement metrics</li>
 <li>Cost reduction and efficiency gains</li>
-<li>User satisfaction and engagement</li>
-<li>Return on investment (ROI)</li>
+<li>User satisfaction and engagement levels</li>
+<li>Return on investment (ROI) calculations</li>
+<li>Market share and competitive positioning</li>
 </ul>
 
-<h2>Getting Started</h2>
+<h2>Getting Started with ${primaryKeyword}</h2>
 
-<p>Ready to implement ${primaryKeyword} strategies for your business? Start with a clear understanding of your goals and available resources.</p>
+<p>Ready to implement ${primaryKeyword} strategies for your organization${locationContext}? Follow these essential first steps:</p>
 
-<p>For comprehensive guidance and proven solutions, explore the expert resources available at <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a>. Our platform provides the tools and insights needed to achieve your ${primaryKeyword} objectives.</p>
+<ol>
+<li><strong>Assessment:</strong> Evaluate your current situation and identify improvement opportunities</li>
+<li><strong>Planning:</strong> Develop a comprehensive ${primaryKeyword} strategy aligned with your goals</li>
+<li><strong>Implementation:</strong> Execute your plan systematically with proper resource allocation</li>
+<li><strong>Monitoring:</strong> Track progress and adjust strategies based on performance data</li>
+</ol>
+
+<h3>Professional Support and Resources</h3>
+
+<p>For comprehensive guidance and proven solutions, explore the expert resources available at <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a>. Our platform provides the tools, insights, and support needed to achieve your ${primaryKeyword} objectives and drive sustainable growth.</p>
 
 <h2>Conclusion</h2>
 
-<p>${primaryKeyword} success requires the right combination of strategy, tools, and execution. By following proven methodologies and leveraging expert resources, businesses can achieve exceptional results and sustainable growth.</p>
+<p>${primaryKeyword} success requires the right combination of strategy, tools, and execution. By following proven methodologies, leveraging expert resources, and maintaining a commitment to continuous improvement, organizations can achieve exceptional results and build sustainable competitive advantages${locationContext}.</p>
+
+<p>Take the first step toward ${primaryKeyword} excellence today. With proper planning, implementation, and ongoing optimization, your organization can unlock its full potential and achieve lasting success.</p>
+
+<div style="background: #f8fafc; padding: 24px; border-radius: 8px; border-left: 4px solid #3b82f6; margin: 24px 0;">
+<h3 style="margin-top: 0; color: #1f2937;">Ready to Get Started?</h3>
+<p style="margin-bottom: 0;">Discover how <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a> can accelerate your ${primaryKeyword} success with proven strategies and expert guidance.</p>
+</div>
 
 <p>Take the first step toward ${primaryKeyword} excellence today and discover why thousands of businesses trust our proven approach to drive their success.</p>
 `;
@@ -629,6 +704,12 @@ exports.handler = async (event, context) => {
       // Validate and repair content structure
       content = validateAndRepairContent(content, { primaryKeyword, targetUrl, anchorText });
 
+      // Final AI content validation
+      if (!content || content.trim().length === 0) {
+        console.error('⚠️ AI content became empty after validation!');
+        content = generateContextualContent(request);
+      }
+
       // Generate enhanced SEO metadata for AI content
       seoMeta = generateEnhancedSEOMetadata(request, aiResult.content);
     } else {
@@ -642,6 +723,26 @@ exports.handler = async (event, context) => {
         content = generateFallbackContent(request);
       }
     }
+
+    // CRITICAL: Final content validation before database save
+    if (!content || content.trim().length === 0) {
+      console.error('EMERGENCY: All content generation methods failed!');
+      content = generateFallbackContent(request);
+      console.log('Emergency fallback content generated with length:', content?.length || 0);
+
+      // Double-check emergency content
+      if (!content || content.trim().length < 500) {
+        console.error('CRITICAL: Emergency fallback also failed! Generating minimal content.');
+        const { primaryKeyword, targetUrl, anchorText } = request;
+        const anchor = anchorText || primaryKeyword;
+        content = `<h1>${primaryKeyword}: Essential Guide</h1><p>${primaryKeyword} is essential for business success. Learn effective strategies and best practices.</p><p>For professional tools and expert guidance, visit <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a>.</p>`;
+      }
+    }
+
+    console.log('Final content validation:', {
+      contentLength: content?.length || 0,
+      hasValidContent: Boolean(content && content.trim().length > 100)
+    });
     const blogPost = {
       id: crypto.randomUUID(),
       slug: `${primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
@@ -670,18 +771,56 @@ exports.handler = async (event, context) => {
 
     // Store in database
     try {
-      // Clean content before storing in database to prevent malformed patterns
+      // Validate content before cleaning
+      console.log('Pre-cleaning content stats:', {
+        length: blogPost.content?.length || 0,
+        hasH1: blogPost.content?.includes('<h1>') || blogPost.content?.includes('# '),
+        hasH2: blogPost.content?.includes('<h2>') || blogPost.content?.includes('## '),
+        hasHTML: blogPost.content?.includes('<'),
+        isEmpty: !blogPost.content || blogPost.content.trim().length === 0
+      });
+
+      if (!blogPost.content || blogPost.content.trim().length === 0) {
+        console.error('CRITICAL: Blog content is empty before database save!');
+        // Generate emergency fallback content
+        blogPost.content = generateFallbackContent(request);
+        console.log('Using emergency fallback content');
+
+        // Verify emergency content is valid
+        if (!blogPost.content || blogPost.content.trim().length < 200) {
+          console.error('EMERGENCY FALLBACK FAILED! Using absolute minimal content.');
+          const { primaryKeyword, targetUrl, anchorText } = request;
+          const anchor = anchorText || primaryKeyword;
+          blogPost.content = `<h1>${primaryKeyword}</h1><p>This comprehensive guide covers ${primaryKeyword} strategies for success.</p><p>Visit <a href="${targetUrl}" target="_blank" rel="noopener noreferrer">${anchor}</a> for expert resources.</p>`;
+        }
+      }
+
+      // SAFE content cleaning - only fix specific malformed patterns, preserve content
       const cleanedBlogPost = {
         ...blogPost,
         content: blogPost.content
+          // Only fix specific heading malformations
           .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
-          .replace(/##\s*&lt;\s*h[1-6]\s*&gt;/gi, '##')
-          .replace(/##\s*&lt;[^>]*&gt;[^\n]*/g, '')
-          .replace(/&lt;\s*h[1-6]\s*&gt;/gi, '')
-          .replace(/&lt;\s*\/\s*h[1-6]\s*&gt;/gi, '')
-          .replace(/&lt;\s*p\s*&gt;/gi, '')
-          .replace(/&lt;\s*\/\s*p\s*&gt;/gi, '')
+          .replace(/##\s*&lt;\s*h[1-6]\s*&gt;([^\n]+)/gi, '## $1')
+          // Remove dangling HTML entities only if not part of valid content
+          .replace(/\s+&lt;\s*\/\s*h[1-6]\s*&gt;\s*$/gmi, '')
+          .replace(/\s+&lt;\s*\/\s*p\s*&gt;\s*$/gmi, '')
+          // Fix malformed entity patterns but preserve content
+          .replace(/&lt;\s*h[1-6]\s*&gt;([^&\n<]+)/gi, '$1')
+          .replace(/([^&\n>]+)&lt;\s*\/\s*h[1-6]\s*&gt;/gi, '$1')
       };
+
+      // Final validation
+      if (!cleanedBlogPost.content || cleanedBlogPost.content.trim().length === 0) {
+        console.error('CRITICAL: Content became empty after cleaning!');
+        cleanedBlogPost.content = blogPost.content; // Restore original
+        console.log('Restored original content to prevent empty save');
+      }
+
+      console.log('Post-cleaning content stats:', {
+        length: cleanedBlogPost.content?.length || 0,
+        hasContent: Boolean(cleanedBlogPost.content && cleanedBlogPost.content.trim().length > 0)
+      });
 
       // Save to both tables for compatibility
       const { error: dbError } = await supabase

@@ -1050,28 +1050,58 @@ export function BeautifulBlogPost() {
                       try {
                         const content = blogPost.content || '';
 
+                        console.log('🔍 BeautifulBlogPost content debug:', {
+                          postId: blogPost.id,
+                          slug: blogPost.slug,
+                          contentLength: content.length,
+                          isEmpty: !content || content.trim().length === 0,
+                          contentPreview: content.substring(0, 100)
+                        });
+
                         if (!content || content.trim().length === 0) {
-                          return '<div style="padding: 20px; text-align: center; color: #ef4444;"><h3>Content Error</h3><p>This blog post appears to have no content.</p></div>';
+                          console.error('❌ Blog post has no content:', {
+                            postId: blogPost.id,
+                            slug: blogPost.slug,
+                            title: blogPost.title
+                          });
+
+                          return `
+                            <div style="padding: 40px; text-align: center; background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; margin: 20px 0;">
+                              <h3 style="color: #dc2626; margin-bottom: 16px;">Content Error</h3>
+                              <p style="color: #7f1d1d; margin-bottom: 16px;">This blog post appears to have no content in the database.</p>
+                              <details style="text-align: left; background: white; padding: 16px; border-radius: 4px; border: 1px solid #f3f4f6;">
+                                <summary style="cursor: pointer; font-weight: 600; color: #374151;">Debug Information</summary>
+                                <pre style="margin-top: 8px; font-size: 12px; color: #6b7280;">Post ID: ${blogPost.id}\nSlug: ${blogPost.slug}\nTitle: ${blogPost.title || 'No title'}\nStatus: ${blogPost.status || 'unknown'}\nCreated: ${blogPost.created_at || 'unknown'}</pre>
+                              </details>
+                            </div>
+                          `;
                         }
 
-                        // Process content with robust processor
+                        // Process content with robust processor - DISABLE title removal to prevent content loss
                         const result = RobustBlogProcessor.processIfNeeded(content, blogPost.title, {
-                          removeTitle: true,
+                          removeTitle: false, // CRITICAL: Don't remove title to prevent content loss
                           targetUrl: blogPost.target_url,
                           anchorText: blogPost.anchor_text,
                           keyword: blogPost.keyword
                         });
 
                         // Log processing results for debugging
-                        if (result.wasProcessed) {
-                          console.log('✅ Blog content processed successfully:', {
-                            issues: result.issues,
-                            warnings: result.warnings
-                          });
-                        }
+                        console.log('���� Blog content processing result:', {
+                          wasProcessed: result.wasProcessed,
+                          originalLength: content.length,
+                          processedLength: result.content.length,
+                          issues: result.issues,
+                          warnings: result.warnings
+                        });
 
                         if (result.warnings.length > 0) {
                           console.warn('⚠️ Blog content warnings:', result.warnings);
+                        }
+
+                        // Final safety check after processing
+                        if (!result.content || result.content.trim().length === 0) {
+                          console.error('❌ Content became empty after processing! Using original.');
+                          return content; // Return original unprocessed content
                         }
 
                         return result.content;
