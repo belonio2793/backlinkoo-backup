@@ -617,7 +617,15 @@ export function BeautifulBlogPost() {
       .replace(/\n{3,}/g, '\n\n')
       .trim();
 
-    // Step 2: Convert markdown-style formatting to HTML if needed
+    // Step 2: Remove duplicate title if it appears in content
+    if (title) {
+      const titleClean = title.toLowerCase().trim();
+      // Remove title from start of content if it matches
+      formattedContent = formattedContent.replace(new RegExp(`^\\s*${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i'), '');
+      formattedContent = formattedContent.replace(new RegExp(`^\\s*<h[1-6][^>]*>\\s*${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*</h[1-6]>\\s*`, 'i'), '');
+    }
+
+    // Step 3: Convert markdown-style formatting to HTML if needed
     if (!formattedContent.includes('<p>') && !formattedContent.includes('<h1>')) {
       // Convert **text** to <strong>text</strong>
       formattedContent = formattedContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
@@ -631,6 +639,11 @@ export function BeautifulBlogPost() {
 
         // Skip empty or invalid content
         if (!para || para === '****' || para.match(/^\*+$/)) {
+          continue;
+        }
+
+        // Skip if this paragraph matches the blog title (duplicate title removal)
+        if (title && para.toLowerCase().trim() === title.toLowerCase().trim()) {
           continue;
         }
 
@@ -1422,7 +1435,7 @@ export function BeautifulBlogPost() {
                       return (
                         <div className="max-w-2xl mx-auto bg-red-600 text-white p-4 rounded-lg animate-pulse border-4 border-yellow-400">
                           <div className="text-center font-black text-lg">
-                            💀 CRITICAL: LESS THAN 1 HOUR REMAINING! ⚠️⚠️⚠��
+                            💀 CRITICAL: LESS THAN 1 HOUR REMAINING! ⚠️⚠️⚠️
                           </div>
                           <div className="text-center text-sm mt-2">
                             Your content is entering the DEATH ZONE!
