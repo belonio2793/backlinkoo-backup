@@ -301,10 +301,10 @@ const ContentProcessor = ({
     }
 
     // Handle bold text
-    processedText = processedText.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>');
+    processedText = processedText.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-gray-900 bg-gray-50/50 px-1 py-0.5 rounded">$1</strong>');
 
     // Handle italic text
-    processedText = processedText.replace(/\*([^*]+)\*/g, '<em class="italic">$1</em>');
+    processedText = processedText.replace(/\*([^*]+)\*/g, '<em class="italic text-gray-800 font-medium">$1</em>');
 
     return <span dangerouslySetInnerHTML={{ __html: processedText }} />;
   }, [targetKeyword, anchorText, targetUrl]);
