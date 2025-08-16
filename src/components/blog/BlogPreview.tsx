@@ -37,19 +37,27 @@ export function BlogPreview({ content }: BlogPreviewProps) {
   const [isPublishing, setIsPublishing] = useState(false);
   const { toast } = useToast();
 
-  // Auto-adjust content for display with quality metrics
-  const { adjustedContent, qualityMetrics, wasAdjusted } = useMemo(() => {
+  // Auto-adjust content for display with quality metrics and security processing
+  const { adjustedContent, qualityMetrics, wasAdjusted, securityInfo } = useMemo(() => {
     if (!content?.content) {
-      return { adjustedContent: null, qualityMetrics: null, wasAdjusted: false };
+      return { adjustedContent: null, qualityMetrics: null, wasAdjusted: false, securityInfo: null };
     }
 
-    const metrics = BlogQualityMonitor.analyzeContent(content.content, content.targetUrl);
-    const adjusted = BlogAutoAdjustmentService.adjustContentForDisplay(content.content, content);
+    // Security first
+    const secureResult = BlogContentSecurityProcessor.processContent(content.content, content.title);
+    const metrics = BlogQualityMonitor.analyzeContent(secureResult.content, content.targetUrl);
+
+    // Apply additional quality adjustments if needed
+    let finalContent = secureResult.content;
+    if (metrics.qualityScore < 70 || metrics.hasMalformedPatterns) {
+      finalContent = BlogAutoAdjustmentService.adjustContentForDisplay(finalContent, content);
+    }
 
     return {
-      adjustedContent: adjusted,
+      adjustedContent: finalContent,
       qualityMetrics: metrics,
-      wasAdjusted: adjusted !== content.content
+      wasAdjusted: finalContent !== content.content,
+      securityInfo: secureResult
     };
   }, [content]);
 
