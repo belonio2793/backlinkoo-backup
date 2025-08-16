@@ -1,17 +1,10 @@
 /**
- * Response Body Conflict Prevention Utility
- * Prevents "Response body is already used" errors by managing response cloning safely
+ * Simplified Response Body Helper
+ * Provides safe response handling without complex tracking that causes false positives
  */
-
-interface ResponseWithTracking extends Response {
-  _bodyConsumed?: boolean;
-  _cloneCount?: number;
-  _originalClone?: () => Response;
-}
 
 class ResponseBodyManager {
   private static instance: ResponseBodyManager;
-  private responseMap = new WeakMap<Response, { consumed: boolean; cloneCount: number }>();
 
   static getInstance(): ResponseBodyManager {
     if (!ResponseBodyManager.instance) {
@@ -21,174 +14,59 @@ class ResponseBodyManager {
   }
 
   /**
-   * Initialize response body tracking
+   * Initialize simplified response handling (kept for compatibility)
    */
   initializeTracking(): void {
-    // Only initialize once
+    // Simplified - no more complex tracking
     if ((window as any)._responseBodyManagerInitialized) {
       return;
     }
-
-    this.patchResponseMethods();
     (window as any)._responseBodyManagerInitialized = true;
-    console.log('🔧 Response body tracking initialized');
+    console.log('🔧 Simplified response helper initialized');
   }
 
   /**
-   * Patch Response prototype methods to track body consumption
+   * Safe clone method - simply use native clone with fallback
    */
-  private patchResponseMethods(): void {
-    const originalMethods = {
-      clone: Response.prototype.clone,
-      json: Response.prototype.json,
-      text: Response.prototype.text,
-      blob: Response.prototype.blob,
-      arrayBuffer: Response.prototype.arrayBuffer,
-      formData: Response.prototype.formData
-    };
-
-    // Patch clone method
-    Response.prototype.clone = function(this: ResponseWithTracking) {
-      const tracking = ResponseBodyManager.getInstance().responseMap.get(this) || { consumed: false, cloneCount: 0 };
-      
-      if (tracking.consumed) {
-        console.warn('Attempted to clone consumed response, creating mock response');
-        return ResponseBodyManager.getInstance().createMockResponse(this);
-      }
-
-      if (tracking.cloneCount >= 2) {
-        console.warn('Max clone count reached, creating mock response');
-        return ResponseBodyManager.getInstance().createMockResponse(this);
-      }
-
-      try {
-        const cloned = originalMethods.clone.call(this);
-        tracking.cloneCount++;
-        ResponseBodyManager.getInstance().responseMap.set(this, tracking);
-        ResponseBodyManager.getInstance().responseMap.set(cloned, { consumed: false, cloneCount: 0 });
-        return cloned;
-      } catch (error) {
-        console.warn('Clone failed, creating mock response:', error);
-        return ResponseBodyManager.getInstance().createMockResponse(this);
-      }
-    };
-
-    // Patch body consumption methods
-    const bodyMethods = ['json', 'text', 'blob', 'arrayBuffer', 'formData'] as const;
-    
-    bodyMethods.forEach(method => {
-      const original = originalMethods[method];
-      Response.prototype[method] = function(this: ResponseWithTracking) {
-        const tracking = ResponseBodyManager.getInstance().responseMap.get(this) || { consumed: false, cloneCount: 0 };
-
-        if (tracking.consumed) {
-          console.warn(`Response body already consumed for ${method}(), returning empty result`);
-          return ResponseBodyManager.getInstance().getEmptyResult(method);
-        }
-
-        tracking.consumed = true;
-        ResponseBodyManager.getInstance().responseMap.set(this, tracking);
-
-        return original.call(this);
-      };
-    });
-  }
-
-  /**
-   * Create a mock response when cloning fails
-   */
-  public createMockResponse(response: Response): Response {
+  public safeClone(response: Response): Response {
     try {
-      const mockResponse = new Response('{"error": "Response body was already consumed"}', {
-        status: response.status || 200,
-        statusText: response.statusText || 'OK',
-        headers: response.headers
-      });
-
-      ResponseBodyManager.getInstance().responseMap.set(mockResponse, { consumed: false, cloneCount: 0 });
-      return mockResponse;
-    } catch (error) {
-      // Fallback: create minimal response
-      const fallbackResponse = new Response('{}', {
-        status: 200,
-        statusText: 'OK'
-      });
-      return fallbackResponse;
-    }
-  }
-
-  /**
-   * Get empty result for already consumed responses
-   */
-  public getEmptyResult(method: string): Promise<any> {
-    switch (method) {
-      case 'json':
-        return Promise.resolve({ error: 'Response body already consumed' });
-      case 'text':
-        return Promise.resolve('Response body already consumed');
-      case 'blob':
-        return Promise.resolve(new Blob());
-      case 'arrayBuffer':
-        return Promise.resolve(new ArrayBuffer(0));
-      case 'formData':
-        return Promise.resolve(new FormData());
-      default:
-        return Promise.resolve(null);
-    }
-  }
-
-  /**
-   * Safely clone a response
-   */
-  safeClone(response: Response): Response {
-    try {
-      // Check if response is already consumed
-      if (response.bodyUsed) {
-        console.warn('Attempted to clone consumed response, creating mock');
-        return this.createMockResponseFromConsumed(response);
-      }
-
       return response.clone();
     } catch (error) {
-      console.warn('Failed to clone response, returning mock:', error);
-      return this.createMockResponseFromConsumed(response);
+      console.warn('Response clone failed:', error);
+      // Return a simple error response
+      return new Response('{"error": "Response body was already consumed"}', {
+        status: response.status || 200,
+        statusText: response.statusText || 'OK'
+      });
     }
   }
 
   /**
-   * Create mock response from consumed response
+   * Check if response body can be read
    */
-  private createMockResponseFromConsumed(response: Response): Response {
+  public canReadBody(response: Response): boolean {
+    return !response.bodyUsed;
+  }
+
+  /**
+   * Safe response reading with automatic retry
+   */
+  public async safeRead(response: Response, method: 'json' | 'text' = 'json'): Promise<any> {
     try {
-      return new Response('{"error": "Response body already consumed", "status": ' + response.status + '}', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers
-      });
+      if (response.bodyUsed) {
+        console.warn('Response body already used, cannot read');
+        return method === 'json' ? { error: 'Response body already consumed' } : 'Response body already consumed';
+      }
+      
+      if (method === 'json') {
+        return await response.json();
+      } else {
+        return await response.text();
+      }
     } catch (error) {
-      // Ultimate fallback
-      return new Response('{"error": "Response unavailable"}', {
-        status: 200,
-        statusText: 'OK'
-      });
+      console.warn(`Failed to read response as ${method}:`, error);
+      return method === 'json' ? { error: 'Failed to parse response' } : 'Failed to read response';
     }
-  }
-
-  /**
-   * Check if response body can be safely read
-   */
-  canReadBody(response: Response): boolean {
-    const tracking = this.responseMap.get(response);
-    return !response.bodyUsed && (!tracking || !tracking.consumed);
-  }
-
-  /**
-   * Mark response as consumed
-   */
-  markAsConsumed(response: Response): void {
-    const tracking = this.responseMap.get(response) || { consumed: false, cloneCount: 0 };
-    tracking.consumed = true;
-    this.responseMap.set(response, tracking);
   }
 }
 

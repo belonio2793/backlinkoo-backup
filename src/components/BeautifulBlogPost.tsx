@@ -405,14 +405,15 @@ export function BeautifulBlogPost() {
             body: JSON.stringify({ slug })
           });
 
-          const responseText = await response.text();
-          console.log('📡 API Response:', { status: response.status, body: responseText });
+          console.log('📡 API Response Status:', response.status);
 
           if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${responseText}`);
+            const errorText = await response.text();
+            console.log('📡 API Error:', errorText);
+            throw new Error(`HTTP ${response.status}: ${errorText}`);
           }
 
-          const result = JSON.parse(responseText);
+          const result = await response.json();
           if (result.success) {
             toast({
               title: "Post Deleted",
@@ -604,35 +605,123 @@ export function BeautifulBlogPost() {
 
     let formattedContent = content;
 
-    // Step 1: Clean up malformed content and artifacts
+    // Step 1: Clean up malformed content first
     formattedContent = formattedContent
-      .replace(/^(Introduction|Section \d+|Conclusion|Call-to-Action):\s*/gim, '')
-      .replace(/^(Hook Introduction|Summary|Overview):\s*/gim, '')
+      // Remove problematic markers
+      .replace(/\*{2,}/g, '') // Remove ** markers
+      .replace(/_{2,}/g, '') // Remove __ markers
       .replace(/\bH[1-6]:\s*/gi, '')
       .replace(/Title:\s*/gi, '')
       .replace(/Hook Introduction:\s*/gi, '')
-      .replace(/^#+\s*/gm, '')
-      .replace(/^>\s*/gm, '')
-      .replace(/["=]{2,}/g, '')
+      // Clean up excessive whitespace
       .replace(/\n{3,}/g, '\n\n')
       .trim();
 
-    // Step 2: Apply premium HTML structure with beautiful classes
+    // Step 2: Remove duplicate title if it appears in content
+    if (title) {
+      const titleClean = title.toLowerCase().trim();
+      // Remove title from start of content if it matches
+      formattedContent = formattedContent.replace(new RegExp(`^\\s*${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i'), '');
+      formattedContent = formattedContent.replace(new RegExp(`^\\s*<h[1-6][^>]*>\\s*${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*</h[1-6]>\\s*`, 'i'), '');
+    }
+
+    // Step 3: Convert markdown-style formatting to HTML if needed
+    if (!formattedContent.includes('<p>') && !formattedContent.includes('<h1>')) {
+      // Convert **text** to <strong>text</strong>
+      formattedContent = formattedContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+      // Split into paragraphs and process
+      const paragraphs = formattedContent.split(/\n\s*\n/).filter(p => p.trim().length > 0);
+
+      let htmlContent = '';
+      for (let i = 0; i < paragraphs.length; i++) {
+        const para = paragraphs[i].trim();
+
+        // Skip empty or invalid content
+        if (!para || para === '****' || para.match(/^\*+$/)) {
+          continue;
+        }
+
+        // Skip if this paragraph matches the blog title (duplicate title removal)
+        if (title && para.toLowerCase().trim() === title.toLowerCase().trim()) {
+          continue;
+        }
+
+        // Check if it's a heading (short line with title-like content)
+        if (para.length < 120 && (
+          para.includes('Guide') ||
+          para.includes('Introduction') ||
+          para.includes('Facebook') ||
+          para.includes('Conclusion') ||
+          para.includes('Strategy') ||
+          (para.split(' ').length <= 8 && para.charAt(0).toUpperCase() === para.charAt(0))
+        )) {
+          htmlContent += `<h2>${para}</h2>\n\n`;
+        }
+        // Check if it's a numbered list item
+        else if (para.match(/^\d+\./)) {
+          // If this is the start of a list, open <ol>
+          if (i === 0 || !paragraphs[i-1].match(/^\d+\./)) {
+            htmlContent += '<ol>\n';
+          }
+          const listContent = para.replace(/^\d+\.\s*/, '');
+          htmlContent += `<li>${listContent}</li>\n`;
+
+          // If next paragraph is not a list item, close </ol>
+          if (i === paragraphs.length - 1 || !paragraphs[i+1].match(/^\d+\./)) {
+            htmlContent += '</ol>\n\n';
+          }
+        }
+        // Check if it's a bullet point
+        else if (para.match(/^[•·\-\*]\s/)) {
+          // If this is the start of a list, open <ul>
+          if (i === 0 || !paragraphs[i-1].match(/^[•·\-\*]\s/)) {
+            htmlContent += '<ul>\n';
+          }
+          const listContent = para.replace(/^[•·\-\*]\s*/, '');
+          htmlContent += `<li>${listContent}</li>\n`;
+
+          // If next paragraph is not a list item, close </ul>
+          if (i === paragraphs.length - 1 || !paragraphs[i+1].match(/^[•·\-\*]\s/)) {
+            htmlContent += '</ul>\n\n';
+          }
+        }
+        // Regular paragraph
+        else {
+          htmlContent += `<p>${para}</p>\n\n`;
+        }
+      }
+      formattedContent = htmlContent;
+    }
+
+    // Step 4: Apply premium HTML structure with beautiful classes and remove duplicate titles
     formattedContent = formattedContent
       .replace(/<h1([^>]*)>(.*?)<\/h1>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
+        // Skip if this heading matches the blog title (remove duplicate)
+        if (title && cleanText.toLowerCase() === title.toLowerCase()) {
+          return '';
+        }
         return `<h1 class="beautiful-prose text-4xl md:text-5xl font-black mb-8 leading-tight text-black"${attrs}>${cleanText}</h1>`;
       })
       .replace(/<h2([^>]*)>(.*?)<\/h2>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
+        // Skip if this heading matches the blog title (remove duplicate)
+        if (title && cleanText.toLowerCase() === title.toLowerCase()) {
+          return '';
+        }
         return `<h2 class="beautiful-prose text-3xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h2>`;
       })
       .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
+        // Skip if this heading matches the blog title (remove duplicate)
+        if (title && cleanText.toLowerCase() === title.toLowerCase()) {
+          return '';
+        }
         return `<h3 class="beautiful-prose text-2xl font-semibold text-black mb-4 mt-8"${attrs}>${cleanText}</h3>`;
       });
 
-    // Step 3: Enhanced paragraphs with beautiful typography
+    // Step 5: Enhanced paragraphs with beautiful typography
     formattedContent = formattedContent
       .replace(/<p([^>]*)>(.*?)<\/p>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
@@ -640,7 +729,7 @@ export function BeautifulBlogPost() {
         return `<p class="beautiful-prose text-lg leading-relaxed text-gray-700 mb-6"${attrs}>${cleanText}</p>`;
       });
 
-    // Step 4: Beautiful lists with premium styling
+    // Step 6: Beautiful lists with premium styling
     formattedContent = formattedContent
       .replace(/<ul([^>]*)>/gi, '<ul class="beautiful-prose space-y-4 my-8"$1>')
       .replace(/<ol([^>]*)>/gi, '<ol class="beautiful-prose space-y-4 my-8"$1>')
@@ -649,7 +738,7 @@ export function BeautifulBlogPost() {
         return `<li class="beautiful-prose relative pl-8 text-lg leading-relaxed text-gray-700"${attrs}>${cleanText}</li>`;
       });
 
-    // Step 5: Enhanced links with beautiful styling
+    // Step 7: Enhanced links with beautiful styling
     formattedContent = formattedContent.replace(
       /<a([^>]*?)href="([^"]*)"([^>]*?)>(.*?)<\/a>/gi,
       (match, preAttrs, href, postAttrs, text) => {
@@ -659,7 +748,7 @@ export function BeautifulBlogPost() {
       }
     );
 
-    // Step 6: Beautiful blockquotes
+    // Step 8: Beautiful blockquotes
     formattedContent = formattedContent.replace(
       /<blockquote([^>]*)>(.*?)<\/blockquote>/gis,
       (match, attrs, text) => {
@@ -668,7 +757,7 @@ export function BeautifulBlogPost() {
       }
     );
 
-    // Step 7: Enhanced images with beautiful wrapper
+    // Step 9: Enhanced images with beautiful wrapper
     formattedContent = formattedContent.replace(
       /<img([^>]*?)src="([^"]*)"([^>]*?)>/gi,
       (match, preAttrs, src, postAttrs) => {
@@ -682,7 +771,7 @@ export function BeautifulBlogPost() {
       }
     );
 
-    // Step 8: Enhanced code blocks
+    // Step 10: Enhanced code blocks
     formattedContent = formattedContent.replace(
       /<code([^>]*)>(.*?)<\/code>/gi,
       (match, attrs, text) => {
@@ -690,20 +779,27 @@ export function BeautifulBlogPost() {
       }
     );
 
-    // Step 9: Apply drop cap to first paragraph
+    // Step 11: Apply drop cap to first paragraph
     formattedContent = formattedContent.replace(
       /<p class="beautiful-prose([^"]*)"([^>]*)>(.*?)<\/p>/,
       '<p class="beautiful-prose$1 beautiful-first-paragraph"$2>$3</p>'
     );
 
-    // Step 10: Ensure proper spacing and structure
+    // Step 12: Final cleanup - remove problematic content patterns
     formattedContent = formattedContent
+      // Remove empty or invalid headings
+      .replace(/<h[1-6][^>]*>\s*\*+\s*<\/h[1-6]>/gi, '')
+      .replace(/<h[1-6][^>]*>\s*<\/h[1-6]>/gi, '')
+      .replace(/<h[1-6][^>]*>\s*\d+\.\s*<\/h[1-6]>/gi, '')
+      // Remove empty paragraphs
+      .replace(/<p[^>]*>\s*<\/p>/gi, '')
+      .replace(/<p[^>]*>\s*\*+\s*<\/p>/gi, '')
+      // Fix spacing
       .replace(/>\s+</g, '><')
       .replace(/(<\/h[1-6]>)\s*(<p)/gi, '$1\n\n$2')
       .replace(/(<\/p>)\s*(<h[1-6])/gi, '$1\n\n$2')
       .replace(/(<\/ul>|<\/ol>)\s*(<p)/gi, '$1\n\n$2')
       .replace(/(<\/p>)\s*(<ul>|<ol>)/gi, '$1\n\n$2')
-      .replace(/<p[^>]*>\s*<\/p>/gi, '')
       .trim();
 
     return formattedContent;
@@ -1189,48 +1285,24 @@ export function BeautifulBlogPost() {
                           `;
                         }
 
-                        // Process content with robust processor - DISABLE title removal to prevent content loss
-                        // SECURITY FIRST: Use the secure HTML processor
-                        const secureHtmlResult = BlogContentSecurityProcessor.createSecureHTML(content, blogPost.title);
+                        // SIMPLIFIED PROCESSING: Apply beautiful formatting directly to preserve structure
+                        let finalContent = applyBeautifulContentStructure(content, blogPost.title);
 
-                        // Log security results
-                        if (secureHtmlResult.securityInfo.securityIssues.length > 0) {
-                          console.warn('🔒 Security processing applied:', {
-                            riskLevel: secureHtmlResult.securityInfo.riskLevel,
-                            issues: secureHtmlResult.securityInfo.securityIssues,
-                            fixes: secureHtmlResult.securityInfo.fixes
-                          });
-                        }
-
-                        // Apply additional quality processing if needed
-                        let finalContent = secureHtmlResult.__html;
-                        const qualityMetrics = BlogQualityMonitor.analyzeContent(finalContent, blogPost.target_url);
-
-                        if (qualityMetrics.qualityScore < 70 || qualityMetrics.hasMalformedPatterns) {
-                          finalContent = BlogAutoAdjustmentService.adjustContentForDisplay(finalContent, {
-                            title: blogPost.title,
-                            target_url: blogPost.target_url,
-                            anchor_text: blogPost.anchor_text
-                          });
-                        }
-
-                        // FORCE BEAUTIFUL CONTENT STRUCTURE: Apply beautiful formatting to ALL posts
-                        finalContent = applyBeautifulContentStructure(finalContent, blogPost.title);
+                        // Basic security check only - remove scripts and dangerous elements
+                        finalContent = finalContent
+                          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                          .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+                          .replace(/javascript:/gi, '')
+                          .replace(/on\w+\s*=/gi, '');
                         // Variables are already defined above as finalContent and securityInfo
 
                         // Log processing results for debugging
-                        console.log('���� Blog content processing result:', {
-                          securityProcessed: secureHtmlResult.securityInfo.wasProcessed,
-                          securityRisk: secureHtmlResult.securityInfo.riskLevel,
-                          qualityScore: qualityMetrics.qualityScore,
+                        console.log('Blog content processing result:', {
                           originalLength: content.length,
                           finalLength: finalContent.length,
-                          securityIssues: secureHtmlResult.securityInfo.securityIssues
+                          hasStructure: finalContent.includes('<h1>') || finalContent.includes('<h2>') || finalContent.includes('<p>'),
+                          processedSuccessfully: true
                         });
-
-                        if (secureHtmlResult.securityInfo.securityIssues.length > 0) {
-                          console.warn('Security issues detected:', secureHtmlResult.securityInfo.securityIssues);
-                        }
 
                         // Final safety check after processing
                         if (!finalContent || finalContent.trim().length === 0) {
@@ -1386,7 +1458,7 @@ export function BeautifulBlogPost() {
                       return (
                         <div className="max-w-2xl mx-auto bg-orange-600 text-white p-4 rounded-lg animate-pulse">
                           <div className="text-center font-bold">
-                            ⚠️ WARNING: Content expires in {hours} hours!
+                            ⚠�� WARNING: Content expires in {hours} hours!
                           </div>
                         </div>
                       );
