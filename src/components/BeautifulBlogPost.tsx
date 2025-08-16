@@ -1247,7 +1247,7 @@ export function BeautifulBlogPost() {
 
               {/* Meta Description */}
               {blogPost.meta_description && (
-                <p className="beautiful-blog-subtitle text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed max-w-3xl mx-auto">
+                <p className="beautiful-blog-subtitle text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed max-w-4xl mx-auto">
                   {blogPost.meta_description}
                 </p>
               )}
