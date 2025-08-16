@@ -263,7 +263,12 @@ export class BlogService {
           console.log('❌ [BlogService] Blog post not found in either table');
           return null; // No rows found in either table
         }
-        console.error('❌ [BlogService] Error fetching from both tables:', { error, fallbackError });
+        console.error('❌ [BlogService] Error fetching from both tables:', {
+          primaryError: error?.message || 'Unknown error',
+          fallbackError: fallbackError?.message || 'Unknown error',
+          primaryCode: error?.code,
+          fallbackCode: fallbackError?.code
+        });
         throw new Error(`Failed to fetch blog post: ${fallbackError.message}`);
       }
 
@@ -274,7 +279,11 @@ export class BlogService {
     }
 
     if (error) {
-      console.error('❌ [BlogService] Error fetching from published_blog_posts:', error);
+      console.error('❌ [BlogService] Error fetching from published_blog_posts:', {
+        message: error?.message || 'Unknown error',
+        code: error?.code,
+        details: error?.details
+      });
       throw new Error(`Failed to fetch blog post: ${error.message}`);
     }
 
