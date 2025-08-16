@@ -674,8 +674,14 @@ export function BeautifulBlogPost() {
       .replace(/\n{3,}/g, '\n\n')
       .trim();
 
-    // Step 2: Convert markdown links to HTML before other processing
-    formattedContent = formattedContent.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>');
+    // Step 2: Convert markdown formatting to HTML before other processing
+    formattedContent = formattedContent
+      // Convert markdown links [text](url) to HTML
+      .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+      // Convert italic text *text* to <em>text</em>
+      .replace(/\*([^*\n]+)\*/g, '<em>$1</em>')
+      // Convert italic text _text_ to <em>text</em>
+      .replace(/_([^_\n]+)_/g, '<em>$1</em>');
 
     // Step 2.5: Remove duplicate title if it appears in content
     if (title) {
