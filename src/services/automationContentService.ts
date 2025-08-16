@@ -145,25 +145,58 @@ export class AutomationContentService {
         if (endpoint !== '/.netlify/functions/working-content-generator' && attempt === 1) {
           try {
             console.log('🔄 Trying working-content-generator as fallback...');
-            const fallbackResponse = await (window._originalFetch || fetch)('/.netlify/functions/working-content-generator', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ keyword, anchorText, targetUrl })
-            });
 
-            if (fallbackResponse.ok) {
-              const fallbackData = await fallbackResponse.json();
-              if (fallbackData.success && fallbackData.data) {
-                console.log('✅ Fallback function succeeded');
-                return [{
-                  type: 'article',
-                  content: fallbackData.data.content,
-                  wordCount: fallbackData.data.wordCount || 800
-                }];
+            // First check if the function exists (404 = function not deployed)
+            let healthCheckOk = false;
+            try {
+              const healthResponse = await (window._originalFetch || fetch)('/.netlify/functions/working-content-generator', {
+                method: 'GET'
+              });
+              healthCheckOk = healthResponse.ok || healthResponse.status !== 404;
+
+              if (healthResponse.status === 404) {
+                console.warn('⚠️ working-content-generator function not found (404), skipping fallback');
+                throw new Error('working-content-generator function not deployed');
+              }
+            } catch (healthError: any) {
+              if (healthError.message?.includes('404') || healthError.message?.includes('not deployed')) {
+                console.warn('⚠️ Skipping working-content-generator fallback - function not available');
+                throw healthError;
+              }
+              // Other health check errors are not critical, continue with fallback attempt
+              console.warn('Health check failed but attempting fallback anyway:', healthError.message);
+              healthCheckOk = true;
+            }
+
+            if (healthCheckOk) {
+              const fallbackResponse = await (window._originalFetch || fetch)('/.netlify/functions/working-content-generator', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ keyword, anchorText, targetUrl })
+              });
+
+              if (fallbackResponse.ok) {
+                const fallbackData = await fallbackResponse.json();
+                if (fallbackData.success && fallbackData.data) {
+                  console.log('✅ Fallback function succeeded');
+                  return [{
+                    type: 'article',
+                    content: fallbackData.data.content,
+                    wordCount: fallbackData.data.wordCount || 800
+                  }];
+                }
+              } else if (fallbackResponse.status === 404) {
+                console.warn('⚠️ working-content-generator returned 404 - function not available');
+                throw new Error('working-content-generator function not available');
               }
             }
-          } catch (fallbackError) {
-            console.warn('Fallback function also failed:', fallbackError);
+          } catch (fallbackError: any) {
+            const errorMsg = fallbackError.message || 'Unknown error';
+            if (errorMsg.includes('404') || errorMsg.includes('not deployed') || errorMsg.includes('not available')) {
+              console.warn('⚠️ working-content-generator function not available, skipping fallback');
+            } else {
+              console.warn('Fallback function failed:', errorMsg);
+            }
           }
         }
 

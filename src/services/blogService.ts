@@ -78,14 +78,16 @@ export class BlogService {
       published_url: `${baseUrl}/blog/${tempSlug}`, // Set published URL with temporary slug
       status: 'published',
       is_trial_post: isTrialPost,
-      expires_at: isTrialPost ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null,
+      expires_at: isTrialPost ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : undefined, // Use undefined instead of null for timestamp
       view_count: 0,
       seo_score: data.seoScore,
       reading_time: data.readingTime,
       word_count: data.wordCount,
       author_name: 'Backlink ∞ ',
       tags: this.generateTags(data.title, data.targetUrl),
-      category: this.categorizeContent(data.title)
+      category: this.categorizeContent(data.title),
+      published_at: new Date().toISOString(), // Ensure published_at is always set
+      created_at: new Date().toISOString() // Ensure created_at is always set
     };
 
     // If this is a claimed post (has userId and not trial), use maximum persistence
@@ -323,9 +325,55 @@ export class BlogService {
    * Fetch using basic query with minimal fields
    */
   private async fetchWithBasicQuery(slug: string, tableName: string): Promise<BlogPost | null> {
+    // Try with all fields first, fallback to minimal if column missing
+    try {
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('id, slug, title, content, status, created_at, updated_at, user_id, target_url, published_url, view_count, seo_score, reading_time, word_count, author_name, tags, category, is_trial_post, expires_at, anchor_text, is_claimed, claimed_by, claimed_at, keyword, meta_description, excerpt, keywords, published_at')
+        .eq('slug', slug)
+        .eq('status', 'published')
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') {
+          return null; // Not found
+        }
+        // If column doesn't exist, try minimal query
+        if (error.message?.includes('column') && error.message?.includes('does not exist')) {
+          return await this.fetchWithMinimalFields(slug, tableName);
+        }
+        throw new Error(this.getSafeErrorMessage(error));
+      }
+
+      // Map to expected format if needed
+      return {
+        ...data,
+        // Ensure compatibility with both table schemas
+        claimed: data.is_claimed || false,
+        meta_description: data.meta_description || '',
+        excerpt: data.excerpt || '',
+        keywords: data.keywords || [],
+        keyword: data.keyword || this.extractKeywordFromTitle(data.title || ''),
+        published_at: data.published_at || data.created_at
+      } as BlogPost;
+
+    } catch (error: any) {
+      // If column error, try minimal fields
+      if (error.message?.includes('column') || error.message?.includes('keyword')) {
+        console.warn(`Column error in ${tableName}, trying minimal fields:`, this.getSafeErrorMessage(error));
+        return await this.fetchWithMinimalFields(slug, tableName);
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Fetch with only essential fields to handle missing columns
+   */
+  private async fetchWithMinimalFields(slug: string, tableName: string): Promise<BlogPost | null> {
     const { data, error } = await supabase
       .from(tableName)
-      .select('id, slug, title, content, status, created_at, updated_at, user_id, target_url, published_url, view_count, seo_score, reading_time, word_count, author_name, tags, category, is_trial_post, expires_at, anchor_text, is_claimed, claimed_by, claimed_at')
+      .select('id, slug, title, content, status, created_at, user_id, target_url, view_count, is_trial_post, expires_at, anchor_text')
       .eq('slug', slug)
       .eq('status', 'published')
       .single();
@@ -337,15 +385,27 @@ export class BlogService {
       throw new Error(this.getSafeErrorMessage(error));
     }
 
-    // Map to expected format if needed
+    // Map to expected format with safe defaults
     return {
       ...data,
-      // Ensure compatibility with both table schemas
-      claimed: data.is_claimed || false,
-      meta_description: data.meta_description || '',
-      excerpt: data.excerpt || '',
-      keywords: data.keywords || [],
-      published_at: data.published_at || data.created_at
+      // Safe defaults for missing columns
+      claimed: false,
+      meta_description: '',
+      excerpt: '',
+      keywords: [],
+      keyword: this.extractKeywordFromTitle(data.title || ''),
+      published_at: data.created_at,
+      updated_at: data.created_at,
+      published_url: data.published_url || `/blog/${data.slug}`,
+      seo_score: 0,
+      reading_time: 0,
+      word_count: 0,
+      author_name: 'Backlink ∞',
+      tags: [],
+      category: 'General',
+      is_claimed: false,
+      claimed_by: null,
+      claimed_at: null
     } as BlogPost;
   }
 
@@ -471,25 +531,76 @@ export class BlogService {
    */
   async getRecentBlogPosts(limit: number = 10): Promise<BlogPost[]> {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('status', 'published')
-        .order('created_at', { ascending: false })
-        .limit(limit);
+      // Try published_blog_posts first, then fallback to blog_posts
+      let data, error;
 
-      if (error) {
-        // Handle third-party interference gracefully
-        if (error.message?.includes('Third-party script interference')) {
-          console.warn('⚠️ Third-party interference detected in getRecentBlogPosts, returning empty array');
-          return [];
+      try {
+        const result = await supabase
+          .from('published_blog_posts')
+          .select('*')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+          .limit(limit);
+
+        data = result.data;
+        error = result.error;
+
+        if (error && error.message?.includes('relation') && error.message?.includes('does not exist')) {
+          throw new Error('Table not found, trying fallback');
         }
-        throw new Error(`Failed to fetch recent blog posts: ${error.message}`);
+      } catch (tableError: any) {
+        console.warn('⚠️ published_blog_posts table issue, trying blog_posts:', this.getSafeErrorMessage(tableError));
+
+        const fallbackResult = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+          .limit(limit);
+
+        data = fallbackResult.data;
+        error = fallbackResult.error;
       }
 
-      return data || [];
+      if (error) {
+        // Handle specific database errors gracefully
+        if (error.message?.includes('Third-party script interference') ||
+            error.message?.includes('column') ||
+            error.message?.includes('keyword')) {
+          console.warn('⚠️ Database issue detected in getRecentBlogPosts, returning empty array:', this.getSafeErrorMessage(error));
+          return [];
+        }
+
+        // For other errors, still return empty array to prevent crashes
+        console.warn('⚠️ Database error in getRecentBlogPosts:', this.getSafeErrorMessage(error));
+        return [];
+      }
+
+      return (data || []).map(post => ({
+        ...post,
+        // Ensure safe defaults for potentially missing fields
+        keyword: post.keyword || this.extractKeywordFromTitle(post.title || ''),
+        meta_description: post.meta_description || '',
+        excerpt: post.excerpt || '',
+        keywords: post.keywords || [],
+        published_at: post.published_at || post.created_at,
+        claimed: post.is_claimed || post.claimed || false
+      })) as BlogPost[];
+
     } catch (networkError: any) {
-      console.warn('⚠️ Network error in getRecentBlogPosts:', networkError.message);
+      const errorMsg = this.getSafeErrorMessage(networkError);
+      console.warn('⚠️ Network error in getRecentBlogPosts:', errorMsg);
+
+      // Special handling for fetch failures
+      if (errorMsg.includes('Failed to fetch') || errorMsg.includes('fetch')) {
+        console.warn('🔌 Database connection issue detected in blog service');
+        // Show user-friendly message in development
+        if (import.meta.env.DEV) {
+          console.info('💡 Blog posts may not load due to database connection issues');
+          console.info('🔧 Check your Supabase configuration in environment variables');
+        }
+      }
+
       // Return empty array instead of throwing to prevent cascade failures
       return [];
     }

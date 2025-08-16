@@ -204,11 +204,46 @@ export class NetworkErrorHandler {
     // Enhanced fetch wrapper with better error handling
     window.fetch = async (...args) => {
       try {
-        const [url] = args;
+        const [url, options] = args;
 
         // Don't interfere with module loading (dynamic imports)
         if (url && typeof url === 'string' && (url.includes('.tsx') || url.includes('.ts') || url.includes('.js'))) {
           return await this.originalFetch(...args);
+        }
+
+        // Check for problematic requests that commonly fail
+        if (url && typeof url === 'string') {
+          // Skip Supabase requests if credentials are invalid
+          if (url.includes('.supabase.co') && localStorage.getItem('supabase_connection_failed') === 'true') {
+            console.warn('🚫 Skipping Supabase request due to previous connection failure:', url.substring(0, 50));
+            throw new Error('Supabase connection previously failed. Please check your configuration.');
+          }
+
+          // Add timeout for all external requests
+          if (!options || !options.signal) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => {
+              controller.abort();
+              console.warn('⏰ Request timeout for:', url.substring(0, 50));
+            }, 15000); // 15 second timeout
+
+            const modifiedOptions = {
+              ...options,
+              signal: controller.signal
+            };
+
+            try {
+              const response = await this.originalFetch(url, modifiedOptions);
+              clearTimeout(timeoutId);
+              return response;
+            } catch (timeoutError: any) {
+              clearTimeout(timeoutId);
+              if (timeoutError.name === 'AbortError') {
+                throw new Error(`Request timeout: ${url.substring(0, 50)}... took too long to respond`);
+              }
+              throw timeoutError;
+            }
+          }
         }
 
         // Use the stored original fetch to avoid recursive wrapping
@@ -237,8 +272,15 @@ export class NetworkErrorHandler {
           throw error;
         }
 
-        // Log fetch errors with context but avoid recursive logging
-        console.error('Fetch error detected:', error?.message || 'Unknown error');
+        // Log fetch errors with enhanced debugging context
+        const errorMsg = error?.message || 'Unknown error';
+        const errorUrl = typeof url === 'string' ? url.substring(0, 100) : 'Unknown URL';
+        console.error('Fetch error detected:', {
+          message: errorMsg,
+          url: errorUrl,
+          type: error?.name || 'Unknown',
+          stack: error?.stack ? error.stack.substring(0, 200) + '...' : 'No stack'
+        });
 
         // Only treat as FullStory error if there's explicit evidence
         if (this.isFullStoryError(error)) {
@@ -258,6 +300,32 @@ export class NetworkErrorHandler {
           const newError = new Error('Response already processed. Please try again.');
           newError.name = 'ResponseBodyError';
           throw newError;
+        }
+
+        // Handle specific network error types with recovery suggestions
+        if (this.isNetworkError(error)) {
+          const errorUrl = typeof url === 'string' ? url : 'unknown';
+
+          // Mark Supabase connection as failed if it's a Supabase URL
+          if (errorUrl.includes('.supabase.co')) {
+            localStorage.setItem('supabase_connection_failed', 'true');
+            console.error('🔌 Supabase connection failed - marking for skip on future requests');
+
+            // Clear the flag after 30 seconds to allow retry
+            setTimeout(() => {
+              localStorage.removeItem('supabase_connection_failed');
+              console.log('🔄 Supabase connection flag cleared - allowing retries');
+            }, 30000);
+          }
+
+          // Provide more specific error message based on URL
+          if (errorUrl.includes('supabase')) {
+            throw new Error('Database connection failed. Please check your internet connection or try refreshing the page.');
+          } else if (errorUrl.includes('functions') || errorUrl.includes('api')) {
+            throw new Error('API service temporarily unavailable. Please try again in a moment.');
+          } else {
+            throw new Error(`Network request failed: ${error.message || 'Connection error'}`);
+          }
         }
 
         throw error;

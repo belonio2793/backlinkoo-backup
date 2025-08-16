@@ -12,6 +12,7 @@ import { BlogClaimService } from '@/services/blogClaimService';
 import { supabase } from '@/integrations/supabase/client';
 import type { BlogPost } from '@/types/blogTypes';
 import { Footer } from '@/components/Footer';
+import { FetchErrorBoundary } from '@/components/FetchErrorHandler';
 
 import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
 import { ClaimStatusIndicator } from '@/components/ClaimStatusIndicator';
@@ -522,7 +523,11 @@ function Blog() {
 
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+    <FetchErrorBoundary
+      context="loading blog posts"
+      onRetry={() => window.location.reload()}
+    >
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
       {/* Header */}
       <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-6 py-4">
@@ -768,10 +773,18 @@ function Blog() {
               </div>
               <div className="flex-shrink-0 text-center md:text-left">
                 {user ? (
-                  <div className="text-center">
-                    <div className="text-2xl font-bold">{filteredPosts.filter(p => p.is_trial_post && !p.user_id).length}</div>
-                    <div className="text-blue-200 text-sm">Claimable Posts</div>
-                  </div>
+                  // Only show claimable count if there are claimable posts
+                  filteredPosts.filter(p => p.is_trial_post && !p.user_id).length > 0 ? (
+                    <div className="text-center">
+                      <div className="text-2xl font-bold">{filteredPosts.filter(p => p.is_trial_post && !p.user_id).length}</div>
+                      <div className="text-blue-200 text-sm">Claimable Posts</div>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <div className="text-lg text-blue-200">No claimable posts available</div>
+                      <div className="text-blue-300 text-sm">Check back later for new content</div>
+                    </div>
+                  )
                 ) : (
                   <Button
                     onClick={() => setLoginModalOpen(true)}
@@ -955,7 +968,8 @@ function Blog() {
           });
         }}
       />
-    </div>
+      </div>
+    </FetchErrorBoundary>
   );
 }
 

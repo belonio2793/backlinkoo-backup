@@ -67,7 +67,13 @@ function createXHRFetch(): typeof fetch {
       xhr.timeout = 30000; // 30 seconds
       
       xhr.onload = () => {
-        const response = new Response(xhr.responseText, {
+        // Check if this status code should have a body
+        const shouldHaveBody = xhr.status !== 204 && xhr.status !== 205 && xhr.status !== 304;
+
+        // Only pass response text for statuses that can have bodies
+        const responseBody = shouldHaveBody ? xhr.responseText : null;
+
+        const response = new Response(responseBody, {
           status: xhr.status,
           statusText: xhr.statusText,
           headers: (() => {
@@ -84,7 +90,7 @@ function createXHRFetch(): typeof fetch {
             return headers;
           })()
         });
-        
+
         resolve(response);
       };
       
