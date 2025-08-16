@@ -207,23 +207,49 @@ export class BlogService {
    * Get blog post by slug
    */
   async getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+    console.log('🔍 [BlogService] Fetching blog post by slug:', slug);
+
+    // Try published_blog_posts first (where most new posts are saved)
     const { data, error } = await supabase
-      .from('blog_posts')
+      .from('published_blog_posts')
       .select('*')
       .eq('slug', slug)
       .eq('status', 'published')
       .single();
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // No rows found
+    // If not found in published_blog_posts, try blog_posts as fallback
+    if (error && error.code === 'PGRST116') {
+      console.log('🔄 [BlogService] Not found in published_blog_posts, trying blog_posts...');
+      const { data: fallbackData, error: fallbackError } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('slug', slug)
+        .eq('status', 'published')
+        .single();
+
+      if (fallbackError) {
+        if (fallbackError.code === 'PGRST116') {
+          console.log('❌ [BlogService] Blog post not found in either table');
+          return null; // No rows found in either table
+        }
+        console.error('❌ [BlogService] Error fetching from both tables:', { error, fallbackError });
+        throw new Error(`Failed to fetch blog post: ${fallbackError.message}`);
       }
+
+      console.log('✅ [BlogService] Found in blog_posts table');
+      // Increment view count in the correct table
+      await this.incrementViewCount(slug, 'blog_posts');
+      return fallbackData;
+    }
+
+    if (error) {
+      console.error('❌ [BlogService] Error fetching from published_blog_posts:', error);
       throw new Error(`Failed to fetch blog post: ${error.message}`);
     }
 
-    // Increment view count
-    await this.incrementViewCount(slug);
-
+    console.log('✅ [BlogService] Found in published_blog_posts table');
+    // Increment view count in the correct table
+    await this.incrementViewCount(slug, 'published_blog_posts');
     return data;
   }
 
