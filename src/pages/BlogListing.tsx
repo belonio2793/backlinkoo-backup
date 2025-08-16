@@ -43,7 +43,7 @@ export function BlogListing() {
 
   const initializeAndLoadPosts = async () => {
     // Initialize database with sample data if needed
-    await DatabaseSetup.initializeDatabase();
+    await initializeDatabase();
     // Then load the posts
     loadPosts();
   };
