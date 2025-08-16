@@ -918,7 +918,7 @@ export function BeautifulBlogPost() {
 
           {/* Article Content */}
           <div className="prose prose-lg max-w-none">
-            <Card className="p-8 md:p-12 lg:p-16 border-0 shadow-lg bg-white/50 backdrop-blur-sm">
+            <Card className="p-6 md:p-10 lg:p-12 border-0 shadow-lg bg-white/50 backdrop-blur-sm">
               <div className="max-w-none">
                 <ContentProcessor
                   content={blogPost.content || ''}
