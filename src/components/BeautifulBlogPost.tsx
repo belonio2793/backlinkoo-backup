@@ -194,7 +194,7 @@ function formatContent(raw: string, title?: string) {
         /^(Section|Step|Chapter|Part)\s*\d+\s*[-–—]\s*/.test(line)) {
       const processedContent = processLineContent(line);
       return (
-        <h2 key={i} className="beautiful-prose text-2xl font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
+        <h2 key={i} className="beautiful-prose text-lg font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
       );
     }
 
@@ -202,7 +202,7 @@ function formatContent(raw: string, title?: string) {
     if (/^(Key Insights|Pro Tip|Conclusion|Summary|Overview|Benefits|Important|Essential|Critical|Best Practices|Implementation)/i.test(line)) {
       const processedContent = processLineContent(line);
       return (
-        <h3 key={i} className="beautiful-prose text-2xl font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
+        <h3 key={i} className="beautiful-prose text-lg font-bold text-black mb-6 mt-12" dangerouslySetInnerHTML={{ __html: processedContent }} />
       );
     }
 
@@ -1108,7 +1108,7 @@ export function BeautifulBlogPost() {
         if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
-        return `<h1 class="beautiful-prose text-2xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h1>`;
+        return `<h1 class="beautiful-prose text-lg font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h1>`;
       })
       .replace(/<h2([^>]*)>(.*?)<\/h2>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
@@ -1118,7 +1118,7 @@ export function BeautifulBlogPost() {
         if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
-        return `<h2 class="beautiful-prose text-2xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h2>`;
+        return `<h2 class="beautiful-prose text-lg font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h2>`;
       })
       .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
@@ -1128,7 +1128,7 @@ export function BeautifulBlogPost() {
         if (title && (cleanText.toLowerCase() === title.toLowerCase() || textOnly.toLowerCase() === title.toLowerCase())) {
           return '';
         }
-        return `<h3 class="beautiful-prose text-2xl font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h3>`;
+        return `<h3 class="beautiful-prose text-lg font-bold text-black mb-6 mt-12"${attrs}>${cleanText}</h3>`;
       });
 
     // Step 5: Enhanced paragraphs with beautiful typography
