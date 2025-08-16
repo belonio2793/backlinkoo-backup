@@ -1689,7 +1689,7 @@ export function BeautifulBlogPost() {
                       console.log('⚡ Using new formatContent function for better structure');
 
                       // Use new formatContent function for better parsing
-                      const formattedContent = formatContent(content, blogPost.title);
+                      const formattedContent = formatContent(content, memoizedBlogTitle);
 
                       const processingTime = performance.now() - processingStart;
 
