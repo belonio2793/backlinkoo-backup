@@ -76,7 +76,8 @@ import {
   LazyEdgeFunctionDiagnostic,
   LazyRouteSyncTest,
   LazyEmailAuthenticationAudit,
-  LazyEmailDiagnostic
+  LazyEmailDiagnostic,
+  LazyBlogValidator
 } from './LazyComponents';
 
 // Loading component for better UX
