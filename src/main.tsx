@@ -5,6 +5,8 @@ import './index.css'
 import './styles/mobile-payment-fix.css'
 // Enhanced FullStory fix - must load FIRST
 import './utils/fullstoryFix'
+// Fetch error diagnostics - helps debug network issues
+import './utils/fetchErrorDiagnostic'
 // Unified error handler - fixes all [object Object] displays
 import './utils/unifiedErrorHandler'
 // Campaign-specific error handling
