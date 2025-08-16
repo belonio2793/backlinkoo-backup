@@ -670,18 +670,48 @@ exports.handler = async (event, context) => {
 
     // Store in database
     try {
-      // Clean content before storing in database to prevent malformed patterns
+      // Validate content before cleaning
+      console.log('Pre-cleaning content stats:', {
+        length: blogPost.content?.length || 0,
+        hasH1: blogPost.content?.includes('<h1>') || blogPost.content?.includes('# '),
+        hasH2: blogPost.content?.includes('<h2>') || blogPost.content?.includes('## '),
+        hasHTML: blogPost.content?.includes('<'),
+        isEmpty: !blogPost.content || blogPost.content.trim().length === 0
+      });
+
+      if (!blogPost.content || blogPost.content.trim().length === 0) {
+        console.error('CRITICAL: Blog content is empty before database save!');
+        // Generate emergency fallback content
+        blogPost.content = generateFallbackContent(request);
+        console.log('Using emergency fallback content');
+      }
+
+      // SAFE content cleaning - only fix specific malformed patterns, preserve content
       const cleanedBlogPost = {
         ...blogPost,
         content: blogPost.content
+          // Only fix specific heading malformations
           .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
-          .replace(/##\s*&lt;\s*h[1-6]\s*&gt;/gi, '##')
-          .replace(/##\s*&lt;[^>]*&gt;[^\n]*/g, '')
-          .replace(/&lt;\s*h[1-6]\s*&gt;/gi, '')
-          .replace(/&lt;\s*\/\s*h[1-6]\s*&gt;/gi, '')
-          .replace(/&lt;\s*p\s*&gt;/gi, '')
-          .replace(/&lt;\s*\/\s*p\s*&gt;/gi, '')
+          .replace(/##\s*&lt;\s*h[1-6]\s*&gt;([^\n]+)/gi, '## $1')
+          // Remove dangling HTML entities only if not part of valid content
+          .replace(/\s+&lt;\s*\/\s*h[1-6]\s*&gt;\s*$/gmi, '')
+          .replace(/\s+&lt;\s*\/\s*p\s*&gt;\s*$/gmi, '')
+          // Fix malformed entity patterns but preserve content
+          .replace(/&lt;\s*h[1-6]\s*&gt;([^&\n<]+)/gi, '$1')
+          .replace(/([^&\n>]+)&lt;\s*\/\s*h[1-6]\s*&gt;/gi, '$1')
       };
+
+      // Final validation
+      if (!cleanedBlogPost.content || cleanedBlogPost.content.trim().length === 0) {
+        console.error('CRITICAL: Content became empty after cleaning!');
+        cleanedBlogPost.content = blogPost.content; // Restore original
+        console.log('Restored original content to prevent empty save');
+      }
+
+      console.log('Post-cleaning content stats:', {
+        length: cleanedBlogPost.content?.length || 0,
+        hasContent: Boolean(cleanedBlogPost.content && cleanedBlogPost.content.trim().length > 0)
+      });
 
       // Save to both tables for compatibility
       const { error: dbError } = await supabase
