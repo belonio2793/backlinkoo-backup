@@ -192,7 +192,7 @@ const ContentProcessor = ({
         }
 
         elements.push(
-          <ol key={`numbered-list-${i}`} className="mb-8 ml-6 space-y-4 list-decimal list-outside">
+          <ol key={`numbered-list-${i}`} className="mb-6 ml-6 space-y-2 list-decimal list-outside">
             {listItems.map((item, idx) => (
               <li key={idx} className="text-lg leading-relaxed text-gray-700 pl-3" style={{ textAlign: 'justify' }}>
                 {processTextContent(item, idx + i)}
