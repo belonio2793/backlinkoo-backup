@@ -81,10 +81,16 @@ function formatContent(raw: string) {
     .replace(/Content Block:\s*/gi, '')
     // Fix malformed asterisk patterns
     .replace(/\*+$/gm, '') // Remove trailing asterisks
-    .replace(/^\*+/gm, '') // Remove leading asterisks that aren't bullet points
+    .replace(/^\*+(?!\*)/gm, '') // Remove leading single asterisks that aren't part of ** bold syntax
+    .replace(/\*+\s*\*+/g, '**') // Fix multiple asterisks to proper bold syntax
     // Fix broken URLs in markdown links (space in URL)
     .replace(/\]\(([^)]*)\s+([^)]*)\)/g, ']($1$2)') // Remove spaces in URLs
-    .replace(/https:\s*\/\//g, 'https://'); // Fix broken https: // patterns
+    .replace(/https:\s*\/\//g, 'https://') // Fix broken https: // patterns
+    .replace(/\]\(https:\s*\/\//g, '](https://') // Fix https: // in markdown links specifically
+    // Clean up common artifacts
+    .replace(/\*{3,}/g, '**') // Replace multiple asterisks with proper bold syntax
+    .replace(/\s+\*\s+$/gm, '') // Remove trailing single asterisks with spaces
+    .replace(/^\s*\*\s*$/gm, ''); // Remove lines with just asterisks
 
   const lines = cleanedContent.split(/\n+/).map(l => l.trim()).filter(Boolean);
 
