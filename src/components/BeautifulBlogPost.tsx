@@ -69,7 +69,7 @@ const ContentProcessor = ({
   
   const processContent = useCallback((rawContent: string) => {
     if (!rawContent) return [];
-    
+
     // Clean and normalize content
     let cleanContent = rawContent
       .replace(/Natural Link Integration:\s*/gi, '')
@@ -88,52 +88,132 @@ const ContentProcessor = ({
       cleanContent = cleanContent.replace(titlePattern, '');
     }
 
-    // Split into paragraphs
-    const paragraphs = cleanContent
-      .split(/\n\s*\n/)
-      .map(p => p.trim())
-      .filter(p => p.length > 0);
+    // Split into lines first to better detect lists
+    const lines = cleanContent.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+    const elements: React.ReactNode[] = [];
+    let i = 0;
 
-    return paragraphs.map((paragraph, index) => {
-      // Process markdown links and convert to proper HTML links
-      const processedParagraph = paragraph.replace(
-        /\[([^\]]+)\]\(([^)]+)\)/g, 
-        (match, linkText, url) => {
-          const cleanUrl = url.trim().startsWith('http') ? url.trim() : `https://${url.trim()}`;
-          const cleanText = linkText.trim();
-          
-          return `<a href="${cleanUrl}" class="text-blue-600 hover:text-blue-800 font-medium underline decoration-2 underline-offset-2 transition-colors duration-200" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
+    while (i < lines.length) {
+      const line = lines[i];
+
+      // Detect numbered lists (1. 2. 3. etc.)
+      if (/^\d+\.\s/.test(line)) {
+        const listItems: string[] = [];
+        let j = i;
+
+        // Collect all consecutive numbered list items
+        while (j < lines.length && /^\d+\.\s/.test(lines[j])) {
+          listItems.push(lines[j].replace(/^\d+\.\s/, '').trim());
+          j++;
         }
-      );
 
-      // Handle special anchor text insertion for target keyword
-      let finalContent = processedParagraph;
-      if (targetKeyword && anchorText && targetUrl && index === Math.floor(paragraphs.length / 2)) {
-        // Insert the target link naturally in the middle paragraph
-        const keywordRegex = new RegExp(`\\b${targetKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
-        if (keywordRegex.test(finalContent) && !finalContent.includes(targetUrl)) {
-          finalContent = finalContent.replace(
-            keywordRegex,
-            `<a href="${targetUrl}" class="text-blue-600 hover:text-blue-800 font-semibold underline decoration-2 underline-offset-2 transition-colors duration-200" target="_blank" rel="noopener noreferrer">${anchorText}</a>`
-          );
+        elements.push(
+          <ol key={`numbered-list-${i}`} className="mb-6 ml-6 space-y-3 list-decimal list-outside">
+            {listItems.map((item, idx) => (
+              <li key={idx} className="text-lg leading-8 text-gray-700 pl-2">
+                {processTextContent(item, idx + i)}
+              </li>
+            ))}
+          </ol>
+        );
+
+        i = j;
+        continue;
+      }
+
+      // Detect bullet point lists (- • * etc.)
+      if (/^[-•*]\s/.test(line)) {
+        const listItems: string[] = [];
+        let j = i;
+
+        // Collect all consecutive bullet point items
+        while (j < lines.length && /^[-•*]\s/.test(lines[j])) {
+          listItems.push(lines[j].replace(/^[-•*]\s/, '').trim());
+          j++;
+        }
+
+        elements.push(
+          <ul key={`bullet-list-${i}`} className="mb-6 ml-6 space-y-3 list-disc list-outside">
+            {listItems.map((item, idx) => (
+              <li key={idx} className="text-lg leading-8 text-gray-700 pl-2">
+                {processTextContent(item, idx + i)}
+              </li>
+            ))}
+          </ul>
+        );
+
+        i = j;
+        continue;
+      }
+
+      // Detect multi-line content blocks (collect until empty line or list)
+      const paragraphLines: string[] = [];
+      let j = i;
+
+      while (j < lines.length &&
+             !/^\d+\.\s/.test(lines[j]) &&
+             !/^[-•*]\s/.test(lines[j]) &&
+             lines[j].trim() !== '') {
+        paragraphLines.push(lines[j]);
+        j++;
+
+        // If we hit an empty line, break (but include it as paragraph end)
+        if (j < lines.length && lines[j].trim() === '') {
+          j++; // Skip the empty line
+          break;
         }
       }
 
-      // Handle bold text
-      finalContent = finalContent.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>');
-      
-      // Handle italic text
-      finalContent = finalContent.replace(/\*([^*]+)\*/g, '<em class="italic">$1</em>');
+      if (paragraphLines.length > 0) {
+        const paragraphContent = paragraphLines.join(' ');
+        elements.push(
+          <div
+            key={`paragraph-${i}`}
+            className="mb-6 text-lg leading-8 text-gray-700"
+          >
+            {processTextContent(paragraphContent, i)}
+          </div>
+        );
+      }
 
-      return (
-        <div 
-          key={index} 
-          className="mb-6 text-lg leading-8 text-gray-700"
-          dangerouslySetInnerHTML={{ __html: finalContent }}
-        />
-      );
-    });
+      i = j;
+    }
+
+    return elements;
   }, [title, targetKeyword, anchorText, targetUrl]);
+
+  // Helper function to process text content (links, bold, italic, etc.)
+  const processTextContent = useCallback((text: string, index: number) => {
+    // Process markdown links first
+    let processedText = text.replace(
+      /\[([^\]]+)\]\(([^)]+)\)/g,
+      (match, linkText, url) => {
+        const cleanUrl = url.trim().startsWith('http') ? url.trim() : `https://${url.trim()}`;
+        const cleanText = linkText.trim();
+
+        return `<a href="${cleanUrl}" class="text-blue-600 hover:text-blue-800 font-medium underline decoration-2 underline-offset-2 transition-colors duration-200" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
+      }
+    );
+
+    // Handle special anchor text insertion for target keyword (only for middle content)
+    if (targetKeyword && anchorText && targetUrl && index % 5 === 2) { // Every 5th element around middle
+      const keywordRegex = new RegExp(`\\b${targetKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+      if (keywordRegex.test(processedText) && !processedText.includes(targetUrl)) {
+        processedText = processedText.replace(
+          keywordRegex,
+          `<a href="${targetUrl}" class="text-blue-600 hover:text-blue-800 font-semibold underline decoration-2 underline-offset-2 transition-colors duration-200" target="_blank" rel="noopener noreferrer">${anchorText}</a>`
+        );
+      }
+    }
+
+    // Handle bold text
+    processedText = processedText.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>');
+
+    // Handle italic text
+    processedText = processedText.replace(/\*([^*]+)\*/g, '<em class="italic">$1</em>');
+
+    return <span dangerouslySetInnerHTML={{ __html: processedText }} />;
+  }, [targetKeyword, anchorText, targetUrl]);
 
   return (
     <div className="prose prose-lg max-w-none">
