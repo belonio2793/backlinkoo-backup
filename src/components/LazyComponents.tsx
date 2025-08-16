@@ -23,11 +23,11 @@ export const LazyEnhancedBlogListing = lazy(() => import('@/components/EnhancedB
 export const LazySuperEnhancedBlogListing = lazy(() => import('@/components/SuperEnhancedBlogListing').then(module => ({ default: module.SuperEnhancedBlogListing })));
 export const LazyEnhancedBlogPost = lazy(() => import('@/components/EnhancedBlogPost').then(module => ({ default: module.EnhancedBlogPost })));
 export const LazyBeautifulBlogPost = lazy(() =>
-  import('@/components/BeautifulBlogPost')
+  import('@/components/BeautifulBlogPostSimple')
     .then(module => {
       console.log('✅ BeautifulBlogPost module loaded successfully');
       // Make sure we return the component correctly
-      const component = module.BeautifulBlogPost || module.default;
+      const component = module.BeautifulBlogPostSimple || module.default;
       if (!component) {
         throw new Error('BeautifulBlogPost component not found in module');
       }
