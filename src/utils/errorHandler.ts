@@ -169,6 +169,13 @@ export class NetworkErrorHandler {
       return;
     }
 
+    // Check if fetch wrapper should be disabled (escape hatch)
+    if (window.localStorage?.getItem('disable-fetch-wrapper') === 'true') {
+      console.log('🚫 Fetch wrapper disabled via localStorage flag');
+      this.isInitialized = true;
+      return;
+    }
+
     // Store original fetch before any modifications
     this.originalFetch = window.fetch.bind(window);
     
