@@ -891,7 +891,7 @@ export function BeautifulBlogPost() {
           <header className="text-center mb-16">
             {/* Main Title - Prominently displayed on its own line */}
             <div className="mb-12">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-gray-900 mb-6">
+              <h1 className="beautiful-main-title beautiful-blog-title mb-6">
                 {cleanTitle}
               </h1>
 
