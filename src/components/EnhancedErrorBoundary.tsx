@@ -71,7 +71,12 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
     const isComponentError = error.message.includes('Loading chunk') ||
                             error.message.includes('is not defined') ||
                             error.message.includes('lazy') ||
-                            error.message.includes('Cannot resolve module');
+                            error.message.includes('Cannot resolve module') ||
+                            error.message.includes('Failed to fetch dynamically imported module');
+
+    // Network blocked errors (analytics interference)
+    const isNetworkBlockedError = error.name === 'NetworkBlockedError' ||
+                                 error.message.includes('Network request blocked by browser analytics');
 
     // Blog system errors
     const isBlogError = error.message.includes('blog') ||
