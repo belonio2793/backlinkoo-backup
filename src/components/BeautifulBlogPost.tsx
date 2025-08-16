@@ -1215,8 +1215,8 @@ export function BeautifulBlogPost() {
       .replace(/>\s+</g, '><')
       .replace(/(<\/h[1-6]>)\s*(<p)/gi, '$1\n\n$2')
       .replace(/(<\/p>)\s*(<h[1-6])/gi, '$1\n\n$2')
-      .replace(/(<\/ul>|<\/ol>)\s*(<p)/gi, '$1\n\n$2')
-      .replace(/(<\/p>)\s*(<ul>|<ol>)/gi, '$1\n\n$2')
+      .replace(/(<\/ul>)\s*(<p)/gi, '$1\n\n$2')
+      .replace(/(<\/p>)\s*(<ul>)/gi, '$1\n\n$2')
       .trim();
 
     return formattedContent;
