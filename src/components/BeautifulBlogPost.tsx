@@ -589,7 +589,7 @@ export function BeautifulBlogPost() {
     }, 1000);
   };
 
-  const copyToClipboard = async () => {
+  const copyToClipboard = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
       toast({
@@ -622,7 +622,7 @@ export function BeautifulBlogPost() {
         });
       }
     }
-  };
+  }, [toast]);
 
   const sharePost = async () => {
     if (navigator.share) {
