@@ -484,7 +484,7 @@ const EnhancedContentProcessor = ({
   };
 
   return (
-    <div className="prose prose-xl prose-slate max-w-none">
+    <div className="prose prose-xl prose-slate max-w-none enhanced-blog-content">
       <div className="space-y-8">
         {processContent(content)}
       </div>
