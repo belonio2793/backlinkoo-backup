@@ -53,7 +53,7 @@ const createMockSupabaseClient = () => {
 
   const mockAuth = {
     getSession: () => {
-      console.warn('⚠️ Mock auth getSession called - using fake session');
+      console.warn('��️ Mock auth getSession called - using fake session');
       return Promise.resolve({ data: { session: null }, error: { message: 'Mock mode: Please configure real Supabase credentials' } });
     },
     getUser: () => {
@@ -259,14 +259,15 @@ const baseClient = hasValidCredentials ?
         } catch (error: any) {
           // Log error safely without exposing Response objects
           const errorMessage = error?.message || 'Unknown fetch error';
-          console.error('🌐 Supabase fetch error:', {
-            message: errorMessage,
-            name: error?.name,
-            url: url ? url.toString().substring(0, 100) + '...' : 'unknown'
-          });
+          console.error('🌐 Supabase fetch error:', errorMessage);
 
           if (error.name === 'AbortError') {
             throw new Error('Network timeout - please check your connection and try again');
+          }
+          if (error.name === 'NetworkBlockedError') {
+            // Browser analytics blocking the request - try to recover
+            console.warn('Network request blocked by browser analytics, attempting recovery...');
+            throw new Error('Network request blocked by browser analytics. Please try refreshing the page.');
           }
           if (errorMessage.includes('Failed to fetch')) {
             throw new Error('Network connection failed - please check your internet connection');
@@ -331,7 +332,7 @@ if (hasValidCredentials) {
         );
 
         if (error) {
-          console.warn('⚠️ Database test failed:', error.message);
+          console.warn('⚠�� Database test failed:', error.message);
           if (error.message?.includes('relation "blog_posts" does not exist')) {
             console.info('ℹ️ Database tables may not be created yet - this is normal for new projects');
           }
