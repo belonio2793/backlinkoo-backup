@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { PricingModal } from "@/components/PricingModal";
+import { ToastAction } from "@/components/ui/toast";
 
 import { AnimatedHeadline } from "@/components/AnimatedHeadline";
 import { HomepageBlogGenerator } from "@/components/HomepageBlogGenerator";
@@ -363,12 +364,13 @@ const Index = () => {
                   title: "🎉 Blog Post Published!",
                   description: `"${blogPost.title}" is now live and will open in a new window`,
                   action: (
-                    <button
+                    <ToastAction
+                      altText="Open blog post in new window"
                       onClick={() => window.open(fullBlogUrl, '_blank')}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
+                      className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600"
                     >
                       Open Blog Post
-                    </button>
+                    </ToastAction>
                   ),
                   duration: 8000, // Show for 8 seconds
                 });
