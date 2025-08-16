@@ -909,18 +909,23 @@ exports.handler = async (event, context) => {
       }
 
       // SAFE content cleaning - only fix specific malformed patterns, preserve content
+      let cleanedContent = blogPost.content
+        // Only fix specific heading malformations
+        .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
+        .replace(/##\s*&lt;\s*h[1-6]\s*&gt;([^\n]+)/gi, '## $1')
+        // Remove dangling HTML entities only if not part of valid content
+        .replace(/\s+&lt;\s*\/\s*h[1-6]\s*&gt;\s*$/gmi, '')
+        .replace(/\s+&lt;\s*\/\s*p\s*&gt;\s*$/gmi, '')
+        // Fix malformed entity patterns but preserve content
+        .replace(/&lt;\s*h[1-6]\s*&gt;([^&\n<]+)/gi, '$1')
+        .replace(/([^&\n>]+)&lt;\s*\/\s*h[1-6]\s*&gt;/gi, '$1');
+
+      // AUTOMATICALLY apply beautiful content structure to ALL new blog posts
+      cleanedContent = applyBeautifulContentStructure(cleanedContent, blogPost.title);
+
       const cleanedBlogPost = {
         ...blogPost,
-        content: blogPost.content
-          // Only fix specific heading malformations
-          .replace(/##\s*&lt;\s*h[1-6]\s*&gt;\s*Pro\s*Tip/gi, '## Pro Tip')
-          .replace(/##\s*&lt;\s*h[1-6]\s*&gt;([^\n]+)/gi, '## $1')
-          // Remove dangling HTML entities only if not part of valid content
-          .replace(/\s+&lt;\s*\/\s*h[1-6]\s*&gt;\s*$/gmi, '')
-          .replace(/\s+&lt;\s*\/\s*p\s*&gt;\s*$/gmi, '')
-          // Fix malformed entity patterns but preserve content
-          .replace(/&lt;\s*h[1-6]\s*&gt;([^&\n<]+)/gi, '$1')
-          .replace(/([^&\n>]+)&lt;\s*\/\s*h[1-6]\s*&gt;/gi, '$1')
+        content: cleanedContent
       };
 
       // Final validation
