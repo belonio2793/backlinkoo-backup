@@ -536,7 +536,10 @@ export class CampaignBlogIntegrationService {
       const blogUrl = `https://backlinkoo.com/${slug}`;
 
       // Generate simple but professional content
-      const content = this.generateFallbackContent(primaryKeyword, request.targetUrl, anchorText);
+      const rawContent = this.generateFallbackContent(primaryKeyword, request.targetUrl, anchorText);
+
+      // Apply beautiful content structure automatically
+      const content = applyBeautifulContentStructure(rawContent, title);
 
       // Store in localStorage for guest users
       const guestBlogPosts = JSON.parse(localStorage.getItem('guest_blog_posts') || '[]');
