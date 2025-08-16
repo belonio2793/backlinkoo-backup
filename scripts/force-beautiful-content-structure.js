@@ -224,8 +224,7 @@ async function processBlogPost(post) {
     const { error } = await supabase
       .from('blog_posts')
       .update({
-        content: beautifulContent,
-        updated_at: new Date().toISOString()
+        content: beautifulContent
       })
       .eq('id', post.id);
 
