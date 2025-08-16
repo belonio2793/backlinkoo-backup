@@ -22,10 +22,11 @@ interface NotificationData {
   timestamp: Date;
 }
 
-export const BacklinkNotification: React.FC<BacklinkNotificationProps> = ({ 
-  isVisible = true 
+export const BacklinkNotification: React.FC<BacklinkNotificationProps> = ({
+  isVisible = true
 }) => {
   const [notifications, setNotifications] = useState<NotificationData[]>([]);
+  const [shownUrls, setShownUrls] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (!isVisible) return;
@@ -49,6 +50,15 @@ export const BacklinkNotification: React.FC<BacklinkNotificationProps> = ({
           console.warn('⚠️ BacklinkNotification: Invalid URL format, skipping notification:', publishedUrl);
           return;
         }
+
+        // Check if we've already shown a notification for this URL
+        if (shownUrls.has(publishedUrl)) {
+          console.log('📡 BacklinkNotification: Skipping duplicate notification for URL:', publishedUrl);
+          return;
+        }
+
+        // Add URL to shown set
+        setShownUrls(prev => new Set([...prev, publishedUrl]));
 
         const notification: NotificationData = {
           id: `notification-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
