@@ -629,6 +629,12 @@ exports.handler = async (event, context) => {
       // Validate and repair content structure
       content = validateAndRepairContent(content, { primaryKeyword, targetUrl, anchorText });
 
+      // Final AI content validation
+      if (!content || content.trim().length === 0) {
+        console.error('⚠️ AI content became empty after validation!');
+        content = generateContextualContent(request);
+      }
+
       // Generate enhanced SEO metadata for AI content
       seoMeta = generateEnhancedSEOMetadata(request, aiResult.content);
     } else {
@@ -642,6 +648,18 @@ exports.handler = async (event, context) => {
         content = generateFallbackContent(request);
       }
     }
+
+    // CRITICAL: Final content validation before database save
+    if (!content || content.trim().length === 0) {
+      console.error('EMERGENCY: All content generation methods failed!');
+      content = generateFallbackContent(request);
+      console.log('Emergency fallback content generated with length:', content?.length || 0);
+    }
+
+    console.log('Final content validation:', {
+      contentLength: content?.length || 0,
+      hasValidContent: Boolean(content && content.trim().length > 100)
+    });
     const blogPost = {
       id: crypto.randomUUID(),
       slug: `${primaryKeyword.toLowerCase().replace(/\s+/g, '-')}-guide-${Date.now()}`,
