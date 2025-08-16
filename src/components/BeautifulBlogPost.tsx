@@ -689,12 +689,28 @@ export function BeautifulBlogPost() {
       // Convert inline code `code` to <code>code</code>
       .replace(/`([^`]+)`/g, '<code>$1</code>');
 
-    // Step 2.5: Remove duplicate title if it appears in content
+    // Step 2.5: Comprehensive duplicate title removal
     if (title) {
       const titleClean = title.toLowerCase().trim();
-      // Remove title from start of content if it matches
-      formattedContent = formattedContent.replace(new RegExp(`^\\s*${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*`, 'i'), '');
-      formattedContent = formattedContent.replace(new RegExp(`^\\s*<h[1-6][^>]*>\\s*${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*</h[1-6]>\\s*`, 'i'), '');
+      const titleEscaped = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      // Remove title from start of content if it matches (plain text)
+      formattedContent = formattedContent.replace(new RegExp(`^\\s*${titleEscaped}\\s*`, 'i'), '');
+
+      // Remove title wrapped in any heading tags
+      formattedContent = formattedContent.replace(new RegExp(`^\\s*<h[1-6][^>]*>\\s*${titleEscaped}\\s*</h[1-6]>\\s*`, 'i'), '');
+
+      // Remove title wrapped in strong tags
+      formattedContent = formattedContent.replace(new RegExp(`^\\s*<strong>\\s*${titleEscaped}\\s*</strong>\\s*`, 'i'), '');
+
+      // Remove title wrapped in heading tags with strong tags inside
+      formattedContent = formattedContent.replace(new RegExp(`^\\s*<h[1-6][^>]*>\\s*<strong>\\s*${titleEscaped}\\s*</strong>\\s*</h[1-6]>\\s*`, 'i'), '');
+
+      // Remove title anywhere in content that appears as a standalone heading
+      formattedContent = formattedContent.replace(new RegExp(`\\n\\s*<h[1-6][^>]*>\\s*(?:<strong>\\s*)?${titleEscaped}(?:\\s*</strong>)?\\s*</h[1-6]>\\s*\\n`, 'gi'), '\n\n');
+
+      // Remove title as standalone paragraph
+      formattedContent = formattedContent.replace(new RegExp(`\\n\\s*<p[^>]*>\\s*(?:<strong>\\s*)?${titleEscaped}(?:\\s*</strong>)?\\s*</p>\\s*\\n`, 'gi'), '\n\n');
     }
 
     // Step 3: Convert remaining markdown-style formatting to HTML if needed
