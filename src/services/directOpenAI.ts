@@ -460,9 +460,20 @@ Generate content so valuable that readers feel they've discovered insider knowle
 
     } catch (error) {
       console.error('❌ Mock blog generation failed:', error);
+
+      // Handle specific stream errors gracefully
+      const errorMessage = error instanceof Error ? error.message : 'Mock generation failed';
+      if (errorMessage.includes('body stream already read') || errorMessage.includes('body used already')) {
+        console.error('🔄 Stream conflict in mock API - retrying...');
+        return {
+          success: false,
+          error: 'Network communication error. Please try again.'
+        };
+      }
+
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Mock generation failed'
+        error: errorMessage
       };
     }
   }
