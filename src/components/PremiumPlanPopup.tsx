@@ -363,17 +363,22 @@ export function PremiumPlanPopup({
         ))}
       </div>
 
-      {/* Features List */}
-      <div className="space-y-3">
-        <h3 className="font-semibold">What's Included:</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {features.map((feature, index) => (
-            <div key={index} className="flex items-center gap-2 text-sm">
-              <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+      {/* Features List - Compact */}
+      <div className="space-y-2">
+        <h3 className="text-sm sm:text-base font-semibold">What's Included:</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 sm:gap-2">
+          {features.slice(0, 6).map((feature, index) => (
+            <div key={index} className="flex items-center gap-2 text-xs sm:text-sm">
+              <CheckCircle className="h-3 w-3 sm:h-4 sm:w-4 text-green-500 flex-shrink-0" />
               <span>{feature.text}</span>
             </div>
           ))}
         </div>
+        {features.length > 6 && (
+          <div className="text-xs text-muted-foreground text-center">
+            +{features.length - 6} more premium features
+          </div>
+        )}
       </div>
 
       {/* Continue Button */}
