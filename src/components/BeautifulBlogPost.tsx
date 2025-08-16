@@ -131,13 +131,13 @@ function formatContent(raw: string, title?: string) {
         .replace(/\*+$/, ''); // Remove any remaining trailing asterisks
 
       // Enhanced markdown links processing with intelligent anchor text optimization
-      processedText = processedText.replace(/\[([^\]]+)\]\(([^)\s]*\s*[^)]*)\)/g, (match, linkText, url) => {
+      processedText = processedText.replace(/\[([^\]]+)\]\(([^)]*)\)/g, (match, linkText, url) => {
         // Clean up the URL and text
         let cleanText = linkText.trim();
         let cleanUrl = url.trim();
 
-        // Enhanced anchor text optimization
-        if (cleanUrl.includes('backlinkoo.com') && cleanText.toLowerCase().includes('backlinkoo')) {
+        // Enhanced anchor text optimization for Backlinkoo - always use "Weebly SEO"
+        if (cleanUrl.includes('backlinkoo.com') || cleanText.toLowerCase().includes('backlinkoo')) {
           cleanText = 'Weebly SEO';
         }
 
@@ -152,7 +152,7 @@ function formatContent(raw: string, title?: string) {
           }
         }
 
-        // Fix common URL formatting issues
+        // Fix common URL formatting issues - handle broken URLs with spaces
         cleanUrl = cleanUrl.replace(/https?\s*:\s*\/\//g, 'https://');
         cleanUrl = cleanUrl.replace(/www\s*\./g, 'www.');
 
@@ -1860,7 +1860,7 @@ export function BeautifulBlogPost() {
                   <ArrowRight className="h-5 w-5 ml-2" />
                 </Button>
                 <p className="mt-4 text-sm text-gray-500">
-                  ✨ Join thousands of users already growing their online presence
+                  ��� Join thousands of users already growing their online presence
                 </p>
               </div>
             </div>
