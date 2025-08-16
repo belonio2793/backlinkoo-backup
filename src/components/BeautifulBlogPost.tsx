@@ -1084,7 +1084,7 @@ export function BeautifulBlogPost() {
                                  para.toLowerCase().trim() === title.toLowerCase().trim());
 
         if (isLikelyHeading && !isTitle) {
-          htmlContent += `<h2>${para}</h2>\n\n`;
+          htmlContent += `<p>${para}</p>\n\n`;
         }
         // Convert numbered list items to bullet lists for better readability
         else if (para.match(/^\d+\./)) {
