@@ -14,10 +14,10 @@ class ResponseBodyManager {
   }
 
   /**
-   * Initialize simplified response handling (deprecated - kept for compatibility)
+   * Initialize simplified response handling (kept for compatibility)
    */
   initializeTracking(): void {
-    // Simplified - no more tracking, just logging
+    // Simplified - no more complex tracking
     if ((window as any)._responseBodyManagerInitialized) {
       return;
     }
@@ -26,100 +26,47 @@ class ResponseBodyManager {
   }
 
   /**
-   * Create a mock response when cloning fails
+   * Safe clone method - simply use native clone with fallback
    */
-  public createMockResponse(response: Response): Response {
+  public safeClone(response: Response): Response {
     try {
-      const mockResponse = new Response('{"error": "Response body was already consumed"}', {
-        status: response.status || 200,
-        statusText: response.statusText || 'OK',
-        headers: response.headers
-      });
-
-      ResponseBodyManager.getInstance().responseMap.set(mockResponse, { consumed: false, cloneCount: 0 });
-      return mockResponse;
-    } catch (error) {
-      // Fallback: create minimal response
-      const fallbackResponse = new Response('{}', {
-        status: 200,
-        statusText: 'OK'
-      });
-      return fallbackResponse;
-    }
-  }
-
-  /**
-   * Get empty result for already consumed responses
-   */
-  public getEmptyResult(method: string): Promise<any> {
-    switch (method) {
-      case 'json':
-        return Promise.resolve({ error: 'Response body already consumed' });
-      case 'text':
-        return Promise.resolve('Response body already consumed');
-      case 'blob':
-        return Promise.resolve(new Blob());
-      case 'arrayBuffer':
-        return Promise.resolve(new ArrayBuffer(0));
-      case 'formData':
-        return Promise.resolve(new FormData());
-      default:
-        return Promise.resolve(null);
-    }
-  }
-
-  /**
-   * Safely clone a response
-   */
-  safeClone(response: Response): Response {
-    try {
-      // Check if response is already consumed
-      if (response.bodyUsed) {
-        console.warn('Attempted to clone consumed response, creating mock');
-        return this.createMockResponseFromConsumed(response);
-      }
-
       return response.clone();
     } catch (error) {
-      console.warn('Failed to clone response, returning mock:', error);
-      return this.createMockResponseFromConsumed(response);
+      console.warn('Response clone failed:', error);
+      // Return a simple error response
+      return new Response('{"error": "Response body was already consumed"}', {
+        status: response.status || 200,
+        statusText: response.statusText || 'OK'
+      });
     }
   }
 
   /**
-   * Create mock response from consumed response
+   * Check if response body can be read
    */
-  private createMockResponseFromConsumed(response: Response): Response {
+  public canReadBody(response: Response): boolean {
+    return !response.bodyUsed;
+  }
+
+  /**
+   * Safe response reading with automatic retry
+   */
+  public async safeRead(response: Response, method: 'json' | 'text' = 'json'): Promise<any> {
     try {
-      return new Response('{"error": "Response body already consumed", "status": ' + response.status + '}', {
-        status: response.status,
-        statusText: response.statusText,
-        headers: response.headers
-      });
+      if (response.bodyUsed) {
+        console.warn('Response body already used, cannot read');
+        return method === 'json' ? { error: 'Response body already consumed' } : 'Response body already consumed';
+      }
+      
+      if (method === 'json') {
+        return await response.json();
+      } else {
+        return await response.text();
+      }
     } catch (error) {
-      // Ultimate fallback
-      return new Response('{"error": "Response unavailable"}', {
-        status: 200,
-        statusText: 'OK'
-      });
+      console.warn(`Failed to read response as ${method}:`, error);
+      return method === 'json' ? { error: 'Failed to parse response' } : 'Failed to read response';
     }
-  }
-
-  /**
-   * Check if response body can be safely read
-   */
-  canReadBody(response: Response): boolean {
-    const tracking = this.responseMap.get(response);
-    return !response.bodyUsed && (!tracking || !tracking.consumed);
-  }
-
-  /**
-   * Mark response as consumed
-   */
-  markAsConsumed(response: Response): void {
-    const tracking = this.responseMap.get(response) || { consumed: false, cloneCount: 0 };
-    tracking.consumed = true;
-    this.responseMap.set(response, tracking);
   }
 }
 
