@@ -53,7 +53,7 @@ window.checkNetworkStatus = function() {
   console.log('- Fetch wrapper disabled:', localStorage.getItem('disable-fetch-wrapper') === 'true');
   console.log('- Online status:', navigator.onLine);
   console.log('- User agent:', navigator.userAgent);
-  
+
   // Test basic fetch
   fetch(window.location.href + '?test=1')
     .then(response => {
@@ -61,6 +61,17 @@ window.checkNetworkStatus = function() {
     })
     .catch(error => {
       console.log('❌ Basic fetch test failed:', error.message);
+    });
+
+  // Test dynamic import
+  console.log('🧪 Testing dynamic import...');
+  import('/src/components/EmergencyBlogPost.tsx?test=' + Date.now())
+    .then(module => {
+      console.log('✅ Dynamic import test passed');
+    })
+    .catch(error => {
+      console.log('❌ Dynamic import test failed:', error.message);
+      console.log('This explains why the blog post won\'t load!');
     });
 };
 
