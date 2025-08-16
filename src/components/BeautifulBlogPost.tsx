@@ -748,7 +748,7 @@ export function BeautifulBlogPost() {
       }
     );
 
-    // Step 6: Beautiful blockquotes
+    // Step 8: Beautiful blockquotes
     formattedContent = formattedContent.replace(
       /<blockquote([^>]*)>(.*?)<\/blockquote>/gis,
       (match, attrs, text) => {
@@ -757,7 +757,7 @@ export function BeautifulBlogPost() {
       }
     );
 
-    // Step 7: Enhanced images with beautiful wrapper
+    // Step 9: Enhanced images with beautiful wrapper
     formattedContent = formattedContent.replace(
       /<img([^>]*?)src="([^"]*)"([^>]*?)>/gi,
       (match, preAttrs, src, postAttrs) => {
@@ -771,7 +771,7 @@ export function BeautifulBlogPost() {
       }
     );
 
-    // Step 8: Enhanced code blocks
+    // Step 10: Enhanced code blocks
     formattedContent = formattedContent.replace(
       /<code([^>]*)>(.*?)<\/code>/gi,
       (match, attrs, text) => {
@@ -779,13 +779,13 @@ export function BeautifulBlogPost() {
       }
     );
 
-    // Step 9: Apply drop cap to first paragraph
+    // Step 11: Apply drop cap to first paragraph
     formattedContent = formattedContent.replace(
       /<p class="beautiful-prose([^"]*)"([^>]*)>(.*?)<\/p>/,
       '<p class="beautiful-prose$1 beautiful-first-paragraph"$2>$3</p>'
     );
 
-    // Step 10: Final cleanup - remove problematic content patterns
+    // Step 12: Final cleanup - remove problematic content patterns
     formattedContent = formattedContent
       // Remove empty or invalid headings
       .replace(/<h[1-6][^>]*>\s*\*+\s*<\/h[1-6]>/gi, '')
