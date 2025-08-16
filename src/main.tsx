@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import './styles/mobile-payment-fix.css'
+// Enhanced FullStory fix - must load FIRST
+import './utils/fullstoryFix'
 // Unified error handler - fixes all [object Object] displays
 import './utils/unifiedErrorHandler'
 // Campaign-specific error handling
@@ -399,7 +401,7 @@ if (typeof window !== 'undefined') {
           },
           set(newValue) {
             // Allow updates but log them
-            console.log(`🔧 ${propertyName} property updated by extension`);
+            console.log(`�� ${propertyName} property updated by extension`);
             currentValue = newValue;
           },
           configurable: true, // Keep configurable to allow extensions to work
