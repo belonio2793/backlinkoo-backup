@@ -23,14 +23,21 @@ export async function runOneTimeBeautifulContentMigration(): Promise<void> {
     console.log('🎨 Starting one-time beautiful content structure migration...');
 
     // Get all blog posts that need migration (those without beautiful-prose classes)
-    const { data: posts, error } = await supabase
-      .from('blog_posts')
-      .select('*')
-      .not('content', 'like', '%beautiful-prose%')
-      .order('created_at', { ascending: false });
+    let posts;
+    try {
+      const { data, error } = await supabase
+        .from('blog_posts')
+        .select('*')
+        .not('content', 'like', '%beautiful-prose%')
+        .order('created_at', { ascending: false });
 
-    if (error) {
-      console.error('❌ Failed to fetch blog posts for migration:', error);
+      if (error) {
+        console.error('❌ Failed to fetch blog posts for migration:', error);
+        return;
+      }
+      posts = data;
+    } catch (fetchError: any) {
+      console.error('❌ Network error fetching blog posts for migration:', fetchError.message);
       return;
     }
 
