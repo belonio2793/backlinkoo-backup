@@ -434,28 +434,35 @@ export class BlogService {
   /**
    * Increment view count
    */
-  private async incrementViewCount(slug: string): Promise<void> {
+  private async incrementViewCount(slug: string, tableName: string = 'blog_posts'): Promise<void> {
     try {
-      // Try using the RPC function first
-      const { error } = await supabase.rpc('increment_blog_post_views', { post_slug: slug });
+      // Try using the RPC function first (works for both tables)
+      let rpcFunction = '';
+      if (tableName === 'published_blog_posts') {
+        rpcFunction = 'increment_published_blog_post_views';
+      } else {
+        rpcFunction = 'increment_blog_post_views';
+      }
+
+      const { error } = await supabase.rpc(rpcFunction, { post_slug: slug });
 
       if (error) {
         // Check if it's a missing function error and use fallback
         if (error.code === '42883' || error.code === 'PGRST202' || error.message?.includes('Could not find the function')) {
-          console.log('View increment function not available, using direct update');
+          console.log(`View increment function ${rpcFunction} not available, using direct update on ${tableName}`);
         } else {
           console.warn('View increment function failed:', error.message);
         }
 
-        // Fallback: direct update
+        // Fallback: direct update on the correct table
         await supabase
-          .from('blog_posts')
+          .from(tableName)
           .update({ view_count: supabase.sql`view_count + 1` })
           .eq('slug', slug)
           .eq('status', 'published');
       }
     } catch (error) {
-      console.warn('Failed to increment view count:', error);
+      console.warn(`Failed to increment view count for ${tableName}:`, error);
     }
   }
 
