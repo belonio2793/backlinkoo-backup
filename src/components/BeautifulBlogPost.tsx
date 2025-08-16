@@ -166,14 +166,18 @@ const ContentProcessor = ({
 
       if (paragraphLines.length > 0) {
         const paragraphContent = paragraphLines.join(' ');
-        elements.push(
-          <div
-            key={`paragraph-${i}`}
-            className="mb-6 text-lg leading-8 text-gray-700"
-          >
-            {processTextContent(paragraphContent, i)}
-          </div>
-        );
+        const improvedParagraphs = improveSentenceStructure(paragraphContent);
+
+        improvedParagraphs.forEach((paragraph, idx) => {
+          elements.push(
+            <div
+              key={`paragraph-${i}-${idx}`}
+              className="mb-6 text-lg leading-8 text-gray-700"
+            >
+              {processTextContent(paragraph, i + idx)}
+            </div>
+          );
+        });
       }
 
       i = j;
