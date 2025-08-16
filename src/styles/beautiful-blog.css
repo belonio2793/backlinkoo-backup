@@ -223,6 +223,44 @@
 .beautiful-prose {
   color: rgb(55, 65, 81);
   line-height: 1.8;
+  font-weight: 300;
+  letter-spacing: 0.01em;
+}
+
+/* Professional paragraph styling */
+.beautiful-prose-paragraph {
+  font-size: 1.25rem;
+  line-height: 1.8;
+  color: rgb(55, 65, 81);
+  font-weight: 300;
+  letter-spacing: 0.01em;
+  margin-bottom: 2rem;
+  text-align: justify;
+  text-justify: inter-word;
+  hyphens: auto;
+}
+
+/* Enhanced title hierarchy */
+.beautiful-main-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  line-height: 0.9;
+  color: rgb(17, 24, 39);
+  text-rendering: optimizeLegibility;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .beautiful-main-title {
+    font-size: clamp(3rem, 6vw, 5rem);
+  }
+}
+
+@media (min-width: 1024px) {
+  .beautiful-main-title {
+    font-size: clamp(3.5rem, 7vw, 6rem);
+  }
 }
 
 .beautiful-prose h2 {
