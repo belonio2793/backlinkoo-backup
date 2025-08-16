@@ -239,7 +239,7 @@ const EnhancedContentProcessor = ({
 
   // Create numbered list element
   const createNumberedList = (items: string[], index: number) => (
-    <ol key={`numbered-list-${index}`} className="mb-8 ml-6 space-y-3 list-decimal list-outside">
+    <ol key={`numbered-list-${index}`} className="ml-6 space-y-3 list-decimal list-outside">
       {items.map((item, idx) => (
         <li key={idx} className="text-lg leading-7 text-gray-700 pl-3 font-normal">
           {processTextContent(item, `${index}-${idx}`)}
@@ -250,7 +250,7 @@ const EnhancedContentProcessor = ({
 
   // Create bullet list element
   const createBulletList = (items: string[], index: number) => (
-    <ul key={`bullet-list-${index}`} className="mb-8 ml-6 space-y-3 list-disc list-outside">
+    <ul key={`bullet-list-${index}`} className="ml-6 space-y-3 list-disc list-outside">
       {items.map((item, idx) => (
         <li key={idx} className="text-lg leading-7 text-gray-700 pl-3 font-normal">
           {processTextContent(item, `${index}-${idx}`)}
@@ -280,9 +280,9 @@ const EnhancedContentProcessor = ({
     const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
 
     return (
-      <HeadingTag 
-        key={`heading-${index}`} 
-        className={`font-bold text-gray-900 mt-8 mb-4 tracking-tight ${
+      <HeadingTag
+        key={`heading-${index}`}
+        className={`font-bold text-gray-900 tracking-tight ${
           level === 3 ? 'text-2xl' : 
           level === 4 ? 'text-xl' : 
           level === 5 ? 'text-lg' : 'text-base'
@@ -327,7 +327,7 @@ const EnhancedContentProcessor = ({
     return paragraphs.map((paragraph, idx) => (
       <div
         key={`paragraph-${index}-${idx}`}
-        className="mb-6 text-lg leading-8 text-gray-700 font-normal"
+        className="text-lg leading-8 text-gray-700 font-normal"
         style={{ textAlign: 'justify', lineHeight: '1.75' }}
       >
         {processTextContent(paragraph, `${index}-${idx}`)}
@@ -408,7 +408,7 @@ const EnhancedContentProcessor = ({
 
   return (
     <div className="prose prose-xl prose-slate max-w-none">
-      <div className="space-y-1">
+      <div className="space-y-6">
         {processContent(content)}
       </div>
     </div>

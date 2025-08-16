@@ -44,16 +44,22 @@ function createXHRFetch(): typeof fetch {
       
       xhr.open(method, url, true);
       
+      // Track if Content-Type was set
+      let hasContentType = false;
+
       // Set headers
       if (init.headers) {
         const headers = new Headers(init.headers);
         headers.forEach((value, key) => {
+          if (key.toLowerCase() === 'content-type') {
+            hasContentType = true;
+          }
           xhr.setRequestHeader(key, value);
         });
       }
-      
+
       // Default headers for JSON
-      if (!xhr.getRequestHeader('Content-Type') && init.body) {
+      if (!hasContentType && init.body) {
         xhr.setRequestHeader('Content-Type', 'application/json');
       }
       
