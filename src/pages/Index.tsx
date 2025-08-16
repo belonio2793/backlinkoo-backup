@@ -358,22 +358,17 @@ const Index = () => {
                   fullBlogUrl = `${window.location.origin}/blog/${blogPost.metadata.slug}`;
                 }
 
-                // Show success notification with clickable link
+                // Show success notification with action to open in new window
                 toast({
                   title: "🎉 Blog Post Published!",
-                  description: (
-                    <div className="space-y-2">
-                      <p className="font-medium">"{blogPost.title}" is now live!</p>
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Live URL:</span>
-                        <button
-                          onClick={() => window.open(fullBlogUrl, '_blank')}
-                          className="text-blue-600 hover:text-blue-800 underline text-sm font-medium"
-                        >
-                          Click to open blog post
-                        </button>
-                      </div>
-                    </div>
+                  description: `"${blogPost.title}" is now live and will open in a new window`,
+                  action: (
+                    <button
+                      onClick={() => window.open(fullBlogUrl, '_blank')}
+                      className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm font-medium transition-colors"
+                    >
+                      Open Blog Post
+                    </button>
                   ),
                   duration: 8000, // Show for 8 seconds
                 });
