@@ -67,10 +67,10 @@ export const BacklinkNotification: React.FC<BacklinkNotificationProps> = ({
 
         setNotifications(prev => [notification, ...prev.slice(0, 2)]); // Keep max 3 notifications
 
-        // Auto-remove after 8 seconds
+        // Auto-remove after 4 seconds - shorter duration as requested
         setTimeout(() => {
           setNotifications(prev => prev.filter(n => n.id !== notification.id));
-        }, 8000);
+        }, 4000);
       }
     };
 

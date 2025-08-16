@@ -93,7 +93,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
           toast({
             title: "New Backlink Published!",
             description: `Published "${event.details?.keyword || event.keyword || 'content'}" to ${event.details?.platform || event.platform || 'platform'}`,
-            duration: 5000,
+            duration: 3000, // Shorter duration - just a few seconds
           });
 
           // Note: Don't create duplicate status messages - BacklinkNotification handles popup notifications
