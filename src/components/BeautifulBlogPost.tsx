@@ -715,10 +715,6 @@ export function BeautifulBlogPost() {
 
           {/* Article Header */}
           <header className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 leading-tight bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-              {cleanTitle}
-            </h1>
-
             {blogPost.meta_description && (
               <p className="text-xl md:text-2xl text-gray-600 mb-12 leading-relaxed">
                 {blogPost.meta_description}
