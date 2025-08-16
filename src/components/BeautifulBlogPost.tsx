@@ -327,7 +327,7 @@ const EnhancedContentProcessor = ({
     return paragraphs.map((paragraph, idx) => (
       <div
         key={`paragraph-${index}-${idx}`}
-        className="mb-6 text-lg leading-8 text-gray-700 font-normal"
+        className="text-lg leading-8 text-gray-700 font-normal"
         style={{ textAlign: 'justify', lineHeight: '1.75' }}
       >
         {processTextContent(paragraph, `${index}-${idx}`)}
