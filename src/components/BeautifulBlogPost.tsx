@@ -1213,33 +1213,15 @@ export function BeautifulBlogPost() {
                           `;
                         }
 
-                        // Process content with robust processor - DISABLE title removal to prevent content loss
-                        // SECURITY FIRST: Use the secure HTML processor
-                        const secureHtmlResult = BlogContentSecurityProcessor.createSecureHTML(content, blogPost.title);
+                        // SIMPLIFIED PROCESSING: Apply beautiful formatting directly to preserve structure
+                        let finalContent = applyBeautifulContentStructure(content, blogPost.title);
 
-                        // Log security results
-                        if (secureHtmlResult.securityInfo.securityIssues.length > 0) {
-                          console.warn('🔒 Security processing applied:', {
-                            riskLevel: secureHtmlResult.securityInfo.riskLevel,
-                            issues: secureHtmlResult.securityInfo.securityIssues,
-                            fixes: secureHtmlResult.securityInfo.fixes
-                          });
-                        }
-
-                        // Apply additional quality processing if needed
-                        let finalContent = secureHtmlResult.__html;
-                        const qualityMetrics = BlogQualityMonitor.analyzeContent(finalContent, blogPost.target_url);
-
-                        if (qualityMetrics.qualityScore < 70 || qualityMetrics.hasMalformedPatterns) {
-                          finalContent = BlogAutoAdjustmentService.adjustContentForDisplay(finalContent, {
-                            title: blogPost.title,
-                            target_url: blogPost.target_url,
-                            anchor_text: blogPost.anchor_text
-                          });
-                        }
-
-                        // FORCE BEAUTIFUL CONTENT STRUCTURE: Apply beautiful formatting to ALL posts
-                        finalContent = applyBeautifulContentStructure(finalContent, blogPost.title);
+                        // Basic security check only - remove scripts and dangerous elements
+                        finalContent = finalContent
+                          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                          .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
+                          .replace(/javascript:/gi, '')
+                          .replace(/on\w+\s*=/gi, '');
                         // Variables are already defined above as finalContent and securityInfo
 
                         // Log processing results for debugging
