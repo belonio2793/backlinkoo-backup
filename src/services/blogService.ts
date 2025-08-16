@@ -263,9 +263,21 @@ export class BlogService {
       } catch (error: any) {
         console.warn(`⚠️ [BlogService] Approach ${i + 1} failed:`, this.getSafeErrorMessage(error));
 
-        // If this is the last approach, return null instead of throwing
+        // If this is the last approach, try emergency service
         if (i === approaches.length - 1) {
-          console.error('❌ [BlogService] All approaches failed, returning null');
+          console.log('🚨 [BlogService] All approaches failed, trying emergency service...');
+
+          try {
+            const emergencyResult = await emergencyBlogService.emergencyFetchBySlug(slug);
+            if (emergencyResult) {
+              console.log('✅ [BlogService] Emergency service succeeded');
+              return emergencyResult as BlogPost;
+            }
+          } catch (emergencyError) {
+            console.error('❌ [BlogService] Emergency service also failed:', this.getSafeErrorMessage(emergencyError));
+          }
+
+          console.error('❌ [BlogService] All methods failed, returning null');
           return null;
         }
       }
