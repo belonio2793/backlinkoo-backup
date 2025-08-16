@@ -23,15 +23,30 @@ export const LazyEnhancedBlogListing = lazy(() => import('@/components/EnhancedB
 export const LazySuperEnhancedBlogListing = lazy(() => import('@/components/SuperEnhancedBlogListing').then(module => ({ default: module.SuperEnhancedBlogListing })));
 export const LazyEnhancedBlogPost = lazy(() => import('@/components/EnhancedBlogPost').then(module => ({ default: module.EnhancedBlogPost })));
 export const LazyBeautifulBlogPost = lazy(() =>
-  import('@/components/BeautifulBlogPost')
+  import('@/components/BeautifulBlogPostWrapper')
     .then(module => {
-      console.log('✅ BeautifulBlogPost module loaded:', module);
-      return { default: module.BeautifulBlogPost || module.default };
+      console.log('✅ BeautifulBlogPostWrapper module loaded:', module);
+      return { default: module.default || module.BeautifulBlogPost };
     })
     .catch(error => {
-      console.error('❌ Failed to load BeautifulBlogPost:', error);
-      console.error('Error details:', error);
-      throw error;
+      console.error('❌ Failed to load BeautifulBlogPostWrapper:', error);
+      // Return a simple fallback component
+      return {
+        default: () => (
+          <div className="min-h-screen flex items-center justify-center">
+            <div className="text-center p-8">
+              <h2 className="text-2xl font-bold text-red-600 mb-4">Module Loading Error</h2>
+              <p className="text-gray-600 mb-4">Failed to load blog post component</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              >
+                Refresh Page
+              </button>
+            </div>
+          </div>
+        )
+      };
     })
 );
 export const LazyBeautifulBlogTemplate = lazy(() => import('@/components/BeautifulBlogTemplate').then(module => ({ default: module.BeautifulBlogTemplate })));
