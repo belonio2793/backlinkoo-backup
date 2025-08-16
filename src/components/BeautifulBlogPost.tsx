@@ -278,14 +278,18 @@ const ContentProcessor = ({
         const improvedParagraphs = improveSentenceStructure(paragraphContent);
 
         improvedParagraphs.forEach((paragraph, idx) => {
-          elements.push(
-            <div
-              key={`paragraph-${i}-${idx}`}
-              className="beautiful-prose-paragraph max-w-none break-words"
-            >
-              {processTextContent(paragraph, i + idx)}
-            </div>
-          );
+          const processedContent = processTextContent(paragraph, i + idx);
+          // Only render if content is not null (not filtered out)
+          if (processedContent !== null) {
+            elements.push(
+              <div
+                key={`paragraph-${i}-${idx}`}
+                className="beautiful-prose-paragraph max-w-none break-words"
+              >
+                {processedContent}
+              </div>
+            );
+          }
         });
       }
 
