@@ -256,13 +256,7 @@ const ContentProcessor = ({
           elements.push(
             <div
               key={`paragraph-${i}-${idx}`}
-              className="mb-8 text-xl leading-9 text-gray-700 max-w-none break-words font-light"
-              style={{
-                textAlign: 'justify',
-                textJustify: 'inter-word',
-                hyphens: 'auto',
-                letterSpacing: '0.01em'
-              }}
+              className="beautiful-prose-paragraph max-w-none break-words"
             >
               {processTextContent(paragraph, i + idx)}
             </div>
