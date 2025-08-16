@@ -737,15 +737,22 @@ export function BeautifulBlogPost() {
           continue;
         }
 
-        // Check if it's a heading (short line with title-like content)
-        if (para.length < 120 && (
-          para.includes('Guide') ||
-          para.includes('Introduction') ||
-          para.includes('Facebook') ||
+        // Check if it's a heading (short line with title-like content) but NOT the blog title
+        const paraTextOnly = para.replace(/<[^>]*>/g, '').trim();
+        const isLikelyHeading = para.length < 120 && (
+          (para.includes('Introduction') && !para.includes('Hook Introduction')) ||
           para.includes('Conclusion') ||
           para.includes('Strategy') ||
+          para.includes('Step ') ||
+          para.includes('Chapter ') ||
           (para.split(' ').length <= 8 && para.charAt(0).toUpperCase() === para.charAt(0))
-        )) {
+        );
+
+        // Don't convert to heading if it matches the title or is too similar
+        const isTitle = title && (paraTextOnly.toLowerCase() === title.toLowerCase() ||
+                                 para.toLowerCase().trim() === title.toLowerCase().trim());
+
+        if (isLikelyHeading && !isTitle) {
           htmlContent += `<h2>${para}</h2>\n\n`;
         }
         // Check if it's a numbered list item
