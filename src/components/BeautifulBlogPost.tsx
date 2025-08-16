@@ -714,10 +714,14 @@ export function BeautifulBlogPost() {
       })
       .replace(/<h3([^>]*)>(.*?)<\/h3>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
+        // Skip if this heading matches the blog title (remove duplicate)
+        if (title && cleanText.toLowerCase() === title.toLowerCase()) {
+          return '';
+        }
         return `<h3 class="beautiful-prose text-2xl font-semibold text-black mb-4 mt-8"${attrs}>${cleanText}</h3>`;
       });
 
-    // Step 3: Enhanced paragraphs with beautiful typography
+    // Step 5: Enhanced paragraphs with beautiful typography
     formattedContent = formattedContent
       .replace(/<p([^>]*)>(.*?)<\/p>/gi, (match, attrs, text) => {
         const cleanText = text.trim();
