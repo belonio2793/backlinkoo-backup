@@ -15,6 +15,7 @@ export interface BlogPostGenerationData {
   content: string;
   targetUrl: string;
   anchorText?: string;
+  primaryKeyword?: string;
   wordCount: number;
   readingTime: number;
   seoScore: number;
@@ -95,7 +96,7 @@ export class BlogService {
     }
 
     // For trial posts, attempt normal creation
-    console.log('🔓 Attempting blog post creation...');
+    console.log('��� Attempting blog post creation...');
 
     // Remove any custom id field to let database auto-generate UUID
     const { id: _, ...cleanBlogPostData } = blogPostData as any;
