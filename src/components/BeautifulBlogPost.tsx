@@ -543,16 +543,40 @@ export function BeautifulBlogPost() {
           console.log('  - Created:', post.created_at);
           console.log('  - Claimed:', post.claimed);
         }
-      } catch (dbError) {
+      } catch (dbError: any) {
         console.warn('Database lookup failed, trying localStorage fallback:', dbError);
+
+        // Check if this is a FullStory-related fetch error
+        if (dbError?.message?.includes('Failed to fetch') ||
+            dbError?.stack?.includes('fullstory') ||
+            dbError?.stack?.includes('fs.js')) {
+          console.warn('🛡️ FullStory interference detected during blog post load');
+
+          // Try to restore original fetch and retry once
+          if ((window as any).restoreOriginalFetch) {
+            try {
+              (window as any).restoreOriginalFetch();
+              console.log('🔄 Retrying with restored fetch...');
+              post = await blogService.getBlogPostBySlug(slug);
+              if (post) {
+                console.log('✅ Retry successful after fetch restoration');
+              }
+            } catch (retryError) {
+              console.warn('⚠️ Retry after fetch restoration also failed:', retryError);
+            }
+          }
+        }
+
         // Try to load from localStorage as fallback
-        const localStoragePost = localStorage.getItem(`blog_post_${slug}`);
-        if (localStoragePost) {
-          try {
-            post = JSON.parse(localStoragePost);
-            console.log('Loaded from localStorage fallback');
-          } catch (parseError) {
-            console.error('Failed to parse localStorage data:', parseError);
+        if (!post) {
+          const localStoragePost = localStorage.getItem(`blog_post_${slug}`);
+          if (localStoragePost) {
+            try {
+              post = JSON.parse(localStoragePost);
+              console.log('✅ Loaded from localStorage fallback');
+            } catch (parseError) {
+              console.error('❌ Failed to parse localStorage data:', parseError);
+            }
           }
         }
       }
