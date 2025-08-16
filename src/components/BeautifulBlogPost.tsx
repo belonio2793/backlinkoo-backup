@@ -97,21 +97,36 @@ function formatContent(raw: string) {
   return lines.map((line, i) => {
     // Process each line to handle bold text and markdown links
     const processLineContent = (text: string) => {
-      // Convert **text** to bold
-      text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      // Clean up the text first
+      let processedText = text
+        .replace(/\*+$/, '') // Remove trailing asterisks
+        .replace(/^\*+(?!\*)/, '') // Remove leading single asterisks
+        .trim();
+
+      // Convert **text** to bold (handle edge cases)
+      processedText = processedText.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+      // Handle remaining single asterisks that might be formatting artifacts
+      processedText = processedText.replace(/\s+\*\s*$/, ''); // Remove trailing single asterisks
 
       // Convert markdown links [text](url) to HTML links
-      text = text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
+      processedText = processedText.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
         // Clean up the URL and text
         const cleanText = linkText.trim();
         let cleanUrl = url.trim();
+        // Fix common URL issues
         if (cleanUrl && !cleanUrl.match(/^https?:\/\//)) {
           cleanUrl = cleanUrl.startsWith('//') ? 'https:' + cleanUrl : 'https://' + cleanUrl;
         }
         return `<a href="${cleanUrl}" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">${cleanText}</a>`;
       });
 
-      return text;
+      // Convert plain URLs to links if they're not already in markdown
+      if (!processedText.includes('<a ') && /https?:\/\/\S+/.test(processedText)) {
+        processedText = processedText.replace(/(https?:\/\/[^\s<>"']+)/g, '<a href="$1" class="beautiful-prose text-blue-600 hover:text-purple-600 font-semibold transition-colors duration-300 underline decoration-2 underline-offset-2 hover:decoration-purple-600" target="_blank" rel="noopener noreferrer">$1</a>');
+      }
+
+      return processedText;
     };
 
     // Enhanced section heading detection
