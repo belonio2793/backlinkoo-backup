@@ -126,8 +126,18 @@ export async function runOneTimeBeautifulContentMigration(): Promise<void> {
   }
 }
 
+// Manual retry function
+export function retryBeautifulContentMigration(): void {
+  localStorage.removeItem(MIGRATION_KEY);
+  console.log('🔄 Migration reset - running again...');
+  runOneTimeBeautifulContentMigration();
+}
+
 // Auto-run migration when imported (with delay to not block app startup)
 if (typeof window !== 'undefined') {
+  // Make retry function available globally for debugging
+  (window as any).retryBeautifulContentMigration = retryBeautifulContentMigration;
+
   // Run after a delay to not block initial app load
   setTimeout(() => {
     runOneTimeBeautifulContentMigration().catch(console.error);
