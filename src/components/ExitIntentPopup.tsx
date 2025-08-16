@@ -101,8 +101,8 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
             </p>
 
             {/* Enhanced time remaining box */}
-            <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-400 rounded-xl p-5 mb-6 shadow-sm">
-              <div className="flex items-center justify-center gap-3 text-amber-800 mb-3">
+            <div className="bg-gradient-to-r from-amber-50 to-orange-50 border-l-4 border-amber-400 rounded-xl p-4 mb-6 shadow-sm">
+              <div className="flex items-center justify-center gap-3 text-amber-800 mb-2">
                 <div className="h-8 w-8 bg-amber-100 rounded-full flex items-center justify-center">
                   <Clock className="h-4 w-4 text-amber-600" />
                 </div>
@@ -114,7 +114,7 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
             </div>
           </div>
 
-          {/* Benefits section with modern design */}
+          {/* Benefits section with modern design - 2 column layout for wider display */}
           <div className="space-y-4">
             <div className="text-center">
               <h4 className="font-bold text-gray-900 text-lg flex items-center justify-center gap-2">
@@ -123,7 +123,7 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
               </h4>
             </div>
 
-            <div className="grid grid-cols-1 gap-3">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div className="flex items-center gap-4 p-3 bg-green-50 rounded-xl border border-green-100 hover:bg-green-100 transition-colors">
                 <div className="h-8 w-8 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
                   <CheckCircle className="h-4 w-4 text-white" />
