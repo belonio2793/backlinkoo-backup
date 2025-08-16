@@ -253,6 +253,16 @@ const App = () => (
               }
             />
 
+            {/* Debug and test routes */}
+            <Route
+              path="/debug/blog-fix"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <BlogGenerationFixTestPage />
+                </Suspense>
+              }
+            />
+
             {/* 404 Catch-all route */}
             <Route
               path="*"
