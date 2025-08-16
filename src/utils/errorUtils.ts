@@ -8,23 +8,24 @@
  * Extracts a readable error message from various error types
  */
 export function getErrorMessage(error: any): string {
-  if (!error) {
-    return 'Unknown error occurred';
-  }
-
-  // Handle Symbol errors specifically
-  if (typeof error === 'symbol') {
-    try {
-      return error.toString();
-    } catch {
-      return '[Symbol error - cannot convert to string]';
+  try {
+    if (!error) {
+      return 'Unknown error occurred';
     }
-  }
 
-  // If it's already a string, return it
-  if (typeof error === 'string') {
-    return error;
-  }
+    // Handle Symbol errors specifically
+    if (typeof error === 'symbol') {
+      try {
+        return error.toString();
+      } catch {
+        return '[Symbol error - cannot convert to string]';
+      }
+    }
+
+    // If it's already a string, return it
+    if (typeof error === 'string') {
+      return error;
+    }
 
   // Try to get the message property
   if (error.message && typeof error.message === 'string') {
@@ -104,8 +105,13 @@ export function getErrorMessage(error: any): string {
     }
   }
 
-  // Final fallback
-  return 'Unknown error occurred';
+    // Final fallback
+    return 'Unknown error occurred';
+  } catch (processingError) {
+    // If there's any error in processing (like Symbol conversion), return safe fallback
+    console.warn('Error processing error message:', processingError);
+    return 'Error occurred (processing failed)';
+  }
 }
 
 /**
