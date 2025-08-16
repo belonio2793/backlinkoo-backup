@@ -159,8 +159,8 @@ async function createStripeSubscription(
       email,
       plan: subscriptionData.plan,
       isGuest: subscriptionData.isGuest ? 'true' : 'false',
-      productId: product.id,
-      priceId: price.id
+      priceId: priceId,
+      description: planConfig.description
     },
     subscription_data: {
       metadata: {
