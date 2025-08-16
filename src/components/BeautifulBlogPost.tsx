@@ -799,7 +799,7 @@ export function BeautifulBlogPost() {
           htmlContent += `<li>${listContent}</li>\n`;
 
           // If next paragraph is not a list item, close </ul>
-          if (i === paragraphs.length - 1 || (!paragraphs[i+1].match(/^[•·\-\*]\s/) && !paragraphs[i+1].match(/^\*\s/) && !paragraphs[i+1].match(/^-\s/))) {
+          if (i === paragraphs.length - 1 || (!paragraphs[i+1].match(/^[��·\-\*]\s/) && !paragraphs[i+1].match(/^\*\s/) && !paragraphs[i+1].match(/^-\s/))) {
             htmlContent += '</ul>\n\n';
           }
         }
@@ -1418,8 +1418,17 @@ export function BeautifulBlogPost() {
                           `;
                         }
 
-                        // SIMPLIFIED PROCESSING: Apply beautiful formatting directly to preserve structure
+                        // Enhanced processing with performance monitoring
+                        const processingStart = performance.now();
                         let finalContent = applyBeautifulContentStructure(content, blogPost.title);
+                        const processingTime = performance.now() - processingStart;
+
+                        console.log('⚡ Content processing performance:', {
+                          processingTimeMs: Math.round(processingTime * 100) / 100,
+                          contentSizeKB: Math.round((content.length / 1024) * 100) / 100,
+                          outputSizeKB: Math.round((finalContent.length / 1024) * 100) / 100,
+                          efficiency: Math.round((content.length / processingTime) * 100) / 100 + ' chars/ms'
+                        });
 
                         // Basic security check only - remove scripts and dangerous elements
                         finalContent = finalContent
