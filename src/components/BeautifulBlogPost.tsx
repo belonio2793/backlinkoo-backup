@@ -1198,7 +1198,7 @@ export function BeautifulBlogPost() {
             </div>
 
             {/* Post Information Section */}
-            <div className="mt-12 space-y-6">
+            <div className="mt-12 space-y-6 max-w-4xl mx-auto px-6">
               {/* ENHANCED EXPIRATION WARNING WITH KILLER DELETION ALERT */}
               {!blogPost.claimed && blogPost.expires_at && (
                 <div className="space-y-4">
