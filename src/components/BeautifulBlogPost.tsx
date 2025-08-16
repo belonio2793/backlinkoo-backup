@@ -940,8 +940,8 @@ export function BeautifulBlogPost() {
             <Card className="border-0 shadow-xl bg-white/80 backdrop-blur-sm overflow-hidden">
               <div className="relative">
                 {/* Content Wrapper */}
-                <div className="px-8 md:px-12 lg:px-16 py-12 md:py-16">
-                  <div className="max-w-none prose prose-xl prose-slate prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:text-blue-800 prose-strong:text-gray-900 prose-li:text-gray-700">
+                <div className="px-8 md:px-12 lg:px-16 py-12 md:py-16 beautiful-blog-content">
+                  <div className="max-w-none prose prose-xl prose-slate beautiful-prose prose-headings:font-bold prose-headings:tracking-tight prose-headings:text-gray-900 prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-blue-600 prose-a:no-underline hover:prose-a:text-blue-800 prose-strong:text-gray-900 prose-li:text-gray-700">
                     <ContentProcessor
                       content={blogPost.content || ''}
                       title={cleanTitle}
