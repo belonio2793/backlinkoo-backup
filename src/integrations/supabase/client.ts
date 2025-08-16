@@ -236,37 +236,51 @@ const baseClient = hasValidCredentials ?
       headers: {
         'X-Client-Info': 'backlink-infinity@1.0.0',
       },
-      // Enhanced fetch with timeout and error handling
+      // Enhanced fetch with timeout and stream-safe error handling
       fetch: async (url, options = {}) => {
+        let response: Response | null = null;
+
         try {
           // Create abort controller for timeout
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 30000);
 
-          const response = await fetch(url, {
+          response = await fetch(url, {
             ...options,
             signal: controller.signal,
           });
 
           clearTimeout(timeoutId);
 
-          // Don't clone response here to prevent body stream issues
-          // Let Supabase handle response processing
+          // Don't clone or read the response body here
+          // Let Supabase handle all response processing to avoid stream conflicts
           return response;
 
         } catch (error: any) {
-          console.error('🌐 Supabase fetch error:', error);
+          // Log error safely without exposing Response objects
+          const errorMessage = error?.message || 'Unknown fetch error';
+          console.error('🌐 Supabase fetch error:', {
+            message: errorMessage,
+            name: error?.name,
+            url: url ? url.toString().substring(0, 100) + '...' : 'unknown'
+          });
 
           if (error.name === 'AbortError') {
             throw new Error('Network timeout - please check your connection and try again');
           }
-          if (error.message?.includes('Failed to fetch')) {
+          if (errorMessage.includes('Failed to fetch')) {
             throw new Error('Network connection failed - please check your internet connection');
           }
-          if (error.message?.includes('body stream already read')) {
-            throw new Error('Response processing error - please try again');
+          if (errorMessage.includes('body stream already read') ||
+              errorMessage.includes('body used already')) {
+            // Don't retry stream errors, they're not recoverable
+            throw new Error('Response processing error - request cannot be retried');
+          }
+          if (errorMessage.includes('NetworkError')) {
+            throw new Error('Network error - please check your connection');
           }
 
+          // Re-throw original error for other cases
           throw error;
         }
       },
