@@ -516,18 +516,18 @@ const KeywordsSection = ({ keywords }: { keywords?: string[] }) => {
   if (!keywords?.length) return null;
 
   return (
-    <Card className="mt-12 max-w-4xl mx-auto">
-      <CardContent className="p-8">
-        <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-purple-600" />
+    <Card className="mt-16 max-w-4xl mx-auto border-0 shadow-lg bg-gradient-to-r from-purple-50/50 via-white to-blue-50/50">
+      <CardContent className="p-10">
+        <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center justify-center gap-3">
+          <Sparkles className="h-6 w-6 text-purple-600" />
           Keywords & Topics
         </h3>
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-4 justify-center">
           {keywords.map((keyword, index) => (
-            <Badge 
-              key={index} 
+            <Badge
+              key={index}
               variant="outline"
-              className="px-4 py-2 bg-white border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors rounded-full"
+              className="px-6 py-3 bg-white/80 border-purple-200 text-gray-700 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 rounded-full text-sm font-medium shadow-sm hover:shadow-md"
             >
               {keyword}
             </Badge>
