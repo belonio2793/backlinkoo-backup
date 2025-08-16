@@ -184,9 +184,22 @@ const SEOToolsSection = ({ user }: SEOToolsSectionProps) => {
         throw new Error(result.error);
       }
 
-      // Redirect to Stripe checkout
+      // Open Stripe checkout in new window
       if (result.url) {
-        window.location.href = result.url;
+        const checkoutWindow = window.open(
+          result.url,
+          'stripe-checkout',
+          'width=800,height=600,scrollbars=yes,resizable=yes,location=yes,status=yes'
+        );
+
+        if (!checkoutWindow) {
+          // Popup blocked - fallback to current window
+          toast({
+            title: "Popup Blocked",
+            description: "Redirecting in current window...",
+          });
+          window.location.href = result.url;
+        }
       }
     } catch (error: any) {
       console.error('Error creating subscription:', error);
