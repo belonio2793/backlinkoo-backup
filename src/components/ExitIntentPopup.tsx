@@ -55,7 +55,7 @@ export function ExitIntentPopup({ isVisible, onClose, postTitle, timeRemaining =
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-lg bg-gradient-to-br from-white via-white to-blue-50/20 shadow-2xl border-0 rounded-2xl overflow-hidden animate-slide-up">
+      <Card className="w-full max-w-4xl bg-gradient-to-br from-white via-white to-blue-50/20 shadow-2xl border-0 rounded-2xl overflow-hidden animate-slide-up">
         {/* Header with gradient background */}
         <CardHeader className="relative text-center pb-6 bg-gradient-to-br from-red-500 via-orange-500 to-amber-500 text-white">
           <Button
