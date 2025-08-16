@@ -85,7 +85,7 @@ export class EnhancedErrorBoundary extends React.Component<ErrorBoundaryProps, E
                        error.stack?.includes('blog');
 
     // For recoverable errors, don't show error state
-    if (isExtensionError || isAuthError || isDatabaseError || isComponentError || isRouteError || isBlogError) {
+    if (isExtensionError || isAuthError || isDatabaseError || isComponentError || isRouteError || isBlogError || isNetworkBlockedError) {
       console.warn('Recoverable error - not showing error UI:', error.message);
       return;
     }
