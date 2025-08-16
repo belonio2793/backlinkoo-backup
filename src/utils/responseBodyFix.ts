@@ -1,17 +1,10 @@
 /**
- * Response Body Conflict Prevention Utility
- * Prevents "Response body is already used" errors by managing response cloning safely
+ * Simplified Response Body Helper
+ * Provides safe response handling without complex tracking that causes false positives
  */
-
-interface ResponseWithTracking extends Response {
-  _bodyConsumed?: boolean;
-  _cloneCount?: number;
-  _originalClone?: () => Response;
-}
 
 class ResponseBodyManager {
   private static instance: ResponseBodyManager;
-  private responseMap = new WeakMap<Response, { consumed: boolean; cloneCount: number }>();
 
   static getInstance(): ResponseBodyManager {
     if (!ResponseBodyManager.instance) {
@@ -21,77 +14,15 @@ class ResponseBodyManager {
   }
 
   /**
-   * Initialize response body tracking
+   * Initialize simplified response handling (deprecated - kept for compatibility)
    */
   initializeTracking(): void {
-    // Only initialize once
+    // Simplified - no more tracking, just logging
     if ((window as any)._responseBodyManagerInitialized) {
       return;
     }
-
-    this.patchResponseMethods();
     (window as any)._responseBodyManagerInitialized = true;
-    console.log('🔧 Response body tracking initialized');
-  }
-
-  /**
-   * Patch Response prototype methods to track body consumption
-   */
-  private patchResponseMethods(): void {
-    const originalMethods = {
-      clone: Response.prototype.clone,
-      json: Response.prototype.json,
-      text: Response.prototype.text,
-      blob: Response.prototype.blob,
-      arrayBuffer: Response.prototype.arrayBuffer,
-      formData: Response.prototype.formData
-    };
-
-    // Patch clone method
-    Response.prototype.clone = function(this: ResponseWithTracking) {
-      const tracking = ResponseBodyManager.getInstance().responseMap.get(this) || { consumed: false, cloneCount: 0 };
-      
-      if (tracking.consumed) {
-        console.warn('Attempted to clone consumed response, creating mock response');
-        return ResponseBodyManager.getInstance().createMockResponse(this);
-      }
-
-      if (tracking.cloneCount >= 2) {
-        console.warn('Max clone count reached, creating mock response');
-        return ResponseBodyManager.getInstance().createMockResponse(this);
-      }
-
-      try {
-        const cloned = originalMethods.clone.call(this);
-        tracking.cloneCount++;
-        ResponseBodyManager.getInstance().responseMap.set(this, tracking);
-        ResponseBodyManager.getInstance().responseMap.set(cloned, { consumed: false, cloneCount: 0 });
-        return cloned;
-      } catch (error) {
-        console.warn('Clone failed, creating mock response:', error);
-        return ResponseBodyManager.getInstance().createMockResponse(this);
-      }
-    };
-
-    // Patch body consumption methods
-    const bodyMethods = ['json', 'text', 'blob', 'arrayBuffer', 'formData'] as const;
-    
-    bodyMethods.forEach(method => {
-      const original = originalMethods[method];
-      Response.prototype[method] = function(this: ResponseWithTracking) {
-        const tracking = ResponseBodyManager.getInstance().responseMap.get(this) || { consumed: false, cloneCount: 0 };
-
-        if (tracking.consumed) {
-          console.warn(`Response body already consumed for ${method}(), returning empty result`);
-          return ResponseBodyManager.getInstance().getEmptyResult(method);
-        }
-
-        tracking.consumed = true;
-        ResponseBodyManager.getInstance().responseMap.set(this, tracking);
-
-        return original.call(this);
-      };
-    });
+    console.log('🔧 Simplified response helper initialized');
   }
 
   /**
