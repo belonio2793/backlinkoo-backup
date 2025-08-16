@@ -887,32 +887,50 @@ export function BeautifulBlogPost() {
           />
 
           {/* Article Header */}
-          <header className="text-center mb-12">
-            {blogPost.meta_description && (
-              <p className="text-xl md:text-2xl text-gray-600 mb-8 leading-relaxed">
-                {blogPost.meta_description}
-              </p>
-            )}
+          <header className="text-center mb-16">
+            {/* Main Title - Prominently displayed on its own line */}
+            <div className="mb-12">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight text-gray-900 mb-6">
+                {cleanTitle}
+              </h1>
 
-            {/* Meta Information */}
-            <div className="flex flex-wrap items-center justify-center gap-6 text-gray-500 mb-8">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                <time dateTime={blogPost.created_at}>{formattedDate}</time>
+              {/* Subtitle/Meta Description */}
+              {blogPost.meta_description && (
+                <div className="max-w-3xl mx-auto">
+                  <p className="text-xl md:text-2xl text-gray-600 leading-relaxed font-light">
+                    {blogPost.meta_description}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Meta Information Bar */}
+            <div className="max-w-2xl mx-auto">
+              <div className="flex flex-wrap items-center justify-center gap-8 text-gray-500 py-4 border-t border-b border-gray-200/50">
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <time dateTime={blogPost.created_at} className="text-gray-700">
+                    {formattedDate}
+                  </time>
+                </div>
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Clock className="h-4 w-4 text-green-600" />
+                  <span className="text-gray-700">{readingTime} min read</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm font-medium">
+                  <Eye className="h-4 w-4 text-purple-600" />
+                  <span className="text-gray-700">SEO Optimized</span>
+                </div>
+                <SEOScoreDisplay
+                  score={effectiveScore}
+                  title={blogPost.title}
+                  content={blogPost.content}
+                  metaDescription={blogPost.meta_description || undefined}
+                  targetKeyword={blogPost.keywords?.[0]}
+                  showDetails={true}
+                  isPremiumScore={isPremiumScore}
+                />
               </div>
-              <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                <span>{readingTime} min read</span>
-              </div>
-              <SEOScoreDisplay
-                score={effectiveScore}
-                title={blogPost.title}
-                content={blogPost.content}
-                metaDescription={blogPost.meta_description || undefined}
-                targetKeyword={blogPost.keywords?.[0]}
-                showDetails={true}
-                isPremiumScore={isPremiumScore}
-              />
             </div>
           </header>
 
