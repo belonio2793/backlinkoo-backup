@@ -1000,7 +1000,7 @@ export function BeautifulBlogPost() {
         const isLikelyHeading = para.length < 150 && (
           // Section patterns (enhanced to catch more variations)
           para.match(/^Section\s+\d+:/i) ||
-          para.match(/^Section\s+\d+\s*[-��—]\s*/i) ||
+          para.match(/^Section\s+\d+\s*[-–—]\s*/i) ||
           para.match(/^Part\s+\d+:/i) ||
           para.match(/^Chapter\s+\d+:/i) ||
           para.match(/^\d+\.\s+[A-Z]/i) ||
@@ -1606,7 +1606,7 @@ export function BeautifulBlogPost() {
 
               {/* Title with enhanced styling and accessibility */}
               <h1
-                className="beautiful-blog-title text-4xl md:text-5xl lg:text-6xl font-black mb-8 leading-tight break-words bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent"
+                className="beautiful-blog-title text-2xl font-bold mb-6 mt-12 leading-tight break-words bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 bg-clip-text text-transparent"
                 role="heading"
                 aria-level={1}
               >
