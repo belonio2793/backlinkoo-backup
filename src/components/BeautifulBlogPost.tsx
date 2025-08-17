@@ -621,7 +621,7 @@ const BeautifulBlogPost = () => {
       if (result.success) {
         setBlogPost(result.post!);
         toast({
-          title: "Article Claimed! 🎉",
+          title: "Article Claimed! ���",
           description: result.message,
         });
       } else {
@@ -672,22 +672,52 @@ const BeautifulBlogPost = () => {
 
   const handleDelete = async () => {
     try {
-      const { error } = await supabase
-        .from('blog_posts')
+      console.log('🗑️ Attempting to delete blog post:', slug);
+
+      // Try deleting from published_blog_posts first (where new posts are saved)
+      let { error: publishedError } = await supabase
+        .from('published_blog_posts')
         .delete()
         .eq('slug', slug!);
 
-      if (error) throw error;
+      // If not found in published_blog_posts, try blog_posts table
+      if (publishedError && publishedError.code === 'PGRST116') {
+        console.log('📖 Post not found in published_blog_posts, trying blog_posts...');
+        const { error: blogError } = await supabase
+          .from('blog_posts')
+          .delete()
+          .eq('slug', slug!);
+
+        if (blogError) {
+          throw blogError;
+        }
+      } else if (publishedError) {
+        throw publishedError;
+      }
+
+      console.log('✅ Blog post deleted successfully');
 
       toast({
         title: "Article Deleted",
         description: "The article has been permanently removed.",
       });
+
+      // Navigate back to blog list
       navigate('/blog');
+
     } catch (error: any) {
+      console.error('❌ Failed to delete blog post:', error);
+
+      let errorMessage = 'Unable to delete article';
+      if (error.code === 'PGRST116') {
+        errorMessage = 'Article not found or already deleted';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       toast({
         title: "Delete Failed",
-        description: `Unable to delete article: ${error.message}`,
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
