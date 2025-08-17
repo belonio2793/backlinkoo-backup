@@ -319,8 +319,8 @@ function parseFormattedText(text) {
   const segments = [];
   let currentIndex = 0;
 
-  // Combined regex for all formatting types
-  const formatRegex = /(\*\*([^*]+)\*\*|<strong>([^<]+)<\/strong>|<b>([^<]+)<\/b>|\*([^*]+)\*|<i>([^<]+)<\/i>|<em>([^<]+)<\/em>|\[([^\]]+)\]\(([^)]+)\))/g;
+  // Enhanced regex for all formatting types with better HTML support
+  const formatRegex = /(<a\s[^>]*href\s*=\s*["']([^"']+)["'][^>]*>([^<]+)<\/a>|<strong>([^<]+)<\/strong>|<b>([^<]+)<\/b>|\*\*([^*]+)\*\*|<i>([^<]+)<\/i>|<em>([^<]+)<\/em>|\*([^*]+)\*|\[([^\]]+)\]\(([^)]+)\))/gi;
   let match;
 
   while ((match = formatRegex.exec(text)) !== null) {
@@ -333,18 +333,31 @@ function parseFormattedText(text) {
     }
 
     // Determine the type of formatting
-    if (match[0].startsWith('**') || match[0].startsWith('<strong>') || match[0].startsWith('<b>')) {
-      // Bold text
-      const content = match[2] || match[3] || match[4];
+    if (match[0].startsWith('<a')) {
+      // HTML link
+      const url = match[2];
+      const content = match[3];
+      segments.push({ type: 'link', content, url });
+    } else if (match[0].startsWith('<strong>') || match[0].startsWith('<b>')) {
+      // HTML bold
+      const content = match[4] || match[5];
       segments.push({ type: 'bold', content });
-    } else if (match[0].startsWith('*') || match[0].startsWith('<i>') || match[0].startsWith('<em>')) {
-      // Italic text
-      const content = match[5] || match[6] || match[7];
+    } else if (match[0].startsWith('**')) {
+      // Markdown bold
+      const content = match[6];
+      segments.push({ type: 'bold', content });
+    } else if (match[0].startsWith('<i>') || match[0].startsWith('<em>')) {
+      // HTML italic
+      const content = match[7] || match[8];
+      segments.push({ type: 'italic', content });
+    } else if (match[0].startsWith('*')) {
+      // Markdown italic
+      const content = match[9];
       segments.push({ type: 'italic', content });
     } else if (match[0].startsWith('[')) {
-      // Link
-      const content = match[8];
-      const url = match[9];
+      // Markdown link
+      const content = match[10];
+      const url = match[11];
       segments.push({ type: 'link', content, url });
     }
 
