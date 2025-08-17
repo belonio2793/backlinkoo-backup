@@ -349,9 +349,23 @@ export class ContentFormatter {
       // Pattern: **E**nhanced SEO Performance: -> **Enhanced SEO Performance:**
       .replace(/\*\*([A-Z])\*\*([a-z][^:]*:)/g, '**$1$2**')
 
-      // Convert remaining **text** to <strong> tags (inline bold) - use simpler markup initially
-      .replace(/\*\*([^*]+?)\*\*/g, (match, content) => {
+      // Handle section headers with trailing asterisks first (like "Data Point:**")
+      .replace(/\b([A-Za-z][A-Za-z\s&,.-]+?):\*\*/g, '<strong class="font-bold text-inherit">$1:</strong>')
+      .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '<strong class="font-bold text-inherit">$1:</strong>')
+
+      // Handle multi-line bold text where ** is followed by newline
+      .replace(/\*\*\s*\n\s*([^*]+?)(?=\n\s*\n|\n\s*$|$)/gs, '<strong class="font-bold text-inherit">$1</strong>')
+      .replace(/^\*\*\s*\n\s*(.+?)(?=\n\s*\n|\n\s*$|$)/gms, '<strong class="font-bold text-inherit">$1</strong>')
+
+      // Convert remaining **text** to <strong> tags (inline bold) - improved pattern matching
+      .replace(/\*\*([^*\n]+?)\*\*/g, (match, content) => {
         console.log('Converting bold text:', match, '->', content);
+        return `<strong class="font-bold text-inherit">${content}</strong>`;
+      })
+
+      // Multi-line bold patterns (fallback for complex cases)
+      .replace(/\*\*([^*]+?)\*\*/gs, (match, content) => {
+        console.log('Converting multi-line bold text:', match);
         return `<strong class="font-bold text-inherit">${content}</strong>`;
       })
       // Convert *text* to <em> tags (italic)
