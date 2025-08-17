@@ -423,7 +423,19 @@ const EnhancedContentProcessor = ({
 
     // Process bold text with multiple patterns
     processedText = processedText
-      .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>')
+      // Handle section headers that end with :** pattern (like "Data Point:**" or "Title Tags and Meta Descriptions:**")
+      // This matches text that starts with a letter, can contain letters, spaces, and common punctuation, ends with a colon and two asterisks
+      .replace(/\b([A-Za-z][A-Za-z\s&,.-]+?):\*\*/g, '<strong class="font-bold text-gray-900">$1:</strong>')
+      // Also handle patterns at the start of lines
+      .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '<strong class="font-bold text-gray-900">$1:</strong>')
+      // Handle multi-line bold text where ** is followed by whitespace and newline (most common case)
+      .replace(/\*\*\s*\n\s*([^*]+?)(?=\n\s*\n|\n\s*$|$)/gs, '<strong class="font-bold text-gray-900">$1</strong>')
+      // Handle ** at start of paragraph followed by content
+      .replace(/^\*\*\s*\n\s*(.+?)(?=\n\s*\n|\n\s*$|$)/gms, '<strong class="font-bold text-gray-900">$1</strong>')
+      // Standard markdown bold patterns (single line)
+      .replace(/\*\*([^*\n]+?)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>')
+      // Multi-line bold patterns (without newline after opening **) - fallback
+      .replace(/\*\*([^*]+?)\*\*/gs, '<strong class="font-bold text-gray-900">$1</strong>')
       .replace(/__([^_]+)__/g, '<strong class="font-bold text-gray-900">$1</strong>');
 
     // Process italic text with multiple patterns
@@ -447,6 +459,12 @@ const EnhancedContentProcessor = ({
       .replace(/\s+/g, ' ') // Normalize whitespace
       .replace(/\s*([.!?])\s*/g, '$1 ') // Fix punctuation spacing
       .replace(/([.!?])([A-Z])/g, '$1 $2') // Add space after sentence ending
+      // Final cleanup: Remove any remaining visible asterisks that weren't processed
+      .replace(/^\*\*\s*/g, '') // Remove ** at the very beginning
+      .replace(/\*\*\s*$/g, '') // Remove ** at the very end
+      .replace(/>\*\*\s*</g, '><') // Remove ** between tags
+      .replace(/>\*\*\s*/g, '>') // Remove ** after opening tags
+      .replace(/\s*\*\*</g, '<') // Remove ** before closing tags
       .trim();
 
     return <span dangerouslySetInnerHTML={{ __html: processedText }} />;

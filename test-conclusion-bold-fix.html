@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conclusion Bold Fix Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; }
+        .original { background-color: #f5f5f5; }
+        .processed { background-color: #e8f5e8; }
+        .font-bold { font-weight: bold; }
+        .text-gray-900 { color: #1a1a1a; }
+        .error { background-color: #ffe6e6; color: #cc0000; }
+        .success { background-color: #e6ffe6; color: #006600; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Conclusion Bold Formatting Fix Test</h1>
+    
+    <div class="test-section original">
+        <h2>Original Content (Problematic)</h2>
+        <div id="original-content"></div>
+    </div>
+    
+    <div class="test-section processed">
+        <h2>Processed Content (Fixed)</h2>
+        <div id="processed-content"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        // This mimics the exact content from the problematic blog post
+        const testContent = `**
+In conclusion, mastering Weebly SEO is not just about optimizing your website for search engines; it's about creating a seamless user experience and delivering valuable content to your audience. By implementing the strategies outlined in this guide, you can elevate your Weebly website's visibility, attract organic traffic, and achieve sustainable growth in the digital landscape. Take charge of your Weebly SEO journey today and watch your website soar to the top of search rankings.
+
+This comprehensive guide is your roadmap to unlocking the full potential of Weebly SEO. Bookmark this page, share it with your peers, and start implementing these strategies to transform your online presence. Let's embark on this SEO journey together and pave the way for success in the digital realm.`;
+
+        // Test content with other patterns
+        const additionalTests = `
+**Regular bold text**
+
+Data Point:** This should be bold without asterisks
+
+**Another normal bold**
+
+**
+This is also a multi-line bold pattern that should work.
+`;
+
+        // Enhanced Blog Cleaner simulation
+        function cleanContent(content) {
+            return content
+                // Fix malformed bold patterns like "**\nIn conclusion..." to "**In conclusion..."
+                .replace(/\*\*\s*\n/g, '**')
+                // Other cleaning...
+                .replace(/\n{3,}/g, '\n\n')
+                .trim();
+        }
+
+        // Simulate the processing logic from BeautifulBlogPost.tsx
+        function processText(text) {
+            return text
+                // Handle section headers that end with :** pattern
+                .replace(/\b([A-Za-z][A-Za-z\s&,.-]+?):\*\*/g, '<strong class="font-bold text-gray-900">$1:</strong>')
+                .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '<strong class="font-bold text-gray-900">$1:</strong>')
+                // Handle multi-line bold text where ** is followed by newline
+                .replace(/\*\*\s*\n(.+?)(?=\n\n|\n$|$)/gs, '<strong class="font-bold text-gray-900">$1</strong>')
+                // Standard markdown bold patterns (single line)
+                .replace(/\*\*([^*\n]+)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>')
+                // Multi-line bold patterns (without newline after opening **)
+                .replace(/\*\*([^*]+?)\*\*/gs, '<strong class="font-bold text-gray-900">$1</strong>');
+        }
+
+        // Display original content
+        document.getElementById('original-content').innerHTML = `<pre>${testContent}</pre>`;
+
+        // Clean and process content
+        const cleaned = cleanContent(testContent);
+        const processed = processText(cleaned);
+        
+        // Display processed content
+        document.getElementById('processed-content').innerHTML = processed.replace(/\n/g, '<br>');
+
+        // Test results
+        const tests = [
+            {
+                name: 'Conclusion paragraph bold formatting',
+                test: () => {
+                    // Should NOT contain visible ** at the start
+                    const hasVisibleAsterisks = processed.includes('**\n') || processed.includes('**<br>');
+                    // Should contain the conclusion text wrapped in strong tags
+                    const hasBoldConclusion = processed.includes('<strong class="font-bold text-gray-900">In conclusion');
+                    return !hasVisibleAsterisks && hasBoldConclusion;
+                }
+            },
+            {
+                name: 'Regular bold formatting still works',
+                test: () => {
+                    const testRegular = processText('**Regular bold text**');
+                    return testRegular.includes('<strong class="font-bold text-gray-900">Regular bold text</strong>');
+                }
+            },
+            {
+                name: 'Section headers still work',
+                test: () => {
+                    const testSection = processText('Data Point:** This should be bold');
+                    return testSection.includes('<strong class="font-bold text-gray-900">Data Point:</strong>');
+                }
+            }
+        ];
+
+        let results = '<h3>🔍 Test Results:</h3>';
+        let allPassed = true;
+
+        tests.forEach(test => {
+            const passed = test.test();
+            allPassed = allPassed && passed;
+            results += `<div class="${passed ? 'success' : 'error'}">
+                ${passed ? '✅' : '❌'} <strong>${test.name}</strong>: ${passed ? 'PASSED' : 'FAILED'}
+            </div>`;
+        });
+
+        results += `<div class="${allPassed ? 'success' : 'error'}">
+            <h4>${allPassed ? '🎉 All tests passed!' : '⚠️ Some tests failed'}</h4>
+        </div>`;
+
+        document.getElementById('test-results').innerHTML = results;
+
+        // Log to console for debugging
+        console.log('🧪 Testing Conclusion Bold Fix');
+        console.log('=============================');
+        console.log('Original:', testContent);
+        console.log('Cleaned:', cleaned);
+        console.log('Processed:', processed);
+        
+        tests.forEach(test => {
+            const passed = test.test();
+            console.log(`${passed ? '✅' : '❌'} ${test.name}: ${passed ? 'PASSED' : 'FAILED'}`);
+        });
+    </script>
+</body>
+</html>

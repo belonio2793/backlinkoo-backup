@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ContentFormatter Bold Text Fix Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        .original { background-color: #fff3cd; border-color: #ffeaa7; }
+        .cleaned { background-color: #d1ecf1; border-color: #bee5eb; }
+        .processed { background-color: #d4edda; border-color: #c3e6cb; }
+        .font-bold { font-weight: bold; }
+        .text-inherit { color: inherit; }
+        .error { background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .success { background-color: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .warning { background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; }
+        .visual-test { border: 2px solid #007bff; padding: 20px; margin: 10px 0; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 ContentFormatter Bold Text Wrapping Fix Test</h1>
+    <p><strong>Purpose:</strong> Test the fixed ContentFormatter logic for proper bold text processing and wrapping.</p>
+    
+    <div class="test-section original">
+        <h2>📝 Test Content (Problematic Patterns)</h2>
+        <pre id="original-content"></pre>
+    </div>
+    
+    <div class="test-section cleaned">
+        <h2>🔧 After Pre-Processing</h2>
+        <pre id="preprocessed-content"></pre>
+    </div>
+    
+    <div class="test-section processed">
+        <h2>✨ After Full ContentFormatter Processing</h2>
+        <div id="processed-content"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>👀 Visual Result (How Users See It)</h2>
+        <div class="visual-test">
+            <div id="visual-result"></div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        // Test content with the exact patterns we're seeing in the DOM
+        const testContent = `**
+In conclusion, mastering Weebly SEO is not just about optimizing your website for search engines; it's about creating a seamless user experience and delivering valuable content to your audience.
+
+**E**nhanced SEO Performance: This should show "Enhanced SEO Performance:" as fully bold, not just the "E".
+
+**T**itle Tags and Meta Descriptions: Craft compelling and keyword-rich titles and meta descriptions to enhance click-through rates.
+
+**H**eading Structure: Utilize H1, H2, and H3 tags effectively to organize your content and signal its relevance to search engines.
+
+**K**eyword Research: Conduct thorough keyword research to identify relevant terms and phrases that resonate with your target audience.
+
+**C**ontent Optimization: Incorporate keywords naturally within your content while maintaining readability and value for users.
+
+**W**eebly SEO Settings: Explore Weebly's built-in SEO settings to customize your website's meta tags, URLs, and more for optimal search performance.
+
+**I**nsights from Case Studies: Learn from successful Weebly SEO case studies to understand best practices and apply them to your own website.
+
+This is **regular bold text** that should work normally.
+
+Data Point:** According to studies, proper SEO increases traffic by 40%.
+
+Expert Insight:** Professional consultants recommend these techniques.`;
+
+        // Simulate ContentFormatter.preProcessMalformedHtml
+        function preProcessMalformedHtml(content) {
+            return content
+                // Fix bold text that got malformed into first-letter-only patterns
+                .replace(/\*\*([A-Z])\*\*([a-z][^:]*:)/g, '**$1$2**')
+                .replace(/\*\*([A-Z])\*\*([a-z][A-Za-z\s&,.-]*:)/g, '**$1$2**')
+                // Fix malformed bold patterns with line breaks
+                .replace(/\*\*\s*\n\s*([A-Z])/g, '**$1')
+                .replace(/([A-Za-z])\s*\n\s*\*\*/g, '$1**');
+        }
+
+        // Simulate ContentFormatter.convertMarkdownToHtml (simplified version focusing on bold)
+        function convertMarkdownToHtml(content) {
+            return content
+                // Handle section headers with trailing asterisks first
+                .replace(/\b([A-Za-z][A-Za-z\s&,.-]+?):\*\*/g, '<strong class="font-bold text-inherit">$1:</strong>')
+                .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '<strong class="font-bold text-inherit">$1:</strong>')
+                
+                // Handle multi-line bold text where ** is followed by newline
+                .replace(/\*\*\s*\n\s*([^*]+?)(?=\n\s*\n|\n\s*$|$)/gs, '<strong class="font-bold text-inherit">$1</strong>')
+                .replace(/^\*\*\s*\n\s*(.+?)(?=\n\s*\n|\n\s*$|$)/gms, '<strong class="font-bold text-inherit">$1</strong>')
+                
+                // Convert remaining **text** to <strong> tags (inline bold)
+                .replace(/\*\*([^*\n]+?)\*\*/g, '<strong class="font-bold text-inherit">$1</strong>')
+                
+                // Multi-line bold patterns (fallback for complex cases)
+                .replace(/\*\*([^*]+?)\*\*/gs, '<strong class="font-bold text-inherit">$1</strong>');
+        }
+
+        // Simulate final cleanup
+        function finalCleanup(content) {
+            return content
+                // Remove any remaining visible asterisks that weren't processed
+                .replace(/^\*\*\s*/gm, '') // Remove ** at the start of lines
+                .replace(/\*\*\s*$/gm, '') // Remove ** at the end of lines
+                .replace(/>\*\*\s*</g, '><') // Remove ** between tags
+                .replace(/>\*\*\s*/g, '>') // Remove ** after opening tags
+                .replace(/\s*\*\*</g, '<') // Remove ** before closing tags
+                .replace(/(\s)\*\*(\s)/g, '$1$2'); // Remove ** surrounded by spaces
+        }
+
+        // Display original content
+        document.getElementById('original-content').textContent = testContent;
+
+        // Pre-process content
+        const preprocessed = preProcessMalformedHtml(testContent);
+        document.getElementById('preprocessed-content').textContent = preprocessed;
+
+        // Process content through simplified ContentFormatter
+        let processed = convertMarkdownToHtml(preprocessed);
+        processed = finalCleanup(processed);
+        
+        // Display processed content (HTML)
+        document.getElementById('processed-content').innerHTML = `<pre>${processed.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre>`;
+        
+        // Show visual result (how it should look to users)
+        document.getElementById('visual-result').innerHTML = processed.replace(/\n/g, '<br>');
+
+        // Test results
+        const tests = [
+            {
+                name: 'No visible asterisks in final output',
+                test: () => {
+                    const visibleAsterisks = processed.includes('**');
+                    return !visibleAsterisks;
+                }
+            },
+            {
+                name: 'Enhanced SEO Performance is fully bolded',
+                test: () => {
+                    return processed.includes('<strong class="font-bold text-inherit">Enhanced SEO Performance:</strong>');
+                }
+            },
+            {
+                name: 'Title Tags and Meta Descriptions is fully bolded',
+                test: () => {
+                    return processed.includes('<strong class="font-bold text-inherit">Title Tags and Meta Descriptions:</strong>');
+                }
+            },
+            {
+                name: 'Heading Structure is fully bolded',
+                test: () => {
+                    return processed.includes('<strong class="font-bold text-inherit">Heading Structure:</strong>');
+                }
+            },
+            {
+                name: 'Conclusion paragraph is properly bolded',
+                test: () => {
+                    return processed.includes('<strong class="font-bold text-inherit">In conclusion');
+                }
+            },
+            {
+                name: 'Regular bold text still works',
+                test: () => {
+                    return processed.includes('<strong class="font-bold text-inherit">regular bold text</strong>');
+                }
+            },
+            {
+                name: 'Data Point pattern works',
+                test: () => {
+                    return processed.includes('<strong class="font-bold text-inherit">Data Point:</strong>');
+                }
+            },
+            {
+                name: 'Expert Insight pattern works',
+                test: () => {
+                    return processed.includes('<strong class="font-bold text-inherit">Expert Insight:</strong>');
+                }
+            }
+        ];
+
+        // Run tests and display results
+        let results = '<h3>🔍 Test Results:</h3>';
+        let allPassed = true;
+        let passed = 0;
+
+        tests.forEach((test, index) => {
+            const testPassed = test.test();
+            allPassed = allPassed && testPassed;
+            if (testPassed) passed++;
+            
+            results += `<div class="${testPassed ? 'success' : 'error'}">
+                ${testPassed ? '✅' : '❌'} <strong>Test ${index + 1}:</strong> ${test.name}
+                <br><small>${testPassed ? 'PASSED' : 'FAILED'}</small>
+            </div>`;
+        });
+
+        results += `<div class="${allPassed ? 'success' : (passed > 4 ? 'warning' : 'error')}">
+            <h4>📊 Summary: ${passed}/${tests.length} tests passed ${allPassed ? '🎉' : (passed > 4 ? '⚠️' : '❌')}</h4>
+        </div>`;
+
+        // Additional diagnostics
+        results += '<h3>🔧 Diagnostics:</h3>';
+        results += `<div><strong>Original length:</strong> ${testContent.length} characters</div>`;
+        results += `<div><strong>Preprocessed length:</strong> ${preprocessed.length} characters</div>`;
+        results += `<div><strong>Processed length:</strong> ${processed.length} characters</div>`;
+        results += `<div><strong>Contains visible asterisks:</strong> ${processed.includes('**') ? '❌ YES' : '✅ NO'}</div>`;
+        results += `<div><strong>Contains strong tags:</strong> ${processed.includes('<strong') ? '✅ YES' : '❌ NO'}</div>`;
+        results += `<div><strong>Strong tags count:</strong> ${(processed.match(/<strong/g) || []).length}</div>`;
+
+        document.getElementById('test-results').innerHTML = results;
+
+        // Console logging for debugging
+        console.log('🧪 ContentFormatter Bold Text Fix Test Results');
+        console.log('=============================================');
+        console.log('Original:', testContent);
+        console.log('Preprocessed:', preprocessed);
+        console.log('Processed:', processed);
+        console.log(`Tests passed: ${passed}/${tests.length}`);
+        
+        // Specific pattern testing
+        console.log('\n🔬 Specific Pattern Analysis:');
+        const patterns = [
+            'Enhanced SEO Performance:',
+            'Title Tags and Meta Descriptions:',
+            'Heading Structure:',
+            'In conclusion'
+        ];
+        
+        patterns.forEach(pattern => {
+            const originalHas = testContent.includes(`**${pattern.charAt(0)}**${pattern.slice(1)}`);
+            const processedHas = processed.includes(`<strong class="font-bold text-inherit">${pattern}</strong>`);
+            console.log(`${pattern}: Original malformed=${originalHas}, Fixed=${processedHas}`);
+        });
+    </script>
+</body>
+</html>

@@ -186,6 +186,10 @@ export class ContentFormatter {
       // })
       // Remove empty markdown headings
       .replace(/^#{1,6}\s*$$/gm, '')
+      // Fix malformed bold patterns before cleaning up excessive symbols
+      .replace(/\*\*([A-Z])\*\*([a-z][A-Za-z\s&,.-]*:)/g, '**$1$2**')
+      .replace(/\*\*([A-Z])\*\*([a-z][^:*\n]*:)/g, '**$1$2**')
+
       // Clean up excessive markdown symbols
       .replace(/\*{3,}/g, '**')
       .replace(/_{3,}/g, '__')
@@ -349,9 +353,23 @@ export class ContentFormatter {
       // Pattern: **E**nhanced SEO Performance: -> **Enhanced SEO Performance:**
       .replace(/\*\*([A-Z])\*\*([a-z][^:]*:)/g, '**$1$2**')
 
-      // Convert remaining **text** to <strong> tags (inline bold) - use simpler markup initially
-      .replace(/\*\*([^*]+?)\*\*/g, (match, content) => {
+      // Handle section headers with trailing asterisks first (like "Data Point:**")
+      .replace(/\b([A-Za-z][A-Za-z\s&,.-]+?):\*\*/g, '<strong class="font-bold text-inherit">$1:</strong>')
+      .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '<strong class="font-bold text-inherit">$1:</strong>')
+
+      // Handle multi-line bold text where ** is followed by newline
+      .replace(/\*\*\s*\n\s*([^*]+?)(?=\n\s*\n|\n\s*$|$)/gs, '<strong class="font-bold text-inherit">$1</strong>')
+      .replace(/^\*\*\s*\n\s*(.+?)(?=\n\s*\n|\n\s*$|$)/gms, '<strong class="font-bold text-inherit">$1</strong>')
+
+      // Convert remaining **text** to <strong> tags (inline bold) - improved pattern matching
+      .replace(/\*\*([^*\n]+?)\*\*/g, (match, content) => {
         console.log('Converting bold text:', match, '->', content);
+        return `<strong class="font-bold text-inherit">${content}</strong>`;
+      })
+
+      // Multi-line bold patterns (fallback for complex cases)
+      .replace(/\*\*([^*]+?)\*\*/gs, (match, content) => {
+        console.log('Converting multi-line bold text:', match);
         return `<strong class="font-bold text-inherit">${content}</strong>`;
       })
       // Convert *text* to <em> tags (italic)
@@ -794,6 +812,12 @@ export class ContentFormatter {
       // CRITICAL: Fix bold text that got malformed into first-letter-only patterns
       // Pattern: **E**nhanced SEO Performance: -> **Enhanced SEO Performance:**
       .replace(/\*\*([A-Z])\*\*([a-z][^:]*:)/g, '**$1$2**')
+      // Fix patterns like **T**itle Tags and Meta Descriptions: -> **Title Tags and Meta Descriptions:**
+      .replace(/\*\*([A-Z])\*\*([a-z][A-Za-z\s&,.-]*:)/g, '**$1$2**')
+
+      // Fix malformed bold patterns with line breaks
+      .replace(/\*\*\s*\n\s*([A-Z])/g, '**$1')
+      .replace(/([A-Za-z])\s*\n\s*\*\*/g, '$1**')
 
       // CRITICAL: Fix malformed markdown headings that will cause DOM issues
       // Pattern: ## <strong>Title</strong> or ## &lt;strong&gt;Title&lt;/strong&gt;
@@ -1056,6 +1080,14 @@ export class ContentFormatter {
 
       // Fix general malformed class attributes in strong tags
       .replace(/<strong\s+class([^=]*)=""\s+([^>]*?)>/gi, '<strong class="font-bold text-inherit">')
+
+      // FINAL CLEANUP: Remove any remaining visible asterisks that weren't processed
+      .replace(/^\*\*\s*/gm, '') // Remove ** at the start of lines
+      .replace(/\*\*\s*$/gm, '') // Remove ** at the end of lines
+      .replace(/>\*\*\s*</g, '><') // Remove ** between tags
+      .replace(/>\*\*\s*/g, '>') // Remove ** after opening tags
+      .replace(/\s*\*\*</g, '<') // Remove ** before closing tags
+      .replace(/(\s)\*\*(\s)/g, '$1$2') // Remove ** surrounded by spaces
 
       // FINAL LINK RESTORATION: Fix malformed link attributes
       .replace(/<a\s+([^>]*?)>/gi, (match, attrs) => {

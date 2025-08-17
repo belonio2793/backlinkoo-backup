@@ -139,19 +139,29 @@ export class EnhancedBlogCleaner {
    */
   static cleanFormattingArtifacts(content: string): string {
     return content
+      // Normalize section headers with trailing asterisks to proper markdown
+      // Convert "Title Tags and Meta Descriptions:**" to "**Title Tags and Meta Descriptions:**"
+      .replace(/\b([A-Za-z][A-Za-z\s&,.-]+?):\*\*/g, '**$1:**')
+      .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '**$1:**')
+
+      // Fix malformed bold patterns like "**\nIn conclusion..." to "**In conclusion..."
+      .replace(/\*\*\s*\n\s*/g, '**')
+      // Also handle patterns at the start of content
+      .replace(/^\*\*\s*\n\s*/gm, '**')
+
       // Remove excessive markdown symbols
       .replace(/\*{3,}/g, '')
       .replace(/_{3,}/g, '')
       .replace(/-{3,}/g, '')
       .replace(/={3,}/g, '')
-      
+
       // Remove empty lines with just symbols
       .replace(/^[\s*_=-]+$/gm, '')
-      
+
       // Clean up excessive whitespace
       .replace(/\n{3,}/g, '\n\n')
       .replace(/^\s+$/gm, '') // Remove lines with only whitespace
-      
+
       // Remove trailing whitespace from lines
       .replace(/[ \t]+$/gm, '');
   }
