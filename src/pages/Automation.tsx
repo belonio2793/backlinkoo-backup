@@ -681,7 +681,7 @@ const Automation = () => {
           </div>
 
           {/* Live Monitor (Right Column) */}
-          <div className="lg:col-span-1 h-full">
+          <div className="lg:col-span-1">
             <InlineFeedMonitor
               activeCampaigns={activeCampaigns}
               isVisible={true}
