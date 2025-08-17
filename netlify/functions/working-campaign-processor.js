@@ -446,35 +446,53 @@ function convertToTelegraphFormat(html) {
 }
 
 /**
- * Process HTML content for Telegraph format
+ * Process HTML content for Telegraph format with bold text support
  */
 function processHTMLContent(text) {
-  const linkRegex = /<a\s+href="([^"]+)"[^>]*>([^<]+)<\/a>/g;
   const result = [];
-  let lastIndex = 0;
+  let currentIndex = 0;
+
+  // Enhanced regex to handle links, bold, and strong tags
+  const formatRegex = /(<a\s+href="([^"]+)"[^>]*>([^<]+)<\/a>|<strong>([^<]+)<\/strong>|<b>([^<]+)<\/b>)/gi;
   let match;
 
-  while ((match = linkRegex.exec(text)) !== null) {
-    // Add text before the link
-    if (match.index > lastIndex) {
-      result.push(text.substring(lastIndex, match.index));
+  while ((match = formatRegex.exec(text)) !== null) {
+    // Add any text before this match
+    if (match.index > currentIndex) {
+      const beforeText = text.substring(currentIndex, match.index);
+      if (beforeText.trim()) {
+        result.push(beforeText);
+      }
     }
-    
-    // Add the link
-    result.push({
-      tag: 'a',
-      attrs: { href: match[1] },
-      children: [match[2]]
-    });
-    
-    lastIndex = match.index + match[0].length;
+
+    // Determine what type of formatting we found
+    if (match[0].startsWith('<a')) {
+      // Link
+      result.push({
+        tag: 'a',
+        attrs: { href: match[2] },
+        children: [match[3]]
+      });
+    } else if (match[0].startsWith('<strong>') || match[0].startsWith('<b>')) {
+      // Bold text
+      const content = match[4] || match[5];
+      result.push({
+        tag: 'b',
+        children: [content]
+      });
+    }
+
+    currentIndex = match.index + match[0].length;
   }
-  
-  // Add remaining text
-  if (lastIndex < text.length) {
-    result.push(text.substring(lastIndex));
+
+  // Add any remaining text
+  if (currentIndex < text.length) {
+    const remainingText = text.substring(currentIndex);
+    if (remainingText.trim()) {
+      result.push(remainingText);
+    }
   }
-  
+
   return result.length > 0 ? result : [text];
 }
 
