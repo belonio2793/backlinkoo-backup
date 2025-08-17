@@ -671,7 +671,7 @@ const Automation = () => {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="status" className="space-y-4">
+              <TabsContent value="status" className="space-y-4 flex-1 flex flex-col">
                 <AutomationServiceStatus />
                 <DatabaseSchemaFixer />
               </TabsContent>
