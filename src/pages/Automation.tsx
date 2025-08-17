@@ -430,7 +430,7 @@ const Automation = () => {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="create" className="space-y-6 h-[calc(100%-3rem)]">
+              <TabsContent value="create" className="space-y-6">
                 {/* Campaign Creation Card with Modal Trigger */}
                 <Card className="h-full">
                   <CardHeader>
