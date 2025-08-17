@@ -215,7 +215,7 @@ const legacyRender = (content: string) =>
     .split(/\n{2,}/) // break on double newlines
     .map((p, idx) => (
       <p key={`legacy-${idx}`} className="mb-6 leading-8 text-lg text-gray-700 text-justify">
-        {p.trim()}
+        {processTextFormatting(p.trim())}
       </p>
     ));
 
