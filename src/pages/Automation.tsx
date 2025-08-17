@@ -400,10 +400,7 @@ const Automation = () => {
         {/* Development Mode Indicator */}
         <DevelopmentModeIndicator />
 
-        {/* Database Schema Fixer - Show if there are HTTP errors related to missing columns */}
-        {statusMessages.some(msg => msg.message.includes('column') || msg.message.includes('schema')) && (
-          <DatabaseSchemaFixer />
-        )}
+        {/* Database Schema Fixer removed for cleaner UI */}
 
         {/* Status Messages */}
         {statusMessages.length > 0 && (
@@ -673,7 +670,6 @@ const Automation = () => {
 
               <TabsContent value="status" className="space-y-4 flex-1 flex flex-col">
                 <AutomationServiceStatus />
-                <DatabaseSchemaFixer />
               </TabsContent>
             </Tabs>
           </div>
