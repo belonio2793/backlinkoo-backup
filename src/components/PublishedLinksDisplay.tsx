@@ -134,7 +134,7 @@ const PublishedLinksDisplay = () => {
             Published Backlinks
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex-1 flex flex-col justify-center min-h-0 px-6 py-4">
+        <CardContent className="flex-1 flex flex-col justify-center min-h-0 px-8 py-6">
           <div className="text-center">
             <Globe className="w-12 h-12 mx-auto mb-4 text-gray-400" />
             <h3 className="font-medium text-gray-900 mb-2">Sign In to View Published Links</h3>
