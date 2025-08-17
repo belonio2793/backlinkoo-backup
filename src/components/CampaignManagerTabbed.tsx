@@ -458,7 +458,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col">
+      <CardContent className="flex-1 flex flex-col min-h-0">
         {/* Summary Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="text-center p-3 bg-blue-50 rounded-lg">
