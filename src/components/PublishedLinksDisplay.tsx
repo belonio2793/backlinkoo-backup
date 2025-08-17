@@ -184,7 +184,7 @@ const PublishedLinksDisplay = () => {
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 overflow-y-auto px-6 pb-6 pt-0">
+      <CardContent className="flex-1 overflow-y-auto px-8 pb-8 pt-2">
         {loading ? (
           <div className="flex-1 flex flex-col justify-center">
             <div className="text-center">
