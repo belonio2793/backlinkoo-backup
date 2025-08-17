@@ -257,13 +257,32 @@ const legacyRender = (content: string) =>
     ));
 
 // Content Processor Component
-const ContentProcessor = ({ content, title, enableAutoFormat = true }: { 
-  content: string; 
-  title: string; 
+const ContentProcessor = ({ content, title, enableAutoFormat = true }: {
+  content: string;
+  title: string;
   enableAutoFormat?: boolean;
 }) => {
   const processedContent = useMemo(() => {
     if (!content?.trim()) return null;
+
+    // Check if content is already HTML (contains HTML tags)
+    const isHtmlContent = /<[a-z][\s\S]*>/i.test(content);
+
+    // If content is already HTML with beautiful classes, render it directly
+    if (isHtmlContent && content.includes('beautiful-prose')) {
+      console.log('🎨 Detected beautiful HTML content, rendering directly');
+
+      // Remove title duplicates from HTML content if needed
+      let cleanHtmlContent = content;
+      if (title) {
+        const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Remove HTML headings that match the title
+        const titlePattern = new RegExp(`<h[1-6][^>]*>\\s*${escapedTitle}\\s*<\/h[1-6]>`, 'gi');
+        cleanHtmlContent = cleanHtmlContent.replace(titlePattern, '');
+      }
+
+      return <div dangerouslySetInnerHTML={{ __html: cleanHtmlContent.trim() }} />;
+    }
 
     // Enhanced title removal - multiple patterns and variations
     let cleanContent = content;
@@ -305,6 +324,13 @@ const ContentProcessor = ({ content, title, enableAutoFormat = true }: {
 
     cleanContent = cleanContent.trim();
 
+    // If content contains HTML tags but not beautiful classes, render as HTML
+    if (isHtmlContent) {
+      console.log('🔧 Detected HTML content, rendering as HTML');
+      return <div dangerouslySetInnerHTML={{ __html: cleanContent }} />;
+    }
+
+    // Otherwise, process as markdown/plain text
     if (enableAutoFormat) {
       try {
         const blocks = parseContentToBlocks(cleanContent, title);
