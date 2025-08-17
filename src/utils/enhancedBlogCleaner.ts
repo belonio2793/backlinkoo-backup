@@ -141,8 +141,8 @@ export class EnhancedBlogCleaner {
     return content
       // Normalize section headers with trailing asterisks to proper markdown
       // Convert "Title Tags and Meta Descriptions:**" to "**Title Tags and Meta Descriptions:**"
+      .replace(/\b([A-Za-z][A-Za-z\s&,.-]+?):\*\*/g, '**$1:**')
       .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '**$1:**')
-      .replace(/\b([A-Za-z][A-Za-z\s&]+):\*\*/g, '**$1:**')
 
       // Remove excessive markdown symbols
       .replace(/\*{3,}/g, '')
