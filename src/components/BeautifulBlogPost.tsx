@@ -938,6 +938,11 @@ const BeautifulBlogPost = () => {
         
         <Header />
 
+        {/* Supabase Connection Fixer */}
+        <div className="max-w-4xl mx-auto px-6 py-2">
+          <SupabaseConnectionFixerComponent onConnectionRestored={() => slug && loadBlogPost(slug)} />
+        </div>
+
         {/* Navigation Bar */}
         <div className="sticky top-16 z-30 border-b border-gray-200/50 bg-white/80 backdrop-blur-md">
           <div className="max-w-4xl mx-auto px-6 py-4">
