@@ -639,14 +639,14 @@ async function validateWriteAsUrl(url) {
 /**
  * Save published link to database
  */
-async function savePublishedLink(supabase, campaignId, url, title) {
+async function savePublishedLink(supabase, campaignId, url, title, platform = 'Telegraph.ph') {
   try {
     const { error } = await supabase
       .from('automation_published_links')
       .insert({
         campaign_id: campaignId,
         published_url: url,
-        platform: 'Telegraph.ph',
+        platform: platform,
         title: title,
         status: 'active',
         published_at: new Date().toISOString()
