@@ -887,7 +887,7 @@ const BeautifulBlogPost = () => {
         </Card>
 
         {/* Keywords */}
-        {blogPost.keywords?.length && (
+        {blogPost.keywords?.length > 0 && (
           <Card className="mb-8 bg-gradient-to-r from-purple-50 to-blue-50">
             <CardContent className="p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center justify-center gap-3">
