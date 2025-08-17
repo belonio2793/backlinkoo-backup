@@ -145,7 +145,9 @@ export class EnhancedBlogCleaner {
       .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '**$1:**')
 
       // Fix malformed bold patterns like "**\nIn conclusion..." to "**In conclusion..."
-      .replace(/\*\*\s*\n/g, '**')
+      .replace(/\*\*\s*\n\s*/g, '**')
+      // Also handle patterns at the start of content
+      .replace(/^\*\*\s*\n\s*/gm, '**')
 
       // Remove excessive markdown symbols
       .replace(/\*{3,}/g, '')
