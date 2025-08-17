@@ -348,8 +348,8 @@ const Automation = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 px-2 py-4">
-        <div className="w-full space-y-6">
+      <main className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 px-8 py-4">
+        <div className="w-full max-w-7xl mx-auto space-y-6">
 
           {/* Page Header */}
           <div className="text-center space-y-4">
@@ -442,7 +442,7 @@ const Automation = () => {
                       Launch a new link building campaign with automated content generation and backlinks
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 px-8 py-6">
                     {/* Form Progress Bar */}
                     <div className="mb-4">
                       <div className="flex justify-between text-xs text-gray-500 mb-1">
@@ -673,20 +673,18 @@ const Automation = () => {
 
           {/* Activity (Middle Column) */}
           <div className="lg:col-span-1 h-full">
-            {isAuthenticated && (
-              <CampaignManagerTabbed
-                onStatusUpdate={(message, type) => addStatusMessage(message, type)}
-                currentCampaignProgress={campaignProgress}
-                onRetryProgress={handleRetryCampaign}
-              />
-            )}
+            <CampaignManagerTabbed
+              onStatusUpdate={(message, type) => addStatusMessage(message, type)}
+              currentCampaignProgress={campaignProgress}
+              onRetryProgress={handleRetryCampaign}
+            />
           </div>
 
           {/* Live Monitor (Right Column) */}
           <div className="lg:col-span-1 h-full">
             <InlineFeedMonitor
               activeCampaigns={activeCampaigns}
-              isVisible={isAuthenticated}
+              isVisible={true}
             />
           </div>
         </div>
