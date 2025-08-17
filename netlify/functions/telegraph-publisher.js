@@ -156,8 +156,80 @@ export const handler = async (event, context) => {
   }
 };
 
-// Convert markdown content to Telegraph DOM format
-function convertMarkdownToTelegraph(markdown) {
+// Convert markdown or HTML content to Telegraph DOM format
+function convertMarkdownToTelegraph(content) {
+  // Check if content is HTML or markdown
+  const isHtml = content.includes('<p>') || content.includes('<h') || content.includes('<div>');
+
+  if (isHtml) {
+    console.log('🔄 Processing HTML content for Telegraph...');
+    return convertHtmlToTelegraph(content);
+  } else {
+    console.log('🔄 Processing Markdown content for Telegraph...');
+    return convertMarkdownToTelegraphNodes(content);
+  }
+}
+
+// Convert HTML content to Telegraph DOM format
+function convertHtmlToTelegraph(html) {
+  const telegraphNodes = [];
+
+  // Split by HTML tags and process each element
+  const htmlRegex = /<(\w+)(?:\s[^>]*)?>([^<]*(?:<(?!\/?(?:p|h[1-6]|div|ul|ol|li)\b)[^<]*)*?)<\/\1>|([^<]+)/gi;
+  let match;
+
+  while ((match = htmlRegex.exec(html)) !== null) {
+    const tag = match[1];
+    const content = match[2] || match[3];
+
+    if (!content || !content.trim()) continue;
+
+    if (tag) {
+      // Handle HTML tags
+      let telegraphTag = 'p'; // default
+
+      if (tag.match(/^h[1-6]$/)) {
+        const level = parseInt(tag.charAt(1));
+        telegraphTag = level <= 2 ? 'h3' : 'h4'; // Telegraph supports h3 and h4
+      } else if (tag === 'p') {
+        telegraphTag = 'p';
+      }
+
+      const processedContent = processTextFormatting(content.trim());
+      telegraphNodes.push({
+        tag: telegraphTag,
+        children: processedContent
+      });
+    } else if (content.trim()) {
+      // Plain text content
+      const processedContent = processTextFormatting(content.trim());
+      telegraphNodes.push({
+        tag: 'p',
+        children: processedContent
+      });
+    }
+  }
+
+  // Fallback: if no nodes were created, split by double newlines and process as paragraphs
+  if (telegraphNodes.length === 0) {
+    const paragraphs = html.split(/\n\s*\n/).filter(p => p.trim());
+    for (const paragraph of paragraphs) {
+      const cleanParagraph = paragraph.replace(/<[^>]*>/g, '').trim();
+      if (cleanParagraph) {
+        const processedContent = processTextFormatting(cleanParagraph);
+        telegraphNodes.push({
+          tag: 'p',
+          children: processedContent
+        });
+      }
+    }
+  }
+
+  return telegraphNodes;
+}
+
+// Convert markdown content to Telegraph DOM format (original function)
+function convertMarkdownToTelegraphNodes(markdown) {
   const lines = markdown.split('\n');
   const telegraphNodes = [];
 
