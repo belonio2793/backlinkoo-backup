@@ -354,7 +354,13 @@ async function publishToTelegraph(title, content) {
   const accessToken = accountData.result.access_token;
 
   // Step 2: Convert content to Telegraph format
+  console.log('🔄 Converting content to Telegraph format...');
+  console.log('Original content sample:', content.substring(0, 300) + '...');
+
   const telegraphContent = convertToTelegraphFormat(content);
+
+  console.log('✅ Telegraph conversion complete. Nodes:', telegraphContent.length);
+  console.log('First few nodes:', JSON.stringify(telegraphContent.slice(0, 2), null, 2));
 
   // Step 3: Create Telegraph page
   const pageResponse = await fetch('https://api.telegra.ph/createPage', {
