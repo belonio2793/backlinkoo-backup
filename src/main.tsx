@@ -9,6 +9,8 @@ import './utils/fullstoryFix'
 import './utils/fetchErrorDiagnostic'
 // Unified error handler - fixes all [object Object] displays
 import './utils/unifiedErrorHandler'
+// Immediate fix for Supabase connection blocks
+import './utils/clearSupabaseBlock'
 // Campaign-specific error handling
 import './utils/campaignErrorHandler'
 // Comprehensive error debug fix
@@ -241,6 +243,31 @@ if (import.meta.env.DEV) {
     }
   };
 
+  // Add Supabase connection fix helper
+  (window as any).fixSupabaseConnection = async () => {
+    console.log('🔧 Fixing Supabase connection...');
+    try {
+      const { clearSupabaseConnectionBlock } = await import('./utils/clearSupabaseBlock');
+      clearSupabaseConnectionBlock();
+      console.log('✅ Supabase connection block cleared - page will refresh');
+    } catch (error) {
+      console.error('❌ Failed to fix Supabase connection:', error);
+    }
+  };
+
+  // Add emergency Supabase connection fixer
+  (window as any).emergencyFixSupabase = async () => {
+    console.log('🚨 Running emergency Supabase fix...');
+    try {
+      const { SupabaseConnectionFixer } = await import('./utils/supabaseConnectionFixer');
+      const result = await SupabaseConnectionFixer.emergencyFix();
+      console.log('🚨 Emergency fix result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Emergency Supabase fix failed:', error);
+    }
+  };
+
   // Add client content generator test
   (window as any).testClientContent = async () => {
     try {
@@ -335,6 +362,8 @@ if (import.meta.env.DEV) {
   console.log('  - testContentGeneration() - Test content generation functions');
   console.log('  - fixFetchErrors() - Emergency fix for fetch protection issues');
   console.log('  - fixFullStoryErrors() - Fix FullStory fetch interference specifically');
+  console.log('  - fixSupabaseConnection() - Clear Supabase connection block and refresh');
+  console.log('  - emergencyFixSupabase() - Full emergency Supabase connection diagnosis and fix');
   console.log('  - testClientContent() - Test client-side content generation');
   console.log('  - testClientTelegraph() - Test client-side Telegraph publishing');
   console.log('  - testFullPipeline() - Test complete automation pipeline');

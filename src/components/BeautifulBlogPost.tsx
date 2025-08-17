@@ -44,6 +44,8 @@ import BlogErrorBoundary from '@/components/BlogErrorBoundary';
 import { EnhancedBlogClaimService } from '@/services/enhancedBlogClaimService';
 import { usePremiumSEOScore } from '@/hooks/usePremiumSEOScore';
 import { maskEmail } from '@/utils/emailMasker';
+import { EnhancedBlogCleaner } from '@/utils/enhancedBlogCleaner';
+import { SupabaseConnectionFixerComponent } from '@/components/SupabaseConnectionFixer';
 
 // Styles
 import '../styles/beautiful-blog.css';
@@ -71,7 +73,7 @@ const EnhancedContentProcessor = ({
 
   const [isRegenerating, setIsRegenerating] = useState(false);
 
-  // Enhanced content processing with better structure and formatting
+  // Enhanced content processing with superior structure and formatting detection
   const processContent = useCallback((rawContent: string) => {
     if (!rawContent || rawContent.trim().length === 0) {
       return [
@@ -80,7 +82,7 @@ const EnhancedContentProcessor = ({
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Content Not Available</h3>
           <p className="text-gray-600 mb-6">This blog post appears to have empty content.</p>
           {onRegenerateContent && (
-            <Button 
+            <Button
               onClick={() => handleContentRegeneration()}
               disabled={isRegenerating}
               className="bg-blue-600 hover:bg-blue-700 text-white"
@@ -102,32 +104,40 @@ const EnhancedContentProcessor = ({
       ];
     }
 
-    // Clean and normalize content
-    let cleanContent = rawContent
-      // Remove metadata prefixes
+    // Use EnhancedBlogCleaner for comprehensive content cleaning
+    let cleanContent = EnhancedBlogCleaner.cleanContent(rawContent, title);
+
+    // Additional formatting improvements specific to display
+    cleanContent = cleanContent
+      // Remove metadata and AI-generated prefixes
       .replace(/Natural Link Integration:\s*/gi, '')
       .replace(/Link Placement:\s*/gi, '')
       .replace(/Anchor Text:\s*/gi, '')
       .replace(/URL Integration:\s*/gi, '')
       .replace(/Link Strategy:\s*/gi, '')
       .replace(/Backlink Placement:\s*/gi, '')
-      // Remove markdown artifacts
-      .replace(/^\s*\*+\s*$|^\s*#+\s*$/gm, '')
-      // Normalize line breaks
-      .replace(/\n{3,}/g, '\n\n')
+      // Fix common formatting issues
+      .replace(/\*\s+/g, '* ') // Fix bullet point spacing
+      .replace(/\d+\.\s+/g, (match) => match.replace(/\s+/g, ' ')) // Fix numbered list spacing
+      // Normalize line breaks and spacing
+      .replace(/\n{4,}/g, '\n\n\n')
+      .replace(/\r\n/g, '\n')
+      .replace(/[ \t]+$/gm, '') // Remove trailing whitespace
       .trim();
 
-    // Enhanced title removal - prevent title duplication
+    // Enhanced title removal with better pattern matching
     if (title) {
       const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      
+      const simplifiedTitle = title.replace(/[^a-zA-Z0-9\s]/g, '').trim();
+
       // Remove various forms of title duplication
       const titlePatterns = [
-        new RegExp(`^\\s*${escapedTitle}\\s*`, 'i'),           // At start
-        new RegExp(`^\\s*${escapedTitle}\\s*$`, 'gim'),       // As standalone line
+        new RegExp(`^\\s*${escapedTitle}\\s*\\n`, 'i'),          // At start with newline
+        new RegExp(`^\\s*${escapedTitle}\\s*$`, 'gim'),        // As standalone line
         new RegExp(`\\*\\*\\s*${escapedTitle}\\s*\\*\\*`, 'gi'), // Bold markdown
-        new RegExp(`^#+\\s*${escapedTitle}\\s*$`, 'gim'),     // As heading
+        new RegExp(`^#+\\s*${escapedTitle}\\s*$`, 'gim'),      // As heading
         new RegExp(`<h[1-6][^>]*>\\s*${escapedTitle}\\s*<\\/h[1-6]>`, 'gi'), // HTML headings
+        new RegExp(`^\\s*${simplifiedTitle}\\s*$`, 'gim'),     // Simplified version
       ];
 
       titlePatterns.forEach(pattern => {
@@ -135,17 +145,29 @@ const EnhancedContentProcessor = ({
       });
     }
 
-    // Final cleanup
+    // Advanced cleanup for better text structure
     cleanContent = cleanContent
+      // Fix paragraph spacing
       .replace(/\n\s*\n\s*\n/g, '\n\n')
+      // Remove empty lines with only punctuation
+      .replace(/^\s*[.!?]+\s*$/gm, '')
+      // Fix common text artifacts
+      .replace(/\s+([.!?])/g, '$1') // Remove spaces before punctuation
+      .replace(/([.!?])([A-Z])/g, '$1 $2') // Add space after punctuation
+      // Remove excessive formatting
+      .replace(/\*{4,}/g, '**')
+      .replace(/_{4,}/g, '__')
       .replace(/^\s+|\s+$/g, '')
       .trim();
+
+    // Smart paragraph detection and structure improvement
+    cleanContent = improveTextStructure(cleanContent);
 
     // Process content into structured elements
     return parseContentIntoElements(cleanContent);
   }, [title, targetKeyword, anchorText, targetUrl, onRegenerateContent, isRegenerating]);
 
-  // Parse content into well-structured React elements
+  // Parse content into well-structured React elements with enhanced detection
   const parseContentIntoElements = useCallback((content: string) => {
     const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     const elements: React.ReactNode[] = [];
@@ -154,30 +176,48 @@ const EnhancedContentProcessor = ({
     while (currentIndex < lines.length) {
       const line = lines[currentIndex];
 
-      // Handle numbered lists
-      if (/^\d+\.\s/.test(line)) {
-        const listItems = extractConsecutiveItems(lines, currentIndex, /^\d+\.\s/);
+      // Skip empty or whitespace-only lines
+      if (!line || line.trim().length === 0) {
+        currentIndex++;
+        continue;
+      }
+
+      // Handle numbered lists with improved detection
+      if (/^\d+\.\s/.test(line) || /^\d+\)\s/.test(line)) {
+        const listItems = extractConsecutiveItems(lines, currentIndex, /^\d+[.)\s]/);
         elements.push(createNumberedList(listItems.items, currentIndex));
         currentIndex = listItems.nextIndex;
         continue;
       }
 
-      // Handle bullet point lists
-      if (/^[-•*]\s/.test(line)) {
-        const listItems = extractConsecutiveItems(lines, currentIndex, /^[-•*]\s/);
+      // Handle bullet point lists with more pattern support
+      if (/^[-•*+]\s/.test(line) || /^●\s/.test(line) || /^○\s/.test(line)) {
+        const listItems = extractConsecutiveItems(lines, currentIndex, /^[-•*+●○]\s/);
         elements.push(createBulletList(listItems.items, currentIndex));
         currentIndex = listItems.nextIndex;
         continue;
       }
 
-      // Handle headings (HTML or Markdown)
-      if (/^<h[1-6]/.test(line) || /^#{1,6}\s/.test(line)) {
+      // Handle headings with better detection (HTML, Markdown, and plain text)
+      if (/^<h[1-6]/.test(line) || /^#{1,6}\s/.test(line) || isHeadingLine(line, lines[currentIndex + 1])) {
         elements.push(createHeading(line, currentIndex));
         currentIndex++;
+        // Skip underline if it's a markdown-style heading
+        if (currentIndex < lines.length && /^[=-]+$/.test(lines[currentIndex].trim())) {
+          currentIndex++;
+        }
         continue;
       }
 
-      // Handle regular paragraphs (collect multiple lines)
+      // Handle blockquotes
+      if (/^>\s/.test(line)) {
+        const quoteLines = extractConsecutiveItems(lines, currentIndex, /^>\s/);
+        elements.push(createBlockquote(quoteLines.items, currentIndex));
+        currentIndex = quoteLines.nextIndex;
+        continue;
+      }
+
+      // Handle regular paragraphs with smart grouping
       const paragraphLines = collectParagraphLines(lines, currentIndex);
       if (paragraphLines.lines.length > 0) {
         elements.push(createParagraph(paragraphLines.lines.join(' '), paragraphLines.nextIndex));
@@ -335,9 +375,20 @@ const EnhancedContentProcessor = ({
     ));
   };
 
-  // Process text content with enhanced link handling
+  // Process text content with comprehensive markdown and HTML handling
   const processTextContent = useCallback((text: string, elementId: string) => {
     let processedText = text;
+
+    // Clean up any remaining HTML artifacts
+    processedText = processedText
+      .replace(/<\/?div[^>]*>/gi, '') // Remove div tags
+      .replace(/<\/?span[^>]*>/gi, '') // Remove span tags
+      .replace(/<br\s*\/?>/gi, ' ') // Convert br tags to spaces
+      .replace(/&nbsp;/gi, ' ') // Convert non-breaking spaces
+      .replace(/&amp;/gi, '&') // Convert HTML entities
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>')
+      .replace(/&quot;/gi, '"');
 
     // Process existing markdown links first
     processedText = processedText.replace(
@@ -345,6 +396,17 @@ const EnhancedContentProcessor = ({
       (match, linkText, url) => {
         const cleanUrl = url.trim().startsWith('http') ? url.trim() : `https://${url.trim()}`;
         return `<a href="${cleanUrl}" class="inline-link text-blue-600 hover:text-blue-800 font-semibold underline decoration-2 underline-offset-2 transition-colors duration-200 bg-blue-50/30 hover:bg-blue-50/50 px-1 py-0.5 rounded" target="_blank" rel="noopener noreferrer">${linkText.trim()}</a>`;
+      }
+    );
+
+    // Process inline code first (to preserve it from other formatting)
+    const codeBlocks: string[] = [];
+    processedText = processedText.replace(
+      /`([^`]+)`/g,
+      (match, code) => {
+        const index = codeBlocks.length;
+        codeBlocks.push(`<code class="bg-gray-100 text-purple-700 px-2 py-1 rounded text-sm font-mono">${code}</code>`);
+        return `__CODE_BLOCK_${index}__`;
       }
     );
 
@@ -359,17 +421,33 @@ const EnhancedContentProcessor = ({
       }
     }
 
-    // Process bold text
+    // Process bold text with multiple patterns
+    processedText = processedText
+      .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>')
+      .replace(/__([^_]+)__/g, '<strong class="font-bold text-gray-900">$1</strong>');
+
+    // Process italic text with multiple patterns
+    processedText = processedText
+      .replace(/\*([^*]+)\*/g, '<em class="italic text-gray-800 font-medium">$1</em>')
+      .replace(/_([^_]+)_/g, '<em class="italic text-gray-800 font-medium">$1</em>');
+
+    // Process strikethrough text
     processedText = processedText.replace(
-      /\*\*([^*]+)\*\*/g, 
-      '<strong class="font-bold text-gray-900">$1</strong>'
+      /~~([^~]+)~~/g,
+      '<del class="line-through text-gray-500">$1</del>'
     );
 
-    // Process italic text
-    processedText = processedText.replace(
-      /\*([^*]+)\*/g, 
-      '<em class="italic text-gray-800 font-medium">$1</em>'
-    );
+    // Restore code blocks
+    codeBlocks.forEach((code, index) => {
+      processedText = processedText.replace(`__CODE_BLOCK_${index}__`, code);
+    });
+
+    // Clean up excessive whitespace and formatting artifacts
+    processedText = processedText
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .replace(/\s*([.!?])\s*/g, '$1 ') // Fix punctuation spacing
+      .replace(/([.!?])([A-Z])/g, '$1 $2') // Add space after sentence ending
+      .trim();
 
     return <span dangerouslySetInnerHTML={{ __html: processedText }} />;
   }, [targetKeyword, anchorText, targetUrl]);
@@ -407,8 +485,8 @@ const EnhancedContentProcessor = ({
   };
 
   return (
-    <div className="prose prose-xl prose-slate max-w-none">
-      <div className="space-y-6">
+    <div className="prose prose-xl prose-slate max-w-none enhanced-blog-content">
+      <div className="space-y-8">
         {processContent(content)}
       </div>
     </div>
@@ -859,6 +937,11 @@ const BeautifulBlogPost = () => {
         <ReadingProgress />
         
         <Header />
+
+        {/* Supabase Connection Fixer */}
+        <div className="max-w-4xl mx-auto px-6 py-2">
+          <SupabaseConnectionFixerComponent onConnectionRestored={() => slug && loadBlogPost(slug)} />
+        </div>
 
         {/* Navigation Bar */}
         <div className="sticky top-16 z-30 border-b border-gray-200/50 bg-white/80 backdrop-blur-md">
