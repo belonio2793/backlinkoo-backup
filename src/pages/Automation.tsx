@@ -672,7 +672,7 @@ const Automation = () => {
           </div>
 
           {/* Activity (Middle Column) */}
-          <div className="lg:col-span-1 h-full">
+          <div className="lg:col-span-1">
             <CampaignManagerTabbed
               onStatusUpdate={(message, type) => addStatusMessage(message, type)}
               currentCampaignProgress={campaignProgress}
