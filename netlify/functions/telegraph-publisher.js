@@ -154,36 +154,46 @@ export const handler = async (event, context) => {
 function convertMarkdownToTelegraph(markdown) {
   const lines = markdown.split('\n');
   const telegraphNodes = [];
-  
+
   for (const line of lines) {
     const trimmed = line.trim();
-    
+
     if (!trimmed) {
       continue; // Skip empty lines
     }
-    
+
     // Handle headings
     if (trimmed.startsWith('# ')) {
+      const headingText = processTextFormatting(trimmed.substring(2));
       telegraphNodes.push({
         tag: 'h3',
-        children: [trimmed.substring(2)]
+        children: headingText
       });
     } else if (trimmed.startsWith('## ')) {
+      const headingText = processTextFormatting(trimmed.substring(3));
       telegraphNodes.push({
         tag: 'h4',
-        children: [trimmed.substring(3)]
+        children: headingText
       });
     }
-    // Handle paragraphs with links
+    // Handle list items
+    else if (trimmed.startsWith('• ') || trimmed.match(/^\d+\.\s/)) {
+      const listText = processTextFormatting(trimmed.replace(/^[•\d]+\.\s*/, ''));
+      telegraphNodes.push({
+        tag: 'p',
+        children: ['• ', ...listText]
+      });
+    }
+    // Handle paragraphs with text formatting and links
     else {
-      const processedText = processLinksInText(trimmed);
+      const processedText = processTextFormatting(trimmed);
       telegraphNodes.push({
         tag: 'p',
         children: processedText
       });
     }
   }
-  
+
   return telegraphNodes;
 }
 
