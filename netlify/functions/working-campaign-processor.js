@@ -524,7 +524,7 @@ function processHTMLContent(text) {
  */
 async function validateTelegraphUrl(url) {
   const fetch = require('node-fetch');
-  
+
   try {
     const response = await fetch(url, { method: 'HEAD' });
     if (!response.ok) {
@@ -533,6 +533,104 @@ async function validateTelegraphUrl(url) {
     return true;
   } catch (error) {
     console.warn('Telegraph URL validation failed:', error);
+    // Don't throw - URL might still be valid even if HEAD request fails
+    return false;
+  }
+}
+
+/**
+ * Publish content to Write.as
+ */
+async function publishToWriteAs(title, content) {
+  const fetch = require('node-fetch');
+
+  // Convert HTML content to markdown format for Write.as
+  const writeasContent = convertToWriteasFormat(content);
+
+  console.log('🔄 Publishing to Write.as...');
+  console.log('Content sample:', writeasContent.substring(0, 200) + '...');
+
+  const postResponse = await fetch('https://write.as/api/posts', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      title: title,
+      body: writeasContent
+    })
+  });
+
+  const responseData = await postResponse.json();
+
+  if (!postResponse.ok || responseData.code !== 201) {
+    throw new Error(`Write.as post creation failed: ${responseData.error || responseData.message || 'Unknown error'}`);
+  }
+
+  const postData = responseData.data;
+  const postUrl = `https://write.as/${postData.id}`;
+
+  console.log('✅ Write.as post created:', postUrl);
+
+  return postUrl;
+}
+
+/**
+ * Convert HTML content to Write.as markdown format
+ */
+function convertToWriteasFormat(htmlContent) {
+  let markdown = htmlContent;
+
+  // Convert HTML headings to markdown
+  markdown = markdown.replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1');
+  markdown = markdown.replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1');
+  markdown = markdown.replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1');
+  markdown = markdown.replace(/<h4[^>]*>(.*?)<\/h4>/gi, '#### $1');
+
+  // Convert HTML paragraphs to markdown (just remove p tags)
+  markdown = markdown.replace(/<p[^>]*>/gi, '');
+  markdown = markdown.replace(/<\/p>/gi, '\n\n');
+
+  // Convert bold text to markdown
+  markdown = markdown.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**');
+  markdown = markdown.replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**');
+
+  // Convert italic text to markdown
+  markdown = markdown.replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*');
+  markdown = markdown.replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*');
+
+  // Convert links to markdown
+  markdown = markdown.replace(/<a[^>]*href\s*=\s*["']([^"']+)["'][^>]*>(.*?)<\/a>/gi, '[$2]($1)');
+
+  // Clean up list items
+  markdown = markdown.replace(/<li[^>]*>(.*?)<\/li>/gi, '• $1');
+  markdown = markdown.replace(/<\/?[uo]l[^>]*>/gi, '');
+
+  // Remove any remaining HTML tags
+  markdown = markdown.replace(/<[^>]*>/g, '');
+
+  // Clean up multiple newlines
+  markdown = markdown.replace(/\n\s*\n\s*\n/g, '\n\n');
+
+  // Trim whitespace
+  return markdown.trim();
+}
+
+/**
+ * Validate Write.as URL by making a request
+ */
+async function validateWriteAsUrl(url) {
+  const fetch = require('node-fetch');
+
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    if (!response.ok) {
+      throw new Error(`Write.as URL validation failed: ${response.status}`);
+    }
+    console.log('✅ Write.as URL validated successfully');
+    return true;
+  } catch (error) {
+    console.warn('Write.as URL validation failed:', error);
     // Don't throw - URL might still be valid even if HEAD request fails
     return false;
   }
