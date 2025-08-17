@@ -751,7 +751,10 @@ export class AutomationOrchestrator {
 
     const { data, error } = await supabase
       .from('automation_campaigns')
-      .select('*')
+      .select(`
+        *,
+        automation_published_links(*)
+      `)
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
 
