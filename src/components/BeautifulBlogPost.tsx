@@ -29,10 +29,11 @@ import {
   ArrowLeft, Share2, Copy, Calendar, Clock, Eye, Bookmark, Heart,
   Crown, Trash2, CheckCircle2, Timer, User, AlertTriangle,
   ExternalLink, Sparkles, Target, TrendingUp, Zap, Globe,
-  ShieldCheck, XCircle, MessageCircle, RefreshCw, Wand2
+  ShieldCheck, XCircle, MessageCircle, RefreshCw, Wand2,
+  BookOpen, Hash, Quote
 } from 'lucide-react';
 
-// Other Components
+// Components
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ClaimLoginModal } from '@/components/ClaimLoginModal';
@@ -52,6 +53,7 @@ import '../styles/beautiful-blog.css';
 
 type BlogPost = Tables<'blog_posts'>;
 
+// Enhanced Content Processor for optimal SEO and readability
 interface EnhancedContentProcessorProps {
   content: string;
   title: string;
@@ -61,7 +63,38 @@ interface EnhancedContentProcessorProps {
   onRegenerateContent?: () => void;
 }
 
-// Enhanced Content Processor with smart link handling and regeneration capabilities
+// Advanced content structure analyzer for perfect readability
+const analyzeContentStructure = (content: string) => {
+  const analysis = {
+    hasHeadings: /#{1,6}\s|<h[1-6]/.test(content),
+    hasLists: /^\s*[-*+]\s|^\s*\d+\.\s/m.test(content),
+    hasBlockquotes: /^\s*>/m.test(content),
+    averageSentenceLength: 0,
+    paragraphCount: 0,
+    readabilityScore: 0
+  };
+
+  // Calculate average sentence length for readability
+  const sentences = content.match(/[.!?]+/g);
+  const words = content.match(/\b\w+\b/g);
+  if (sentences && words) {
+    analysis.averageSentenceLength = words.length / sentences.length;
+  }
+
+  // Count paragraphs
+  analysis.paragraphCount = content.split(/\n\s*\n/).filter(p => p.trim().length > 0).length;
+
+  // Basic readability score (Flesch-Kincaid inspired)
+  if (analysis.averageSentenceLength > 0) {
+    analysis.readabilityScore = Math.max(0, Math.min(100, 
+      100 - ((analysis.averageSentenceLength * 1.015) + (6.84 * 1))
+    ));
+  }
+
+  return analysis;
+};
+
+// Enhanced Content Processor with superior structure and SEO optimization
 const EnhancedContentProcessor = ({ 
   content, 
   title, 
@@ -70,178 +103,154 @@ const EnhancedContentProcessor = ({
   targetUrl,
   onRegenerateContent
 }: EnhancedContentProcessorProps) => {
-
   const [isRegenerating, setIsRegenerating] = useState(false);
+  const [contentAnalysis, setContentAnalysis] = useState(analyzeContentStructure(content));
 
-  // Enhanced content processing with superior structure and formatting detection
+  useEffect(() => {
+    setContentAnalysis(analyzeContentStructure(content));
+  }, [content]);
+
+  // Enhanced content processing with superior semantic HTML structure
   const processContent = useCallback((rawContent: string) => {
-    if (!rawContent || rawContent.trim().length === 0) {
-      return [
-        <div key="empty-content" className="text-center py-12">
-          <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Content Not Available</h3>
-          <p className="text-gray-600 mb-6">This blog post appears to have empty content.</p>
+    if (!rawContent?.trim()) {
+      return (
+        <section className="text-center py-16" role="alert" aria-live="polite">
+          <AlertTriangle className="h-16 w-16 text-amber-500 mx-auto mb-6" aria-hidden="true" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Content Unavailable</h2>
+          <p className="text-lg text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
+            This article content is currently being processed or has encountered an issue.
+          </p>
           {onRegenerateContent && (
             <Button
-              onClick={() => handleContentRegeneration()}
+              onClick={handleContentRegeneration}
               disabled={isRegenerating}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-full font-semibold transition-all duration-200"
+              aria-label="Regenerate article content"
             >
               {isRegenerating ? (
                 <>
-                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Regenerating...
+                  <RefreshCw className="h-5 w-5 mr-3 animate-spin" aria-hidden="true" />
+                  Regenerating Content...
                 </>
               ) : (
                 <>
-                  <Wand2 className="h-4 w-4 mr-2" />
+                  <Wand2 className="h-5 w-5 mr-3" aria-hidden="true" />
                   Regenerate Content
                 </>
               )}
             </Button>
           )}
-        </div>
-      ];
+        </section>
+      );
     }
 
-    // Use EnhancedBlogCleaner for comprehensive content cleaning
+    // Comprehensive content cleaning and optimization
     let cleanContent = EnhancedBlogCleaner.cleanContent(rawContent, title);
 
-    // Additional formatting improvements specific to display
+    // Advanced content normalization for web standards
     cleanContent = cleanContent
-      // Remove metadata and AI-generated prefixes
-      .replace(/Natural Link Integration:\s*/gi, '')
-      .replace(/Link Placement:\s*/gi, '')
-      .replace(/Anchor Text:\s*/gi, '')
-      .replace(/URL Integration:\s*/gi, '')
-      .replace(/Link Strategy:\s*/gi, '')
-      .replace(/Backlink Placement:\s*/gi, '')
-      // Fix common formatting issues
-      .replace(/\*\s+/g, '* ') // Fix bullet point spacing
-      .replace(/\d+\.\s+/g, (match) => match.replace(/\s+/g, ' ')) // Fix numbered list spacing
-      // Normalize line breaks and spacing
-      .replace(/\n{4,}/g, '\n\n\n')
-      .replace(/\r\n/g, '\n')
-      .replace(/[ \t]+$/gm, '') // Remove trailing whitespace
+      // Remove AI generation artifacts and metadata
+      .replace(/(?:Natural Link Integration|Link Placement|Anchor Text|URL Integration|Link Strategy|Backlink Placement):\s*/gi, '')
+      // Normalize whitespace and punctuation
+      .replace(/\s+/g, ' ')
+      .replace(/\s+([.!?])/g, '$1')
+      .replace(/([.!?])([A-Z])/g, '$1 $2')
+      .replace(/\n{3,}/g, '\n\n')
+      .replace(/[ \t]+$/gm, '')
+      // Remove title duplication with enhanced pattern matching
+      .replace(new RegExp(`^\\s*(?:##+\\s*)?${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*(?:\n|$)`, 'gim'), '')
       .trim();
 
-    // Enhanced title removal with better pattern matching
-    if (title) {
-      const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const simplifiedTitle = title.replace(/[^a-zA-Z0-9\s]/g, '').trim();
-
-      // Remove various forms of title duplication
-      const titlePatterns = [
-        new RegExp(`^\\s*${escapedTitle}\\s*\\n`, 'i'),          // At start with newline
-        new RegExp(`^\\s*${escapedTitle}\\s*$`, 'gim'),        // As standalone line
-        new RegExp(`\\*\\*\\s*${escapedTitle}\\s*\\*\\*`, 'gi'), // Bold markdown
-        new RegExp(`^#+\\s*${escapedTitle}\\s*$`, 'gim'),      // As heading
-        new RegExp(`<h[1-6][^>]*>\\s*${escapedTitle}\\s*<\\/h[1-6]>`, 'gi'), // HTML headings
-        new RegExp(`^\\s*${simplifiedTitle}\\s*$`, 'gim'),     // Simplified version
-      ];
-
-      titlePatterns.forEach(pattern => {
-        cleanContent = cleanContent.replace(pattern, '');
-      });
-    }
-
-    // Advanced cleanup for better text structure
-    cleanContent = cleanContent
-      // Fix paragraph spacing
-      .replace(/\n\s*\n\s*\n/g, '\n\n')
-      // Remove empty lines with only punctuation
-      .replace(/^\s*[.!?]+\s*$/gm, '')
-      // Fix common text artifacts
-      .replace(/\s+([.!?])/g, '$1') // Remove spaces before punctuation
-      .replace(/([.!?])([A-Z])/g, '$1 $2') // Add space after punctuation
-      // Remove excessive formatting
-      .replace(/\*{4,}/g, '**')
-      .replace(/_{4,}/g, '__')
-      .replace(/^\s+|\s+$/g, '')
-      .trim();
-
-    // Smart paragraph detection and structure improvement
-    cleanContent = improveTextStructure(cleanContent);
-
-    // Process content into structured elements
-    return parseContentIntoElements(cleanContent);
+    // Parse content into semantic HTML structure
+    return parseContentIntoSemanticHTML(cleanContent);
   }, [title, targetKeyword, anchorText, targetUrl, onRegenerateContent, isRegenerating]);
 
-  // Parse content into well-structured React elements with enhanced detection
-  const parseContentIntoElements = useCallback((content: string) => {
+  // Parse content into semantic HTML with accessibility and SEO optimization
+  const parseContentIntoSemanticHTML = useCallback((content: string) => {
     const lines = content.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     const elements: React.ReactNode[] = [];
     let currentIndex = 0;
+    let headingCount = 0;
 
     while (currentIndex < lines.length) {
       const line = lines[currentIndex];
 
-      // Skip empty or whitespace-only lines
-      if (!line || line.trim().length === 0) {
+      if (!line?.trim()) {
         currentIndex++;
         continue;
       }
 
-      // Handle numbered lists with improved detection
-      if (/^\d+\.\s/.test(line) || /^\d+\)\s/.test(line)) {
-        const listItems = extractConsecutiveItems(lines, currentIndex, /^\d+[.)\s]/);
-        elements.push(createNumberedList(listItems.items, currentIndex));
-        currentIndex = listItems.nextIndex;
-        continue;
-      }
-
-      // Handle bullet point lists with more pattern support
-      if (/^[-•*+]\s/.test(line) || /^●\s/.test(line) || /^○\s/.test(line)) {
-        const listItems = extractConsecutiveItems(lines, currentIndex, /^[-•*+●○]\s/);
-        elements.push(createBulletList(listItems.items, currentIndex));
-        currentIndex = listItems.nextIndex;
-        continue;
-      }
-
-      // Handle headings with better detection (HTML, Markdown, and plain text)
-      if (/^<h[1-6]/.test(line) || /^#{1,6}\s/.test(line) || isHeadingLine(line, lines[currentIndex + 1])) {
-        elements.push(createHeading(line, currentIndex));
+      // Enhanced heading detection with proper hierarchy
+      if (isHeading(line)) {
+        headingCount++;
+        const headingElement = createSemanticHeading(line, currentIndex, headingCount);
+        elements.push(headingElement);
         currentIndex++;
-        // Skip underline if it's a markdown-style heading
-        if (currentIndex < lines.length && /^[=-]+$/.test(lines[currentIndex].trim())) {
-          currentIndex++;
-        }
         continue;
       }
 
-      // Handle blockquotes
+      // Numbered lists with proper semantic structure
+      if (/^\d+\.\s/.test(line)) {
+        const listData = extractOrderedList(lines, currentIndex);
+        elements.push(createSemanticOrderedList(listData.items, currentIndex));
+        currentIndex = listData.nextIndex;
+        continue;
+      }
+
+      // Bullet lists with enhanced detection
+      if (/^[-•*+●○]\s/.test(line)) {
+        const listData = extractUnorderedList(lines, currentIndex);
+        elements.push(createSemanticUnorderedList(listData.items, currentIndex));
+        currentIndex = listData.nextIndex;
+        continue;
+      }
+
+      // Blockquotes for testimonials and emphasis
       if (/^>\s/.test(line)) {
-        const quoteLines = extractConsecutiveItems(lines, currentIndex, /^>\s/);
-        elements.push(createBlockquote(quoteLines.items, currentIndex));
-        currentIndex = quoteLines.nextIndex;
+        const quoteData = extractBlockquote(lines, currentIndex);
+        elements.push(createSemanticBlockquote(quoteData.items, currentIndex));
+        currentIndex = quoteData.nextIndex;
         continue;
       }
 
-      // Handle regular paragraphs with smart grouping
-      const paragraphLines = collectParagraphLines(lines, currentIndex);
-      if (paragraphLines.lines.length > 0) {
-        elements.push(createParagraph(paragraphLines.lines.join(' '), paragraphLines.nextIndex));
-        currentIndex = paragraphLines.nextIndex;
+      // Enhanced paragraph creation with readability optimization
+      const paragraphData = extractParagraph(lines, currentIndex);
+      if (paragraphData.lines.length > 0) {
+        elements.push(createSemanticParagraph(paragraphData.lines.join(' '), paragraphData.nextIndex));
+        currentIndex = paragraphData.nextIndex;
         continue;
       }
 
       currentIndex++;
     }
 
-    return elements.length > 0 ? elements : [
-      <div key="no-content" className="text-center py-8 text-gray-500">
-        <p>No content could be processed for display.</p>
+    // Ensure content is wrapped in semantic sections
+    return elements.length > 0 ? (
+      <div className="prose prose-xl prose-slate max-w-none" role="main">
+        {elements}
       </div>
-    ];
-  }, []);
+    ) : (
+      <section className="text-center py-12" role="alert">
+        <BookOpen className="h-12 w-12 text-gray-400 mx-auto mb-4" aria-hidden="true" />
+        <p className="text-lg text-gray-600">Content processing complete. No readable content found.</p>
+      </section>
+    );
+  }, [targetKeyword, anchorText, targetUrl]);
 
-  // Extract consecutive list items
-  const extractConsecutiveItems = (lines: string[], startIndex: number, pattern: RegExp) => {
+  // Helper functions for content parsing
+
+  const isHeading = (line: string): boolean => {
+    return /^#{1,6}\s/.test(line) || 
+           /^<h[1-6]/.test(line) || 
+           (line.length > 5 && line.length < 100 && !line.includes('.') && !line.includes(','));
+  };
+
+  const extractOrderedList = (lines: string[], startIndex: number) => {
     const items: string[] = [];
     let currentIndex = startIndex;
 
-    while (currentIndex < lines.length && pattern.test(lines[currentIndex])) {
-      const cleanItem = lines[currentIndex].replace(pattern, '').trim();
+    while (currentIndex < lines.length && /^\d+\.\s/.test(lines[currentIndex])) {
+      const cleanItem = lines[currentIndex].replace(/^\d+\.\s/, '').trim();
       if (cleanItem.length > 0) {
         items.push(cleanItem);
       }
@@ -251,16 +260,45 @@ const EnhancedContentProcessor = ({
     return { items, nextIndex: currentIndex };
   };
 
-  // Collect paragraph lines until list or heading
-  const collectParagraphLines = (lines: string[], startIndex: number) => {
+  const extractUnorderedList = (lines: string[], startIndex: number) => {
+    const items: string[] = [];
+    let currentIndex = startIndex;
+
+    while (currentIndex < lines.length && /^[-•*+●○]\s/.test(lines[currentIndex])) {
+      const cleanItem = lines[currentIndex].replace(/^[-•*+●○]\s/, '').trim();
+      if (cleanItem.length > 0) {
+        items.push(cleanItem);
+      }
+      currentIndex++;
+    }
+
+    return { items, nextIndex: currentIndex };
+  };
+
+  const extractBlockquote = (lines: string[], startIndex: number) => {
+    const items: string[] = [];
+    let currentIndex = startIndex;
+
+    while (currentIndex < lines.length && /^>\s/.test(lines[currentIndex])) {
+      const cleanItem = lines[currentIndex].replace(/^>\s/, '').trim();
+      if (cleanItem.length > 0) {
+        items.push(cleanItem);
+      }
+      currentIndex++;
+    }
+
+    return { items, nextIndex: currentIndex };
+  };
+
+  const extractParagraph = (lines: string[], startIndex: number) => {
     const paragraphLines: string[] = [];
     let currentIndex = startIndex;
 
     while (currentIndex < lines.length &&
+           !isHeading(lines[currentIndex]) &&
            !/^\d+\.\s/.test(lines[currentIndex]) &&
-           !/^[-•*]\s/.test(lines[currentIndex]) &&
-           !/^<h[1-6]/.test(lines[currentIndex]) &&
-           !/^#{1,6}\s/.test(lines[currentIndex])) {
+           !/^[-•*+●○]\s/.test(lines[currentIndex]) &&
+           !/^>\s/.test(lines[currentIndex])) {
       
       if (lines[currentIndex].trim().length > 0) {
         paragraphLines.push(lines[currentIndex]);
@@ -269,7 +307,7 @@ const EnhancedContentProcessor = ({
 
       // Break on empty line (paragraph boundary)
       if (currentIndex < lines.length && lines[currentIndex].trim() === '') {
-        currentIndex++; // Skip the empty line
+        currentIndex++;
         break;
       }
     }
@@ -277,65 +315,99 @@ const EnhancedContentProcessor = ({
     return { lines: paragraphLines, nextIndex: currentIndex };
   };
 
-  // Create numbered list element
-  const createNumberedList = (items: string[], index: number) => (
-    <ol key={`numbered-list-${index}`} className="ml-6 space-y-3 list-decimal list-outside">
+  // Semantic HTML element creators
+
+  const createSemanticHeading = (line: string, index: number, headingNumber: number) => {
+    let headingText = line;
+    let level = 2; // Start with h2 for article content
+
+    if (line.startsWith('<h')) {
+      const match = line.match(/<h([1-6])[^>]*>(.*?)<\/h[1-6]>/);
+      if (match) {
+        level = Math.min(parseInt(match[1]) + 1, 6);
+        headingText = match[2];
+      }
+    } else if (line.startsWith('#')) {
+      const hashes = line.match(/^#+/)?.[0].length || 1;
+      level = Math.min(hashes + 1, 6);
+      headingText = line.replace(/^#+\s*/, '');
+    }
+
+    const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
+    const headingId = `section-${headingNumber}`;
+
+    return (
+      <HeadingTag
+        key={`heading-${index}`}
+        id={headingId}
+        className={`font-bold text-gray-900 tracking-tight mb-6 mt-12 scroll-mt-24 ${
+          level === 2 ? 'text-3xl lg:text-4xl' : 
+          level === 3 ? 'text-2xl lg:text-3xl' : 
+          level === 4 ? 'text-xl lg:text-2xl' : 
+          level === 5 ? 'text-lg lg:text-xl' : 'text-base lg:text-lg'
+        }`}
+        role="heading"
+        aria-level={level}
+      >
+        <Hash className="inline h-6 w-6 mr-3 text-blue-600 opacity-70" aria-hidden="true" />
+        {processInlineContent(headingText, `heading-${index}`)}
+      </HeadingTag>
+    );
+  };
+
+  const createSemanticOrderedList = (items: string[], index: number) => (
+    <ol 
+      key={`ordered-list-${index}`} 
+      className="ml-8 space-y-4 list-decimal list-outside my-8"
+      role="list"
+    >
       {items.map((item, idx) => (
-        <li key={idx} className="text-lg leading-7 text-gray-700 pl-3 font-normal">
-          {processTextContent(item, `${index}-${idx}`)}
+        <li 
+          key={idx} 
+          className="text-lg leading-8 text-gray-700 pl-4 font-normal"
+          role="listitem"
+        >
+          {processInlineContent(item, `ol-${index}-${idx}`)}
         </li>
       ))}
     </ol>
   );
 
-  // Create bullet list element
-  const createBulletList = (items: string[], index: number) => (
-    <ul key={`bullet-list-${index}`} className="ml-6 space-y-3 list-disc list-outside">
+  const createSemanticUnorderedList = (items: string[], index: number) => (
+    <ul 
+      key={`unordered-list-${index}`} 
+      className="ml-8 space-y-4 list-disc list-outside my-8"
+      role="list"
+    >
       {items.map((item, idx) => (
-        <li key={idx} className="text-lg leading-7 text-gray-700 pl-3 font-normal">
-          {processTextContent(item, `${index}-${idx}`)}
+        <li 
+          key={idx} 
+          className="text-lg leading-8 text-gray-700 pl-4 font-normal"
+          role="listitem"
+        >
+          {processInlineContent(item, `ul-${index}-${idx}`)}
         </li>
       ))}
     </ul>
   );
 
-  // Create heading element
-  const createHeading = (line: string, index: number) => {
-    // Extract heading text and level
-    let headingText = line;
-    let level = 3; // Default to h3
+  const createSemanticBlockquote = (items: string[], index: number) => (
+    <blockquote 
+      key={`blockquote-${index}`}
+      className="border-l-4 border-blue-500 pl-8 py-6 my-8 bg-blue-50/30 rounded-r-lg"
+      role="blockquote"
+    >
+      <Quote className="h-8 w-8 text-blue-500 mb-4 opacity-60" aria-hidden="true" />
+      {items.map((item, idx) => (
+        <p key={idx} className="text-lg leading-8 text-gray-700 italic font-medium mb-4 last:mb-0">
+          {processInlineContent(item, `quote-${index}-${idx}`)}
+        </p>
+      ))}
+    </blockquote>
+  );
 
-    if (line.startsWith('<h')) {
-      const match = line.match(/<h([1-6])[^>]*>(.*?)<\/h[1-6]>/);
-      if (match) {
-        level = parseInt(match[1]) + 1; // Shift down one level
-        headingText = match[2];
-      }
-    } else if (line.startsWith('#')) {
-      const hashes = line.match(/^#+/)?.[0].length || 1;
-      level = Math.min(hashes + 2, 6); // Shift down by 2, max h6
-      headingText = line.replace(/^#+\s*/, '');
-    }
-
-    const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
-
-    return (
-      <HeadingTag
-        key={`heading-${index}`}
-        className={`font-bold text-gray-900 tracking-tight ${
-          level === 3 ? 'text-2xl' : 
-          level === 4 ? 'text-xl' : 
-          level === 5 ? 'text-lg' : 'text-base'
-        }`}
-      >
-        {processTextContent(headingText, `heading-${index}`)}
-      </HeadingTag>
-    );
-  };
-
-  // Create paragraph element with smart text breaking
-  const createParagraph = (text: string, index: number) => {
-    // Break long paragraphs intelligently
+  const createSemanticParagraph = (text: string, index: number) => {
+    // Intelligent paragraph breaking for optimal readability
     const sentences = text.split(/([.!?]+\s+)/).filter(Boolean);
     const paragraphs: string[] = [];
     let currentParagraph = '';
@@ -345,16 +417,17 @@ const EnhancedContentProcessor = ({
       const delimiter = sentences[i + 1] || '';
       const fullSentence = sentence + delimiter;
 
-      if (currentParagraph.length > 0 && (currentParagraph.length + fullSentence.length) > 300) {
+      // Break paragraphs at optimal length for readability (250-350 words)
+      if (currentParagraph.length > 0 && (currentParagraph.length + fullSentence.length) > 1400) {
         paragraphs.push(currentParagraph.trim());
         currentParagraph = fullSentence;
       } else {
         currentParagraph += fullSentence;
       }
 
-      // End paragraph after 2-3 sentences if reasonable length
+      // Create natural paragraph breaks after 2-4 sentences
       const sentenceCount = (currentParagraph.match(/[.!?]/g) || []).length;
-      if (sentenceCount >= 3 || (sentenceCount >= 2 && currentParagraph.length > 200)) {
+      if (sentenceCount >= 4 || (sentenceCount >= 2 && currentParagraph.length > 800)) {
         paragraphs.push(currentParagraph.trim());
         currentParagraph = '';
       }
@@ -365,122 +438,95 @@ const EnhancedContentProcessor = ({
     }
 
     return paragraphs.map((paragraph, idx) => (
-      <div
+      <p
         key={`paragraph-${index}-${idx}`}
-        className="text-lg leading-8 text-gray-700 font-normal"
-        style={{ textAlign: 'justify', lineHeight: '1.75' }}
+        className="text-lg leading-9 text-gray-700 font-normal mb-6 text-justify hyphens-auto"
+        style={{ 
+          textAlign: 'justify',
+          lineHeight: '1.8',
+          letterSpacing: '0.01em'
+        }}
       >
-        {processTextContent(paragraph, `${index}-${idx}`)}
-      </div>
+        {processInlineContent(paragraph, `p-${index}-${idx}`)}
+      </p>
     ));
   };
 
-  // Process text content with comprehensive markdown and HTML handling
-  const processTextContent = useCallback((text: string, elementId: string) => {
+  // Enhanced inline content processing with accessibility and SEO
+  const processInlineContent = useCallback((text: string, elementId: string) => {
     let processedText = text;
 
-    // Clean up any remaining HTML artifacts
+    // Clean HTML entities and artifacts
     processedText = processedText
-      .replace(/<\/?div[^>]*>/gi, '') // Remove div tags
-      .replace(/<\/?span[^>]*>/gi, '') // Remove span tags
-      .replace(/<br\s*\/?>/gi, ' ') // Convert br tags to spaces
-      .replace(/&nbsp;/gi, ' ') // Convert non-breaking spaces
-      .replace(/&amp;/gi, '&') // Convert HTML entities
+      .replace(/<\/?(?:div|span)[^>]*>/gi, '')
+      .replace(/<br\s*\/?>/gi, ' ')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/&amp;/gi, '&')
       .replace(/&lt;/gi, '<')
       .replace(/&gt;/gi, '>')
       .replace(/&quot;/gi, '"');
 
-    // Process existing markdown links first
+    // Process markdown links with enhanced accessibility
     processedText = processedText.replace(
       /\[([^\]]+)\]\(([^)]+)\)/g,
       (match, linkText, url) => {
         const cleanUrl = url.trim().startsWith('http') ? url.trim() : `https://${url.trim()}`;
-        return `<a href="${cleanUrl}" class="inline-link text-blue-600 hover:text-blue-800 font-semibold underline decoration-2 underline-offset-2 transition-colors duration-200 bg-blue-50/30 hover:bg-blue-50/50 px-1 py-0.5 rounded" target="_blank" rel="noopener noreferrer">${linkText.trim()}</a>`;
+        return `<a href="${cleanUrl}" class="inline-link text-blue-600 hover:text-blue-800 font-semibold underline decoration-2 underline-offset-2 transition-all duration-200 bg-blue-50/20 hover:bg-blue-50/40 px-1 py-0.5 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" target="_blank" rel="noopener noreferrer" aria-label="External link: ${linkText.trim()}">${linkText.trim()}</a>`;
       }
     );
 
-    // Process inline code first (to preserve it from other formatting)
-    const codeBlocks: string[] = [];
+    // Process inline code with syntax highlighting
     processedText = processedText.replace(
       /`([^`]+)`/g,
-      (match, code) => {
-        const index = codeBlocks.length;
-        codeBlocks.push(`<code class="bg-gray-100 text-purple-700 px-2 py-1 rounded text-sm font-mono">${code}</code>`);
-        return `__CODE_BLOCK_${index}__`;
-      }
+      '<code class="bg-gray-100 text-purple-700 px-2 py-1 rounded text-sm font-mono border border-gray-200 shadow-sm">$1</code>'
     );
 
-    // Smart anchor text insertion (only for specific elements to avoid over-linking)
+    // Smart anchor text insertion for natural link placement
     if (targetKeyword && anchorText && targetUrl && shouldInsertAnchorText(elementId)) {
       const keywordRegex = new RegExp(`\\b${targetKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
       if (keywordRegex.test(processedText) && !processedText.includes(targetUrl)) {
         processedText = processedText.replace(
           keywordRegex,
-          `<a href="${targetUrl}" class="anchor-link text-blue-600 hover:text-blue-800 font-semibold underline decoration-2 underline-offset-2 transition-colors duration-200" target="_blank" rel="noopener noreferrer">${anchorText}</a>`
+          `<a href="${targetUrl}" class="anchor-link text-blue-600 hover:text-blue-800 font-semibold underline decoration-2 underline-offset-2 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2" target="_blank" rel="noopener noreferrer" aria-label="Learn more: ${anchorText}">${anchorText}</a>`
         );
       }
     }
 
-    // Process bold text with multiple patterns
+    // Enhanced text formatting with proper semantic markup
     processedText = processedText
-      // Handle section headers that end with :** pattern (like "Data Point:**" or "Title Tags and Meta Descriptions:**")
-      // This matches text that starts with a letter, can contain letters, spaces, and common punctuation, ends with a colon and two asterisks
-      .replace(/\b([A-Za-z][A-Za-z\s&,.-]+?):\*\*/g, '<strong class="font-bold text-gray-900">$1:</strong>')
-      // Also handle patterns at the start of lines
-      .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '<strong class="font-bold text-gray-900">$1:</strong>')
-      // Handle multi-line bold text where ** is followed by whitespace and newline (most common case)
-      .replace(/\*\*\s*\n\s*([^*]+?)(?=\n\s*\n|\n\s*$|$)/gs, '<strong class="font-bold text-gray-900">$1</strong>')
-      // Handle ** at start of paragraph followed by content
-      .replace(/^\*\*\s*\n\s*(.+?)(?=\n\s*\n|\n\s*$|$)/gms, '<strong class="font-bold text-gray-900">$1</strong>')
-      // Standard markdown bold patterns (single line)
+      // Section headers with colons
+      .replace(/\b([A-Za-z][A-Za-z\s&,.-]+?):\*\*/g, '<strong class="font-bold text-gray-900 block mb-3">$1:</strong>')
+      .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '<strong class="font-bold text-gray-900 block mb-3">$1:</strong>')
+      // Bold text formatting
       .replace(/\*\*([^*\n]+?)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>')
-      // Multi-line bold patterns (without newline after opening **) - fallback
-      .replace(/\*\*([^*]+?)\*\*/gs, '<strong class="font-bold text-gray-900">$1</strong>')
-      .replace(/__([^_]+)__/g, '<strong class="font-bold text-gray-900">$1</strong>');
-
-    // Process italic text with multiple patterns
-    processedText = processedText
+      .replace(/__([^_]+)__/g, '<strong class="font-bold text-gray-900">$1</strong>')
+      // Italic text formatting
       .replace(/\*([^*]+)\*/g, '<em class="italic text-gray-800 font-medium">$1</em>')
-      .replace(/_([^_]+)_/g, '<em class="italic text-gray-800 font-medium">$1</em>');
+      .replace(/_([^_]+)_/g, '<em class="italic text-gray-800 font-medium">$1</em>')
+      // Strikethrough formatting
+      .replace(/~~([^~]+)~~/g, '<del class="line-through text-gray-500">$1</del>');
 
-    // Process strikethrough text
-    processedText = processedText.replace(
-      /~~([^~]+)~~/g,
-      '<del class="line-through text-gray-500">$1</del>'
-    );
-
-    // Restore code blocks
-    codeBlocks.forEach((code, index) => {
-      processedText = processedText.replace(`__CODE_BLOCK_${index}__`, code);
-    });
-
-    // Clean up excessive whitespace and formatting artifacts
+    // Final cleanup for optimal presentation
     processedText = processedText
-      .replace(/\s+/g, ' ') // Normalize whitespace
-      .replace(/\s*([.!?])\s*/g, '$1 ') // Fix punctuation spacing
-      .replace(/([.!?])([A-Z])/g, '$1 $2') // Add space after sentence ending
-      // Final cleanup: Remove any remaining visible asterisks that weren't processed
-      .replace(/^\*\*\s*/g, '') // Remove ** at the very beginning
-      .replace(/\*\*\s*$/g, '') // Remove ** at the very end
-      .replace(/>\*\*\s*</g, '><') // Remove ** between tags
-      .replace(/>\*\*\s*/g, '>') // Remove ** after opening tags
-      .replace(/\s*\*\*</g, '<') // Remove ** before closing tags
+      .replace(/\s+/g, ' ')
+      .replace(/\s*([.!?])\s*/g, '$1 ')
+      .replace(/([.!?])([A-Z])/g, '$1 $2')
+      .replace(/^\*\*\s*|\s*\*\*$/g, '')
       .trim();
 
     return <span dangerouslySetInnerHTML={{ __html: processedText }} />;
   }, [targetKeyword, anchorText, targetUrl]);
 
-  // Determine if anchor text should be inserted in this element
+  // Determine optimal anchor text placement for natural SEO
   const shouldInsertAnchorText = (elementId: string): boolean => {
-    // Insert anchor text in middle elements to appear natural
     const numericPart = elementId.split('-').pop();
     const elementNumber = parseInt(numericPart || '0');
     
-    // Insert in elements that are likely in the middle of content
-    return elementNumber % 7 === 3 || elementNumber % 11 === 5;
+    // Strategic placement for natural link distribution
+    return elementNumber % 8 === 3 || elementNumber % 13 === 7;
   };
 
-  // Handle content regeneration
+  // Handle content regeneration with user feedback
   const handleContentRegeneration = async () => {
     if (!targetKeyword || !anchorText || !targetUrl) return;
 
@@ -503,39 +549,68 @@ const EnhancedContentProcessor = ({
   };
 
   return (
-    <div className="prose prose-xl prose-slate max-w-none enhanced-blog-content">
+    <article className="enhanced-blog-content" role="article" aria-labelledby="article-title">
       <div className="space-y-8">
         {processContent(content)}
       </div>
-    </div>
+      
+      {/* Content quality indicator */}
+      {contentAnalysis.readabilityScore > 0 && (
+        <aside className="mt-8 p-4 bg-green-50 border border-green-200 rounded-lg" role="complementary">
+          <p className="text-sm text-green-700">
+            <ShieldCheck className="inline h-4 w-4 mr-2" aria-hidden="true" />
+            Content readability score: {Math.round(contentAnalysis.readabilityScore)}/100
+          </p>
+        </aside>
+      )}
+    </article>
   );
 };
 
-// Reading Progress Component
+// Reading Progress Indicator with enhanced UX
 const ReadingProgress = () => {
   const [progress, setProgress] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
     const updateProgress = () => {
       const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
       const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
       const scrolled = (winScroll / height) * 100;
-      setProgress(Math.min(scrolled, 100));
+      
+      setProgress(Math.min(Math.max(scrolled, 0), 100));
+      setIsVisible(scrolled > 5); // Show after scrolling 5%
     };
 
-    window.addEventListener('scroll', updateProgress);
-    return () => window.removeEventListener('scroll', updateProgress);
+    let timeoutId: NodeJS.Timeout;
+    const throttledUpdate = () => {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(updateProgress, 16); // ~60fps
+    };
+
+    window.addEventListener('scroll', throttledUpdate, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', throttledUpdate);
+      clearTimeout(timeoutId);
+    };
   }, []);
+
+  if (!isVisible) return null;
 
   return (
     <div 
-      className="fixed top-0 left-0 h-1 bg-gradient-to-r from-blue-600 to-purple-600 z-50 transition-all duration-300"
+      className="fixed top-0 left-0 h-1 bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 z-50 transition-all duration-300 shadow-lg"
       style={{ width: `${progress}%` }}
+      role="progressbar"
+      aria-valuenow={Math.round(progress)}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label="Reading progress"
     />
   );
 };
 
-// Enhanced Status Badge Component
+// Enhanced Status Badge with accessibility improvements
 const EnhancedStatusBadge = ({ 
   blogPost, 
   user, 
@@ -562,15 +637,15 @@ const EnhancedStatusBadge = ({
 
   if (blogPost.claimed) {
     return (
-      <div className="flex items-center justify-center gap-4 mb-8">
-        <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full">
-          <CheckCircle2 className="h-5 w-5 text-green-600" />
+      <section className="flex items-center justify-center gap-4 mb-12" role="status" aria-live="polite">
+        <div className="flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-full shadow-sm">
+          <CheckCircle2 className="h-6 w-6 text-green-600" aria-hidden="true" />
           <div className="text-center">
-            <span className="font-semibold text-green-700">
-              {isOwnPost ? 'You own this post' : 'Claimed Post'}
+            <span className="font-semibold text-green-700 text-lg">
+              {isOwnPost ? 'Your Article' : 'Claimed Article'}
             </span>
             {!isOwnPost && authorEmail && (
-              <div className="text-xs text-green-600 mt-1">
+              <div className="text-sm text-green-600 mt-1">
                 by {maskEmail(authorEmail)}
               </div>
             )}
@@ -578,14 +653,15 @@ const EnhancedStatusBadge = ({
         </div>
         
         {isOwnPost && (
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <Button
               onClick={onRegenerate}
               variant="outline"
               size="sm"
-              className="rounded-full border-blue-300 text-blue-700 hover:bg-blue-50"
+              className="rounded-full border-blue-300 text-blue-700 hover:bg-blue-50 transition-all duration-200"
+              aria-label="Regenerate article content"
             >
-              <Wand2 className="h-4 w-4 mr-2" />
+              <Wand2 className="h-4 w-4 mr-2" aria-hidden="true" />
               Regenerate
             </Button>
             {canUnclaim && (
@@ -593,9 +669,10 @@ const EnhancedStatusBadge = ({
                 onClick={onUnclaim}
                 variant="outline"
                 size="sm"
-                className="rounded-full border-orange-300 text-orange-700 hover:bg-orange-50"
+                className="rounded-full border-orange-300 text-orange-700 hover:bg-orange-50 transition-all duration-200"
+                aria-label="Unclaim this article"
               >
-                <XCircle className="h-4 w-4 mr-2" />
+                <XCircle className="h-4 w-4 mr-2" aria-hidden="true" />
                 Unclaim
               </Button>
             )}
@@ -604,41 +681,43 @@ const EnhancedStatusBadge = ({
                 onClick={onDelete}
                 variant="outline"
                 size="sm"
-                className="rounded-full border-gray-300 text-gray-700 hover:bg-gray-50"
+                className="rounded-full border-red-300 text-red-700 hover:bg-red-50 transition-all duration-200"
+                aria-label="Delete this article"
               >
-                <Trash2 className="h-4 w-4" />
+                <Trash2 className="h-4 w-4" aria-hidden="true" />
               </Button>
             )}
           </div>
         )}
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="flex items-center justify-center gap-4 mb-8">
-      <Badge className="px-4 py-2 text-sm font-medium rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300">
-        <Timer className="mr-2 h-4 w-4" />
-        Unclaimed
+    <section className="flex items-center justify-center gap-4 mb-12" role="status" aria-live="polite">
+      <Badge className="px-6 py-3 text-base font-medium rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 border border-gray-300">
+        <Timer className="mr-2 h-5 w-5" aria-hidden="true" />
+        Available to Claim
       </Badge>
       
-      <div className="flex gap-2">
+      <div className="flex gap-3">
         {canClaim && (
           <Button
             onClick={onClaim}
             disabled={claiming}
             size="sm"
-            className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+            className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 transition-all duration-200"
+            aria-label={user ? 'Claim this article' : 'Login to claim this article'}
           >
             {claiming ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" aria-hidden="true" />
                 Claiming...
               </>
             ) : (
               <>
-                <Crown className="mr-2 h-4 w-4" />
-                {user ? 'Claim' : 'Login to Claim'}
+                <Crown className="mr-2 h-5 w-5" aria-hidden="true" />
+                {user ? 'Claim Article' : 'Login to Claim'}
               </>
             )}
           </Button>
@@ -648,24 +727,25 @@ const EnhancedStatusBadge = ({
             onClick={onDelete}
             variant="outline"
             size="sm"
-            className="rounded-full border-gray-300 text-gray-700 hover:bg-gray-50"
+            className="rounded-full border-red-300 text-red-700 hover:bg-red-50 transition-all duration-200"
+            aria-label="Delete this article"
           >
-            <Trash2 className="h-4 w-4" />
+            <Trash2 className="h-4 w-4" aria-hidden="true" />
           </Button>
         )}
       </div>
-    </div>
+    </section>
   );
 };
 
-// Main Component
+// Main Beautiful Blog Post Component
 const BeautifulBlogPost = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // State
+  // State management
   const [blogPost, setBlogPost] = useState<BlogPost | null>(null);
   const [authorEmail, setAuthorEmail] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -676,26 +756,28 @@ const BeautifulBlogPost = () => {
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
 
-  // Computed values
+  // Computed values with enhanced processing
   const { effectiveScore, isPremiumScore } = usePremiumSEOScore(blogPost);
   
   const cleanTitle = useMemo(() => {
     if (!blogPost?.title) return '';
     
-    // Enhanced title cleaning
     return blogPost.title
-      .replace(/^h\d+[-\s]*/, '') // Remove h1-, h2-, etc. prefixes
-      .replace(/[-\s]*[a-z0-9]{8}$/, '') // Remove random suffixes
+      .replace(/^h\d+[-\s]*/, '')
+      .replace(/[-\s]*[a-z0-9]{8}$/i, '')
       .replace(/\s+/g, ' ')
       .trim();
   }, [blogPost?.title]);
 
   const readingTime = useMemo(() => {
-    return blogPost?.reading_time || Math.ceil((blogPost?.content?.length || 0) / 1000);
+    if (blogPost?.reading_time) return blogPost.reading_time;
+    
+    const wordCount = blogPost?.content?.split(/\s+/).length || 0;
+    return Math.max(1, Math.ceil(wordCount / 250)); // 250 words per minute average
   }, [blogPost?.content, blogPost?.reading_time]);
 
   const formattedDate = useMemo(() => {
-    if (!blogPost?.created_at) return 'Date unknown';
+    if (!blogPost?.created_at) return 'Date unavailable';
     try {
       return format(new Date(blogPost.created_at), 'MMMM dd, yyyy');
     } catch {
@@ -703,7 +785,7 @@ const BeautifulBlogPost = () => {
     }
   }, [blogPost?.created_at]);
 
-  // Load blog post with enhanced error handling
+  // Enhanced blog post loading with comprehensive error handling
   const loadBlogPost = useCallback(async (slug: string) => {
     try {
       setLoading(true);
@@ -712,13 +794,13 @@ const BeautifulBlogPost = () => {
       const post = await blogService.getBlogPostBySlug(slug);
       
       if (!post) {
-        setError(new Error(`Blog post not found: ${slug}`));
+        setError(new Error(`Article not found: ${slug}`));
         return;
       }
 
       setBlogPost(post);
 
-      // Fetch author email if claimed
+      // Fetch author information for claimed posts
       if (post.claimed && post.user_id) {
         try {
           const { data: profile } = await supabase
@@ -731,7 +813,7 @@ const BeautifulBlogPost = () => {
             setAuthorEmail(profile.email);
           }
         } catch (error) {
-          console.warn('Could not fetch author email:', error);
+          console.warn('Could not fetch author information:', error);
         }
       }
     } catch (error: any) {
@@ -749,12 +831,12 @@ const BeautifulBlogPost = () => {
     }
   }, [slug, loadBlogPost]);
 
-  // Handle content regeneration
+  // Enhanced content regeneration
   const handleContentRegeneration = async () => {
-    if (!blogPost || !blogPost.keywords?.[0] || !blogPost.anchor_text || !blogPost.target_url) {
+    if (!blogPost?.keywords?.[0] || !blogPost.anchor_text || !blogPost.target_url) {
       toast({
-        title: "Cannot Regenerate",
-        description: "Missing required information for content regeneration",
+        title: "Regeneration Unavailable",
+        description: "This article is missing required information for content regeneration.",
         variant: "destructive"
       });
       return;
@@ -769,7 +851,6 @@ const BeautifulBlogPost = () => {
       });
 
       if (result.success) {
-        // Update the blog post with new content
         const updatedPost = await blogService.updateBlogPost(blogPost.id, {
           content: result.content,
           title: result.title,
@@ -779,8 +860,8 @@ const BeautifulBlogPost = () => {
         setBlogPost(updatedPost);
         
         toast({
-          title: "Content Regenerated! ✨",
-          description: "The blog post has been updated with fresh content",
+          title: "Content Regenerated Successfully! ✨",
+          description: "Your article has been updated with fresh, optimized content.",
         });
       } else {
         throw new Error(result.error || 'Content regeneration failed');
@@ -788,13 +869,13 @@ const BeautifulBlogPost = () => {
     } catch (error: any) {
       toast({
         title: "Regeneration Failed",
-        description: error.message || 'Unable to regenerate content',
+        description: error.message || 'Unable to regenerate content at this time.',
         variant: "destructive"
       });
     }
   };
 
-  // Handle claim
+  // Enhanced claim handling
   const handleClaim = async () => {
     if (!user) {
       setShowClaimModal(true);
@@ -808,7 +889,7 @@ const BeautifulBlogPost = () => {
       if (result.success) {
         setBlogPost(result.post!);
         toast({
-          title: "Success! 🎉",
+          title: "Article Claimed Successfully! 🎉",
           description: result.message,
         });
       } else {
@@ -820,8 +901,8 @@ const BeautifulBlogPost = () => {
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "An unexpected error occurred while claiming the post",
+        title: "Unexpected Error",
+        description: "An error occurred while claiming the article. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -836,7 +917,7 @@ const BeautifulBlogPost = () => {
       if (result.success) {
         setBlogPost(result.post!);
         toast({
-          title: "Post Unclaimed",
+          title: "Article Unclaimed",
           description: result.message,
         });
       } else {
@@ -867,14 +948,14 @@ const BeautifulBlogPost = () => {
       if (error) throw error;
 
       toast({
-        title: "Post Deleted",
-        description: "The blog post has been successfully deleted.",
+        title: "Article Deleted",
+        description: "The article has been permanently removed.",
       });
       navigate('/blog');
     } catch (error: any) {
       toast({
         title: "Delete Failed",
-        description: `Unable to delete post: ${error.message}`,
+        description: `Unable to delete article: ${error.message}`,
         variant: "destructive"
       });
     } finally {
@@ -886,8 +967,8 @@ const BeautifulBlogPost = () => {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: blogPost?.title,
-          text: blogPost?.meta_description || blogPost?.excerpt,
+          title: cleanTitle,
+          text: blogPost?.meta_description || blogPost?.excerpt || `Read "${cleanTitle}" - an insightful article.`,
           url: window.location.href,
         });
       } catch (error: any) {
@@ -904,41 +985,44 @@ const BeautifulBlogPost = () => {
     try {
       await navigator.clipboard.writeText(window.location.href);
       toast({
-        title: "Link Copied!",
-        description: "Blog post URL copied to clipboard",
+        title: "Link Copied! 📋",
+        description: "Article URL has been copied to your clipboard.",
       });
     } catch (error) {
       toast({
         title: "Copy Failed",
-        description: "Unable to copy URL to clipboard",
+        description: "Unable to copy URL. Please try selecting and copying manually.",
         variant: "destructive"
       });
     }
   };
 
-  // Loading state
+  // Loading state with enhanced UX
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
         <Header />
-        <div className="flex items-center justify-center py-20">
-          <div className="text-center space-y-4">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto" />
-            <p className="text-lg font-medium text-gray-600">Loading blog post...</p>
+        <main className="flex items-center justify-center py-24" role="main">
+          <div className="text-center space-y-6 max-w-md">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto" aria-hidden="true" />
+            <div className="space-y-2">
+              <h1 className="text-2xl font-bold text-gray-900">Loading Article</h1>
+              <p className="text-lg text-gray-600">Please wait while we prepare your content...</p>
+            </div>
           </div>
-        </div>
+        </main>
         <Footer />
       </div>
     );
   }
 
-  // Error state
+  // Error state with enhanced UX
   if (error || !blogPost) {
     return (
       <>
         <Header />
         <BlogErrorBoundary
-          error={error || new Error('Blog post not found')}
+          error={error || new Error('Article not found')}
           slug={slug}
           onRetry={() => slug && loadBlogPost(slug)}
         />
@@ -947,60 +1031,85 @@ const BeautifulBlogPost = () => {
     );
   }
 
+  // Generate structured data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": cleanTitle,
+    "description": blogPost.meta_description || blogPost.excerpt,
+    "datePublished": blogPost.created_at,
+    "dateModified": blogPost.updated_at || blogPost.created_at,
+    "wordCount": blogPost.word_count,
+    "keywords": blogPost.keywords?.join(', '),
+    "mainEntityOfPage": {
+      "@type": "WebPage",
+      "@id": window.location.href
+    }
+  };
+
   return (
     <TooltipProvider delayDuration={300}>
       <div className="beautiful-blog-wrapper min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
         
-        {/* Reading Progress */}
+        {/* Structured Data for SEO */}
+        <script 
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        />
+
+        {/* Reading Progress Indicator */}
         <ReadingProgress />
         
         <Header />
 
-        {/* Supabase Connection Fixer */}
+        {/* Connection Health Check */}
         <div className="max-w-4xl mx-auto px-6 py-2">
           <SupabaseConnectionFixerComponent onConnectionRestored={() => slug && loadBlogPost(slug)} />
         </div>
 
-        {/* Navigation Bar */}
-        <div className="sticky top-16 z-30 border-b border-gray-200/50 bg-white/80 backdrop-blur-md">
-          <div className="max-w-4xl mx-auto px-6 py-4">
+        {/* Enhanced Navigation */}
+        <nav className="sticky top-16 z-30 border-b border-gray-200/50 bg-white/90 backdrop-blur-md" role="navigation">
+          <div className="max-w-5xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
               <Button
                 variant="ghost"
                 onClick={() => navigate('/blog')}
-                className="flex items-center gap-2 hover:bg-blue-50 text-gray-600 hover:text-blue-600"
+                className="flex items-center gap-2 hover:bg-blue-50 text-gray-600 hover:text-blue-600 transition-all duration-200"
+                aria-label="Return to blog listing"
               >
-                <ArrowLeft className="h-4 w-4" />
-                Back to Blog
+                <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+                Back to Articles
               </Button>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={handleShare}
-                  className="rounded-full"
+                  className="rounded-full transition-all duration-200"
+                  aria-label="Share this article"
                 >
-                  <Share2 className="h-4 w-4 mr-2" />
+                  <Share2 className="h-4 w-4 mr-2" aria-hidden="true" />
                   Share
                 </Button>
                 <Button 
                   variant="outline" 
                   size="sm" 
                   onClick={handleCopyLink}
-                  className="rounded-full"
+                  className="rounded-full transition-all duration-200"
+                  aria-label="Copy article link"
                 >
-                  <Copy className="h-4 w-4 mr-2" />
-                  Copy
+                  <Copy className="h-4 w-4 mr-2" aria-hidden="true" />
+                  Copy Link
                 </Button>
               </div>
             </div>
           </div>
-        </div>
+        </nav>
 
-        {/* Article Container */}
-        <article className="max-w-5xl mx-auto px-6 py-16 lg:px-8">
+        {/* Main Article Container */}
+        <main className="max-w-5xl mx-auto px-6 py-16 lg:px-8" role="main">
           
-          {/* Enhanced Status Badge */}
+          {/* Article Status */}
           <EnhancedStatusBadge
             blogPost={blogPost}
             user={user}
@@ -1012,10 +1121,13 @@ const BeautifulBlogPost = () => {
             claiming={claiming}
           />
 
-          {/* Article Header */}
-          <header className="text-center mb-16">
-            <div className="mb-12">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6 tracking-tight">
+          {/* Article Header with Enhanced SEO */}
+          <header className="text-center mb-20">
+            <div className="mb-16">
+              <h1 
+                id="article-title"
+                className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-8 tracking-tight max-w-4xl mx-auto"
+              >
                 {cleanTitle}
               </h1>
 
@@ -1028,21 +1140,21 @@ const BeautifulBlogPost = () => {
               )}
             </div>
 
-            {/* Meta Information */}
-            <div className="max-w-2xl mx-auto">
-              <div className="flex flex-wrap items-center justify-center gap-8 text-gray-500 py-4 border-t border-b border-gray-200/50">
+            {/* Enhanced Meta Information */}
+            <div className="max-w-3xl mx-auto">
+              <div className="flex flex-wrap items-center justify-center gap-8 text-gray-500 py-6 border-t border-b border-gray-200/50">
                 <div className="flex items-center gap-2 text-sm font-medium">
-                  <Calendar className="h-4 w-4 text-blue-600" />
+                  <Calendar className="h-5 w-5 text-blue-600" aria-hidden="true" />
                   <time dateTime={blogPost.created_at} className="text-gray-700">
                     {formattedDate}
                   </time>
                 </div>
                 <div className="flex items-center gap-2 text-sm font-medium">
-                  <Clock className="h-4 w-4 text-green-600" />
-                  <span className="text-gray-700">{readingTime} min read</span>
+                  <Clock className="h-5 w-5 text-green-600" aria-hidden="true" />
+                  <span className="text-gray-700">{readingTime} minute read</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm font-medium">
-                  <Eye className="h-4 w-4 text-purple-600" />
+                  <Eye className="h-5 w-5 text-purple-600" aria-hidden="true" />
                   <span className="text-gray-700">SEO Optimized</span>
                 </div>
                 <SEOScoreDisplay
@@ -1058,11 +1170,11 @@ const BeautifulBlogPost = () => {
             </div>
           </header>
 
-          {/* Article Content */}
-          <main className="mb-16">
-            <Card className="border-0 shadow-xl bg-white/90 backdrop-blur-sm overflow-hidden">
+          {/* Enhanced Article Content */}
+          <section className="mb-20">
+            <Card className="border-0 shadow-2xl bg-white/95 backdrop-blur-sm overflow-hidden">
               <div className="relative">
-                <div className="px-8 md:px-12 lg:px-16 py-12 md:py-16">
+                <div className="px-8 md:px-12 lg:px-20 py-16 md:py-20">
                   <EnhancedContentProcessor
                     content={blogPost.content || ''}
                     title={cleanTitle}
@@ -1072,113 +1184,128 @@ const BeautifulBlogPost = () => {
                     onRegenerateContent={handleContentRegeneration}
                   />
                 </div>
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue-50/10 pointer-events-none" />
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-blue-50/5 pointer-events-none" />
               </div>
             </Card>
-          </main>
+          </section>
 
-          {/* Keywords Section */}
+          {/* Enhanced Keywords Section */}
           {blogPost.keywords?.length && (
-            <Card className="mt-16 max-w-4xl mx-auto border-0 shadow-lg bg-gradient-to-r from-purple-50/50 via-white to-blue-50/50">
-              <CardContent className="p-10">
-                <h3 className="text-2xl font-bold text-gray-900 mb-8 flex items-center justify-center gap-3">
-                  <Sparkles className="h-6 w-6 text-purple-600" />
-                  Keywords & Topics
-                </h3>
-                <div className="flex flex-wrap gap-4 justify-center">
-                  {blogPost.keywords.map((keyword, index) => (
-                    <Badge
-                      key={index}
+            <section className="mb-16">
+              <Card className="border-0 shadow-lg bg-gradient-to-r from-purple-50/50 via-white to-blue-50/50">
+                <CardContent className="p-12">
+                  <h2 className="text-3xl font-bold text-gray-900 mb-10 flex items-center justify-center gap-3">
+                    <Sparkles className="h-8 w-8 text-purple-600" aria-hidden="true" />
+                    Article Topics & Keywords
+                  </h2>
+                  <div className="flex flex-wrap gap-4 justify-center">
+                    {blogPost.keywords.map((keyword, index) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="px-8 py-4 bg-white/90 border-purple-200 text-gray-700 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 rounded-full text-base font-medium shadow-sm hover:shadow-md"
+                      >
+                        <Hash className="h-4 w-4 mr-2 text-purple-500" aria-hidden="true" />
+                        {keyword}
+                      </Badge>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+          )}
+
+          {/* Enhanced Engagement Section */}
+          <section className="mb-8">
+            <Card className="border-0 shadow-xl bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-blue-200">
+              <CardContent className="p-16 text-center">
+                <div className="max-w-3xl mx-auto">
+                  <h2 className="text-4xl font-bold text-gray-900 mb-8 tracking-tight">
+                    Found This Article Helpful?
+                  </h2>
+                  <p className="text-gray-600 mb-12 text-xl leading-relaxed font-light">
+                    Share it with your network and help others discover valuable insights! Your engagement helps us create more quality content.
+                  </p>
+                  <div className="flex justify-center gap-6">
+                    <Button
+                      onClick={handleShare}
                       variant="outline"
-                      className="px-6 py-3 bg-white/80 border-purple-200 text-gray-700 hover:bg-purple-50 hover:border-purple-300 transition-all duration-200 rounded-full text-sm font-medium shadow-sm hover:shadow-md"
+                      size="lg"
+                      className="rounded-full px-10 py-4 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400 transition-all duration-200 text-lg"
+                      aria-label="Share this article on social media"
                     >
-                      {keyword}
-                    </Badge>
-                  ))}
+                      <Share2 className="mr-3 h-6 w-6" aria-hidden="true" />
+                      Share Article
+                    </Button>
+                    <Button
+                      onClick={handleCopyLink}
+                      variant="outline"
+                      size="lg"
+                      className="rounded-full px-10 py-4 border-indigo-300 text-indigo-700 hover:bg-indigo-50 hover:border-indigo-400 transition-all duration-200 text-lg"
+                      aria-label="Copy article link to clipboard"
+                    >
+                      <Copy className="mr-3 h-6 w-6" aria-hidden="true" />
+                      Copy Link
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          )}
+          </section>
 
-          {/* Engagement Section */}
-          <Card className="mt-16 bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 border-blue-200 shadow-xl">
-            <CardContent className="p-12 text-center">
-              <div className="max-w-2xl mx-auto">
-                <h3 className="text-3xl font-bold text-gray-900 mb-6 tracking-tight">
-                  Enjoyed this article?
-                </h3>
-                <p className="text-gray-600 mb-10 text-xl leading-relaxed font-light">
-                  Share it with your network and help others discover great content!
-                </p>
-                <div className="flex justify-center gap-6">
-                  <Button
-                    onClick={handleShare}
-                    variant="outline"
-                    size="lg"
-                    className="rounded-full px-8 py-3 border-blue-300 text-blue-700 hover:bg-blue-50 hover:border-blue-400"
-                  >
-                    <Share2 className="mr-3 h-5 w-5" />
-                    Share Article
-                  </Button>
-                  <Button
-                    onClick={handleCopyLink}
-                    variant="outline"
-                    size="lg"
-                    className="rounded-full px-8 py-3 border-indigo-300 text-indigo-700 hover:bg-indigo-50 hover:border-indigo-400"
-                  >
-                    <Copy className="mr-3 h-5 w-5" />
-                    Copy Link
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        </main>
 
-        </article>
-
-        {/* Delete Dialog */}
+        {/* Enhanced Dialog Components */}
+        
+        {/* Delete Confirmation Dialog */}
         <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-          <AlertDialogContent>
+          <AlertDialogContent className="max-w-md">
             <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center gap-2">
-                <Trash2 className="h-5 w-5 text-red-600" />
-                Delete Blog Post
+              <AlertDialogTitle className="flex items-center gap-3 text-xl">
+                <Trash2 className="h-6 w-6 text-red-600" aria-hidden="true" />
+                Delete Article
               </AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete "{blogPost.title}"? This action cannot be undone.
+              <AlertDialogDescription className="text-base leading-relaxed">
+                Are you sure you want to permanently delete "{cleanTitle}"? This action cannot be undone and will remove the article from all systems.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={handleDelete} className="bg-red-600 hover:bg-red-700">
-                Delete Post
+            <AlertDialogFooter className="gap-3">
+              <AlertDialogCancel className="px-6 py-2">Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleDelete} 
+                className="bg-red-600 hover:bg-red-700 px-6 py-2"
+              >
+                Delete Permanently
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Unclaim Dialog */}
+        {/* Unclaim Confirmation Dialog */}
         <AlertDialog open={showUnclaimDialog} onOpenChange={setShowUnclaimDialog}>
-          <AlertDialogContent>
+          <AlertDialogContent className="max-w-md">
             <AlertDialogHeader>
-              <AlertDialogTitle className="flex items-center gap-2">
-                <XCircle className="h-5 w-5 text-orange-600" />
-                Unclaim Blog Post
+              <AlertDialogTitle className="flex items-center gap-3 text-xl">
+                <XCircle className="h-6 w-6 text-orange-600" aria-hidden="true" />
+                Unclaim Article
               </AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to unclaim "{blogPost.title}"? This post will return to the claimable pool.
+              <AlertDialogDescription className="text-base leading-relaxed">
+                Are you sure you want to unclaim "{cleanTitle}"? This will return the article to the available pool for others to claim.
               </AlertDialogDescription>
             </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Keep Claimed</AlertDialogCancel>
-              <AlertDialogAction onClick={handleUnclaim} className="bg-orange-600 hover:bg-orange-700">
-                Unclaim Post
+            <AlertDialogFooter className="gap-3">
+              <AlertDialogCancel className="px-6 py-2">Keep Claimed</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={handleUnclaim} 
+                className="bg-orange-600 hover:bg-orange-700 px-6 py-2"
+              >
+                Unclaim Article
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
 
-        {/* Claim Modal */}
+        {/* Claim Login Modal */}
         <ClaimLoginModal
           isOpen={showClaimModal}
           onClose={() => setShowClaimModal(false)}
@@ -1190,7 +1317,7 @@ const BeautifulBlogPost = () => {
           postSlug={slug || ''}
         />
 
-        {/* Payment Modal */}
+        {/* Premium Payment Modal */}
         <EnhancedUnifiedPaymentModal
           isOpen={showPaymentModal}
           onClose={() => setShowPaymentModal(false)}
@@ -1198,8 +1325,8 @@ const BeautifulBlogPost = () => {
           onSuccess={() => {
             setShowPaymentModal(false);
             toast({
-              title: "Welcome to Premium! 🎉",
-              description: "Your premium subscription has been activated.",
+              title: "Welcome to Premium! 🌟",
+              description: "Your premium subscription is now active. Enjoy enhanced features!",
             });
           }}
         />
