@@ -428,11 +428,13 @@ const EnhancedContentProcessor = ({
       .replace(/\b([A-Za-z][A-Za-z\s&,.-]+?):\*\*/g, '<strong class="font-bold text-gray-900">$1:</strong>')
       // Also handle patterns at the start of lines
       .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '<strong class="font-bold text-gray-900">$1:</strong>')
-      // Handle multi-line bold text where ** is followed by newline (like "**\nIn conclusion...")
-      .replace(/\*\*\s*\n(.+?)(?=\n\n|\n$|$)/gs, '<strong class="font-bold text-gray-900">$1</strong>')
+      // Handle multi-line bold text where ** is followed by whitespace and newline (most common case)
+      .replace(/\*\*\s*\n\s*([^*]+?)(?=\n\s*\n|\n\s*$|$)/gs, '<strong class="font-bold text-gray-900">$1</strong>')
+      // Handle ** at start of paragraph followed by content
+      .replace(/^\*\*\s*\n\s*(.+?)(?=\n\s*\n|\n\s*$|$)/gms, '<strong class="font-bold text-gray-900">$1</strong>')
       // Standard markdown bold patterns (single line)
-      .replace(/\*\*([^*\n]+)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>')
-      // Multi-line bold patterns (without newline after opening **)
+      .replace(/\*\*([^*\n]+?)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>')
+      // Multi-line bold patterns (without newline after opening **) - fallback
       .replace(/\*\*([^*]+?)\*\*/gs, '<strong class="font-bold text-gray-900">$1</strong>')
       .replace(/__([^_]+)__/g, '<strong class="font-bold text-gray-900">$1</strong>');
 
