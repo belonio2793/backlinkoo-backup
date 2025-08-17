@@ -261,23 +261,52 @@ export class ClaimableBlogService {
 
   /**
    * Get all claimable posts (with expiration logic)
+   * Queries published_blog_posts first, then blog_posts as fallback
    */
   static async getClaimablePosts(limit: number = 20): Promise<any[]> {
     try {
       console.log('🔍 Fetching claimable posts...');
 
-      // Use the database function to get posts with expiration logic
-      const { data, error } = await supabase
+      // Try the database function first
+      const { data: rpcData, error: rpcError } = await supabase
         .rpc('get_claimable_posts', { limit_count: limit });
 
-      if (error) {
-        console.error('❌ Failed to fetch claimable posts:', {
-          error: error?.message || error,
-          code: error?.code,
-          limit,
-          timestamp: new Date().toISOString()
-        });
-        return [];
+      if (!rpcError && rpcData && rpcData.length > 0) {
+        console.log(`✅ Fetched ${rpcData.length} claimable posts via RPC`);
+        return rpcData;
+      }
+
+      // Fallback: Query published_blog_posts directly
+      console.log('📖 RPC failed, trying published_blog_posts direct query...');
+      let { data, error } = await supabase
+        .from('published_blog_posts')
+        .select('*')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+      // If published_blog_posts fails, try blog_posts fallback
+      if (error || !data || data.length === 0) {
+        console.log('📖 Trying blog_posts fallback...');
+        const fallbackResult = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+          .limit(limit);
+
+        if (fallbackResult.error) {
+          console.error('❌ Failed to fetch claimable posts from both tables:', {
+            rpcError: rpcError?.message || rpcError,
+            publishedError: error?.message || error,
+            fallbackError: fallbackResult.error?.message || fallbackResult.error,
+            limit,
+            timestamp: new Date().toISOString()
+          });
+          return [];
+        }
+
+        data = fallbackResult.data;
       }
 
       console.log(`✅ Fetched ${data?.length || 0} claimable posts`);
