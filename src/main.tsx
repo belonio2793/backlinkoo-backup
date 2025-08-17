@@ -243,6 +243,31 @@ if (import.meta.env.DEV) {
     }
   };
 
+  // Add Supabase connection fix helper
+  (window as any).fixSupabaseConnection = async () => {
+    console.log('🔧 Fixing Supabase connection...');
+    try {
+      const { clearSupabaseConnectionBlock } = await import('./utils/clearSupabaseBlock');
+      clearSupabaseConnectionBlock();
+      console.log('✅ Supabase connection block cleared - page will refresh');
+    } catch (error) {
+      console.error('❌ Failed to fix Supabase connection:', error);
+    }
+  };
+
+  // Add emergency Supabase connection fixer
+  (window as any).emergencyFixSupabase = async () => {
+    console.log('🚨 Running emergency Supabase fix...');
+    try {
+      const { SupabaseConnectionFixer } = await import('./utils/supabaseConnectionFixer');
+      const result = await SupabaseConnectionFixer.emergencyFix();
+      console.log('🚨 Emergency fix result:', result);
+      return result;
+    } catch (error) {
+      console.error('❌ Emergency Supabase fix failed:', error);
+    }
+  };
+
   // Add client content generator test
   (window as any).testClientContent = async () => {
     try {
