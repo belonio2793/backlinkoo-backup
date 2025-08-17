@@ -15,6 +15,9 @@ export class ContentFormatter {
     // CRITICAL: Add debug logging for production issues
     console.log('ContentFormatter: Original content length:', content.length);
 
+    // ENHANCED: Remove author notes and conclusions early in the process
+    content = this.removeAuthorNotes(content);
+
     // FIRST: Fix malformed links before any other processing
     content = LinkAttributeFixer.fixMalformedLinks(content);
 
@@ -119,6 +122,9 @@ export class ContentFormatter {
 
     // FINAL: Ensure all links have proper styling and attributes
     formattedContent = LinkAttributeFixer.ensureLinkStyling(formattedContent);
+
+    // ENHANCED: Final cleanup to remove any remaining issues
+    formattedContent = this.finalCleanup(formattedContent);
 
     // CRITICAL: Ensure we have proper HTML structure for production
     if (!formattedContent.includes('<p>') && !formattedContent.includes('<h')) {
@@ -266,6 +272,18 @@ export class ContentFormatter {
     // Remove **Title: title** pattern at the beginning
     const starTitlePrefixPattern = new RegExp(`^\\s*\\*\\*Title:\\s*${this.escapeRegex(cleanTitle)}\\*\\*\\s*\\n?`, 'i');
     content = content.replace(starTitlePrefixPattern, '');
+
+    // ENHANCED: Remove partial title matches (handle truncated titles)
+    if (cleanTitle.length > 20) {
+      // For longer titles, try to match truncated versions
+      const shortTitle = cleanTitle.substring(0, Math.min(50, cleanTitle.length - 5));
+      const partialTitlePattern = new RegExp(`^\\s*<h[1-6][^>]*>\\s*${this.escapeRegex(shortTitle)}[^<]*<\\/h[1-6]>\\s*`, 'i');
+      content = content.replace(partialTitlePattern, '');
+
+      // Remove markdown truncated titles
+      const markdownPartialPattern = new RegExp(`^\\s*#{1,6}\\s+${this.escapeRegex(shortTitle)}[^\\n]*\\n`, 'i');
+      content = content.replace(markdownPartialPattern, '');
+    }
 
     // Final cleanup - remove any remaining "Title:" patterns at the beginning of content
     content = content.replace(/^[\s\n]*Title:\s*[^\n]*\n?/gi, '');
@@ -647,6 +665,21 @@ export class ContentFormatter {
       .replace(/style="[^"]*&lt;[^"]*&gt;[^"]*"/gi, 'style="color:#2563eb;font-weight:500;"')
       .replace(/style="[^"]*color:[^#]*#[^0-9a-f]*([0-9a-f]{6})[^"]*"/gi, 'style="color:#$1;font-weight:500;"')
 
+      // ENHANCED: Remove author notes and conclusions
+      .replace(/---\s*\n\s*In this blog post[\s\S]*?enhance[\s\S]*?subscriber base\./gi, '')
+      .replace(/---\s*\n\s*In conclusion[\s\S]*?$/gi, '')
+      .replace(/---\s*\n\s*To summarize[\s\S]*?$/gi, '')
+      .replace(/---\s*\n\s*This article[\s\S]*?covered[\s\S]*?$/gi, '')
+      .replace(/---\s*\n[\s\S]*?actionable tips[\s\S]*?subscriber base[\s\S]*?$/gi, '')
+
+      // Remove triple dash patterns followed by author notes
+      .replace(/---\s*\n[\s\S]*?(?:strategies|tips|practices)[\s\S]*?(?:performance|visibility|growth)[\s\S]*?$/gi, '')
+
+      // Remove standalone numbers at the end (like random "0")
+      .replace(/\n\s*\d+\s*$/g, '')
+      .replace(/<p[^>]*>\s*\d+\s*<\/p>\s*$/gi, '')
+      .replace(/^\s*\d+\s*$/gm, '') // Remove lines that are just numbers
+
       // Remove any remaining markdown artifacts
       .replace(/---+/g, '')
       .replace(/^\s*---\s*$/gm, '')
@@ -752,6 +785,14 @@ export class ContentFormatter {
       // Fix "Claim your place among the legends" patterns
       .replace(/Claim\s+your\s+place\s+among\s+the\s+legends[^.]*\.\s*Play\s+now\s+at\s+([a-zA-Z0-9.-]+\.com)/gi,
         'Claim your place among the legends. Play now at <a href="https://$1">$1</a>.')
+
+      // ENHANCED: Fix malformed link attributes (missing spaces)
+      .replace(/<a\s+href([^=\s]+?)=""\s+([^"]+?)"=""\s+target([^=\s]+?)=""\s+rel([^=\s]+?)=""\s+style([^>]*?)"=""([^>]*)>/gi,
+        '<a href="$1://$2" target="_$3" rel="$4" style="color:#2563eb;font-weight:500;text-decoration:underline;">$6')
+
+      // Fix the specific broken pattern: hrefhttps target_blank relnoopener noreferrer
+      .replace(/<a\s+hrefhttps\s*=""\s*([^"\s]+)\s*=""\s*target_blank\s*=""\s*rel([^\s]+?)\s*=""\s*([^>]*?)>/gi,
+        '<a href="https://$1" target="_blank" rel="noopener noreferrer" style="color:#2563eb;font-weight:500;text-decoration:underline;">$3')
 
       // General cleanup of malformed HTML entities in text
       .replace(/&lt;\s*\/\s*[a-zA-Z]+\s*&gt;/g, '') // Remove &lt;/tag&gt; patterns
@@ -909,6 +950,57 @@ export class ContentFormatter {
       // Fix broken HTML entities
       .replace(/&lt;(\w+)/g, '<$1')
       .replace(/(\w+)&gt;/g, '$1>');
+  }
+
+  /**
+   * Remove author notes and conclusion sections that appear at the end of posts
+   */
+  private static removeAuthorNotes(content: string): string {
+    return content
+      // Remove author notes starting with triple dashes
+      .replace(/---\s*\n\s*In this blog post[\s\S]*?enhance[\s\S]*?performance[\s\S]*?$/gi, '')
+      .replace(/---\s*\n\s*In this blog post[\s\S]*?covered[\s\S]*?strategies[\s\S]*?$/gi, '')
+      .replace(/---\s*\n\s*In this blog post[\s\S]*?actionable tips[\s\S]*?subscriber base[\s\S]*?$/gi, '')
+      .replace(/---\s*\n\s*In this article[\s\S]*?covered[\s\S]*?strategies[\s\S]*?$/gi, '')
+      .replace(/---\s*\n\s*This comprehensive guide[\s\S]*?strategies[\s\S]*?performance[\s\S]*?$/gi, '')
+
+      // Remove other conclusion patterns
+      .replace(/---\s*\n\s*In conclusion[\s\S]*?$/gi, '')
+      .replace(/---\s*\n\s*To summarize[\s\S]*?$/gi, '')
+      .replace(/---\s*\n\s*To conclude[\s\S]*?$/gi, '')
+
+      // Remove general author note patterns
+      .replace(/---\s*\n[\s\S]*?(?:following these|implementing these|by following)[\s\S]*?(?:strategies|tips|practices)[\s\S]*?(?:performance|visibility|growth|success)[\s\S]*?$/gi, '')
+      .replace(/---\s*\n[\s\S]*?essential strategies[\s\S]*?performance[\s\S]*?$/gi, '')
+      .replace(/---\s*\n[\s\S]*?actionable tips[\s\S]*?best practices[\s\S]*?$/gi, '')
+
+      // Clean up any remaining triple dashes
+      .replace(/\n\s*---\s*$/g, '')
+      .replace(/---\s*$/g, '');
+  }
+
+  /**
+   * Final cleanup to remove remaining issues like random numbers
+   */
+  private static finalCleanup(content: string): string {
+    return content
+      // Remove standalone numbers at the end
+      .replace(/\n\s*\d+\s*$/g, '')
+      .replace(/<p[^>]*>\s*\d+\s*<\/p>\s*$/gi, '')
+      .replace(/^\s*\d+\s*$/gm, '') // Remove lines that are just numbers
+
+      // Remove empty paragraphs at the end
+      .replace(/<p[^>]*>\s*<\/p>\s*$/gi, '')
+
+      // Clean up excessive whitespace at the end
+      .replace(/\s+$/g, '')
+
+      // Remove any remaining HTML artifacts
+      .replace(/<\s*>/g, '') // Remove empty tags
+      .replace(/<\/\s*>/g, '') // Remove malformed closing tags
+
+      // Final trim
+      .trim();
   }
 
   /**
