@@ -52,29 +52,42 @@ exports.handler = async (event, context) => {
     const blogPost = await generateSingleBlogPost(keyword, anchorText, targetUrl);
     console.log('✅ Generated blog post using random prompt');
 
-    // Step 2: Publish the post to Telegraph
+    // Step 2: Publish the post to multiple platforms
     const publishedUrls = [];
+    const platforms = ['telegraph', 'writeas']; // Available platforms
+
+    // Randomly select one platform to avoid footprints
+    const selectedPlatform = platforms[Math.floor(Math.random() * platforms.length)];
+    console.log(`📡 Selected platform: ${selectedPlatform}`);
 
     try {
-      const telegraphUrl = await publishToTelegraph(blogPost.title, blogPost.content);
-      publishedUrls.push(telegraphUrl);
-      console.log(`✅ Published post to Telegraph:`, telegraphUrl);
+      let publishedUrl;
+      let platform;
 
-      // Validate the published URL
-      await validateTelegraphUrl(telegraphUrl);
-      console.log(`✅ Validated post`);
+      if (selectedPlatform === 'telegraph') {
+        publishedUrl = await publishToTelegraph(blogPost.title, blogPost.content);
+        platform = 'Telegraph';
+        await validateTelegraphUrl(publishedUrl);
+      } else if (selectedPlatform === 'writeas') {
+        publishedUrl = await publishToWriteAs(blogPost.title, blogPost.content);
+        platform = 'Write.as';
+        await validateWriteAsUrl(publishedUrl);
+      }
+
+      publishedUrls.push(publishedUrl);
+      console.log(`✅ Published post to ${platform}:`, publishedUrl);
 
       // Save to database
-      await savePublishedLink(supabase, campaignId, telegraphUrl, blogPost.title);
+      await savePublishedLink(supabase, campaignId, publishedUrl, blogPost.title, platform);
       console.log(`✅ Saved post to database`);
 
     } catch (error) {
       console.error(`❌ Failed to publish post:`, error);
-      throw new Error('Failed to publish post to Telegraph');
+      throw new Error(`Failed to publish post to ${selectedPlatform}`);
     }
 
     if (publishedUrls.length === 0) {
-      throw new Error('Failed to publish post to Telegraph');
+      throw new Error('Failed to publish post to any platform');
     }
 
     // Step 3: Update campaign status to completed
