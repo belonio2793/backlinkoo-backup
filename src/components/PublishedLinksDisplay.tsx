@@ -44,10 +44,21 @@ const PublishedLinksDisplay = () => {
       setLoading(true);
       const orchestrator = getOrchestrator();
       const campaigns = await orchestrator.getUserCampaigns();
-      
+
+      console.log('📊 Debug: Loading published links...');
+      console.log('📊 Debug: Found campaigns:', campaigns.length);
+
       // Extract all published links from campaigns
       const allLinks: PublishedLink[] = [];
-      campaigns.forEach(campaign => {
+      campaigns.forEach((campaign, index) => {
+        console.log(`📊 Debug: Campaign ${index + 1}:`, {
+          id: campaign.id,
+          name: campaign.name,
+          status: campaign.status,
+          published_links_count: campaign.automation_published_links?.length || 0,
+          published_links: campaign.automation_published_links
+        });
+
         if (campaign.automation_published_links) {
           campaign.automation_published_links.forEach(link => {
             allLinks.push({
@@ -61,11 +72,19 @@ const PublishedLinksDisplay = () => {
         }
       });
 
+      console.log('📊 Debug: Total links extracted:', allLinks.length);
+      console.log('📊 Debug: Links data:', allLinks);
+
       // Sort by published date (newest first)
       allLinks.sort((a, b) => new Date(b.published_at).getTime() - new Date(a.published_at).getTime());
       setLinks(allLinks);
     } catch (error) {
-      console.error('Error loading published links:', error);
+      console.error('❌ Error loading published links:', error);
+      toast({
+        title: "Error Loading Links",
+        description: `Failed to load published links: ${error.message}`,
+        variant: "destructive"
+      });
     } finally {
       setLoading(false);
     }
