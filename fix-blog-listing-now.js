@@ -55,11 +55,11 @@
     }
 
     // Step 5: If Supabase client is available, test the connection
-    if (window.supabase || (window as any).supabase) {
+    if (window.supabase || window.supabaseClient) {
       console.log('🔍 Testing database connection...');
       
       try {
-        const supabase = window.supabase || (window as any).supabase;
+        const supabase = window.supabase || window.supabaseClient;
         const { data, error } = await supabase
           .from('blog_posts')
           .select('id, title, status')
@@ -131,12 +131,12 @@ window.blogDebugHelpers = {
    * Quick test to see what's in each table
    */
   async testTables() {
-    if (!window.supabase && !(window as any).supabase) {
+    if (!window.supabase && !window.supabaseClient) {
       console.error('❌ Supabase client not available');
       return;
     }
 
-    const supabase = window.supabase || (window as any).supabase;
+    const supabase = window.supabase || window.supabaseClient;
     
     console.log('🔍 Testing both blog tables...');
 
@@ -154,9 +154,11 @@ window.blogDebugHelpers = {
         console.error('  ❌ Error:', blogError.message);
       } else {
         console.log(`  ✅ Found ${blogPosts?.length || 0} posts`);
-        blogPosts?.forEach(post => {
-          console.log(`    - ${post.title?.substring(0, 50)}... (${post.created_at})`);
-        });
+        if (blogPosts) {
+          blogPosts.forEach(post => {
+            console.log(`    - ${post.title?.substring(0, 50)}... (${post.created_at})`);
+          });
+        }
       }
     } catch (error) {
       console.error('  ❌ blog_posts query failed:', error);
@@ -176,9 +178,11 @@ window.blogDebugHelpers = {
         console.error('  ❌ Error:', publishedError.message);
       } else {
         console.log(`  ✅ Found ${publishedPosts?.length || 0} posts`);
-        publishedPosts?.forEach(post => {
-          console.log(`    - ${post.title?.substring(0, 50)}... (${post.created_at})`);
-        });
+        if (publishedPosts) {
+          publishedPosts.forEach(post => {
+            console.log(`    - ${post.title?.substring(0, 50)}... (${post.created_at})`);
+          });
+        }
       }
     } catch (error) {
       console.error('  ❌ published_blog_posts query failed:', error);
