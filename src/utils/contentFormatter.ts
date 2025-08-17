@@ -186,6 +186,10 @@ export class ContentFormatter {
       // })
       // Remove empty markdown headings
       .replace(/^#{1,6}\s*$$/gm, '')
+      // Fix malformed bold patterns before cleaning up excessive symbols
+      .replace(/\*\*([A-Z])\*\*([a-z][A-Za-z\s&,.-]*:)/g, '**$1$2**')
+      .replace(/\*\*([A-Z])\*\*([a-z][^:*\n]*:)/g, '**$1$2**')
+
       // Clean up excessive markdown symbols
       .replace(/\*{3,}/g, '**')
       .replace(/_{3,}/g, '__')
