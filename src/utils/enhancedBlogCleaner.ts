@@ -144,6 +144,9 @@ export class EnhancedBlogCleaner {
       .replace(/\b([A-Za-z][A-Za-z\s&,.-]+?):\*\*/g, '**$1:**')
       .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '**$1:**')
 
+      // Fix malformed bold patterns like "**\nIn conclusion..." to "**In conclusion..."
+      .replace(/\*\*\s*\n/g, '**')
+
       // Remove excessive markdown symbols
       .replace(/\*{3,}/g, '')
       .replace(/_{3,}/g, '')
