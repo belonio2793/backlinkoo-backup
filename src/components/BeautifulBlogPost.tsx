@@ -189,7 +189,7 @@ const renderBlocks = (blocks: Block[]) => {
     else {
       out.push(
         <p key={`p-${i}`} className="mb-6 leading-8 text-lg text-gray-700 text-justify">
-          {strongify(b.text)}
+          {processTextFormatting(b.text)}
         </p>
       );
     }
