@@ -127,14 +127,14 @@ const PublishedLinksDisplay = () => {
 
   if (!user) {
     return (
-      <Card className="w-full h-full">
-        <CardHeader>
+      <Card className="w-full h-full flex flex-col">
+        <CardHeader className="flex-shrink-0">
           <CardTitle className="flex items-center gap-2">
             <LinkIcon className="w-5 h-5" />
             Published Backlinks
           </CardTitle>
         </CardHeader>
-        <CardContent className="text-center py-8 flex-1 flex flex-col justify-center">
+        <CardContent className="text-center flex-1 flex flex-col justify-center min-h-0 py-8">
           <Globe className="w-12 h-12 mx-auto mb-4 text-gray-400" />
           <h3 className="font-medium text-gray-900 mb-2">Sign In to View Published Links</h3>
           <p className="text-sm text-gray-500">
@@ -146,8 +146,8 @@ const PublishedLinksDisplay = () => {
   }
 
   return (
-    <Card className="w-full h-full">
-      <CardHeader>
+    <Card className="w-full h-full flex flex-col">
+      <CardHeader className="flex-shrink-0">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <LinkIcon className="w-5 h-5" />
@@ -181,8 +181,8 @@ const PublishedLinksDisplay = () => {
           )}
         </div>
       </CardHeader>
-      
-      <CardContent className="flex-1 flex flex-col">
+
+      <CardContent className="flex-1 flex flex-col min-h-0 p-6">
         {loading ? (
           <div className="text-center py-8">
             <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
