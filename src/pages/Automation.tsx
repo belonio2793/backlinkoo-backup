@@ -673,13 +673,11 @@ const Automation = () => {
 
           {/* Activity (Middle Column) */}
           <div className="lg:col-span-1 h-full">
-            {isAuthenticated && (
-              <CampaignManagerTabbed
-                onStatusUpdate={(message, type) => addStatusMessage(message, type)}
-                currentCampaignProgress={campaignProgress}
-                onRetryProgress={handleRetryCampaign}
-              />
-            )}
+            <CampaignManagerTabbed
+              onStatusUpdate={(message, type) => addStatusMessage(message, type)}
+              currentCampaignProgress={campaignProgress}
+              onRetryProgress={handleRetryCampaign}
+            />
           </div>
 
           {/* Live Monitor (Right Column) */}
