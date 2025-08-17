@@ -9,7 +9,20 @@ export class LinkAttributeFixer {
    */
   static fixMalformedLinks(content: string): string {
     console.log('🔧 LinkAttributeFixer: Processing content for malformed links...');
-    
+
+    // ENHANCED: Fix the specific broken pattern from the user's example
+    // Pattern: <a hrefhttps://backlinkoo.com" target_blank" relnoopener noreferrer">
+    content = content.replace(
+      /<a\s+hrefhttps:\/\/([^"\s]+)"\s+target_blank"\s+rel([^"\s]+)">/gi,
+      '<a href="https://$1" target="_blank" rel="$2" style="color:#2563eb;font-weight:500;text-decoration:underline;">'
+    );
+
+    // Fix missing spaces in attributes - the core issue
+    content = content.replace(
+      /<a\s+href([^=\s]+?)([^"\s]+)"\s+target([^=\s]+?)"\s+rel([^=\s]+?)">/gi,
+      '<a href="$1$2" target="_$3" rel="$4" style="color:#2563eb;font-weight:500;text-decoration:underline;">'
+    );
+
     // Pattern 1: Fix the specific Go High Level Stars pattern
     content = content.replace(
       /<a\s+hrefhttps\s*=""\s*:\s*=""\s*gohighlevelstars\.com\s*=""\s*stylecolor:[^>]*>/gi,
