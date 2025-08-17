@@ -424,7 +424,7 @@ const Automation = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 xl:gap-8">
           {/* Campaign Creation (Left Column) */}
           <div className="lg:col-span-1 flex flex-col min-h-[600px]">
-            <Tabs defaultValue="create" className="w-full">
+            <Tabs defaultValue="create" className="w-full h-full flex flex-col">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="create" className="flex items-center gap-2">
                   <Target className="w-4 h-4" />
