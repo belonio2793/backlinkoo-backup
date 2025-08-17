@@ -493,7 +493,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
           </TabsList>
 
           {/* Campaign Activity Tab */}
-          <TabsContent value="activity" className="mt-6 space-y-4 flex-1 flex flex-col">
+          <TabsContent value="activity" className="space-y-4 flex-1 flex flex-col">
             {!user ? (
               <div className="flex-1 flex items-center justify-center min-h-0">
                 <div className="text-center">
