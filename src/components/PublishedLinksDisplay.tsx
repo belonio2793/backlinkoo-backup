@@ -150,35 +150,37 @@ const PublishedLinksDisplay = () => {
   return (
     <Card className="w-full h-full flex flex-col">
       <CardHeader className="flex-shrink-0 pb-3">
-        <div className="flex items-center justify-between">
+        <div className="space-y-3">
           <CardTitle className="flex items-center gap-2">
             <LinkIcon className="w-5 h-5" />
             Published Backlinks
-            <Badge variant="outline" className="ml-2">
-              {links.length} Total
-            </Badge>
           </CardTitle>
           {links.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => loadPublishedLinks()}
-                className="text-xs"
-                disabled={loading}
-              >
-                <RefreshCw className={`w-3 h-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={copyAllUrls}
-                className="text-xs"
-              >
-                <Copy className="w-3 h-3 mr-1" />
-                Copy All
-              </Button>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-600">
+                You have {links.length} published backlink{links.length !== 1 ? 's' : ''}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => loadPublishedLinks()}
+                  className="text-xs"
+                  disabled={loading}
+                >
+                  <RefreshCw className={`w-3 h-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={copyAllUrls}
+                  className="text-xs"
+                >
+                  <Copy className="w-3 h-3 mr-1" />
+                  Copy All
+                </Button>
+              </div>
             </div>
           )}
         </div>
