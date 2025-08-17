@@ -182,7 +182,7 @@ const PublishedLinksDisplay = () => {
         </div>
       </CardHeader>
       
-      <CardContent>
+      <CardContent className="flex-1 flex flex-col">
         {loading ? (
           <div className="text-center py-8">
             <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
@@ -197,7 +197,7 @@ const PublishedLinksDisplay = () => {
             </p>
           </div>
         ) : (
-          <ScrollArea className="h-96">
+          <ScrollArea className="flex-1 min-h-0">
             <div className="space-y-3">
               {links.map((link) => (
                 <div
