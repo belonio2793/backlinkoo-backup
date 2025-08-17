@@ -208,17 +208,25 @@ if (import.meta.env.DEV) {
 
   // Add emergency fetch fix helper
   (window as any).fixFetchErrors = async () => {
-    console.log('🚨 Applying emergency fetch fix...');
+    console.log('🚨 Applying emergency fetch conflict fix...');
     try {
-      // First try the enhanced FullStory fix
-      if ((window as any).restoreOriginalFetch) {
-        (window as any).restoreOriginalFetch();
-        console.log('✅ Original fetch restored via FullStory fix');
+      // Apply the new emergency fetch conflict fix
+      if ((window as any).applyEmergencyFetchFix) {
+        (window as any).applyEmergencyFetchFix();
+        console.log('✅ Emergency fetch conflict fix applied');
+      } else {
+        // Fallback to original fix
+        if ((window as any).restoreOriginalFetch) {
+          (window as any).restoreOriginalFetch();
+          console.log('✅ Original fetch restored via FullStory fix');
+        }
+
+        const { emergencyDisableFetchProtection } = await import('./utils/emergencyFetchFix');
+        emergencyDisableFetchProtection();
+        console.log('✅ Fetch protection disabled');
       }
 
-      const { emergencyDisableFetchProtection } = await import('./utils/emergencyFetchFix');
-      emergencyDisableFetchProtection();
-      console.log('✅ Fetch protection disabled - try your request again');
+      console.log('🔄 Please refresh the page to complete the fix');
     } catch (error) {
       console.error('❌ Failed to apply fetch fix:', error);
     }
