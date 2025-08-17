@@ -134,7 +134,7 @@ const PublishedLinksDisplay = () => {
             Published Backlinks
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex-1 flex flex-col justify-center min-h-0 px-6 py-4">
+        <CardContent className="flex-1 flex flex-col justify-center min-h-0 px-8 py-6">
           <div className="text-center">
             <Globe className="w-12 h-12 mx-auto mb-4 text-gray-400" />
             <h3 className="font-medium text-gray-900 mb-2">Sign In to View Published Links</h3>
@@ -150,41 +150,43 @@ const PublishedLinksDisplay = () => {
   return (
     <Card className="w-full h-full flex flex-col">
       <CardHeader className="flex-shrink-0 pb-3">
-        <div className="flex items-center justify-between">
+        <div className="space-y-3">
           <CardTitle className="flex items-center gap-2">
             <LinkIcon className="w-5 h-5" />
             Published Backlinks
-            <Badge variant="outline" className="ml-2">
-              {links.length} Total
-            </Badge>
           </CardTitle>
           {links.length > 0 && (
-            <div className="flex items-center gap-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => loadPublishedLinks()}
-                className="text-xs"
-                disabled={loading}
-              >
-                <RefreshCw className={`w-3 h-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
-                Refresh
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={copyAllUrls}
-                className="text-xs"
-              >
-                <Copy className="w-3 h-3 mr-1" />
-                Copy All
-              </Button>
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-600">
+                You have {links.length} published backlink{links.length !== 1 ? 's' : ''}
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => loadPublishedLinks()}
+                  className="text-xs"
+                  disabled={loading}
+                >
+                  <RefreshCw className={`w-3 h-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={copyAllUrls}
+                  className="text-xs"
+                >
+                  <Copy className="w-3 h-3 mr-1" />
+                  Copy All
+                </Button>
+              </div>
             </div>
           )}
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 overflow-y-auto px-6 pb-6 pt-0">
+      <CardContent className="flex-1 overflow-y-auto px-8 pb-8 pt-2">
         {loading ? (
           <div className="flex-1 flex flex-col justify-center">
             <div className="text-center">
@@ -203,11 +205,11 @@ const PublishedLinksDisplay = () => {
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {links.map((link) => (
                 <div
                   key={link.id}
-                  className="border rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="border rounded-lg p-5 bg-gray-50 hover:bg-gray-100 transition-colors"
                 >
                   {/* Header */}
                   <div className="flex items-start justify-between mb-3">
