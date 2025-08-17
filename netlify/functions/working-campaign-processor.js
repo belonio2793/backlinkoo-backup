@@ -407,19 +407,23 @@ function convertToTelegraphFormat(html) {
         children: [trimmed.replace(/<\/?h3>/g, '')]
       });
     } else if (trimmed.startsWith('<p>')) {
-      // Handle paragraphs with links
+      // Handle paragraphs with links and formatting
       const processedText = processHTMLContent(trimmed.replace(/<\/?p>/g, ''));
-      telegraphNodes.push({
-        tag: 'p',
-        children: processedText
-      });
+      if (processedText.length > 0) {
+        telegraphNodes.push({
+          tag: 'p',
+          children: processedText
+        });
+      }
     } else if (trimmed.startsWith('<li>')) {
-      // Handle list items
+      // Handle list items with formatting
       const processedText = processHTMLContent(trimmed.replace(/<\/?li>/g, ''));
-      telegraphNodes.push({
-        tag: 'p',
-        children: ['• ' + processedText]
-      });
+      if (processedText.length > 0) {
+        telegraphNodes.push({
+          tag: 'p',
+          children: ['• ', ...processedText]
+        });
+      }
     } else if (trimmed.startsWith('<ul>') || trimmed.startsWith('</ul>') || 
                trimmed.startsWith('<ol>') || trimmed.startsWith('</ol>')) {
       // Skip list container tags
