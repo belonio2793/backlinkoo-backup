@@ -139,19 +139,23 @@ export class EnhancedBlogCleaner {
    */
   static cleanFormattingArtifacts(content: string): string {
     return content
+      // Fix section headers with asterisks (like "Data Point:**" or "Title Tags and Meta Descriptions:**")
+      .replace(/([A-Za-z][^:\n]*?):\*\*/g, '**$1:**')
+      .replace(/([A-Za-z][A-Za-z\s]+):\*\*/g, '**$1:**')
+
       // Remove excessive markdown symbols
       .replace(/\*{3,}/g, '')
       .replace(/_{3,}/g, '')
       .replace(/-{3,}/g, '')
       .replace(/={3,}/g, '')
-      
+
       // Remove empty lines with just symbols
       .replace(/^[\s*_=-]+$/gm, '')
-      
+
       // Clean up excessive whitespace
       .replace(/\n{3,}/g, '\n\n')
       .replace(/^\s+$/gm, '') // Remove lines with only whitespace
-      
+
       // Remove trailing whitespace from lines
       .replace(/[ \t]+$/gm, '');
   }
