@@ -459,6 +459,12 @@ const EnhancedContentProcessor = ({
       .replace(/\s+/g, ' ') // Normalize whitespace
       .replace(/\s*([.!?])\s*/g, '$1 ') // Fix punctuation spacing
       .replace(/([.!?])([A-Z])/g, '$1 $2') // Add space after sentence ending
+      // Final cleanup: Remove any remaining visible asterisks that weren't processed
+      .replace(/^\*\*\s*/g, '') // Remove ** at the very beginning
+      .replace(/\*\*\s*$/g, '') // Remove ** at the very end
+      .replace(/>\*\*\s*</g, '><') // Remove ** between tags
+      .replace(/>\*\*\s*/g, '>') // Remove ** after opening tags
+      .replace(/\s*\*\*</g, '<') // Remove ** before closing tags
       .trim();
 
     return <span dangerouslySetInnerHTML={{ __html: processedText }} />;
