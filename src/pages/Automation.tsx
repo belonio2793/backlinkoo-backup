@@ -442,7 +442,7 @@ const Automation = () => {
                       Launch a new link building campaign with automated content generation and backlinks
                     </CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
+                  <CardContent className="space-y-4 px-8 py-6">
                     {/* Form Progress Bar */}
                     <div className="mb-4">
                       <div className="flex justify-between text-xs text-gray-500 mb-1">
