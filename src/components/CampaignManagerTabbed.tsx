@@ -494,21 +494,25 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
 
           {/* Campaign Activity Tab */}
           <TabsContent value="activity" className="mt-6 space-y-4 flex-1 flex flex-col">
-            <div className="flex-1 overflow-y-auto space-y-3 min-h-0">
-              {!user ? (
-                <div className="text-center py-8">
+            {!user ? (
+              <div className="flex-1 flex items-center justify-center min-h-0">
+                <div className="text-center">
                   <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                   <p className="text-gray-600">Sign in to view your campaigns</p>
                   <p className="text-sm text-gray-500">Create an account or sign in to start monitoring your campaigns</p>
                 </div>
-              ) : campaigns.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <p className="text-gray-600">No campaigns found</p>
-                    <p className="text-sm text-gray-500">Create your first campaign to get started</p>
-                  </div>
-                ) : (
-                  campaigns.map((campaign) => (
+              </div>
+            ) : campaigns.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center min-h-0">
+                <div className="text-center">
+                  <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <p className="text-gray-600">No campaigns found</p>
+                  <p className="text-sm text-gray-500">Create your first campaign to get started</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto space-y-3 min-h-0">
+                {campaigns.map((campaign) => (
                     <div key={campaign.id} className="p-4 border rounded-lg bg-white hover:bg-gray-50">
                       <div className="flex items-start justify-between">
                         <div className="flex-1 space-y-2">
@@ -714,9 +718,9 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                         </div>
                       </div>
                     </div>
-                  ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Live Links Tab */}
