@@ -74,10 +74,10 @@ const processTextFormatting = (text: string): React.ReactNode => {
     '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline font-semibold decoration-2 underline-offset-2 transition-colors duration-200">$1</a>'
   );
 
-  // Handle standalone URLs that aren't already in links
+  // Handle standalone URLs (simple approach to avoid conflicts)
   processedText = processedText.replace(
-    /(?<!href=["']|>)(https?:\/\/[^\s<>"']+)/gi,
-    '<a href="$1" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline font-semibold decoration-2 underline-offset-2 transition-colors duration-200">$1</a>'
+    /(^|\s)(https?:\/\/[^\s<>"']+)/gi,
+    '$1<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline font-semibold decoration-2 underline-offset-2 transition-colors duration-200">$2</a>'
   );
 
   // Handle markdown bold with **text**
