@@ -29,6 +29,8 @@ import './utils/silentErrorTest'
 import './utils/emergencyErrorFix'
 // Emergency fetch fix (load first)
 import './utils/emergencyFetchFix'
+// Emergency fetch conflict fix - fixes cascading fetch interceptors
+import './utils/emergencyFetchConflictFix'
 // Network error handler for user-friendly solutions
 import './utils/errorHandler'
 // Fix response body conflicts early
