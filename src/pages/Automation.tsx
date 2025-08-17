@@ -22,6 +22,7 @@ import FormCompletionCelebration from '@/components/FormCompletionCelebration';
 import InlineFeedMonitor from '@/components/InlineFeedMonitor';
 import DevelopmentModeIndicator from '@/components/DevelopmentModeIndicator';
 import BacklinkNotification from '@/components/BacklinkNotification';
+import DatabaseSchemaFixer from '@/components/DatabaseSchemaFixer';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
