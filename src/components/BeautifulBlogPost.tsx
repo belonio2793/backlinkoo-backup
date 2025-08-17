@@ -65,8 +65,14 @@ const urlOnly = (line: string) => {
 
 // --- Utility: process markdown and boldify text ---
 const processTextFormatting = (text: string): React.ReactNode => {
-  // First, process markdown bold formatting (**text**)
+  // First, process markdown formatting
   let processedText = text;
+
+  // Handle markdown links first [text](url)
+  processedText = processedText.replace(
+    /\[([^\]]+)\]\(([^)]+)\)/g,
+    '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-800 underline font-semibold decoration-2 underline-offset-2 transition-colors duration-200">$1</a>'
+  );
 
   // Handle markdown bold with **text**
   processedText = processedText.replace(
@@ -74,9 +80,9 @@ const processTextFormatting = (text: string): React.ReactNode => {
     '<strong class="font-bold text-gray-900">$1</strong>'
   );
 
-  // Handle markdown italic with *text*
+  // Handle markdown italic with *text* (but not if it's already inside bold)
   processedText = processedText.replace(
-    /\*([^*]+)\*/g,
+    /(?<!\*)\*([^*]+)\*(?!\*)/g,
     '<em class="italic text-gray-700">$1</em>'
   );
 
