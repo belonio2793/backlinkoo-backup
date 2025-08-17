@@ -80,10 +80,10 @@ const processTextFormatting = (text: string): React.ReactNode => {
     '<strong class="font-bold text-gray-900">$1</strong>'
   );
 
-  // Handle markdown italic with *text* (but not if it's already inside bold)
+  // Handle markdown italic with *text* (avoiding conflicts with bold)
   processedText = processedText.replace(
-    /(?<!\*)\*([^*]+)\*(?!\*)/g,
-    '<em class="italic text-gray-700">$1</em>'
+    /(^|[^*])\*([^*]+)\*([^*]|$)/g,
+    '$1<em class="italic text-gray-700">$2</em>$3'
   );
 
   // If no markdown formatting was found, try the colon-based formatting
