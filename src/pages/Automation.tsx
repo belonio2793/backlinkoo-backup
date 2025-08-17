@@ -436,7 +436,7 @@ const Automation = () => {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="create" className="space-y-6">
+              <TabsContent value="create" className="space-y-6 flex-1 flex flex-col">
                 {/* Campaign Creation Card with Modal Trigger */}
                 <Card>
                   <CardHeader>
