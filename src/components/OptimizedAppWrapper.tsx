@@ -52,7 +52,6 @@ import {
   LazyBlogPostView,
   LazyEnhancedBlogListing,
   LazySuperEnhancedBlogListing,
-  LazyEnhancedBlogPost,
   LazyBeautifulBlogPost,
   LazyBeautifulBlogTemplate,
 
