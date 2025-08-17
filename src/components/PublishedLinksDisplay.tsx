@@ -148,8 +148,8 @@ const PublishedLinksDisplay = () => {
   }
 
   return (
-    <Card className="w-full h-full flex flex-col overflow-hidden">
-      <CardHeader className="flex-shrink-0 pb-3">
+    <Card className="w-full h-full flex flex-col">
+      <CardHeader className="flex-shrink-0 pb-4">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <LinkIcon className="w-5 h-5" />
@@ -184,7 +184,7 @@ const PublishedLinksDisplay = () => {
         </div>
       </CardHeader>
 
-      <CardContent className="flex-1 flex flex-col min-h-0 p-6">
+      <CardContent className="flex-1 overflow-y-auto p-6">
         {loading ? (
           <div className="flex-1 flex flex-col justify-center">
             <div className="text-center">
