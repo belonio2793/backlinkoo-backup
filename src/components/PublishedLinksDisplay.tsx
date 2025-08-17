@@ -203,11 +203,11 @@ const PublishedLinksDisplay = () => {
             </div>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-4">
             {links.map((link) => (
                 <div
                   key={link.id}
-                  className="border rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
+                  className="border rounded-lg p-5 bg-gray-50 hover:bg-gray-100 transition-colors"
                 >
                   {/* Header */}
                   <div className="flex items-start justify-between mb-3">
