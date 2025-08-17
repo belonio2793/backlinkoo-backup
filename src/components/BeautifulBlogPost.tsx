@@ -63,20 +63,44 @@ const urlOnly = (line: string) => {
   return m ? m[1] : null;
 };
 
-// --- Utility: boldify "Heading: text" ---
-const strongify = (text: string): React.ReactNode => {
-  const idx = text.indexOf(":");
-  if (idx > 0 && idx < 80) {
-    const head = text.slice(0, idx).trim();
-    const tail = text.slice(idx + 1).trim();
-    if (/^[\p{L}\d][\p{L}\d\s'&/()-]*$/u.test(head)) {
-      return (
-        <>
-          <strong className="font-bold text-gray-900">{head}:</strong> {tail}
-        </>
-      );
+// --- Utility: process markdown and boldify text ---
+const processTextFormatting = (text: string): React.ReactNode => {
+  // First, process markdown bold formatting (**text**)
+  let processedText = text;
+
+  // Handle markdown bold with **text**
+  processedText = processedText.replace(
+    /\*\*([^*]+)\*\*/g,
+    '<strong class="font-bold text-gray-900">$1</strong>'
+  );
+
+  // Handle markdown italic with *text*
+  processedText = processedText.replace(
+    /\*([^*]+)\*/g,
+    '<em class="italic text-gray-700">$1</em>'
+  );
+
+  // If no markdown formatting was found, try the colon-based formatting
+  if (processedText === text) {
+    const idx = text.indexOf(":");
+    if (idx > 0 && idx < 80) {
+      const head = text.slice(0, idx).trim();
+      const tail = text.slice(idx + 1).trim();
+      if (/^[\p{L}\d][\p{L}\d\s'&/()-]*$/u.test(head)) {
+        return (
+          <>
+            <strong className="font-bold text-gray-900">{head}:</strong> {tail}
+          </>
+        );
+      }
     }
   }
+
+  // If we have HTML markup, render it safely
+  if (processedText !== text) {
+    return <span dangerouslySetInnerHTML={{ __html: processedText }} />;
+  }
+
   return text;
 };
 
