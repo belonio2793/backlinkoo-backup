@@ -671,8 +671,9 @@ const Automation = () => {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="status">
+              <TabsContent value="status" className="space-y-4">
                 <AutomationServiceStatus />
+                <DatabaseSchemaFixer />
               </TabsContent>
             </Tabs>
           </div>
