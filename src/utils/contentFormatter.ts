@@ -808,6 +808,12 @@ export class ContentFormatter {
       // CRITICAL: Fix bold text that got malformed into first-letter-only patterns
       // Pattern: **E**nhanced SEO Performance: -> **Enhanced SEO Performance:**
       .replace(/\*\*([A-Z])\*\*([a-z][^:]*:)/g, '**$1$2**')
+      // Fix patterns like **T**itle Tags and Meta Descriptions: -> **Title Tags and Meta Descriptions:**
+      .replace(/\*\*([A-Z])\*\*([a-z][A-Za-z\s&,.-]*:)/g, '**$1$2**')
+
+      // Fix malformed bold patterns with line breaks
+      .replace(/\*\*\s*\n\s*([A-Z])/g, '**$1')
+      .replace(/([A-Za-z])\s*\n\s*\*\*/g, '$1**')
 
       // CRITICAL: Fix malformed markdown headings that will cause DOM issues
       // Pattern: ## <strong>Title</strong> or ## &lt;strong&gt;Title&lt;/strong&gt;
