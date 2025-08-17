@@ -265,15 +265,27 @@ const ContentProcessor = ({ content, title, enableAutoFormat = true }: {
   const processedContent = useMemo(() => {
     if (!content?.trim()) return null;
 
+    // Decode HTML entities if content contains escaped HTML
+    let decodedContent = content;
+    if (content.includes('&lt;') || content.includes('&gt;') || content.includes('&amp;')) {
+      console.log('🔧 Detected escaped HTML entities, decoding...');
+      decodedContent = content
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+    }
+
     // Check if content is already HTML (contains HTML tags)
-    const isHtmlContent = /<[a-z][\s\S]*>/i.test(content);
+    const isHtmlContent = /<[a-z][\s\S]*>/i.test(decodedContent);
 
     // If content is already HTML with beautiful classes, render it directly
-    if (isHtmlContent && content.includes('beautiful-prose')) {
+    if (isHtmlContent && decodedContent.includes('beautiful-prose')) {
       console.log('🎨 Detected beautiful HTML content, rendering directly');
 
       // Remove title duplicates from HTML content if needed
-      let cleanHtmlContent = content;
+      let cleanHtmlContent = decodedContent;
       if (title) {
         const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         // Remove HTML headings that match the title
@@ -285,7 +297,7 @@ const ContentProcessor = ({ content, title, enableAutoFormat = true }: {
     }
 
     // Enhanced title removal - multiple patterns and variations
-    let cleanContent = content;
+    let cleanContent = decodedContent;
 
     if (title) {
       const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
