@@ -203,9 +203,8 @@ const PublishedLinksDisplay = () => {
             </div>
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto min-h-0">
-            <div className="space-y-3 pr-2">
-              {links.map((link) => (
+          <div className="space-y-3">
+            {links.map((link) => (
                 <div
                   key={link.id}
                   className="border rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
@@ -296,8 +295,7 @@ const PublishedLinksDisplay = () => {
                     </div>
                   )}
                 </div>
-              ))}
-            </div>
+            ))}
           </div>
         )}
       </CardContent>
