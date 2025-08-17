@@ -47,7 +47,13 @@ export const handler = async (event, context) => {
     }
 
     // Convert markdown content to Telegraph format
+    console.log('🔄 Converting content to Telegraph format...');
+    console.log('Original content sample:', content.substring(0, 200) + '...');
+
     const telegraphContent = convertMarkdownToTelegraph(content);
+
+    console.log('✅ Telegraph content nodes:', telegraphContent.length);
+    console.log('First few nodes:', JSON.stringify(telegraphContent.slice(0, 3), null, 2));
 
     // Create Telegraph account if needed (using a simple approach)
     let accessToken = process.env.TELEGRAPH_ACCESS_TOKEN;
