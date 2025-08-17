@@ -154,7 +154,7 @@ const renderBlocks = (blocks: Block[]) => {
         <ul key={`ul-${i}`} className="list-disc list-inside my-6 pl-6 space-y-2">
           {items.map((it, idx) => (
             <li key={`li-${i}-${idx}`} className="text-lg leading-7 text-gray-700">
-              {strongify(it.text)}
+              {processTextFormatting(it.text)}
             </li>
           ))}
         </ul>
