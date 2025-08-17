@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Listing Fix Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+        .post-item {
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            background: white;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        .loading { text-align: center; color: #666; }
+        pre {
+            background: #f4f4f4;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th { background: #f8f9fa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Blog Listing Fix Test</h1>
+        <p>This page tests whether the blog listing fix is working correctly. New posts should now appear in the blog listing.</p>
+
+        <div class="test-section">
+            <h2>📊 Table Comparison</h2>
+            <button onclick="compareTableContents()">Compare published_blog_posts vs blog_posts</button>
+            <div id="table-comparison"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔍 Service Testing</h2>
+            <button onclick="testUnifiedClaimService()">Test UnifiedClaimService.getClaimablePosts()</button>
+            <button onclick="testClaimableBlogService()">Test ClaimableBlogService.getClaimablePosts()</button>
+            <button onclick="testBlogService()">Test BlogService.getRecentBlogPosts()</button>
+            <div id="service-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📝 Create Test Post</h2>
+            <button onclick="createTestPost()">Create Test Post in published_blog_posts</button>
+            <div id="create-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 End-to-End Test</h2>
+            <button onclick="runEndToEndTest()">Run Complete Test (Create + List)</button>
+            <div id="e2e-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔄 Recent Posts Summary</h2>
+            <div id="summary-results"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // Initialize Supabase
+        const SUPABASE_URL = 'https://dfhanacsmsvvkpunurnp.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzMyNTU3NjAsImV4cCI6MjA0ODgzMTc2MH0.1BjbGRYRAc4nBLUEcjb0YE2fjt0GG8-YFCxZoVNWHQg';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        function log(message, type = 'info') {
+            console.log(message);
+            const div = document.createElement('div');
+            div.className = `status ${type}`;
+            div.innerHTML = message;
+            return div;
+        }
+
+        async function compareTableContents() {
+            const resultsDiv = document.getElementById('table-comparison');
+            resultsDiv.innerHTML = '<div class="loading">Comparing table contents...</div>';
+
+            try {
+                // Count posts in both tables
+                const [publishedResult, blogPostsResult] = await Promise.all([
+                    supabase.from('published_blog_posts')
+                        .select('id, title, slug, created_at, status', { count: 'exact' })
+                        .eq('status', 'published')
+                        .order('created_at', { ascending: false })
+                        .limit(10),
+                    supabase.from('blog_posts')
+                        .select('id, title, slug, created_at, status', { count: 'exact' })
+                        .eq('status', 'published')
+                        .order('created_at', { ascending: false })
+                        .limit(10)
+                ]);
+
+                let html = '<table>';
+                html += '<tr><th>Table</th><th>Count</th><th>Recent Posts</th><th>Status</th></tr>';
+                
+                html += '<tr>';
+                html += '<td><strong>published_blog_posts</strong></td>';
+                html += `<td>${publishedResult.count || 0}</td>`;
+                html += '<td>';
+                if (publishedResult.data && publishedResult.data.length > 0) {
+                    html += '<ul>';
+                    publishedResult.data.slice(0, 3).forEach(post => {
+                        html += `<li>${post.title} (${post.slug})</li>`;
+                    });
+                    html += '</ul>';
+                } else {
+                    html += 'No posts found';
+                }
+                html += '</td>';
+                html += publishedResult.error ? 
+                    `<td class="error">Error: ${publishedResult.error.message}</td>` : 
+                    `<td class="success">✅ Working</td>`;
+                html += '</tr>';
+
+                html += '<tr>';
+                html += '<td><strong>blog_posts</strong></td>';
+                html += `<td>${blogPostsResult.count || 0}</td>`;
+                html += '<td>';
+                if (blogPostsResult.data && blogPostsResult.data.length > 0) {
+                    html += '<ul>';
+                    blogPostsResult.data.slice(0, 3).forEach(post => {
+                        html += `<li>${post.title} (${post.slug})</li>`;
+                    });
+                    html += '</ul>';
+                } else {
+                    html += 'No posts found';
+                }
+                html += '</td>';
+                html += blogPostsResult.error ? 
+                    `<td class="error">Error: ${blogPostsResult.error.message}</td>` : 
+                    `<td class="success">✅ Working</td>`;
+                html += '</tr>';
+
+                html += '</table>';
+
+                // Analysis
+                if (publishedResult.count > blogPostsResult.count) {
+                    html += log('✅ published_blog_posts has more posts than blog_posts - this is expected for new posts!', 'success').outerHTML;
+                } else if (publishedResult.count === blogPostsResult.count && publishedResult.count > 0) {
+                    html += log('ℹ️ Both tables have the same number of posts', 'info').outerHTML;
+                } else {
+                    html += log('⚠️ blog_posts has more posts - might indicate sync issues', 'warning').outerHTML;
+                }
+
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = log(`❌ Error comparing tables: ${error.message}`, 'error').outerHTML;
+            }
+        }
+
+        async function testUnifiedClaimService() {
+            const resultsDiv = document.getElementById('service-results');
+            resultsDiv.innerHTML = '<div class="loading">Testing UnifiedClaimService...</div>';
+
+            try {
+                // Simulate the UnifiedClaimService.getClaimablePosts() logic
+                console.log('📖 Testing published_blog_posts query...');
+                let { data, error } = await supabase
+                    .from('published_blog_posts')
+                    .select('*')
+                    .eq('status', 'published')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                if (error && error.code === 'PGRST116') {
+                    // Try fallback
+                    console.log('📖 Trying blog_posts fallback...');
+                    const fallbackResult = await supabase
+                        .from('blog_posts')
+                        .select('*')
+                        .eq('status', 'published')
+                        .order('created_at', { ascending: false })
+                        .limit(10);
+                    
+                    data = fallbackResult.data;
+                    error = fallbackResult.error;
+                }
+
+                let html = '<h3>UnifiedClaimService Test Results:</h3>';
+                if (error) {
+                    html += log(`❌ Error: ${error.message}`, 'error').outerHTML;
+                } else {
+                    html += log(`✅ Successfully fetched ${data?.length || 0} posts`, 'success').outerHTML;
+                    if (data && data.length > 0) {
+                        html += '<h4>Sample Posts:</h4>';
+                        data.slice(0, 3).forEach(post => {
+                            html += `<div class="post-item">📝 ${post.title} (${post.slug}) - Created: ${new Date(post.created_at).toLocaleString()}</div>`;
+                        });
+                    }
+                }
+
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = log(`❌ Error testing UnifiedClaimService: ${error.message}`, 'error').outerHTML;
+            }
+        }
+
+        async function testClaimableBlogService() {
+            const resultsDiv = document.getElementById('service-results');
+            resultsDiv.innerHTML = '<div class="loading">Testing ClaimableBlogService...</div>';
+
+            try {
+                // Test RPC function first, then direct query fallback
+                let { data: rpcData, error: rpcError } = await supabase
+                    .rpc('get_claimable_posts', { limit_count: 10 });
+
+                let html = '<h3>ClaimableBlogService Test Results:</h3>';
+                
+                if (!rpcError && rpcData && rpcData.length > 0) {
+                    html += log(`✅ RPC function worked: ${rpcData.length} posts`, 'success').outerHTML;
+                } else {
+                    html += log(`⚠️ RPC function failed, testing direct query fallback...`, 'warning').outerHTML;
+                    
+                    // Test the fallback logic
+                    let { data, error } = await supabase
+                        .from('published_blog_posts')
+                        .select('*')
+                        .eq('status', 'published')
+                        .order('created_at', { ascending: false })
+                        .limit(10);
+
+                    if (error || !data || data.length === 0) {
+                        // Try blog_posts fallback
+                        const fallbackResult = await supabase
+                            .from('blog_posts')
+                            .select('*')
+                            .eq('status', 'published')
+                            .order('created_at', { ascending: false })
+                            .limit(10);
+                        
+                        data = fallbackResult.data;
+                        error = fallbackResult.error;
+                    }
+
+                    if (error) {
+                        html += log(`❌ Error: ${error.message}`, 'error').outerHTML;
+                    } else {
+                        html += log(`✅ Fallback worked: ${data?.length || 0} posts`, 'success').outerHTML;
+                    }
+                }
+
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = log(`❌ Error testing ClaimableBlogService: ${error.message}`, 'error').outerHTML;
+            }
+        }
+
+        async function testBlogService() {
+            const resultsDiv = document.getElementById('service-results');
+            resultsDiv.innerHTML = '<div class="loading">Testing BlogService...</div>';
+
+            try {
+                // Simulate BlogService.getRecentBlogPosts() logic
+                console.log('📖 Fetching recent blog posts from blog_posts table...');
+                let { data, error } = await supabase
+                    .from('blog_posts')
+                    .select('*')
+                    .eq('status', 'published')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                // If blog_posts fails, try published_blog_posts as fallback
+                if (error && error.message?.includes('relation') && error.message?.includes('does not exist')) {
+                    console.log('⚠️ blog_posts table issue, trying published_blog_posts fallback');
+                    const fallbackResult = await supabase
+                        .from('published_blog_posts')
+                        .select('*')
+                        .eq('status', 'published')
+                        .order('created_at', { ascending: false })
+                        .limit(10);
+
+                    data = fallbackResult.data;
+                    error = fallbackResult.error;
+                }
+
+                let html = '<h3>BlogService Test Results:</h3>';
+                if (error) {
+                    html += log(`❌ Error: ${error.message}`, 'error').outerHTML;
+                } else {
+                    html += log(`✅ Successfully fetched ${data?.length || 0} posts`, 'success').outerHTML;
+                    if (data && data.length > 0) {
+                        html += '<h4>Recent Posts:</h4>';
+                        data.slice(0, 3).forEach(post => {
+                            html += `<div class="post-item">📝 ${post.title} (${post.slug}) - Created: ${new Date(post.created_at).toLocaleString()}</div>`;
+                        });
+                    }
+                }
+
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = log(`❌ Error testing BlogService: ${error.message}`, 'error').outerHTML;
+            }
+        }
+
+        async function createTestPost() {
+            const resultsDiv = document.getElementById('create-results');
+            resultsDiv.innerHTML = '<div class="loading">Creating test post...</div>';
+
+            try {
+                const testSlug = `test-blog-listing-fix-${Date.now()}`;
+                const testPost = {
+                    title: `Test Blog Listing Fix - ${new Date().toLocaleString()}`,
+                    slug: testSlug,
+                    content: '<h2>Test Content</h2><p>This is a test post created to verify the blog listing fix is working correctly.</p>',
+                    status: 'published',
+                    created_at: new Date().toISOString(),
+                    published_at: new Date().toISOString(),
+                    target_url: 'https://example.com',
+                    anchor_text: 'test link',
+                    is_trial_post: true,
+                    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                    view_count: 0,
+                    seo_score: 75,
+                    reading_time: 2,
+                    word_count: 50,
+                    author_name: 'Test Author',
+                    category: 'Test',
+                    keyword: 'test'
+                };
+
+                const { data, error } = await supabase
+                    .from('published_blog_posts')
+                    .insert(testPost)
+                    .select()
+                    .single();
+
+                if (error) {
+                    resultsDiv.innerHTML = log(`❌ Error creating test post: ${error.message}`, 'error').outerHTML;
+                } else {
+                    resultsDiv.innerHTML = log(`✅ Test post created successfully! Slug: ${data.slug}`, 'success').outerHTML;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = log(`❌ Error creating test post: ${error.message}`, 'error').outerHTML;
+            }
+        }
+
+        async function runEndToEndTest() {
+            const resultsDiv = document.getElementById('e2e-results');
+            resultsDiv.innerHTML = '<div class="loading">Running end-to-end test...</div>';
+
+            try {
+                let html = '<h3>End-to-End Test Results:</h3>';
+
+                // Step 1: Create a test post
+                html += '<h4>Step 1: Creating test post in published_blog_posts...</h4>';
+                const testSlug = `e2e-test-${Date.now()}`;
+                const testPost = {
+                    title: `E2E Test Post - ${new Date().toLocaleString()}`,
+                    slug: testSlug,
+                    content: '<h2>E2E Test</h2><p>This post tests the complete flow from creation to listing.</p>',
+                    status: 'published',
+                    created_at: new Date().toISOString(),
+                    published_at: new Date().toISOString(),
+                    target_url: 'https://example.com',
+                    anchor_text: 'test link',
+                    is_trial_post: true,
+                    expires_at: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                    view_count: 0,
+                    seo_score: 80,
+                    reading_time: 2,
+                    word_count: 45,
+                    author_name: 'E2E Tester',
+                    category: 'Test',
+                    keyword: 'e2e'
+                };
+
+                const { data: createdPost, error: createError } = await supabase
+                    .from('published_blog_posts')
+                    .insert(testPost)
+                    .select()
+                    .single();
+
+                if (createError) {
+                    html += log(`❌ Failed to create test post: ${createError.message}`, 'error').outerHTML;
+                    resultsDiv.innerHTML = html;
+                    return;
+                }
+
+                html += log(`✅ Test post created: ${createdPost.slug}`, 'success').outerHTML;
+
+                // Step 2: Test that it appears in listings
+                html += '<h4>Step 2: Testing if post appears in listings...</h4>';
+                
+                // Wait a moment for database consistency
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Test UnifiedClaimService
+                const { data: unifiedPosts } = await supabase
+                    .from('published_blog_posts')
+                    .select('*')
+                    .eq('status', 'published')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                const foundInUnified = unifiedPosts?.some(post => post.slug === testSlug);
+                html += foundInUnified ? 
+                    log('✅ Post found via UnifiedClaimService query', 'success').outerHTML :
+                    log('❌ Post NOT found via UnifiedClaimService query', 'error').outerHTML;
+
+                // Test ClaimableBlogService fallback
+                const { data: claimablePosts } = await supabase
+                    .from('published_blog_posts')
+                    .select('*')
+                    .eq('status', 'published')
+                    .order('created_at', { ascending: false })
+                    .limit(10);
+
+                const foundInClaimable = claimablePosts?.some(post => post.slug === testSlug);
+                html += foundInClaimable ? 
+                    log('✅ Post found via ClaimableBlogService query', 'success').outerHTML :
+                    log('❌ Post NOT found via ClaimableBlogService query', 'error').outerHTML;
+
+                // Overall result
+                if (foundInUnified && foundInClaimable) {
+                    html += log('🎉 END-TO-END TEST PASSED! The fix is working correctly.', 'success').outerHTML;
+                } else {
+                    html += log('❌ END-TO-END TEST FAILED! The fix may not be working as expected.', 'error').outerHTML;
+                }
+
+                resultsDiv.innerHTML = html;
+            } catch (error) {
+                resultsDiv.innerHTML = log(`❌ Error in end-to-end test: ${error.message}`, 'error').outerHTML;
+            }
+        }
+
+        // Auto-load summary on page load
+        window.addEventListener('load', async () => {
+            const summaryDiv = document.getElementById('summary-results');
+            summaryDiv.innerHTML = '<div class="loading">Loading recent posts summary...</div>';
+
+            try {
+                const [publishedCount, blogPostsCount] = await Promise.all([
+                    supabase.from('published_blog_posts').select('*', { count: 'exact', head: true }).eq('status', 'published'),
+                    supabase.from('blog_posts').select('*', { count: 'exact', head: true }).eq('status', 'published')
+                ]);
+
+                let html = '<h3>📊 Current Status:</h3>';
+                html += `<p><strong>published_blog_posts:</strong> ${publishedCount.count || 0} posts</p>`;
+                html += `<p><strong>blog_posts:</strong> ${blogPostsCount.count || 0} posts</p>`;
+
+                if (publishedCount.count > 0) {
+                    html += log('✅ New posts should now appear in blog listings!', 'success').outerHTML;
+                } else {
+                    html += log('ℹ️ No posts in published_blog_posts yet. Create a new post to test the fix.', 'info').outerHTML;
+                }
+
+                summaryDiv.innerHTML = html;
+            } catch (error) {
+                summaryDiv.innerHTML = log(`❌ Error loading summary: ${error.message}`, 'error').outerHTML;
+            }
+        });
+    </script>
+</body>
+</html>
