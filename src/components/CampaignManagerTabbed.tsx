@@ -910,12 +910,17 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                     </div>
                   </ScrollArea>
 
-                  {getAllPublishedLinks().length === 0 && (
+                  {(!user || getAllPublishedLinks().length === 0) && (
                     <div className="p-8 text-center">
                       <Link className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                      <h6 className="font-medium text-gray-900 mb-2">No Published Links Yet</h6>
+                      <h6 className="font-medium text-gray-900 mb-2">
+                        {!user ? "Sign In to View Published Links" : "No Published Links Yet"}
+                      </h6>
                       <p className="text-sm text-gray-500 mb-4">
-                        Published backlinks will appear here after campaigns complete
+                        {!user
+                          ? "Create an account or sign in to view your published backlinks"
+                          : "Published backlinks will appear here after campaigns complete"
+                        }
                       </p>
                       <Button
                         variant="outline"
@@ -923,7 +928,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                         onClick={() => setActiveTab('activity')}
                       >
                         <Target className="w-4 h-4 mr-2" />
-                        View Campaign Activity
+                        {!user ? "View Campaign Creation" : "View Campaign Activity"}
                       </Button>
                     </div>
                   )}
