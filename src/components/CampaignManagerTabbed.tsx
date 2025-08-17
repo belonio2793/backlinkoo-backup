@@ -34,6 +34,7 @@ import CampaignErrorStatus from './CampaignErrorStatus';
 import InlineProgressTracker from './InlineProgressTracker';
 import { CampaignProgress } from './CampaignProgressTracker';
 import { CampaignDetailsModal } from './CampaignDetailsModal';
+import PublishedLinksDisplay from './PublishedLinksDisplay';
 
 interface PublishedLink {
   id: string;
