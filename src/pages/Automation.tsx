@@ -22,6 +22,7 @@ import FormCompletionCelebration from '@/components/FormCompletionCelebration';
 import InlineFeedMonitor from '@/components/InlineFeedMonitor';
 import DevelopmentModeIndicator from '@/components/DevelopmentModeIndicator';
 import BacklinkNotification from '@/components/BacklinkNotification';
+import DatabaseSchemaFixer from '@/components/DatabaseSchemaFixer';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -348,8 +349,8 @@ const Automation = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 px-8 py-4">
-        <div className="w-full max-w-7xl mx-auto space-y-6">
+      <main className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-6 sm:px-6 lg:px-8 xl:px-12">
+        <div className="w-full max-w-[1600px] mx-auto space-y-6">
 
           {/* Page Header */}
           <div className="text-center space-y-4">
@@ -399,6 +400,11 @@ const Automation = () => {
         {/* Development Mode Indicator */}
         <DevelopmentModeIndicator />
 
+        {/* Database Schema Fixer - Show if there are HTTP errors related to missing columns */}
+        {statusMessages.some(msg => msg.message.includes('column') || msg.message.includes('schema')) && (
+          <DatabaseSchemaFixer />
+        )}
+
         {/* Status Messages */}
         {statusMessages.length > 0 && (
           <div className="space-y-2">
@@ -415,10 +421,10 @@ const Automation = () => {
 
 
         {/* Main Content - Top Row: Campaign Creation, Activity, Live Monitor */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-2 mb-4 h-[calc(100vh-200px)]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 xl:gap-8">
           {/* Campaign Creation (Left Column) */}
-          <div className="lg:col-span-1 h-full">
-            <Tabs defaultValue="create" className="w-full h-full">
+          <div className="lg:col-span-1 flex flex-col min-h-[600px]">
+            <Tabs defaultValue="create" className="w-full h-full flex flex-col">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="create" className="flex items-center gap-2">
                   <Target className="w-4 h-4" />
@@ -430,9 +436,9 @@ const Automation = () => {
                 </TabsTrigger>
               </TabsList>
 
-              <TabsContent value="create" className="space-y-6 h-[calc(100%-3rem)]">
+              <TabsContent value="create" className="space-y-6 flex-1 flex flex-col">
                 {/* Campaign Creation Card with Modal Trigger */}
-                <Card className="h-full">
+                <Card className="flex-1 flex flex-col">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
                       <Target className="w-5 h-5" />
@@ -665,14 +671,15 @@ const Automation = () => {
                 </Card>
               </TabsContent>
 
-              <TabsContent value="status">
+              <TabsContent value="status" className="space-y-4 flex-1 flex flex-col">
                 <AutomationServiceStatus />
+                <DatabaseSchemaFixer />
               </TabsContent>
             </Tabs>
           </div>
 
           {/* Activity (Middle Column) */}
-          <div className="lg:col-span-1 h-full">
+          <div className="lg:col-span-1 flex flex-col min-h-[600px]">
             <CampaignManagerTabbed
               onStatusUpdate={(message, type) => addStatusMessage(message, type)}
               currentCampaignProgress={campaignProgress}
@@ -681,7 +688,7 @@ const Automation = () => {
           </div>
 
           {/* Live Monitor (Right Column) */}
-          <div className="lg:col-span-1 h-full">
+          <div className="lg:col-span-1 flex flex-col min-h-[600px]">
             <InlineFeedMonitor
               activeCampaigns={activeCampaigns}
               isVisible={true}
