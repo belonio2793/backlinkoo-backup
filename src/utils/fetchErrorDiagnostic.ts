@@ -250,14 +250,25 @@ if (typeof window !== 'undefined') {
   }, 5000);
 }
 
-// Auto-log fetch errors
-const originalFetch = window.fetch;
-window.fetch = async (...args) => {
-  try {
-    return await originalFetch(...args);
-  } catch (error) {
-    const [url] = args;
-    FetchErrorDiagnostic.logError(url as string, error);
-    throw error;
-  }
-};
+// Fetch error logging is now handled by the unified fetch manager
+// This prevents conflicts with other fetch interceptors
+// Use fetchManager.registerInterceptor() to add error logging if needed
+
+// Register with unified fetch manager if available
+if (typeof window !== 'undefined') {
+  setTimeout(() => {
+    if ((window as any).fetchManager) {
+      (window as any).fetchManager.registerInterceptor('error-diagnostic', (originalFetch: typeof fetch) => {
+        return async (...args) => {
+          try {
+            return await originalFetch(...args);
+          } catch (error) {
+            const [url] = args;
+            FetchErrorDiagnostic.logError(url as string, error);
+            throw error;
+          }
+        };
+      }, 200);
+    }
+  }, 200);
+}

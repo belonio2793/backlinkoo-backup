@@ -201,8 +201,9 @@ export class NetworkErrorHandler {
       }
     });
     
-    // Enhanced fetch wrapper with better error handling
-    window.fetch = async (...args) => {
+    // Enhanced fetch wrapper disabled to prevent conflicts
+    // Use unified fetch manager instead
+    const enhancedFetch = async (...args) => {
       try {
         const [url, options] = args;
 

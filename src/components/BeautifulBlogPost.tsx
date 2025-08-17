@@ -257,16 +257,47 @@ const legacyRender = (content: string) =>
     ));
 
 // Content Processor Component
-const ContentProcessor = ({ content, title, enableAutoFormat = true }: { 
-  content: string; 
-  title: string; 
+const ContentProcessor = ({ content, title, enableAutoFormat = true }: {
+  content: string;
+  title: string;
   enableAutoFormat?: boolean;
 }) => {
   const processedContent = useMemo(() => {
     if (!content?.trim()) return null;
 
+    // Decode HTML entities if content contains escaped HTML
+    let decodedContent = content;
+    if (content.includes('&lt;') || content.includes('&gt;') || content.includes('&amp;')) {
+      console.log('🔧 Detected escaped HTML entities, decoding...');
+      decodedContent = content
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&amp;/g, '&')
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
+    }
+
+    // Check if content is already HTML (contains HTML tags)
+    const isHtmlContent = /<[a-z][\s\S]*>/i.test(decodedContent);
+
+    // If content is already HTML with beautiful classes, render it directly
+    if (isHtmlContent && decodedContent.includes('beautiful-prose')) {
+      console.log('🎨 Detected beautiful HTML content, rendering directly');
+
+      // Remove title duplicates from HTML content if needed
+      let cleanHtmlContent = decodedContent;
+      if (title) {
+        const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // Remove HTML headings that match the title
+        const titlePattern = new RegExp(`<h[1-6][^>]*>\\s*${escapedTitle}\\s*<\/h[1-6]>`, 'gi');
+        cleanHtmlContent = cleanHtmlContent.replace(titlePattern, '');
+      }
+
+      return <div dangerouslySetInnerHTML={{ __html: cleanHtmlContent.trim() }} />;
+    }
+
     // Enhanced title removal - multiple patterns and variations
-    let cleanContent = content;
+    let cleanContent = decodedContent;
 
     if (title) {
       const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -305,6 +336,13 @@ const ContentProcessor = ({ content, title, enableAutoFormat = true }: {
 
     cleanContent = cleanContent.trim();
 
+    // If content contains HTML tags but not beautiful classes, render as HTML
+    if (isHtmlContent) {
+      console.log('🔧 Detected HTML content, rendering as HTML');
+      return <div dangerouslySetInnerHTML={{ __html: cleanContent }} />;
+    }
+
+    // Otherwise, process as markdown/plain text
     if (enableAutoFormat) {
       try {
         const blocks = parseContentToBlocks(cleanContent, title);
@@ -359,13 +397,13 @@ const ReadingProgress = () => {
 };
 
 // Status Badge Component
-const StatusBadge = ({ 
-  blogPost, 
-  user, 
-  onClaim, 
-  onUnclaim, 
+const StatusBadge = ({
+  blogPost,
+  user,
+  onClaim,
+  onUnclaim,
   onDelete,
-  claiming = false 
+  claiming = false
 }: {
   blogPost: BlogPost;
   user: any;
@@ -378,6 +416,9 @@ const StatusBadge = ({
   const canClaim = EnhancedBlogClaimService.canClaimPost(blogPost);
   const { canUnclaim } = EnhancedBlogClaimService.canUnclaimPost(blogPost, user);
   const { canDelete } = EnhancedBlogClaimService.canDeletePost(blogPost, user);
+
+  // Check if user is admin (you can extend this logic based on your admin system)
+  const isAdmin = user?.email?.includes('admin') || user?.user_metadata?.role === 'admin';
 
   if (blogPost.claimed) {
     return (
@@ -425,27 +466,42 @@ const StatusBadge = ({
         <Timer className="mr-2 h-4 w-4" />
         Available to Claim
       </Badge>
-      
-      {canClaim && (
-        <Button
-          onClick={onClaim}
-          disabled={claiming}
-          size="sm"
-          className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-        >
-          {claiming ? (
-            <>
-              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-              Claiming...
-            </>
-          ) : (
-            <>
-              <Crown className="mr-2 h-4 w-4" />
-              {user ? 'Claim Article' : 'Login to Claim'}
-            </>
-          )}
-        </Button>
-      )}
+
+      <div className="flex gap-2">
+        {canClaim && (
+          <Button
+            onClick={onClaim}
+            disabled={claiming}
+            size="sm"
+            className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+          >
+            {claiming ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Claiming...
+              </>
+            ) : (
+              <>
+                <Crown className="mr-2 h-4 w-4" />
+                {user ? 'Claim Article' : 'Login to Claim'}
+              </>
+            )}
+          </Button>
+        )}
+
+        {/* Show delete button for unclaimed posts (anyone can delete) or for admins */}
+        {canDelete && (user || isAdmin) && (
+          <Button
+            onClick={onDelete}
+            variant="outline"
+            size="sm"
+            className="rounded-full border-red-300 text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
@@ -565,7 +621,7 @@ const BeautifulBlogPost = () => {
       if (result.success) {
         setBlogPost(result.post!);
         toast({
-          title: "Article Claimed! 🎉",
+          title: "Article Claimed! ���",
           description: result.message,
         });
       } else {
@@ -616,22 +672,52 @@ const BeautifulBlogPost = () => {
 
   const handleDelete = async () => {
     try {
-      const { error } = await supabase
-        .from('blog_posts')
+      console.log('🗑️ Attempting to delete blog post:', slug);
+
+      // Try deleting from published_blog_posts first (where new posts are saved)
+      let { error: publishedError } = await supabase
+        .from('published_blog_posts')
         .delete()
         .eq('slug', slug!);
 
-      if (error) throw error;
+      // If not found in published_blog_posts, try blog_posts table
+      if (publishedError && publishedError.code === 'PGRST116') {
+        console.log('📖 Post not found in published_blog_posts, trying blog_posts...');
+        const { error: blogError } = await supabase
+          .from('blog_posts')
+          .delete()
+          .eq('slug', slug!);
+
+        if (blogError) {
+          throw blogError;
+        }
+      } else if (publishedError) {
+        throw publishedError;
+      }
+
+      console.log('✅ Blog post deleted successfully');
 
       toast({
         title: "Article Deleted",
         description: "The article has been permanently removed.",
       });
+
+      // Navigate back to blog list
       navigate('/blog');
+
     } catch (error: any) {
+      console.error('❌ Failed to delete blog post:', error);
+
+      let errorMessage = 'Unable to delete article';
+      if (error.code === 'PGRST116') {
+        errorMessage = 'Article not found or already deleted';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
       toast({
         title: "Delete Failed",
-        description: `Unable to delete article: ${error.message}`,
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -849,7 +935,7 @@ const BeautifulBlogPost = () => {
         </Card>
 
         {/* Keywords */}
-        {blogPost.keywords?.length && (
+        {blogPost.keywords?.length > 0 && (
           <Card className="mb-8 bg-gradient-to-r from-purple-50 to-blue-50">
             <CardContent className="p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center justify-center gap-3">

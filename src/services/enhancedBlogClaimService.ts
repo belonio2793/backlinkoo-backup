@@ -68,11 +68,31 @@ export class EnhancedBlogClaimService {
         return { canDelete: true };
       }
 
-      // Check if user is admin (this would need to be implemented based on your admin logic)
+      // Check if user is admin
+      const isAdmin = this.isUserAdmin(user);
+      if (isAdmin) {
+        return { canDelete: true };
+      }
+
       return { canDelete: false, reason: 'Only post owners and admins can delete claimed posts' };
     }
 
     return { canDelete: false, reason: 'Unknown post state' };
+  }
+
+  /**
+   * Check if user has admin privileges
+   */
+  private static isUserAdmin(user: User): boolean {
+    // Check various admin indicators
+    return (
+      user.email?.includes('admin') ||
+      user.user_metadata?.role === 'admin' ||
+      user.app_metadata?.role === 'admin' ||
+      user.user_metadata?.is_admin === true ||
+      // Add specific admin email addresses
+      ['admin@backlink.com', 'admin@backlinkoo.com'].includes(user.email || '')
+    );
   }
 
   /**

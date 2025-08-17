@@ -117,19 +117,35 @@ export class UnifiedClaimService {
 
   /**
    * Get blog post by slug from database
+   * Queries published_blog_posts first, then blog_posts as fallback
    */
   static async getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
+      // Try published_blog_posts first (where new posts are saved)
+      let { data, error } = await supabase
+        .from('published_blog_posts')
         .select('*')
         .eq('slug', slug)
         .eq('status', 'published')
         .single();
 
+      if (error && error.code === 'PGRST116') {
+        // Not found in published_blog_posts, try blog_posts fallback
+        console.log('📖 Post not found in published_blog_posts, trying blog_posts fallback...');
+        const fallbackResult = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('slug', slug)
+          .eq('status', 'published')
+          .single();
+
+        data = fallbackResult.data;
+        error = fallbackResult.error;
+      }
+
       if (error) {
         if (error.code === 'PGRST116') {
-          return null; // No rows found
+          return null; // No rows found in either table
         }
         console.error('Error fetching blog post:', error.message || error);
         return null;
@@ -144,14 +160,29 @@ export class UnifiedClaimService {
 
   /**
    * Get blog post by ID from database
+   * Queries published_blog_posts first, then blog_posts as fallback
    */
   static async getBlogPostById(id: string): Promise<BlogPost | null> {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
+      // Try published_blog_posts first (where new posts are saved)
+      let { data, error } = await supabase
+        .from('published_blog_posts')
         .select('*')
         .eq('id', id)
         .single();
+
+      if (error && error.code === 'PGRST116') {
+        // Not found in published_blog_posts, try blog_posts fallback
+        console.log('📖 Post not found in published_blog_posts, trying blog_posts fallback...');
+        const fallbackResult = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('id', id)
+          .single();
+
+        data = fallbackResult.data;
+        error = fallbackResult.error;
+      }
 
       if (error) {
         if (error.code === 'PGRST116') {
@@ -333,21 +364,39 @@ export class UnifiedClaimService {
 
   /**
    * Get all available posts for saving to dashboard
+   * Queries published_blog_posts first, then blog_posts as fallback
    */
   static async getAvailablePosts(limit: number = 20): Promise<BlogPost[]> {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
+      console.log('📖 Fetching available posts from published_blog_posts...');
+
+      // Try published_blog_posts first (where new posts are saved)
+      let { data, error } = await supabase
+        .from('published_blog_posts')
         .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false })
         .limit(limit);
 
-      if (error) {
-        console.error('Failed to get available posts:', error.message || error);
-        return [];
+      // If published_blog_posts fails or returns no data, try blog_posts fallback
+      if (error || !data || data.length === 0) {
+        console.log('📖 Trying blog_posts fallback...');
+        const fallbackResult = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('status', 'published')
+          .order('created_at', { ascending: false })
+          .limit(limit);
+
+        if (fallbackResult.error) {
+          console.error('Failed to get available posts from both tables:', fallbackResult.error.message || fallbackResult.error);
+          return [];
+        }
+
+        data = fallbackResult.data;
       }
 
+      console.log(`✅ Found ${data?.length || 0} available posts`);
       return data || [];
     } catch (error) {
       console.error('Error getting available posts:', error.message || error);
