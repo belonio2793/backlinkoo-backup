@@ -435,7 +435,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
 
   return (
     <>
-    <Card className="h-full flex flex-col">
+    <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
