@@ -127,7 +127,7 @@ const PublishedLinksDisplay = () => {
 
   if (!user) {
     return (
-      <Card>
+      <Card className="w-full h-full">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <LinkIcon className="w-5 h-5" />
