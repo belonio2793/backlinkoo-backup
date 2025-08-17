@@ -139,9 +139,10 @@ export class EnhancedBlogCleaner {
    */
   static cleanFormattingArtifacts(content: string): string {
     return content
-      // Fix section headers with asterisks (like "Data Point:**" or "Title Tags and Meta Descriptions:**")
-      .replace(/([A-Za-z][^:\n]*?):\*\*/g, '**$1:**')
-      .replace(/([A-Za-z][A-Za-z\s]+):\*\*/g, '**$1:**')
+      // Normalize section headers with trailing asterisks to proper markdown
+      // Convert "Title Tags and Meta Descriptions:**" to "**Title Tags and Meta Descriptions:**"
+      .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '**$1:**')
+      .replace(/\b([A-Za-z][A-Za-z\s&]+):\*\*/g, '**$1:**')
 
       // Remove excessive markdown symbols
       .replace(/\*{3,}/g, '')
