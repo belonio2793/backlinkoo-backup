@@ -435,7 +435,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
 
   return (
     <>
-    <Card className="h-full flex flex-col">
+    <Card className="w-full">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -458,7 +458,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="flex-1 flex flex-col">
+      <CardContent className="p-6">
         {/* Summary Stats */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <div className="text-center p-3 bg-blue-50 rounded-lg">
@@ -480,7 +480,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex-1 flex flex-col">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="activity" className="flex items-center gap-2">
               <BarChart3 className="w-4 h-4" />
@@ -493,22 +493,26 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
           </TabsList>
 
           {/* Campaign Activity Tab */}
-          <TabsContent value="activity" className="mt-6 space-y-4 flex-1 flex flex-col">
-            <div className="flex-1 overflow-y-auto space-y-3 min-h-0">
-              {!user ? (
-                <div className="text-center py-8">
+          <TabsContent value="activity" className="space-y-4 mt-6">
+            {!user ? (
+              <div className="flex-1 flex items-center justify-center min-h-0">
+                <div className="text-center">
                   <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
                   <p className="text-gray-600">Sign in to view your campaigns</p>
                   <p className="text-sm text-gray-500">Create an account or sign in to start monitoring your campaigns</p>
                 </div>
-              ) : campaigns.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-                    <p className="text-gray-600">No campaigns found</p>
-                    <p className="text-sm text-gray-500">Create your first campaign to get started</p>
-                  </div>
-                ) : (
-                  campaigns.map((campaign) => (
+              </div>
+            ) : campaigns.length === 0 ? (
+              <div className="flex-1 flex items-center justify-center min-h-0">
+                <div className="text-center">
+                  <Target className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                  <p className="text-gray-600">No campaigns found</p>
+                  <p className="text-sm text-gray-500">Create your first campaign to get started</p>
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1 overflow-y-auto space-y-3 min-h-0">
+                {campaigns.map((campaign) => (
                     <div key={campaign.id} className="p-4 border rounded-lg bg-white hover:bg-gray-50">
                       <div className="flex items-start justify-between">
                         <div className="flex-1 space-y-2">
@@ -594,94 +598,100 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                         </div>
 
                         {/* Campaign Controls */}
-                        <div className="flex flex-col gap-2 ml-4">
-                          {(() => {
-                            const summary = campaignStatusSummaries.get(campaign.id);
-                            const isActive = ['active', 'pending', 'generating', 'publishing'].includes(campaign.status);
-                            const isPaused = campaign.status === 'paused';
-                            const isCompleted = campaign.status === 'completed';
+                        <div className="flex flex-col items-end gap-3 ml-4 min-w-[140px]">
+                          {/* Primary Action Button */}
+                          <div className="flex flex-col gap-2">
+                            {(() => {
+                              const summary = campaignStatusSummaries.get(campaign.id);
+                              const isActive = ['active', 'pending', 'generating', 'publishing'].includes(campaign.status);
+                              const isPaused = campaign.status === 'paused';
+                              const isCompleted = campaign.status === 'completed';
 
-                            // Always show pause button for active campaigns
-                            if (isActive) {
-                              return (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handlePauseCampaign(campaign.id)}
-                                  disabled={actionLoading === campaign.id}
-                                  title="Pause Campaign"
-                                  className="border-orange-300 text-orange-700 hover:bg-orange-50"
-                                >
-                                  {actionLoading === campaign.id ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    <>
-                                      <Pause className="w-4 h-4 mr-1" />
-                                      Pause
-                                    </>
-                                  )}
-                                </Button>
-                              );
-                            }
+                              // Always show pause button for active campaigns
+                              if (isActive) {
+                                return (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => handlePauseCampaign(campaign.id)}
+                                    disabled={actionLoading === campaign.id}
+                                    title="Pause Campaign"
+                                    className="border-orange-300 text-orange-700 hover:bg-orange-50 w-full"
+                                  >
+                                    {actionLoading === campaign.id ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      <>
+                                        <Pause className="w-4 h-4 mr-1" />
+                                        Pause
+                                      </>
+                                    )}
+                                  </Button>
+                                );
+                              }
 
-                            // Always show resume button for paused or completed campaigns
-                            if (isPaused || isCompleted) {
-                              const hasNextPlatform = summary?.nextPlatform;
-                              const buttonText = isCompleted ? 'Re-run' : hasNextPlatform ? 'Resume' : 'Re-run';
-                              const tooltipText = isCompleted
-                                ? 'Campaign completed - click to check for new opportunities or re-run'
-                                : hasNextPlatform
-                                  ? `Resume to continue posting to ${summary.nextPlatform}`
-                                  : 'No more platforms available - click to check for new opportunities';
+                              // Always show resume button for paused or completed campaigns
+                              if (isPaused || isCompleted) {
+                                const hasNextPlatform = summary?.nextPlatform;
+                                const buttonText = isCompleted ? 'Re-run' : hasNextPlatform ? 'Resume' : 'Re-run';
+                                const tooltipText = isCompleted
+                                  ? 'Campaign completed - click to check for new opportunities or re-run'
+                                  : hasNextPlatform
+                                    ? `Resume to continue posting to ${summary.nextPlatform}`
+                                    : 'No more platforms available - click to check for new opportunities';
 
-                              return (
-                                <Button
-                                  size="sm"
-                                  variant="default"
-                                  onClick={() => handleResumeCampaign(campaign.id)}
-                                  disabled={actionLoading === campaign.id}
-                                  title={tooltipText}
-                                  className={isCompleted ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-green-600 hover:bg-green-700 text-white"}
-                                >
-                                  {actionLoading === campaign.id ? (
-                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                  ) : (
-                                    <>
-                                      <Play className="w-4 h-4 mr-1" />
-                                      {buttonText}
-                                    </>
-                                  )}
-                                </Button>
-                              );
-                            }
+                                return (
+                                  <Button
+                                    size="sm"
+                                    variant="default"
+                                    onClick={() => handleResumeCampaign(campaign.id)}
+                                    disabled={actionLoading === campaign.id}
+                                    title={tooltipText}
+                                    className={`${isCompleted ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-green-600 hover:bg-green-700 text-white"} w-full`}
+                                  >
+                                    {actionLoading === campaign.id ? (
+                                      <Loader2 className="w-4 h-4 animate-spin" />
+                                    ) : (
+                                      <>
+                                        <Play className="w-4 h-4 mr-1" />
+                                        {buttonText}
+                                      </>
+                                    )}
+                                  </Button>
+                                );
+                              }
 
-                            return null;
-                          })()}
-                          
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleViewDetails(campaign.id)}
-                            title="View Campaign Details"
-                            className="border-blue-300 text-blue-700 hover:bg-blue-50"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
+                              return null;
+                            })()}
 
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteCampaign(campaign.id, campaign.keywords?.[0] || campaign.name)}
-                            disabled={actionLoading === campaign.id}
-                            title="Delete Campaign"
-                            className="border-red-300 text-red-700 hover:bg-red-50"
-                          >
-                            {actionLoading === campaign.id ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                            ) : (
-                              <Trash2 className="w-4 h-4" />
-                            )}
-                          </Button>
+                            {/* Secondary Action Buttons */}
+                            <div className="flex gap-1">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleViewDetails(campaign.id)}
+                                title="View Campaign Details"
+                                className="border-blue-300 text-blue-700 hover:bg-blue-50 flex-1"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDeleteCampaign(campaign.id, campaign.keywords?.[0] || campaign.name)}
+                                disabled={actionLoading === campaign.id}
+                                title="Delete Campaign"
+                                className="border-red-300 text-red-700 hover:bg-red-50 flex-1"
+                              >
+                                {actionLoading === campaign.id ? (
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-4 h-4" />
+                                )}
+                              </Button>
+                            </div>
+                          </div>
 
                           {/* Platform Visual Progress */}
                           {(() => {
@@ -689,16 +699,16 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                             if (summary && summary.totalPlatforms > 0) {
                               const completedCount = summary.platformsCompleted || 0;
                               return (
-                                <div className="flex flex-col gap-1 mt-2">
-                                  <div className="text-xs text-gray-500">Platforms:</div>
+                                <div className="flex flex-col items-center gap-1 mt-1">
+                                  <div className="text-xs text-gray-500 font-medium">Platforms</div>
                                   <div className="flex gap-1">
                                     {Array.from({ length: summary.totalPlatforms }, (_, i) => (
                                       <div
                                         key={i}
-                                        className={`w-2 h-2 rounded-full transition-colors duration-200 ${
+                                        className={`w-3 h-3 rounded-full transition-colors duration-200 border ${
                                           i < completedCount
-                                            ? 'bg-green-500'
-                                            : 'bg-gray-300'
+                                            ? 'bg-green-500 border-green-600'
+                                            : 'bg-gray-200 border-gray-300'
                                         }`}
                                         title={`Platform ${i + 1}: ${
                                           i < completedCount ? 'Completed' : 'Pending'
@@ -714,13 +724,13 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                         </div>
                       </div>
                     </div>
-                  ))
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           {/* Live Links Tab */}
-          <TabsContent value="live-links" className="mt-6 flex-1 flex flex-col">
+          <TabsContent value="live-links" className="mt-6">
             <PublishedLinksDisplay />
           </TabsContent>
         </Tabs>

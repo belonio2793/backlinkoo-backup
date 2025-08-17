@@ -127,27 +127,29 @@ const PublishedLinksDisplay = () => {
 
   if (!user) {
     return (
-      <Card className="w-full h-full">
-        <CardHeader>
+      <Card className="w-full h-full flex flex-col overflow-hidden">
+        <CardHeader className="flex-shrink-0 pb-3">
           <CardTitle className="flex items-center gap-2">
             <LinkIcon className="w-5 h-5" />
             Published Backlinks
           </CardTitle>
         </CardHeader>
-        <CardContent className="text-center py-8 flex-1 flex flex-col justify-center">
-          <Globe className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-          <h3 className="font-medium text-gray-900 mb-2">Sign In to View Published Links</h3>
-          <p className="text-sm text-gray-500">
-            Create an account or sign in to view your published backlinks
-          </p>
+        <CardContent className="flex-1 flex flex-col justify-center min-h-0 px-6 py-4">
+          <div className="text-center">
+            <Globe className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+            <h3 className="font-medium text-gray-900 mb-2">Sign In to View Published Links</h3>
+            <p className="text-sm text-gray-500">
+              Create an account or sign in to view your published backlinks
+            </p>
+          </div>
         </CardContent>
       </Card>
     );
   }
 
   return (
-    <Card className="w-full h-full">
-      <CardHeader>
+    <Card className="w-full h-full flex flex-col">
+      <CardHeader className="flex-shrink-0 pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <LinkIcon className="w-5 h-5" />
@@ -181,25 +183,28 @@ const PublishedLinksDisplay = () => {
           )}
         </div>
       </CardHeader>
-      
-      <CardContent className="flex-1 flex flex-col">
+
+      <CardContent className="flex-1 overflow-y-auto px-6 pb-6 pt-0">
         {loading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <p className="text-sm text-gray-500">Loading published links...</p>
+          <div className="flex-1 flex flex-col justify-center">
+            <div className="text-center">
+              <div className="animate-spin w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+              <p className="text-sm text-gray-500">Loading published links...</p>
+            </div>
           </div>
         ) : links.length === 0 ? (
-          <div className="text-center py-8">
-            <LinkIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
-            <h3 className="font-medium text-gray-900 mb-2">No Published Links Yet</h3>
-            <p className="text-sm text-gray-500">
-              Links will appear here after your campaigns publish content
-            </p>
+          <div className="flex-1 flex flex-col justify-center">
+            <div className="text-center">
+              <LinkIcon className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+              <h3 className="font-medium text-gray-900 mb-2">No Published Links Yet</h3>
+              <p className="text-sm text-gray-500">
+                Links will appear here after your campaigns publish content
+              </p>
+            </div>
           </div>
         ) : (
-          <ScrollArea className="flex-1 min-h-0">
-            <div className="space-y-3">
-              {links.map((link) => (
+          <div className="space-y-3">
+            {links.map((link) => (
                 <div
                   key={link.id}
                   className="border rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition-colors"
@@ -290,9 +295,8 @@ const PublishedLinksDisplay = () => {
                     </div>
                   )}
                 </div>
-              ))}
-            </div>
-          </ScrollArea>
+            ))}
+          </div>
         )}
       </CardContent>
     </Card>
