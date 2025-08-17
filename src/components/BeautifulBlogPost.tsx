@@ -118,6 +118,17 @@ function parseContentToBlocks(raw: string): Block[] {
       blocks.push({ type: "link", text: line, href: url });
       continue;
     }
+
+    // Check if line is bold-wrapped heading (like **Introduction:**)
+    const boldHeadingMatch = line.match(/^\*\*([^*]+)\*\*\s*:?\s*$/);
+    if (boldHeadingMatch) {
+      blocks.push({
+        type: "h2",
+        text: boldHeadingMatch[1].trim(),
+      });
+      continue;
+    }
+
     if (isSectionHeading(line)) {
       blocks.push({
         type: "h2",
