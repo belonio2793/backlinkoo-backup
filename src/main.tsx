@@ -362,6 +362,8 @@ if (import.meta.env.DEV) {
   console.log('  - testContentGeneration() - Test content generation functions');
   console.log('  - fixFetchErrors() - Emergency fix for fetch protection issues');
   console.log('  - fixFullStoryErrors() - Fix FullStory fetch interference specifically');
+  console.log('  - fixSupabaseConnection() - Clear Supabase connection block and refresh');
+  console.log('  - emergencyFixSupabase() - Full emergency Supabase connection diagnosis and fix');
   console.log('  - testClientContent() - Test client-side content generation');
   console.log('  - testClientTelegraph() - Test client-side Telegraph publishing');
   console.log('  - testFullPipeline() - Test complete automation pipeline');
