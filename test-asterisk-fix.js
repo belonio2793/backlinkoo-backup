@@ -17,9 +17,9 @@ Some **proper bold formatting** should still work.
 // Simulate the processing logic from BeautifulBlogPost.tsx
 function processText(text) {
   return text
-    // Handle section headers that end with :** pattern
+    // Handle section headers that end with :** pattern (updated patterns)
+    .replace(/\b([A-Za-z][A-Za-z\s&,.-]+?):\*\*/g, '<strong class="font-bold text-gray-900">$1:</strong>')
     .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '<strong class="font-bold text-gray-900">$1:</strong>')
-    .replace(/\b([A-Za-z][A-Za-z\s&]+):\*\*/g, '<strong class="font-bold text-gray-900">$1:</strong>')
     // Standard markdown bold patterns
     .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>');
 }
