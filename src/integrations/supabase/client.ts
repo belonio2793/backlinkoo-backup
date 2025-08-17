@@ -3,6 +3,8 @@ import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { SecureConfig } from '../../lib/secure-config';
 import { supabaseErrorHandler } from '../../utils/supabaseErrorHandler';
+// Import connection fixer to auto-resolve blocked connections
+import '../../utils/supabaseConnectionFixer';
 // Simplified imports without fetch workarounds
 
 // Get Supabase configuration with proper fallback
