@@ -55,6 +55,12 @@ export const handler = async (event, context) => {
     console.log('✅ Telegraph content nodes:', telegraphContent.length);
     console.log('First few nodes:', JSON.stringify(telegraphContent.slice(0, 3), null, 2));
 
+    // Validate Telegraph content structure
+    const validationErrors = validateTelegraphContent(telegraphContent);
+    if (validationErrors.length > 0) {
+      console.warn('⚠️ Telegraph content validation warnings:', validationErrors);
+    }
+
     // Create Telegraph account if needed (using a simple approach)
     let accessToken = process.env.TELEGRAPH_ACCESS_TOKEN;
     
