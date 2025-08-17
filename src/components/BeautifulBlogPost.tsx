@@ -470,11 +470,37 @@ const BeautifulBlogPost = () => {
   
   const cleanTitle = useMemo(() => {
     if (!blogPost?.title) return '';
-    return blogPost.title
-      .replace(/^h\d+[-\s]*/, '')
-      .replace(/[-\s]*[a-z0-9]{8}$/i, '')
+
+    let title = blogPost.title;
+
+    // Remove common prefixes that appear in raw titles
+    title = title
+      .replace(/^h\d+[-\s]*/, '') // Remove h1, h2, etc. prefixes
+      .replace(/^title:\s*/i, '') // Remove "Title:" prefix
+      .replace(/^\*\*.*?\*\*:\s*/i, '') // Remove **H1**: style prefixes
+      .replace(/^\*\*(.+?)\*\*$/i, '$1') // Remove **title** wrapping
+      .replace(/^#+\s*/, '') // Remove markdown heading markers
+
+      // Remove common suffixes (hash codes, extra formatting)
+      .replace(/[-\s]*[a-z0-9]{8}$/i, '') // Remove hash suffixes like -abc12345
+      .replace(/\s*-\s*[a-z0-9]+$/i, '') // Remove dash suffixes
+
+      // Handle truncation indicators
+      .replace(/\.\.\.$/, '') // Remove ellipsis
+      .replace(/\s+\w{1,3}$/, '') // Remove partial words at the end
+
+      // Clean up spacing and punctuation
       .replace(/\s+/g, ' ')
+      .replace(/[*]+/g, '') // Remove asterisks
       .trim();
+
+    // If the title seems truncated (ends abruptly), try to make it more complete
+    if (title.length < 30 && title.match(/[a-z]$/)) {
+      // Title might be truncated, but we'll display what we have
+      console.log('🔍 Potentially truncated title detected:', title);
+    }
+
+    return title;
   }, [blogPost?.title]);
 
   const readingTime = useMemo(() => {
