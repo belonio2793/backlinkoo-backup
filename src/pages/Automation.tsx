@@ -400,6 +400,11 @@ const Automation = () => {
         {/* Development Mode Indicator */}
         <DevelopmentModeIndicator />
 
+        {/* Database Schema Fixer - Show if there are HTTP errors related to missing columns */}
+        {statusMessages.some(msg => msg.message.includes('column') || msg.message.includes('schema')) && (
+          <DatabaseSchemaFixer />
+        )}
+
         {/* Status Messages */}
         {statusMessages.length > 0 && (
           <div className="space-y-2">
