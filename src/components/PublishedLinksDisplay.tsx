@@ -149,15 +149,27 @@ const PublishedLinksDisplay = () => {
             </Badge>
           </CardTitle>
           {links.length > 0 && (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={copyAllUrls}
-              className="text-xs"
-            >
-              <Copy className="w-3 h-3 mr-1" />
-              Copy All
-            </Button>
+            <div className="flex items-center gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => loadPublishedLinks()}
+                className="text-xs"
+                disabled={loading}
+              >
+                <RefreshCw className={`w-3 h-3 mr-1 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={copyAllUrls}
+                className="text-xs"
+              >
+                <Copy className="w-3 h-3 mr-1" />
+                Copy All
+              </Button>
+            </div>
           )}
         </div>
       </CardHeader>
