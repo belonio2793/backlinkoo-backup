@@ -386,6 +386,41 @@ function processLinksInText(text) {
   return processTextFormatting(text);
 }
 
+// Validate Telegraph content structure
+function validateTelegraphContent(content) {
+  const errors = [];
+
+  if (!Array.isArray(content)) {
+    errors.push('Content must be an array of nodes');
+    return errors;
+  }
+
+  if (content.length === 0) {
+    errors.push('Content array is empty');
+    return errors;
+  }
+
+  content.forEach((node, index) => {
+    if (!node.tag) {
+      errors.push(`Node ${index} missing 'tag' property`);
+    }
+
+    if (!node.children) {
+      errors.push(`Node ${index} missing 'children' property`);
+    } else if (!Array.isArray(node.children)) {
+      errors.push(`Node ${index} 'children' must be an array`);
+    }
+
+    // Check for valid Telegraph tags
+    const validTags = ['p', 'h3', 'h4', 'b', 'i', 'strong', 'em', 'a', 'br'];
+    if (node.tag && !validTags.includes(node.tag)) {
+      errors.push(`Node ${index} uses unsupported tag '${node.tag}'`);
+    }
+  });
+
+  return errors;
+}
+
 // Store published article in database for reporting
 async function storePublishedArticle(articleData) {
   try {
