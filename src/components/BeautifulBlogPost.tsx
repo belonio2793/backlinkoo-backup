@@ -397,13 +397,13 @@ const ReadingProgress = () => {
 };
 
 // Status Badge Component
-const StatusBadge = ({ 
-  blogPost, 
-  user, 
-  onClaim, 
-  onUnclaim, 
+const StatusBadge = ({
+  blogPost,
+  user,
+  onClaim,
+  onUnclaim,
   onDelete,
-  claiming = false 
+  claiming = false
 }: {
   blogPost: BlogPost;
   user: any;
@@ -416,6 +416,9 @@ const StatusBadge = ({
   const canClaim = EnhancedBlogClaimService.canClaimPost(blogPost);
   const { canUnclaim } = EnhancedBlogClaimService.canUnclaimPost(blogPost, user);
   const { canDelete } = EnhancedBlogClaimService.canDeletePost(blogPost, user);
+
+  // Check if user is admin (you can extend this logic based on your admin system)
+  const isAdmin = user?.email?.includes('admin') || user?.user_metadata?.role === 'admin';
 
   if (blogPost.claimed) {
     return (
@@ -463,27 +466,42 @@ const StatusBadge = ({
         <Timer className="mr-2 h-4 w-4" />
         Available to Claim
       </Badge>
-      
-      {canClaim && (
-        <Button
-          onClick={onClaim}
-          disabled={claiming}
-          size="sm"
-          className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-        >
-          {claiming ? (
-            <>
-              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-              Claiming...
-            </>
-          ) : (
-            <>
-              <Crown className="mr-2 h-4 w-4" />
-              {user ? 'Claim Article' : 'Login to Claim'}
-            </>
-          )}
-        </Button>
-      )}
+
+      <div className="flex gap-2">
+        {canClaim && (
+          <Button
+            onClick={onClaim}
+            disabled={claiming}
+            size="sm"
+            className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
+          >
+            {claiming ? (
+              <>
+                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                Claiming...
+              </>
+            ) : (
+              <>
+                <Crown className="mr-2 h-4 w-4" />
+                {user ? 'Claim Article' : 'Login to Claim'}
+              </>
+            )}
+          </Button>
+        )}
+
+        {/* Show delete button for unclaimed posts (anyone can delete) or for admins */}
+        {canDelete && (user || isAdmin) && (
+          <Button
+            onClick={onDelete}
+            variant="outline"
+            size="sm"
+            className="rounded-full border-red-300 text-red-700 hover:bg-red-50"
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
