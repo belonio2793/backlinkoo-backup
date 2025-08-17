@@ -349,7 +349,7 @@ const Automation = () => {
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <main className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-6 sm:px-6 lg:px-8">
+      <main className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-100 px-4 py-6 sm:px-6 lg:px-8 xl:px-12">
         <div className="w-full max-w-[1600px] mx-auto space-y-6">
 
           {/* Page Header */}
