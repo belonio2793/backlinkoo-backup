@@ -531,28 +531,25 @@ export class BlogService {
    */
   async getRecentBlogPosts(limit: number = 10): Promise<BlogPost[]> {
     try {
-      // Try published_blog_posts first, then fallback to blog_posts
+      // UPDATED: Use blog_posts as primary table since new posts go there
       let data, error;
 
-      try {
-        const result = await supabase
-          .from('published_blog_posts')
-          .select('*')
-          .eq('status', 'published')
-          .order('created_at', { ascending: false })
-          .limit(limit);
+      console.log('📖 Fetching recent blog posts from blog_posts table...');
+      const result = await supabase
+        .from('blog_posts')
+        .select('*')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false })
+        .limit(limit);
 
-        data = result.data;
-        error = result.error;
+      data = result.data;
+      error = result.error;
 
-        if (error && error.message?.includes('relation') && error.message?.includes('does not exist')) {
-          throw new Error('Table not found, trying fallback');
-        }
-      } catch (tableError: any) {
-        console.warn('⚠️ published_blog_posts table issue, trying blog_posts:', this.getSafeErrorMessage(tableError));
-
+      // If blog_posts fails, try published_blog_posts as fallback
+      if (error && error.message?.includes('relation') && error.message?.includes('does not exist')) {
+        console.warn('⚠️ blog_posts table issue, trying published_blog_posts fallback');
         const fallbackResult = await supabase
-          .from('blog_posts')
+          .from('published_blog_posts')
           .select('*')
           .eq('status', 'published')
           .order('created_at', { ascending: false })
