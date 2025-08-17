@@ -146,7 +146,7 @@ const PublishedLinksDisplay = () => {
   }
 
   return (
-    <Card>
+    <Card className="w-full h-full">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
