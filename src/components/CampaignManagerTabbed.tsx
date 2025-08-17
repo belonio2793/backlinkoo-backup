@@ -123,7 +123,14 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
   const loadCampaigns = async (showRefreshing = false) => {
     try {
       if (showRefreshing) setRefreshing(true);
-      
+
+      // If user is not authenticated, don't try to load campaigns
+      if (!user) {
+        setCampaigns([]);
+        setCampaignStatusSummaries(new Map());
+        return;
+      }
+
       const userCampaigns = await orchestrator.getUserCampaigns();
       
       // Load published links for each campaign
