@@ -1071,6 +1071,14 @@ export class ContentFormatter {
       // Fix general malformed class attributes in strong tags
       .replace(/<strong\s+class([^=]*)=""\s+([^>]*?)>/gi, '<strong class="font-bold text-inherit">')
 
+      // FINAL CLEANUP: Remove any remaining visible asterisks that weren't processed
+      .replace(/^\*\*\s*/gm, '') // Remove ** at the start of lines
+      .replace(/\*\*\s*$/gm, '') // Remove ** at the end of lines
+      .replace(/>\*\*\s*</g, '><') // Remove ** between tags
+      .replace(/>\*\*\s*/g, '>') // Remove ** after opening tags
+      .replace(/\s*\*\*</g, '<') // Remove ** before closing tags
+      .replace(/(\s)\*\*(\s)/g, '$1$2') // Remove ** surrounded by spaces
+
       // FINAL LINK RESTORATION: Fix malformed link attributes
       .replace(/<a\s+([^>]*?)>/gi, (match, attrs) => {
         console.log('🔧 Fixing malformed link attributes:', attrs);
