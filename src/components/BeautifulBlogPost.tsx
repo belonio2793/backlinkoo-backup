@@ -228,11 +228,45 @@ const ContentProcessor = ({ content, title, enableAutoFormat = true }: {
   const processedContent = useMemo(() => {
     if (!content?.trim()) return null;
 
-    // Clean content first
-    let cleanContent = content
-      // Remove title duplication
-      .replace(new RegExp(`^\\s*(?:#{1,6}\\s*)?${title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*(?:\n|$)`, 'gim'), '')
-      .trim();
+    // Enhanced title removal - multiple patterns and variations
+    let cleanContent = content;
+
+    if (title) {
+      const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      // Create variations of the title to match
+      const titleVariations = [
+        title,
+        title.replace(/\s+/g, '\\s+'), // Match flexible whitespace
+        title.replace(/[^\w\s]/g, ''), // Remove punctuation
+        title.toLowerCase(),
+        title.toUpperCase()
+      ];
+
+      // Remove title patterns from start of content
+      titleVariations.forEach(variation => {
+        const escapedVariation = variation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        // Multiple removal patterns
+        const patterns = [
+          // Markdown headings
+          new RegExp(`^\\s*#{1,6}\\s*\\*\\*?\\s*${escapedVariation}\\s*\\*\\*?\\s*:?\\s*\\n?`, 'gim'),
+          new RegExp(`^\\s*#{1,6}\\s*${escapedVariation}\\s*:?\\s*\\n?`, 'gim'),
+          // Bold wrapped titles
+          new RegExp(`^\\s*\\*\\*\\s*${escapedVariation}\\s*\\*\\*\\s*:?\\s*\\n?`, 'gim'),
+          // Plain titles at start
+          new RegExp(`^\\s*${escapedVariation}\\s*:?\\s*\\n?`, 'gim'),
+          // HTML headings
+          new RegExp(`^\\s*<h[1-6][^>]*>\\s*${escapedVariation}\\s*<\\/h[1-6]>\\s*\\n?`, 'gim')
+        ];
+
+        patterns.forEach(pattern => {
+          cleanContent = cleanContent.replace(pattern, '');
+        });
+      });
+    }
+
+    cleanContent = cleanContent.trim();
 
     if (enableAutoFormat) {
       try {
