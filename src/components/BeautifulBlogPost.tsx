@@ -295,7 +295,7 @@ const ContentProcessor = ({ content, title, enableAutoFormat = true }: {
 
     if (enableAutoFormat) {
       try {
-        const blocks = parseContentToBlocks(cleanContent);
+        const blocks = parseContentToBlocks(cleanContent, title);
         return renderBlocks(blocks);
       } catch (e) {
         console.error("BeautifulBlogPost formatter failed, fallback:", e);
