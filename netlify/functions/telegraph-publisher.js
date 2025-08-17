@@ -197,38 +197,96 @@ function convertMarkdownToTelegraph(markdown) {
   return telegraphNodes;
 }
 
-// Process markdown links and convert them to Telegraph format
-function processLinksInText(text) {
-  const linkRegex = /\[([^\]]+)\]\(([^)]+)\)/g;
+// Process text formatting including bold, italic, and links for Telegraph
+function processTextFormatting(text) {
+  // Process all formatting in sequence: bold, italic, then links
   const result = [];
-  let lastIndex = 0;
-  let match;
-  
-  while ((match = linkRegex.exec(text)) !== null) {
-    // Add text before the link
-    if (match.index > lastIndex) {
-      result.push(text.substring(lastIndex, match.index));
+  const segments = parseFormattedText(text);
+
+  for (const segment of segments) {
+    if (segment.type === 'text') {
+      result.push(segment.content);
+    } else if (segment.type === 'bold') {
+      result.push({
+        tag: 'b',
+        children: [segment.content]
+      });
+    } else if (segment.type === 'italic') {
+      result.push({
+        tag: 'i',
+        children: [segment.content]
+      });
+    } else if (segment.type === 'strong') {
+      result.push({
+        tag: 'strong',
+        children: [segment.content]
+      });
+    } else if (segment.type === 'link') {
+      result.push({
+        tag: 'a',
+        attrs: {
+          href: segment.url,
+          target: '_blank'
+        },
+        children: [segment.content]
+      });
     }
-    
-    // Add the link
-    result.push({
-      tag: 'a',
-      attrs: {
-        href: match[2],
-        target: '_blank'
-      },
-      children: [match[1]]
-    });
-    
-    lastIndex = match.index + match[0].length;
   }
-  
-  // Add remaining text
-  if (lastIndex < text.length) {
-    result.push(text.substring(lastIndex));
-  }
-  
+
   return result.length > 0 ? result : [text];
+}
+
+// Parse text with mixed formatting (bold, italic, links)
+function parseFormattedText(text) {
+  const segments = [];
+  let currentIndex = 0;
+
+  // Combined regex for all formatting types
+  const formatRegex = /(\*\*([^*]+)\*\*|<strong>([^<]+)<\/strong>|<b>([^<]+)<\/b>|\*([^*]+)\*|<i>([^<]+)<\/i>|<em>([^<]+)<\/em>|\[([^\]]+)\]\(([^)]+)\))/g;
+  let match;
+
+  while ((match = formatRegex.exec(text)) !== null) {
+    // Add any text before this match
+    if (match.index > currentIndex) {
+      const beforeText = text.substring(currentIndex, match.index);
+      if (beforeText) {
+        segments.push({ type: 'text', content: beforeText });
+      }
+    }
+
+    // Determine the type of formatting
+    if (match[0].startsWith('**') || match[0].startsWith('<strong>') || match[0].startsWith('<b>')) {
+      // Bold text
+      const content = match[2] || match[3] || match[4];
+      segments.push({ type: 'bold', content });
+    } else if (match[0].startsWith('*') || match[0].startsWith('<i>') || match[0].startsWith('<em>')) {
+      // Italic text
+      const content = match[5] || match[6] || match[7];
+      segments.push({ type: 'italic', content });
+    } else if (match[0].startsWith('[')) {
+      // Link
+      const content = match[8];
+      const url = match[9];
+      segments.push({ type: 'link', content, url });
+    }
+
+    currentIndex = match.index + match[0].length;
+  }
+
+  // Add any remaining text
+  if (currentIndex < text.length) {
+    const remainingText = text.substring(currentIndex);
+    if (remainingText) {
+      segments.push({ type: 'text', content: remainingText });
+    }
+  }
+
+  return segments.length > 0 ? segments : [{ type: 'text', content: text }];
+}
+
+// Process markdown links and convert them to Telegraph format (legacy function for backward compatibility)
+function processLinksInText(text) {
+  return processTextFormatting(text);
 }
 
 // Store published article in database for reporting
