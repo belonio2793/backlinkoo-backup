@@ -684,7 +684,7 @@ const Automation = () => {
           <div className="lg:col-span-1 h-full">
             <InlineFeedMonitor
               activeCampaigns={activeCampaigns}
-              isVisible={isAuthenticated}
+              isVisible={true}
             />
           </div>
         </div>
