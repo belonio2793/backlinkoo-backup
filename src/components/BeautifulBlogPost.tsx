@@ -105,14 +105,39 @@ const processTextFormatting = (text: string): React.ReactNode => {
 };
 
 // --- Parse into structured blocks ---
-function parseContentToBlocks(raw: string): Block[] {
+function parseContentToBlocks(raw: string, title?: string): Block[] {
   const lines = raw
     .split(/\r?\n/)
     .map((l) => l.trim())
     .filter(Boolean);
 
   const blocks: Block[] = [];
+
+  // Helper function to check if a line matches the title
+  const isTitle = (line: string): boolean => {
+    if (!title) return false;
+
+    const cleanLine = line.replace(/^\*\*|\*\*$|^#+\s*|\s*:?\s*$/g, '').trim();
+    const cleanTitle = title.replace(/[^\w\s]/g, '').toLowerCase();
+    const cleanLineText = cleanLine.replace(/[^\w\s]/g, '').toLowerCase();
+
+    // Check for exact match or very close match (90% similarity)
+    if (cleanLineText === cleanTitle) return true;
+
+    // Check if line contains most of the title words
+    const titleWords = cleanTitle.split(/\s+/);
+    const lineWords = cleanLineText.split(/\s+/);
+    const matchingWords = titleWords.filter(word => lineWords.includes(word));
+
+    return matchingWords.length >= Math.ceil(titleWords.length * 0.8);
+  };
+
   for (const line of lines) {
+    // Skip lines that match the title
+    if (isTitle(line)) {
+      continue;
+    }
+
     const url = urlOnly(line);
     if (url) {
       blocks.push({ type: "link", text: line, href: url });
@@ -121,7 +146,7 @@ function parseContentToBlocks(raw: string): Block[] {
 
     // Check if line is bold-wrapped heading (like **Introduction:**)
     const boldHeadingMatch = line.match(/^\*\*([^*]+)\*\*\s*:?\s*$/);
-    if (boldHeadingMatch) {
+    if (boldHeadingMatch && !isTitle(boldHeadingMatch[1])) {
       blocks.push({
         type: "h2",
         text: boldHeadingMatch[1].trim(),
@@ -129,7 +154,7 @@ function parseContentToBlocks(raw: string): Block[] {
       continue;
     }
 
-    if (isSectionHeading(line)) {
+    if (isSectionHeading(line) && !isTitle(line)) {
       blocks.push({
         type: "h2",
         text: line.replace(/\s*[:.]$/, "").trim(),
