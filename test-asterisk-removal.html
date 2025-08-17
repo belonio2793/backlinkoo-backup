@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asterisk Removal Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+        .test-section { margin: 20px 0; padding: 20px; border: 1px solid #ccc; border-radius: 8px; }
+        .original { background-color: #fff3cd; border-color: #ffeaa7; }
+        .cleaned { background-color: #d1ecf1; border-color: #bee5eb; }
+        .processed { background-color: #d4edda; border-color: #c3e6cb; }
+        .font-bold { font-weight: bold; }
+        .text-gray-900 { color: #1a1a1a; }
+        .error { background-color: #f8d7da; color: #721c24; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .success { background-color: #d4edda; color: #155724; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .warning { background-color: #fff3cd; color: #856404; padding: 10px; border-radius: 4px; margin: 10px 0; }
+        pre { background: #f8f9fa; padding: 15px; border-radius: 4px; overflow-x: auto; }
+        .visual-test { border: 2px solid #007bff; padding: 20px; margin: 10px 0; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Asterisk Removal & Bold Formatting Test</h1>
+    <p><strong>Purpose:</strong> Test if visible asterisks (**) are properly hidden and converted to bold formatting.</p>
+    
+    <div class="test-section original">
+        <h2>📝 Original Problematic Content</h2>
+        <pre id="original-content"></pre>
+    </div>
+    
+    <div class="test-section cleaned">
+        <h2>🧹 After Blog Cleaner</h2>
+        <pre id="cleaned-content"></pre>
+    </div>
+    
+    <div class="test-section processed">
+        <h2>✨ After Text Processing</h2>
+        <div id="processed-content"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>👀 Visual Verification</h2>
+        <div class="visual-test">
+            <h3>How the conclusion should look to users:</h3>
+            <div id="visual-result"></div>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h2>📊 Test Results</h2>
+        <div id="test-results"></div>
+    </div>
+
+    <script>
+        // This is the exact problematic content from the blog post
+        const problematicContent = `**
+In conclusion, mastering Weebly SEO is not just about optimizing your website for search engines; it's about creating a seamless user experience and delivering valuable content to your audience. By implementing the strategies outlined in this guide, you can elevate your Weebly website's visibility, attract organic traffic, and achieve sustainable growth in the digital landscape. Take charge of your Weebly SEO journey today and watch your website soar to the top of search rankings.
+
+This comprehensive guide is your roadmap to unlocking the full potential of Weebly SEO. Bookmark this page, share it with your peers, and start implementing these strategies to transform your online presence. Let's embark on this SEO journey together and pave the way for success in the digital realm.`;
+
+        // Additional test cases
+        const additionalTests = {
+            sectionHeader: 'Data Point:** According to studies, SEO improves traffic by 40%.',
+            regularBold: 'This is **regular bold text** in a sentence.',
+            multiLineBold: '**This is a multi-line\nbold paragraph that spans\nmultiple lines.**',
+            mixedContent: `**Bold introduction**
+
+Regular paragraph here.
+
+Data Point:** Important information here.
+
+**
+Another conclusion paragraph that should be bold.`
+        };
+
+        // Enhanced Blog Cleaner simulation
+        function cleanContent(content) {
+            return content
+                // Normalize section headers with trailing asterisks
+                .replace(/\b([A-Za-z][A-Za-z\s&,.-]+?):\*\*/g, '**$1:**')
+                .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '**$1:**')
+                // Fix malformed bold patterns
+                .replace(/\*\*\s*\n\s*/g, '**')
+                .replace(/^\*\*\s*\n\s*/gm, '**')
+                // Clean up excessive whitespace
+                .replace(/\n{3,}/g, '\n\n')
+                .replace(/^\s+$/gm, '')
+                .replace(/[ \t]+$/gm, '')
+                .trim();
+        }
+
+        // Text processing simulation (from BeautifulBlogPost.tsx)
+        function processText(text) {
+            let processedText = text;
+            
+            // Process bold text with multiple patterns
+            processedText = processedText
+                // Handle section headers that end with :** pattern
+                .replace(/\b([A-Za-z][A-Za-z\s&,.-]+?):\*\*/g, '<strong class="font-bold text-gray-900">$1:</strong>')
+                .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '<strong class="font-bold text-gray-900">$1:</strong>')
+                // Handle multi-line bold text where ** is followed by whitespace and newline
+                .replace(/\*\*\s*\n\s*([^*]+?)(?=\n\s*\n|\n\s*$|$)/gs, '<strong class="font-bold text-gray-900">$1</strong>')
+                // Handle ** at start of paragraph followed by content
+                .replace(/^\*\*\s*\n\s*(.+?)(?=\n\s*\n|\n\s*$|$)/gms, '<strong class="font-bold text-gray-900">$1</strong>')
+                // Standard markdown bold patterns (single line)
+                .replace(/\*\*([^*\n]+?)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>')
+                // Multi-line bold patterns (fallback)
+                .replace(/\*\*([^*]+?)\*\*/gs, '<strong class="font-bold text-gray-900">$1</strong>');
+                
+            return processedText;
+        }
+
+        // Display original content
+        document.getElementById('original-content').textContent = problematicContent;
+
+        // Clean and process content
+        const cleaned = cleanContent(problematicContent);
+        const processed = processText(cleaned);
+        
+        // Display cleaned content
+        document.getElementById('cleaned-content').textContent = cleaned;
+        
+        // Display processed content (HTML)
+        document.getElementById('processed-content').innerHTML = processed.replace(/\n/g, '<br>');
+        
+        // Show visual result (how it should look to users)
+        document.getElementById('visual-result').innerHTML = processed.replace(/\n/g, '<br>');
+
+        // Comprehensive tests
+        const tests = [
+            {
+                name: 'No visible asterisks in final output',
+                test: () => {
+                    const visibleInHTML = processed.includes('**');
+                    return !visibleInHTML;
+                }
+            },
+            {
+                name: 'Conclusion paragraph is properly bolded',
+                test: () => {
+                    return processed.includes('<strong class="font-bold text-gray-900">In conclusion');
+                }
+            },
+            {
+                name: 'No orphaned ** tags at start',
+                test: () => {
+                    const startsWithAsterisks = processed.trim().startsWith('**') || processed.includes('>**<') || processed.includes('>**\n');
+                    return !startsWithAsterisks;
+                }
+            },
+            {
+                name: 'Content is wrapped in strong tags',
+                test: () => {
+                    return processed.includes('<strong class="font-bold text-gray-900">') && processed.includes('</strong>');
+                }
+            },
+            {
+                name: 'Section headers still work',
+                test: () => {
+                    const testSection = processText('Data Point:** This should be bold');
+                    return testSection.includes('<strong class="font-bold text-gray-900">Data Point:</strong>');
+                }
+            }
+        ];
+
+        // Run tests and display results
+        let results = '<h3>🔍 Test Results:</h3>';
+        let allPassed = true;
+        let passed = 0;
+
+        tests.forEach((test, index) => {
+            const testPassed = test.test();
+            allPassed = allPassed && testPassed;
+            if (testPassed) passed++;
+            
+            results += `<div class="${testPassed ? 'success' : 'error'}">
+                ${testPassed ? '✅' : '❌'} <strong>Test ${index + 1}:</strong> ${test.name}
+                <br><small>${testPassed ? 'PASSED' : 'FAILED'}</small>
+            </div>`;
+        });
+
+        results += `<div class="${allPassed ? 'success' : (passed > 0 ? 'warning' : 'error')}">
+            <h4>📊 Summary: ${passed}/${tests.length} tests passed ${allPassed ? '🎉' : (passed > 0 ? '⚠️' : '❌')}</h4>
+        </div>`;
+
+        // Additional diagnostics
+        results += '<h3>🔧 Diagnostics:</h3>';
+        results += `<div><strong>Original length:</strong> ${problematicContent.length} characters</div>`;
+        results += `<div><strong>Cleaned length:</strong> ${cleaned.length} characters</div>`;
+        results += `<div><strong>Processed length:</strong> ${processed.length} characters</div>`;
+        results += `<div><strong>Contains visible asterisks:</strong> ${processed.includes('**') ? '❌ YES' : '✅ NO'}</div>`;
+        results += `<div><strong>Contains strong tags:</strong> ${processed.includes('<strong') ? '✅ YES' : '❌ NO'}</div>`;
+
+        document.getElementById('test-results').innerHTML = results;
+
+        // Console logging for debugging
+        console.log('🧪 Asterisk Removal Test Results');
+        console.log('================================');
+        console.log('Original:', problematicContent);
+        console.log('Cleaned:', cleaned);
+        console.log('Processed:', processed);
+        console.log(`Tests passed: ${passed}/${tests.length}`);
+        
+        // Test all additional cases
+        console.log('\n🔬 Additional Test Cases:');
+        Object.entries(additionalTests).forEach(([name, content]) => {
+            const result = processText(cleanContent(content));
+            console.log(`${name}:`, result);
+        });
+    </script>
+</body>
+</html>
