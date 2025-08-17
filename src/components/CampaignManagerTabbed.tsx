@@ -720,7 +720,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
           </TabsContent>
 
           {/* Live Links Tab */}
-          <TabsContent value="live-links" className="mt-6 flex-1 flex flex-col">
+          <TabsContent value="live-links" className="mt-6 flex-1 flex flex-col min-h-0">
             <PublishedLinksDisplay />
           </TabsContent>
         </Tabs>
