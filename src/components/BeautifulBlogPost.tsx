@@ -424,8 +424,10 @@ const EnhancedContentProcessor = ({
     // Process bold text with multiple patterns
     processedText = processedText
       // Handle section headers that end with :** pattern (like "Data Point:**" or "Title Tags and Meta Descriptions:**")
+      // This matches text that starts with a letter, can contain letters, spaces, and common punctuation, ends with a colon and two asterisks
+      .replace(/\b([A-Za-z][A-Za-z\s&,.-]+?):\*\*/g, '<strong class="font-bold text-gray-900">$1:</strong>')
+      // Also handle patterns at the start of lines
       .replace(/^([A-Za-z][^:\n]*?):\*\*/gm, '<strong class="font-bold text-gray-900">$1:</strong>')
-      .replace(/\b([A-Za-z][A-Za-z\s&]+):\*\*/g, '<strong class="font-bold text-gray-900">$1:</strong>')
       // Standard markdown bold patterns
       .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-gray-900">$1</strong>')
       .replace(/__([^_]+)__/g, '<strong class="font-bold text-gray-900">$1</strong>');
