@@ -661,7 +661,7 @@ async function savePublishedLink(supabase, campaignId, url, title, platform = 'T
         .insert({
           campaign_id: campaignId,
           url: url,
-          platform: 'Telegraph.ph',
+          platform: platform,
           created_at: new Date().toISOString()
         });
         
