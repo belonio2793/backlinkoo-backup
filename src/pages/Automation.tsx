@@ -676,6 +676,10 @@ const Automation = () => {
               <TabsContent value="status" className="space-y-4 flex-1 flex flex-col">
                 <AutomationServiceStatus />
               </TabsContent>
+
+              <TabsContent value="debug" className="space-y-4 flex-1 flex flex-col">
+                <PublishedLinksDebugger />
+              </TabsContent>
             </Tabs>
           </div>
 
