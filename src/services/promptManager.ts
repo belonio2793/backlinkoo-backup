@@ -552,9 +552,9 @@ Purpose: Reference document for bookmark and sharing`,
         contentLimits: { minWords: 100, maxWords: 1000 },
         linkPolicy: 'moderate',
         domainRating: 78,
-        isActive: true
+        isActive: true // ✅ API Key auth, 20-60 req/min
       },
-      
+
       // Social Platforms
       {
         name: 'LinkedIn',
@@ -564,7 +564,7 @@ Purpose: Reference document for bookmark and sharing`,
         contentLimits: { minWords: 10, maxWords: 100, maxCharacters: 3000 },
         linkPolicy: 'moderate',
         domainRating: 100,
-        isActive: true
+        isActive: false // ⚠️ Requires manual approval for posting permissions
       },
       {
         name: 'Tumblr',
@@ -574,7 +574,7 @@ Purpose: Reference document for bookmark and sharing`,
         contentLimits: { minWords: 20, maxWords: 1000 },
         linkPolicy: 'friendly',
         domainRating: 86,
-        isActive: true
+        isActive: true // ✅ OAuth 1.0a, 1000 req/hour, 250 posts/day
       }
     ];
   }
