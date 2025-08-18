@@ -527,7 +527,78 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                           </div>
                           
                           <div className="text-sm text-gray-600 space-y-1">
-                            <p><strong>Target:</strong> {campaign.target_url}</p>
+                            <div className="flex items-center justify-between">
+                              <p><strong>Target:</strong> {campaign.target_url}</p>
+                              <div className="flex items-center gap-3">
+                                {/* Re-run/Resume Button */}
+                                {(() => {
+                                  const summary = campaignStatusSummaries.get(campaign.id);
+                                  const isActive = ['active', 'pending', 'generating', 'publishing'].includes(campaign.status);
+                                  const isPaused = campaign.status === 'paused';
+                                  const isCompleted = campaign.status === 'completed';
+
+                                  if (isPaused || isCompleted) {
+                                    const hasNextPlatform = summary?.nextPlatform;
+                                    const buttonText = isCompleted ? 'Re-run' : hasNextPlatform ? 'Resume' : 'Re-run';
+                                    const tooltipText = isCompleted
+                                      ? 'Campaign completed - click to check for new opportunities or re-run'
+                                      : hasNextPlatform
+                                        ? `Resume to continue posting to ${summary.nextPlatform}`
+                                        : 'No more platforms available - click to check for new opportunities';
+
+                                    return (
+                                      <Button
+                                        size="sm"
+                                        variant="default"
+                                        onClick={() => handleResumeCampaign(campaign.id)}
+                                        disabled={actionLoading === campaign.id}
+                                        title={tooltipText}
+                                        className={`${isCompleted ? "bg-blue-600 hover:bg-blue-700 text-white" : "bg-green-600 hover:bg-green-700 text-white"} text-xs px-2 py-1 h-6`}
+                                      >
+                                        {actionLoading === campaign.id ? (
+                                          <Loader2 className="w-3 h-3 animate-spin" />
+                                        ) : (
+                                          <>
+                                            <Play className="w-3 h-3 mr-1" />
+                                            {buttonText}
+                                          </>
+                                        )}
+                                      </Button>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+
+                                {/* Platform Indicators */}
+                                {(() => {
+                                  const summary = campaignStatusSummaries.get(campaign.id);
+                                  if (summary && summary.totalPlatforms > 0) {
+                                    const completedCount = summary.platformsCompleted || 0;
+                                    return (
+                                      <div className="flex items-center gap-2">
+                                        <div className="text-xs text-gray-500 font-medium">Platforms</div>
+                                        <div className="flex gap-1">
+                                          {Array.from({ length: summary.totalPlatforms }, (_, i) => (
+                                            <div
+                                              key={i}
+                                              className={`w-2 h-2 rounded-full transition-colors duration-200 border ${
+                                                i < completedCount
+                                                  ? 'bg-green-500 border-green-600'
+                                                  : 'bg-gray-200 border-gray-300'
+                                              }`}
+                                              title={`Platform ${i + 1}: ${
+                                                i < completedCount ? 'Completed' : 'Pending'
+                                              }`}
+                                            />
+                                          ))}
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+                                  return null;
+                                })()}
+                              </div>
+                            </div>
                             <p><strong>Anchor:</strong> {campaign.anchor_texts?.[0] || 'N/A'}</p>
                             <p><strong>Created:</strong> {new Date(campaign.created_at).toLocaleString()}</p>
 
