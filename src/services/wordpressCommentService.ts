@@ -1,7 +1,9 @@
 /**
  * WordPress Comment Testing Service
- * Handles discovery and testing of WordPress comment forms
+ * Handles discovery and testing of WordPress comment forms with 404 checking
  */
+
+import { websiteValidationService, ValidationResult } from './websiteValidationService';
 
 export interface WordPressBlog {
   id: string;
