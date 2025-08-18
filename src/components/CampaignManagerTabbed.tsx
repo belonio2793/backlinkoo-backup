@@ -524,6 +524,33 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                               </div>
                             </Badge>
                             <span className="font-medium">{campaign.keywords?.[0] || campaign.name}</span>
+
+                            {/* Campaign Details and Delete Actions */}
+                            <div className="flex items-center gap-1 ml-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleViewDetails(campaign.id)}
+                                title="View Campaign Details"
+                                className="px-1 border-gray-300 text-xs h-5 w-5"
+                              >
+                                <Eye className="w-3 h-3" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleDeleteCampaign(campaign.id, campaign.keywords?.[0] || campaign.name)}
+                                disabled={actionLoading === campaign.id}
+                                title="Delete Campaign"
+                                className="px-1 border-red-300 text-red-600 hover:bg-red-50 text-xs h-5 w-5"
+                              >
+                                {actionLoading === campaign.id ? (
+                                  <Loader2 className="w-2 h-2 animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-3 h-3" />
+                                )}
+                              </Button>
+                            </div>
                           </div>
                           
                           <div className="text-sm text-gray-600 space-y-1">
