@@ -739,7 +739,7 @@ const Automation = () => {
                 <div className="bg-gray-50 border rounded-lg p-3">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-medium text-sm text-gray-900">Active Platforms</h3>
-                    <div className="text-xs text-green-700 bg-green-100 px-2 py-1 rounded">2 Available</div>
+                    <div className="text-xs text-green-700 bg-green-100 px-2 py-1 rounded">100+ Available</div>
                   </div>
                   <div className="max-h-32 overflow-y-auto space-y-2">
                     <div className="flex items-center justify-between p-3 bg-white border rounded">
