@@ -283,18 +283,29 @@ export class Web2PlatformsEngine extends BaseEngine {
       }
 
       // If all platforms failed
+      console.error(`💀 All ${opportunities.length} platforms failed for task ${task.id}:`, failedPlatforms);
+
+      // Check if any errors were retryable
+      const hasRetryableErrors = platformErrors.some(error => error.retryable);
+      const errorDetails = platformErrors.map(e => `${e.platform}: ${e.error}`).join('; ');
+
       return {
         success: false,
         error: {
-          code: 'ALL_PLATFORMS_FAILED',
-          message: `Failed to publish after ${attemptsCount} attempts`,
-          retryable: true,
-          retryAfter: new Date(Date.now() + 2 * 60 * 60 * 1000) // 2 hours
+          code: 'ALL_PLATFORMS_EXHAUSTED',
+          message: `Exhausted all ${opportunities.length} available platforms. Failed platforms: ${failedPlatforms.join(', ')}. Errors: ${errorDetails}`,
+          retryable: hasRetryableErrors,
+          retryAfter: hasRetryableErrors ? new Date(Date.now() + 1 * 60 * 60 * 1000) : undefined // 1 hour if retryable
         },
         metrics: {
           processingTimeMs: Date.now() - startTime,
           attemptsCount,
-          resourcesUsed
+          resourcesUsed,
+          platformAttempts: {
+            totalPlatforms: opportunities.length,
+            failedPlatforms: failedPlatforms,
+            platformErrors: platformErrors
+          }
         }
       };
 
