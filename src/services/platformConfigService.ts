@@ -267,4 +267,64 @@ export class PlatformConfigService {
       allCompleted: remaining.length === 0
     };
   }
+
+  /**
+   * Enable or disable massive platform support
+   */
+  static setMassivePlatformMode(enabled: boolean): void {
+    this.useMassivePlatforms = enabled;
+    console.log(`${enabled ? '🚀 Enabled' : '⏸️ Disabled'} massive platform support`);
+  }
+
+  /**
+   * Get platform statistics
+   */
+  static getPlatformStats(): any {
+    if (this.useMassivePlatforms) {
+      return massivePlatformManager.getStats();
+    }
+
+    const activePlatforms = this.getActivePlatforms();
+    return {
+      total: AVAILABLE_PLATFORMS.length,
+      active: activePlatforms.length,
+      byCategory: { basic: activePlatforms.length },
+      byDifficulty: { medium: activePlatforms.length },
+      averageDA: 85,
+      highAuthorityCount: activePlatforms.length
+    };
+  }
+
+  /**
+   * Refresh platform data
+   */
+  static refreshPlatforms(): void {
+    if (this.useMassivePlatforms) {
+      massivePlatformManager.refreshPlatforms();
+    }
+  }
+
+  /**
+   * Get platforms with specific criteria
+   */
+  static getPlatformsWithCriteria(criteria: {
+    minDA?: number;
+    category?: string;
+    maxCount?: number;
+  }): PublishingPlatform[] {
+    if (this.useMassivePlatforms) {
+      const platforms = massivePlatformManager.getPlatforms({
+        minDomainAuthority: criteria.minDA,
+        categories: criteria.category ? [criteria.category] : undefined
+      });
+
+      const converted = massivePlatformManager.toPublishingPlatforms(
+        criteria.maxCount || platforms.length
+      );
+
+      return converted;
+    }
+
+    return this.getActivePlatforms().slice(0, criteria.maxCount || 10);
+  }
 }
