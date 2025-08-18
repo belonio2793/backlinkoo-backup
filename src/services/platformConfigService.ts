@@ -5,6 +5,7 @@
  */
 
 import { massivePlatformManager, type MassivePlatform } from './massivePlatformManager';
+import { verifiedPlatformManager, type VerifiedPlatform } from './verifiedPlatformManager';
 
 export interface PublishingPlatform {
   id: string;
