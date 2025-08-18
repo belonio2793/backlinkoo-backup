@@ -262,6 +262,11 @@ export const OptimizedAppWrapper = () => {
               <LazyAutomation />
             </Suspense>
           } />
+          <Route path="/automation/discovery" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyPlatformDiscovery />
+            </Suspense>
+          } />
           <Route path="/campaign/:campaignId" element={
             <InstantEmailVerificationGuard>
               <LazyCampaignDeliverables />
