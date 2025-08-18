@@ -1,7 +1,10 @@
 /**
  * Centralized Platform Configuration Service
  * Single source of truth for all platform configurations
+ * Now supports thousands of platforms via MassivePlatformManager
  */
+
+import { massivePlatformManager, type MassivePlatform } from './massivePlatformManager';
 
 export interface PublishingPlatform {
   id: string;
