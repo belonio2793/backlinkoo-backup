@@ -1099,6 +1099,67 @@ export class AutomationOrchestrator {
   }
 
   /**
+   * Validate that campaign won't publish to platforms that already have published links
+   * This is critical for re-run/resume operations
+   */
+  async validateNoPlatformDuplication(campaignId: string): Promise<{
+    isValid: boolean;
+    availablePlatforms: PublishingPlatform[];
+    usedPlatforms: string[];
+    message: string;
+  }> {
+    try {
+      // Get all published links from database
+      const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
+      const publishedLinks = campaignWithLinks?.automation_published_links || [];
+
+      if (publishedLinks.length === 0) {
+        // No existing links, all platforms available
+        const activePlatforms = this.getActivePlatforms();
+        return {
+          isValid: true,
+          availablePlatforms: activePlatforms,
+          usedPlatforms: [],
+          message: `All ${activePlatforms.length} platforms available for new campaign`
+        };
+      }
+
+      // Create normalized set of used platform IDs
+      const usedPlatformIds = new Set(
+        publishedLinks.map(link => {
+          const platform = link.platform.toLowerCase();
+          // Normalize legacy platform names to current IDs
+          if (platform === 'write.as' || platform === 'writeas') return 'writeas';
+          if (platform === 'telegraph.ph' || platform === 'telegraph') return 'telegraph';
+          return platform;
+        })
+      );
+
+      const activePlatforms = this.getActivePlatforms();
+      const availablePlatforms = activePlatforms.filter(platform => !usedPlatformIds.has(platform.id));
+      const usedPlatformNames = Array.from(usedPlatformIds)
+        .map(id => activePlatforms.find(p => p.id === id)?.name || id)
+        .filter(Boolean);
+
+      return {
+        isValid: availablePlatforms.length > 0,
+        availablePlatforms,
+        usedPlatforms: usedPlatformNames,
+        message: availablePlatforms.length > 0
+          ? `${availablePlatforms.length} platform(s) available: ${availablePlatforms.map(p => p.name).join(', ')}. Already used: ${usedPlatformNames.join(', ')}`
+          : `All platforms already used: ${usedPlatformNames.join(', ')}. Consider enabling more platforms or creating a new campaign.`
+      };
+    } catch (error) {
+      return {
+        isValid: false,
+        availablePlatforms: [],
+        usedPlatforms: [],
+        message: `Error validating platform usage: ${error instanceof Error ? error.message : String(error)}`
+      };
+    }
+  }
+
+  /**
    * Get detailed platform information for debugging
    */
   getDebugInfo(campaignId?: string): any {
