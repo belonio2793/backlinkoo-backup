@@ -47,6 +47,14 @@ export interface DiscoveryResult {
   totalFound: number;
   searchQueries: string[];
   discoveryTime: number;
+  validationStats: {
+    totalChecked: number;
+    accessible: number;
+    removed404s: number;
+    wordpressConfirmed: number;
+    commentFormsFound: number;
+    averageQualityScore: number;
+  };
 }
 
 export interface TestResult {
