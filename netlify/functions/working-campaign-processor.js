@@ -905,3 +905,58 @@ async function checkAllPlatformsCompleted(supabase, campaignId) {
     return false; // Default to not completing if check fails
   }
 }
+
+/**
+ * Trigger next platform processing automatically
+ */
+async function triggerNextPlatformProcessing(campaignId, keyword, anchorText, targetUrl) {
+  const fetch = require('node-fetch');
+
+  // Get the current URL for the processor
+  const processorUrl = process.env.URL ?
+    `${process.env.URL}/.netlify/functions/working-campaign-processor` :
+    'http://localhost:8888/.netlify/functions/working-campaign-processor';
+
+  try {
+    const response = await fetch(processorUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        campaignId,
+        keyword,
+        anchorText,
+        targetUrl
+      })
+    });
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Failed to trigger next platform processing:', error);
+    throw error;
+  }
+}
+
+/**
+ * Log campaign activity
+ */
+async function logCampaignActivity(supabase, campaignId, level, message) {
+  try {
+    const { error } = await supabase
+      .from('automation_logs')
+      .insert({
+        campaign_id: campaignId,
+        level: level,
+        message: message,
+        created_at: new Date().toISOString()
+      });
+
+    if (error) {
+      console.warn('Failed to log campaign activity:', error);
+    }
+  } catch (error) {
+    console.warn('Campaign activity logging error:', error);
+  }
+}
