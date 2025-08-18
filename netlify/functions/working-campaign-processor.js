@@ -56,7 +56,7 @@ exports.handler = async (event, context) => {
     const publishedUrls = [];
 
     // Get next platform from orchestrator for proper rotation
-    const nextPlatform = getNextAvailablePlatform(supabase, campaignId);
+    const nextPlatform = await getNextAvailablePlatform(supabase, campaignId);
     console.log(`📡 Next platform for rotation: ${nextPlatform}`);
 
     try {
