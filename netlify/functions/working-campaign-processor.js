@@ -97,12 +97,12 @@ exports.handler = async (event, context) => {
       throw new Error('Failed to publish post to any platform');
     }
 
-    // Step 3: Mark campaign as completed after successful Telegraph publishing
-    await updateCampaignStatus(supabase, campaignId, 'completed', publishedUrls);
+    // Step 3: Keep campaign active after successful Telegraph publishing
+    await updateCampaignStatus(supabase, campaignId, 'active', publishedUrls);
     await logCampaignActivity(supabase, campaignId, 'info',
-      `Campaign completed successfully. Published to ${platform}: ${publishedUrls[0]}`);
+      `Successfully published to ${platform}: ${publishedUrls[0]}. Campaign remains active.`);
 
-    console.log('✅ Campaign completed after Telegraph publishing');
+    console.log('✅ Telegraph publishing successful - campaign remains active');
 
     return {
       statusCode: 200,
