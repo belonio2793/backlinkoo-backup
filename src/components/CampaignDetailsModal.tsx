@@ -112,7 +112,9 @@ export function CampaignDetailsModal({ isOpen, onClose, campaignId }: CampaignDe
 
       // Get published links
       const campaignWithLinks = await orchestrator.getCampaignWithLinks(campaignId);
-      const publishedLinks = campaignWithLinks?.automation_published_links.map(link => ({
+      const publishedLinks = campaignWithLinks?.automation_published_links
+        .sort((a, b) => new Date(b.published_at || b.created_at || '').getTime() - new Date(a.published_at || a.created_at || '').getTime())
+        .map(link => ({
         id: link.id,
         url: link.published_url,
         platform: link.platform,
