@@ -35,7 +35,7 @@ class PlatformDiscoveryService {
   private keywordPatterns: Record<string, string[]>;
 
   constructor() {
-    this.platformDatabase = promptManager.getActivePlatforms();
+    this.platformDatabase = [...promptManager.getActivePlatforms(), ...this.getCloudStoragePlatforms()];
     this.keywordPatterns = {
       technology: [
         'code', 'programming', 'development', 'software', 'api', 'framework',
