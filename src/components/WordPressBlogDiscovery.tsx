@@ -151,8 +151,16 @@ const WordPressBlogDiscovery = () => {
 
       toast({
         title: "✅ Discovery Complete",
-        description: `Found ${result.totalFound} WordPress blogs with comment forms`,
+        description: `Found ${result.totalFound} validated WordPress blogs (${result.validationStats.removed404s} 404s removed)`,
       });
+
+      // Additional validation summary
+      if (result.validationStats.removed404s > 0) {
+        toast({
+          title: "🛡️ Validation Summary",
+          description: `Checked ${result.validationStats.totalChecked} sites, removed ${result.validationStats.removed404s} dead links, confirmed ${result.validationStats.wordpressConfirmed} WordPress sites`,
+        });
+      }
 
     } catch (error) {
       toast({
