@@ -9,6 +9,7 @@ import { realTimeFeedService } from './realTimeFeedService';
 import { campaignNetworkLogger } from './campaignNetworkLogger';
 import MockContentGenerator from './mockContentGenerator';
 import MockTelegraphPublisher from './mockTelegraphPublisher';
+import MockWriteAsPublisher from './mockWriteAsPublisher';
 
 export interface DevelopmentProcessResult {
   success: boolean;
