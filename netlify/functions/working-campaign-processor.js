@@ -644,6 +644,41 @@ async function validateWriteAsUrl(url) {
 }
 
 /**
+ * Get next available platform for campaign rotation
+ */
+function getNextAvailablePlatform(supabase, campaignId) {
+  // Define available platforms in priority order
+  const availablePlatforms = [
+    { id: 'telegraph', name: 'Telegraph.ph' },
+    { id: 'writeas', name: 'Write.as' }
+  ];
+
+  // For now, use alternating logic based on campaign ID
+  // This ensures different campaigns use different platforms
+  const campaignHash = campaignId.split('').reduce((a, b) => {
+    a = ((a << 5) - a) + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+
+  const platformIndex = Math.abs(campaignHash) % availablePlatforms.length;
+  return availablePlatforms[platformIndex].id;
+}
+
+/**
+ * Track platform usage for proper rotation
+ */
+async function trackPlatformUsage(supabase, campaignId, platformId) {
+  try {
+    // This could be enhanced to track in a separate table for rotation logic
+    console.log(`📊 Tracked platform usage: ${platformId} for campaign ${campaignId}`);
+    return true;
+  } catch (error) {
+    console.warn('Failed to track platform usage:', error);
+    return false;
+  }
+}
+
+/**
  * Save published link to database
  */
 async function savePublishedLink(supabase, campaignId, url, title, platform = 'Telegraph.ph') {
