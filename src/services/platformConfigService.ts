@@ -101,8 +101,24 @@ export class PlatformConfigService {
 
   /**
    * Get only active platforms sorted by priority
+   * Now supports thousands of platforms when enabled
    */
   static getActivePlatforms(): PublishingPlatform[] {
+    if (this.useMassivePlatforms) {
+      try {
+        // Get platforms from massive database with intelligent limits
+        const massivePlatforms = massivePlatformManager.toPublishingPlatforms(100); // Start with 100 best platforms
+
+        if (massivePlatforms.length > 0) {
+          console.log(`🚀 Using ${massivePlatforms.length} platforms from massive database`);
+          return massivePlatforms;
+        }
+      } catch (error) {
+        console.warn('❌ Error loading massive platforms, falling back to basic platforms:', error);
+      }
+    }
+
+    // Fallback to basic platforms
     return AVAILABLE_PLATFORMS
       .filter(p => p.isActive)
       .sort((a, b) => a.priority - b.priority);
