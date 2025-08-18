@@ -836,6 +836,7 @@ export class AutomationOrchestrator {
         automation_published_links(*)
       `)
       .eq('id', campaignId)
+      .order('published_at', { referencedTable: 'automation_published_links', ascending: false })
       .single();
 
     if (error) {
