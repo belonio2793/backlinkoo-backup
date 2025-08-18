@@ -986,8 +986,9 @@ export class AutomationOrchestrator {
 
       // For continuous rotation, always continue to next platform
       if (!nextPlatform) {
-        await this.logActivity(campaignId, 'info', 'All platforms used once - continuing rotation to first platform');
-        // Don't complete - just let it continue to the next cycle
+        await this.logActivity(campaignId, 'warning', 'No next platform available - this should not happen with continuous rotation');
+        console.warn(`⚠️ No next platform available for campaign ${campaignId} - checking platform configuration`);
+        return; // Exit early if no platform available
       }
 
       await this.logActivity(campaignId, 'info',
