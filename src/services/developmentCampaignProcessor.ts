@@ -71,25 +71,37 @@ export class DevelopmentCampaignProcessor {
         campaign.user_id
       );
 
-      // Step 3: Publish to Telegraph.ph
-      console.log('📡 Publishing to Telegraph.ph...');
-      realTimeFeedService.emitSystemEvent(`Publishing "${contentResult.data.title}" to Telegraph.ph`, 'info');
+      // Step 3: Determine next platform and publish
+      const nextPlatform = await this.getNextAvailablePlatform(campaign.id);
+      console.log(`📡 Publishing to ${nextPlatform.name}...`);
+      realTimeFeedService.emitSystemEvent(`Publishing "${contentResult.data.title}" to ${nextPlatform.name}`, 'info');
 
-      const publishResult = await MockTelegraphPublisher.publishContent({
-        title: contentResult.data.title,
-        content: contentResult.data.content,
-        authorName: 'Backlinkoo'
-      });
+      let publishResult;
+      if (nextPlatform.id === 'telegraph') {
+        publishResult = await MockTelegraphPublisher.publishContent({
+          title: contentResult.data.title,
+          content: contentResult.data.content,
+          authorName: 'Backlinkoo'
+        });
+      } else if (nextPlatform.id === 'writeas') {
+        publishResult = await MockWriteAsPublisher.publishContent({
+          title: contentResult.data.title,
+          content: contentResult.data.content,
+          authorName: 'Anonymous'
+        });
+      } else {
+        throw new Error(`Unsupported platform: ${nextPlatform.id}`);
+      }
 
       if (!publishResult.success) {
-        throw new Error(`Telegraph publishing failed: ${publishResult.error}`);
+        throw new Error(`${nextPlatform.name} publishing failed: ${publishResult.error}`);
       }
 
       const publishedUrls = [publishResult.url];
-      console.log(`✅ Published to Telegraph: ${publishResult.url}`);
+      console.log(`✅ Published to ${nextPlatform.name}: ${publishResult.url}`);
 
       // Step 4: Save published link to database
-      await this.savePublishedLink(campaign.id, publishResult.url, contentResult.data);
+      await this.savePublishedLink(campaign.id, publishResult.url, contentResult.data, nextPlatform.id);
 
       // Emit URL published event
       realTimeFeedService.emitUrlPublished(
@@ -97,7 +109,7 @@ export class DevelopmentCampaignProcessor {
         campaign.name,
         keyword,
         publishResult.url,
-        'Telegraph.ph',
+        nextPlatform.name,
         campaign.user_id
       );
 
