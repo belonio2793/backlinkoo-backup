@@ -536,6 +536,65 @@
 <p>• <strong>Search Engine Optimization:</strong> Boost your organic visibility</p>
 <p>• <strong>Content Marketing:</strong> Create engaging content that converts</p>
 <p>• <strong>Analytics & Tracking:</strong> Measure what matters for growth</p>`;
+
+        async function testWriteAsPublishing() {
+            const testContent = `<h1>Write.as Test Article</h1>
+
+<p>This is a test article for <strong>Write.as publishing</strong> with <strong>bold text formatting</strong> and <a href="https://example.com">external links</a>.</p>
+
+<p>Key features being tested:</p>
+
+<p>• <strong>Bold text formatting:</strong> Should convert to markdown</p>
+<p>• <strong>Link preservation:</strong> Links should work correctly</p>
+<p>• <strong>Anonymous publishing:</strong> No account required</p>`;
+
+            const resultDiv = document.getElementById('workflow-result');
+            resultDiv.innerHTML = '<div class="result">Publishing to Write.as...</div>';
+            resultDiv.style.display = 'block';
+
+            try {
+                const response = await fetch('/.netlify/functions/writeas-publisher', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: 'Write.as Formatting Test',
+                        content: testContent,
+                        author_name: 'Test Author'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Write.as Publishing Successful</h3>
+                            <p><strong>URL:</strong> <a href="${result.url}" target="_blank">${result.url}</a></p>
+                            <p><strong>Platform:</strong> ${result.platform}</p>
+                            <p><strong>Post ID:</strong> ${result.post_id}</p>
+                            <p><strong>Can Claim:</strong> ${result.metadata.can_claim ? 'Yes' : 'No'}</p>
+                            <p>Check the published page to verify markdown formatting and bold text.</p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h3>❌ Write.as Publishing Failed</h3>
+                            <p>${result.error}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Request Failed</h3>
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
     </script>
 </body>
 </html>
