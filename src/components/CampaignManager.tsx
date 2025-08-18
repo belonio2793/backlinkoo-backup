@@ -464,7 +464,9 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                           <div className="mt-2">
                             <p className="font-medium">Published Links ({campaign.automation_published_links.length}):</p>
                             <div className="space-y-1 mt-1">
-                              {campaign.automation_published_links.slice(0, 2).map((link) => (
+                              {campaign.automation_published_links
+                                .sort((a, b) => new Date(b.published_at || b.created_at || '').getTime() - new Date(a.published_at || a.created_at || '').getTime())
+                                .slice(0, 2).map((link) => (
                                 <a
                                   key={link.id}
                                   href={link.published_url}
