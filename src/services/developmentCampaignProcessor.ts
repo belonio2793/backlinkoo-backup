@@ -10,6 +10,7 @@ import { campaignNetworkLogger } from './campaignNetworkLogger';
 import MockContentGenerator from './mockContentGenerator';
 import MockTelegraphPublisher from './mockTelegraphPublisher';
 import MockWriteAsPublisher from './mockWriteAsPublisher';
+import { PlatformConfigService } from './platformConfigService';
 
 export interface DevelopmentProcessResult {
   success: boolean;
