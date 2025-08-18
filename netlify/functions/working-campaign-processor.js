@@ -69,7 +69,7 @@ exports.handler = async (event, context) => {
         await validateTelegraphUrl(publishedUrl);
       } else if (nextPlatform === 'writeas') {
         publishedUrl = await publishToWriteAs(blogPost.title, blogPost.content);
-        platform = 'Write.as';
+        platform = 'writeas';
         await validateWriteAsUrl(publishedUrl);
       } else {
         // Fallback to Telegraph if no specific platform determined
