@@ -69,8 +69,8 @@ export class QueueManager extends EventEmitter {
   // Initialize all link building engines
   private initializeEngines(): void {
     this.engines.set('blog_comments', new BlogCommentsEngine());
+    this.engines.set('web2_platforms', new Web2PlatformsEngine());
     // TODO: Add other engines
-    // this.engines.set('web2_platforms', new Web2PlatformsEngine());
     // this.engines.set('forum_profiles', new ForumProfilesEngine());
     // this.engines.set('social_media', new SocialMediaEngine());
   }
