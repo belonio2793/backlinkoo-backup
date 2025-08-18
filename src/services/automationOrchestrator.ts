@@ -467,6 +467,19 @@ export class AutomationOrchestrator {
         throw new Error('Campaign not found');
       }
 
+      // CRITICAL: Validate no platform duplication before processing
+      const validation = await this.validateNoPlatformDuplication(campaignId);
+      if (!validation.isValid) {
+        // Auto-complete the campaign instead of throwing an error
+        await this.updateCampaignStatus(campaignId, 'completed');
+        await this.logActivity(campaignId, 'info', `Campaign auto-completed: ${validation.message}`);
+        console.log(`✅ Campaign ${campaignId} auto-completed - all platforms already used`);
+        return;
+      }
+
+      // Log available platforms for transparency
+      await this.logActivity(campaignId, 'info', `Processing campaign - ${validation.message}`);
+
       // Use the working campaign processor for reliable processing
       const result = await workingCampaignProcessor.processCampaign(campaign);
 
