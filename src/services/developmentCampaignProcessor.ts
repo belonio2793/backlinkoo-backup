@@ -72,25 +72,23 @@ export class DevelopmentCampaignProcessor {
         campaign.user_id
       );
 
-      // Step 3: Try to publish to available platforms
+      // Step 3: Try to publish to available platforms (one attempt per platform)
       let publishResult: any = null;
       let successfulPlatform: any = null;
-      let attempts = 0;
-      const maxAttempts = 5; // Prevent infinite loops
+      let platformsTried = 0;
 
-      while (!publishResult?.success && attempts < maxAttempts) {
-        attempts++;
+      while (!publishResult?.success && platformsTried < 10) { // Prevent infinite loops
+        const nextPlatform = await this.getNextAvailablePlatform(campaign.id);
+        if (!nextPlatform) {
+          console.log(`⚠️ [DEV] No more platforms available for campaign ${campaign.id}`);
+          break;
+        }
+
+        platformsTried++;
+        console.log(`📡 Publishing to ${nextPlatform.name}...`);
+        realTimeFeedService.emitSystemEvent(`Publishing "${contentResult.data.title}" to ${nextPlatform.name}`, 'info');
 
         try {
-          const nextPlatform = await this.getNextAvailablePlatform(campaign.id);
-          if (!nextPlatform) {
-            console.log(`⚠️ [DEV] No more platforms available for campaign ${campaign.id}`);
-            break;
-          }
-
-          console.log(`📡 Publishing to ${nextPlatform.name} (attempt ${attempts})...`);
-          realTimeFeedService.emitSystemEvent(`Publishing "${contentResult.data.title}" to ${nextPlatform.name}`, 'info');
-
           if (nextPlatform.id === 'telegraph') {
             publishResult = await MockTelegraphPublisher.publishContent({
               title: contentResult.data.title,
@@ -106,29 +104,29 @@ export class DevelopmentCampaignProcessor {
             });
             successfulPlatform = nextPlatform;
           } else {
-            // Log unsupported platform but continue to next one
+            // Unsupported platform - skip to next immediately
             console.warn(`⚠️ [DEV] Unsupported platform: ${nextPlatform.id}, skipping to next platform`);
-            await this.logActivity(campaign.id, 'warning', `Skipped unsupported platform: ${nextPlatform.name}`);
-
-            // Mark this platform as "used" so we don't try it again
+            await this.logActivity(campaign.id, 'info', `Skipped unsupported platform: ${nextPlatform.name}`);
             await this.saveSkippedPlatform(campaign.id, nextPlatform.id, `Unsupported platform: ${nextPlatform.id}`);
-            continue;
+            continue; // Try next platform immediately
           }
 
-          // Check if publishing was successful
+          // Check if publishing was successful - if not, skip to next platform immediately
           if (!publishResult.success) {
-            console.warn(`⚠️ [DEV] ${nextPlatform.name} publishing failed: ${publishResult.error}, trying next platform`);
-            await this.logActivity(campaign.id, 'warning', `${nextPlatform.name} publishing failed: ${publishResult.error}, continuing to next platform`);
-
-            // Mark this platform as failed so we don't try it again
+            console.warn(`⚠️ [DEV] ${nextPlatform.name} publishing failed: ${publishResult.error}, skipping to next platform`);
+            await this.logActivity(campaign.id, 'info', `${nextPlatform.name} publishing failed, trying next platform`);
             await this.saveSkippedPlatform(campaign.id, nextPlatform.id, publishResult.error || 'Publishing failed');
             publishResult = null; // Reset to try next platform
+            continue; // Try next platform immediately
           }
 
         } catch (platformError) {
-          console.warn(`⚠️ [DEV] Platform error on attempt ${attempts}:`, platformError);
-          await this.logActivity(campaign.id, 'warning', `Platform error: ${platformError.message}, continuing to next platform`);
+          // Platform error - skip to next platform immediately
+          console.warn(`⚠️ [DEV] ${nextPlatform.name} error: ${platformError.message}, skipping to next platform`);
+          await this.logActivity(campaign.id, 'info', `${nextPlatform.name} error, trying next platform`);
+          await this.saveSkippedPlatform(campaign.id, nextPlatform.id, platformError.message);
           publishResult = null; // Reset to try next platform
+          continue; // Try next platform immediately
         }
       }
 
