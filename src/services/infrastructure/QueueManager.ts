@@ -2,6 +2,7 @@ import { Redis } from 'ioredis';
 import { EventEmitter } from 'events';
 import type { EngineTask, EngineType, TaskPriority, LinkPlacementResult } from '../engines/BaseEngine';
 import { BlogCommentsEngine } from '../engines/BlogCommentsEngine';
+import { Web2PlatformsEngine } from '../engines/Web2PlatformsEngine';
 
 export interface QueueConfig {
   redis: {
