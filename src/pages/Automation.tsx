@@ -28,6 +28,7 @@ import EnhancedCampaignCreator from '@/components/EnhancedCampaignCreator';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import MassivePlatformStats from '@/components/MassivePlatformStats';
+import PlatformTestCampaign from '@/components/PlatformTestCampaign';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useCampaignFormPersistence } from '@/hooks/useCampaignFormPersistence';
 import { useSmartCampaignFlow } from '@/hooks/useSmartCampaignFlow';
