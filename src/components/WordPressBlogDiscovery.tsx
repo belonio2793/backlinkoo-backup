@@ -303,14 +303,14 @@ const WordPressBlogDiscovery = () => {
       </Card>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-blue-600" />
+              <Database className="w-4 h-4 text-blue-600" />
               <div>
-                <p className="text-sm text-gray-600">Found</p>
-                <p className="text-xl font-bold">{stats.totalFound}</p>
+                <p className="text-sm text-gray-600">Checked</p>
+                <p className="text-xl font-bold">{stats.totalChecked}</p>
               </div>
             </div>
           </CardContent>
@@ -318,10 +318,10 @@ const WordPressBlogDiscovery = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-green-600" />
+              <Globe className="w-4 h-4 text-green-600" />
               <div>
-                <p className="text-sm text-gray-600">Passed</p>
-                <p className="text-xl font-bold text-green-600">{stats.testsPassed}</p>
+                <p className="text-sm text-gray-600">Valid</p>
+                <p className="text-xl font-bold text-green-600">{stats.totalFound}</p>
               </div>
             </div>
           </CardContent>
@@ -331,8 +331,19 @@ const WordPressBlogDiscovery = () => {
             <div className="flex items-center gap-2">
               <XCircle className="w-4 h-4 text-red-600" />
               <div>
-                <p className="text-sm text-gray-600">Failed</p>
-                <p className="text-xl font-bold text-red-600">{stats.testsFailed}</p>
+                <p className="text-sm text-gray-600">404s Removed</p>
+                <p className="text-xl font-bold text-red-600">{stats.removed404s}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="w-4 h-4 text-green-600" />
+              <div>
+                <p className="text-sm text-gray-600">Tests Passed</p>
+                <p className="text-xl font-bold text-green-600">{stats.testsPassed}</p>
               </div>
             </div>
           </CardContent>
@@ -353,8 +364,8 @@ const WordPressBlogDiscovery = () => {
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-orange-600" />
               <div>
-                <p className="text-sm text-gray-600">Success Rate</p>
-                <p className="text-xl font-bold text-orange-600">{stats.averageSuccessRate}%</p>
+                <p className="text-sm text-gray-600">Quality</p>
+                <p className="text-xl font-bold text-orange-600">{stats.averageQualityScore}</p>
               </div>
             </div>
           </CardContent>
