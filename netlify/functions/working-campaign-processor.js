@@ -840,43 +840,11 @@ function normalizePlatformId(platformId) {
 
 /**
  * Check if all active platforms have completed for a campaign
+ * Updated for continuous rotation - always returns false to prevent auto-completion
  */
 async function checkAllPlatformsCompleted(supabase, campaignId) {
-  try {
-    // Get active platforms from centralized configuration
-    const activePlatforms = await getActivePlatforms();
-
-    // Get published links for this campaign
-    const { data: publishedLinks, error } = await supabase
-      .from('automation_published_links')
-      .select('platform, published_url')
-      .eq('campaign_id', campaignId)
-      .eq('status', 'active');
-
-    if (error) {
-      console.warn('Failed to fetch published links:', error);
-      return false; // Default to not completing if we can't check
-    }
-
-    // Check if all active platforms have published content using normalized IDs
-    const publishedPlatforms = new Set(
-      (publishedLinks || []).map(link => normalizePlatformId(link.platform))
-    );
-    const activePlatformIds = activePlatforms.map(p => p.id);
-
-    const allCompleted = activePlatformIds.every(platformId =>
-      publishedPlatforms.has(platformId)
-    );
-
-    console.log(`🔍 Platform completion check:`, {
-      activePlatforms: activePlatformIds,
-      publishedPlatforms: Array.from(publishedPlatforms),
-      allCompleted
-    });
-
-    return allCompleted;
-  } catch (error) {
-    console.warn('Failed to check platform completion:', error);
-    return false; // Default to not completing if check fails
-  }
+  // For continuous rotation, campaigns should never auto-complete
+  // They should only be completed manually by the user
+  console.log(`🔄 Continuous rotation enabled - campaign ${campaignId} will not auto-complete`);
+  return false;
 }
