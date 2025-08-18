@@ -175,11 +175,8 @@ export class DevelopmentCampaignProcessor {
    */
   private async getNextAvailablePlatform(campaignId: string): Promise<{ id: string; name: string }> {
     try {
-      // Define available platforms in priority order
-      const availablePlatforms = [
-        { id: 'telegraph', name: 'Telegraph.ph' },
-        { id: 'writeas', name: 'Write.as' }
-      ];
+      // Get available platforms from centralized configuration
+      const availablePlatforms = PlatformConfigService.getActivePlatforms();
 
       // Get existing published links for this campaign from database
       const { data: publishedLinks, error } = await supabase
