@@ -487,27 +487,8 @@ export class AutomationOrchestrator {
         throw new Error('Campaign not found');
       }
 
-      // CRITICAL: Validate platform usage before processing
-      const validation = await this.validateNoPlatformDuplication(campaignId);
-      if (!validation.isValid) {
-        // Check if all platforms are TRULY completed (both active platforms have published)
-        const allPlatformsCompleted = this.shouldAutoPauseCampaign(campaignId);
-
-        if (allPlatformsCompleted) {
-          // All platforms genuinely completed - mark as done
-          await this.updateCampaignStatus(campaignId, 'completed');
-          await this.logActivity(campaignId, 'info', `Campaign completed: All platforms have published content`);
-          console.log(`✅ Campaign ${campaignId} completed - all platforms have published`);
-          return;
-        } else {
-          // Campaign has some published links but not all platforms - let it continue
-          console.log(`⚠️ Campaign ${campaignId} has partial platform usage, continuing processing`);
-          await this.logActivity(campaignId, 'info', `Continuing campaign - ${validation.message}`);
-        }
-      } else {
-        // Log available platforms for transparency
-        await this.logActivity(campaignId, 'info', `Processing campaign - ${validation.message}`);
-      }
+      // Log campaign processing status - no completion logic for continuous rotation
+      await this.logActivity(campaignId, 'info', `Processing campaign - continuous rotation enabled`);
 
       // Use the working campaign processor for reliable processing
       const result = await workingCampaignProcessor.processCampaign(campaign);
