@@ -131,6 +131,45 @@ export class AutomationOrchestrator {
   }
 
   /**
+   * Get next available platform for a campaign (async version that checks database)
+   */
+  async getNextPlatformForCampaignAsync(campaignId: string): Promise<PublishingPlatform | null> {
+    const activePlatforms = this.getActivePlatforms();
+
+    // Get published links from database to check which platforms are already used
+    const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
+    const publishedLinks = campaignWithLinks?.automation_published_links || [];
+
+    // Create set of used platform IDs from database (normalize to handle legacy data)
+    const usedPlatformIds = new Set(
+      publishedLinks.map(link => {
+        const platform = link.platform.toLowerCase();
+        // Normalize legacy platform names
+        if (platform === 'write.as' || platform === 'writeas') return 'writeas';
+        if (platform === 'telegraph.ph' || platform === 'telegraph') return 'telegraph';
+        return platform;
+      })
+    );
+
+    // Also check in-memory progress map as backup
+    const campaignProgress = this.platformProgressMap.get(campaignId) || [];
+    for (const progress of campaignProgress) {
+      if (progress.isCompleted) {
+        usedPlatformIds.add(progress.platformId);
+      }
+    }
+
+    // Find the first platform that hasn't been used yet
+    for (const platform of activePlatforms) {
+      if (!usedPlatformIds.has(platform.id)) {
+        return platform;
+      }
+    }
+
+    return null; // All platforms have been used
+  }
+
+  /**
    * Check if campaign should auto-pause (completed all available platforms)
    */
   shouldAutoPauseCampaign(campaignId: string): boolean {
