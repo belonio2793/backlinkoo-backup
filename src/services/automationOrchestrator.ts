@@ -1354,25 +1354,10 @@ export class AutomationOrchestrator {
         };
       }
 
-      // Check if campaign has published links and if all platforms are completed
+      // For continuous rotation, always allow resume regardless of published links
       const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
       if (campaignWithLinks?.automation_published_links && campaignWithLinks.automation_published_links.length > 0) {
-        // Check if all active platforms have completed before marking as completed
-        const shouldComplete = this.shouldAutoPauseCampaign(campaignId);
-
-        if (shouldComplete) {
-          // All platforms completed - mark as completed
-          await this.updateCampaignStatus(campaignId, 'completed');
-          await this.logActivity(campaignId, 'info', 'Campaign marked as completed - all platforms have published content');
-
-          return {
-            success: false,
-            message: 'This campaign is completed. Please create a new campaign.'
-          };
-        }
-
-        // Has published links but not all platforms completed - continue with resume
-        await this.logActivity(campaignId, 'info', 'Campaign has published content but more platforms available - continuing');
+        await this.logActivity(campaignId, 'info', 'Campaign has published content - continuing with continuous rotation');
       }
 
       return await this.smartResumeCampaign(campaignId);
