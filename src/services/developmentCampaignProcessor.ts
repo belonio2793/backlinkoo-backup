@@ -185,8 +185,8 @@ export class DevelopmentCampaignProcessor {
         .eq('campaign_id', campaignId);
 
       if (error) {
-        console.warn('Error checking published links, defaulting to Telegraph:', error);
-        return availablePlatforms[0];
+        console.warn('Error checking published links, using first available platform:', error);
+        return availablePlatforms[0] || { id: 'telegraph', name: 'Telegraph.ph' };
       }
 
       // Create set of used platforms (normalize legacy platform names)
