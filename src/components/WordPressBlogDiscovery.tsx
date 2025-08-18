@@ -15,9 +15,9 @@ import {
   User, 
   Mail, 
   Link, 
-  MessageSquare, 
-  CheckCircle, 
-  XCircle, 
+  MessageSquare,
+  CheckCircle,
+  XCircle,
   Loader2,
   ExternalLink,
   Target,
@@ -25,7 +25,9 @@ import {
   Shield,
   AlertTriangle,
   TrendingUp,
-  Zap
+  Zap,
+  Eye,
+  Database
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { wordpressCommentService } from '@/services/wordpressCommentService';
