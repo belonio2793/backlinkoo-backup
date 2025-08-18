@@ -131,7 +131,10 @@ const WordPressBlogDiscovery = () => {
       setStats(prev => ({
         ...prev,
         totalFound: statsData.total,
-        averageSuccessRate: statsData.averageSuccessRate
+        totalChecked: result.validationStats.totalChecked,
+        removed404s: result.validationStats.removed404s,
+        averageSuccessRate: statsData.averageSuccessRate,
+        averageQualityScore: result.validationStats.averageQualityScore
       }));
 
       toast({
