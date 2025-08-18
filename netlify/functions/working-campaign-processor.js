@@ -655,11 +655,9 @@ async function validateWriteAsUrl(url) {
  */
 async function getNextAvailablePlatform(supabase, campaignId) {
   try {
-    // Define available platforms in priority order
-    const availablePlatforms = [
-      { id: 'telegraph', name: 'Telegraph.ph' },
-      { id: 'writeas', name: 'Write.as' }
-    ];
+    // Get available platforms from centralized configuration
+    // This ensures new platforms are automatically included when activated
+    const availablePlatforms = await getActivePlatforms();
 
     // Get existing published links for this campaign from database
     const { data: publishedLinks, error } = await supabase
@@ -800,12 +798,8 @@ async function updateCampaignStatus(supabase, campaignId, status, publishedUrls)
  */
 async function checkAllPlatformsCompleted(supabase, campaignId) {
   try {
-    // Define active platforms (similar to the orchestrator)
-    const activePlatforms = [
-      { id: 'telegraph', name: 'Telegraph.ph', isActive: true },
-      { id: 'writeas', name: 'Write.as', isActive: true }
-      // Add other active platforms as needed
-    ];
+    // Get active platforms from centralized configuration
+    const activePlatforms = await getActivePlatforms();
 
     // Get published links for this campaign
     const { data: publishedLinks, error } = await supabase
