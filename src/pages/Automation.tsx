@@ -23,6 +23,7 @@ import InlineFeedMonitor from '@/components/InlineFeedMonitor';
 import DevelopmentModeIndicator from '@/components/DevelopmentModeIndicator';
 import BacklinkNotification from '@/components/BacklinkNotification';
 import DatabaseSchemaFixer from '@/components/DatabaseSchemaFixer';
+import PublishedLinksDebugger from '@/components/debug/PublishedLinksDebugger';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
