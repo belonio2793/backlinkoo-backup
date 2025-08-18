@@ -169,6 +169,59 @@ export class DevelopmentCampaignProcessor {
   }
 
   /**
+   * Get next available platform for campaign (development version)
+   */
+  private async getNextAvailablePlatform(campaignId: string): Promise<{ id: string; name: string }> {
+    try {
+      // Define available platforms in priority order
+      const availablePlatforms = [
+        { id: 'telegraph', name: 'Telegraph.ph' },
+        { id: 'writeas', name: 'Write.as' }
+      ];
+
+      // Get existing published links for this campaign from database
+      const { data: publishedLinks, error } = await supabase
+        .from('automation_published_links')
+        .select('platform')
+        .eq('campaign_id', campaignId);
+
+      if (error) {
+        console.warn('Error checking published links, defaulting to Telegraph:', error);
+        return availablePlatforms[0];
+      }
+
+      // Create set of used platforms (normalize legacy platform names)
+      const usedPlatforms = new Set(
+        (publishedLinks || []).map(link => {
+          const platform = link.platform.toLowerCase();
+          // Normalize legacy platform names
+          if (platform === 'write.as' || platform === 'writeas') return 'writeas';
+          if (platform === 'telegraph.ph' || platform === 'telegraph') return 'telegraph';
+          return platform;
+        })
+      );
+
+      console.log(`📊 [DEV] Campaign ${campaignId} - Used platforms:`, Array.from(usedPlatforms));
+
+      // Find first available platform that hasn't been used
+      for (const platform of availablePlatforms) {
+        if (!usedPlatforms.has(platform.id)) {
+          console.log(`✅ [DEV] Selected next platform: ${platform.id} (${platform.name})`);
+          return platform;
+        }
+      }
+
+      // All platforms have been used
+      console.log(`⚠️ [DEV] All platforms used for campaign ${campaignId}, defaulting to Telegraph`);
+      throw new Error('All available platforms have been used for this campaign');
+
+    } catch (error) {
+      console.error('Error getting next platform, defaulting to Telegraph:', error);
+      return { id: 'telegraph', name: 'Telegraph.ph' };
+    }
+  }
+
+  /**
    * Update campaign status in database
    */
   private async updateCampaignStatus(campaignId: string, status: string): Promise<void> {
