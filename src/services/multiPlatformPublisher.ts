@@ -39,7 +39,14 @@ class MultiPlatformPublisher {
         case 'justpaste':
           return await this.publishToJustPaste(request, startTime);
         default:
-          throw new Error(`Unsupported platform: ${request.platform}`);
+          console.warn(`⚠️ Unsupported platform: ${request.platform}, skipping...`);
+          return {
+            success: false,
+            platform: request.platform,
+            publishing_time_ms: Date.now() - startTime,
+            error: `Platform ${request.platform} is not yet implemented. Skipping to next available platform.`,
+            warning: 'Platform not supported - will try next platform'
+          };
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
