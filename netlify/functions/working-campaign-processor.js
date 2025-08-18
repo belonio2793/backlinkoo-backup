@@ -104,8 +104,23 @@ exports.handler = async (event, context) => {
       await updateCampaignStatus(supabase, campaignId, 'completed', publishedUrls);
       console.log('✅ Campaign marked as completed - all platforms have published content');
     } else {
-      await updateCampaignStatus(supabase, campaignId, 'paused', publishedUrls);
-      console.log('⏸️ Campaign paused - waiting for other platforms to complete');
+      // Continue to next platform automatically instead of just pausing
+      await updateCampaignStatus(supabase, campaignId, 'active', publishedUrls);
+      console.log('🔄 Campaign continuing to next platform - auto-resuming...');
+
+      try {
+        // Trigger the next platform processing automatically
+        const nextResult = await processNextPlatform(supabase, campaignId, keyword, anchorText, targetUrl);
+        console.log('✅ Next platform processing triggered:', nextResult.success ? 'Success' : 'Failed');
+
+        if (!nextResult.success) {
+          console.warn('⚠️ Next platform processing failed, campaign will remain active for manual retry');
+        }
+      } catch (error) {
+        console.error('❌ Failed to auto-continue to next platform:', error);
+        await updateCampaignStatus(supabase, campaignId, 'paused', publishedUrls);
+        console.log('⏸️ Campaign paused due to auto-continue failure');
+      }
     }
 
     return {
