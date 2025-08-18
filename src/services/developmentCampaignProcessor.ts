@@ -220,9 +220,10 @@ export class DevelopmentCampaignProcessor {
    * Save published link to database
    */
   private async savePublishedLink(
-    campaignId: string, 
-    url: string, 
-    contentData: any
+    campaignId: string,
+    url: string,
+    contentData: any,
+    platform: string = 'telegraph'
   ): Promise<void> {
     try {
       // Save to automation_published_links
@@ -233,7 +234,7 @@ export class DevelopmentCampaignProcessor {
           published_url: url,
           anchor_text: contentData.anchorText,
           target_url: contentData.targetUrl,
-          platform: 'telegraph',
+          platform: platform,
           status: 'active',
           published_at: new Date().toISOString()
         });
