@@ -416,6 +416,28 @@ const Automation = () => {
         {/* Development Mode Indicator */}
         <DevelopmentModeIndicator />
 
+        {/* Platform Discovery Announcement */}
+        <Alert className="border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50">
+          <Search className="h-4 w-4" />
+          <AlertDescription className="text-purple-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <strong>🆕 Platform Discovery Available!</strong>
+                <p className="text-sm mt-1">
+                  Use advanced footprint analysis to discover link building opportunities across WordPress blogs,
+                  guest posting sites, forums, directories, and more. Automatically validate and integrate platforms.
+                </p>
+              </div>
+              <a
+                href="/automation/discovery"
+                className="ml-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors whitespace-nowrap"
+              >
+                Explore Discovery
+              </a>
+            </div>
+          </AlertDescription>
+        </Alert>
+
         {/* Database Schema Fixer removed for cleaner UI */}
 
         {/* Status Messages */}
