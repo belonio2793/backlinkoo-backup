@@ -97,9 +97,17 @@ exports.handler = async (event, context) => {
       throw new Error('Failed to publish post to any platform');
     }
 
-    // Step 3: Update campaign status to completed
-    await updateCampaignStatus(supabase, campaignId, 'completed', publishedUrls);
-    console.log('✅ Campaign marked as completed');
+    // Step 3: Check if all platforms have completed before marking campaign as completed
+    const shouldComplete = await checkAllPlatformsCompleted(supabase, campaignId);
+
+    if (shouldComplete) {
+      await updateCampaignStatus(supabase, campaignId, 'completed', publishedUrls);
+      console.log('✅ Campaign marked as completed - all platforms have published content');
+    } else {
+      // Keep campaign active so it can be automatically resumed for next platform
+      await updateCampaignStatus(supabase, campaignId, 'active', publishedUrls);
+      console.log('🔄 Campaign marked as active - ready for next platform processing');
+    }
 
     return {
       statusCode: 200,
@@ -648,11 +656,9 @@ async function validateWriteAsUrl(url) {
  */
 async function getNextAvailablePlatform(supabase, campaignId) {
   try {
-    // Define available platforms in priority order
-    const availablePlatforms = [
-      { id: 'telegraph', name: 'Telegraph.ph' },
-      { id: 'writeas', name: 'Write.as' }
-    ];
+    // Get available platforms from centralized configuration
+    // This ensures new platforms are automatically included when activated
+    const availablePlatforms = await getActivePlatforms();
 
     // Get existing published links for this campaign from database
     const { data: publishedLinks, error } = await supabase
@@ -785,5 +791,83 @@ async function updateCampaignStatus(supabase, campaignId, status, publishedUrls)
   } catch (error) {
     console.warn('Campaign status update failed:', error);
     // Don't throw - campaign can still be considered successful
+  }
+}
+
+/**
+ * Get active platforms from centralized configuration
+ */
+async function getActivePlatforms() {
+  // Centralized platform configuration - single source of truth
+  const allPlatforms = [
+    { id: 'telegraph', name: 'Telegraph.ph', isActive: true, priority: 1 },
+    { id: 'writeas', name: 'Write.as', isActive: true, priority: 2 },
+    { id: 'medium', name: 'Medium.com', isActive: false, priority: 3 },
+    { id: 'devto', name: 'Dev.to', isActive: false, priority: 4 },
+    { id: 'linkedin', name: 'LinkedIn Articles', isActive: false, priority: 5 },
+    { id: 'hashnode', name: 'Hashnode', isActive: false, priority: 6 },
+    { id: 'substack', name: 'Substack', isActive: false, priority: 7 }
+  ];
+
+  return allPlatforms
+    .filter(p => p.isActive)
+    .sort((a, b) => a.priority - b.priority);
+}
+
+/**
+ * Normalize platform ID for consistency
+ */
+function normalizePlatformId(platformId) {
+  const normalized = platformId.toLowerCase();
+
+  // Handle legacy platform names
+  if (normalized === 'write.as' || normalized === 'writeas') return 'writeas';
+  if (normalized === 'telegraph.ph' || normalized === 'telegraph') return 'telegraph';
+  if (normalized === 'medium.com') return 'medium';
+  if (normalized === 'dev.to') return 'devto';
+
+  return normalized;
+}
+
+/**
+ * Check if all active platforms have completed for a campaign
+ */
+async function checkAllPlatformsCompleted(supabase, campaignId) {
+  try {
+    // Get active platforms from centralized configuration
+    const activePlatforms = await getActivePlatforms();
+
+    // Get published links for this campaign
+    const { data: publishedLinks, error } = await supabase
+      .from('automation_published_links')
+      .select('platform, published_url')
+      .eq('campaign_id', campaignId)
+      .eq('status', 'active');
+
+    if (error) {
+      console.warn('Failed to fetch published links:', error);
+      return false; // Default to not completing if we can't check
+    }
+
+    // Check if all active platforms have published content using normalized IDs
+    const publishedPlatforms = new Set(
+      (publishedLinks || []).map(link => normalizePlatformId(link.platform))
+    );
+    const activePlatformIds = activePlatforms.map(p => p.id);
+
+    const allCompleted = activePlatformIds.every(platformId =>
+      publishedPlatforms.has(platformId)
+    );
+
+    console.log(`🔍 Platform completion check:`, {
+      activePlatforms: activePlatformIds,
+      publishedPlatforms: Array.from(publishedPlatforms),
+      allCompleted
+    });
+
+    return allCompleted;
+  } catch (error) {
+    console.warn('Failed to check platform completion:', error);
+    return false; // Default to not completing if check fails
   }
 }

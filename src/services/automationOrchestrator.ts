@@ -6,6 +6,7 @@ import { ProgressStep, CampaignProgress } from '@/components/CampaignProgressTra
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { realTimeFeedService } from './realTimeFeedService';
 import { campaignNetworkLogger } from './campaignNetworkLogger';
+import { PlatformConfigService, AVAILABLE_PLATFORMS, type PublishingPlatform } from './platformConfigService';
 // Removed campaignErrorHandler import - using simplified error handling
 
 export interface Campaign {
@@ -31,24 +32,9 @@ export interface CampaignProgressInfo {
   error?: string;
 }
 
-// Available publishing platforms
-export interface PublishingPlatform {
-  id: string;
-  name: string;
-  isActive: boolean;
-  maxPostsPerCampaign: number;
-  priority: number;
-}
-
-export const AVAILABLE_PLATFORMS: PublishingPlatform[] = [
-  { id: 'telegraph', name: 'Telegraph.ph', isActive: true, maxPostsPerCampaign: 1, priority: 1 },
-  { id: 'writeas', name: 'Write.as', isActive: true, maxPostsPerCampaign: 1, priority: 2 },
-  { id: 'medium', name: 'Medium.com', isActive: false, maxPostsPerCampaign: 1, priority: 3 },
-  { id: 'devto', name: 'Dev.to', isActive: false, maxPostsPerCampaign: 1, priority: 4 },
-  { id: 'linkedin', name: 'LinkedIn Articles', isActive: false, maxPostsPerCampaign: 1, priority: 5 },
-  { id: 'hashnode', name: 'Hashnode', isActive: false, maxPostsPerCampaign: 1, priority: 6 },
-  { id: 'substack', name: 'Substack', isActive: false, maxPostsPerCampaign: 1, priority: 7 }
-];
+// Re-export platform types and constants from centralized service
+export type { PublishingPlatform } from './platformConfigService';
+export { AVAILABLE_PLATFORMS } from './platformConfigService';
 
 export interface CampaignPlatformProgress {
   campaignId: string;
@@ -109,7 +95,7 @@ export class AutomationOrchestrator {
    * Get active publishing platforms
    */
   getActivePlatforms(): PublishingPlatform[] {
-    return AVAILABLE_PLATFORMS.filter(p => p.isActive).sort((a, b) => a.priority - b.priority);
+    return PlatformConfigService.getActivePlatforms();
   }
 
   /**
@@ -181,10 +167,12 @@ export class AutomationOrchestrator {
       return false;
     }
 
-    // Check if all active platforms have been completed
-    return activePlatforms.every(platform =>
-      campaignProgress.some(p => p.platformId === platform.id && p.isCompleted)
-    );
+    // Check if all active platforms have been completed using centralized service
+    const publishedPlatformIds = campaignProgress
+      .filter(p => p.isCompleted)
+      .map(p => p.platformId);
+
+    return PlatformConfigService.areAllPlatformsCompleted(publishedPlatformIds);
   }
 
   /**
@@ -305,7 +293,7 @@ export class AutomationOrchestrator {
       {
         id: 'publish-content',
         title: 'Publish Content',
-        description: 'Publishing content to Telegraph.ph platform',
+        description: PlatformConfigService.getPlatformRotationDescription(),
         status: 'pending'
       },
       {
@@ -467,18 +455,27 @@ export class AutomationOrchestrator {
         throw new Error('Campaign not found');
       }
 
-      // CRITICAL: Validate no platform duplication before processing
+      // CRITICAL: Validate platform usage before processing
       const validation = await this.validateNoPlatformDuplication(campaignId);
       if (!validation.isValid) {
-        // Auto-complete the campaign instead of throwing an error
-        await this.updateCampaignStatus(campaignId, 'completed');
-        await this.logActivity(campaignId, 'info', `Campaign auto-completed: ${validation.message}`);
-        console.log(`✅ Campaign ${campaignId} auto-completed - all platforms already used`);
-        return;
-      }
+        // Check if all platforms are TRULY completed (both active platforms have published)
+        const allPlatformsCompleted = this.shouldAutoPauseCampaign(campaignId);
 
-      // Log available platforms for transparency
-      await this.logActivity(campaignId, 'info', `Processing campaign - ${validation.message}`);
+        if (allPlatformsCompleted) {
+          // All platforms genuinely completed - mark as done
+          await this.updateCampaignStatus(campaignId, 'completed');
+          await this.logActivity(campaignId, 'info', `Campaign completed: All platforms have published content`);
+          console.log(`✅ Campaign ${campaignId} completed - all platforms have published`);
+          return;
+        } else {
+          // Campaign has some published links but not all platforms - let it continue
+          console.log(`⚠️ Campaign ${campaignId} has partial platform usage, continuing processing`);
+          await this.logActivity(campaignId, 'info', `Continuing campaign - ${validation.message}`);
+        }
+      } else {
+        // Log available platforms for transparency
+        await this.logActivity(campaignId, 'info', `Processing campaign - ${validation.message}`);
+      }
 
       // Use the working campaign processor for reliable processing
       const result = await workingCampaignProcessor.processCampaign(campaign);
@@ -670,35 +667,51 @@ export class AutomationOrchestrator {
         }
       }
 
-      // Step 7: Mark campaign as completed after successful publishing
+      // Step 7: Handle platform completion and check if campaign should be completed
       if (publishedLinks.length > 0) {
         this.updateStep(campaignId, 'publish-content', {
           status: 'completed',
           details: `Successfully published to ${nextPlatform.name}`
         });
 
-        // Complete the campaign since we've successfully published to Telegraph
-        this.updateStep(campaignId, 'complete-campaign', {
-          status: 'completed',
-          details: 'Campaign successfully completed with published content'
-        });
+        // Mark this platform as completed
+        this.markPlatformCompleted(campaignId, nextPlatform.id, publishedLinks[0]);
+        await this.logActivity(campaignId, 'info', `Successfully published to ${nextPlatform.name}: ${publishedLinks[0]}`);
 
-        this.updateProgress(campaignId, {
-          isComplete: true,
-          endTime: new Date()
-        });
+        // Check if all active platforms have been completed
+        const shouldComplete = this.shouldAutoPauseCampaign(campaignId);
 
-        // Mark campaign as completed in database
-        await this.updateCampaignStatus(campaignId, 'completed');
-        await this.logActivity(campaignId, 'info', `Campaign completed successfully. Published link: ${publishedLinks[0]}`);
+        if (shouldComplete) {
+          // All platforms completed - mark campaign as completed
+          this.updateStep(campaignId, 'complete-campaign', {
+            status: 'completed',
+            details: 'Campaign successfully completed - all platforms have published content'
+          });
 
-        // Emit completion event
-        realTimeFeedService.emitCampaignCompleted(
-          campaignId,
-          campaign.name,
-          campaign.keywords[0] || '',
-          publishedLinks
-        );
+          this.updateProgress(campaignId, {
+            isComplete: true,
+            endTime: new Date()
+          });
+
+          await this.updateCampaignStatus(campaignId, 'completed');
+          await this.logActivity(campaignId, 'info', `Campaign completed successfully. All platforms have published content.`);
+
+          // Get all published URLs for the completion event
+          const allPublishedUrls = this.getCampaignPlatformProgress(campaignId)
+            .filter(p => p.isCompleted && p.publishedUrl)
+            .map(p => p.publishedUrl);
+
+          // Emit completion event
+          realTimeFeedService.emitCampaignCompleted(
+            campaignId,
+            campaign.name,
+            campaign.keywords[0] || '',
+            allPublishedUrls
+          );
+        } else {
+          // More platforms to process - automatically continue to next platform
+          await this.continueToNextPlatform(campaignId);
+        }
       } else {
         this.updateStep(campaignId, 'publish-content', {
           status: 'error',
@@ -986,6 +999,43 @@ export class AutomationOrchestrator {
   }
 
   /**
+   * Continue campaign to next platform automatically
+   */
+  async continueToNextPlatform(campaignId: string): Promise<void> {
+    try {
+      const nextPlatform = this.getNextPlatformForCampaign(campaignId);
+      const remainingPlatforms = this.getActivePlatforms().length - this.getCampaignPlatformProgress(campaignId).length;
+
+      if (!nextPlatform) {
+        await this.updateCampaignStatus(campaignId, 'completed');
+        await this.logActivity(campaignId, 'info', 'Campaign completed - all platforms have published content');
+        return;
+      }
+
+      await this.logActivity(campaignId, 'info',
+        `Continuing to next platform: ${nextPlatform.name}. ${remainingPlatforms} platform(s) remaining.`
+      );
+
+      // Small delay to ensure database updates are processed
+      setTimeout(async () => {
+        try {
+          // Process the next platform
+          await this.processCampaignWithErrorHandling(campaignId);
+        } catch (error) {
+          console.error('Failed to continue to next platform:', error);
+          await this.updateCampaignStatus(campaignId, 'paused');
+          await this.logActivity(campaignId, 'error', `Failed to continue to next platform: ${error.message}`);
+        }
+      }, 2000); // 2 second delay
+
+    } catch (error) {
+      console.error('Error in continueToNextPlatform:', error);
+      await this.updateCampaignStatus(campaignId, 'paused');
+      await this.logActivity(campaignId, 'error', `Failed to continue campaign: ${error.message}`);
+    }
+  }
+
+  /**
    * Pause campaign temporarily between platforms
    */
   async pauseCampaignForNextPlatform(campaignId: string): Promise<void> {
@@ -1228,7 +1278,7 @@ export class AutomationOrchestrator {
           );
 
           if (!alreadyCompleted) {
-            console.log(`🔄 Auto-syncing platform progress: ${platform.name} completed for campaign ${campaignId}`);
+            console.log(`��� Auto-syncing platform progress: ${platform.name} completed for campaign ${campaignId}`);
             this.markPlatformCompleted(campaignId, platform.id, link.published_url);
           }
         }
@@ -1348,17 +1398,25 @@ export class AutomationOrchestrator {
         };
       }
 
-      // Check if campaign has published links (indicating completion)
+      // Check if campaign has published links and if all platforms are completed
       const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
       if (campaignWithLinks?.automation_published_links && campaignWithLinks.automation_published_links.length > 0) {
-        // Mark as completed if it has published links but isn't marked as completed
-        await this.updateCampaignStatus(campaignId, 'completed');
-        await this.logActivity(campaignId, 'info', 'Campaign marked as completed - already has published content');
+        // Check if all active platforms have completed before marking as completed
+        const shouldComplete = this.shouldAutoPauseCampaign(campaignId);
 
-        return {
-          success: false,
-          message: 'This campaign is completed. Please create a new campaign.'
-        };
+        if (shouldComplete) {
+          // All platforms completed - mark as completed
+          await this.updateCampaignStatus(campaignId, 'completed');
+          await this.logActivity(campaignId, 'info', 'Campaign marked as completed - all platforms have published content');
+
+          return {
+            success: false,
+            message: 'This campaign is completed. Please create a new campaign.'
+          };
+        }
+
+        // Has published links but not all platforms completed - continue with resume
+        await this.logActivity(campaignId, 'info', 'Campaign has published content but more platforms available - continuing');
       }
 
       return await this.smartResumeCampaign(campaignId);

@@ -10,6 +10,7 @@ import { campaignNetworkLogger } from './campaignNetworkLogger';
 import MockContentGenerator from './mockContentGenerator';
 import MockTelegraphPublisher from './mockTelegraphPublisher';
 import MockWriteAsPublisher from './mockWriteAsPublisher';
+import { PlatformConfigService } from './platformConfigService';
 
 export interface DevelopmentProcessResult {
   success: boolean;
@@ -174,11 +175,8 @@ export class DevelopmentCampaignProcessor {
    */
   private async getNextAvailablePlatform(campaignId: string): Promise<{ id: string; name: string }> {
     try {
-      // Define available platforms in priority order
-      const availablePlatforms = [
-        { id: 'telegraph', name: 'Telegraph.ph' },
-        { id: 'writeas', name: 'Write.as' }
-      ];
+      // Get available platforms from centralized configuration
+      const availablePlatforms = PlatformConfigService.getActivePlatforms();
 
       // Get existing published links for this campaign from database
       const { data: publishedLinks, error } = await supabase
@@ -187,8 +185,8 @@ export class DevelopmentCampaignProcessor {
         .eq('campaign_id', campaignId);
 
       if (error) {
-        console.warn('Error checking published links, defaulting to Telegraph:', error);
-        return availablePlatforms[0];
+        console.warn('Error checking published links, using first available platform:', error);
+        return availablePlatforms[0] || { id: 'telegraph', name: 'Telegraph.ph' };
       }
 
       // Create set of used platforms (normalize legacy platform names)

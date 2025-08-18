@@ -5,6 +5,7 @@ import { realTimeFeedService } from './realTimeFeedService';
 import { campaignNetworkLogger } from './campaignNetworkLogger';
 import { responseBodyManager } from '@/utils/responseBodyFix';
 import { developmentCampaignProcessor } from './developmentCampaignProcessor';
+import { PlatformConfigService } from './platformConfigService';
 
 /**
  * Working Campaign Processor - Simplified server-side processing
@@ -134,7 +135,7 @@ export class WorkingCampaignProcessor {
       const publishedUrls = result.data.publishedUrls || [];
       const totalPosts = result.data.totalPosts || publishedUrls.length;
 
-      console.log('✅ Content generated and published successfully via server-side processor');
+      console.log('�� Content generated and published successfully via server-side processor');
       console.log(`📤 Published ${totalPosts} posts successfully:`, publishedUrls);
 
       realTimeFeedService.emitContentGenerated(
@@ -159,18 +160,11 @@ export class WorkingCampaignProcessor {
         );
       }
 
-      // Step 4: Mark campaign as completed
-      await this.updateCampaignStatus(campaign.id, 'completed');
-      await this.logActivity(campaign.id, 'info', `Campaign completed successfully. Published ${totalPosts} posts: ${publishedUrls.join(', ')}`);
+      // Step 4: Campaign status is already handled by the netlify function
+      // The working-campaign-processor function manages platform rotation and completion
+      await this.logActivity(campaign.id, 'info', `Campaign processing completed. Published ${totalPosts} posts: ${publishedUrls.join(', ')}`);
 
-      realTimeFeedService.emitCampaignCompleted(
-        campaign.id,
-        campaign.name,
-        keyword,
-        publishedUrls
-      );
-
-      console.log('🎉 Campaign processing completed successfully');
+      console.log('🎉 Campaign processing completed successfully - status managed by netlify function');
 
       return {
         success: true,
@@ -373,6 +367,45 @@ export class WorkingCampaignProcessor {
     }
 
     console.warn('Failed to save published link to any table - continuing without saving');
+  }
+
+  /**
+   * Check if all active platforms have completed for a campaign
+   */
+  private async checkAllPlatformsCompleted(campaignId: string): Promise<boolean> {
+    try {
+      // Get active platforms from centralized configuration
+      const activePlatforms = PlatformConfigService.getActivePlatforms();
+
+      // Get published links for this campaign from Supabase
+      const supabase = (await import('@/integrations/supabase/client')).supabase;
+
+      const { data: publishedLinks, error } = await supabase
+        .from('automation_published_links')
+        .select('platform, published_url')
+        .eq('campaign_id', campaignId)
+        .eq('status', 'active');
+
+      if (error) {
+        console.warn('Failed to fetch published links:', error);
+        return false; // Default to not completing if we can't check
+      }
+
+      // Check if all active platforms have published content using centralized service
+      const publishedPlatformIds = (publishedLinks || []).map(link => link.platform);
+      const allCompleted = PlatformConfigService.areAllPlatformsCompleted(publishedPlatformIds);
+
+      console.log(`🔍 Platform completion check for campaign ${campaignId}:`, {
+        activePlatforms: activePlatforms.map(p => p.id),
+        publishedPlatforms: publishedPlatformIds,
+        allCompleted
+      });
+
+      return allCompleted;
+    } catch (error) {
+      console.warn('Failed to check platform completion:', error);
+      return false; // Default to not completing if check fails
+    }
   }
 
   /**
