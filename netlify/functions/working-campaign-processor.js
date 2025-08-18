@@ -848,12 +848,14 @@ async function checkAllPlatformsCompleted(supabase, campaignId) {
       return false; // Default to not completing if we can't check
     }
 
-    // Check if all active platforms have published content
-    const publishedPlatforms = new Set((publishedLinks || []).map(link => link.platform.toLowerCase()));
-    const activePlatformIds = activePlatforms.filter(p => p.isActive).map(p => p.id);
+    // Check if all active platforms have published content using normalized IDs
+    const publishedPlatforms = new Set(
+      (publishedLinks || []).map(link => normalizePlatformId(link.platform))
+    );
+    const activePlatformIds = activePlatforms.map(p => p.id);
 
     const allCompleted = activePlatformIds.every(platformId =>
-      publishedPlatforms.has(platformId) || publishedPlatforms.has(platformId.replace('.', ''))
+      publishedPlatforms.has(platformId)
     );
 
     console.log(`🔍 Platform completion check:`, {
