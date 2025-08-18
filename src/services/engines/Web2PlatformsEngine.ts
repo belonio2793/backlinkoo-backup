@@ -209,6 +209,9 @@ export class Web2PlatformsEngine extends BaseEngine {
           if (submission.success) {
             console.log(`✅ Successfully published to ${opportunity.domain} after ${attemptsCount} attempts`);
 
+            // Record platform usage for rate limiting
+            this.recordPlatformUsage(opportunity.domain);
+
             const placement = {
               sourceUrl: submission.placementUrl!,
               sourceDomain: opportunity.domain,
