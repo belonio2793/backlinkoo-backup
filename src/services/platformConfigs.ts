@@ -69,8 +69,8 @@ export const PLATFORM_CONFIGS: Record<string, PlatformConfig> = {
     }
   },
   
-  'write-as': {
-    id: 'write-as',
+  'writeas': {
+    id: 'writeas',
     name: 'Write.as',
     domain: 'write.as',
     apiUrl: 'https://write.as/api',
