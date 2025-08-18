@@ -1,22 +1,287 @@
 {
-  "publishingPlatform": {
-    "description": "The only platform we use for instant publishing",
-    "site": {
-      "url": "https://telegra.ph",
-      "name": "Telegraph",
-      "htmlSupport": true,
-      "linksAllowed": true,
-      "accountRequired": false,
-      "features": ["Rich text editor", "Instant publish", "Anonymous posting", "Working API"]
+  "publishingPlatforms": {
+    "description": "Integrated publishing platforms with working APIs",
+    "platforms": [
+      {
+        "id": "telegraph",
+        "name": "Telegraph",
+        "url": "https://telegra.ph",
+        "domainAuthority": 91,
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": false,
+        "apiAvailable": true,
+        "costPerPost": 0,
+        "features": ["Rich text editor", "Instant publish", "Anonymous posting", "Working API"],
+        "rateLimits": {
+          "postsPerHour": 10,
+          "postsPerDay": 50
+        },
+        "requirements": {
+          "minContentLength": 200,
+          "supportedFormats": ["html"],
+          "requiresAuthentication": false,
+          "allowsAnonymous": true
+        }
+      },
+      {
+        "id": "wordpress",
+        "name": "WordPress.com / Self-hosted",
+        "url": "https://wordpress.com",
+        "domainAuthority": 85,
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "apiAvailable": true,
+        "costPerPost": 3.50,
+        "features": ["REST API", "Full CMS", "Custom domains", "SEO optimization"],
+        "rateLimits": {
+          "postsPerHour": 5,
+          "postsPerDay": 20
+        },
+        "requirements": {
+          "minContentLength": 300,
+          "supportedFormats": ["html", "markdown"],
+          "requiresAuthentication": true,
+          "allowsAnonymous": false,
+          "authMethod": "application_password"
+        }
+      },
+      {
+        "id": "medium",
+        "name": "Medium",
+        "url": "https://medium.com",
+        "domainAuthority": 96,
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "apiAvailable": true,
+        "costPerPost": 5.00,
+        "features": ["High DA", "Large audience", "OAuth API", "Publication support"],
+        "rateLimits": {
+          "postsPerHour": 3,
+          "postsPerDay": 10
+        },
+        "requirements": {
+          "minContentLength": 400,
+          "supportedFormats": ["markdown", "html"],
+          "requiresAuthentication": true,
+          "allowsAnonymous": false,
+          "authMethod": "oauth2"
+        }
+      },
+      {
+        "id": "devto",
+        "name": "Dev.to",
+        "url": "https://dev.to",
+        "domainAuthority": 90,
+        "htmlSupport": false,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "apiAvailable": true,
+        "costPerPost": 4.00,
+        "features": ["Developer community", "High engagement", "Tech focus", "REST API"],
+        "rateLimits": {
+          "postsPerHour": 4,
+          "postsPerDay": 15
+        },
+        "requirements": {
+          "minContentLength": 350,
+          "supportedFormats": ["markdown"],
+          "requiresAuthentication": true,
+          "allowsAnonymous": false,
+          "authMethod": "api_key"
+        }
+      },
+      {
+        "id": "hashnode",
+        "name": "Hashnode",
+        "url": "https://hashnode.com",
+        "domainAuthority": 88,
+        "htmlSupport": false,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "apiAvailable": true,
+        "costPerPost": 4.50,
+        "features": ["Developer blogs", "Custom domains", "GraphQL API", "Publications"],
+        "rateLimits": {
+          "postsPerHour": 4,
+          "postsPerDay": 12
+        },
+        "requirements": {
+          "minContentLength": 400,
+          "supportedFormats": ["markdown"],
+          "requiresAuthentication": true,
+          "allowsAnonymous": false,
+          "authMethod": "access_token"
+        }
+      },
+      {
+        "id": "ghost",
+        "name": "Ghost CMS",
+        "url": "https://ghost.org",
+        "domainAuthority": 85,
+        "htmlSupport": true,
+        "linksAllowed": true,
+        "accountRequired": true,
+        "apiAvailable": true,
+        "costPerPost": 3.00,
+        "features": ["Professional publishing", "Custom domains", "Admin API", "SEO optimized"],
+        "rateLimits": {
+          "postsPerHour": 6,
+          "postsPerDay": 25
+        },
+        "requirements": {
+          "minContentLength": 300,
+          "supportedFormats": ["html", "markdown"],
+          "requiresAuthentication": true,
+          "allowsAnonymous": false,
+          "authMethod": "admin_api_key"
+        }
+      }
+    ]
+  },
+  "platformCategories": {
+    "instant_publish": {
+      "name": "Instant Publishing",
+      "description": "Platforms that publish content immediately without moderation",
+      "platforms": ["telegraph"]
+    },
+    "high_authority": {
+      "name": "High Authority",
+      "description": "Platforms with domain authority above 90",
+      "platforms": ["telegraph", "medium", "devto"]
+    },
+    "developer_focused": {
+      "name": "Developer Community",
+      "description": "Platforms focused on technical and developer content",
+      "platforms": ["devto", "hashnode", "ghost"]
+    },
+    "content_management": {
+      "name": "Full CMS",
+      "description": "Complete content management systems",
+      "platforms": ["wordpress", "ghost"]
+    },
+    "api_integration": {
+      "name": "API Available",
+      "description": "Platforms with working API integrations",
+      "platforms": ["telegraph", "wordpress", "medium", "devto", "hashnode", "ghost"]
+    }
+  },
+  "costAnalysis": {
+    "free": ["telegraph"],
+    "low_cost": ["ghost", "wordpress"],
+    "medium_cost": ["devto", "hashnode"],
+    "premium": ["medium"]
+  },
+  "authenticationMethods": {
+    "none": {
+      "platforms": ["telegraph"],
+      "description": "No authentication required"
+    },
+    "api_key": {
+      "platforms": ["devto"],
+      "description": "Simple API key authentication"
+    },
+    "access_token": {
+      "platforms": ["hashnode"],
+      "description": "Access token authentication"
+    },
+    "oauth2": {
+      "platforms": ["medium"],
+      "description": "OAuth 2.0 authentication flow"
+    },
+    "application_password": {
+      "platforms": ["wordpress"],
+      "description": "WordPress application passwords"
+    },
+    "admin_api_key": {
+      "platforms": ["ghost"],
+      "description": "Ghost Admin API key"
+    }
+  },
+  "recommendedUse": {
+    "quick_backlinks": {
+      "description": "Fast backlink placement without authentication",
+      "recommendedPlatforms": ["telegraph"],
+      "pros": ["Instant publishing", "No account needed", "High DA"],
+      "cons": ["Limited customization"]
+    },
+    "authority_content": {
+      "description": "High-authority content placement",
+      "recommendedPlatforms": ["medium", "devto"],
+      "pros": ["Very high DA", "Large audience", "Good SEO value"],
+      "cons": ["Requires authentication", "Content restrictions"]
+    },
+    "developer_content": {
+      "description": "Technical and developer-focused content",
+      "recommendedPlatforms": ["devto", "hashnode"],
+      "pros": ["Targeted audience", "Good engagement", "Tech-friendly"],
+      "cons": ["Niche audience", "Content must be technical"]
+    },
+    "professional_publishing": {
+      "description": "Professional content management and publishing",
+      "recommendedPlatforms": ["wordpress", "ghost"],
+      "pros": ["Full control", "Custom domains", "SEO optimization"],
+      "cons": ["Requires setup", "Higher complexity"]
+    }
+  },
+  "integrationStatus": {
+    "live": {
+      "platforms": ["telegraph"],
+      "description": "Platforms currently integrated and working"
+    },
+    "ready": {
+      "platforms": ["wordpress", "medium", "devto", "hashnode", "ghost"],
+      "description": "Platforms with implemented APIs ready for integration"
+    },
+    "testing": {
+      "platforms": [],
+      "description": "Platforms in testing phase"
     }
   },
   "removedPlatforms": {
-    "description": "All other platforms removed - only Telegraph works reliably",
-    "reason": "Complex authentication, no APIs, or non-functional integrations"
+    "description": "Platforms removed due to API limitations or restrictions",
+    "examples": [
+      {
+        "name": "LinkedIn",
+        "reason": "API restrictions on automated posting"
+      },
+      {
+        "name": "Reddit",
+        "reason": "Anti-spam measures and API changes"
+      },
+      {
+        "name": "HackerNews",
+        "reason": "No API for posting, manual approval required"
+      },
+      {
+        "name": "Substack",
+        "reason": "No public API for posting"
+      }
+    ]
   },
-  "allOtherPlatforms": {
-    "description": "All removed - requires authentication, manual approval, or non-functional APIs",
-    "examples": ["Medium", "Dev.to", "Hashnode", "Substack", "HackerNoon", "LinkedIn", "Reddit", "etc."],
-    "reason": "Only Telegraph provides instant anonymous publishing with working API"
+  "upcomingPlatforms": {
+    "description": "Platforms being evaluated for future integration",
+    "candidates": [
+      {
+        "name": "Notion",
+        "api": "Available",
+        "status": "Evaluating",
+        "potential_da": 92
+      },
+      {
+        "name": "GitBook",
+        "api": "Available", 
+        "status": "Evaluating",
+        "potential_da": 86
+      },
+      {
+        "name": "Blogger",
+        "api": "Available",
+        "status": "Low priority",
+        "potential_da": 82
+      }
+    ]
   }
 }
