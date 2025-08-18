@@ -160,6 +160,91 @@ class WordPressCommentService {
   }
 
   /**
+   * Validate discovered blogs for accessibility and WordPress presence
+   */
+  private async validateDiscoveredBlogs(blogs: WordPressBlog[]): Promise<WordPressBlog[]> {
+    console.log(`🔍 Validating ${blogs.length} discovered blogs...`);
+
+    const validatedBlogs: WordPressBlog[] = [];
+
+    // Validate in batches to avoid overwhelming servers
+    const batchSize = 5;
+    for (let i = 0; i < blogs.length; i += batchSize) {
+      const batch = blogs.slice(i, i + batchSize);
+
+      console.log(`Validating batch ${Math.floor(i / batchSize) + 1}/${Math.ceil(blogs.length / batchSize)}`);
+
+      // Process batch in parallel
+      const batchPromises = batch.map(async (blog) => {
+        // Update status to validating
+        blog.testStatus = 'validating';
+
+        try {
+          // Validate website
+          const validation = await websiteValidationService.validateWebsite(blog.url);
+
+          // Check website quality
+          const quality = await websiteValidationService.checkWebsiteQuality(blog.url);
+
+          // Update blog with validation results
+          blog.validation = {
+            isValidated: true,
+            isAccessible: validation.isAccessible,
+            isWordPress: validation.isWordPress,
+            hasCommentForm: validation.hasCommentForm,
+            qualityScore: quality.qualityScore,
+            statusCode: validation.statusCode,
+            errors: validation.errors
+          };
+
+          // Update other properties based on validation
+          if (validation.isAccessible) {
+            blog.responseTime = validation.responseTime;
+            blog.testStatus = 'pending';
+
+            // Adjust success rate based on quality
+            if (quality.qualityScore >= 70) {
+              blog.successRate = Math.min(95, blog.successRate + 10);
+            } else if (quality.qualityScore < 40) {
+              blog.successRate = Math.max(20, blog.successRate - 20);
+            }
+          } else {
+            blog.testStatus = 'failed';
+            blog.successRate = 0;
+          }
+
+          return blog;
+
+        } catch (error) {
+          console.error(`Validation failed for ${blog.url}:`, error);
+
+          blog.validation = {
+            isValidated: true,
+            isAccessible: false,
+            isWordPress: false,
+            hasCommentForm: false,
+            qualityScore: 0,
+            errors: [error.message]
+          };
+          blog.testStatus = 'failed';
+
+          return blog;
+        }
+      });
+
+      const batchResults = await Promise.all(batchPromises);
+      validatedBlogs.push(...batchResults);
+
+      // Rate limiting between batches
+      if (i + batchSize < blogs.length) {
+        await this.delay(2000); // 2 seconds between batches
+      }
+    }
+
+    return validatedBlogs;
+  }
+
+  /**
    * Search for blogs using a specific query
    */
   private async searchBlogsWithQuery(query: string, maxResults: number): Promise<WordPressBlog[]> {
