@@ -114,18 +114,29 @@ const WordPressBlogDiscovery = () => {
         description: "Searching for WordPress blogs with comment forms...",
       });
 
-      // Use real discovery service
-      const result = await wordpressCommentService.discoverWordPressBlogs(40);
-      setDiscoveredBlogs(result.blogs);
-
-      // Update progress smoothly
-      const updateProgress = async () => {
-        for (let i = 0; i <= 100; i += 10) {
-          setDiscoveryProgress(i);
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
+      // Use real discovery service with progress tracking
+      const updateProgressCallback = (progress: number) => {
+        setDiscoveryProgress(progress * 0.4); // Discovery is 40% of total
       };
-      updateProgress();
+
+      const updateValidationCallback = (progress: number) => {
+        setValidationProgress(progress);
+        setDiscoveryProgress(40 + (progress * 0.6)); // Validation is 60% of total
+      };
+
+      // Set up progress monitoring (simulated)
+      const progressInterval = setInterval(() => {
+        if (discoveryProgress < 40) {
+          setDiscoveryProgress(prev => Math.min(40, prev + 5));
+        }
+      }, 500);
+
+      const result = await wordpressCommentService.discoverWordPressBlogs(40);
+      clearInterval(progressInterval);
+
+      setDiscoveredBlogs(result.blogs);
+      setDiscoveryProgress(100);
+      setValidationProgress(100);
 
       // Update stats
       const statsData = wordpressCommentService.getDiscoveryStats(result.blogs);
