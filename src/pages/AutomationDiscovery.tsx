@@ -136,7 +136,7 @@ const AutomationDiscovery = () => {
     setDiscoveryResults([]);
 
     try {
-      const response = await fetch('/.netlify/functions/link-discovery', {
+      const response = await fetch('/.netlify/functions/discovery-engine', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -144,7 +144,6 @@ const AutomationDiscovery = () => {
         body: JSON.stringify({
           campaignId: `discovery_${Date.now()}`,
           keywords: [searchQuery],
-          linkStrategy: 'guest_posting',
           platforms: selectedPlatforms,
           maxResults,
           discoveryDepth
@@ -153,8 +152,11 @@ const AutomationDiscovery = () => {
 
       if (!response.ok) throw new Error('Failed to start discovery');
 
+      const data = await response.json();
+      const sessionId = data.sessionId;
+
       // Set up SSE for real-time updates
-      const eventSource = new EventSource(`/.netlify/functions/link-discovery?sessionId=${Date.now()}`);
+      const eventSource = new EventSource(`/.netlify/functions/discovery-engine?sessionId=${sessionId}`);
       eventSourceRef.current = eventSource;
 
       eventSource.onmessage = (event) => {
