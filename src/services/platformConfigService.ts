@@ -93,6 +93,7 @@ export const AVAILABLE_PLATFORMS: PublishingPlatform[] = [
  */
 export class PlatformConfigService {
   private static useMassivePlatforms = true; // Toggle for massive platform support
+  private static useVerifiedOnly = true; // Toggle to only show verified working platforms
   /**
    * Get all platforms
    */
