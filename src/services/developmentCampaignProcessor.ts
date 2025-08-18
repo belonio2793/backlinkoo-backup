@@ -72,37 +72,74 @@ export class DevelopmentCampaignProcessor {
         campaign.user_id
       );
 
-      // Step 3: Determine next platform and publish
-      const nextPlatform = await this.getNextAvailablePlatform(campaign.id);
-      console.log(`📡 Publishing to ${nextPlatform.name}...`);
-      realTimeFeedService.emitSystemEvent(`Publishing "${contentResult.data.title}" to ${nextPlatform.name}`, 'info');
+      // Step 3: Try to publish to available platforms (one attempt per platform)
+      let publishResult: any = null;
+      let successfulPlatform: any = null;
+      let platformsTried = 0;
 
-      let publishResult;
-      if (nextPlatform.id === 'telegraph') {
-        publishResult = await MockTelegraphPublisher.publishContent({
-          title: contentResult.data.title,
-          content: contentResult.data.content,
-          authorName: 'Backlinkoo'
-        });
-      } else if (nextPlatform.id === 'writeas') {
-        publishResult = await MockWriteAsPublisher.publishContent({
-          title: contentResult.data.title,
-          content: contentResult.data.content,
-          authorName: 'Anonymous'
-        });
-      } else {
-        throw new Error(`Unsupported platform: ${nextPlatform.id}`);
+      while (!publishResult?.success && platformsTried < 10) { // Prevent infinite loops
+        const nextPlatform = await this.getNextAvailablePlatform(campaign.id);
+        if (!nextPlatform) {
+          console.log(`⚠️ [DEV] No more platforms available for campaign ${campaign.id}`);
+          break;
+        }
+
+        platformsTried++;
+        console.log(`📡 Publishing to ${nextPlatform.name}...`);
+        realTimeFeedService.emitSystemEvent(`Publishing "${contentResult.data.title}" to ${nextPlatform.name}`, 'info');
+
+        try {
+          if (nextPlatform.id === 'telegraph') {
+            publishResult = await MockTelegraphPublisher.publishContent({
+              title: contentResult.data.title,
+              content: contentResult.data.content,
+              authorName: 'Backlinkoo'
+            });
+            successfulPlatform = nextPlatform;
+          } else if (nextPlatform.id === 'writeas') {
+            publishResult = await MockWriteAsPublisher.publishContent({
+              title: contentResult.data.title,
+              content: contentResult.data.content,
+              authorName: 'Anonymous'
+            });
+            successfulPlatform = nextPlatform;
+          } else {
+            // Unsupported platform - skip to next immediately
+            console.warn(`⚠️ [DEV] Unsupported platform: ${nextPlatform.id}, skipping to next platform`);
+            await this.logActivity(campaign.id, 'info', `Skipped unsupported platform: ${nextPlatform.name}`);
+            await this.saveSkippedPlatform(campaign.id, nextPlatform.id, `Unsupported platform: ${nextPlatform.id}`);
+            continue; // Try next platform immediately
+          }
+
+          // Check if publishing was successful - if not, skip to next platform immediately
+          if (!publishResult.success) {
+            console.warn(`⚠️ [DEV] ${nextPlatform.name} publishing failed: ${publishResult.error}, skipping to next platform`);
+            await this.logActivity(campaign.id, 'info', `${nextPlatform.name} publishing failed, trying next platform`);
+            await this.saveSkippedPlatform(campaign.id, nextPlatform.id, publishResult.error || 'Publishing failed');
+            publishResult = null; // Reset to try next platform
+            continue; // Try next platform immediately
+          }
+
+        } catch (platformError) {
+          // Platform error - skip to next platform immediately
+          console.warn(`⚠️ [DEV] ${nextPlatform.name} error: ${platformError.message}, skipping to next platform`);
+          await this.logActivity(campaign.id, 'info', `${nextPlatform.name} error, trying next platform`);
+          await this.saveSkippedPlatform(campaign.id, nextPlatform.id, platformError.message);
+          publishResult = null; // Reset to try next platform
+          continue; // Try next platform immediately
+        }
       }
 
-      if (!publishResult.success) {
-        throw new Error(`${nextPlatform.name} publishing failed: ${publishResult.error}`);
+      // Check if we successfully published to any platform
+      if (!publishResult?.success || !successfulPlatform) {
+        throw new Error('All available platforms failed or are unsupported. Campaign cannot continue.');
       }
 
       const publishedUrls = [publishResult.url];
-      console.log(`✅ Published to ${nextPlatform.name}: ${publishResult.url}`);
+      console.log(`✅ Published to ${successfulPlatform.name}: ${publishResult.url}`);
 
       // Step 4: Save published link to database
-      await this.savePublishedLink(campaign.id, publishResult.url, contentResult.data, nextPlatform.id);
+      await this.savePublishedLink(campaign.id, publishResult.url, contentResult.data, successfulPlatform.id);
 
       // Emit URL published event
       realTimeFeedService.emitUrlPublished(
@@ -110,7 +147,7 @@ export class DevelopmentCampaignProcessor {
         campaign.name,
         keyword,
         publishResult.url,
-        nextPlatform.name,
+        successfulPlatform.name,
         campaign.user_id
       );
 
@@ -140,8 +177,8 @@ export class DevelopmentCampaignProcessor {
           publishedUrls,
           totalPosts: 1,
           contentGenerated: true,
-          platformUsed: nextPlatform.id,
-          platformName: nextPlatform.name
+          platformUsed: successfulPlatform.id,
+          platformName: successfulPlatform.name
         }
       };
 
@@ -178,10 +215,10 @@ export class DevelopmentCampaignProcessor {
       // Get available platforms from centralized configuration
       const availablePlatforms = PlatformConfigService.getActivePlatforms();
 
-      // Get existing published links for this campaign from database
+      // Get existing published links for this campaign from database (including skipped ones)
       const { data: publishedLinks, error } = await supabase
         .from('automation_published_links')
-        .select('platform')
+        .select('platform, status')
         .eq('campaign_id', campaignId);
 
       if (error) {
@@ -189,7 +226,7 @@ export class DevelopmentCampaignProcessor {
         return availablePlatforms[0] || { id: 'telegraph', name: 'Telegraph.ph' };
       }
 
-      // Create set of used platforms (normalize legacy platform names)
+      // Create set of used platforms (including skipped ones) (normalize legacy platform names)
       const usedPlatforms = new Set(
         (publishedLinks || []).map(link => {
           const platform = link.platform.toLowerCase();
@@ -252,10 +289,10 @@ export class DevelopmentCampaignProcessor {
         .from('automation_logs')
         .insert({
           campaign_id: campaignId,
-          log_level: level === 'error' ? 'error' : level === 'warning' ? 'warning' : 'info',
+          level: level === 'error' ? 'error' : level === 'warning' ? 'warning' : 'info',
           message,
-          step_name: 'development-processing',
-          timestamp: new Date().toISOString()
+          step: 'development-processing',
+          created_at: new Date().toISOString()
         });
 
       if (error) {
@@ -265,6 +302,39 @@ export class DevelopmentCampaignProcessor {
       }
     } catch (error) {
       console.warn('Activity logging failed:', error);
+    }
+  }
+
+  /**
+   * Save skipped platform info to prevent retrying
+   */
+  private async saveSkippedPlatform(
+    campaignId: string,
+    platform: string,
+    reason: string
+  ): Promise<void> {
+    try {
+      // Save to automation_published_links with status 'skipped' to mark as used
+      const { error } = await supabase
+        .from('automation_published_links')
+        .insert({
+          campaign_id: campaignId,
+          published_url: `skipped:${reason}`,
+          anchor_text: '',
+          target_url: '',
+          platform: platform,
+          status: 'skipped',
+          published_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.warn('Failed to save skipped platform:', error.message);
+      } else {
+        console.log(`📝 Marked platform ${platform} as skipped for campaign ${campaignId}`);
+      }
+
+    } catch (error) {
+      console.warn('Error saving skipped platform:', error);
     }
   }
 
