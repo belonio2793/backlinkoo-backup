@@ -97,51 +97,12 @@ exports.handler = async (event, context) => {
       throw new Error('Failed to publish post to any platform');
     }
 
-    // Step 3: Check if all platforms have completed before marking campaign as completed
-    const shouldComplete = await checkAllPlatformsCompleted(supabase, campaignId);
+    // Step 3: Mark campaign as completed after successful Telegraph publishing
+    await updateCampaignStatus(supabase, campaignId, 'completed', publishedUrls);
+    await logCampaignActivity(supabase, campaignId, 'info',
+      `Campaign completed successfully. Published to ${platform}: ${publishedUrls[0]}`);
 
-    if (shouldComplete) {
-      await updateCampaignStatus(supabase, campaignId, 'completed', publishedUrls);
-      console.log('✅ Campaign marked as completed - all platforms have published content');
-    } else {
-      // More platforms available - set up for continuation
-      const nextAvailablePlatform = await getNextAvailablePlatform(supabase, campaignId);
-
-      if (nextAvailablePlatform) {
-        // Keep campaign active and schedule next platform processing
-        await updateCampaignStatus(supabase, campaignId, 'active', publishedUrls);
-
-        // Add activity log about next platform
-        await logCampaignActivity(supabase, campaignId, 'info',
-          `Published to ${nextPlatform}. Next platform: ${nextAvailablePlatform}`);
-
-        console.log(`🔄 Campaign active - next platform: ${nextAvailablePlatform}`);
-
-        // CRITICAL FIX: Auto-trigger next platform processing after delay
-        setTimeout(async () => {
-          try {
-            console.log(`🚀 Auto-triggering next platform: ${nextAvailablePlatform}`);
-
-            // Call the processor again for the next platform
-            const nextProcessingResult = await triggerNextPlatformProcessing(
-              campaignId, keyword, anchorText, targetUrl
-            );
-
-            console.log('✅ Next platform processing triggered:', nextProcessingResult.success);
-          } catch (error) {
-            console.error('❌ Failed to trigger next platform:', error);
-            // Pause campaign for manual intervention
-            await updateCampaignStatus(supabase, campaignId, 'paused', publishedUrls);
-            await logCampaignActivity(supabase, campaignId, 'error',
-              `Failed to auto-continue to next platform: ${error.message}`);
-          }
-        }, 3000); // 3 second delay to allow current request to complete
-      } else {
-        // No more platforms - mark as completed
-        await updateCampaignStatus(supabase, campaignId, 'completed', publishedUrls);
-        console.log('✅ Campaign completed - no more platforms available');
-      }
-    }
+    console.log('✅ Campaign completed after Telegraph publishing');
 
     return {
       statusCode: 200,
