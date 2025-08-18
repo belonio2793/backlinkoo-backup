@@ -308,6 +308,40 @@ export class DevelopmentCampaignProcessor {
   }
 
   /**
+   * Save skipped platform info to prevent retrying
+   */
+  private async saveSkippedPlatform(
+    campaignId: string,
+    platform: string,
+    reason: string
+  ): Promise<void> {
+    try {
+      // Save to automation_published_links with status 'skipped' to mark as used
+      const { error } = await supabase
+        .from('automation_published_links')
+        .insert({
+          campaign_id: campaignId,
+          published_url: '',
+          anchor_text: '',
+          target_url: '',
+          platform: platform,
+          status: 'skipped',
+          published_at: new Date().toISOString(),
+          notes: reason
+        });
+
+      if (error) {
+        console.warn('Failed to save skipped platform:', error.message);
+      } else {
+        console.log(`📝 Marked platform ${platform} as skipped for campaign ${campaignId}`);
+      }
+
+    } catch (error) {
+      console.warn('Error saving skipped platform:', error);
+    }
+  }
+
+  /**
    * Save published link to database
    */
   private async savePublishedLink(
