@@ -141,6 +141,24 @@ const App = () => (
               }
             />
             <Route
+              path="/automation/discovery"
+              element={
+                <Suspense fallback={
+                  <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 flex items-center justify-center">
+                    <div className="text-center">
+                      <LoadingSpinner />
+                      <div className="mt-4">
+                        <h2 className="text-xl font-semibold text-gray-900">Loading Discovery Engine</h2>
+                        <p className="text-gray-600 mt-2">Initializing platform discovery and link opportunity scanner...</p>
+                      </div>
+                    </div>
+                  </div>
+                }>
+                  <LazyAutomationDiscovery />
+                </Suspense>
+              }
+            />
+            <Route
               path="/backlink-report"
               element={
                 <Suspense fallback={<LoadingSpinner />}>
