@@ -722,16 +722,21 @@ const Automation = () => {
           </div>
         </div>
 
+        {/* Platform Database Statistics */}
+        <div className="w-full">
+          <MassivePlatformStats />
+        </div>
+
         {/* Publishing Platforms - Full Width Second Row */}
         <div className="w-full">
           <Card className="h-fit">
             <CardHeader>
               <CardTitle className="flex items-center gap-2 text-lg">
                 <Link className="w-5 h-5" />
-                Publishing Platforms
+                Sample Publishing Platforms
               </CardTitle>
               <CardDescription>
-                Available platforms for automatic content publishing
+                Preview of platforms available for automatic content publishing (showing 2 of 100+)
               </CardDescription>
             </CardHeader>
             <CardContent>
