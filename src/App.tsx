@@ -30,6 +30,7 @@ const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
 const LazyBlog = lazy(() => import("./pages/Blog"));
 const LazyDashboard = lazy(() => import("./pages/Dashboard"));
 const LazyAutomation = lazy(() => import("./pages/Automation"));
+const LazyAutomationDiscovery = lazy(() => import("./pages/AutomationDiscovery"));
 const LazyLogin = lazy(() => import("./pages/Login"));
 // Removed - using LazyBeautifulBlogPost from LazyComponents instead
 const LazyAuthCallback = lazy(() => import("./pages/AuthCallback"));
