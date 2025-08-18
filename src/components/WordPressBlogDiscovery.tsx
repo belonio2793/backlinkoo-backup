@@ -364,7 +364,7 @@ const WordPressBlogDiscovery = () => {
                 Discover WordPress Blogs
               </CardTitle>
               <CardDescription>
-                Search for WordPress blogs using: "powered by wordpress" "leave a comment"
+                Search for WordPress blogs using: {mainDiscoveryQuery}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
