@@ -58,6 +58,62 @@ class PlatformDiscoveryService {
     };
   }
 
+  // Get cloud storage platforms as PlatformConfig
+  private getCloudStoragePlatforms(): PlatformConfig[] {
+    return [
+      {
+        name: 'Google Drive',
+        type: 'documentation',
+        domain: 'drive.google.com',
+        preferredPrompts: ['long-form-blog', 'how-to-guide', 'press-release', 'qa-answer'],
+        contentLimits: { minWords: 200, maxWords: 5000 },
+        linkPolicy: 'friendly',
+        domainRating: 100,
+        isActive: true
+      },
+      {
+        name: 'Dropbox',
+        type: 'documentation',
+        domain: 'dropbox.com',
+        preferredPrompts: ['long-form-blog', 'how-to-guide', 'directory-entry'],
+        contentLimits: { minWords: 200, maxWords: 3000 },
+        linkPolicy: 'friendly',
+        domainRating: 94,
+        isActive: true
+      },
+      {
+        name: 'OneDrive',
+        type: 'documentation',
+        domain: '1drv.ms',
+        preferredPrompts: ['long-form-blog', 'press-release', 'how-to-guide'],
+        contentLimits: { minWords: 200, maxWords: 4000 },
+        linkPolicy: 'friendly',
+        domainRating: 96,
+        isActive: true
+      },
+      {
+        name: 'Box',
+        type: 'documentation',
+        domain: 'app.box.com',
+        preferredPrompts: ['long-form-blog', 'press-release', 'qa-answer'],
+        contentLimits: { minWords: 300, maxWords: 2000 },
+        linkPolicy: 'friendly',
+        domainRating: 88,
+        isActive: true
+      },
+      {
+        name: 'Mega.nz',
+        type: 'documentation',
+        domain: 'mega.nz',
+        preferredPrompts: ['long-form-blog', 'how-to-guide'],
+        contentLimits: { minWords: 200, maxWords: 3000 },
+        linkPolicy: 'moderate',
+        domainRating: 85,
+        isActive: false // Disabled until SDK integration
+      }
+    ];
+  }
+
   // Analyze keyword and suggest optimal strategy
   analyzeKeyword(keyword: string): KeywordAnalysis {
     const category = this.categorizeKeyword(keyword);
