@@ -289,10 +289,10 @@ export class DevelopmentCampaignProcessor {
         .from('automation_logs')
         .insert({
           campaign_id: campaignId,
-          log_level: level === 'error' ? 'error' : level === 'warning' ? 'warning' : 'info',
+          level: level === 'error' ? 'error' : level === 'warning' ? 'warning' : 'info',
           message,
-          step_name: 'development-processing',
-          timestamp: new Date().toISOString()
+          step: 'development-processing',
+          created_at: new Date().toISOString()
         });
 
       if (error) {
