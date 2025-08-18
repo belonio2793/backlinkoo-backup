@@ -159,16 +159,23 @@ export class WorkingCampaignProcessor {
         );
       }
 
-      // Step 4: Mark campaign as completed
-      await this.updateCampaignStatus(campaign.id, 'completed');
-      await this.logActivity(campaign.id, 'info', `Campaign completed successfully. Published ${totalPosts} posts: ${publishedUrls.join(', ')}`);
+      // Step 4: Check if all platforms have completed before marking campaign as completed
+      const shouldComplete = await this.checkAllPlatformsCompleted(campaign.id);
 
-      realTimeFeedService.emitCampaignCompleted(
-        campaign.id,
-        campaign.name,
-        keyword,
-        publishedUrls
-      );
+      if (shouldComplete) {
+        await this.updateCampaignStatus(campaign.id, 'completed');
+        await this.logActivity(campaign.id, 'info', `Campaign completed successfully. All platforms have published content. Published ${totalPosts} posts: ${publishedUrls.join(', ')}`);
+
+        realTimeFeedService.emitCampaignCompleted(
+          campaign.id,
+          campaign.name,
+          keyword,
+          publishedUrls
+        );
+      } else {
+        await this.updateCampaignStatus(campaign.id, 'paused');
+        await this.logActivity(campaign.id, 'info', `Campaign paused - waiting for other platforms to complete. Published ${totalPosts} posts: ${publishedUrls.join(', ')}`);
+      }
 
       console.log('🎉 Campaign processing completed successfully');
 
