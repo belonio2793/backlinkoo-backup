@@ -946,37 +946,12 @@ export class AutomationOrchestrator {
   }
 
   /**
-   * Auto-pause campaign when all platforms are completed
+   * Auto-pause campaign when all platforms are completed (disabled for continuous rotation)
    */
   async autoPauseCampaign(campaignId: string, reason: string): Promise<void> {
-    const campaign = await this.getCampaign(campaignId);
-
-    this.updateStep(campaignId, 'complete-campaign', {
-      status: 'completed',
-      details: reason
-    });
-
-    this.updateProgress(campaignId, {
-      isComplete: true,
-      endTime: new Date()
-    });
-
-    // Get published URLs for the completion event
-    const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
-    const publishedUrls = campaignWithLinks?.automation_published_links?.map(link => link.published_url) || [];
-
-    // Emit real-time feed event for campaign completion
-    if (campaign) {
-      realTimeFeedService.emitCampaignCompleted(
-        campaignId,
-        campaign.name,
-        campaign.keywords[0] || '',
-        publishedUrls
-      );
-    }
-
-    await this.updateCampaignStatus(campaignId, 'completed');
-    await this.logActivity(campaignId, 'info', `Campaign completed: ${reason}`);
+    // For continuous rotation, don't complete campaigns - just log and continue
+    await this.logActivity(campaignId, 'info', `Campaign continues with continuous rotation: ${reason}`);
+    console.log(`🔄 Campaign ${campaignId} continues - continuous rotation enabled: ${reason}`);
   }
 
   /**
