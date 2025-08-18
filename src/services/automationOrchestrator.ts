@@ -700,8 +700,8 @@ export class AutomationOrchestrator {
             allPublishedUrls
           );
         } else {
-          // More platforms to process - pause for next platform
-          await this.pauseCampaignForNextPlatform(campaignId);
+          // More platforms to process - automatically continue to next platform
+          await this.continueToNextPlatform(campaignId);
         }
       } else {
         this.updateStep(campaignId, 'publish-content', {
