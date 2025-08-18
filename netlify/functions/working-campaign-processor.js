@@ -52,38 +52,45 @@ exports.handler = async (event, context) => {
     const blogPost = await generateSingleBlogPost(keyword, anchorText, targetUrl);
     console.log('✅ Generated blog post using random prompt');
 
-    // Step 2: Publish the post to multiple platforms
+    // Step 2: Publish the post using proper platform rotation
     const publishedUrls = [];
-    const platforms = ['telegraph', 'writeas']; // Available platforms
 
-    // Randomly select one platform to avoid footprints
-    const selectedPlatform = platforms[Math.floor(Math.random() * platforms.length)];
-    console.log(`📡 Selected platform: ${selectedPlatform}`);
+    // Get next platform from orchestrator for proper rotation
+    const nextPlatform = getNextAvailablePlatform(supabase, campaignId);
+    console.log(`📡 Next platform for rotation: ${nextPlatform}`);
 
     try {
       let publishedUrl;
       let platform;
 
-      if (selectedPlatform === 'telegraph') {
+      if (nextPlatform === 'telegraph') {
         publishedUrl = await publishToTelegraph(blogPost.title, blogPost.content);
-        platform = 'Telegraph';
+        platform = 'Telegraph.ph';
         await validateTelegraphUrl(publishedUrl);
-      } else if (selectedPlatform === 'writeas') {
+      } else if (nextPlatform === 'writeas') {
         publishedUrl = await publishToWriteAs(blogPost.title, blogPost.content);
         platform = 'Write.as';
         await validateWriteAsUrl(publishedUrl);
+      } else {
+        // Fallback to Telegraph if no specific platform determined
+        publishedUrl = await publishToTelegraph(blogPost.title, blogPost.content);
+        platform = 'Telegraph.ph';
+        await validateTelegraphUrl(publishedUrl);
       }
 
       publishedUrls.push(publishedUrl);
       console.log(`✅ Published post to ${platform}:`, publishedUrl);
 
-      // Save to database
+      // Save to database with platform tracking
       await savePublishedLink(supabase, campaignId, publishedUrl, blogPost.title, platform);
       console.log(`✅ Saved post to database`);
 
+      // Track platform usage for rotation
+      await trackPlatformUsage(supabase, campaignId, nextPlatform);
+
     } catch (error) {
       console.error(`❌ Failed to publish post:`, error);
-      throw new Error(`Failed to publish post to ${selectedPlatform}`);
+      throw new Error(`Failed to publish post to ${nextPlatform || 'platform'}`);
     }
 
     if (publishedUrls.length === 0) {
