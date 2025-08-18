@@ -135,7 +135,7 @@ export class WorkingCampaignProcessor {
       const publishedUrls = result.data.publishedUrls || [];
       const totalPosts = result.data.totalPosts || publishedUrls.length;
 
-      console.log('✅ Content generated and published successfully via server-side processor');
+      console.log('�� Content generated and published successfully via server-side processor');
       console.log(`📤 Published ${totalPosts} posts successfully:`, publishedUrls);
 
       realTimeFeedService.emitContentGenerated(
@@ -410,8 +410,8 @@ export class WorkingCampaignProcessor {
       const allCompleted = PlatformConfigService.areAllPlatformsCompleted(publishedPlatformIds);
 
       console.log(`🔍 Platform completion check for campaign ${campaignId}:`, {
-        activePlatforms: activePlatformIds,
-        publishedPlatforms: Array.from(publishedPlatforms),
+        activePlatforms: activePlatforms.map(p => p.id),
+        publishedPlatforms: publishedPlatformIds,
         allCompleted
       });
 
