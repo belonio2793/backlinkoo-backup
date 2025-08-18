@@ -5,6 +5,7 @@ import { realTimeFeedService } from './realTimeFeedService';
 import { campaignNetworkLogger } from './campaignNetworkLogger';
 import { responseBodyManager } from '@/utils/responseBodyFix';
 import { developmentCampaignProcessor } from './developmentCampaignProcessor';
+import { PlatformConfigService } from './platformConfigService';
 
 /**
  * Working Campaign Processor - Simplified server-side processing
@@ -387,12 +388,8 @@ export class WorkingCampaignProcessor {
    */
   private async checkAllPlatformsCompleted(campaignId: string): Promise<boolean> {
     try {
-      // Define active platforms (should match the orchestrator configuration)
-      const activePlatforms = [
-        { id: 'telegraph', name: 'Telegraph.ph', isActive: true },
-        { id: 'writeas', name: 'Write.as', isActive: true }
-        // Add other active platforms as needed
-      ];
+      // Get active platforms from centralized configuration
+      const activePlatforms = PlatformConfigService.getActivePlatforms();
 
       // Get published links for this campaign from Supabase
       const supabase = (await import('@/integrations/supabase/client')).supabase;
@@ -408,15 +405,9 @@ export class WorkingCampaignProcessor {
         return false; // Default to not completing if we can't check
       }
 
-      // Check if all active platforms have published content
-      const publishedPlatforms = new Set((publishedLinks || []).map(link => link.platform.toLowerCase()));
-      const activePlatformIds = activePlatforms.filter(p => p.isActive).map(p => p.id);
-
-      const allCompleted = activePlatformIds.every(platformId =>
-        publishedPlatforms.has(platformId) ||
-        publishedPlatforms.has(platformId.replace('.', '')) ||
-        publishedPlatforms.has(`${platformId}.ph`)
-      );
+      // Check if all active platforms have published content using centralized service
+      const publishedPlatformIds = (publishedLinks || []).map(link => link.platform);
+      const allCompleted = PlatformConfigService.areAllPlatformsCompleted(publishedPlatformIds);
 
       console.log(`🔍 Platform completion check for campaign ${campaignId}:`, {
         activePlatforms: activePlatformIds,
