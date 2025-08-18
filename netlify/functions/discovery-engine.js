@@ -1,10 +1,14 @@
-// Enhanced Discovery Engine - Comprehensive link building opportunity discovery
+// Enhanced Discovery Engine - Real URL discovery with database integration
 const { createClient } = require('@supabase/supabase-js');
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+// In-memory storage for sessions (in production, use Redis)
+global.discoverySessions = global.discoverySessions || {};
+global.discoveryResults = global.discoveryResults || {};
 
 exports.handler = async (event, context) => {
   const headers = {
@@ -14,33 +18,49 @@ exports.handler = async (event, context) => {
   };
 
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: '',
-    };
-  }
-
-  if (event.httpMethod === 'GET') {
-    // Handle SSE connection for real-time updates
-    return handleSSEConnection(event, headers);
-  }
-
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      headers,
-      body: JSON.stringify({ error: 'Method not allowed' }),
-    };
+    return { statusCode: 200, headers, body: '' };
   }
 
   try {
-    const { 
-      campaignId, 
-      keywords, 
-      platforms = ['all'], 
-      maxResults = 100, 
-      discoveryDepth = 'medium' 
+    if (event.httpMethod === 'GET') {
+      // Return session status for SSE-like updates
+      const sessionId = event.queryStringParameters?.sessionId;
+      if (!sessionId) {
+        return {
+          statusCode: 400,
+          headers,
+          body: JSON.stringify({ error: 'Session ID required' })
+        };
+      }
+
+      const session = global.discoverySessions[sessionId];
+      const results = global.discoveryResults[sessionId] || [];
+
+      return {
+        statusCode: 200,
+        headers: { ...headers, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          session: session || null,
+          results: results,
+          total: results.length
+        })
+      };
+    }
+
+    if (event.httpMethod !== 'POST') {
+      return {
+        statusCode: 405,
+        headers,
+        body: JSON.stringify({ error: 'Method not allowed' }),
+      };
+    }
+
+    const {
+      campaignId,
+      keywords,
+      platforms = ['all'],
+      maxResults = 100,
+      discoveryDepth = 'medium'
     } = JSON.parse(event.body || '{}');
 
     if (!campaignId || !keywords || !Array.isArray(keywords)) {
@@ -52,7 +72,7 @@ exports.handler = async (event, context) => {
     }
 
     // Start discovery session
-    const sessionId = `session_${campaignId}_${Date.now()}`;
+    const sessionId = `session_${Date.now()}`;
     const session = {
       id: sessionId,
       query: keywords.join(', '),
@@ -61,15 +81,14 @@ exports.handler = async (event, context) => {
       results_count: 0,
       progress: 0,
       platforms_scanned: [],
-      current_platform: 'Initializing'
+      current_platform: 'Starting discovery...'
     };
 
-    // Store session in temporary storage (would use Redis in production)
-    global.discoverySessions = global.discoverySessions || {};
     global.discoverySessions[sessionId] = session;
+    global.discoveryResults[sessionId] = [];
 
-    // Start background discovery process
-    startDiscoveryProcess(sessionId, keywords, platforms, maxResults, discoveryDepth);
+    // Start discovery process
+    setImmediate(() => performDiscovery(sessionId, keywords, platforms, maxResults, discoveryDepth));
 
     return {
       statusCode: 200,
@@ -82,12 +101,12 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error('Error starting discovery:', error);
+    console.error('Discovery engine error:', error);
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
-        error: error.message || 'An unexpected error occurred'
+        error: error.message || 'Discovery failed'
       }),
     };
   }
