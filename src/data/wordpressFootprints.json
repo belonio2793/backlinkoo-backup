@@ -1,0 +1,408 @@
+{
+  "meta": {
+    "description": "WordPress footprint database for discovering vulnerable sites",
+    "targetTypes": ["personal_blogs", "small_business", "hobby_sites", "abandoned_sites"],
+    "discoveryMethods": ["theme_footprints", "plugin_footprints", "comment_forms", "vulnerability_scans"],
+    "estimatedTargets": "50,000-100,000 sites"
+  },
+  
+  "themeFootprints": {
+    "popular_vulnerable": {
+      "description": "Popular themes with known vulnerabilities",
+      "themes": [
+        {
+          "name": "twentyten",
+          "footprint": "inurl:wp-content/themes/twentyten",
+          "vulnerability": "comment_form_xss",
+          "estimated_sites": 50000,
+          "success_rate": 75
+        },
+        {
+          "name": "twentyeleven", 
+          "footprint": "inurl:wp-content/themes/twentyeleven",
+          "vulnerability": "weak_comment_validation",
+          "estimated_sites": 45000,
+          "success_rate": 70
+        },
+        {
+          "name": "genesis",
+          "footprint": "inurl:wp-content/themes/genesis",
+          "vulnerability": "comment_injection",
+          "estimated_sites": 35000,
+          "success_rate": 65
+        },
+        {
+          "name": "avada",
+          "footprint": "inurl:wp-content/themes/avada",
+          "vulnerability": "form_bypass",
+          "estimated_sites": 30000,
+          "success_rate": 60
+        },
+        {
+          "name": "enfold",
+          "footprint": "inurl:wp-content/themes/enfold",
+          "vulnerability": "comment_moderation_bypass",
+          "estimated_sites": 25000,
+          "success_rate": 58
+        }
+      ]
+    },
+    
+    "old_default_themes": {
+      "description": "Old default WordPress themes often left unpatched",
+      "themes": [
+        {
+          "name": "default",
+          "footprint": "inurl:wp-content/themes/default",
+          "vulnerability": "legacy_comment_system",
+          "estimated_sites": 15000,
+          "success_rate": 85
+        },
+        {
+          "name": "classic",
+          "footprint": "inurl:wp-content/themes/classic", 
+          "vulnerability": "no_comment_filtering",
+          "estimated_sites": 12000,
+          "success_rate": 80
+        },
+        {
+          "name": "kubrick",
+          "footprint": "inurl:wp-content/themes/kubrick",
+          "vulnerability": "legacy_wp_version",
+          "estimated_sites": 8000,
+          "success_rate": 90
+        }
+      ]
+    },
+    
+    "abandoned_themes": {
+      "description": "Themes no longer maintained, often vulnerable",
+      "themes": [
+        {
+          "name": "arthemia",
+          "footprint": "inurl:wp-content/themes/arthemia",
+          "vulnerability": "unpatched_comment_form",
+          "estimated_sites": 5000,
+          "success_rate": 95
+        },
+        {
+          "name": "mystique",
+          "footprint": "inurl:wp-content/themes/mystique",
+          "vulnerability": "comment_spam_bypass",
+          "estimated_sites": 4500,
+          "success_rate": 92
+        },
+        {
+          "name": "elegance",
+          "footprint": "inurl:wp-content/themes/elegance",
+          "vulnerability": "weak_form_validation",
+          "estimated_sites": 4000,
+          "success_rate": 88
+        }
+      ]
+    }
+  },
+  
+  "pluginFootprints": {
+    "contact_forms": {
+      "description": "Contact form plugins with submission opportunities",
+      "plugins": [
+        {
+          "name": "contact-form-7",
+          "footprint": "inurl:wp-content/plugins/contact-form-7",
+          "form_endpoint": "/wp-content/plugins/contact-form-7/includes/js/scripts.js",
+          "estimated_sites": 2000000,
+          "success_rate": 45,
+          "link_placement": "message_body"
+        },
+        {
+          "name": "wpforms",
+          "footprint": "inurl:wp-content/plugins/wpforms",
+          "form_endpoint": "/wp-content/plugins/wpforms/assets/js/wpforms.js",
+          "estimated_sites": 800000,
+          "success_rate": 40,
+          "link_placement": "message_body"
+        },
+        {
+          "name": "ninja-forms",
+          "footprint": "inurl:wp-content/plugins/ninja-forms",
+          "form_endpoint": "/wp-content/plugins/ninja-forms/assets/js/min/front-end.js",
+          "estimated_sites": 500000,
+          "success_rate": 50,
+          "link_placement": "form_fields"
+        },
+        {
+          "name": "gravity-forms",
+          "footprint": "inurl:wp-content/plugins/gravityforms",
+          "form_endpoint": "/wp-content/plugins/gravityforms/js/gravityforms.js",
+          "estimated_sites": 600000,
+          "success_rate": 35,
+          "link_placement": "message_body"
+        }
+      ]
+    },
+    
+    "comment_plugins": {
+      "description": "Comment system plugins with vulnerabilities",
+      "plugins": [
+        {
+          "name": "disqus",
+          "footprint": "inurl:wp-content/plugins/disqus-comment-system",
+          "vulnerability": "comment_injection",
+          "estimated_sites": 300000,
+          "success_rate": 55
+        },
+        {
+          "name": "jetpack-comments",
+          "footprint": "inurl:wp-content/plugins/jetpack",
+          "vulnerability": "weak_moderation",
+          "estimated_sites": 1500000,
+          "success_rate": 25
+        }
+      ]
+    },
+    
+    "social_plugins": {
+      "description": "Social plugins allowing profile links",
+      "plugins": [
+        {
+          "name": "social-warfare",
+          "footprint": "inurl:wp-content/plugins/social-warfare",
+          "link_placement": "author_profile",
+          "estimated_sites": 200000,
+          "success_rate": 60
+        },
+        {
+          "name": "ultimate-member",
+          "footprint": "inurl:wp-content/plugins/ultimate-member",
+          "link_placement": "user_profile",
+          "estimated_sites": 150000,
+          "success_rate": 70
+        }
+      ]
+    }
+  },
+  
+  "commentFormFootprints": {
+    "standard_wp_comments": {
+      "description": "Standard WordPress comment forms",
+      "selectors": [
+        "form#commentform",
+        "form.comment-form",
+        "form[action*='wp-comments-post.php']"
+      ],
+      "fields": {
+        "author": ["#author", "input[name='author']", ".comment-form-author input"],
+        "email": ["#email", "input[name='email']", ".comment-form-email input"],
+        "url": ["#url", "input[name='url']", ".comment-form-url input"],
+        "comment": ["#comment", "textarea[name='comment']", ".comment-form-comment textarea"]
+      },
+      "success_indicators": [
+        "Your comment is awaiting moderation",
+        "Thank you for your comment",
+        "Comment submitted successfully"
+      ]
+    },
+    
+    "theme_specific_forms": {
+      "description": "Theme-specific comment form implementations",
+      "variations": [
+        {
+          "theme": "genesis",
+          "form_selector": ".comment-respond form",
+          "url_field": "input[name='url']",
+          "success_rate": 65
+        },
+        {
+          "theme": "divi",
+          "form_selector": "#respond form",
+          "url_field": "#url",
+          "success_rate": 60
+        },
+        {
+          "theme": "avada",
+          "form_selector": ".comment-form",
+          "url_field": "input[name='url']",
+          "success_rate": 55
+        }
+      ]
+    }
+  },
+  
+  "vulnerabilityFootprints": {
+    "outdated_wordpress": {
+      "description": "Sites running outdated WordPress versions",
+      "footprints": [
+        "\"generator\" content=\"WordPress 4.9\"",
+        "\"generator\" content=\"WordPress 5.0\"",
+        "\"generator\" content=\"WordPress 5.1\"",
+        "/wp-includes/js/wp-embed.min.js?ver=4.9",
+        "/wp-includes/js/wp-embed.min.js?ver=5.0"
+      ],
+      "estimated_sites": 500000,
+      "risk_level": "high"
+    },
+    
+    "exposed_files": {
+      "description": "Sites with exposed sensitive files",
+      "footprints": [
+        "inurl:wp-config.php.bak",
+        "inurl:wp-config.txt",
+        "inurl:debug.log wordpress",
+        "filetype:log \"wordpress error\"",
+        "inurl:error_log \"wordpress\""
+      ],
+      "estimated_sites": 50000,
+      "risk_level": "critical"
+    },
+    
+    "weak_admin": {
+      "description": "Sites with weak admin security",
+      "footprints": [
+        "inurl:wp-admin \"forgot password\"",
+        "intitle:\"Log In\" \"powered by wordpress\"",
+        "inurl:wp-login.php \"remember me\"",
+        "inurl:wp-admin \"username\" \"password\""
+      ],
+      "estimated_sites": 200000,
+      "risk_level": "medium"
+    }
+  },
+  
+  "discoveryQueries": {
+    "bulk_discovery": [
+      "inurl:wp-content \"leave a comment\"",
+      "\"powered by wordpress\" \"comment\" \"website\"",
+      "inurl:wp-comments-post.php",
+      "\"your email address will not be published\" wordpress",
+      "intext:\"comment\" inurl:wp-content/themes",
+      "\"submit comment\" inurl:wordpress",
+      "\"comment form\" filetype:php site:*",
+      "inurl:wp-content/plugins/contact-form-7",
+      "\"contact form\" \"powered by wordpress\"",
+      "inurl:wp-content/themes site:*.wordpress.com -site:en.wordpress.com",
+      "\"blog comments\" inurl:wp-content",
+      "intext:\"awaiting moderation\" wordpress"
+    ],
+    
+    "theme_specific": [
+      "inurl:wp-content/themes/twentyten \"comment\"",
+      "inurl:wp-content/themes/genesis \"leave a comment\"", 
+      "inurl:wp-content/themes/avada \"comment form\"",
+      "inurl:wp-content/themes/divi \"submit comment\"",
+      "inurl:wp-content/themes/enfold \"your comment\"",
+      "inurl:wp-content/themes/x \"comment\" \"website\"",
+      "inurl:wp-content/themes/salient \"leave a reply\"",
+      "inurl:wp-content/themes/bridge \"comment form\""
+    ],
+    
+    "plugin_based": [
+      "inurl:wp-content/plugins/contact-form-7 \"contact\"",
+      "inurl:wp-content/plugins/wpforms \"form\"",
+      "inurl:wp-content/plugins/ninja-forms \"contact\"",
+      "inurl:wp-content/plugins/gravity-forms \"form\"",
+      "inurl:wp-content/plugins/jetpack \"comment\"",
+      "inurl:wp-content/plugins/akismet \"comment\"",
+      "inurl:wp-content/plugins/disqus \"comment\""
+    ],
+    
+    "vulnerability_based": [
+      "\"WordPress database error\" site:*",
+      "\"wordpress\" \"error\" filetype:log",
+      "inurl:wp-config.php.bak",
+      "\"generator\" content=\"WordPress 4.\" \"comment\"",
+      "\"generator\" content=\"WordPress 5.0\" \"comment\"",
+      "inurl:debug.log \"wordpress\" \"comment\"",
+      "\"wordpress installation\" \"comment\""
+    ]
+  },
+  
+  "targetCategories": {
+    "personal_blogs": {
+      "description": "Individual personal blogs, often unmonitored",
+      "characteristics": ["low_traffic", "infrequent_updates", "weak_security"],
+      "estimated_count": 2000000,
+      "average_success_rate": 70,
+      "link_value": "low_to_medium"
+    },
+    
+    "hobby_sites": {
+      "description": "Hobby and interest-based websites",
+      "characteristics": ["niche_content", "community_driven", "moderate_security"],
+      "estimated_count": 800000,
+      "average_success_rate": 60,
+      "link_value": "medium"
+    },
+    
+    "small_business": {
+      "description": "Small business websites with basic WordPress",
+      "characteristics": ["local_business", "basic_maintenance", "standard_security"],
+      "estimated_count": 1500000,
+      "average_success_rate": 45,
+      "link_value": "medium_to_high"
+    },
+    
+    "abandoned_sites": {
+      "description": "Unmaintained WordPress installations",
+      "characteristics": ["no_updates", "no_monitoring", "vulnerable"],
+      "estimated_count": 500000,
+      "average_success_rate": 85,
+      "link_value": "low"
+    }
+  },
+  
+  "automationStrategies": {
+    "comment_bombing": {
+      "description": "Mass comment submission across discovered forms",
+      "method": "automated_form_submission",
+      "rate_limit": "1_comment_per_5_minutes_per_site",
+      "success_rate": 65,
+      "detection_risk": "medium"
+    },
+    
+    "form_injection": {
+      "description": "Contact form submissions with embedded links",
+      "method": "contact_form_automation",
+      "rate_limit": "1_submission_per_hour_per_site",
+      "success_rate": 40,
+      "detection_risk": "low"
+    },
+    
+    "vulnerability_exploitation": {
+      "description": "Exploit known vulnerabilities for link placement",
+      "method": "targeted_exploitation",
+      "rate_limit": "manual_review_required",
+      "success_rate": 80,
+      "detection_risk": "high"
+    }
+  },
+  
+  "expectedResults": {
+    "discovery_potential": {
+      "total_wordpress_sites": 75000000,
+      "vulnerable_sites": 5000000,
+      "accessible_comment_forms": 3000000,
+      "exploitable_sites": 500000
+    },
+    
+    "realistic_targets": {
+      "daily_discovery": "500-2000 new sites",
+      "weekly_discovery": "3500-14000 new sites",
+      "monthly_discovery": "15000-60000 new sites"
+    },
+    
+    "link_placement_rates": {
+      "comment_forms": "60-80% success rate",
+      "contact_forms": "30-50% success rate", 
+      "vulnerability_exploitation": "70-90% success rate",
+      "plugin_exploitation": "40-60% success rate"
+    },
+    
+    "campaign_scaling": {
+      "phase_1": "100-500 WordPress targets per campaign",
+      "phase_2": "500-2000 WordPress targets per campaign",
+      "phase_3": "2000-10000 WordPress targets per campaign",
+      "full_scale": "10000+ WordPress targets per campaign"
+    }
+  }
+}
