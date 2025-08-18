@@ -479,25 +479,117 @@ export class Web2PlatformsEngine extends BaseEngine {
   // Helper methods
   private async getAvailablePlatforms(task: EngineTask): Promise<Map<string, PlatformConfig>> {
     const available = new Map<string, PlatformConfig>();
-    
+
     for (const [platformId, config] of this.platformConfigs) {
-      if (!config.enabled) continue;
-      
-      // Check if platform meets task requirements
+      // Check if platform meets basic task requirements
       if (task.requirements.maxCostPerLink < this.calculateCost(config)) {
+        console.log(`💰 Platform ${platformId} too expensive: $${this.calculateCost(config)} > $${task.requirements.maxCostPerLink}`);
         continue;
       }
-      
+
+      // Check minimum domain authority if specified
+      if (task.requirements.minDomainAuthority && config.domainAuthority < task.requirements.minDomainAuthority) {
+        console.log(`📊 Platform ${platformId} DA too low: ${config.domainAuthority} < ${task.requirements.minDomainAuthority}`);
+        continue;
+      }
+
       available.set(platformId, config);
     }
-    
+
+    console.log(`🎯 ${available.size}/${this.platformConfigs.size} platforms meet basic requirements`);
     return available;
   }
 
-  private async checkRateLimits(platformId: string): Promise<boolean> {
-    // Implementation would check actual rate limits from database/cache
-    // For now, return true (rate limits would be checked in platform services)
-    return true;
+  private async checkRateLimits(platformId: string): Promise<boolean | null> {
+    // Check if we've hit rate limits for this platform
+    const rateLimitKey = `rate_limit_${platformId}`;
+
+    try {
+      // Try to get rate limit status from localStorage or memory
+      const lastUsed = localStorage.getItem(`${rateLimitKey}_last_used`);
+      const usageCount = localStorage.getItem(`${rateLimitKey}_count`);
+
+      if (!lastUsed || !usageCount) {
+        return true; // No rate limit data, assume OK
+      }
+
+      const lastUsedTime = new Date(lastUsed);
+      const currentHour = new Date();
+      currentHour.setMinutes(0, 0, 0);
+
+      // Reset counter if it's a new hour
+      if (lastUsedTime < currentHour) {
+        localStorage.removeItem(`${rateLimitKey}_count`);
+        return true;
+      }
+
+      const config = this.platformConfigs.get(platformId);
+      if (!config) return null;
+
+      const hourlyLimit = config.rateLimits.postsPerHour;
+      const currentCount = parseInt(usageCount);
+
+      if (currentCount >= hourlyLimit) {
+        console.log(`⏱️  Platform ${platformId} rate limited: ${currentCount}/${hourlyLimit} posts this hour`);
+        return false;
+      }
+
+      return true;
+
+    } catch (error) {
+      console.warn(`Rate limit check failed for ${platformId}:`, error);
+      return null; // Unknown status, don't block
+    }
+  }
+
+  private hasValidCredentials(platformId: string): boolean {
+    try {
+      // Check for stored credentials in localStorage
+      const credentials = localStorage.getItem('platform_credentials');
+      if (!credentials) return false;
+
+      const parsedCredentials = JSON.parse(credentials);
+      const platformCreds = parsedCredentials[platformId];
+
+      if (!platformCreds) return false;
+
+      // Check if required credential fields are present
+      switch (platformId) {
+        case 'wordpress':
+          return !!(platformCreds.baseUrl && platformCreds.username && platformCreds.applicationPassword);
+        case 'medium':
+          return !!(platformCreds.accessToken);
+        case 'devto':
+          return !!(platformCreds.apiKey);
+        case 'hashnode':
+          return !!(platformCreds.accessToken);
+        case 'ghost':
+          return !!(platformCreds.apiUrl && platformCreds.adminApiKey);
+        case 'telegraph':
+          return true; // No credentials required
+        default:
+          return false;
+      }
+    } catch (error) {
+      console.warn(`Credential check failed for ${platformId}:`, error);
+      return false;
+    }
+  }
+
+  private recordPlatformUsage(platformId: string): void {
+    try {
+      const rateLimitKey = `rate_limit_${platformId}`;
+      const now = new Date().toISOString();
+      const countKey = `${rateLimitKey}_count`;
+
+      localStorage.setItem(`${rateLimitKey}_last_used`, now);
+
+      const currentCount = parseInt(localStorage.getItem(countKey) || '0');
+      localStorage.setItem(countKey, (currentCount + 1).toString());
+
+    } catch (error) {
+      console.warn(`Failed to record usage for ${platformId}:`, error);
+    }
   }
 
   private calculatePlatformSuitability(config: PlatformConfig, task: EngineTask): number {
