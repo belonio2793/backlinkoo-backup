@@ -737,6 +737,11 @@ const Automation = () => {
           <MassivePlatformStats />
         </div>
 
+        {/* Automatic Platform Filtering Monitor */}
+        <div className="w-full">
+          <AutomaticFilteringMonitor />
+        </div>
+
         {/* Publishing Platforms - Full Width Second Row */}
         <div className="w-full">
           <Card className="h-fit">
