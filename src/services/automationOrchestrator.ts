@@ -99,21 +99,45 @@ export class AutomationOrchestrator {
   }
 
   /**
-   * Get next available platform for a campaign
+   * Get next available platform for a campaign (continuous rotation)
    */
   getNextPlatformForCampaign(campaignId: string): PublishingPlatform | null {
     const activePlatforms = this.getActivePlatforms();
     const campaignProgress = this.platformProgressMap.get(campaignId) || [];
 
-    // Find the first platform that hasn't been used yet
+    if (activePlatforms.length === 0) {
+      return null;
+    }
+
+    // Count posts per platform for this campaign
+    const platformCounts = new Map<string, number>();
+
+    // Initialize counts
+    activePlatforms.forEach(platform => {
+      platformCounts.set(platform.id, 0);
+    });
+
+    // Count existing posts
+    campaignProgress.forEach(progress => {
+      if (progress.isCompleted) {
+        const currentCount = platformCounts.get(progress.platformId) || 0;
+        platformCounts.set(progress.platformId, currentCount + 1);
+      }
+    });
+
+    // Find platform with minimum posts (round-robin rotation)
+    let selectedPlatform = activePlatforms[0];
+    let minCount = platformCounts.get(selectedPlatform.id) || 0;
+
     for (const platform of activePlatforms) {
-      const hasPosted = campaignProgress.some(p => p.platformId === platform.id && p.isCompleted);
-      if (!hasPosted) {
-        return platform;
+      const count = platformCounts.get(platform.id) || 0;
+      if (count < minCount) {
+        selectedPlatform = platform;
+        minCount = count;
       }
     }
 
-    return null; // All platforms have been used
+    return selectedPlatform; // Always return a platform for continuous rotation
   }
 
   /**
@@ -122,57 +146,65 @@ export class AutomationOrchestrator {
   async getNextPlatformForCampaignAsync(campaignId: string): Promise<PublishingPlatform | null> {
     const activePlatforms = this.getActivePlatforms();
 
-    // Get published links from database to check which platforms are already used
+    if (activePlatforms.length === 0) {
+      return null;
+    }
+
+    // Get published links from database to check platform usage counts
     const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
     const publishedLinks = campaignWithLinks?.automation_published_links || [];
 
-    // Create set of used platform IDs from database (normalize to handle legacy data)
-    const usedPlatformIds = new Set(
-      publishedLinks.map(link => {
-        const platform = link.platform.toLowerCase();
-        // Normalize legacy platform names
-        if (platform === 'write.as' || platform === 'writeas') return 'writeas';
-        if (platform === 'telegraph.ph' || platform === 'telegraph') return 'telegraph';
-        return platform;
-      })
-    );
+    // Count posts per platform from database
+    const platformCounts = new Map<string, number>();
+
+    // Initialize counts
+    activePlatforms.forEach(platform => {
+      platformCounts.set(platform.id, 0);
+    });
+
+    // Count existing posts from database
+    publishedLinks.forEach(link => {
+      const platform = link.platform.toLowerCase();
+      // Normalize legacy platform names
+      let normalizedPlatform = platform;
+      if (platform === 'write.as' || platform === 'writeas') normalizedPlatform = 'writeas';
+      if (platform === 'telegraph.ph' || platform === 'telegraph') normalizedPlatform = 'telegraph';
+
+      const currentCount = platformCounts.get(normalizedPlatform) || 0;
+      platformCounts.set(normalizedPlatform, currentCount + 1);
+    });
 
     // Also check in-memory progress map as backup
     const campaignProgress = this.platformProgressMap.get(campaignId) || [];
-    for (const progress of campaignProgress) {
+    campaignProgress.forEach(progress => {
       if (progress.isCompleted) {
-        usedPlatformIds.add(progress.platformId);
+        const currentCount = platformCounts.get(progress.platformId) || 0;
+        platformCounts.set(progress.platformId, currentCount + 1);
       }
-    }
+    });
 
-    // Find the first platform that hasn't been used yet
+    // Find platform with minimum posts (round-robin rotation)
+    let selectedPlatform = activePlatforms[0];
+    let minCount = platformCounts.get(selectedPlatform.id) || 0;
+
     for (const platform of activePlatforms) {
-      if (!usedPlatformIds.has(platform.id)) {
-        return platform;
+      const count = platformCounts.get(platform.id) || 0;
+      if (count < minCount) {
+        selectedPlatform = platform;
+        minCount = count;
       }
     }
 
-    return null; // All platforms have been used
+    return selectedPlatform; // Always return a platform for continuous rotation
   }
 
   /**
-   * Check if campaign should auto-pause (completed all available platforms)
+   * Check if campaign should auto-pause (never auto-pause for continuous rotation)
    */
   shouldAutoPauseCampaign(campaignId: string): boolean {
-    const activePlatforms = this.getActivePlatforms();
-    const campaignProgress = this.platformProgressMap.get(campaignId) || [];
-
-    // Safety check: if no active platforms, should not pause
-    if (activePlatforms.length === 0) {
-      return false;
-    }
-
-    // Check if all active platforms have been completed using centralized service
-    const publishedPlatformIds = campaignProgress
-      .filter(p => p.isCompleted)
-      .map(p => p.platformId);
-
-    return PlatformConfigService.areAllPlatformsCompleted(publishedPlatformIds);
+    // For continuous rotation, campaigns should never auto-pause
+    // They should only be paused manually by the user or due to errors
+    return false;
   }
 
   /**
@@ -455,27 +487,8 @@ export class AutomationOrchestrator {
         throw new Error('Campaign not found');
       }
 
-      // CRITICAL: Validate platform usage before processing
-      const validation = await this.validateNoPlatformDuplication(campaignId);
-      if (!validation.isValid) {
-        // Check if all platforms are TRULY completed (both active platforms have published)
-        const allPlatformsCompleted = this.shouldAutoPauseCampaign(campaignId);
-
-        if (allPlatformsCompleted) {
-          // All platforms genuinely completed - mark as done
-          await this.updateCampaignStatus(campaignId, 'completed');
-          await this.logActivity(campaignId, 'info', `Campaign completed: All platforms have published content`);
-          console.log(`✅ Campaign ${campaignId} completed - all platforms have published`);
-          return;
-        } else {
-          // Campaign has some published links but not all platforms - let it continue
-          console.log(`⚠️ Campaign ${campaignId} has partial platform usage, continuing processing`);
-          await this.logActivity(campaignId, 'info', `Continuing campaign - ${validation.message}`);
-        }
-      } else {
-        // Log available platforms for transparency
-        await this.logActivity(campaignId, 'info', `Processing campaign - ${validation.message}`);
-      }
+      // Log campaign processing status - no completion logic for continuous rotation
+      await this.logActivity(campaignId, 'info', `Processing campaign - continuous rotation enabled`);
 
       // Use the working campaign processor for reliable processing
       const result = await workingCampaignProcessor.processCampaign(campaign);
@@ -485,6 +498,28 @@ export class AutomationOrchestrator {
       }
 
       console.log('✅ Campaign processed successfully by working processor');
+
+      // Mark platform as completed in orchestrator tracking
+      if (result.publishedUrls && result.publishedUrls.length > 0) {
+        // Determine which platform was used (for now, assume it follows the rotation logic)
+        const nextPlatform = await this.getNextPlatformForCampaignAsync(campaignId);
+        if (nextPlatform) {
+          this.markPlatformCompleted(campaignId, nextPlatform.id, result.publishedUrls[0]);
+          await this.logActivity(campaignId, 'info', `Successfully published to ${nextPlatform.name}: ${result.publishedUrls[0]}`);
+        }
+      }
+
+      // Continue to next platform immediately for continuous rotation
+      console.log('🔄 Continuing to next platform for continuous rotation...');
+      try {
+        await this.continueToNextPlatform(campaignId);
+      } catch (continuationError) {
+        console.error('❌ Failed to continue to next platform:', continuationError);
+        await this.logActivity(campaignId, 'warning', `Platform continuation failed, will retry: ${continuationError.message}`);
+
+        // Keep campaign active but log the issue - don't pause the entire campaign for continuation errors
+        await this.updateCampaignStatus(campaignId, 'active');
+      }
 
     } catch (error) {
       console.error('Campaign processing error:', formatErrorForLogging(error, 'processCampaign'));
@@ -678,41 +713,7 @@ export class AutomationOrchestrator {
         this.markPlatformCompleted(campaignId, nextPlatform.id, publishedLinks[0]);
         await this.logActivity(campaignId, 'info', `Successfully published to ${nextPlatform.name}: ${publishedLinks[0]}`);
 
-        // Check if all active platforms have been completed
-        // Note: Auto-completion disabled - always keep campaigns active
-        const shouldComplete = false; // Disabled auto-completion
-
-        if (shouldComplete) {
-          // All platforms completed - mark campaign as completed
-          this.updateStep(campaignId, 'complete-campaign', {
-            status: 'completed',
-            details: 'Campaign successfully completed - all platforms have published content'
-          });
-
-          this.updateProgress(campaignId, {
-            isComplete: true,
-            endTime: new Date()
-          });
-
-          await this.updateCampaignStatus(campaignId, 'completed');
-          await this.logActivity(campaignId, 'info', `Campaign completed successfully. All platforms have published content.`);
-
-          // Get all published URLs for the completion event
-          const allPublishedUrls = this.getCampaignPlatformProgress(campaignId)
-            .filter(p => p.isCompleted && p.publishedUrl)
-            .map(p => p.publishedUrl);
-
-          // Emit completion event
-          realTimeFeedService.emitCampaignCompleted(
-            campaignId,
-            campaign.name,
-            campaign.keywords[0] || '',
-            allPublishedUrls
-          );
-        } else {
-          // More platforms to process - automatically continue to next platform
-          await this.continueToNextPlatform(campaignId);
-        }
+ main
       } else {
         this.updateStep(campaignId, 'publish-content', {
           status: 'error',
@@ -966,37 +967,12 @@ export class AutomationOrchestrator {
   }
 
   /**
-   * Auto-pause campaign when all platforms are completed
+   * Auto-pause campaign when all platforms are completed (disabled for continuous rotation)
    */
   async autoPauseCampaign(campaignId: string, reason: string): Promise<void> {
-    const campaign = await this.getCampaign(campaignId);
-
-    this.updateStep(campaignId, 'complete-campaign', {
-      status: 'completed',
-      details: reason
-    });
-
-    this.updateProgress(campaignId, {
-      isComplete: true,
-      endTime: new Date()
-    });
-
-    // Get published URLs for the completion event
-    const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
-    const publishedUrls = campaignWithLinks?.automation_published_links?.map(link => link.published_url) || [];
-
-    // Emit real-time feed event for campaign completion
-    if (campaign) {
-      realTimeFeedService.emitCampaignCompleted(
-        campaignId,
-        campaign.name,
-        campaign.keywords[0] || '',
-        publishedUrls
-      );
-    }
-
-    await this.updateCampaignStatus(campaignId, 'completed');
-    await this.logActivity(campaignId, 'info', `Campaign completed: ${reason}`);
+    // For continuous rotation, don't complete campaigns - just log and continue
+    await this.logActivity(campaignId, 'info', `Campaign continues with continuous rotation: ${reason}`);
+    console.log(`🔄 Campaign ${campaignId} continues - continuous rotation enabled: ${reason}`);
   }
 
   /**
@@ -1007,27 +983,30 @@ export class AutomationOrchestrator {
       const nextPlatform = this.getNextPlatformForCampaign(campaignId);
       const remainingPlatforms = this.getActivePlatforms().length - this.getCampaignPlatformProgress(campaignId).length;
 
+      // For continuous rotation, always continue to next platform
       if (!nextPlatform) {
-        await this.updateCampaignStatus(campaignId, 'completed');
-        await this.logActivity(campaignId, 'info', 'Campaign completed - all platforms have published content');
-        return;
+        await this.logActivity(campaignId, 'warning', 'No next platform available - this should not happen with continuous rotation');
+        console.warn(`⚠️ No next platform available for campaign ${campaignId} - checking platform configuration`);
+        return; // Exit early if no platform available
       }
 
       await this.logActivity(campaignId, 'info',
         `Continuing to next platform: ${nextPlatform.name}. ${remainingPlatforms} platform(s) remaining.`
       );
 
-      // Small delay to ensure database updates are processed
-      setTimeout(async () => {
-        try {
-          // Process the next platform
-          await this.processCampaignWithErrorHandling(campaignId);
-        } catch (error) {
-          console.error('Failed to continue to next platform:', error);
-          await this.updateCampaignStatus(campaignId, 'paused');
-          await this.logActivity(campaignId, 'error', `Failed to continue to next platform: ${error.message}`);
-        }
-      }, 2000); // 2 second delay
+      // Small delay to ensure database updates are processed, then continue immediately
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+
+      try {
+        // Process the next platform immediately
+        await this.processCampaignWithErrorHandling(campaignId);
+        console.log(`✅ Successfully continued campaign ${campaignId} to next platform: ${nextPlatform.name}`);
+      } catch (error) {
+        console.error('Failed to continue to next platform:', error);
+        await this.updateCampaignStatus(campaignId, 'paused');
+        await this.logActivity(campaignId, 'error', `Failed to continue to next platform: ${error.message}`);
+        throw error; // Re-throw to ensure calling function knows it failed
+      }
 
     } catch (error) {
       console.error('Error in continueToNextPlatform:', error);
@@ -1399,25 +1378,10 @@ export class AutomationOrchestrator {
         };
       }
 
-      // Check if campaign has published links and if all platforms are completed
+      // For continuous rotation, always allow resume regardless of published links
       const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
       if (campaignWithLinks?.automation_published_links && campaignWithLinks.automation_published_links.length > 0) {
-        // Check if all active platforms have completed before marking as completed
-        const shouldComplete = this.shouldAutoPauseCampaign(campaignId);
-
-        if (shouldComplete) {
-          // All platforms completed - mark as completed
-          await this.updateCampaignStatus(campaignId, 'completed');
-          await this.logActivity(campaignId, 'info', 'Campaign marked as completed - all platforms have published content');
-
-          return {
-            success: false,
-            message: 'This campaign is completed. Please create a new campaign.'
-          };
-        }
-
-        // Has published links but not all platforms completed - continue with resume
-        await this.logActivity(campaignId, 'info', 'Campaign has published content but more platforms available - continuing');
+        await this.logActivity(campaignId, 'info', 'Campaign has published content - continuing with continuous rotation');
       }
 
       return await this.smartResumeCampaign(campaignId);

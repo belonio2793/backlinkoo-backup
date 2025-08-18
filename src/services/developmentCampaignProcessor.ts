@@ -114,8 +114,8 @@ export class DevelopmentCampaignProcessor {
         campaign.user_id
       );
 
-      // Step 5: Mark campaign as completed
-      await this.updateCampaignStatus(campaign.id, 'completed');
+      // Step 5: Keep campaign active for continuous rotation
+      await this.updateCampaignStatus(campaign.id, 'active');
       await this.logActivity(
         campaign.id, 
         'info', 

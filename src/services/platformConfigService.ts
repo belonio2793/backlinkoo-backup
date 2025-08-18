@@ -18,65 +18,65 @@ export interface PublishingPlatform {
  * When adding new platforms, only update this list
  */
 export const AVAILABLE_PLATFORMS: PublishingPlatform[] = [
-  { 
-    id: 'telegraph', 
-    name: 'Telegraph.ph', 
-    isActive: true, 
-    maxPostsPerCampaign: 1, 
+  {
+    id: 'telegraph',
+    name: 'Telegraph.ph',
+    isActive: true,
+    maxPostsPerCampaign: -1,
     priority: 1,
     description: 'Anonymous publishing platform',
     capabilities: ['html', 'anonymous']
   },
-  { 
-    id: 'writeas', 
-    name: 'Write.as', 
-    isActive: true, 
-    maxPostsPerCampaign: 1, 
+  {
+    id: 'writeas',
+    name: 'Write.as',
+    isActive: true,
+    maxPostsPerCampaign: -1,
     priority: 2,
     description: 'Minimalist publishing platform',
     capabilities: ['markdown', 'anonymous']
   },
-  { 
-    id: 'medium', 
-    name: 'Medium.com', 
-    isActive: false, 
-    maxPostsPerCampaign: 1, 
+  {
+    id: 'medium',
+    name: 'Medium.com',
+    isActive: true,
+    maxPostsPerCampaign: -1,
     priority: 3,
     description: 'Professional publishing platform',
     capabilities: ['html', 'account_required']
   },
-  { 
-    id: 'devto', 
-    name: 'Dev.to', 
-    isActive: false, 
-    maxPostsPerCampaign: 1, 
+  {
+    id: 'devto',
+    name: 'Dev.to',
+    isActive: true,
+    maxPostsPerCampaign: -1,
     priority: 4,
     description: 'Developer community platform',
     capabilities: ['markdown', 'account_required']
   },
-  { 
-    id: 'linkedin', 
-    name: 'LinkedIn Articles', 
-    isActive: false, 
-    maxPostsPerCampaign: 1, 
+  {
+    id: 'linkedin',
+    name: 'LinkedIn Articles',
+    isActive: true,
+    maxPostsPerCampaign: -1,
     priority: 5,
     description: 'Professional network articles',
     capabilities: ['html', 'account_required']
   },
-  { 
-    id: 'hashnode', 
-    name: 'Hashnode', 
-    isActive: false, 
-    maxPostsPerCampaign: 1, 
+  {
+    id: 'hashnode',
+    name: 'Hashnode',
+    isActive: true,
+    maxPostsPerCampaign: -1,
     priority: 6,
     description: 'Developer blogging platform',
     capabilities: ['markdown', 'account_required']
   },
-  { 
-    id: 'substack', 
-    name: 'Substack', 
-    isActive: false, 
-    maxPostsPerCampaign: 1, 
+  {
+    id: 'substack',
+    name: 'Substack',
+    isActive: true,
+    maxPostsPerCampaign: -1,
     priority: 7,
     description: 'Newsletter and publishing platform',
     capabilities: ['html', 'account_required']
