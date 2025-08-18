@@ -279,6 +279,7 @@ const WordPressBlogDiscovery = () => {
   // Get test status icon
   const getTestStatusIcon = (status: string) => {
     switch (status) {
+      case 'validating': return <Eye className="w-4 h-4 animate-pulse text-purple-600" />;
       case 'testing': return <Loader2 className="w-4 h-4 animate-spin text-blue-600" />;
       case 'success': return <CheckCircle className="w-4 h-4 text-green-600" />;
       case 'failed': return <XCircle className="w-4 h-4 text-red-600" />;
