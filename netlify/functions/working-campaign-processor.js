@@ -97,17 +97,10 @@ exports.handler = async (event, context) => {
       throw new Error('Failed to publish post to any platform');
     }
 
-    // Step 3: Check if all platforms have completed before marking campaign as completed
-    const shouldComplete = await checkAllPlatformsCompleted(supabase, campaignId);
-
-    if (shouldComplete) {
-      await updateCampaignStatus(supabase, campaignId, 'completed', publishedUrls);
-      console.log('✅ Campaign marked as completed - all platforms have published content');
-    } else {
-      // Keep campaign active so it can be automatically resumed for next platform
-      await updateCampaignStatus(supabase, campaignId, 'active', publishedUrls);
-      console.log('🔄 Campaign marked as active - ready for next platform processing');
-    }
+    // Step 3: Keep campaign active for continuous rotation
+    // Never auto-complete campaigns - they should continue rotating through platforms
+    await updateCampaignStatus(supabase, campaignId, 'active', publishedUrls);
+    console.log('🔄 Campaign remains active - continuous platform rotation enabled');
 
     return {
       statusCode: 200,
@@ -652,13 +645,16 @@ async function validateWriteAsUrl(url) {
 }
 
 /**
- * Get next available platform for campaign rotation
+ * Get next available platform for campaign rotation (continuous round-robin)
  */
 async function getNextAvailablePlatform(supabase, campaignId) {
   try {
     // Get available platforms from centralized configuration
-    // This ensures new platforms are automatically included when activated
     const availablePlatforms = await getActivePlatforms();
+
+    if (availablePlatforms.length === 0) {
+      throw new Error('No active platforms available');
+    }
 
     // Get existing published links for this campaign from database
     const { data: publishedLinks, error } = await supabase
@@ -667,35 +663,47 @@ async function getNextAvailablePlatform(supabase, campaignId) {
       .eq('campaign_id', campaignId);
 
     if (error) {
-      console.warn('Error checking published links, using fallback platform selection:', error);
+      console.warn('Error checking published links, using first platform:', error);
       // Fallback to first platform if database check fails
       return availablePlatforms[0].id;
     }
 
-    // Create set of used platforms (normalize legacy platform names)
-    const usedPlatforms = new Set(
-      (publishedLinks || []).map(link => {
-        const platform = link.platform.toLowerCase();
-        // Normalize legacy platform names
-        if (platform === 'write.as' || platform === 'writeas') return 'writeas';
-        if (platform === 'telegraph.ph' || platform === 'telegraph') return 'telegraph';
-        return platform;
-      })
-    );
+    // Count posts per platform for round-robin rotation
+    const platformCounts = new Map();
 
-    console.log(`📊 Campaign ${campaignId} - Used platforms:`, Array.from(usedPlatforms));
+    // Initialize counts
+    availablePlatforms.forEach(platform => {
+      platformCounts.set(platform.id, 0);
+    });
 
-    // Find first available platform that hasn't been used
+    // Count existing posts
+    (publishedLinks || []).forEach(link => {
+      const platform = link.platform.toLowerCase();
+      // Normalize legacy platform names
+      let normalizedPlatform = platform;
+      if (platform === 'write.as' || platform === 'writeas') normalizedPlatform = 'writeas';
+      if (platform === 'telegraph.ph' || platform === 'telegraph') normalizedPlatform = 'telegraph';
+
+      const currentCount = platformCounts.get(normalizedPlatform) || 0;
+      platformCounts.set(normalizedPlatform, currentCount + 1);
+    });
+
+    console.log(`📊 Campaign ${campaignId} - Platform counts:`, Object.fromEntries(platformCounts));
+
+    // Find platform with minimum posts (round-robin rotation)
+    let selectedPlatform = availablePlatforms[0];
+    let minCount = platformCounts.get(selectedPlatform.id) || 0;
+
     for (const platform of availablePlatforms) {
-      if (!usedPlatforms.has(platform.id)) {
-        console.log(`✅ Selected next platform: ${platform.id} (${platform.name})`);
-        return platform.id;
+      const count = platformCounts.get(platform.id) || 0;
+      if (count < minCount) {
+        selectedPlatform = platform;
+        minCount = count;
       }
     }
 
-    // All platforms have been used
-    console.log(`⚠️ All platforms used for campaign ${campaignId}`);
-    throw new Error('All available platforms have been used for this campaign');
+    console.log(`✅ Selected platform for round-robin: ${selectedPlatform.id} (${selectedPlatform.name}) - current count: ${minCount}`);
+    return selectedPlatform.id;
 
   } catch (error) {
     console.error('Error getting next platform:', error);
@@ -799,14 +807,15 @@ async function updateCampaignStatus(supabase, campaignId, status, publishedUrls)
  */
 async function getActivePlatforms() {
   // Centralized platform configuration - single source of truth
+  // Updated to enable all platforms for full rotation
   const allPlatforms = [
     { id: 'telegraph', name: 'Telegraph.ph', isActive: true, priority: 1 },
     { id: 'writeas', name: 'Write.as', isActive: true, priority: 2 },
-    { id: 'medium', name: 'Medium.com', isActive: false, priority: 3 },
-    { id: 'devto', name: 'Dev.to', isActive: false, priority: 4 },
-    { id: 'linkedin', name: 'LinkedIn Articles', isActive: false, priority: 5 },
-    { id: 'hashnode', name: 'Hashnode', isActive: false, priority: 6 },
-    { id: 'substack', name: 'Substack', isActive: false, priority: 7 }
+    { id: 'medium', name: 'Medium.com', isActive: true, priority: 3 },
+    { id: 'devto', name: 'Dev.to', isActive: true, priority: 4 },
+    { id: 'linkedin', name: 'LinkedIn Articles', isActive: true, priority: 5 },
+    { id: 'hashnode', name: 'Hashnode', isActive: true, priority: 6 },
+    { id: 'substack', name: 'Substack', isActive: true, priority: 7 }
   ];
 
   return allPlatforms
