@@ -356,7 +356,9 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                 {campaigns
                   .filter(c => c.automation_published_links?.length > 0)
                   .map(campaign =>
-                    campaign.automation_published_links.map(link => (
+                    campaign.automation_published_links
+                      .sort((a, b) => new Date(b.published_at || b.created_at || '').getTime() - new Date(a.published_at || a.created_at || '').getTime())
+                      .map(link => (
                       <div key={link.id} className="flex items-center justify-between p-2 bg-white rounded border text-xs">
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-1">
@@ -464,7 +466,9 @@ const CampaignManager: React.FC<CampaignManagerProps> = ({ onStatusUpdate }) => 
                           <div className="mt-2">
                             <p className="font-medium">Published Links ({campaign.automation_published_links.length}):</p>
                             <div className="space-y-1 mt-1">
-                              {campaign.automation_published_links.slice(0, 2).map((link) => (
+                              {campaign.automation_published_links
+                                .sort((a, b) => new Date(b.published_at || b.created_at || '').getTime() - new Date(a.published_at || a.created_at || '').getTime())
+                                .slice(0, 2).map((link) => (
                                 <a
                                   key={link.id}
                                   href={link.published_url}

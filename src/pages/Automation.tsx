@@ -23,6 +23,7 @@ import InlineFeedMonitor from '@/components/InlineFeedMonitor';
 import DevelopmentModeIndicator from '@/components/DevelopmentModeIndicator';
 import BacklinkNotification from '@/components/BacklinkNotification';
 import DatabaseSchemaFixer from '@/components/DatabaseSchemaFixer';
+import PublishedLinksDebugger from '@/components/debug/PublishedLinksDebugger';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -422,7 +423,7 @@ const Automation = () => {
           {/* Campaign Creation (Left Column) */}
           <div className="lg:col-span-1 flex flex-col min-h-[600px]">
             <Tabs defaultValue="create" className="w-full h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-2">
+              <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="create" className="flex items-center gap-2">
                   <Target className="w-4 h-4" />
                   New Campaign
@@ -430,6 +431,10 @@ const Automation = () => {
                 <TabsTrigger value="status" className="flex items-center gap-2">
                   <FileText className="w-4 h-4" />
                   Status
+                </TabsTrigger>
+                <TabsTrigger value="debug" className="flex items-center gap-2">
+                  <Activity className="w-4 h-4" />
+                  Debug Links
                 </TabsTrigger>
               </TabsList>
 
@@ -670,6 +675,10 @@ const Automation = () => {
 
               <TabsContent value="status" className="space-y-4 flex-1 flex flex-col">
                 <AutomationServiceStatus />
+              </TabsContent>
+
+              <TabsContent value="debug" className="space-y-4 flex-1 flex flex-col">
+                <PublishedLinksDebugger />
               </TabsContent>
             </Tabs>
           </div>
