@@ -1090,7 +1090,9 @@ export class AutomationOrchestrator {
         const platform = activePlatforms.find(p =>
           p.name.toLowerCase() === link.platform.toLowerCase() ||
           p.id.toLowerCase() === link.platform.toLowerCase() ||
-          (link.platform === 'telegraph' && p.id === 'telegraph')
+          (link.platform === 'telegraph' && p.id === 'telegraph') ||
+          (link.platform.toLowerCase() === 'write.as' && p.id === 'writeas') ||
+          (link.platform.toLowerCase() === 'writeas' && p.id === 'writeas')
         );
 
         if (platform) {
