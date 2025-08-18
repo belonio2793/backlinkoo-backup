@@ -670,35 +670,51 @@ export class AutomationOrchestrator {
         }
       }
 
-      // Step 7: Mark campaign as completed after successful publishing
+      // Step 7: Handle platform completion and check if campaign should be completed
       if (publishedLinks.length > 0) {
         this.updateStep(campaignId, 'publish-content', {
           status: 'completed',
           details: `Successfully published to ${nextPlatform.name}`
         });
 
-        // Complete the campaign since we've successfully published to Telegraph
-        this.updateStep(campaignId, 'complete-campaign', {
-          status: 'completed',
-          details: 'Campaign successfully completed with published content'
-        });
+        // Mark this platform as completed
+        this.markPlatformCompleted(campaignId, nextPlatform.id, publishedLinks[0]);
+        await this.logActivity(campaignId, 'info', `Successfully published to ${nextPlatform.name}: ${publishedLinks[0]}`);
 
-        this.updateProgress(campaignId, {
-          isComplete: true,
-          endTime: new Date()
-        });
+        // Check if all active platforms have been completed
+        const shouldComplete = this.shouldAutoPauseCampaign(campaignId);
 
-        // Mark campaign as completed in database
-        await this.updateCampaignStatus(campaignId, 'completed');
-        await this.logActivity(campaignId, 'info', `Campaign completed successfully. Published link: ${publishedLinks[0]}`);
+        if (shouldComplete) {
+          // All platforms completed - mark campaign as completed
+          this.updateStep(campaignId, 'complete-campaign', {
+            status: 'completed',
+            details: 'Campaign successfully completed - all platforms have published content'
+          });
 
-        // Emit completion event
-        realTimeFeedService.emitCampaignCompleted(
-          campaignId,
-          campaign.name,
-          campaign.keywords[0] || '',
-          publishedLinks
-        );
+          this.updateProgress(campaignId, {
+            isComplete: true,
+            endTime: new Date()
+          });
+
+          await this.updateCampaignStatus(campaignId, 'completed');
+          await this.logActivity(campaignId, 'info', `Campaign completed successfully. All platforms have published content.`);
+
+          // Get all published URLs for the completion event
+          const allPublishedUrls = this.getCampaignPlatformProgress(campaignId)
+            .filter(p => p.isCompleted && p.publishedUrl)
+            .map(p => p.publishedUrl);
+
+          // Emit completion event
+          realTimeFeedService.emitCampaignCompleted(
+            campaignId,
+            campaign.name,
+            campaign.keywords[0] || '',
+            allPublishedUrls
+          );
+        } else {
+          // More platforms to process - pause for next platform
+          await this.pauseCampaignForNextPlatform(campaignId);
+        }
       } else {
         this.updateStep(campaignId, 'publish-content', {
           status: 'error',
