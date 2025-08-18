@@ -217,10 +217,10 @@ export class DevelopmentCampaignProcessor {
       // Get available platforms from centralized configuration
       const availablePlatforms = PlatformConfigService.getActivePlatforms();
 
-      // Get existing published links for this campaign from database
+      // Get existing published links for this campaign from database (including skipped ones)
       const { data: publishedLinks, error } = await supabase
         .from('automation_published_links')
-        .select('platform')
+        .select('platform, status')
         .eq('campaign_id', campaignId);
 
       if (error) {
@@ -228,7 +228,7 @@ export class DevelopmentCampaignProcessor {
         return availablePlatforms[0] || { id: 'telegraph', name: 'Telegraph.ph' };
       }
 
-      // Create set of used platforms (normalize legacy platform names)
+      // Create set of used platforms (including skipped ones) (normalize legacy platform names)
       const usedPlatforms = new Set(
         (publishedLinks || []).map(link => {
           const platform = link.platform.toLowerCase();
