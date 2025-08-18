@@ -109,7 +109,7 @@ class PlatformDiscoveryService {
         contentLimits: { minWords: 200, maxWords: 3000 },
         linkPolicy: 'moderate',
         domainRating: 85,
-        isActive: false // Disabled until SDK integration
+        isActive: false // Requires SDK integration - not REST API
       }
     ];
   }
