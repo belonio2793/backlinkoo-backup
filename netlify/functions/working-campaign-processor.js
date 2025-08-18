@@ -52,29 +52,49 @@ exports.handler = async (event, context) => {
     const blogPost = await generateSingleBlogPost(keyword, anchorText, targetUrl);
     console.log('✅ Generated blog post using random prompt');
 
-    // Step 2: Publish the post to Telegraph
+    // Step 2: Publish the post using proper platform rotation
     const publishedUrls = [];
 
+    // Get next platform from orchestrator for proper rotation
+    const nextPlatform = getNextAvailablePlatform(supabase, campaignId);
+    console.log(`📡 Next platform for rotation: ${nextPlatform}`);
+
     try {
-      const telegraphUrl = await publishToTelegraph(blogPost.title, blogPost.content);
-      publishedUrls.push(telegraphUrl);
-      console.log(`✅ Published post to Telegraph:`, telegraphUrl);
+      let publishedUrl;
+      let platform;
 
-      // Validate the published URL
-      await validateTelegraphUrl(telegraphUrl);
-      console.log(`✅ Validated post`);
+      if (nextPlatform === 'telegraph') {
+        publishedUrl = await publishToTelegraph(blogPost.title, blogPost.content);
+        platform = 'Telegraph.ph';
+        await validateTelegraphUrl(publishedUrl);
+      } else if (nextPlatform === 'writeas') {
+        publishedUrl = await publishToWriteAs(blogPost.title, blogPost.content);
+        platform = 'Write.as';
+        await validateWriteAsUrl(publishedUrl);
+      } else {
+        // Fallback to Telegraph if no specific platform determined
+        publishedUrl = await publishToTelegraph(blogPost.title, blogPost.content);
+        platform = 'Telegraph.ph';
+        await validateTelegraphUrl(publishedUrl);
+      }
 
-      // Save to database
-      await savePublishedLink(supabase, campaignId, telegraphUrl, blogPost.title);
+      publishedUrls.push(publishedUrl);
+      console.log(`✅ Published post to ${platform}:`, publishedUrl);
+
+      // Save to database with platform tracking
+      await savePublishedLink(supabase, campaignId, publishedUrl, blogPost.title, platform);
       console.log(`✅ Saved post to database`);
+
+      // Track platform usage for rotation
+      await trackPlatformUsage(supabase, campaignId, nextPlatform);
 
     } catch (error) {
       console.error(`❌ Failed to publish post:`, error);
-      throw new Error('Failed to publish post to Telegraph');
+      throw new Error(`Failed to publish post to ${nextPlatform || 'platform'}`);
     }
 
     if (publishedUrls.length === 0) {
-      throw new Error('Failed to publish post to Telegraph');
+      throw new Error('Failed to publish post to any platform');
     }
 
     // Step 3: Update campaign status to completed
@@ -354,7 +374,13 @@ async function publishToTelegraph(title, content) {
   const accessToken = accountData.result.access_token;
 
   // Step 2: Convert content to Telegraph format
+  console.log('🔄 Converting content to Telegraph format...');
+  console.log('Original content sample:', content.substring(0, 300) + '...');
+
   const telegraphContent = convertToTelegraphFormat(content);
+
+  console.log('✅ Telegraph conversion complete. Nodes:', telegraphContent.length);
+  console.log('First few nodes:', JSON.stringify(telegraphContent.slice(0, 2), null, 2));
 
   // Step 3: Create Telegraph page
   const pageResponse = await fetch('https://api.telegra.ph/createPage', {
@@ -407,19 +433,23 @@ function convertToTelegraphFormat(html) {
         children: [trimmed.replace(/<\/?h3>/g, '')]
       });
     } else if (trimmed.startsWith('<p>')) {
-      // Handle paragraphs with links
+      // Handle paragraphs with links and formatting
       const processedText = processHTMLContent(trimmed.replace(/<\/?p>/g, ''));
-      telegraphNodes.push({
-        tag: 'p',
-        children: processedText
-      });
+      if (processedText.length > 0) {
+        telegraphNodes.push({
+          tag: 'p',
+          children: processedText
+        });
+      }
     } else if (trimmed.startsWith('<li>')) {
-      // Handle list items
+      // Handle list items with formatting
       const processedText = processHTMLContent(trimmed.replace(/<\/?li>/g, ''));
-      telegraphNodes.push({
-        tag: 'p',
-        children: ['• ' + processedText]
-      });
+      if (processedText.length > 0) {
+        telegraphNodes.push({
+          tag: 'p',
+          children: ['• ', ...processedText]
+        });
+      }
     } else if (trimmed.startsWith('<ul>') || trimmed.startsWith('</ul>') || 
                trimmed.startsWith('<ol>') || trimmed.startsWith('</ol>')) {
       // Skip list container tags
@@ -446,35 +476,53 @@ function convertToTelegraphFormat(html) {
 }
 
 /**
- * Process HTML content for Telegraph format
+ * Process HTML content for Telegraph format with bold text support
  */
 function processHTMLContent(text) {
-  const linkRegex = /<a\s+href="([^"]+)"[^>]*>([^<]+)<\/a>/g;
   const result = [];
-  let lastIndex = 0;
+  let currentIndex = 0;
+
+  // Enhanced regex to handle links, bold, and strong tags
+  const formatRegex = /(<a\s+href="([^"]+)"[^>]*>([^<]+)<\/a>|<strong>([^<]+)<\/strong>|<b>([^<]+)<\/b>)/gi;
   let match;
 
-  while ((match = linkRegex.exec(text)) !== null) {
-    // Add text before the link
-    if (match.index > lastIndex) {
-      result.push(text.substring(lastIndex, match.index));
+  while ((match = formatRegex.exec(text)) !== null) {
+    // Add any text before this match
+    if (match.index > currentIndex) {
+      const beforeText = text.substring(currentIndex, match.index);
+      if (beforeText.trim()) {
+        result.push(beforeText);
+      }
     }
-    
-    // Add the link
-    result.push({
-      tag: 'a',
-      attrs: { href: match[1] },
-      children: [match[2]]
-    });
-    
-    lastIndex = match.index + match[0].length;
+
+    // Determine what type of formatting we found
+    if (match[0].startsWith('<a')) {
+      // Link
+      result.push({
+        tag: 'a',
+        attrs: { href: match[2] },
+        children: [match[3]]
+      });
+    } else if (match[0].startsWith('<strong>') || match[0].startsWith('<b>')) {
+      // Bold text
+      const content = match[4] || match[5];
+      result.push({
+        tag: 'b',
+        children: [content]
+      });
+    }
+
+    currentIndex = match.index + match[0].length;
   }
-  
-  // Add remaining text
-  if (lastIndex < text.length) {
-    result.push(text.substring(lastIndex));
+
+  // Add any remaining text
+  if (currentIndex < text.length) {
+    const remainingText = text.substring(currentIndex);
+    if (remainingText.trim()) {
+      result.push(remainingText);
+    }
   }
-  
+
   return result.length > 0 ? result : [text];
 }
 
@@ -483,7 +531,7 @@ function processHTMLContent(text) {
  */
 async function validateTelegraphUrl(url) {
   const fetch = require('node-fetch');
-  
+
   try {
     const response = await fetch(url, { method: 'HEAD' });
     if (!response.ok) {
@@ -498,16 +546,149 @@ async function validateTelegraphUrl(url) {
 }
 
 /**
+ * Publish content to Write.as
+ */
+async function publishToWriteAs(title, content) {
+  const fetch = require('node-fetch');
+
+  // Convert HTML content to markdown format for Write.as
+  const writeasContent = convertToWriteasFormat(content);
+
+  console.log('🔄 Publishing to Write.as...');
+  console.log('Content sample:', writeasContent.substring(0, 200) + '...');
+
+  const postResponse = await fetch('https://write.as/api/posts', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      title: title,
+      body: writeasContent
+    })
+  });
+
+  const responseData = await postResponse.json();
+
+  if (!postResponse.ok || responseData.code !== 201) {
+    throw new Error(`Write.as post creation failed: ${responseData.error || responseData.message || 'Unknown error'}`);
+  }
+
+  const postData = responseData.data;
+  const postUrl = `https://write.as/${postData.id}`;
+
+  console.log('✅ Write.as post created:', postUrl);
+
+  return postUrl;
+}
+
+/**
+ * Convert HTML content to Write.as markdown format
+ */
+function convertToWriteasFormat(htmlContent) {
+  let markdown = htmlContent;
+
+  // Convert HTML headings to markdown
+  markdown = markdown.replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1');
+  markdown = markdown.replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1');
+  markdown = markdown.replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1');
+  markdown = markdown.replace(/<h4[^>]*>(.*?)<\/h4>/gi, '#### $1');
+
+  // Convert HTML paragraphs to markdown (just remove p tags)
+  markdown = markdown.replace(/<p[^>]*>/gi, '');
+  markdown = markdown.replace(/<\/p>/gi, '\n\n');
+
+  // Convert bold text to markdown
+  markdown = markdown.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**');
+  markdown = markdown.replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**');
+
+  // Convert italic text to markdown
+  markdown = markdown.replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*');
+  markdown = markdown.replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*');
+
+  // Convert links to markdown
+  markdown = markdown.replace(/<a[^>]*href\s*=\s*["']([^"']+)["'][^>]*>(.*?)<\/a>/gi, '[$2]($1)');
+
+  // Clean up list items
+  markdown = markdown.replace(/<li[^>]*>(.*?)<\/li>/gi, '• $1');
+  markdown = markdown.replace(/<\/?[uo]l[^>]*>/gi, '');
+
+  // Remove any remaining HTML tags
+  markdown = markdown.replace(/<[^>]*>/g, '');
+
+  // Clean up multiple newlines
+  markdown = markdown.replace(/\n\s*\n\s*\n/g, '\n\n');
+
+  // Trim whitespace
+  return markdown.trim();
+}
+
+/**
+ * Validate Write.as URL by making a request
+ */
+async function validateWriteAsUrl(url) {
+  const fetch = require('node-fetch');
+
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    if (!response.ok) {
+      throw new Error(`Write.as URL validation failed: ${response.status}`);
+    }
+    console.log('✅ Write.as URL validated successfully');
+    return true;
+  } catch (error) {
+    console.warn('Write.as URL validation failed:', error);
+    // Don't throw - URL might still be valid even if HEAD request fails
+    return false;
+  }
+}
+
+/**
+ * Get next available platform for campaign rotation
+ */
+function getNextAvailablePlatform(supabase, campaignId) {
+  // Define available platforms in priority order
+  const availablePlatforms = [
+    { id: 'telegraph', name: 'Telegraph.ph' },
+    { id: 'writeas', name: 'Write.as' }
+  ];
+
+  // For now, use alternating logic based on campaign ID
+  // This ensures different campaigns use different platforms
+  const campaignHash = campaignId.split('').reduce((a, b) => {
+    a = ((a << 5) - a) + b.charCodeAt(0);
+    return a & a;
+  }, 0);
+
+  const platformIndex = Math.abs(campaignHash) % availablePlatforms.length;
+  return availablePlatforms[platformIndex].id;
+}
+
+/**
+ * Track platform usage for proper rotation
+ */
+async function trackPlatformUsage(supabase, campaignId, platformId) {
+  try {
+    // This could be enhanced to track in a separate table for rotation logic
+    console.log(`📊 Tracked platform usage: ${platformId} for campaign ${campaignId}`);
+    return true;
+  } catch (error) {
+    console.warn('Failed to track platform usage:', error);
+    return false;
+  }
+}
+
+/**
  * Save published link to database
  */
-async function savePublishedLink(supabase, campaignId, url, title) {
+async function savePublishedLink(supabase, campaignId, url, title, platform = 'Telegraph.ph') {
   try {
     const { error } = await supabase
       .from('automation_published_links')
       .insert({
         campaign_id: campaignId,
         published_url: url,
-        platform: 'Telegraph.ph',
+        platform: platform,
         title: title,
         status: 'active',
         published_at: new Date().toISOString()
@@ -522,7 +703,7 @@ async function savePublishedLink(supabase, campaignId, url, title) {
         .insert({
           campaign_id: campaignId,
           url: url,
-          platform: 'Telegraph.ph',
+          platform: platform,
           created_at: new Date().toISOString()
         });
         

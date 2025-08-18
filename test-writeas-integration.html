@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Write.as Integration Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .test-section { 
+            margin: 20px 0; 
+            border: 1px solid #ddd; 
+            padding: 20px; 
+            border-radius: 8px; 
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .result { 
+            background: #f9f9f9; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            border-left: 4px solid #2196F3;
+        }
+        .error { 
+            background: #ffebee; 
+            border-left: 4px solid #f44336; 
+        }
+        .success { 
+            background: #e8f5e8; 
+            border-left: 4px solid #4caf50; 
+        }
+        .btn {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .btn:hover { background: #1976D2; }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        .form-group {
+            margin: 15px 0;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .form-group textarea {
+            height: 150px;
+            resize: vertical;
+        }
+        pre { 
+            background: #f5f5f5; 
+            padding: 10px; 
+            overflow-x: auto; 
+            font-size: 12px; 
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>✍️ Write.as Integration Test</h1>
+    
+    <div class="test-section">
+        <h2>📝 Direct Write.as Publisher Test</h2>
+        <p>Test the Write.as publisher function directly.</p>
+        
+        <div class="form-group">
+            <label for="testTitle">Post Title:</label>
+            <input type="text" id="testTitle" value="Write.as Integration Test - Digital Marketing Guide" placeholder="Enter post title...">
+        </div>
+        
+        <div class="form-group">
+            <label for="testContent">Post Content (HTML):</label>
+            <textarea id="testContent" placeholder="Enter HTML content..."></textarea>
+        </div>
+        
+        <button class="btn" onclick="testWriteAsPublisher()">🚀 Test Write.as Publisher</button>
+        
+        <div id="publisher-result" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔄 Campaign Processor Test</h2>
+        <p>Test the updated campaign processor with Write.as support.</p>
+        
+        <div class="form-group">
+            <label for="keyword">Keyword:</label>
+            <input type="text" id="keyword" value="digital marketing automation" placeholder="digital marketing">
+        </div>
+        
+        <div class="form-group">
+            <label for="anchorText">Anchor Text:</label>
+            <input type="text" id="anchorText" value="advanced marketing tools" placeholder="best marketing tools">
+        </div>
+        
+        <div class="form-group">
+            <label for="targetUrl">Target URL:</label>
+            <input type="url" id="targetUrl" value="https://example.com" placeholder="https://example.com">
+        </div>
+        
+        <button class="btn" onclick="testCampaignProcessor()">🎯 Test Campaign Processor</button>
+        
+        <div id="campaign-result" class="result" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>🔍 Content Conversion Test</h2>
+        <p>Test HTML to Write.as markdown conversion.</p>
+        
+        <div class="form-group">
+            <label for="htmlInput">HTML Content:</label>
+            <textarea id="htmlInput" placeholder="Enter HTML to convert..."></textarea>
+        </div>
+        
+        <button class="btn" onclick="testContentConversion()">🔄 Convert to Write.as Format</button>
+        
+        <div id="conversion-result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Initialize with sample content
+        document.addEventListener('DOMContentLoaded', function() {
+            const sampleContent = `<h1>Digital Marketing Mastery Guide</h1>
+
+<p>Master the fundamentals of <strong>digital marketing</strong> with this comprehensive guide that covers everything from <strong>SEO basics</strong> to <strong>advanced automation strategies</strong>.</p>
+
+<p>This guide will help you understand the key components of successful digital marketing, including <a href="https://example.com" target="_blank">advanced marketing automation tools</a> that can significantly boost your ROI.</p>
+
+<h2>Key Digital Marketing Strategies</h2>
+
+<p>• <strong>Search Engine Optimization:</strong> Improve your organic search visibility</p>
+<p>• <strong>Content Marketing:</strong> Create valuable content that engages your audience</p>
+<p>• <strong>Social Media Marketing:</strong> Build brand awareness across platforms</p>
+<p>• <strong>Email Marketing:</strong> Nurture leads and maintain customer relationships</p>
+
+<p>By implementing these strategies consistently, you'll see measurable improvements in your <strong>conversion rates</strong> and overall marketing performance.</p>`;
+
+            document.getElementById('testContent').value = sampleContent;
+            document.getElementById('htmlInput').value = sampleContent;
+        });
+
+        async function testWriteAsPublisher() {
+            const title = document.getElementById('testTitle').value;
+            const content = document.getElementById('testContent').value;
+            const resultDiv = document.getElementById('publisher-result');
+
+            if (!title || !content) {
+                alert('Please fill in both title and content');
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="result">Testing Write.as publisher...</div>';
+            resultDiv.style.display = 'block';
+
+            try {
+                const response = await fetch('/.netlify/functions/writeas-publisher', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title: title,
+                        content: content,
+                        author_name: 'Test Author',
+                        keyword: 'digital marketing'
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Write.as Publisher Test Successful!</h3>
+                            <p><strong>Published URL:</strong> <a href="${result.url}" target="_blank">${result.url}</a></p>
+                            <p><strong>Platform:</strong> ${result.platform}</p>
+                            <p><strong>Post ID:</strong> ${result.post_id}</p>
+                            <p><strong>Can Claim:</strong> ${result.metadata.can_claim ? 'Yes' : 'No'}</p>
+                            <details style="margin-top: 10px;">
+                                <summary>View Full Response</summary>
+                                <pre>${JSON.stringify(result, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h3>❌ Write.as Publisher Test Failed</h3>
+                            <p><strong>Error:</strong> ${result.error}</p>
+                            ${result.details ? `<p><strong>Details:</strong> ${result.details}</p>` : ''}
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Request Failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testCampaignProcessor() {
+            const keyword = document.getElementById('keyword').value;
+            const anchorText = document.getElementById('anchorText').value;
+            const targetUrl = document.getElementById('targetUrl').value;
+            const resultDiv = document.getElementById('campaign-result');
+
+            if (!keyword || !anchorText || !targetUrl) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="result">Testing campaign processor with Write.as support...</div>';
+            resultDiv.style.display = 'block';
+
+            try {
+                const response = await fetch('/.netlify/functions/working-campaign-processor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        campaign_id: 'test-' + Date.now(),
+                        keywords: [keyword],
+                        target_url: targetUrl,
+                        anchor_text: anchorText
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>✅ Campaign Processor Test Successful!</h3>
+                            <p><strong>Campaign ID:</strong> ${result.campaign_id}</p>
+                            <p><strong>Published URLs:</strong></p>
+                            <ul>
+                                ${result.published_urls.map(url => `<li><a href="${url}" target="_blank">${url}</a></li>`).join('')}
+                            </ul>
+                            <details style="margin-top: 10px;">
+                                <summary>View Full Response</summary>
+                                <pre>${JSON.stringify(result, null, 2)}</pre>
+                            </details>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <h3>❌ Campaign Processor Test Failed</h3>
+                            <p><strong>Error:</strong> ${result.error}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>❌ Request Failed</h3>
+                        <p><strong>Error:</strong> ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function testContentConversion() {
+            const htmlContent = document.getElementById('htmlInput').value;
+            const resultDiv = document.getElementById('conversion-result');
+
+            if (!htmlContent) {
+                alert('Please enter HTML content to convert');
+                return;
+            }
+
+            // Simulate the Write.as conversion function
+            const markdownResult = convertToWriteasFormat(htmlContent);
+
+            resultDiv.innerHTML = `
+                <h3>📄 HTML to Write.as Markdown Conversion</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;">
+                    <div>
+                        <h4>Original HTML:</h4>
+                        <pre style="max-height: 300px; overflow-y: auto;">${htmlContent}</pre>
+                    </div>
+                    <div>
+                        <h4>Converted Markdown:</h4>
+                        <pre style="max-height: 300px; overflow-y: auto;">${markdownResult}</pre>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 4px;">
+                    <h4>Preview (how it will look on Write.as):</h4>
+                    <div style="background: white; padding: 15px; border-radius: 4px; border: 1px solid #ddd;">
+                        ${renderMarkdownPreview(markdownResult)}
+                    </div>
+                </div>
+            `;
+            resultDiv.style.display = 'block';
+        }
+
+        // Simplified version of the server-side conversion function
+        function convertToWriteasFormat(htmlContent) {
+            let markdown = htmlContent;
+            
+            // Convert HTML headings to markdown
+            markdown = markdown.replace(/<h1[^>]*>(.*?)<\/h1>/gi, '# $1');
+            markdown = markdown.replace(/<h2[^>]*>(.*?)<\/h2>/gi, '## $1');
+            markdown = markdown.replace(/<h3[^>]*>(.*?)<\/h3>/gi, '### $1');
+            markdown = markdown.replace(/<h4[^>]*>(.*?)<\/h4>/gi, '#### $1');
+            
+            // Convert HTML paragraphs to markdown (just remove p tags)
+            markdown = markdown.replace(/<p[^>]*>/gi, '');
+            markdown = markdown.replace(/<\/p>/gi, '\n\n');
+            
+            // Convert bold text to markdown
+            markdown = markdown.replace(/<strong[^>]*>(.*?)<\/strong>/gi, '**$1**');
+            markdown = markdown.replace(/<b[^>]*>(.*?)<\/b>/gi, '**$1**');
+            
+            // Convert italic text to markdown
+            markdown = markdown.replace(/<em[^>]*>(.*?)<\/em>/gi, '*$1*');
+            markdown = markdown.replace(/<i[^>]*>(.*?)<\/i>/gi, '*$1*');
+            
+            // Convert links to markdown
+            markdown = markdown.replace(/<a[^>]*href\s*=\s*["']([^"']+)["'][^>]*>(.*?)<\/a>/gi, '[$2]($1)');
+            
+            // Clean up list items
+            markdown = markdown.replace(/<li[^>]*>(.*?)<\/li>/gi, '• $1');
+            markdown = markdown.replace(/<\/?[uo]l[^>]*>/gi, '');
+            
+            // Remove any remaining HTML tags
+            markdown = markdown.replace(/<[^>]*>/g, '');
+            
+            // Clean up multiple newlines
+            markdown = markdown.replace(/\n\s*\n\s*\n/g, '\n\n');
+            
+            return markdown.trim();
+        }
+
+        function renderMarkdownPreview(markdown) {
+            let html = markdown;
+            
+            // Convert markdown back to HTML for preview
+            html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+            html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+            html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+            html = html.replace(/^#### (.*$)/gm, '<h4>$1</h4>');
+            
+            html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            html = html.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+            
+            html = html.replace(/\n\n/g, '</p><p>');
+            html = '<p>' + html + '</p>';
+            html = html.replace(/<p><\/p>/g, '');
+            
+            return html;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegraph Content Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { margin: 20px 0; border: 1px solid #ddd; padding: 15px; border-radius: 5px; }
+        .result { background: #f9f9f9; padding: 10px; margin: 10px 0; border-radius: 3px; }
+        .error { background: #ffebee; border-left: 4px solid #f44336; }
+        .success { background: #e8f5e8; border-left: 4px solid #4caf50; }
+        pre { background: #f5f5f5; padding: 10px; overflow-x: auto; font-size: 12px; }
+        .original { background: #fff3e0; }
+        .converted { background: #e3f2fd; }
+    </style>
+</head>
+<body>
+    <h1>Telegraph Content Formatting Test</h1>
+    
+    <div class="test-section">
+        <h2>Test 1: Sample Content from Automation Generator</h2>
+        <div class="original">
+            <h3>Original Content:</h3>
+            <div id="original1"></div>
+        </div>
+        <div class="converted">
+            <h3>Telegraph Converted:</h3>
+            <pre id="result1"></pre>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 2: Bold Text Formatting</h2>
+        <div class="original">
+            <h3>Original Content:</h3>
+            <div id="original2"></div>
+        </div>
+        <div class="converted">
+            <h3>Telegraph Converted:</h3>
+            <pre id="result2"></pre>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test 3: Mixed Formatting</h2>
+        <div class="original">
+            <h3>Original Content:</h3>
+            <div id="original3"></div>
+        </div>
+        <div class="converted">
+            <h3>Telegraph Converted:</h3>
+            <pre id="result3"></pre>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>Test Telegraph API Call</h2>
+        <button onclick="testTelegraphAPI()">Test Real Telegraph API</button>
+        <div id="api-result" class="result"></div>
+    </div>
+
+    <script>
+        // Mock Telegraph conversion functions (simplified versions)
+        function convertMarkdownToTelegraph(content) {
+            const isHtml = content.includes('<p>') || content.includes('<h') || content.includes('<div>');
+            
+            if (isHtml) {
+                return convertHtmlToTelegraph(content);
+            } else {
+                return convertMarkdownToTelegraphNodes(content);
+            }
+        }
+
+        function convertHtmlToTelegraph(html) {
+            const telegraphNodes = [];
+            
+            // Simple HTML parser for testing
+            const paragraphs = html.split(/\n\s*\n/).filter(p => p.trim());
+            
+            for (const paragraph of paragraphs) {
+                let cleanParagraph = paragraph.trim();
+                
+                // Determine tag type
+                let tag = 'p';
+                if (cleanParagraph.includes('<h1>') || cleanParagraph.includes('<h2>')) {
+                    tag = 'h3';
+                    cleanParagraph = cleanParagraph.replace(/<\/?h[1-6]>/g, '');
+                } else if (cleanParagraph.includes('<h3>') || cleanParagraph.includes('<h4>')) {
+                    tag = 'h4';
+                    cleanParagraph = cleanParagraph.replace(/<\/?h[1-6]>/g, '');
+                } else {
+                    cleanParagraph = cleanParagraph.replace(/<\/?p>/g, '');
+                }
+                
+                if (cleanParagraph) {
+                    const processedContent = processTextFormatting(cleanParagraph);
+                    telegraphNodes.push({
+                        tag: tag,
+                        children: processedContent
+                    });
+                }
+            }
+            
+            return telegraphNodes;
+        }
+
+        function processTextFormatting(text) {
+            const segments = [];
+            let currentIndex = 0;
+            
+            const formatRegex = /(<a\s[^>]*href\s*=\s*["']([^"']+)["'][^>]*>([^<]+)<\/a>|<strong>([^<]+)<\/strong>|<b>([^<]+)<\/b>|\*\*([^*]+)\*\*)/gi;
+            let match;
+            
+            while ((match = formatRegex.exec(text)) !== null) {
+                if (match.index > currentIndex) {
+                    const beforeText = text.substring(currentIndex, match.index);
+                    if (beforeText) {
+                        segments.push(beforeText);
+                    }
+                }
+                
+                if (match[0].startsWith('<a')) {
+                    const url = match[2];
+                    const content = match[3];
+                    segments.push({
+                        tag: 'a',
+                        attrs: { href: url, target: '_blank' },
+                        children: [content]
+                    });
+                } else if (match[0].startsWith('<strong>') || match[0].startsWith('<b>') || match[0].startsWith('**')) {
+                    const content = match[4] || match[5] || match[6];
+                    segments.push({
+                        tag: 'b',
+                        children: [content]
+                    });
+                }
+                
+                currentIndex = match.index + match[0].length;
+            }
+            
+            if (currentIndex < text.length) {
+                const remainingText = text.substring(currentIndex);
+                if (remainingText) {
+                    segments.push(remainingText);
+                }
+            }
+            
+            return segments.length > 0 ? segments : [text];
+        }
+
+        // Test data
+        const testContent1 = `<h1>The Power of Digital Marketing</h1>
+
+<p>Digital marketing has revolutionized the way businesses reach their target audience. In today's competitive landscape, understanding <strong>effective digital marketing strategies</strong> is crucial for success.</p>
+
+<p>One of the most powerful tools in this space is <a href="https://example.com" target="_blank" rel="noopener noreferrer">advanced marketing automation</a>, which can significantly improve your conversion rates.</p>
+
+<p><strong>Key Benefits:</strong></p>
+
+<p>• <strong>Increased ROI:</strong> Digital marketing delivers measurable results</p>
+<p>• <strong>Better Targeting:</strong> Reach the right audience at the right time</p>
+<p>• <strong>Cost-Effective:</strong> More affordable than traditional marketing</p>`;
+
+        const testContent2 = `<p>This is a test with <strong>bold text</strong> and also <b>more bold text</b>.</p>
+
+<p>Here we have **markdown bold** mixed with HTML.</p>`;
+
+        const testContent3 = `<h2>Mixed Content Test</h2>
+
+<p>This paragraph contains <strong>bold text</strong>, <a href="https://example.com">a link</a>, and regular text all mixed together.</p>
+
+<p>• <strong>List item with bold</strong></p>
+<p>• Normal list item with <a href="https://test.com">link</a></p>`;
+
+        // Run tests
+        function runTests() {
+            // Test 1
+            document.getElementById('original1').innerHTML = testContent1;
+            const result1 = convertMarkdownToTelegraph(testContent1);
+            document.getElementById('result1').textContent = JSON.stringify(result1, null, 2);
+
+            // Test 2
+            document.getElementById('original2').innerHTML = testContent2;
+            const result2 = convertMarkdownToTelegraph(testContent2);
+            document.getElementById('result2').textContent = JSON.stringify(result2, null, 2);
+
+            // Test 3
+            document.getElementById('original3').innerHTML = testContent3;
+            const result3 = convertMarkdownToTelegraph(testContent3);
+            document.getElementById('result3').textContent = JSON.stringify(result3, null, 2);
+        }
+
+        async function testTelegraphAPI() {
+            const apiResult = document.getElementById('api-result');
+            apiResult.className = 'result';
+            apiResult.innerHTML = 'Testing Telegraph API...';
+
+            try {
+                const response = await fetch('/.netlify/functions/telegraph-publisher', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        title: 'Telegraph Formatting Test',
+                        content: testContent1,
+                        author_name: 'Test Author',
+                        keyword: 'digital marketing'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    apiResult.className = 'result success';
+                    apiResult.innerHTML = `
+                        <strong>✅ Success!</strong><br>
+                        Published URL: <a href="${result.url}" target="_blank">${result.url}</a><br>
+                        Title: ${result.title}
+                    `;
+                } else {
+                    apiResult.className = 'result error';
+                    apiResult.innerHTML = `<strong>❌ Error:</strong> ${result.error}`;
+                }
+            } catch (error) {
+                apiResult.className = 'result error';
+                apiResult.innerHTML = `<strong>❌ Network Error:</strong> ${error.message}`;
+            }
+        }
+
+        // Run tests on page load
+        runTests();
+    </script>
+</body>
+</html>
