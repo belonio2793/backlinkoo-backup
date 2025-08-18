@@ -90,44 +90,69 @@ class WordPressCommentService {
   ];
 
   /**
-   * Discover WordPress blogs with comment forms
+   * Discover WordPress blogs with comment forms and validate them
    */
   async discoverWordPressBlogs(maxResults: number = 50): Promise<DiscoveryResult> {
     const startTime = Date.now();
     const allBlogs: WordPressBlog[] = [];
-    
+
     try {
       console.log('🔍 Starting WordPress blog discovery...');
-      
+
       // Process each discovery query
       for (const query of this.discoveryQueries) {
         console.log(`Searching with query: "${query}"`);
-        
+
         // Simulate search API call
         const queryBlogs = await this.searchBlogsWithQuery(query, Math.ceil(maxResults / this.discoveryQueries.length));
         allBlogs.push(...queryBlogs);
-        
+
         // Rate limiting to avoid being blocked
         await this.delay(1000);
       }
-      
+
       // Deduplicate by domain
       const uniqueBlogs = this.deduplicateBlogs(allBlogs);
-      
+
+      console.log(`🔍 Found ${uniqueBlogs.length} potential blogs, validating...`);
+
+      // Validate all discovered blogs
+      const validatedBlogs = await this.validateDiscoveredBlogs(uniqueBlogs);
+
+      // Filter out 404s and invalid sites, keep only accessible WordPress sites
+      const accessibleBlogs = validatedBlogs.filter(blog =>
+        blog.validation?.isAccessible &&
+        blog.validation?.isWordPress &&
+        blog.validation?.qualityScore >= 30 // Minimum quality threshold
+      );
+
       // Limit to requested count
-      const finalBlogs = uniqueBlogs.slice(0, maxResults);
-      
+      const finalBlogs = accessibleBlogs.slice(0, maxResults);
+
       const discoveryTime = Date.now() - startTime;
-      
-      console.log(`✅ Discovery complete: ${finalBlogs.length} unique blogs found in ${discoveryTime}ms`);
-      
+
+      // Calculate validation stats
+      const validationStats = {
+        totalChecked: uniqueBlogs.length,
+        accessible: validatedBlogs.filter(b => b.validation?.isAccessible).length,
+        removed404s: uniqueBlogs.length - validatedBlogs.filter(b => b.validation?.isAccessible).length,
+        wordpressConfirmed: validatedBlogs.filter(b => b.validation?.isWordPress).length,
+        commentFormsFound: validatedBlogs.filter(b => b.validation?.hasCommentForm).length,
+        averageQualityScore: validatedBlogs.length > 0 ?
+          Math.round(validatedBlogs.reduce((sum, b) => sum + (b.validation?.qualityScore || 0), 0) / validatedBlogs.length) : 0
+      };
+
+      console.log(`✅ Discovery complete: ${finalBlogs.length} validated WordPress blogs found in ${discoveryTime}ms`);
+      console.log(`📊 Validation stats: ${validationStats.accessible}/${validationStats.totalChecked} accessible, ${validationStats.removed404s} 404s removed`);
+
       return {
         blogs: finalBlogs,
         totalFound: finalBlogs.length,
         searchQueries: this.discoveryQueries,
-        discoveryTime
+        discoveryTime,
+        validationStats
       };
-      
+
     } catch (error) {
       console.error('❌ WordPress discovery error:', error);
       throw new Error(`Discovery failed: ${error.message}`);
