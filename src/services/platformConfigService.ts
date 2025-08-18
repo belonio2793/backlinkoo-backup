@@ -88,8 +88,10 @@ export const AVAILABLE_PLATFORMS: PublishingPlatform[] = [
 
 /**
  * Platform Configuration Service
+ * Enhanced with massive platform support
  */
 export class PlatformConfigService {
+  private static useMassivePlatforms = true; // Toggle for massive platform support
   /**
    * Get all platforms
    */
