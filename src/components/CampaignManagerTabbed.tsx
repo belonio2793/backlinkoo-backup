@@ -669,7 +669,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                         </div>
 
                         {/* Secondary Actions */}
-                        <div className="flex flex-col items-end gap-2 ml-4">
+                        <div className="flex flex-col items-start gap-2">
                           {/* Active Campaign Pause Button */}
                           {(() => {
                             const isActive = ['active', 'pending', 'generating', 'publishing'].includes(campaign.status);
