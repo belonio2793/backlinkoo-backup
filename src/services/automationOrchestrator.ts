@@ -1244,7 +1244,7 @@ export class AutomationOrchestrator {
           );
 
           if (!alreadyCompleted) {
-            console.log(`🔄 Auto-syncing platform progress: ${platform.name} completed for campaign ${campaignId}`);
+            console.log(`��� Auto-syncing platform progress: ${platform.name} completed for campaign ${campaignId}`);
             this.markPlatformCompleted(campaignId, platform.id, link.published_url);
           }
         }
@@ -1364,17 +1364,25 @@ export class AutomationOrchestrator {
         };
       }
 
-      // Check if campaign has published links (indicating completion)
+      // Check if campaign has published links and if all platforms are completed
       const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
       if (campaignWithLinks?.automation_published_links && campaignWithLinks.automation_published_links.length > 0) {
-        // Mark as completed if it has published links but isn't marked as completed
-        await this.updateCampaignStatus(campaignId, 'completed');
-        await this.logActivity(campaignId, 'info', 'Campaign marked as completed - already has published content');
+        // Check if all active platforms have completed before marking as completed
+        const shouldComplete = this.shouldAutoPauseCampaign(campaignId);
 
-        return {
-          success: false,
-          message: 'This campaign is completed. Please create a new campaign.'
-        };
+        if (shouldComplete) {
+          // All platforms completed - mark as completed
+          await this.updateCampaignStatus(campaignId, 'completed');
+          await this.logActivity(campaignId, 'info', 'Campaign marked as completed - all platforms have published content');
+
+          return {
+            success: false,
+            message: 'This campaign is completed. Please create a new campaign.'
+          };
+        }
+
+        // Has published links but not all platforms completed - continue with resume
+        await this.logActivity(campaignId, 'info', 'Campaign has published content but more platforms available - continuing');
       }
 
       return await this.smartResumeCampaign(campaignId);
