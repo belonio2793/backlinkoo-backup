@@ -28,6 +28,7 @@ import {
   Zap
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { wordpressCommentService } from '@/services/wordpressCommentService';
 
 interface WordPressBlog {
   id: string;
