@@ -79,6 +79,10 @@ import {
   LazyBlogValidator
 } from './LazyComponents';
 
+// Platform Discovery page import
+import { lazy } from 'react';
+const LazyPlatformDiscovery = lazy(() => import('@/pages/PlatformDiscovery'));
+
 // Loading component for better UX
 const PageLoader = () => (
   <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-8">
