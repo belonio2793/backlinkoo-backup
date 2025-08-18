@@ -142,47 +142,6 @@ const WordPressBlogDiscovery = () => {
     }
   };
 
-  // Generate mock WordPress blogs for demo
-  const generateMockBlogs = (query: string, count: number): WordPressBlog[] => {
-    const domains = [
-      'myblogjourney.com', 'personalthoughts.org', 'dailyinsights.net',
-      'lifeblogger.info', 'mystories.blog', 'creativecorner.co',
-      'thoughtsandideas.com', 'bloggerlife.org', 'randommusings.net',
-      'personaljournal.info', 'blogworld.co', 'writingcorner.com',
-      'dailyblogger.org', 'myblogspace.net', 'thoughtbubble.info',
-      'creativeblog.co', 'personalsite.com', 'blogcentral.org'
-    ];
-
-    const themes = ['twentytwenty', 'twentytwentyone', 'genesis', 'divi', 'avada'];
-    const securityLevels: ('weak' | 'moderate' | 'strong')[] = ['weak', 'weak', 'moderate', 'weak', 'moderate'];
-
-    return Array.from({ length: count }, (_, i) => {
-      const domain = domains[Math.floor(Math.random() * domains.length)];
-      const theme = themes[Math.floor(Math.random() * themes.length)];
-      const securityLevel = securityLevels[Math.floor(Math.random() * securityLevels.length)];
-      
-      return {
-        id: `blog-${Date.now()}-${i}`,
-        domain,
-        url: `https://${domain}`,
-        title: `${domain.charAt(0).toUpperCase() + domain.split('.')[0].slice(1)} Blog`,
-        theme,
-        commentFormUrl: `https://${domain}/wp-comments-post.php`,
-        securityLevel,
-        successRate: securityLevel === 'weak' ? 
-          Math.floor(Math.random() * 20) + 75 : 
-          Math.floor(Math.random() * 30) + 45,
-        responseTime: Math.floor(Math.random() * 2000) + 500,
-        testStatus: 'pending',
-        commentFormFields: {
-          name: 'author',
-          email: 'email',
-          website: 'url',
-          comment: 'comment'
-        }
-      };
-    });
-  };
 
   // Toggle blog selection
   const toggleBlogSelection = (blogId: string) => {
