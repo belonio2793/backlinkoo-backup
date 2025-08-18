@@ -160,25 +160,11 @@ export class WorkingCampaignProcessor {
         );
       }
 
-      // Step 4: Check if all platforms have completed before marking campaign as completed
-      const shouldComplete = await this.checkAllPlatformsCompleted(campaign.id);
+      // Step 4: Campaign status is already handled by the netlify function
+      // The working-campaign-processor function manages platform rotation and completion
+      await this.logActivity(campaign.id, 'info', `Campaign processing completed. Published ${totalPosts} posts: ${publishedUrls.join(', ')}`);
 
-      if (shouldComplete) {
-        await this.updateCampaignStatus(campaign.id, 'completed');
-        await this.logActivity(campaign.id, 'info', `Campaign completed successfully. All platforms have published content. Published ${totalPosts} posts: ${publishedUrls.join(', ')}`);
-
-        realTimeFeedService.emitCampaignCompleted(
-          campaign.id,
-          campaign.name,
-          keyword,
-          publishedUrls
-        );
-      } else {
-        await this.updateCampaignStatus(campaign.id, 'paused');
-        await this.logActivity(campaign.id, 'info', `Campaign paused - waiting for other platforms to complete. Published ${totalPosts} posts: ${publishedUrls.join(', ')}`);
-      }
-
-      console.log('🎉 Campaign processing completed successfully');
+      console.log('🎉 Campaign processing completed successfully - status managed by netlify function');
 
       return {
         success: true,
