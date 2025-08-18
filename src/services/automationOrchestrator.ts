@@ -1019,10 +1019,10 @@ export class AutomationOrchestrator {
       const nextPlatform = this.getNextPlatformForCampaign(campaignId);
       const remainingPlatforms = this.getActivePlatforms().length - this.getCampaignPlatformProgress(campaignId).length;
 
+      // For continuous rotation, always continue to next platform
       if (!nextPlatform) {
-        await this.updateCampaignStatus(campaignId, 'completed');
-        await this.logActivity(campaignId, 'info', 'Campaign completed - all platforms have published content');
-        return;
+        await this.logActivity(campaignId, 'info', 'All platforms used once - continuing rotation to first platform');
+        // Don't complete - just let it continue to the next cycle
       }
 
       await this.logActivity(campaignId, 'info',
