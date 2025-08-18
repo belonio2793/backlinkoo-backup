@@ -104,9 +104,43 @@ exports.handler = async (event, context) => {
       await updateCampaignStatus(supabase, campaignId, 'completed', publishedUrls);
       console.log('✅ Campaign marked as completed - all platforms have published content');
     } else {
-      // Keep campaign active so it can be automatically resumed for next platform
-      await updateCampaignStatus(supabase, campaignId, 'active', publishedUrls);
-      console.log('🔄 Campaign marked as active - ready for next platform processing');
+      // More platforms available - set up for continuation
+      const nextAvailablePlatform = await getNextAvailablePlatform(supabase, campaignId);
+
+      if (nextAvailablePlatform) {
+        // Keep campaign active and schedule next platform processing
+        await updateCampaignStatus(supabase, campaignId, 'active', publishedUrls);
+
+        // Add activity log about next platform
+        await logCampaignActivity(supabase, campaignId, 'info',
+          `Published to ${nextPlatform}. Next platform: ${nextAvailablePlatform}`);
+
+        console.log(`🔄 Campaign active - next platform: ${nextAvailablePlatform}`);
+
+        // CRITICAL FIX: Auto-trigger next platform processing after delay
+        setTimeout(async () => {
+          try {
+            console.log(`🚀 Auto-triggering next platform: ${nextAvailablePlatform}`);
+
+            // Call the processor again for the next platform
+            const nextProcessingResult = await triggerNextPlatformProcessing(
+              campaignId, keyword, anchorText, targetUrl
+            );
+
+            console.log('✅ Next platform processing triggered:', nextProcessingResult.success);
+          } catch (error) {
+            console.error('❌ Failed to trigger next platform:', error);
+            // Pause campaign for manual intervention
+            await updateCampaignStatus(supabase, campaignId, 'paused', publishedUrls);
+            await logCampaignActivity(supabase, campaignId, 'error',
+              `Failed to auto-continue to next platform: ${error.message}`);
+          }
+        }, 3000); // 3 second delay to allow current request to complete
+      } else {
+        // No more platforms - mark as completed
+        await updateCampaignStatus(supabase, campaignId, 'completed', publishedUrls);
+        console.log('✅ Campaign completed - no more platforms available');
+      }
     }
 
     return {
