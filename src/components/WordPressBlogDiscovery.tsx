@@ -90,17 +90,8 @@ const WordPressBlogDiscovery = () => {
 
   const { toast } = useToast();
 
-  // Discovery search queries
-  const discoveryQueries = [
-    '"powered by wordpress" "leave a comment"',
-    '"your email address will not be published" wordpress',
-    'inurl:wp-comments-post.php',
-    '"comment form" "wordpress" site:*',
-    '"submit comment" inurl:wp-content',
-    'intext:"awaiting moderation" wordpress',
-    '"leave a reply" "powered by wordpress"',
-    'inurl:wp-content/themes "comment"'
-  ];
+  // Main discovery query as specified
+  const mainDiscoveryQuery = '"powered by wordpress" "leave a comment"';
 
   // Start WordPress blog discovery
   const startDiscovery = async () => {
