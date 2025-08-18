@@ -240,8 +240,6 @@ const WordPressBlogDiscovery = () => {
     setTestingProgress(0);
 
     const selectedBlogsList = discoveredBlogs.filter(blog => selectedBlogs.has(blog.id));
-    let successCount = 0;
-    let failCount = 0;
 
     try {
       toast({
@@ -249,66 +247,51 @@ const WordPressBlogDiscovery = () => {
         description: `Testing comment submission on ${selectedBlogsList.length} blogs...`,
       });
 
-      for (let i = 0; i < selectedBlogsList.length; i++) {
-        const blog = selectedBlogsList[i];
-        
-        // Update blog status to testing
-        setDiscoveredBlogs(prev => prev.map(b => 
-          b.id === blog.id ? { ...b, testStatus: 'testing' } : b
-        ));
+      // Update all selected blogs to testing status
+      setDiscoveredBlogs(prev => prev.map(b =>
+        selectedBlogs.has(b.id) ? { ...b, testStatus: 'testing' } : b
+      ));
 
-        // Simulate comment submission test
-        await new Promise(resolve => setTimeout(resolve, 2000 + Math.random() * 1000));
+      // Use real service for bulk testing
+      const result = await wordpressCommentService.bulkTestCommentSubmission(selectedBlogsList, userDetails);
 
-        // Determine test result based on success rate
-        const isSuccess = Math.random() * 100 < blog.successRate;
-        
-        if (isSuccess) {
-          successCount++;
-          const liveCommentUrl = `${blog.url}/#comment-${Date.now()}`;
-          
-          // Update blog with success
-          setDiscoveredBlogs(prev => prev.map(b => 
-            b.id === blog.id ? { 
-              ...b, 
-              testStatus: 'success',
-              liveCommentUrl,
-              lastTested: new Date()
-            } : b
-          ));
-
-          toast({
-            title: "✅ Comment Posted",
-            description: `Successfully posted on ${blog.domain}`,
-          });
-        } else {
-          failCount++;
-          
-          // Update blog with failure
-          setDiscoveredBlogs(prev => prev.map(b => 
-            b.id === blog.id ? { 
-              ...b, 
-              testStatus: 'failed',
-              lastTested: new Date()
-            } : b
-          ));
+      // Update blogs with test results
+      setDiscoveredBlogs(prev => prev.map(blog => {
+        const testResult = result.results.find(r => r.blogId === blog.id);
+        if (testResult) {
+          return {
+            ...blog,
+            testStatus: testResult.success ? 'success' : 'failed',
+            liveCommentUrl: testResult.liveUrl,
+            lastTested: new Date()
+          };
         }
+        return blog;
+      }));
 
-        setTestingProgress(((i + 1) / selectedBlogsList.length) * 100);
-      }
+      // Update progress to 100%
+      setTestingProgress(100);
 
       // Update stats
       setStats(prev => ({
         ...prev,
-        testsPassed: prev.testsPassed + successCount,
-        testsFailed: prev.testsFailed + failCount,
-        liveLinks: prev.liveLinks + successCount
+        testsPassed: prev.testsPassed + result.successful,
+        testsFailed: prev.testsFailed + result.failed,
+        liveLinks: prev.liveLinks + result.successful
       }));
 
       toast({
         title: "🎯 Testing Complete",
-        description: `${successCount} successful, ${failCount} failed out of ${selectedBlogsList.length} tests`,
+        description: `${result.successful} successful, ${result.failed} failed out of ${result.tested} tests`,
       });
+
+      // Show live links
+      if (result.liveLinks.length > 0) {
+        toast({
+          title: "🔗 Live Links Available",
+          description: `${result.liveLinks.length} live backlinks created! Check the Results tab.`,
+        });
+      }
 
     } catch (error) {
       toast({
