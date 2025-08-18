@@ -499,6 +499,20 @@ export class AutomationOrchestrator {
 
       console.log('✅ Campaign processed successfully by working processor');
 
+      // Mark platform as completed in orchestrator tracking
+      if (result.publishedUrls && result.publishedUrls.length > 0) {
+        // Determine which platform was used (for now, assume it follows the rotation logic)
+        const nextPlatform = await this.getNextPlatformForCampaignAsync(campaignId);
+        if (nextPlatform) {
+          this.markPlatformCompleted(campaignId, nextPlatform.id, result.publishedUrls[0]);
+          await this.logActivity(campaignId, 'info', `Successfully published to ${nextPlatform.name}: ${result.publishedUrls[0]}`);
+        }
+      }
+
+      // Continue to next platform immediately for continuous rotation
+      console.log('🔄 Continuing to next platform for continuous rotation...');
+      await this.continueToNextPlatform(campaignId);
+
     } catch (error) {
       console.error('Campaign processing error:', formatErrorForLogging(error, 'processCampaign'));
       throw error;
