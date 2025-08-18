@@ -477,9 +477,6 @@ export class AutomationOrchestrator {
         await this.logActivity(campaignId, 'info', `Processing campaign - ${validation.message}`);
       }
 
-      // Log available platforms for transparency
-      await this.logActivity(campaignId, 'info', `Processing campaign - ${validation.message}`);
-
       // Use the working campaign processor for reliable processing
       const result = await workingCampaignProcessor.processCampaign(campaign);
 
