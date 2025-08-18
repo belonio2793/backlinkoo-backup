@@ -180,26 +180,35 @@ export class Web2PlatformsEngine extends BaseEngine {
         };
       }
 
-      // 3. Try each platform opportunity until successful
-      for (const opportunity of opportunities.slice(0, 3)) { // Try top 3 platforms
+      // 3. Try each platform opportunity until successful - attempt ALL available platforms
+      const failedPlatforms: string[] = [];
+      const platformErrors: { platform: string; error: string; retryable: boolean }[] = [];
+
+      for (const opportunity of opportunities) { // Try ALL platforms, not just top 3
         attemptsCount++;
-        
+
         try {
+          console.log(`🔄 Attempting platform ${opportunity.domain} (attempt ${attemptsCount}/${opportunities.length})`);
+
           // Generate platform-specific content
           resourcesUsed.push('content_generation');
           const content = await this.generateContent(opportunity, task);
-          
+
           // Assess content quality
           const quality = await this.assessContentQuality(content.content, task);
           if (quality.score < 0.7) {
+            console.warn(`⚠️ Content quality too low for ${opportunity.domain} (score: ${quality.score}), trying next platform`);
+            failedPlatforms.push(`${opportunity.domain} (low quality)`);
             continue; // Try next platform
           }
 
           // Submit to platform
           resourcesUsed.push(`${opportunity.domain}_submission`);
           const submission = await this.submitPlacement(content, opportunity);
-          
+
           if (submission.success) {
+            console.log(`✅ Successfully published to ${opportunity.domain} after ${attemptsCount} attempts`);
+
             const placement = {
               sourceUrl: submission.placementUrl!,
               sourceDomain: opportunity.domain,
@@ -222,7 +231,9 @@ export class Web2PlatformsEngine extends BaseEngine {
                   wordCount: content.metadata.wordCount,
                   readabilityScore: content.metadata.readabilityScore,
                   sentiment: content.metadata.sentiment
-                }
+                },
+                failedPlatforms, // Track which platforms failed before success
+                totalAttempts: attemptsCount
               },
               contentSnippet: content.content.substring(0, 200) + '...'
             };
@@ -239,11 +250,34 @@ export class Web2PlatformsEngine extends BaseEngine {
 
             // Post-processing
             await this.postProcess(result, task);
-            
+
             return result;
+          } else {
+            // Submission failed but service responded
+            const errorMsg = submission.error?.message || 'Unknown submission error';
+            const isRetryable = submission.error?.retryable !== false;
+
+            console.warn(`❌ Platform ${opportunity.domain} failed: ${errorMsg}`);
+            failedPlatforms.push(opportunity.domain);
+            platformErrors.push({
+              platform: opportunity.domain,
+              error: errorMsg,
+              retryable: isRetryable
+            });
+
+            // Continue to next platform instead of stopping
+            continue;
           }
         } catch (opportunityError: any) {
-          console.warn(`Failed attempt ${attemptsCount} for platform ${opportunity.domain}:`, opportunityError.message);
+          console.warn(`💥 Platform ${opportunity.domain} threw error: ${opportunityError.message}`);
+          failedPlatforms.push(opportunity.domain);
+          platformErrors.push({
+            platform: opportunity.domain,
+            error: opportunityError.message,
+            retryable: true
+          });
+
+          // Continue to next platform instead of stopping
           continue;
         }
       }
