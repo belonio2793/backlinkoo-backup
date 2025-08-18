@@ -244,11 +244,11 @@ class PlatformDiscoveryService {
   // Suggest platforms based on category
   private suggestPlatformsForCategory(category: string): string[] {
     const platformMap = {
-      technology: ['Dev.to', 'Hashnode', 'Medium', 'Discourse'],
-      business: ['LinkedIn', 'Medium', 'WordPress', 'Ghost CMS'],
-      lifestyle: ['Medium', 'Tumblr', 'WordPress'],
-      education: ['Medium', 'Dev.to', 'WordPress', 'Ghost CMS'],
-      general: ['WordPress', 'Medium', 'Ghost CMS']
+      technology: ['Dev.to', 'Hashnode', 'Medium', 'Google Drive', 'Discourse'],
+      business: ['LinkedIn', 'Medium', 'WordPress', 'OneDrive', 'Google Drive', 'Ghost CMS'],
+      lifestyle: ['Medium', 'Tumblr', 'WordPress', 'Dropbox'],
+      education: ['Medium', 'Dev.to', 'WordPress', 'Google Drive', 'Box', 'Ghost CMS'],
+      general: ['WordPress', 'Medium', 'Google Drive', 'Dropbox', 'Ghost CMS']
     };
 
     return platformMap[category] || platformMap.general;
