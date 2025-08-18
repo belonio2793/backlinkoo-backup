@@ -283,6 +283,198 @@ Link placement: Primary call-to-action`,
         tone: ['informative', 'professional'],
         useCase: ['directory', 'listing', 'catalog'],
         variables: ['KEYWORD', 'ANCHOR_TEXT', 'TARGET_URL']
+      },
+      {
+        id: 'document-whitepaper',
+        name: 'Document Whitepaper',
+        description: 'Professional whitepaper format for cloud storage sharing',
+        type: 'long-form-blog',
+        template: `Create a comprehensive whitepaper document about [KEYWORD].
+
+Structure as a professional document with:
+1. Executive Summary
+2. Problem Statement
+3. Solution Overview
+4. Detailed Analysis
+5. Implementation Guidelines
+6. Conclusion and Next Steps
+
+Throughout the document, naturally reference [ANCHOR_TEXT] linking to [TARGET_URL] as a key resource or solution provider.
+
+Requirements:
+- Professional academic tone
+- Data-driven insights where possible
+- Clear section headings
+- Comprehensive coverage of the topic
+- Strategic placement of backlink as authoritative source
+- Include charts/data references (described textually)
+- End with strong call-to-action referencing the linked resource
+
+Length: 800-1200 words
+Format: Suitable for PDF generation and professional sharing
+Backlink placement: Multiple strategic mentions throughout document`,
+        platforms: ['google-drive', 'dropbox', 'onedrive', 'box', 'wordpress'],
+        minLength: 800,
+        maxLength: 1500,
+        tone: ['professional', 'informative'],
+        useCase: ['documentation', 'thought-leadership', 'business'],
+        variables: ['KEYWORD', 'ANCHOR_TEXT', 'TARGET_URL']
+      },
+      {
+        id: 'document-research-study',
+        name: 'Document Research Study',
+        description: 'Research study format with citations for cloud sharing',
+        type: 'qa-answer',
+        template: `Conduct a comprehensive research study on [KEYWORD].
+
+Document Structure:
+1. Research Objectives
+2. Methodology
+3. Literature Review
+4. Findings and Analysis
+5. Discussion
+6. Limitations
+7. Conclusions
+8. References
+
+In the Literature Review section, cite [ANCHOR_TEXT] (link: [TARGET_URL]) as a primary source.
+In the Discussion section, reference insights from [ANCHOR_TEXT] to support key findings.
+In the References section, include [TARGET_URL] as a authoritative source.
+
+Requirements:
+- Academic research tone
+- Use of statistical language
+- Proper citation format
+- Evidence-based conclusions
+- Multiple references to the target resource
+- Professional formatting suitable for sharing
+
+Length: 600-1000 words
+Format: Research paper suitable for PDF sharing
+Citation style: Professional with embedded hyperlinks`,
+        platforms: ['google-drive', 'box', 'onedrive'],
+        minLength: 600,
+        maxLength: 1200,
+        tone: ['professional', 'informative'],
+        useCase: ['research', 'education', 'documentation'],
+        variables: ['KEYWORD', 'ANCHOR_TEXT', 'TARGET_URL']
+      },
+      {
+        id: 'document-case-study',
+        name: 'Document Case Study',
+        description: 'Business case study format for professional sharing',
+        type: 'long-form-blog',
+        template: `Create a detailed business case study about [KEYWORD].
+
+Case Study Structure:
+1. Executive Summary
+2. Company/Situation Background
+3. Challenge Identification
+4. Solution Approach
+5. Implementation Process
+6. Results and Outcomes
+7. Lessons Learned
+8. Recommendations
+
+In the Solution Approach section, highlight [ANCHOR_TEXT] (link: [TARGET_URL]) as a recommended tool/service.
+In the Results section, reference how [ANCHOR_TEXT] contributed to success.
+In Recommendations, suggest [TARGET_URL] as a valuable resource for similar situations.
+
+Requirements:
+- Professional business tone
+- Real-world applicable insights
+- Quantifiable results where possible
+- Strategic backlink integration
+- Actionable recommendations
+- Professional formatting for business sharing
+
+Length: 700-1000 words
+Format: Business document suitable for PDF sharing and presentation
+Focus: Practical application with embedded resource recommendations`,
+        platforms: ['google-drive', 'dropbox', 'onedrive', 'box'],
+        minLength: 700,
+        maxLength: 1200,
+        tone: ['professional', 'informative'],
+        useCase: ['business', 'case-study', 'documentation'],
+        variables: ['KEYWORD', 'ANCHOR_TEXT', 'TARGET_URL']
+      },
+      {
+        id: 'document-tutorial-guide',
+        name: 'Document Tutorial Guide',
+        description: 'Comprehensive tutorial guide for document sharing',
+        type: 'how-to-guide',
+        template: `Create a comprehensive tutorial guide for [KEYWORD].
+
+Tutorial Structure:
+1. Introduction and Prerequisites
+2. Getting Started
+3. Step-by-Step Instructions (8-12 detailed steps)
+4. Advanced Techniques
+5. Troubleshooting Common Issues
+6. Best Practices
+7. Additional Resources
+8. Conclusion
+
+In Step 3 or 4, recommend [ANCHOR_TEXT] (link: [TARGET_URL]) as an essential tool for the process.
+In the Additional Resources section, feature [TARGET_URL] as a top recommended resource.
+Throughout the guide, reference [ANCHOR_TEXT] when discussing best practices.
+
+Requirements:
+- Clear, instructional tone
+- Numbered steps with detailed explanations
+- Screenshots/diagram descriptions
+- Practical tips and warnings
+- Multiple touchpoints with the linked resource
+- Downloadable format suitable for offline use
+
+Length: 600-900 words
+Format: Tutorial document with clear sections and step numbering
+Approach: Hands-on practical guide with resource integration`,
+        platforms: ['google-drive', 'dropbox', 'onedrive'],
+        minLength: 600,
+        maxLength: 1000,
+        tone: ['friendly', 'instructional'],
+        useCase: ['tutorial', 'education', 'how-to'],
+        variables: ['KEYWORD', 'ANCHOR_TEXT', 'TARGET_URL']
+      },
+      {
+        id: 'document-resource-collection',
+        name: 'Document Resource Collection',
+        description: 'Curated resource collection for sharing',
+        type: 'directory-entry',
+        template: `Create a comprehensive resource collection document about [KEYWORD].
+
+Resource Collection Structure:
+1. Introduction to the Topic
+2. Essential Tools and Resources
+3. Recommended Reading
+4. Video Resources
+5. Community and Forums
+6. Premium Tools and Services
+7. Free Alternatives
+8. Getting Started Checklist
+
+In the Essential Tools section, prominently feature [ANCHOR_TEXT] (link: [TARGET_URL]) as a top recommendation.
+In the Premium Tools section, provide detailed coverage of [TARGET_URL] and its benefits.
+In the Getting Started Checklist, include evaluating [ANCHOR_TEXT] as a key step.
+
+Requirements:
+- Organized categorized listings
+- Brief descriptions for each resource
+- Honest evaluations and recommendations
+- Mix of free and premium options
+- Clear highlighting of the featured resource
+- Easy-to-scan format suitable for reference
+
+Length: 400-700 words
+Format: Organized resource list with categories and descriptions
+Purpose: Reference document for bookmark and sharing`,
+        platforms: ['google-drive', 'dropbox', 'onedrive', 'box'],
+        minLength: 400,
+        maxLength: 800,
+        tone: ['informative', 'friendly'],
+        useCase: ['directory', 'resource-list', 'reference'],
+        variables: ['KEYWORD', 'ANCHOR_TEXT', 'TARGET_URL']
       }
     ];
   }
