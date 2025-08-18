@@ -440,12 +440,34 @@ const WordPressBlogDiscovery = () => {
 
               {/* Discovery Progress */}
               {isDiscovering && (
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span>Searching WordPress blogs...</span>
-                    <span>{Math.round(discoveryProgress)}%</span>
+                <div className="space-y-3">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span>
+                        {discoveryProgress <= 40 ? 'Searching WordPress blogs...' :
+                         discoveryProgress <= 90 ? 'Validating websites (checking for 404s)...' :
+                         'Filtering valid blogs...'}
+                      </span>
+                      <span>{Math.round(discoveryProgress)}%</span>
+                    </div>
+                    <Progress value={discoveryProgress} />
                   </div>
-                  <Progress value={discoveryProgress} />
+
+                  {discoveryProgress > 40 && (
+                    <div className="space-y-2">
+                      <div className="flex justify-between text-sm text-purple-600">
+                        <span>🔍 Validation Progress</span>
+                        <span>{Math.round(validationProgress)}%</span>
+                      </div>
+                      <Progress value={validationProgress} className="h-2" />
+                      <div className="text-xs text-gray-500 flex items-center gap-4">
+                        <span>• Checking accessibility</span>
+                        <span>• Confirming WordPress</span>
+                        <span>• Finding comment forms</span>
+                        <span>• Removing 404s</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
