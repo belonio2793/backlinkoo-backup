@@ -97,10 +97,7 @@ exports.handler = async (event, context) => {
       throw new Error('Failed to publish post to any platform');
     }
 
-    // Step 3: Keep campaign active for continuous rotation
-    // Never auto-complete campaigns - they should continue rotating through platforms
-    await updateCampaignStatus(supabase, campaignId, 'active', publishedUrls);
-    console.log('🔄 Campaign remains active - continuous platform rotation enabled');
+ main
 
     return {
       statusCode: 200,
@@ -847,4 +844,26 @@ async function checkAllPlatformsCompleted(supabase, campaignId) {
   // They should only be completed manually by the user
   console.log(`🔄 Continuous rotation enabled - campaign ${campaignId} will not auto-complete`);
   return false;
+}
+
+/**
+ * Log campaign activity
+ */
+async function logCampaignActivity(supabase, campaignId, level, message) {
+  try {
+    const { error } = await supabase
+      .from('automation_logs')
+      .insert({
+        campaign_id: campaignId,
+        level: level,
+        message: message,
+        created_at: new Date().toISOString()
+      });
+
+    if (error) {
+      console.warn('Failed to log campaign activity:', error);
+    }
+  } catch (error) {
+    console.warn('Campaign activity logging error:', error);
+  }
 }

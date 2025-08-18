@@ -713,8 +713,7 @@ export class AutomationOrchestrator {
         this.markPlatformCompleted(campaignId, nextPlatform.id, publishedLinks[0]);
         await this.logActivity(campaignId, 'info', `Successfully published to ${nextPlatform.name}: ${publishedLinks[0]}`);
 
-        // For continuous rotation, never complete campaigns - just continue to next platform
-        await this.continueToNextPlatform(campaignId);
+ main
       } else {
         this.updateStep(campaignId, 'publish-content', {
           status: 'error',
