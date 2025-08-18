@@ -972,17 +972,19 @@ export class AutomationOrchestrator {
         `Continuing to next platform: ${nextPlatform.name}. ${remainingPlatforms} platform(s) remaining.`
       );
 
-      // Small delay to ensure database updates are processed
-      setTimeout(async () => {
-        try {
-          // Process the next platform
-          await this.processCampaignWithErrorHandling(campaignId);
-        } catch (error) {
-          console.error('Failed to continue to next platform:', error);
-          await this.updateCampaignStatus(campaignId, 'paused');
-          await this.logActivity(campaignId, 'error', `Failed to continue to next platform: ${error.message}`);
-        }
-      }, 2000); // 2 second delay
+      // Small delay to ensure database updates are processed, then continue immediately
+      await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+
+      try {
+        // Process the next platform immediately
+        await this.processCampaignWithErrorHandling(campaignId);
+        console.log(`✅ Successfully continued campaign ${campaignId} to next platform: ${nextPlatform.name}`);
+      } catch (error) {
+        console.error('Failed to continue to next platform:', error);
+        await this.updateCampaignStatus(campaignId, 'paused');
+        await this.logActivity(campaignId, 'error', `Failed to continue to next platform: ${error.message}`);
+        throw error; // Re-throw to ensure calling function knows it failed
+      }
 
     } catch (error) {
       console.error('Error in continueToNextPlatform:', error);
