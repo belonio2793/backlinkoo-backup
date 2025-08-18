@@ -42,11 +42,12 @@ export interface PublishingPlatform {
 
 export const AVAILABLE_PLATFORMS: PublishingPlatform[] = [
   { id: 'telegraph', name: 'Telegraph.ph', isActive: true, maxPostsPerCampaign: 1, priority: 1 },
-  { id: 'medium', name: 'Medium.com', isActive: false, maxPostsPerCampaign: 1, priority: 2 },
-  { id: 'devto', name: 'Dev.to', isActive: false, maxPostsPerCampaign: 1, priority: 3 },
-  { id: 'linkedin', name: 'LinkedIn Articles', isActive: false, maxPostsPerCampaign: 1, priority: 4 },
-  { id: 'hashnode', name: 'Hashnode', isActive: false, maxPostsPerCampaign: 1, priority: 5 },
-  { id: 'substack', name: 'Substack', isActive: false, maxPostsPerCampaign: 1, priority: 6 }
+  { id: 'writeas', name: 'Write.as', isActive: true, maxPostsPerCampaign: 1, priority: 2 },
+  { id: 'medium', name: 'Medium.com', isActive: false, maxPostsPerCampaign: 1, priority: 3 },
+  { id: 'devto', name: 'Dev.to', isActive: false, maxPostsPerCampaign: 1, priority: 4 },
+  { id: 'linkedin', name: 'LinkedIn Articles', isActive: false, maxPostsPerCampaign: 1, priority: 5 },
+  { id: 'hashnode', name: 'Hashnode', isActive: false, maxPostsPerCampaign: 1, priority: 6 },
+  { id: 'substack', name: 'Substack', isActive: false, maxPostsPerCampaign: 1, priority: 7 }
 ];
 
 export interface CampaignPlatformProgress {
