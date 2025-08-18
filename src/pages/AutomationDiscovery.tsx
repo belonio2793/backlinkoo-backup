@@ -157,41 +157,51 @@ const AutomationDiscovery = () => {
       const data = await response.json();
       const sessionId = data.sessionId;
 
-      // Set up SSE for real-time updates
-      const eventSource = new EventSource(`/.netlify/functions/discovery-engine?sessionId=${sessionId}`);
-      eventSourceRef.current = eventSource;
+      toast({
+        title: "Discovery Started",
+        description: `Searching for ${searchQuery} opportunities across platforms...`,
+      });
 
-      eventSource.onmessage = (event) => {
+      // Start polling for results
+      const pollInterval = setInterval(async () => {
         try {
-          const data = JSON.parse(event.data);
-          
-          if (data.type === 'session_start') {
-            setCurrentSession(data.session);
-          } else if (data.type === 'progress') {
-            setCurrentSession(prev => prev ? { ...prev, progress: data.progress, current_platform: data.platform } : null);
-          } else if (data.type === 'result') {
-            setDiscoveryResults(prev => [...prev, data.result]);
-          } else if (data.type === 'session_complete') {
-            setIsDiscovering(false);
-            setCurrentSession(prev => prev ? { ...prev, status: 'completed' } : null);
-            updateSessionStats();
-          } else if (data.type === 'error') {
-            throw new Error(data.message);
+          const statusResponse = await fetch(`/.netlify/functions/discovery-engine?sessionId=${sessionId}`);
+          if (statusResponse.ok) {
+            const statusData = await statusResponse.json();
+
+            if (statusData.session) {
+              setCurrentSession(statusData.session);
+
+              if (statusData.session.status === 'completed') {
+                setIsDiscovering(false);
+                clearInterval(pollInterval);
+                updateSessionStats();
+                toast({
+                  title: "Discovery Complete",
+                  description: `Found ${statusData.results?.length || 0} opportunities!`,
+                });
+              } else if (statusData.session.status === 'error') {
+                setIsDiscovering(false);
+                clearInterval(pollInterval);
+                toast({
+                  title: "Discovery Error",
+                  description: "Discovery session encountered an error.",
+                  variant: "destructive"
+                });
+              }
+            }
+
+            if (statusData.results && statusData.results.length > discoveryResults.length) {
+              setDiscoveryResults(statusData.results);
+            }
           }
         } catch (error) {
-          console.error('Error processing discovery update:', error);
+          console.error('Error polling discovery status:', error);
         }
-      };
+      }, 2000); // Poll every 2 seconds
 
-      eventSource.onerror = () => {
-        setIsDiscovering(false);
-        setCurrentSession(prev => prev ? { ...prev, status: 'error' } : null);
-        toast({
-          title: "Discovery Error",
-          description: "Connection lost during discovery. Results saved.",
-          variant: "destructive"
-        });
-      };
+      // Store interval reference for cleanup
+      eventSourceRef.current = { close: () => clearInterval(pollInterval) };
 
     } catch (error) {
       setIsDiscovering(false);
