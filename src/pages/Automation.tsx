@@ -698,6 +698,10 @@ const Automation = () => {
                 )}
               </TabsContent>
 
+              <TabsContent value="wordpress" className="space-y-4 flex-1 flex flex-col">
+                <WordPressBlogDiscovery />
+              </TabsContent>
+
               <TabsContent value="status" className="space-y-4 flex-1 flex flex-col">
                 <AutomationServiceStatus />
               </TabsContent>
