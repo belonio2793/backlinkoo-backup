@@ -114,36 +114,30 @@ const WordPressBlogDiscovery = () => {
         description: "Searching for WordPress blogs with comment forms...",
       });
 
-      // Simulate discovery process
-      for (let i = 0; i < discoveryQueries.length; i++) {
-        const query = discoveryQueries[i];
-        
-        // Simulate search delay
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        
-        // Generate realistic blog discoveries
-        const newBlogs = generateMockBlogs(query, 3 + Math.floor(Math.random() * 5));
-        setDiscoveredBlogs(prev => [...prev, ...newBlogs]);
-        
-        setDiscoveryProgress(((i + 1) / discoveryQueries.length) * 100);
-        
-        toast({
-          title: "📍 Found Blogs",
-          description: `Discovered ${newBlogs.length} blogs using: "${query.substring(0, 30)}..."`,
-        });
-      }
+      // Use real discovery service
+      const result = await wordpressCommentService.discoverWordPressBlogs(40);
+      setDiscoveredBlogs(result.blogs);
+
+      // Update progress smoothly
+      const updateProgress = async () => {
+        for (let i = 0; i <= 100; i += 10) {
+          setDiscoveryProgress(i);
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      };
+      updateProgress();
 
       // Update stats
-      const totalFound = discoveredBlogs.length + (3 + Math.floor(Math.random() * 5)) * discoveryQueries.length;
+      const statsData = wordpressCommentService.getDiscoveryStats(result.blogs);
       setStats(prev => ({
         ...prev,
-        totalFound,
-        averageSuccessRate: Math.floor(Math.random() * 30) + 60
+        totalFound: statsData.total,
+        averageSuccessRate: statsData.averageSuccessRate
       }));
 
       toast({
         title: "✅ Discovery Complete",
-        description: `Found ${totalFound} WordPress blogs with comment forms`,
+        description: `Found ${result.totalFound} WordPress blogs with comment forms`,
       });
 
     } catch (error) {
