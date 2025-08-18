@@ -556,9 +556,10 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                                 variant="outline"
                                 onClick={() => handleViewDetails(campaign.id)}
                                 title="View Campaign Details"
-                                className="px-1 border-gray-300 text-xs h-5 w-5"
+                                className="px-3 py-1 h-8 min-w-[80px] bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 shadow-sm text-xs font-medium"
                               >
-                                <Eye className="w-3 h-3" />
+                                <Eye className="w-3 h-3 mr-1" />
+                                Details
                               </Button>
                               <Button
                                 size="sm"
@@ -566,13 +567,14 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                                 onClick={() => handleDeleteCampaign(campaign.id, campaign.keywords?.[0] || campaign.name)}
                                 disabled={actionLoading === campaign.id}
                                 title="Delete Campaign"
-                                className="px-1 border-red-300 text-red-600 hover:bg-red-50 text-xs h-5 w-5"
+                                className="px-3 py-1 h-8 min-w-[80px] bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300 transition-all duration-200 shadow-sm text-xs font-medium"
                               >
                                 {actionLoading === campaign.id ? (
-                                  <Loader2 className="w-2 h-2 animate-spin" />
+                                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
                                 ) : (
-                                  <Trash2 className="w-3 h-3" />
+                                  <Trash2 className="w-3 h-3 mr-1" />
                                 )}
+                                Delete
                               </Button>
                             </div>
                           </div>
@@ -620,34 +622,6 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                                   return null;
                                 })()}
 
-                                {/* Platform Indicators */}
-                                {(() => {
-                                  const summary = campaignStatusSummaries.get(campaign.id);
-                                  if (summary && summary.totalPlatforms > 0) {
-                                    const completedCount = summary.platformsCompleted || 0;
-                                    return (
-                                      <div className="flex items-center gap-2">
-                                        <div className="text-xs text-gray-500 font-medium">Platforms</div>
-                                        <div className="flex gap-1">
-                                          {Array.from({ length: summary.totalPlatforms }, (_, i) => (
-                                            <div
-                                              key={i}
-                                              className={`w-2 h-2 rounded-full transition-colors duration-200 border ${
-                                                i < completedCount
-                                                  ? 'bg-green-500 border-green-600'
-                                                  : 'bg-gray-200 border-gray-300'
-                                              }`}
-                                              title={`Platform ${i + 1}: ${
-                                                i < completedCount ? 'Completed' : 'Pending'
-                                              }`}
-                                            />
-                                          ))}
-                                        </div>
-                                      </div>
-                                    );
-                                  }
-                                  return null;
-                                })()}
                               </div>
                             </div>
                             <p><strong>Anchor:</strong> {campaign.anchor_texts?.[0] || 'N/A'}</p>
