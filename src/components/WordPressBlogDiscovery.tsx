@@ -80,10 +80,13 @@ const WordPressBlogDiscovery = () => {
   const [selectedBlogs, setSelectedBlogs] = useState<Set<string>>(new Set());
   const [stats, setStats] = useState<DiscoveryStats>({
     totalFound: 0,
+    totalChecked: 0,
+    removed404s: 0,
     testsPassed: 0,
     testsFailed: 0,
     liveLinks: 0,
-    averageSuccessRate: 0
+    averageSuccessRate: 0,
+    averageQualityScore: 0
   });
 
   const [userDetails, setUserDetails] = useState<UserDetails>({
