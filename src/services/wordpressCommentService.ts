@@ -16,7 +16,7 @@ export interface WordPressBlog {
   successRate: number;
   responseTime: number;
   lastTested?: Date;
-  testStatus: 'pending' | 'testing' | 'success' | 'failed';
+  testStatus: 'pending' | 'testing' | 'success' | 'failed' | 'validating';
   commentFormFields: {
     name?: string;
     email?: string;
@@ -24,6 +24,15 @@ export interface WordPressBlog {
     comment?: string;
   };
   liveCommentUrl?: string;
+  validation?: {
+    isValidated: boolean;
+    isAccessible: boolean;
+    isWordPress: boolean;
+    hasCommentForm: boolean;
+    qualityScore: number;
+    statusCode?: number;
+    errors: string[];
+  };
 }
 
 export interface CommentSubmissionData {
