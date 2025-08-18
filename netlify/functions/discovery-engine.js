@@ -112,72 +112,15 @@ exports.handler = async (event, context) => {
   }
 };
 
-async function handleSSEConnection(event, headers) {
-  const sessionId = event.queryStringParameters?.sessionId;
-  
-  if (!sessionId) {
-    return {
-      statusCode: 400,
-      headers,
-      body: JSON.stringify({ error: 'Session ID required for SSE' })
-    };
-  }
-
-  const sseHeaders = {
-    ...headers,
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive'
-  };
-
-  // In a real implementation, this would establish a proper SSE connection
-  // For Netlify Functions, we'll return the current session state
-  const session = global.discoverySessions?.[sessionId];
-  const results = global.discoveryResults?.[sessionId] || [];
-
-  let response = '';
-  
-  if (session) {
-    response += `data: ${JSON.stringify({
-      type: 'session_start',
-      session: session
-    })}\n\n`;
-
-    if (results.length > 0) {
-      results.forEach(result => {
-        response += `data: ${JSON.stringify({
-          type: 'result',
-          result: result
-        })}\n\n`;
-      });
-    }
-
-    response += `data: ${JSON.stringify({
-      type: 'progress',
-      progress: session.progress,
-      platform: session.current_platform
-    })}\n\n`;
-  }
-
-  return {
-    statusCode: 200,
-    headers: sseHeaders,
-    body: response
-  };
-}
-
-async function startDiscoveryProcess(sessionId, keywords, platforms, maxResults, discoveryDepth) {
+async function performDiscovery(sessionId, keywords, platforms, maxResults, discoveryDepth) {
   try {
-    global.discoveryResults = global.discoveryResults || {};
-    global.discoveryResults[sessionId] = [];
-
     const platformTypes = platforms.includes('all') ? [
-      'wordpress', 'medium', 'dev_to', 'hashnode', 'ghost', 
+      'wordpress', 'medium', 'dev_to', 'hashnode', 'ghost',
       'substack', 'linkedin', 'reddit', 'forums', 'directories'
     ] : platforms;
 
     let totalProgress = 0;
-    const progressIncrement = 100 / (keywords.length * platformTypes.length);
+    const progressIncrement = 80 / (keywords.length * platformTypes.length); // Leave 20% for database operations
 
     for (const keyword of keywords) {
       for (const platform of platformTypes) {
@@ -190,39 +133,56 @@ async function startDiscoveryProcess(sessionId, keywords, platforms, maxResults,
           }
         }
 
-        // Generate discovery results for this platform
-        const platformResults = await discoverPlatformOpportunities(keyword, platform, discoveryDepth);
-        
-        // Add results to session
-        global.discoveryResults[sessionId].push(...platformResults);
-        
+        // Discover URLs for this platform and keyword
+        const discoveredUrls = await discoverUrlsForPlatform(keyword, platform, discoveryDepth);
+
+        // Process and validate each discovered URL
+        for (const urlData of discoveredUrls) {
+          // Save to database
+          const savedUrl = await saveDiscoveredUrl(urlData, sessionId);
+          if (savedUrl) {
+            global.discoveryResults[sessionId].push(savedUrl);
+          }
+        }
+
         totalProgress += progressIncrement;
-        
+
         // Simulate realistic discovery time
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
+        await new Promise(resolve => setTimeout(resolve, 800));
+
         // Break if we've reached max results
         if (global.discoveryResults[sessionId].length >= maxResults) {
           break;
         }
       }
-      
+
       if (global.discoveryResults[sessionId].length >= maxResults) {
         break;
       }
     }
+
+    // Final database cleanup and validation
+    if (global.discoverySessions[sessionId]) {
+      global.discoverySessions[sessionId].current_platform = 'Validating results...';
+      global.discoverySessions[sessionId].progress = 90;
+    }
+
+    // Validate and clean up results
+    await validateDiscoveredUrls(sessionId);
 
     // Complete session
     if (global.discoverySessions[sessionId]) {
       global.discoverySessions[sessionId].status = 'completed';
       global.discoverySessions[sessionId].progress = 100;
       global.discoverySessions[sessionId].results_count = global.discoveryResults[sessionId].length;
+      global.discoverySessions[sessionId].current_platform = 'Discovery complete';
     }
 
   } catch (error) {
     console.error('Discovery process error:', error);
     if (global.discoverySessions[sessionId]) {
       global.discoverySessions[sessionId].status = 'error';
+      global.discoverySessions[sessionId].current_platform = `Error: ${error.message}`;
     }
   }
 }
