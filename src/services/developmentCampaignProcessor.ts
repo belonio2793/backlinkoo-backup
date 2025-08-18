@@ -179,8 +179,8 @@ export class DevelopmentCampaignProcessor {
           publishedUrls,
           totalPosts: 1,
           contentGenerated: true,
-          platformUsed: nextPlatform.id,
-          platformName: nextPlatform.name
+          platformUsed: successfulPlatform.id,
+          platformName: successfulPlatform.name
         }
       };
 
