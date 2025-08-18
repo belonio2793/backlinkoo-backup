@@ -139,7 +139,8 @@ export class DevelopmentCampaignProcessor {
           publishedUrls,
           totalPosts: 1,
           contentGenerated: true,
-          telegraphPublished: true
+          platformUsed: nextPlatform.id,
+          platformName: nextPlatform.name
         }
       };
 
