@@ -6,6 +6,7 @@ import { ProgressStep, CampaignProgress } from '@/components/CampaignProgressTra
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { realTimeFeedService } from './realTimeFeedService';
 import { campaignNetworkLogger } from './campaignNetworkLogger';
+import { PlatformConfigService, AVAILABLE_PLATFORMS, type PublishingPlatform } from './platformConfigService';
 // Removed campaignErrorHandler import - using simplified error handling
 
 export interface Campaign {
@@ -31,24 +32,9 @@ export interface CampaignProgressInfo {
   error?: string;
 }
 
-// Available publishing platforms
-export interface PublishingPlatform {
-  id: string;
-  name: string;
-  isActive: boolean;
-  maxPostsPerCampaign: number;
-  priority: number;
-}
-
-export const AVAILABLE_PLATFORMS: PublishingPlatform[] = [
-  { id: 'telegraph', name: 'Telegraph.ph', isActive: true, maxPostsPerCampaign: 1, priority: 1 },
-  { id: 'writeas', name: 'Write.as', isActive: true, maxPostsPerCampaign: 1, priority: 2 },
-  { id: 'medium', name: 'Medium.com', isActive: false, maxPostsPerCampaign: 1, priority: 3 },
-  { id: 'devto', name: 'Dev.to', isActive: false, maxPostsPerCampaign: 1, priority: 4 },
-  { id: 'linkedin', name: 'LinkedIn Articles', isActive: false, maxPostsPerCampaign: 1, priority: 5 },
-  { id: 'hashnode', name: 'Hashnode', isActive: false, maxPostsPerCampaign: 1, priority: 6 },
-  { id: 'substack', name: 'Substack', isActive: false, maxPostsPerCampaign: 1, priority: 7 }
-];
+// Re-export platform types and constants from centralized service
+export type { PublishingPlatform } from './platformConfigService';
+export { AVAILABLE_PLATFORMS } from './platformConfigService';
 
 export interface CampaignPlatformProgress {
   campaignId: string;
@@ -109,7 +95,7 @@ export class AutomationOrchestrator {
    * Get active publishing platforms
    */
   getActivePlatforms(): PublishingPlatform[] {
-    return AVAILABLE_PLATFORMS.filter(p => p.isActive).sort((a, b) => a.priority - b.priority);
+    return PlatformConfigService.getActivePlatforms();
   }
 
   /**
@@ -181,10 +167,12 @@ export class AutomationOrchestrator {
       return false;
     }
 
-    // Check if all active platforms have been completed
-    return activePlatforms.every(platform =>
-      campaignProgress.some(p => p.platformId === platform.id && p.isCompleted)
-    );
+    // Check if all active platforms have been completed using centralized service
+    const publishedPlatformIds = campaignProgress
+      .filter(p => p.isCompleted)
+      .map(p => p.platformId);
+
+    return PlatformConfigService.areAllPlatformsCompleted(publishedPlatformIds);
   }
 
   /**
@@ -305,7 +293,7 @@ export class AutomationOrchestrator {
       {
         id: 'publish-content',
         title: 'Publish Content',
-        description: 'Publishing content to Telegraph.ph platform',
+        description: PlatformConfigService.getPlatformRotationDescription(),
         status: 'pending'
       },
       {
