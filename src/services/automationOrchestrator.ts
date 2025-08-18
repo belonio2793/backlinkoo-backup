@@ -99,21 +99,45 @@ export class AutomationOrchestrator {
   }
 
   /**
-   * Get next available platform for a campaign
+   * Get next available platform for a campaign (continuous rotation)
    */
   getNextPlatformForCampaign(campaignId: string): PublishingPlatform | null {
     const activePlatforms = this.getActivePlatforms();
     const campaignProgress = this.platformProgressMap.get(campaignId) || [];
 
-    // Find the first platform that hasn't been used yet
+    if (activePlatforms.length === 0) {
+      return null;
+    }
+
+    // Count posts per platform for this campaign
+    const platformCounts = new Map<string, number>();
+
+    // Initialize counts
+    activePlatforms.forEach(platform => {
+      platformCounts.set(platform.id, 0);
+    });
+
+    // Count existing posts
+    campaignProgress.forEach(progress => {
+      if (progress.isCompleted) {
+        const currentCount = platformCounts.get(progress.platformId) || 0;
+        platformCounts.set(progress.platformId, currentCount + 1);
+      }
+    });
+
+    // Find platform with minimum posts (round-robin rotation)
+    let selectedPlatform = activePlatforms[0];
+    let minCount = platformCounts.get(selectedPlatform.id) || 0;
+
     for (const platform of activePlatforms) {
-      const hasPosted = campaignProgress.some(p => p.platformId === platform.id && p.isCompleted);
-      if (!hasPosted) {
-        return platform;
+      const count = platformCounts.get(platform.id) || 0;
+      if (count < minCount) {
+        selectedPlatform = platform;
+        minCount = count;
       }
     }
 
-    return null; // All platforms have been used
+    return selectedPlatform; // Always return a platform for continuous rotation
   }
 
   /**
@@ -122,57 +146,65 @@ export class AutomationOrchestrator {
   async getNextPlatformForCampaignAsync(campaignId: string): Promise<PublishingPlatform | null> {
     const activePlatforms = this.getActivePlatforms();
 
-    // Get published links from database to check which platforms are already used
+    if (activePlatforms.length === 0) {
+      return null;
+    }
+
+    // Get published links from database to check platform usage counts
     const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
     const publishedLinks = campaignWithLinks?.automation_published_links || [];
 
-    // Create set of used platform IDs from database (normalize to handle legacy data)
-    const usedPlatformIds = new Set(
-      publishedLinks.map(link => {
-        const platform = link.platform.toLowerCase();
-        // Normalize legacy platform names
-        if (platform === 'write.as' || platform === 'writeas') return 'writeas';
-        if (platform === 'telegraph.ph' || platform === 'telegraph') return 'telegraph';
-        return platform;
-      })
-    );
+    // Count posts per platform from database
+    const platformCounts = new Map<string, number>();
+
+    // Initialize counts
+    activePlatforms.forEach(platform => {
+      platformCounts.set(platform.id, 0);
+    });
+
+    // Count existing posts from database
+    publishedLinks.forEach(link => {
+      const platform = link.platform.toLowerCase();
+      // Normalize legacy platform names
+      let normalizedPlatform = platform;
+      if (platform === 'write.as' || platform === 'writeas') normalizedPlatform = 'writeas';
+      if (platform === 'telegraph.ph' || platform === 'telegraph') normalizedPlatform = 'telegraph';
+
+      const currentCount = platformCounts.get(normalizedPlatform) || 0;
+      platformCounts.set(normalizedPlatform, currentCount + 1);
+    });
 
     // Also check in-memory progress map as backup
     const campaignProgress = this.platformProgressMap.get(campaignId) || [];
-    for (const progress of campaignProgress) {
+    campaignProgress.forEach(progress => {
       if (progress.isCompleted) {
-        usedPlatformIds.add(progress.platformId);
+        const currentCount = platformCounts.get(progress.platformId) || 0;
+        platformCounts.set(progress.platformId, currentCount + 1);
       }
-    }
+    });
 
-    // Find the first platform that hasn't been used yet
+    // Find platform with minimum posts (round-robin rotation)
+    let selectedPlatform = activePlatforms[0];
+    let minCount = platformCounts.get(selectedPlatform.id) || 0;
+
     for (const platform of activePlatforms) {
-      if (!usedPlatformIds.has(platform.id)) {
-        return platform;
+      const count = platformCounts.get(platform.id) || 0;
+      if (count < minCount) {
+        selectedPlatform = platform;
+        minCount = count;
       }
     }
 
-    return null; // All platforms have been used
+    return selectedPlatform; // Always return a platform for continuous rotation
   }
 
   /**
-   * Check if campaign should auto-pause (completed all available platforms)
+   * Check if campaign should auto-pause (never auto-pause for continuous rotation)
    */
   shouldAutoPauseCampaign(campaignId: string): boolean {
-    const activePlatforms = this.getActivePlatforms();
-    const campaignProgress = this.platformProgressMap.get(campaignId) || [];
-
-    // Safety check: if no active platforms, should not pause
-    if (activePlatforms.length === 0) {
-      return false;
-    }
-
-    // Check if all active platforms have been completed using centralized service
-    const publishedPlatformIds = campaignProgress
-      .filter(p => p.isCompleted)
-      .map(p => p.platformId);
-
-    return PlatformConfigService.areAllPlatformsCompleted(publishedPlatformIds);
+    // For continuous rotation, campaigns should never auto-pause
+    // They should only be paused manually by the user or due to errors
+    return false;
   }
 
   /**
