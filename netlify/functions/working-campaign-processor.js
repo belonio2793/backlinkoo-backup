@@ -794,6 +794,41 @@ async function updateCampaignStatus(supabase, campaignId, status, publishedUrls)
 }
 
 /**
+ * Get active platforms from centralized configuration
+ */
+async function getActivePlatforms() {
+  // Centralized platform configuration - single source of truth
+  const allPlatforms = [
+    { id: 'telegraph', name: 'Telegraph.ph', isActive: true, priority: 1 },
+    { id: 'writeas', name: 'Write.as', isActive: true, priority: 2 },
+    { id: 'medium', name: 'Medium.com', isActive: false, priority: 3 },
+    { id: 'devto', name: 'Dev.to', isActive: false, priority: 4 },
+    { id: 'linkedin', name: 'LinkedIn Articles', isActive: false, priority: 5 },
+    { id: 'hashnode', name: 'Hashnode', isActive: false, priority: 6 },
+    { id: 'substack', name: 'Substack', isActive: false, priority: 7 }
+  ];
+
+  return allPlatforms
+    .filter(p => p.isActive)
+    .sort((a, b) => a.priority - b.priority);
+}
+
+/**
+ * Normalize platform ID for consistency
+ */
+function normalizePlatformId(platformId) {
+  const normalized = platformId.toLowerCase();
+
+  // Handle legacy platform names
+  if (normalized === 'write.as' || normalized === 'writeas') return 'writeas';
+  if (normalized === 'telegraph.ph' || normalized === 'telegraph') return 'telegraph';
+  if (normalized === 'medium.com') return 'medium';
+  if (normalized === 'dev.to') return 'devto';
+
+  return normalized;
+}
+
+/**
  * Check if all active platforms have completed for a campaign
  */
 async function checkAllPlatformsCompleted(supabase, campaignId) {
