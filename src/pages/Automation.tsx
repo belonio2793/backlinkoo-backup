@@ -446,6 +446,10 @@ const Automation = () => {
                 </TabsTrigger>
               </TabsList>
 
+              <TabsContent value="test" className="space-y-4 flex-1 flex flex-col">
+                <PlatformTestCampaign />
+              </TabsContent>
+
               <TabsContent value="create" className="space-y-6 flex-1 flex flex-col">
 
                 {/* Conditional Campaign Creator */}
