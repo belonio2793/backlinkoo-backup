@@ -319,13 +319,12 @@ export class DevelopmentCampaignProcessor {
         .from('automation_published_links')
         .insert({
           campaign_id: campaignId,
-          published_url: '',
+          published_url: `skipped:${reason}`,
           anchor_text: '',
           target_url: '',
           platform: platform,
           status: 'skipped',
-          published_at: new Date().toISOString(),
-          notes: reason
+          published_at: new Date().toISOString()
         });
 
       if (error) {
