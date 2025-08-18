@@ -62,10 +62,13 @@ interface UserDetails {
 
 interface DiscoveryStats {
   totalFound: number;
+  totalChecked: number;
+  removed404s: number;
   testsPassed: number;
   testsFailed: number;
   liveLinks: number;
   averageSuccessRate: number;
+  averageQualityScore: number;
 }
 
 const WordPressBlogDiscovery = () => {
