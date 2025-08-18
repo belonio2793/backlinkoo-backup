@@ -97,17 +97,12 @@ exports.handler = async (event, context) => {
       throw new Error('Failed to publish post to any platform');
     }
 
-    // Step 3: Check if all platforms have completed before marking campaign as completed
-    const shouldComplete = await checkAllPlatformsCompleted(supabase, campaignId);
+    // Step 3: Keep campaign active after successful Telegraph publishing
+    await updateCampaignStatus(supabase, campaignId, 'active', publishedUrls);
+    await logCampaignActivity(supabase, campaignId, 'info',
+      `Successfully published to ${platform}: ${publishedUrls[0]}. Campaign remains active.`);
 
-    if (shouldComplete) {
-      await updateCampaignStatus(supabase, campaignId, 'completed', publishedUrls);
-      console.log('✅ Campaign marked as completed - all platforms have published content');
-    } else {
-      // Keep campaign active so it can be automatically resumed for next platform
-      await updateCampaignStatus(supabase, campaignId, 'active', publishedUrls);
-      console.log('🔄 Campaign marked as active - ready for next platform processing');
-    }
+    console.log('✅ Telegraph publishing successful - campaign remains active');
 
     return {
       statusCode: 200,
@@ -869,5 +864,27 @@ async function checkAllPlatformsCompleted(supabase, campaignId) {
   } catch (error) {
     console.warn('Failed to check platform completion:', error);
     return false; // Default to not completing if check fails
+  }
+}
+
+/**
+ * Log campaign activity
+ */
+async function logCampaignActivity(supabase, campaignId, level, message) {
+  try {
+    const { error } = await supabase
+      .from('automation_logs')
+      .insert({
+        campaign_id: campaignId,
+        level: level,
+        message: message,
+        created_at: new Date().toISOString()
+      });
+
+    if (error) {
+      console.warn('Failed to log campaign activity:', error);
+    }
+  } catch (error) {
+    console.warn('Campaign activity logging error:', error);
   }
 }

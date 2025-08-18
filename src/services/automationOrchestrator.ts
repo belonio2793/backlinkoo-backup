@@ -679,7 +679,8 @@ export class AutomationOrchestrator {
         await this.logActivity(campaignId, 'info', `Successfully published to ${nextPlatform.name}: ${publishedLinks[0]}`);
 
         // Check if all active platforms have been completed
-        const shouldComplete = this.shouldAutoPauseCampaign(campaignId);
+        // Note: Auto-completion disabled - always keep campaigns active
+        const shouldComplete = false; // Disabled auto-completion
 
         if (shouldComplete) {
           // All platforms completed - mark campaign as completed
