@@ -97,9 +97,16 @@ exports.handler = async (event, context) => {
       throw new Error('Failed to publish post to any platform');
     }
 
-    // Step 3: Update campaign status to completed
-    await updateCampaignStatus(supabase, campaignId, 'completed', publishedUrls);
-    console.log('✅ Campaign marked as completed');
+    // Step 3: Check if all platforms have completed before marking campaign as completed
+    const shouldComplete = await checkAllPlatformsCompleted(supabase, campaignId);
+
+    if (shouldComplete) {
+      await updateCampaignStatus(supabase, campaignId, 'completed', publishedUrls);
+      console.log('✅ Campaign marked as completed - all platforms have published content');
+    } else {
+      await updateCampaignStatus(supabase, campaignId, 'paused', publishedUrls);
+      console.log('⏸️ Campaign paused - waiting for other platforms to complete');
+    }
 
     return {
       statusCode: 200,
