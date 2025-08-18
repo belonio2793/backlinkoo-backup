@@ -383,6 +383,55 @@ export class WorkingCampaignProcessor {
   }
 
   /**
+   * Check if all active platforms have completed for a campaign
+   */
+  private async checkAllPlatformsCompleted(campaignId: string): Promise<boolean> {
+    try {
+      // Define active platforms (should match the orchestrator configuration)
+      const activePlatforms = [
+        { id: 'telegraph', name: 'Telegraph.ph', isActive: true },
+        { id: 'writeas', name: 'Write.as', isActive: true }
+        // Add other active platforms as needed
+      ];
+
+      // Get published links for this campaign from Supabase
+      const supabase = (await import('@/integrations/supabase/client')).supabase;
+
+      const { data: publishedLinks, error } = await supabase
+        .from('automation_published_links')
+        .select('platform, published_url')
+        .eq('campaign_id', campaignId)
+        .eq('status', 'active');
+
+      if (error) {
+        console.warn('Failed to fetch published links:', error);
+        return false; // Default to not completing if we can't check
+      }
+
+      // Check if all active platforms have published content
+      const publishedPlatforms = new Set((publishedLinks || []).map(link => link.platform.toLowerCase()));
+      const activePlatformIds = activePlatforms.filter(p => p.isActive).map(p => p.id);
+
+      const allCompleted = activePlatformIds.every(platformId =>
+        publishedPlatforms.has(platformId) ||
+        publishedPlatforms.has(platformId.replace('.', '')) ||
+        publishedPlatforms.has(`${platformId}.ph`)
+      );
+
+      console.log(`🔍 Platform completion check for campaign ${campaignId}:`, {
+        activePlatforms: activePlatformIds,
+        publishedPlatforms: Array.from(publishedPlatforms),
+        allCompleted
+      });
+
+      return allCompleted;
+    } catch (error) {
+      console.warn('Failed to check platform completion:', error);
+      return false; // Default to not completing if check fails
+    }
+  }
+
+  /**
    * Check if we're in development environment
    */
   private isDevelopmentEnvironment(): boolean {
