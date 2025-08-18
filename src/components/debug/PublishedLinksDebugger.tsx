@@ -187,7 +187,9 @@ export default function PublishedLinksDebugger() {
                       <div className="mt-4 space-y-3">
                         <div>
                           <h5 className="font-medium mb-2">Links from getCampaignWithLinks:</h5>
-                          {campaign.automation_published_links?.map((link, index) => (
+                          {campaign.automation_published_links
+                            ?.sort((a, b) => new Date(b.published_at || b.created_at || '').getTime() - new Date(a.published_at || a.created_at || '').getTime())
+                            .map((link, index) => (
                             <div key={link.id} className="ml-4 text-sm bg-blue-50 p-2 rounded mb-1">
                               <div><strong>Platform:</strong> "{link.platform}"</div>
                               <div><strong>URL:</strong> {link.published_url}</div>
