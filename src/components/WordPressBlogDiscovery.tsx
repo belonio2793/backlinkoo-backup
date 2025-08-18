@@ -106,6 +106,7 @@ const WordPressBlogDiscovery = () => {
   const startDiscovery = async () => {
     setIsDiscovering(true);
     setDiscoveryProgress(0);
+    setValidationProgress(0);
     setDiscoveredBlogs([]);
 
     try {
