@@ -24,6 +24,7 @@ import DevelopmentModeIndicator from '@/components/DevelopmentModeIndicator';
 import BacklinkNotification from '@/components/BacklinkNotification';
 import DatabaseSchemaFixer from '@/components/DatabaseSchemaFixer';
 import PublishedLinksDebugger from '@/components/debug/PublishedLinksDebugger';
+import EnhancedCampaignCreator from '@/components/EnhancedCampaignCreator';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -46,6 +47,7 @@ const Automation = () => {
   const [hasShownRestoreMessage, setHasShownRestoreMessage] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [lastFormValidState, setLastFormValidState] = useState(false);
+  const [useEnhancedCreator, setUseEnhancedCreator] = useState(false);
 
   // Modal state for authentication
   const { openLoginModal } = useAuthModal();
@@ -439,7 +441,44 @@ const Automation = () => {
               </TabsList>
 
               <TabsContent value="create" className="space-y-6 flex-1 flex flex-col">
-                {/* Campaign Creation Card with Modal Trigger */}
+                {/* Campaign Creator Mode Toggle */}
+                <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border">
+                  <div>
+                    <h3 className="font-medium text-gray-900">Campaign Creator Mode</h3>
+                    <p className="text-sm text-gray-600">
+                      {useEnhancedCreator
+                        ? 'AI-powered content strategy and platform discovery'
+                        : 'Simple campaign creation with basic settings'
+                      }
+                    </p>
+                  </div>
+                  <Button
+                    variant={useEnhancedCreator ? "default" : "outline"}
+                    onClick={() => setUseEnhancedCreator(!useEnhancedCreator)}
+                    className="flex items-center gap-2"
+                  >
+                    <Wand2 className="w-4 h-4" />
+                    {useEnhancedCreator ? 'Enhanced Mode' : 'Switch to Enhanced'}
+                  </Button>
+                </div>
+
+                {/* Conditional Campaign Creator */}
+                {useEnhancedCreator ? (
+                  <EnhancedCampaignCreator
+                    onCampaignCreate={async (campaignData) => {
+                      // Update form data with enhanced campaign data
+                      setFormData({
+                        targetUrl: campaignData.targetUrl,
+                        keyword: campaignData.keyword,
+                        anchorText: campaignData.anchorText
+                      });
+
+                      // Create campaign using existing logic
+                      await createCampaign();
+                    }}
+                    isCreating={isCreating}
+                  />
+                ) : (
                 <Card className="flex-1 flex flex-col">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2 text-lg">
@@ -671,6 +710,7 @@ const Automation = () => {
                     )}
                   </CardContent>
                 </Card>
+                )}
               </TabsContent>
 
               <TabsContent value="status" className="space-y-4 flex-1 flex flex-col">
