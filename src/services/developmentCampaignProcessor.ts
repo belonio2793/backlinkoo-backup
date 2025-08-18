@@ -9,6 +9,7 @@ import { realTimeFeedService } from './realTimeFeedService';
 import { campaignNetworkLogger } from './campaignNetworkLogger';
 import MockContentGenerator from './mockContentGenerator';
 import MockTelegraphPublisher from './mockTelegraphPublisher';
+import MockWriteAsPublisher from './mockWriteAsPublisher';
 
 export interface DevelopmentProcessResult {
   success: boolean;
@@ -70,25 +71,37 @@ export class DevelopmentCampaignProcessor {
         campaign.user_id
       );
 
-      // Step 3: Publish to Telegraph.ph
-      console.log('📡 Publishing to Telegraph.ph...');
-      realTimeFeedService.emitSystemEvent(`Publishing "${contentResult.data.title}" to Telegraph.ph`, 'info');
+      // Step 3: Determine next platform and publish
+      const nextPlatform = await this.getNextAvailablePlatform(campaign.id);
+      console.log(`📡 Publishing to ${nextPlatform.name}...`);
+      realTimeFeedService.emitSystemEvent(`Publishing "${contentResult.data.title}" to ${nextPlatform.name}`, 'info');
 
-      const publishResult = await MockTelegraphPublisher.publishContent({
-        title: contentResult.data.title,
-        content: contentResult.data.content,
-        authorName: 'Backlinkoo'
-      });
+      let publishResult;
+      if (nextPlatform.id === 'telegraph') {
+        publishResult = await MockTelegraphPublisher.publishContent({
+          title: contentResult.data.title,
+          content: contentResult.data.content,
+          authorName: 'Backlinkoo'
+        });
+      } else if (nextPlatform.id === 'writeas') {
+        publishResult = await MockWriteAsPublisher.publishContent({
+          title: contentResult.data.title,
+          content: contentResult.data.content,
+          authorName: 'Anonymous'
+        });
+      } else {
+        throw new Error(`Unsupported platform: ${nextPlatform.id}`);
+      }
 
       if (!publishResult.success) {
-        throw new Error(`Telegraph publishing failed: ${publishResult.error}`);
+        throw new Error(`${nextPlatform.name} publishing failed: ${publishResult.error}`);
       }
 
       const publishedUrls = [publishResult.url];
-      console.log(`✅ Published to Telegraph: ${publishResult.url}`);
+      console.log(`✅ Published to ${nextPlatform.name}: ${publishResult.url}`);
 
       // Step 4: Save published link to database
-      await this.savePublishedLink(campaign.id, publishResult.url, contentResult.data);
+      await this.savePublishedLink(campaign.id, publishResult.url, contentResult.data, nextPlatform.id);
 
       // Emit URL published event
       realTimeFeedService.emitUrlPublished(
@@ -96,7 +109,7 @@ export class DevelopmentCampaignProcessor {
         campaign.name,
         keyword,
         publishResult.url,
-        'Telegraph.ph',
+        nextPlatform.name,
         campaign.user_id
       );
 
@@ -126,7 +139,8 @@ export class DevelopmentCampaignProcessor {
           publishedUrls,
           totalPosts: 1,
           contentGenerated: true,
-          telegraphPublished: true
+          platformUsed: nextPlatform.id,
+          platformName: nextPlatform.name
         }
       };
 
@@ -152,6 +166,59 @@ export class DevelopmentCampaignProcessor {
         totalPosts: 0,
         error: errorMessage 
       };
+    }
+  }
+
+  /**
+   * Get next available platform for campaign (development version)
+   */
+  private async getNextAvailablePlatform(campaignId: string): Promise<{ id: string; name: string }> {
+    try {
+      // Define available platforms in priority order
+      const availablePlatforms = [
+        { id: 'telegraph', name: 'Telegraph.ph' },
+        { id: 'writeas', name: 'Write.as' }
+      ];
+
+      // Get existing published links for this campaign from database
+      const { data: publishedLinks, error } = await supabase
+        .from('automation_published_links')
+        .select('platform')
+        .eq('campaign_id', campaignId);
+
+      if (error) {
+        console.warn('Error checking published links, defaulting to Telegraph:', error);
+        return availablePlatforms[0];
+      }
+
+      // Create set of used platforms (normalize legacy platform names)
+      const usedPlatforms = new Set(
+        (publishedLinks || []).map(link => {
+          const platform = link.platform.toLowerCase();
+          // Normalize legacy platform names
+          if (platform === 'write.as' || platform === 'writeas') return 'writeas';
+          if (platform === 'telegraph.ph' || platform === 'telegraph') return 'telegraph';
+          return platform;
+        })
+      );
+
+      console.log(`📊 [DEV] Campaign ${campaignId} - Used platforms:`, Array.from(usedPlatforms));
+
+      // Find first available platform that hasn't been used
+      for (const platform of availablePlatforms) {
+        if (!usedPlatforms.has(platform.id)) {
+          console.log(`✅ [DEV] Selected next platform: ${platform.id} (${platform.name})`);
+          return platform;
+        }
+      }
+
+      // All platforms have been used
+      console.log(`⚠️ [DEV] All platforms used for campaign ${campaignId}, defaulting to Telegraph`);
+      throw new Error('All available platforms have been used for this campaign');
+
+    } catch (error) {
+      console.error('Error getting next platform, defaulting to Telegraph:', error);
+      return { id: 'telegraph', name: 'Telegraph.ph' };
     }
   }
 
@@ -207,9 +274,10 @@ export class DevelopmentCampaignProcessor {
    * Save published link to database
    */
   private async savePublishedLink(
-    campaignId: string, 
-    url: string, 
-    contentData: any
+    campaignId: string,
+    url: string,
+    contentData: any,
+    platform: string = 'telegraph'
   ): Promise<void> {
     try {
       // Save to automation_published_links
@@ -220,7 +288,7 @@ export class DevelopmentCampaignProcessor {
           published_url: url,
           anchor_text: contentData.anchorText,
           target_url: contentData.targetUrl,
-          platform: 'telegraph',
+          platform: platform,
           status: 'active',
           published_at: new Date().toISOString()
         });

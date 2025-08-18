@@ -525,8 +525,32 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
                             </Badge>
                             <span className="font-medium">{campaign.keywords?.[0] || campaign.name}</span>
 
-                            {/* Campaign Details and Delete Actions */}
+                            {/* Campaign Details, Pause, and Delete Actions */}
                             <div className="flex items-center gap-1 ml-2">
+                              {/* Pause Button - Active campaigns only */}
+                              {(() => {
+                                const isActive = ['active', 'pending', 'generating', 'publishing'].includes(campaign.status);
+                                if (isActive) {
+                                  return (
+                                    <Button
+                                      size="sm"
+                                      variant="outline"
+                                      onClick={() => handlePauseCampaign(campaign.id)}
+                                      disabled={actionLoading === campaign.id}
+                                      title="Pause Campaign"
+                                      className="px-1 border-orange-300 text-orange-700 hover:bg-orange-50 text-xs h-5 w-5"
+                                    >
+                                      {actionLoading === campaign.id ? (
+                                        <Loader2 className="w-2 h-2 animate-spin" />
+                                      ) : (
+                                        <Pause className="w-3 h-3" />
+                                      )}
+                                    </Button>
+                                  );
+                                }
+                                return null;
+                              })()}
+
                               <Button
                                 size="sm"
                                 variant="outline"
@@ -697,34 +721,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
 
                         {/* Secondary Actions */}
                         <div className="flex flex-col items-start gap-2">
-                          {/* Active Campaign Pause Button */}
-                          {(() => {
-                            const isActive = ['active', 'pending', 'generating', 'publishing'].includes(campaign.status);
-
-                            if (isActive) {
-                              return (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => handlePauseCampaign(campaign.id)}
-                                  disabled={actionLoading === campaign.id}
-                                  title="Pause Campaign"
-                                  className="border-orange-300 text-orange-700 hover:bg-orange-50 text-xs px-2 py-1 h-6"
-                                >
-                                  {actionLoading === campaign.id ? (
-                                    <Loader2 className="w-3 h-3 animate-spin" />
-                                  ) : (
-                                    <>
-                                      <Pause className="w-3 h-3 mr-1" />
-                                      Pause
-                                    </>
-                                  )}
-                                </Button>
-                              );
-                            }
-                            return null;
-                          })()}
-
+                          {/* Future secondary actions can be added here */}
                         </div>
                       </div>
                     </div>

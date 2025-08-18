@@ -153,7 +153,7 @@ class MultiPlatformPublisher {
       return {
         success: true,
         url: postUrl,
-        platform: 'write.as',
+        platform: 'writeas',
         publishing_time_ms: Date.now() - startTime
       };
 

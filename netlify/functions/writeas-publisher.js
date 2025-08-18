@@ -91,7 +91,7 @@ export const handler = async (event, context) => {
       await storePublishedArticle({
         title,
         url: postUrl,
-        platform: 'Write.as',
+        platform: 'writeas',
         user_id,
         keyword,
         content_preview: writeasContent.substring(0, 200),
@@ -109,7 +109,7 @@ export const handler = async (event, context) => {
         success: true,
         url: postUrl,
         title: title,
-        platform: 'Write.as',
+        platform: 'writeas',
         post_id: postData.id,
         post_token: postData.token,
         published_at: postData.created || new Date().toISOString(),

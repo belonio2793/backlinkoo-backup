@@ -131,6 +131,45 @@ export class AutomationOrchestrator {
   }
 
   /**
+   * Get next available platform for a campaign (async version that checks database)
+   */
+  async getNextPlatformForCampaignAsync(campaignId: string): Promise<PublishingPlatform | null> {
+    const activePlatforms = this.getActivePlatforms();
+
+    // Get published links from database to check which platforms are already used
+    const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
+    const publishedLinks = campaignWithLinks?.automation_published_links || [];
+
+    // Create set of used platform IDs from database (normalize to handle legacy data)
+    const usedPlatformIds = new Set(
+      publishedLinks.map(link => {
+        const platform = link.platform.toLowerCase();
+        // Normalize legacy platform names
+        if (platform === 'write.as' || platform === 'writeas') return 'writeas';
+        if (platform === 'telegraph.ph' || platform === 'telegraph') return 'telegraph';
+        return platform;
+      })
+    );
+
+    // Also check in-memory progress map as backup
+    const campaignProgress = this.platformProgressMap.get(campaignId) || [];
+    for (const progress of campaignProgress) {
+      if (progress.isCompleted) {
+        usedPlatformIds.add(progress.platformId);
+      }
+    }
+
+    // Find the first platform that hasn't been used yet
+    for (const platform of activePlatforms) {
+      if (!usedPlatformIds.has(platform.id)) {
+        return platform;
+      }
+    }
+
+    return null; // All platforms have been used
+  }
+
+  /**
    * Check if campaign should auto-pause (completed all available platforms)
    */
   shouldAutoPauseCampaign(campaignId: string): boolean {
@@ -427,6 +466,19 @@ export class AutomationOrchestrator {
       if (!campaign) {
         throw new Error('Campaign not found');
       }
+
+      // CRITICAL: Validate no platform duplication before processing
+      const validation = await this.validateNoPlatformDuplication(campaignId);
+      if (!validation.isValid) {
+        // Auto-complete the campaign instead of throwing an error
+        await this.updateCampaignStatus(campaignId, 'completed');
+        await this.logActivity(campaignId, 'info', `Campaign auto-completed: ${validation.message}`);
+        console.log(`✅ Campaign ${campaignId} auto-completed - all platforms already used`);
+        return;
+      }
+
+      // Log available platforms for transparency
+      await this.logActivity(campaignId, 'info', `Processing campaign - ${validation.message}`);
 
       // Use the working campaign processor for reliable processing
       const result = await workingCampaignProcessor.processCampaign(campaign);
@@ -964,14 +1016,25 @@ export class AutomationOrchestrator {
       const publishedLinks = campaignWithLinks?.automation_published_links || [];
       const isCompleted = campaign.status === 'completed';
 
-      // Check for next available platform
-      const nextPlatform = this.getNextPlatformForCampaign(campaignId);
+      // Check for next available platform using database-aware method
+      const nextPlatform = await this.getNextPlatformForCampaignAsync(campaignId);
 
       if (isCompleted && !nextPlatform) {
         // Check if there are any new platforms available that weren't used
         const activePlatforms = this.getActivePlatforms();
-        const usedPlatformIds = publishedLinks.map(link => link.platform);
-        const unusedPlatforms = activePlatforms.filter(platform => !usedPlatformIds.includes(platform.id));
+
+        // Create normalized set of used platform IDs from database
+        const usedPlatformIds = new Set(
+          publishedLinks.map(link => {
+            const platform = link.platform.toLowerCase();
+            // Normalize legacy platform names to current IDs
+            if (platform === 'write.as' || platform === 'writeas') return 'writeas';
+            if (platform === 'telegraph.ph' || platform === 'telegraph') return 'telegraph';
+            return platform;
+          })
+        );
+
+        const unusedPlatforms = activePlatforms.filter(platform => !usedPlatformIds.has(platform.id));
 
         if (unusedPlatforms.length > 0) {
           // Reset campaign to allow using new platforms
@@ -1049,6 +1112,67 @@ export class AutomationOrchestrator {
   }
 
   /**
+   * Validate that campaign won't publish to platforms that already have published links
+   * This is critical for re-run/resume operations
+   */
+  async validateNoPlatformDuplication(campaignId: string): Promise<{
+    isValid: boolean;
+    availablePlatforms: PublishingPlatform[];
+    usedPlatforms: string[];
+    message: string;
+  }> {
+    try {
+      // Get all published links from database
+      const campaignWithLinks = await this.getCampaignWithLinks(campaignId);
+      const publishedLinks = campaignWithLinks?.automation_published_links || [];
+
+      if (publishedLinks.length === 0) {
+        // No existing links, all platforms available
+        const activePlatforms = this.getActivePlatforms();
+        return {
+          isValid: true,
+          availablePlatforms: activePlatforms,
+          usedPlatforms: [],
+          message: `All ${activePlatforms.length} platforms available for new campaign`
+        };
+      }
+
+      // Create normalized set of used platform IDs
+      const usedPlatformIds = new Set(
+        publishedLinks.map(link => {
+          const platform = link.platform.toLowerCase();
+          // Normalize legacy platform names to current IDs
+          if (platform === 'write.as' || platform === 'writeas') return 'writeas';
+          if (platform === 'telegraph.ph' || platform === 'telegraph') return 'telegraph';
+          return platform;
+        })
+      );
+
+      const activePlatforms = this.getActivePlatforms();
+      const availablePlatforms = activePlatforms.filter(platform => !usedPlatformIds.has(platform.id));
+      const usedPlatformNames = Array.from(usedPlatformIds)
+        .map(id => activePlatforms.find(p => p.id === id)?.name || id)
+        .filter(Boolean);
+
+      return {
+        isValid: availablePlatforms.length > 0,
+        availablePlatforms,
+        usedPlatforms: usedPlatformNames,
+        message: availablePlatforms.length > 0
+          ? `${availablePlatforms.length} platform(s) available: ${availablePlatforms.map(p => p.name).join(', ')}. Already used: ${usedPlatformNames.join(', ')}`
+          : `All platforms already used: ${usedPlatformNames.join(', ')}. Consider enabling more platforms or creating a new campaign.`
+      };
+    } catch (error) {
+      return {
+        isValid: false,
+        availablePlatforms: [],
+        usedPlatforms: [],
+        message: `Error validating platform usage: ${error instanceof Error ? error.message : String(error)}`
+      };
+    }
+  }
+
+  /**
    * Get detailed platform information for debugging
    */
   getDebugInfo(campaignId?: string): any {
@@ -1090,7 +1214,9 @@ export class AutomationOrchestrator {
         const platform = activePlatforms.find(p =>
           p.name.toLowerCase() === link.platform.toLowerCase() ||
           p.id.toLowerCase() === link.platform.toLowerCase() ||
-          (link.platform === 'telegraph' && p.id === 'telegraph')
+          (link.platform === 'telegraph' && p.id === 'telegraph') ||
+          (link.platform.toLowerCase() === 'write.as' && p.id === 'writeas') ||
+          (link.platform.toLowerCase() === 'writeas' && p.id === 'writeas')
         );
 
         if (platform) {
