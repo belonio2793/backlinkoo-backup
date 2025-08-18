@@ -511,7 +511,15 @@ export class AutomationOrchestrator {
 
       // Continue to next platform immediately for continuous rotation
       console.log('🔄 Continuing to next platform for continuous rotation...');
-      await this.continueToNextPlatform(campaignId);
+      try {
+        await this.continueToNextPlatform(campaignId);
+      } catch (continuationError) {
+        console.error('❌ Failed to continue to next platform:', continuationError);
+        await this.logActivity(campaignId, 'warning', `Platform continuation failed, will retry: ${continuationError.message}`);
+
+        // Keep campaign active but log the issue - don't pause the entire campaign for continuation errors
+        await this.updateCampaignStatus(campaignId, 'active');
+      }
 
     } catch (error) {
       console.error('Campaign processing error:', formatErrorForLogging(error, 'processCampaign'));
