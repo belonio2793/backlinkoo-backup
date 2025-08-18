@@ -721,10 +721,7 @@ const CampaignManagerTabbed: React.FC<CampaignManagerTabbedProps> = ({
 
                         {/* Secondary Actions */}
                         <div className="flex flex-col items-start gap-2">
-                          {/* Placeholder for future secondary actions */}
-                          {(() => {
-                          })()}
-
+                          {/* Future secondary actions can be added here */}
                         </div>
                       </div>
                     </div>
