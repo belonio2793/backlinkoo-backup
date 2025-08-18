@@ -323,7 +323,9 @@ const AutomationReporting = () => {
                           {campaign.automation_published_links && campaign.automation_published_links.length > 0 && (
                             <div className="space-y-1">
                               <p className="text-sm font-medium">Published Links ({campaign.automation_published_links.length}):</p>
-                              {campaign.automation_published_links.map((link) => (
+                              {campaign.automation_published_links
+                                .sort((a, b) => new Date(b.published_at || b.created_at || '').getTime() - new Date(a.published_at || a.created_at || '').getTime())
+                                .map((link) => (
                                 <a
                                   key={link.id}
                                   href={link.published_url}
