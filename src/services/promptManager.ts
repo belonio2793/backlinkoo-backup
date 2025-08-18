@@ -490,7 +490,7 @@ Purpose: Reference document for bookmark and sharing`,
         contentLimits: { minWords: 300, maxWords: 2000 },
         linkPolicy: 'friendly',
         domainRating: 86,
-        isActive: true
+        isActive: true // ✅ API Key auth, 60 req/min
       },
       {
         name: 'Medium',
@@ -500,7 +500,7 @@ Purpose: Reference document for bookmark and sharing`,
         contentLimits: { minWords: 400, maxWords: 1500 },
         linkPolicy: 'moderate',
         domainRating: 96,
-        isActive: true
+        isActive: false // ❌ API discontinued for new integrations
       },
       {
         name: 'Ghost CMS',
