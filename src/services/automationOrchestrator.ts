@@ -691,40 +691,8 @@ export class AutomationOrchestrator {
         this.markPlatformCompleted(campaignId, nextPlatform.id, publishedLinks[0]);
         await this.logActivity(campaignId, 'info', `Successfully published to ${nextPlatform.name}: ${publishedLinks[0]}`);
 
-        // Check if all active platforms have been completed
-        const shouldComplete = this.shouldAutoPauseCampaign(campaignId);
-
-        if (shouldComplete) {
-          // All platforms completed - mark campaign as completed
-          this.updateStep(campaignId, 'complete-campaign', {
-            status: 'completed',
-            details: 'Campaign successfully completed - all platforms have published content'
-          });
-
-          this.updateProgress(campaignId, {
-            isComplete: true,
-            endTime: new Date()
-          });
-
-          await this.updateCampaignStatus(campaignId, 'completed');
-          await this.logActivity(campaignId, 'info', `Campaign completed successfully. All platforms have published content.`);
-
-          // Get all published URLs for the completion event
-          const allPublishedUrls = this.getCampaignPlatformProgress(campaignId)
-            .filter(p => p.isCompleted && p.publishedUrl)
-            .map(p => p.publishedUrl);
-
-          // Emit completion event
-          realTimeFeedService.emitCampaignCompleted(
-            campaignId,
-            campaign.name,
-            campaign.keywords[0] || '',
-            allPublishedUrls
-          );
-        } else {
-          // More platforms to process - automatically continue to next platform
-          await this.continueToNextPlatform(campaignId);
-        }
+        // For continuous rotation, never complete campaigns - just continue to next platform
+        await this.continueToNextPlatform(campaignId);
       } else {
         this.updateStep(campaignId, 'publish-content', {
           status: 'error',
