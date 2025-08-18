@@ -520,7 +520,7 @@ Purpose: Reference document for bookmark and sharing`,
         contentLimits: { minWords: 300, maxWords: 5000 },
         linkPolicy: 'friendly',
         domainRating: 94,
-        isActive: true
+        isActive: true // ✅ OAuth 2.0, 150 req/hour
       },
       {
         name: 'Hashnode',
@@ -530,9 +530,9 @@ Purpose: Reference document for bookmark and sharing`,
         contentLimits: { minWords: 400, maxWords: 2000 },
         linkPolicy: 'friendly',
         domainRating: 75,
-        isActive: true
+        isActive: true // ✅ GraphQL API, Personal Access Token
       },
-      
+
       // Forum/Community Platforms
       {
         name: 'Reddit',
@@ -542,7 +542,7 @@ Purpose: Reference document for bookmark and sharing`,
         contentLimits: { minWords: 50, maxWords: 500 },
         linkPolicy: 'strict',
         domainRating: 91,
-        isActive: false // High moderation
+        isActive: false // ❌ Aggressive spam detection, not viable for automation
       },
       {
         name: 'Discourse',
