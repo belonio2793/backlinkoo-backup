@@ -76,6 +76,7 @@ const WordPressBlogDiscovery = () => {
   const [isDiscovering, setIsDiscovering] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
   const [discoveryProgress, setDiscoveryProgress] = useState(0);
+  const [validationProgress, setValidationProgress] = useState(0);
   const [testingProgress, setTestingProgress] = useState(0);
   const [selectedBlogs, setSelectedBlogs] = useState<Set<string>>(new Set());
   const [stats, setStats] = useState<DiscoveryStats>({
