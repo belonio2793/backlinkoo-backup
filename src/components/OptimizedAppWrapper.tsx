@@ -79,6 +79,9 @@ import {
   LazyBlogValidator
 } from './LazyComponents';
 
+// Platform Discovery page import
+const LazyPlatformDiscovery = lazy(() => import('@/pages/PlatformDiscovery'));
+
 // Loading component for better UX
 const PageLoader = () => (
   <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 p-8">
@@ -256,6 +259,11 @@ export const OptimizedAppWrapper = () => {
           <Route path="/automation" element={
             <Suspense fallback={<PageLoader />}>
               <LazyAutomation />
+            </Suspense>
+          } />
+          <Route path="/automation/discovery" element={
+            <Suspense fallback={<PageLoader />}>
+              <LazyPlatformDiscovery />
             </Suspense>
           } />
           <Route path="/campaign/:campaignId" element={
