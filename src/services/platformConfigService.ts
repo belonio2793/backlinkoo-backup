@@ -103,9 +103,24 @@ export class PlatformConfigService {
 
   /**
    * Get only active platforms sorted by priority
-   * Now supports thousands of platforms when enabled
+   * Now supports verified platforms only and thousands of platforms when enabled
    */
-  static getActivePlatforms(): PublishingPlatform[] {
+  static async getActivePlatforms(): Promise<PublishingPlatform[]> {
+    // First priority: Only verified working platforms
+    if (this.useVerifiedOnly) {
+      try {
+        const verifiedPlatforms = await verifiedPlatformManager.toPublishingPlatforms();
+
+        if (verifiedPlatforms.length > 0) {
+          console.log(`✅ Using ${verifiedPlatforms.length} verified working platforms`);
+          return verifiedPlatforms;
+        }
+      } catch (error) {
+        console.warn('❌ Error loading verified platforms, falling back to massive platforms:', error);
+      }
+    }
+
+    // Second priority: Massive platform database
     if (this.useMassivePlatforms) {
       try {
         // Get platforms from massive database with intelligent limits
