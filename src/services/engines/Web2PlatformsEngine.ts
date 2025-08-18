@@ -332,42 +332,81 @@ export class Web2PlatformsEngine extends BaseEngine {
     // Get available platforms based on task requirements
     const availablePlatforms = await this.getAvailablePlatforms(task);
 
+    console.log(`🔍 Discovering opportunities from ${availablePlatforms.size} available platforms`);
+
     for (const [platformId, config] of availablePlatforms) {
-      // Check rate limits
-      const canPublish = await this.checkRateLimits(platformId);
-      if (!canPublish) continue;
+      try {
+        // Check if platform is enabled
+        if (!config.enabled) {
+          console.log(`⏸️  Platform ${platformId} is disabled, skipping`);
+          continue;
+        }
 
-      // Check platform suitability for task
-      const suitabilityScore = this.calculatePlatformSuitability(config, task);
-      if (suitabilityScore < 0.5) continue;
+        // Check rate limits (but don't skip if unknown)
+        const canPublish = await this.checkRateLimits(platformId);
+        if (canPublish === false) {
+          console.log(`⏱️  Platform ${platformId} rate limited, skipping`);
+          continue;
+        }
 
-      opportunities.push({
-        id: `${platformId}_${Date.now()}`,
-        domain: platformId,
-        url: config.baseUrl || `https://${platformId}.com`,
-        placementType: 'web2_post',
-        domainAuthority: config.domainAuthority,
-        pageAuthority: config.domainAuthority - 5, // Estimate PA
-        estimatedCost: this.calculateCost(config),
-        difficultyScore: this.calculateDifficulty(config, task),
-        requirements: {
-          platform: platformId,
-          minContentLength: config.requirements.minContentLength,
-          supportedFormats: config.requirements.supportedFormats,
-          authentication: config.requirements.requiresAuthentication,
-          anonymous: config.requirements.allowsAnonymous
-        },
-        discoveredAt: new Date(),
-        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
-      });
+        // Check platform suitability for task (lowered threshold for more options)
+        const suitabilityScore = this.calculatePlatformSuitability(config, task);
+        if (suitabilityScore < 0.3) { // Lowered from 0.5 to 0.3 for more options
+          console.log(`📊 Platform ${platformId} suitability too low (${suitabilityScore}), skipping`);
+          continue;
+        }
+
+        // Check if platform has required credentials (for non-anonymous platforms)
+        if (config.requirements.requiresAuthentication && !this.hasValidCredentials(platformId)) {
+          console.log(`🔐 Platform ${platformId} missing credentials, skipping`);
+          continue;
+        }
+
+        const opportunity = {
+          id: `${platformId}_${Date.now()}`,
+          domain: platformId,
+          url: config.baseUrl || `https://${platformId}.com`,
+          placementType: 'web2_post' as const,
+          domainAuthority: config.domainAuthority,
+          pageAuthority: config.domainAuthority - 5, // Estimate PA
+          estimatedCost: this.calculateCost(config),
+          difficultyScore: this.calculateDifficulty(config, task),
+          requirements: {
+            platform: platformId,
+            minContentLength: config.requirements.minContentLength,
+            supportedFormats: config.requirements.supportedFormats,
+            authentication: config.requirements.requiresAuthentication,
+            anonymous: config.requirements.allowsAnonymous,
+            suitabilityScore // Add for debugging
+          },
+          discoveredAt: new Date(),
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000) // 24 hours
+        };
+
+        opportunities.push(opportunity);
+        console.log(`✅ Added platform ${platformId} (DA: ${config.domainAuthority}, Suitability: ${suitabilityScore.toFixed(2)})`);
+
+      } catch (error) {
+        console.warn(`⚠️  Error evaluating platform ${platformId}:`, error);
+        // Don't skip on error, but log it
+      }
     }
 
-    // Sort by opportunity score (DA, suitability, cost)
-    return opportunities.sort((a, b) => {
+    console.log(`📋 Found ${opportunities.length} viable platform opportunities`);
+
+    // Sort by opportunity score with multiple factors
+    const sortedOpportunities = opportunities.sort((a, b) => {
       const scoreA = this.calculateOpportunityScore(a, task);
       const scoreB = this.calculateOpportunityScore(b, task);
       return scoreB - scoreA;
     });
+
+    // Log the order for debugging
+    console.log(`📊 Platform priority order:`, sortedOpportunities.map(o =>
+      `${o.domain} (DA:${o.domainAuthority}, Score:${this.calculateOpportunityScore(o, task).toFixed(1)})`
+    ));
+
+    return sortedOpportunities;
   }
 
   protected async generateContent(opportunity: PlacementOpportunity, task: EngineTask): Promise<GeneratedContent> {
