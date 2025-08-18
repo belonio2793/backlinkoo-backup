@@ -1003,14 +1003,25 @@ export class AutomationOrchestrator {
       const publishedLinks = campaignWithLinks?.automation_published_links || [];
       const isCompleted = campaign.status === 'completed';
 
-      // Check for next available platform
-      const nextPlatform = this.getNextPlatformForCampaign(campaignId);
+      // Check for next available platform using database-aware method
+      const nextPlatform = await this.getNextPlatformForCampaignAsync(campaignId);
 
       if (isCompleted && !nextPlatform) {
         // Check if there are any new platforms available that weren't used
         const activePlatforms = this.getActivePlatforms();
-        const usedPlatformIds = publishedLinks.map(link => link.platform);
-        const unusedPlatforms = activePlatforms.filter(platform => !usedPlatformIds.includes(platform.id));
+
+        // Create normalized set of used platform IDs from database
+        const usedPlatformIds = new Set(
+          publishedLinks.map(link => {
+            const platform = link.platform.toLowerCase();
+            // Normalize legacy platform names to current IDs
+            if (platform === 'write.as' || platform === 'writeas') return 'writeas';
+            if (platform === 'telegraph.ph' || platform === 'telegraph') return 'telegraph';
+            return platform;
+          })
+        );
+
+        const unusedPlatforms = activePlatforms.filter(platform => !usedPlatformIds.has(platform.id));
 
         if (unusedPlatforms.length > 0) {
           // Reset campaign to allow using new platforms
