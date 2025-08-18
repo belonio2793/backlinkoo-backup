@@ -10,15 +10,15 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
-import { 
-  Search, 
-  Target, 
-  Globe, 
-  Link2, 
-  Activity, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
+import {
+  Search,
+  Target,
+  Globe,
+  Link2,
+  Activity,
+  CheckCircle,
+  XCircle,
+  Clock,
   TrendingUp,
   RefreshCw,
   Play,
@@ -31,7 +31,8 @@ import {
   Loader2,
   Zap,
   BarChart3,
-  AlertCircle
+  AlertCircle,
+  MessageSquare
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
