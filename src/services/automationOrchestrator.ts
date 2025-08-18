@@ -990,6 +990,43 @@ export class AutomationOrchestrator {
   }
 
   /**
+   * Continue campaign to next platform automatically
+   */
+  async continueToNextPlatform(campaignId: string): Promise<void> {
+    try {
+      const nextPlatform = this.getNextPlatformForCampaign(campaignId);
+      const remainingPlatforms = this.getActivePlatforms().length - this.getCampaignPlatformProgress(campaignId).length;
+
+      if (!nextPlatform) {
+        await this.updateCampaignStatus(campaignId, 'completed');
+        await this.logActivity(campaignId, 'info', 'Campaign completed - all platforms have published content');
+        return;
+      }
+
+      await this.logActivity(campaignId, 'info',
+        `Continuing to next platform: ${nextPlatform.name}. ${remainingPlatforms} platform(s) remaining.`
+      );
+
+      // Small delay to ensure database updates are processed
+      setTimeout(async () => {
+        try {
+          // Process the next platform
+          await this.processCampaignWithErrorHandling(campaignId);
+        } catch (error) {
+          console.error('Failed to continue to next platform:', error);
+          await this.updateCampaignStatus(campaignId, 'paused');
+          await this.logActivity(campaignId, 'error', `Failed to continue to next platform: ${error.message}`);
+        }
+      }, 2000); // 2 second delay
+
+    } catch (error) {
+      console.error('Error in continueToNextPlatform:', error);
+      await this.updateCampaignStatus(campaignId, 'paused');
+      await this.logActivity(campaignId, 'error', `Failed to continue campaign: ${error.message}`);
+    }
+  }
+
+  /**
    * Pause campaign temporarily between platforms
    */
   async pauseCampaignForNextPlatform(campaignId: string): Promise<void> {
