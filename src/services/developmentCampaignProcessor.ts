@@ -138,10 +138,10 @@ export class DevelopmentCampaignProcessor {
       }
 
       const publishedUrls = [publishResult.url];
-      console.log(`✅ Published to ${nextPlatform.name}: ${publishResult.url}`);
+      console.log(`✅ Published to ${successfulPlatform.name}: ${publishResult.url}`);
 
       // Step 4: Save published link to database
-      await this.savePublishedLink(campaign.id, publishResult.url, contentResult.data, nextPlatform.id);
+      await this.savePublishedLink(campaign.id, publishResult.url, contentResult.data, successfulPlatform.id);
 
       // Emit URL published event
       realTimeFeedService.emitUrlPublished(
@@ -149,7 +149,7 @@ export class DevelopmentCampaignProcessor {
         campaign.name,
         keyword,
         publishResult.url,
-        nextPlatform.name,
+        successfulPlatform.name,
         campaign.user_id
       );
 
