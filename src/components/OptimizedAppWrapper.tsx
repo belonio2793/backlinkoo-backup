@@ -80,7 +80,6 @@ import {
 } from './LazyComponents';
 
 // Platform Discovery page import
-import { lazy } from 'react';
 const LazyPlatformDiscovery = lazy(() => import('@/pages/PlatformDiscovery'));
 
 // Loading component for better UX
