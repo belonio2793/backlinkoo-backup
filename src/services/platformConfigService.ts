@@ -155,10 +155,38 @@ export class PlatformConfigService {
 
   /**
    * Get next available platform for rotation
+   * Enhanced with intelligent platform selection from massive database
    */
   static getNextPlatformForCampaign(usedPlatformIds: string[]): PublishingPlatform | null {
+    if (this.useMassivePlatforms) {
+      try {
+        // Use intelligent platform selection from massive database
+        const massivePlatform = massivePlatformManager.getNextPlatform('rotation', usedPlatformIds);
+
+        if (massivePlatform) {
+          // Convert to PublishingPlatform format
+          return {
+            id: massivePlatform.id,
+            name: massivePlatform.name,
+            isActive: massivePlatform.isActive,
+            maxPostsPerCampaign: -1,
+            priority: massivePlatform.priority,
+            description: `${massivePlatform.domain} (DA: ${massivePlatform.domainAuthority})`,
+            capabilities: [
+              massivePlatform.submissionMethod,
+              massivePlatform.authRequired ? 'account_required' : 'anonymous',
+              massivePlatform.backlinksAllowed ? 'backlinks' : 'no_backlinks'
+            ]
+          };
+        }
+      } catch (error) {
+        console.warn('❌ Error getting platform from massive database:', error);
+      }
+    }
+
+    // Fallback to basic platform rotation
     const activePlatforms = this.getActivePlatforms();
-    
+
     // Normalize used platform IDs
     const normalizedUsedIds = new Set(
       usedPlatformIds.map(id => this.normalizePlatformId(id))
@@ -171,7 +199,7 @@ export class PlatformConfigService {
       }
     }
 
-    return null; // All platforms used
+    return activePlatforms[0] || null; // Return first platform for continuous rotation
   }
 
   /**
