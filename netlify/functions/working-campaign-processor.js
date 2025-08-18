@@ -646,22 +646,55 @@ async function validateWriteAsUrl(url) {
 /**
  * Get next available platform for campaign rotation
  */
-function getNextAvailablePlatform(supabase, campaignId) {
-  // Define available platforms in priority order
-  const availablePlatforms = [
-    { id: 'telegraph', name: 'Telegraph.ph' },
-    { id: 'writeas', name: 'Write.as' }
-  ];
+async function getNextAvailablePlatform(supabase, campaignId) {
+  try {
+    // Define available platforms in priority order
+    const availablePlatforms = [
+      { id: 'telegraph', name: 'Telegraph.ph' },
+      { id: 'writeas', name: 'Write.as' }
+    ];
 
-  // For now, use alternating logic based on campaign ID
-  // This ensures different campaigns use different platforms
-  const campaignHash = campaignId.split('').reduce((a, b) => {
-    a = ((a << 5) - a) + b.charCodeAt(0);
-    return a & a;
-  }, 0);
+    // Get existing published links for this campaign from database
+    const { data: publishedLinks, error } = await supabase
+      .from('automation_published_links')
+      .select('platform')
+      .eq('campaign_id', campaignId);
 
-  const platformIndex = Math.abs(campaignHash) % availablePlatforms.length;
-  return availablePlatforms[platformIndex].id;
+    if (error) {
+      console.warn('Error checking published links, using fallback platform selection:', error);
+      // Fallback to first platform if database check fails
+      return availablePlatforms[0].id;
+    }
+
+    // Create set of used platforms (normalize legacy platform names)
+    const usedPlatforms = new Set(
+      (publishedLinks || []).map(link => {
+        const platform = link.platform.toLowerCase();
+        // Normalize legacy platform names
+        if (platform === 'write.as' || platform === 'writeas') return 'writeas';
+        if (platform === 'telegraph.ph' || platform === 'telegraph') return 'telegraph';
+        return platform;
+      })
+    );
+
+    console.log(`📊 Campaign ${campaignId} - Used platforms:`, Array.from(usedPlatforms));
+
+    // Find first available platform that hasn't been used
+    for (const platform of availablePlatforms) {
+      if (!usedPlatforms.has(platform.id)) {
+        console.log(`✅ Selected next platform: ${platform.id} (${platform.name})`);
+        return platform.id;
+      }
+    }
+
+    // All platforms have been used
+    console.log(`⚠️ All platforms used for campaign ${campaignId}`);
+    throw new Error('All available platforms have been used for this campaign');
+
+  } catch (error) {
+    console.error('Error getting next platform:', error);
+    throw error;
+  }
 }
 
 /**
