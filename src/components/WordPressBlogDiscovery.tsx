@@ -467,6 +467,18 @@ const WordPressBlogDiscovery = () => {
                                 <div className="text-sm text-gray-600 space-y-1">
                                   <p>Theme: {blog.theme}</p>
                                   <p>Response: {blog.responseTime}ms</p>
+                                  {blog.validation && (
+                                    <div className="flex items-center gap-2 text-xs">
+                                      {blog.validation.isAccessible && <Badge variant="outline" className="bg-green-50 text-green-700">Accessible</Badge>}
+                                      {blog.validation.isWordPress && <Badge variant="outline" className="bg-blue-50 text-blue-700">WordPress</Badge>}
+                                      {blog.validation.hasCommentForm && <Badge variant="outline" className="bg-purple-50 text-purple-700">Comments</Badge>}
+                                      {blog.validation.qualityScore > 0 && (
+                                        <Badge variant="outline" className="bg-orange-50 text-orange-700">
+                                          Q: {blog.validation.qualityScore}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                  )}
                                   {blog.lastTested && (
                                     <p>Last tested: {blog.lastTested.toLocaleTimeString()}</p>
                                   )}
