@@ -72,30 +72,69 @@ export class DevelopmentCampaignProcessor {
         campaign.user_id
       );
 
-      // Step 3: Determine next platform and publish
-      const nextPlatform = await this.getNextAvailablePlatform(campaign.id);
-      console.log(`📡 Publishing to ${nextPlatform.name}...`);
-      realTimeFeedService.emitSystemEvent(`Publishing "${contentResult.data.title}" to ${nextPlatform.name}`, 'info');
+      // Step 3: Try to publish to available platforms
+      let publishResult: any = null;
+      let successfulPlatform: any = null;
+      let attempts = 0;
+      const maxAttempts = 5; // Prevent infinite loops
 
-      let publishResult;
-      if (nextPlatform.id === 'telegraph') {
-        publishResult = await MockTelegraphPublisher.publishContent({
-          title: contentResult.data.title,
-          content: contentResult.data.content,
-          authorName: 'Backlinkoo'
-        });
-      } else if (nextPlatform.id === 'writeas') {
-        publishResult = await MockWriteAsPublisher.publishContent({
-          title: contentResult.data.title,
-          content: contentResult.data.content,
-          authorName: 'Anonymous'
-        });
-      } else {
-        throw new Error(`Unsupported platform: ${nextPlatform.id}`);
+      while (!publishResult?.success && attempts < maxAttempts) {
+        attempts++;
+
+        try {
+          const nextPlatform = await this.getNextAvailablePlatform(campaign.id);
+          if (!nextPlatform) {
+            console.log(`⚠️ [DEV] No more platforms available for campaign ${campaign.id}`);
+            break;
+          }
+
+          console.log(`📡 Publishing to ${nextPlatform.name} (attempt ${attempts})...`);
+          realTimeFeedService.emitSystemEvent(`Publishing "${contentResult.data.title}" to ${nextPlatform.name}`, 'info');
+
+          if (nextPlatform.id === 'telegraph') {
+            publishResult = await MockTelegraphPublisher.publishContent({
+              title: contentResult.data.title,
+              content: contentResult.data.content,
+              authorName: 'Backlinkoo'
+            });
+            successfulPlatform = nextPlatform;
+          } else if (nextPlatform.id === 'writeas') {
+            publishResult = await MockWriteAsPublisher.publishContent({
+              title: contentResult.data.title,
+              content: contentResult.data.content,
+              authorName: 'Anonymous'
+            });
+            successfulPlatform = nextPlatform;
+          } else {
+            // Log unsupported platform but continue to next one
+            console.warn(`⚠️ [DEV] Unsupported platform: ${nextPlatform.id}, skipping to next platform`);
+            await this.logActivity(campaign.id, 'warning', `Skipped unsupported platform: ${nextPlatform.name}`);
+
+            // Mark this platform as "used" so we don't try it again
+            await this.saveSkippedPlatform(campaign.id, nextPlatform.id, `Unsupported platform: ${nextPlatform.id}`);
+            continue;
+          }
+
+          // Check if publishing was successful
+          if (!publishResult.success) {
+            console.warn(`⚠️ [DEV] ${nextPlatform.name} publishing failed: ${publishResult.error}, trying next platform`);
+            await this.logActivity(campaign.id, 'warning', `${nextPlatform.name} publishing failed: ${publishResult.error}, continuing to next platform`);
+
+            // Mark this platform as failed so we don't try it again
+            await this.saveSkippedPlatform(campaign.id, nextPlatform.id, publishResult.error || 'Publishing failed');
+            publishResult = null; // Reset to try next platform
+          }
+
+        } catch (platformError) {
+          console.warn(`⚠️ [DEV] Platform error on attempt ${attempts}:`, platformError);
+          await this.logActivity(campaign.id, 'warning', `Platform error: ${platformError.message}, continuing to next platform`);
+          publishResult = null; // Reset to try next platform
+        }
       }
 
-      if (!publishResult.success) {
-        throw new Error(`${nextPlatform.name} publishing failed: ${publishResult.error}`);
+      // Check if we successfully published to any platform
+      if (!publishResult?.success || !successfulPlatform) {
+        throw new Error('All available platforms failed or are unsupported. Campaign cannot continue.');
       }
 
       const publishedUrls = [publishResult.url];
