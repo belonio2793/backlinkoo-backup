@@ -41,6 +41,7 @@ import { toast } from '@/hooks/use-toast';
 import BlogThemesService, { BlogTheme, DomainThemeSettings } from '@/services/blogThemesService';
 import { DomainBlogTemplateService, DomainThemeRecord } from '@/services/domainBlogTemplateService';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Domain {
   id: string;
