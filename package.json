@@ -47,7 +47,8 @@
     "test:dns": "node scripts/test-dns-validation.js",
     "domains:add-test": "node scripts/add-test-domain.js",
     "setup:auto-propagation": "node scripts/setup-auto-propagation.js",
-    "setup:domains-full": "npm run setup:blog-themes && npm run setup:campaign-blogs && npm run setup:auto-propagation"
+    "setup:domains-full": "npm run setup:blog-themes && npm run setup:campaign-blogs && npm run setup:auto-propagation",
+    "generate:leadpages-blog": "node scripts/generate-leadpages-blog.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
