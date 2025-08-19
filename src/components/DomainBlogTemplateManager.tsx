@@ -248,23 +248,6 @@ export function DomainBlogTemplateManager({
     }
   };
 
-  // Save to localStorage as fallback
-  const saveToLocalStorage = (domainId: string, themeId: string, styles: any) => {
-    try {
-      const currentSettings = JSON.parse(localStorage.getItem('domain-blog-theme-settings') || '{}');
-      currentSettings[domainId] = {
-        domain_id: domainId,
-        theme_id: themeId,
-        custom_styles: styles,
-        updated_at: new Date().toISOString()
-      };
-      localStorage.setItem('domain-blog-theme-settings', JSON.stringify(currentSettings));
-      return true;
-    } catch (error) {
-      console.error('Error saving to localStorage:', error);
-      return false;
-    }
-  };
 
   useEffect(() => {
     if (selectedTheme) {
