@@ -51,18 +51,10 @@ export class DomainBlogTemplateService {
         .eq('is_active', true)
         .single();
 
-      if (error) {
-        // Handle missing table gracefully
-        if (error.message?.includes('does not exist') || error.message?.includes('domain_blog_themes')) {
-          console.warn('⚠️ Domain blog themes table not set up. Run: npm run setup:blog-themes');
-          return null;
-        }
-
-        if (error.code !== 'PGRST116') { // PGRST116 = no rows returned
-          const errorMessage = error.message || error.details || JSON.stringify(error);
-          console.error('Error fetching domain theme:', errorMessage, error);
-          return null;
-        }
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        const errorMessage = error.message || error.details || JSON.stringify(error);
+        console.error('Error fetching domain theme:', errorMessage, error);
+        throw new Error(`Failed to fetch domain theme: ${errorMessage}`);
       }
 
       return data;
