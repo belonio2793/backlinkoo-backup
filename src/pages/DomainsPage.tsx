@@ -124,6 +124,7 @@ const DomainsPage = () => {
   const [showBulkAdd, setShowBulkAdd] = useState(false);
   const [editingDomain, setEditingDomain] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState(false);
+  const [dnsServiceStatus, setDnsServiceStatus] = useState<'unknown' | 'online' | 'offline'>('unknown');
 
   // Hosting configuration - editable
   const [hostingConfig, setHostingConfig] = useState<HostingConfig>({
