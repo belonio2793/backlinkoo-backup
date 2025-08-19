@@ -937,10 +937,10 @@ anotherdomain.org`}
                             </Button>
                           )}
                           
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
-                            onClick={() => deleteDomain(domain.id, domain.domain)}
+                            onClick={safeAsync(() => deleteDomain(domain.id, domain.domain))}
                             title="Delete Domain"
                           >
                             <Trash2 className="h-3 w-3" />
