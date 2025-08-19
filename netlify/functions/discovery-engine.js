@@ -23,7 +23,7 @@ exports.handler = async (event, context) => {
 
   try {
     if (event.httpMethod === 'GET') {
-      // Return session status for SSE-like updates
+      // Return session status for polling
       const sessionId = event.queryStringParameters?.sessionId;
       if (!sessionId) {
         return {
@@ -55,12 +55,12 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const {
-      campaignId,
-      keywords,
-      platforms = ['all'],
-      maxResults = 100,
-      discoveryDepth = 'medium'
+    const { 
+      campaignId, 
+      keywords, 
+      platforms = ['all'], 
+      maxResults = 100, 
+      discoveryDepth = 'medium' 
     } = JSON.parse(event.body || '{}');
 
     if (!campaignId || !keywords || !Array.isArray(keywords)) {
@@ -115,12 +115,12 @@ exports.handler = async (event, context) => {
 async function performDiscovery(sessionId, keywords, platforms, maxResults, discoveryDepth) {
   try {
     const platformTypes = platforms.includes('all') ? [
-      'wordpress', 'medium', 'dev_to', 'hashnode', 'ghost',
+      'wordpress', 'medium', 'dev_to', 'hashnode', 'ghost', 
       'substack', 'linkedin', 'reddit', 'forums', 'directories'
     ] : platforms;
 
     let totalProgress = 0;
-    const progressIncrement = 80 / (keywords.length * platformTypes.length); // Leave 20% for database operations
+    const progressIncrement = 80 / (keywords.length * platformTypes.length);
 
     for (const keyword of keywords) {
       for (const platform of platformTypes) {
@@ -135,7 +135,7 @@ async function performDiscovery(sessionId, keywords, platforms, maxResults, disc
 
         // Discover URLs for this platform and keyword
         const discoveredUrls = await discoverUrlsForPlatform(keyword, platform, discoveryDepth);
-
+        
         // Process and validate each discovered URL
         for (const urlData of discoveredUrls) {
           // Save to database
@@ -144,31 +144,22 @@ async function performDiscovery(sessionId, keywords, platforms, maxResults, disc
             global.discoveryResults[sessionId].push(savedUrl);
           }
         }
-
+        
         totalProgress += progressIncrement;
-
+        
         // Simulate realistic discovery time
         await new Promise(resolve => setTimeout(resolve, 800));
-
+        
         // Break if we've reached max results
         if (global.discoveryResults[sessionId].length >= maxResults) {
           break;
         }
       }
-
+      
       if (global.discoveryResults[sessionId].length >= maxResults) {
         break;
       }
     }
-
-    // Final database cleanup and validation
-    if (global.discoverySessions[sessionId]) {
-      global.discoverySessions[sessionId].current_platform = 'Validating results...';
-      global.discoverySessions[sessionId].progress = 90;
-    }
-
-    // Validate and clean up results
-    await validateDiscoveredUrls(sessionId);
 
     // Complete session
     if (global.discoverySessions[sessionId]) {
@@ -188,93 +179,26 @@ async function performDiscovery(sessionId, keywords, platforms, maxResults, disc
 }
 
 async function discoverUrlsForPlatform(keyword, platform, discoveryDepth) {
-  // Real URL discovery using search patterns and known platform structures
-  const searchQueries = generateSearchQueries(keyword, platform);
-  const discoveredUrls = [];
-
-  for (const query of searchQueries) {
-    try {
-      // Simulate real discovery using platform-specific patterns
-      const urls = await searchPlatformUrls(query, platform, discoveryDepth);
-      discoveredUrls.push(...urls);
-    } catch (error) {
-      console.error(`Error discovering URLs for ${platform}:`, error);
-    }
-  }
-
-  return discoveredUrls;
-}
-
-function generateSearchQueries(keyword, platform) {
-  const platformQueries = {
-    wordpress: [
-      `site:wordpress.com "${keyword}"`,
-      `"${keyword}" inurl:blog site:*.wordpress.com`,
-      `"${keyword}" "wordpress" "comment"`,
-      `"${keyword}" "write for us" wordpress`
-    ],
-    medium: [
-      `site:medium.com "${keyword}"`,
-      `"${keyword}" site:medium.com`,
-      `"${keyword}" "medium" "publication"`
-    ],
-    dev_to: [
-      `site:dev.to "${keyword}"`,
-      `"${keyword}" dev.to "community"`,
-      `"${keyword}" "dev.to" "publish"`
-    ],
-    hashnode: [
-      `site:hashnode.com "${keyword}"`,
-      `site:hashnode.dev "${keyword}"`,
-      `"${keyword}" "hashnode" "blog"`
-    ],
-    reddit: [
-      `site:reddit.com "${keyword}"`,
-      `"${keyword}" reddit "subreddit"`,
-      `"${keyword}" "r/" site:reddit.com`
-    ],
-    forums: [
-      `"${keyword}" "forum" "register"`,
-      `"${keyword}" "discussion" "post"`,
-      `"${keyword}" inurl:forum`
-    ],
-    directories: [
-      `"${keyword}" "directory" "submit"`,
-      `"${keyword}" "listing" "add"`,
-      `"${keyword}" "business directory"`
-    ]
-  };
-
-  return platformQueries[platform] || [`"${keyword}" "${platform}"`];
-}
-
-async function searchPlatformUrls(query, platform, depth) {
-  // This simulates real URL discovery - in production you'd use:
-  // - Google Custom Search API
-  // - Bing Search API
-  // - SerpAPI
-  // - Web scraping with proper rate limiting
-
   const results = [];
-  const maxResults = depth === 'light' ? 3 : depth === 'medium' ? 6 : 12;
-
-  // Get existing platform data from our database to seed real URLs
+  const maxResults = discoveryDepth === 'light' ? 3 : discoveryDepth === 'medium' ? 6 : 12;
+  
+  // Get existing platform data from our database
   const existingUrls = await getExistingPlatformUrls(platform);
-
+  
   for (let i = 0; i < maxResults; i++) {
-    // Mix of real URLs from database and discovered patterns
-    const url = existingUrls.length > i
+    // Mix of real URLs from database and generated patterns
+    const url = existingUrls.length > i 
       ? existingUrls[i]
-      : await generateRealisticUrl(query, platform);
-
+      : await generateRealisticUrl(keyword, platform);
+      
     if (url) {
-      const urlData = await analyzeUrl(url, platform, query);
+      const urlData = await analyzeUrl(url, platform, keyword);
       if (urlData) {
         results.push(urlData);
       }
     }
   }
-
+  
   return results;
 }
 
@@ -286,12 +210,12 @@ async function getExistingPlatformUrls(platform) {
       .eq('status', 'working')
       .ilike('domain', `%${platform}%`)
       .limit(5);
-
+    
     if (error) {
       console.error('Error fetching existing URLs:', error);
       return [];
     }
-
+    
     return data || [];
   } catch (error) {
     console.error('Database error:', error);
@@ -299,8 +223,7 @@ async function getExistingPlatformUrls(platform) {
   }
 }
 
-async function generateRealisticUrl(query, platform) {
-  // Generate realistic URLs based on platform patterns
+async function generateRealisticUrl(keyword, platform) {
   const platformPatterns = {
     wordpress: [
       'https://example.wordpress.com/blog/',
@@ -322,42 +245,41 @@ async function generateRealisticUrl(query, platform) {
       'https://old.reddit.com/r/subreddit/'
     ]
   };
-
+  
   const patterns = platformPatterns[platform] || [`https://example.com/${platform}/`];
   const pattern = patterns[Math.floor(Math.random() * patterns.length)];
-
+  
   // Create a realistic URL variation
-  const keyword = query.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
-  return pattern.replace('example', keyword.substring(0, 8) || 'discover');
+  const keywordSlug = keyword.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+  return pattern.replace('example', keywordSlug.substring(0, 8) || 'discover');
 }
 
-async function analyzeUrl(urlOrData, platform, query) {
+async function analyzeUrl(urlOrData, platform, keyword) {
   try {
     // Extract URL if it's an object from database
     const url = typeof urlOrData === 'string' ? urlOrData : urlOrData.url;
     const domain = new URL(url).hostname;
-
-    // Simulate URL analysis (in production, you'd analyze the actual page)
+    
     const analysis = {
       url: url,
       domain: domain,
       link_type: determineLinkType(platform),
       discovery_method: 'ai_discovery',
-
-      // Simulated metrics (would be real in production)
+      
+      // Simulated metrics
       domain_authority: Math.floor(Math.random() * 50) + 30,
       page_authority: Math.floor(Math.random() * 40) + 20,
       spam_score: Math.floor(Math.random() * 30),
-
+      
       // Platform-specific data
       requires_registration: platform !== 'directories',
       requires_moderation: ['reddit', 'forums'].includes(platform),
       min_content_length: platform === 'medium' ? 500 : 100,
       max_links_per_post: platform === 'reddit' ? 1 : 3,
-
+      
       // UI display data
-      title: `Discover ${query} opportunities on ${domain}`,
-      description: `High-quality ${platform} platform for ${query} content`,
+      title: `Discover ${keyword} opportunities on ${domain}`,
+      description: `High-quality ${platform} platform for ${keyword} content`,
       opportunity_score: Math.floor(Math.random() * 30) + 70,
       estimated_traffic: Math.floor(Math.random() * 50000) + 5000,
       has_comment_form: ['wordpress', 'forums'].includes(platform),
@@ -366,7 +288,7 @@ async function analyzeUrl(urlOrData, platform, query) {
       last_checked: new Date().toISOString(),
       status: 'pending'
     };
-
+    
     return analysis;
   } catch (error) {
     console.error('Error analyzing URL:', error);
@@ -377,7 +299,7 @@ async function analyzeUrl(urlOrData, platform, query) {
 function determineLinkType(platform) {
   const typeMap = {
     wordpress: 'blog_comment',
-    medium: 'web2_platform',
+    medium: 'web2_platform', 
     dev_to: 'web2_platform',
     hashnode: 'web2_platform',
     reddit: 'forum_profile',
@@ -385,7 +307,7 @@ function determineLinkType(platform) {
     directories: 'directory_listing',
     linkedin: 'social_profile'
   };
-
+  
   return typeMap[platform] || 'web2_platform';
 }
 
@@ -397,9 +319,9 @@ async function saveDiscoveredUrl(urlData, sessionId) {
       .select('id')
       .eq('url', urlData.url)
       .single();
-
+    
     if (existing) {
-      // Update existing URL with new data
+      // Update existing URL
       const { data, error } = await supabase
         .from('discovered_urls')
         .update({
@@ -410,7 +332,7 @@ async function saveDiscoveredUrl(urlData, sessionId) {
         .eq('url', urlData.url)
         .select()
         .single();
-
+        
       if (error) throw error;
       return formatUrlForUI(data);
     } else {
@@ -438,7 +360,7 @@ async function saveDiscoveredUrl(urlData, sessionId) {
         }])
         .select()
         .single();
-
+        
       if (error) throw error;
       return formatUrlForUI(data, urlData);
     }
@@ -467,19 +389,4 @@ function formatUrlForUI(dbData, analysisData = {}) {
     last_checked: dbData.last_verified || dbData.discovered_at,
     status: dbData.status
   };
-}
-
-async function validateDiscoveredUrls(sessionId) {
-  // Perform basic validation on discovered URLs
-  const results = global.discoveryResults[sessionId] || [];
-
-  // Remove duplicates
-  const uniqueUrls = results.filter((url, index, self) =>
-    index === self.findIndex(u => u.url === url.url)
-  );
-
-  // Sort by opportunity score
-  const sortedUrls = uniqueUrls.sort((a, b) => b.opportunity_score - a.opportunity_score);
-
-  global.discoveryResults[sessionId] = sortedUrls;
 }
