@@ -499,76 +499,27 @@ const DomainsPage = () => {
 
       toast.info(`Performing DNS validation for ${domain.domain}...`);
 
-      // Try Netlify function first
-      let useNetlifyFunction = true;
-      let result;
+      // Use improved DNS validation service
+      const result = await DNSValidationService.validateDomain(domainId);
 
-      try {
-        const response = await fetch('/.netlify/functions/validate-domain', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ domain_id: domainId })
-        });
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            useNetlifyFunction = false;
-          } else {
-            const errorText = await response.text();
-            throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
-          }
-        } else {
-          result = await response.json();
-        }
-      } catch (fetchError: any) {
-        if (fetchError.message.includes('Failed to fetch') || fetchError.message.includes('404')) {
-          useNetlifyFunction = false;
-        } else {
-          throw fetchError;
-        }
-      }
-
-      // Fallback to direct database update if Netlify functions unavailable
-      if (!useNetlifyFunction) {
-        console.log('📡 Netlify functions unavailable, using direct validation...');
-        toast.info('Using direct DNS validation (functions unavailable)...');
-
-        // Simulate validation - in production this would need a backend service
-        // For now, mark domains as validated if they have proper format
-        const isValidDomain = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$/.test(domain.domain);
-
-        if (isValidDomain) {
-          await updateDomain(domainId, {
-            dns_validated: true,
-            txt_record_validated: true,
-            a_record_validated: true,
-            status: 'active',
-            last_validation_attempt: new Date().toISOString(),
-            validation_error: null
-          });
-          toast.success(`✅ Domain ${domain.domain} marked as validated (pending real DNS check)`);
-        } else {
-          await updateDomain(domainId, {
-            dns_validated: false,
-            status: 'failed',
-            validation_error: 'Invalid domain format',
-            last_validation_attempt: new Date().toISOString()
-          });
-          toast.error(`❌ Domain ${domain.domain} has invalid format`);
-        }
-
-        await loadDomains();
-        return;
-      }
-
-      // Process Netlify function response
       if (result.success) {
         if (result.validated) {
-          toast.success(`✅ Domain ${result.domain} validated successfully! DNS records are properly configured.`);
+          const successMessage = result.isUsingFallback
+            ? `✅ Domain ${result.domain} validated using fallback method`
+            : `✅ Domain ${result.domain} validated successfully! DNS records are properly configured.`;
+          toast.success(successMessage);
         } else {
-          toast.warning(`❌ Domain ${result.domain} validation failed: ${result.message}`);
+          const warningMessage = result.isUsingFallback
+            ? `⚠️ Domain ${result.domain} validation pending: ${result.message}`
+            : `❌ Domain ${result.domain} validation failed: ${result.message}`;
+          toast.warning(warningMessage);
+        }
+
+        // Show additional info for fallback validation
+        if (result.isUsingFallback) {
+          setTimeout(() => {
+            toast.info('💡 DNS service unavailable. Manual DNS propagation check recommended.');
+          }, 2000);
         }
 
         // Reload domains to get updated status
@@ -579,52 +530,13 @@ const DomainsPage = () => {
           // Don't throw - validation succeeded even if reload failed
         }
       } else {
-        const errorMsg = result.message || result.error || 'DNS validation failed';
+        const errorMsg = result.message || 'DNS validation failed';
         throw new Error(errorMsg);
       }
 
     } catch (error: any) {
       console.error('DNS validation error:', error);
-
-      // Handle different error types with more specific messages
-      let errorMessage = 'DNS validation failed';
-
-      if (error.message.includes('HTTP 502') || error.message.includes('HTTP 503')) {
-        console.log('🔄 DNS service unavailable, attempting direct validation...');
-
-        // Try direct validation as fallback
-        try {
-          const isValidDomain = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$/.test(domain.domain);
-
-          if (isValidDomain) {
-            await updateDomain(domainId, {
-              dns_validated: true,
-              txt_record_validated: true,
-              a_record_validated: true,
-              status: 'active',
-              last_validation_attempt: new Date().toISOString(),
-              validation_error: 'Validated via fallback method - DNS service was temporarily unavailable'
-            });
-
-            toast.success(`✅ Domain ${domain.domain} marked as validated (DNS service was temporarily unavailable, but domain format is valid)`);
-            await loadDomains();
-            return; // Exit early on successful fallback
-          }
-        } catch (fallbackError) {
-          console.error('Fallback validation failed:', fallbackError);
-        }
-
-        errorMessage = 'DNS validation service temporarily unavailable. Domain has been marked as pending validation.';
-      } else if (error.message.includes('Failed to fetch')) {
-        errorMessage = 'Network error during DNS validation. Please check your connection and try again.';
-      } else if (error.message.includes('timeout')) {
-        errorMessage = 'DNS lookup timed out. This may indicate DNS propagation is still in progress.';
-      } else if (error.message.includes('Missing or invalid DNS records')) {
-        errorMessage = error.message; // Keep the specific DNS error message
-      } else if (error?.message) {
-        errorMessage = error.message;
-      }
-
+      const errorMessage = error?.message || 'DNS validation failed';
       toast.error(errorMessage);
     } finally {
       setValidatingDomains(prev => {
