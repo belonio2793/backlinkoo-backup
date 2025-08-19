@@ -124,7 +124,7 @@ export function AutoPropagationWizard({
         }, 1000);
       } else {
         setProgress(100);
-        toast.info(`Manual setup required for ${info.registrar}`);
+        toast.error(`${info.registrar} incompatible with production deployment. Automated DNS required.`);
       }
     } catch (error) {
       console.error('Registrar detection failed:', error);
