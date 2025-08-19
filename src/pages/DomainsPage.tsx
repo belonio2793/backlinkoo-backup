@@ -1385,28 +1385,32 @@ anotherdomain.org`}
         )}
 
 
-        {/* Blog Template Management Section */}
-        <div className="mt-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Blog Template Manager</CardTitle>
-              <p className="text-sm text-gray-600">
-                Domain count: {domains.length}, Blog-enabled: {domains.filter(d => d.blog_enabled).length}
-              </p>
-            </CardHeader>
-            <CardContent>
-              <DomainBlogTemplateManager
-                domains={domains}
-                onThemeUpdate={(domainId, themeId) => {
-                  toast.success(`Theme updated to ${themeId} for domain`);
-                }}
-              />
-            </CardContent>
-          </Card>
+        {/* Blog Template Management Section - Always Show */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Palette className="h-5 w-5" />
+              Blog Template Manager
+            </CardTitle>
+            <p className="text-sm text-gray-600">
+              Total domains: {domains.length} | Blog-enabled domains: {domains.filter(d => d.blog_enabled).length}
+            </p>
+          </CardHeader>
+          <CardContent>
+            <DomainBlogTemplateManager
+              domains={domains}
+              onThemeUpdate={(domainId, themeId) => {
+                toast({
+                  title: "Theme Updated",
+                  description: `Successfully updated theme to ${themeId} for domain`,
+                });
+              }}
+            />
+          </CardContent>
+        </Card>
 
-          {/* Debug Component - Remove after fixing */}
-          <BlogTemplateDebug />
-        </div>
+        {/* Debug Component */}
+        <BlogTemplateDebug />
 
       </div>
       <Footer />
