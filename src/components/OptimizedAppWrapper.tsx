@@ -26,6 +26,7 @@ import { BlogPostDiagnostic } from '@/components/BlogPostDiagnostic';
 import EmergencyRLSFix from '@/pages/EmergencyRLSFix';
 import AuthDiagnostic from '@/pages/AuthDiagnostic';
 import { EmailDiagnosticPage } from '@/pages/EmailDiagnosticPage';
+import DomainsPage from '@/pages/DomainsPage';
 
 // Import optimized instant authentication components
 import { InstantEmailVerificationGuard } from '@/components/InstantEmailVerificationGuard';
@@ -48,6 +49,7 @@ import {
   LazyBlogPost,
   LazyBlog,
   LazyBlogListing,
+  LazyDomainsManager,
   LazyBlogCreation,
   LazyBlogPostView,
   LazyEnhancedBlogListing,
@@ -261,6 +263,7 @@ export const OptimizedAppWrapper = () => {
               <LazyAutomation />
             </Suspense>
           } />
+          <Route path="/domains" element={<DomainsPage />} />
           <Route path="/automation/discovery" element={
             <Suspense fallback={<PageLoader />}>
               <LazyPlatformDiscovery />
