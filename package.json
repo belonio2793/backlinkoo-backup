@@ -44,7 +44,8 @@
     "setup:blog-themes": "node scripts/setup-domain-blog-themes.js",
     "setup:campaign-blogs": "node scripts/setup-campaign-blog-settings.js",
     "setup:domains-complete": "npm run setup:blog-themes && npm run setup:campaign-blogs",
-    "test:dns": "node scripts/test-dns-validation.js"
+    "test:dns": "node scripts/test-dns-validation.js",
+    "domains:add-test": "node scripts/add-test-domain.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
