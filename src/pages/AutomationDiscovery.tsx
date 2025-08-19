@@ -153,7 +153,11 @@ const AutomationDiscovery = () => {
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to start discovery');
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Discovery API Error:', response.status, errorText);
+        throw new Error(`Discovery failed (${response.status}): ${errorText}`);
+      }
 
       const data = await response.json();
       const sessionId = data.sessionId;
