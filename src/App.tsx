@@ -30,6 +30,7 @@ const LazyAdminLanding = lazy(() => import("./pages/AdminLanding"));
 const LazyBlog = lazy(() => import("./pages/Blog"));
 const LazyDashboard = lazy(() => import("./pages/Dashboard"));
 const LazyAutomation = lazy(() => import("./pages/Automation"));
+const LazyAutomationDiscovery = lazy(() => import("./pages/AutomationDiscovery"));
 const LazyLogin = lazy(() => import("./pages/Login"));
 // Removed - using LazyBeautifulBlogPost from LazyComponents instead
 const LazyAuthCallback = lazy(() => import("./pages/AuthCallback"));
@@ -136,6 +137,24 @@ const App = () => (
                   </div>
                 }>
                   <LazyAutomation />
+                </Suspense>
+              }
+            />
+            <Route
+              path="/automation/discovery"
+              element={
+                <Suspense fallback={
+                  <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-100 flex items-center justify-center">
+                    <div className="text-center">
+                      <LoadingSpinner />
+                      <div className="mt-4">
+                        <h2 className="text-xl font-semibold text-gray-900">Loading Discovery Engine</h2>
+                        <p className="text-gray-600 mt-2">Initializing platform discovery and link opportunity scanner...</p>
+                      </div>
+                    </div>
+                  </div>
+                }>
+                  <LazyAutomationDiscovery />
                 </Suspense>
               }
             />
