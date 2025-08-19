@@ -1,10 +1,15 @@
 const { createClient } = require('@supabase/supabase-js');
 const dns = require('dns').promises;
 
+// Check for required environment variables
+if (!process.env.VITE_SUPABASE_URL) {
+  console.error('VITE_SUPABASE_URL environment variable is required');
+}
+
 // Initialize Supabase
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
-  process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
+  process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
 );
 
 // Default hosting configuration - should match your actual hosting setup

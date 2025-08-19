@@ -40,7 +40,14 @@
     "setup:domains": "node scripts/create-user-domains-table.js",
     "setup:domains-table": "echo 'Run the SQL script: scripts/create-domains-table.sql in your Supabase dashboard'",
     "fix:deadlock": "node scripts/fix-database-deadlock.js",
-    "check:database": "node scripts/fix-database-deadlock.js check"
+    "check:database": "node scripts/fix-database-deadlock.js check",
+    "setup:blog-themes": "node scripts/setup-domain-blog-themes.js",
+    "setup:campaign-blogs": "node scripts/setup-campaign-blog-settings.js",
+    "setup:domains-complete": "npm run setup:blog-themes && npm run setup:campaign-blogs",
+    "test:dns": "node scripts/test-dns-validation.js",
+    "domains:add-test": "node scripts/add-test-domain.js",
+    "setup:auto-propagation": "node scripts/setup-auto-propagation.js",
+    "setup:domains-full": "npm run setup:blog-themes && npm run setup:campaign-blogs && npm run setup:auto-propagation"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

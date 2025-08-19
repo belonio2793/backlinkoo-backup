@@ -1,5 +1,6 @@
 import { DomainBlogService, ValidatedDomain } from './domainBlogService';
 import BlogThemesService, { BlogTheme } from './blogThemesService';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface BlogTemplate {
   title: string;
@@ -24,8 +25,126 @@ export interface DomainBlogPost {
   published_at?: string;
 }
 
+export interface DomainThemeRecord {
+  id: string;
+  domain_id: string;
+  theme_id: string;
+  theme_name: string;
+  custom_styles: Record<string, any>;
+  custom_settings: Record<string, any>;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export class DomainBlogTemplateService {
-  
+
+  /**
+   * Get theme settings for a specific domain
+   */
+  static async getDomainTheme(domainId: string): Promise<DomainThemeRecord | null> {
+    try {
+      const { data, error } = await supabase
+        .from('domain_blog_themes')
+        .select('*')
+        .eq('domain_id', domainId)
+        .eq('is_active', true)
+        .single();
+
+      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
+        console.error('Error fetching domain theme:', error);
+        return null;
+      }
+
+      return data;
+    } catch (error) {
+      console.error('Error in getDomainTheme:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Set theme for a specific domain
+   */
+  static async setDomainTheme(
+    domainId: string,
+    themeId: string,
+    customStyles: Record<string, any> = {},
+    customSettings: Record<string, any> = {}
+  ): Promise<boolean> {
+    try {
+      const theme = BlogThemesService.getThemeById(themeId);
+      if (!theme) {
+        throw new Error(`Theme ${themeId} not found`);
+      }
+
+      const { error } = await supabase.rpc('update_domain_blog_theme', {
+        p_domain_id: domainId,
+        p_theme_id: themeId,
+        p_theme_name: theme.name,
+        p_custom_styles: customStyles,
+        p_custom_settings: customSettings
+      });
+
+      if (error) {
+        console.error('Error setting domain theme:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error in setDomainTheme:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Ensure default theme for domain when blog is enabled
+   */
+  static async ensureDefaultTheme(domainId: string): Promise<void> {
+    try {
+      const existingTheme = await this.getDomainTheme(domainId);
+
+      if (!existingTheme) {
+        await this.setDomainTheme(domainId, 'minimal');
+        console.log(`✅ Default theme assigned to domain ${domainId}`);
+      }
+    } catch (error) {
+      console.error('Error ensuring default theme:', error);
+    }
+  }
+
+  /**
+   * Get all themes for blog-enabled domains
+   */
+  static async getAllDomainThemes(): Promise<DomainThemeRecord[]> {
+    try {
+      const { data, error } = await supabase
+        .from('domain_blog_themes')
+        .select(`
+          *,
+          domains!inner (
+            domain,
+            blog_enabled,
+            status
+          )
+        `)
+        .eq('is_active', true)
+        .eq('domains.blog_enabled', true)
+        .eq('domains.status', 'active');
+
+      if (error) {
+        console.error('Error fetching all domain themes:', error);
+        return [];
+      }
+
+      return data || [];
+    } catch (error) {
+      console.error('Error in getAllDomainThemes:', error);
+      return [];
+    }
+  }
+
   /**
    * Generate a blog post for domain publishing
    */
@@ -33,16 +152,29 @@ export class DomainBlogTemplateService {
     keywords: string[],
     targetUrl: string,
     brandName?: string,
-    themeId: string = 'minimal'
+    themeId?: string,
+    domainId?: string
   ): Promise<BlogTemplate> {
     const primaryKeyword = keywords[0] || 'business growth';
     const slug = this.generateSlug(primaryKeyword);
     const title = this.generateTitle(primaryKeyword, brandName);
     const rawContent = this.generateBlogContent(keywords, targetUrl, brandName);
 
+    // Get domain-specific theme if domainId is provided
+    let finalThemeId = themeId || 'minimal';
+    let customStyles = {};
+
+    if (domainId) {
+      const domainTheme = await this.getDomainTheme(domainId);
+      if (domainTheme) {
+        finalThemeId = domainTheme.theme_id;
+        customStyles = domainTheme.custom_styles || {};
+      }
+    }
+
     // Apply theme to content
-    const theme = BlogThemesService.getThemeById(themeId) || BlogThemesService.getDefaultTheme();
-    const themedContent = BlogThemesService.generateThemedBlogPost(rawContent, title, theme);
+    const theme = BlogThemesService.getThemeById(finalThemeId) || BlogThemesService.getDefaultTheme();
+    const themedContent = BlogThemesService.generateThemedBlogPost(rawContent, title, theme, customStyles);
 
     return {
       title,
@@ -59,14 +191,14 @@ export class DomainBlogTemplateService {
    * Publish blog post to a specific domain
    */
   static async publishToDomain(
-    domainId: string, 
+    domainId: string,
     blogPost: BlogTemplate
   ): Promise<DomainBlogPost> {
     try {
       // Get domain info
       const domains = await DomainBlogService.getValidatedDomains();
       const domain = domains.find(d => d.id === domainId);
-      
+
       if (!domain) {
         throw new Error('Domain not found or not validated');
       }
@@ -74,6 +206,9 @@ export class DomainBlogTemplateService {
       if (!domain.blog_enabled) {
         throw new Error('Blog publishing not enabled for this domain');
       }
+
+      // Ensure domain has a default theme assigned
+      await this.ensureDefaultTheme(domainId);
 
       // Create blog URL
       const publishedUrl = DomainBlogService.createBlogURL(
@@ -100,6 +235,30 @@ export class DomainBlogTemplateService {
         created_at: new Date().toISOString(),
         published_at: new Date().toISOString()
       };
+
+      // Store blog post in database
+      try {
+        const domainTheme = await this.getDomainTheme(domainId);
+
+        await supabase
+          .from('domain_blog_posts')
+          .insert({
+            domain_id: domainId,
+            domain_name: domain.domain,
+            title: blogPost.title,
+            slug: blogPost.slug,
+            content: blogPost.content,
+            published_url: publishedUrl,
+            theme_id: domainTheme?.theme_id || 'minimal',
+            status: 'published',
+            keywords: blogPost.keywords,
+            meta_description: blogPost.meta_description,
+            published_at: new Date().toISOString()
+          });
+      } catch (dbError) {
+        console.error('Error storing blog post in database:', dbError);
+        // Don't throw - the post was published successfully
+      }
 
       // Increment the published pages counter
       await DomainBlogService.incrementPublishedPages(domainId);
@@ -133,9 +292,9 @@ export class DomainBlogTemplateService {
 
       for (const domain of selectedDomains) {
         try {
-          // Generate unique content for each domain
-          const blogPost = await this.generateBlogPost(keywords, targetUrl, brandName);
-          
+          // Generate unique content for each domain using domain-specific theme
+          const blogPost = await this.generateBlogPost(keywords, targetUrl, brandName, undefined, domain.id);
+
           // Modify title slightly for uniqueness
           blogPost.title = this.varyTitle(blogPost.title, domain.domain);
           blogPost.slug = this.generateSlug(blogPost.title);

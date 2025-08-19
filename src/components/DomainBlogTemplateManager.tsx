@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import BlogThemesService, { BlogTheme, DomainThemeSettings } from '@/services/blogThemesService';
+import { DomainBlogTemplateService, DomainThemeRecord } from '@/services/domainBlogTemplateService';
 
 interface Domain {
   id: string;
@@ -60,6 +61,8 @@ export function DomainBlogTemplateManager({
   const [devicePreview, setDevicePreview] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [domainThemeSettings, setDomainThemeSettings] = useState<Record<string, DomainThemeSettings>>({});
+  const [domainThemeRecords, setDomainThemeRecords] = useState<Record<string, DomainThemeRecord>>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
   const allThemes = BlogThemesService.getAllThemes();
@@ -69,6 +72,52 @@ export function DomainBlogTemplateManager({
       setSelectedDomain(blogEnabledDomains[0].id);
     }
   }, [blogEnabledDomains]);
+
+  // Load domain themes from database
+  useEffect(() => {
+    const loadDomainThemes = async () => {
+      if (blogEnabledDomains.length === 0) return;
+
+      setIsLoading(true);
+      try {
+        const themeRecords: Record<string, DomainThemeRecord> = {};
+
+        for (const domain of blogEnabledDomains) {
+          const themeRecord = await DomainBlogTemplateService.getDomainTheme(domain.id);
+          if (themeRecord) {
+            themeRecords[domain.id] = themeRecord;
+          } else {
+            // Ensure default theme if none exists
+            await DomainBlogTemplateService.ensureDefaultTheme(domain.id);
+            const defaultTheme = await DomainBlogTemplateService.getDomainTheme(domain.id);
+            if (defaultTheme) {
+              themeRecords[domain.id] = defaultTheme;
+            }
+          }
+        }
+
+        setDomainThemeRecords(themeRecords);
+
+        // Set selected theme based on loaded data
+        if (selectedDomain && themeRecords[selectedDomain]) {
+          setSelectedTheme(themeRecords[selectedDomain].theme_id);
+          setCustomStyles(themeRecords[selectedDomain].custom_styles || {});
+        }
+
+      } catch (error) {
+        console.error('Error loading domain themes:', error);
+        toast({
+          title: "Error Loading Themes",
+          description: "Failed to load domain theme settings",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadDomainThemes();
+  }, [blogEnabledDomains, selectedDomain]);
 
   useEffect(() => {
     if (selectedTheme) {
@@ -99,7 +148,7 @@ export function DomainBlogTemplateManager({
     }));
   };
 
-  const saveThemeSettings = () => {
+  const saveThemeSettings = async () => {
     if (!selectedDomain || !selectedTheme) {
       toast({
         title: "Selection Required",
@@ -109,24 +158,57 @@ export function DomainBlogTemplateManager({
       return;
     }
 
-    const settings: DomainThemeSettings = {
-      domain_id: selectedDomain,
-      theme_id: selectedTheme,
-      custom_styles: customStyles,
-      updated_at: new Date().toISOString()
-    };
+    setIsLoading(true);
+    try {
+      const success = await DomainBlogTemplateService.setDomainTheme(
+        selectedDomain,
+        selectedTheme,
+        customStyles,
+        {} // custom settings can be added later
+      );
 
-    setDomainThemeSettings(prev => ({
-      ...prev,
-      [selectedDomain]: settings
-    }));
+      if (success) {
+        // Update local state
+        const settings: DomainThemeSettings = {
+          domain_id: selectedDomain,
+          theme_id: selectedTheme,
+          custom_styles: customStyles,
+          updated_at: new Date().toISOString()
+        };
 
-    onThemeUpdate?.(selectedDomain, selectedTheme);
+        setDomainThemeSettings(prev => ({
+          ...prev,
+          [selectedDomain]: settings
+        }));
 
-    toast({
-      title: "Theme Saved",
-      description: "Blog theme settings have been saved for this domain",
-    });
+        // Reload theme record
+        const updatedTheme = await DomainBlogTemplateService.getDomainTheme(selectedDomain);
+        if (updatedTheme) {
+          setDomainThemeRecords(prev => ({
+            ...prev,
+            [selectedDomain]: updatedTheme
+          }));
+        }
+
+        onThemeUpdate?.(selectedDomain, selectedTheme);
+
+        toast({
+          title: "Theme Saved",
+          description: "Blog theme settings have been saved to database",
+        });
+      } else {
+        throw new Error('Failed to save theme to database');
+      }
+    } catch (error) {
+      console.error('Error saving theme:', error);
+      toast({
+        title: "Save Failed",
+        description: "Failed to save theme settings. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getDevicePreviewStyle = () => {
@@ -141,7 +223,7 @@ export function DomainBlogTemplateManager({
   };
 
   const getCurrentThemeForDomain = (domainId: string): string => {
-    return domainThemeSettings[domainId]?.theme_id || 'minimal';
+    return domainThemeRecords[domainId]?.theme_id || domainThemeSettings[domainId]?.theme_id || 'minimal';
   };
 
   if (blogEnabledDomains.length === 0) {
@@ -416,9 +498,17 @@ export function DomainBlogTemplateManager({
               </DialogContent>
             </Dialog>
 
-            <Button onClick={saveThemeSettings} className="flex items-center gap-2">
-              <Save className="h-4 w-4" />
-              Save Theme Settings
+            <Button
+              onClick={saveThemeSettings}
+              className="flex items-center gap-2"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              {isLoading ? 'Saving...' : 'Save Theme Settings'}
             </Button>
           </div>
         </CardContent>

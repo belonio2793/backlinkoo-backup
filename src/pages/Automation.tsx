@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2, Activity, MessageSquare, Search, Globe } from 'lucide-react';
+import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2, Globe } from 'lucide-react';
 import { getOrchestrator } from '@/services/automationOrchestrator';
 import { campaignMonitoringService } from '@/services/campaignMonitoringService';
 import { realTimeFeedService } from '@/services/realTimeFeedService';
@@ -23,9 +23,7 @@ import InlineFeedMonitor from '@/components/InlineFeedMonitor';
 import DevelopmentModeIndicator from '@/components/DevelopmentModeIndicator';
 import BacklinkNotification from '@/components/BacklinkNotification';
 import DatabaseSchemaFixer from '@/components/DatabaseSchemaFixer';
-import PublishedLinksDebugger from '@/components/debug/PublishedLinksDebugger';
 import EnhancedCampaignCreator from '@/components/EnhancedCampaignCreator';
-import WordPressBlogDiscovery from '@/components/WordPressBlogDiscovery';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -372,17 +370,6 @@ const Automation = () => {
               </div>
             )}
 
-            {/* Discovery Link */}
-            <div className="flex justify-center">
-              <a
-                href="/automation/discovery"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all font-medium"
-              >
-                <Search className="w-4 h-4" />
-                Platform Discovery
-                <span className="text-xs bg-white/20 px-2 py-0.5 rounded">Advanced</span>
-              </a>
-            </div>
           </div>
 
         {/* Saved form data notification */}
@@ -439,22 +426,14 @@ const Automation = () => {
           {/* Campaign Creation (Left Column) */}
           <div className="lg:col-span-1 flex flex-col min-h-[600px]">
             <Tabs defaultValue="create" className="w-full h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="create" className="flex items-center gap-2">
                   <Target className="w-4 h-4" />
                   New Campaign
                 </TabsTrigger>
-                <TabsTrigger value="wordpress" className="flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" />
-                  WordPress
-                </TabsTrigger>
                 <TabsTrigger value="status" className="flex items-center gap-2">
                   <FileText className="w-4 h-4" />
                   Status
-                </TabsTrigger>
-                <TabsTrigger value="debug" className="flex items-center gap-2">
-                  <Activity className="w-4 h-4" />
-                  Debug Links
                 </TabsTrigger>
               </TabsList>
 
@@ -711,16 +690,8 @@ const Automation = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="wordpress" className="space-y-4 flex-1 flex flex-col">
-                <WordPressBlogDiscovery />
-              </TabsContent>
-
               <TabsContent value="status" className="space-y-4 flex-1 flex flex-col">
                 <AutomationServiceStatus />
-              </TabsContent>
-
-              <TabsContent value="debug" className="space-y-4 flex-1 flex flex-col">
-                <PublishedLinksDebugger />
               </TabsContent>
             </Tabs>
           </div>

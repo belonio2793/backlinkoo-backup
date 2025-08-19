@@ -55,9 +55,12 @@ import {
   Pause,
   Edit3,
   Save,
-  Palette
+  Palette,
+  Wand2
 } from 'lucide-react';
 import DomainBlogTemplateManager from '@/components/DomainBlogTemplateManager';
+import DNSValidationService from '@/services/dnsValidationService';
+import AutoDNSPropagation from '@/components/AutoDNSPropagation';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -134,6 +137,9 @@ const DomainsPage = () => {
   const [showConfig, setShowConfig] = useState(false);
   const [dnsServiceStatus, setDnsServiceStatus] = useState<'unknown' | 'online' | 'offline'>('unknown');
 
+  // Calculate blog-enabled domains for UI messaging
+  const blogEnabledDomains = domains.filter(d => d.blog_enabled);
+
   // Hosting configuration - editable
   const [hostingConfig, setHostingConfig] = useState<HostingConfig>({
     ip: '192.168.1.100', // Replace with your actual hosting IP
@@ -158,22 +164,8 @@ const DomainsPage = () => {
 
   // Check DNS service health
   const checkDNSServiceHealth = async () => {
-    try {
-      const response = await fetch('/.netlify/functions/validate-domain', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain_id: 'health-check' }),
-        signal: AbortSignal.timeout(5000)
-      });
-
-      if (response.status === 404) {
-        setDnsServiceStatus('offline');
-      } else {
-        setDnsServiceStatus('online');
-      }
-    } catch (error) {
-      setDnsServiceStatus('offline');
-    }
+    const status = await DNSValidationService.checkServiceHealth();
+    setDnsServiceStatus(status);
   };
 
   // Fix domains missing verification tokens
@@ -495,76 +487,27 @@ const DomainsPage = () => {
 
       toast.info(`Performing DNS validation for ${domain.domain}...`);
 
-      // Try Netlify function first
-      let useNetlifyFunction = true;
-      let result;
+      // Use improved DNS validation service
+      const result = await DNSValidationService.validateDomain(domainId);
 
-      try {
-        const response = await fetch('/.netlify/functions/validate-domain', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ domain_id: domainId })
-        });
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            useNetlifyFunction = false;
-          } else {
-            const errorText = await response.text();
-            throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
-          }
-        } else {
-          result = await response.json();
-        }
-      } catch (fetchError: any) {
-        if (fetchError.message.includes('Failed to fetch') || fetchError.message.includes('404')) {
-          useNetlifyFunction = false;
-        } else {
-          throw fetchError;
-        }
-      }
-
-      // Fallback to direct database update if Netlify functions unavailable
-      if (!useNetlifyFunction) {
-        console.log('📡 Netlify functions unavailable, using direct validation...');
-        toast.info('Using direct DNS validation (functions unavailable)...');
-
-        // Simulate validation - in production this would need a backend service
-        // For now, mark domains as validated if they have proper format
-        const isValidDomain = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$/.test(domain.domain);
-
-        if (isValidDomain) {
-          await updateDomain(domainId, {
-            dns_validated: true,
-            txt_record_validated: true,
-            a_record_validated: true,
-            status: 'active',
-            last_validation_attempt: new Date().toISOString(),
-            validation_error: null
-          });
-          toast.success(`✅ Domain ${domain.domain} marked as validated (pending real DNS check)`);
-        } else {
-          await updateDomain(domainId, {
-            dns_validated: false,
-            status: 'failed',
-            validation_error: 'Invalid domain format',
-            last_validation_attempt: new Date().toISOString()
-          });
-          toast.error(`❌ Domain ${domain.domain} has invalid format`);
-        }
-
-        await loadDomains();
-        return;
-      }
-
-      // Process Netlify function response
       if (result.success) {
         if (result.validated) {
-          toast.success(`✅ Domain ${result.domain} validated successfully! DNS records are properly configured.`);
+          const successMessage = result.isUsingFallback
+            ? `✅ Domain ${result.domain} validated using fallback method`
+            : `✅ Domain ${result.domain} validated successfully! DNS records are properly configured.`;
+          toast.success(successMessage);
         } else {
-          toast.warning(`❌ Domain ${result.domain} validation failed: ${result.message}`);
+          const warningMessage = result.isUsingFallback
+            ? `⚠️ Domain ${result.domain} validation pending: ${result.message}`
+            : `❌ Domain ${result.domain} validation failed: ${result.message}`;
+          toast.warning(warningMessage);
+        }
+
+        // Show additional info for fallback validation
+        if (result.isUsingFallback) {
+          setTimeout(() => {
+            toast.info('💡 DNS service unavailable. Manual DNS propagation check recommended.');
+          }, 2000);
         }
 
         // Reload domains to get updated status
@@ -575,52 +518,13 @@ const DomainsPage = () => {
           // Don't throw - validation succeeded even if reload failed
         }
       } else {
-        const errorMsg = result.message || result.error || 'DNS validation failed';
+        const errorMsg = result.message || 'DNS validation failed';
         throw new Error(errorMsg);
       }
 
     } catch (error: any) {
       console.error('DNS validation error:', error);
-
-      // Handle different error types with more specific messages
-      let errorMessage = 'DNS validation failed';
-
-      if (error.message.includes('HTTP 502') || error.message.includes('HTTP 503')) {
-        console.log('🔄 DNS service unavailable, attempting direct validation...');
-
-        // Try direct validation as fallback
-        try {
-          const isValidDomain = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9]?\.[a-zA-Z]{2,}$/.test(domain.domain);
-
-          if (isValidDomain) {
-            await updateDomain(domainId, {
-              dns_validated: true,
-              txt_record_validated: true,
-              a_record_validated: true,
-              status: 'active',
-              last_validation_attempt: new Date().toISOString(),
-              validation_error: 'Validated via fallback method - DNS service was temporarily unavailable'
-            });
-
-            toast.success(`✅ Domain ${domain.domain} marked as validated (DNS service was temporarily unavailable, but domain format is valid)`);
-            await loadDomains();
-            return; // Exit early on successful fallback
-          }
-        } catch (fallbackError) {
-          console.error('Fallback validation failed:', fallbackError);
-        }
-
-        errorMessage = 'DNS validation service temporarily unavailable. Domain has been marked as pending validation.';
-      } else if (error.message.includes('Failed to fetch')) {
-        errorMessage = 'Network error during DNS validation. Please check your connection and try again.';
-      } else if (error.message.includes('timeout')) {
-        errorMessage = 'DNS lookup timed out. This may indicate DNS propagation is still in progress.';
-      } else if (error.message.includes('Missing or invalid DNS records')) {
-        errorMessage = error.message; // Keep the specific DNS error message
-      } else if (error?.message) {
-        errorMessage = error.message;
-      }
-
+      const errorMessage = error?.message || 'DNS validation failed';
       toast.error(errorMessage);
     } finally {
       setValidatingDomains(prev => {
@@ -799,32 +703,7 @@ const DomainsPage = () => {
       updateDomain(domain.id, { verification_token: token }).catch(console.error);
     }
 
-    return [
-      {
-        type: 'A',
-        name: '@',
-        value: hostingConfig.ip,
-        description: 'Points your domain to our hosting server',
-        validated: domain.a_record_validated,
-        required: true
-      },
-      {
-        type: 'CNAME',
-        name: 'www',
-        value: hostingConfig.cname,
-        description: 'Redirects www subdomain to main domain',
-        validated: domain.cname_validated,
-        required: false
-      },
-      {
-        type: 'TXT',
-        name: '@',
-        value: `blo-verification=${token}`,
-        description: 'Verifies domain ownership (required for activation)',
-        validated: domain.txt_record_validated,
-        required: true
-      }
-    ];
+    return DNSValidationService.getDNSInstructions(domain, hostingConfig);
   };
 
   const exportDomains = () => {
@@ -1225,7 +1104,7 @@ anotherdomain.org`}
                                   </div>
                                 ))}
 
-                                <div className="text-center pt-4">
+                                <div className="text-center pt-4 space-y-3">
                                   <Button
                                     onClick={safeAsync(() => validateDomain(domain.id))}
                                     disabled={validatingDomains.has(domain.id)}
@@ -1237,6 +1116,43 @@ anotherdomain.org`}
                                     )}
                                     Validate DNS Records
                                   </Button>
+
+                                  {dnsServiceStatus === 'offline' && (
+                                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                      <h4 className="font-medium text-yellow-900 mb-2 flex items-center gap-2">
+                                        <AlertTriangle className="h-4 w-4" />
+                                        Manual DNS Propagation Check
+                                      </h4>
+                                      <div className="text-sm text-yellow-800 space-y-2">
+                                        <p>DNS validation service is unavailable. Check propagation manually:</p>
+                                        <ul className="list-disc list-inside space-y-1 text-xs">
+                                          {DNSValidationService.getManualPropagationInstructions(domain.domain).map((instruction, i) => (
+                                            <li key={i}>{instruction}</li>
+                                          ))}
+                                        </ul>
+                                        <div className="flex gap-2 mt-3">
+                                          <a
+                                            href={`https://whatsmydns.net/#A/${domain.domain}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-600 text-white text-xs rounded hover:bg-yellow-700"
+                                          >
+                                            <ExternalLink className="h-3 w-3" />
+                                            Check A Record
+                                          </a>
+                                          <a
+                                            href={`https://whatsmydns.net/#TXT/${domain.domain}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-600 text-white text-xs rounded hover:bg-yellow-700"
+                                          >
+                                            <ExternalLink className="h-3 w-3" />
+                                            Check TXT Record
+                                          </a>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </DialogContent>
@@ -1386,6 +1302,178 @@ anotherdomain.org`}
                       Each domain gets a unique token
                     </p>
                   </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Automation Integration Info */}
+        {blogEnabledDomains.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Automation Integration
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-green-900 mb-1">Domain Blog Integration Active</h4>
+                    <p className="text-sm text-green-800 mb-3">
+                      Your blog-enabled domains are automatically integrated with campaigns. Each campaign will publish additional themed blog posts across your domains, creating multiple high-quality backlinks.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span>Automatic theme assignment</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span>Campaign blog rotation</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span>SEO-optimized content</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-blue-900 mb-1">How Domain Blog Integration Works</h4>
+                    <p className="text-sm text-blue-800 mb-3">
+                      When you create campaigns in the automation system, the system will:
+                    </p>
+                    <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+                      <li>Generate unique, themed blog posts for each domain</li>
+                      <li>Apply your custom themes and styling automatically</li>
+                      <li>Publish posts with natural backlinks to your target URLs</li>
+                      <li>Rotate across domains to diversify your backlink profile</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <a
+                  href="/automation"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Play className="h-4 w-4" />
+                  Test Automation
+                </a>
+                <a
+                  href="/blog"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  View Published Blogs
+                </a>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Auto DNS Propagation Section */}
+        {domains.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wand2 className="h-5 w-5" />
+                Automatic DNS Propagation
+              </CardTitle>
+              <CardDescription>
+                Automatically detect your registrar and update DNS records with confirmation
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* Domain Selection */}
+                <div className="space-y-2">
+                  <Label>Select Domain for Auto-Propagation</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a domain to auto-propagate" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {domains.map(domain => (
+                        <SelectItem key={domain.id} value={domain.id}>
+                          <div className="flex items-center justify-between w-full">
+                            <span>{domain.domain}</span>
+                            <Badge
+                              variant={domain.status === 'active' ? 'default' : 'secondary'}
+                              className="ml-2"
+                            >
+                              {domain.status}
+                            </Badge>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Auto-propagation for first domain (demo) */}
+                {domains.length > 0 && (
+                  <AutoDNSPropagation
+                    domain={domains[0]}
+                    hostingConfig={hostingConfig}
+                    onSuccess={(domain) => {
+                      toast.success(`✅ Auto-propagation completed for ${domain.domain}`);
+                      loadDomains(); // Refresh domains list
+                    }}
+                    onError={(error) => {
+                      toast.error(`Auto-propagation failed: ${error}`);
+                    }}
+                  />
+                )}
+
+                {/* Info about auto-propagation */}
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    <div className="space-y-2">
+                      <p className="font-medium">How Auto-Propagation Works:</p>
+                      <ol className="list-decimal list-inside space-y-1 text-sm">
+                        <li>Automatically detects your domain registrar (Cloudflare, Namecheap, GoDaddy, etc.)</li>
+                        <li>Shows you exactly what DNS changes will be made</li>
+                        <li>Asks for confirmation before making any updates</li>
+                        <li>Uses secure API integration to update your DNS records</li>
+                        <li>Validates the changes immediately after propagation</li>
+                      </ol>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+
+                {/* Supported Registrars */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-medium mb-3">Supported Registrars</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {[
+                      'Cloudflare',
+                      'Namecheap',
+                      'GoDaddy',
+                      'Route 53',
+                      'DigitalOcean',
+                      'Google Domains'
+                    ].map(registrar => (
+                      <div key={registrar} className="flex items-center gap-2 p-2 bg-white rounded border">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span className="text-sm">{registrar}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-600 mt-3">
+                    Other registrars supported with manual DNS setup
+                  </p>
                 </div>
               </div>
             </CardContent>
