@@ -61,6 +61,7 @@ import {
 import DomainBlogTemplateManager from '@/components/DomainBlogTemplateManager';
 import DNSValidationService from '@/services/dnsValidationService';
 import AutoDNSPropagation from '@/components/AutoDNSPropagation';
+import AutoPropagationWizard from '@/components/AutoPropagationWizard';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
