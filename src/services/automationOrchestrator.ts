@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getContentService, type ContentGenerationParams } from './automationContentService';
 import { getTelegraphService } from './telegraphService';
 import { workingCampaignProcessor } from './workingCampaignProcessor';
+import { DomainBlogTemplateService } from './domainBlogTemplateService';
 import { ProgressStep, CampaignProgress } from '@/components/CampaignProgressTracker';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { realTimeFeedService } from './realTimeFeedService';
