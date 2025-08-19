@@ -1394,22 +1394,6 @@ anotherdomain.org`}
           />
         </div>
 
-        {/* Auto-Propagation Wizard */}
-        {showAutoPropagationWizard && selectedDomainForWizard && (
-          <AutoPropagationWizard
-            domain={selectedDomainForWizard}
-            hostingConfig={hostingConfig}
-            onSuccess={(domain) => {
-              toast.success(`✅ Auto-propagation completed for ${domain.domain}`);
-              loadDomains(); // Refresh domains list
-              closeAutoPropagationWizard();
-            }}
-            onError={(error) => {
-              toast.error(`Auto-propagation failed: ${error}`);
-            }}
-            onClose={closeAutoPropagationWizard}
-          />
-        )}
       </div>
       <Footer />
     </div>
