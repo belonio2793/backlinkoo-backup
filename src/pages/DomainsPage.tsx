@@ -905,10 +905,10 @@ anotherdomain.org`}
                       
                       <TableCell>
                         <div className="flex gap-1">
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
-                            onClick={() => validateDomain(domain.id)}
+                            onClick={safeAsync(() => validateDomain(domain.id))}
                             disabled={validatingDomains.has(domain.id)}
                             title="Validate DNS"
                           >
