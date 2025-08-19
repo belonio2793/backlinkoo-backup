@@ -16,7 +16,7 @@ import {
   TableHeader, 
   TableRow 
 } from '@/components/ui/table';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { blogAutoDeleteService } from '@/services/blogAutoDeleteService';
 import { supabase } from '@/integrations/supabase/client';
 import { databaseDiagnostic } from '@/utils/databaseDiagnostic';
