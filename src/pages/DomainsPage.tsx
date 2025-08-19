@@ -1400,10 +1400,7 @@ anotherdomain.org`}
             <SimpleBlogTemplateManager
               domains={domains}
               onThemeUpdate={(domainId, themeId) => {
-                toast({
-                  title: "Theme Updated",
-                  description: `Successfully updated theme to ${themeId} for domain`,
-                });
+                toast.success(`Successfully updated theme to ${themeId} for domain`);
               }}
             />
           </CardContent>
