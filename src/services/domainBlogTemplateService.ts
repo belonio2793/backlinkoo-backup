@@ -1,4 +1,5 @@
 import { DomainBlogService, ValidatedDomain } from './domainBlogService';
+import BlogThemesService, { BlogTheme } from './blogThemesService';
 
 export interface BlogTemplate {
   title: string;
