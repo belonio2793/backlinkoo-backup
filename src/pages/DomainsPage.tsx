@@ -144,6 +144,30 @@ const DomainsPage = () => {
     }
   }, [user?.id]);
 
+  // Fix domains missing verification tokens
+  useEffect(() => {
+    const fixMissingTokens = async () => {
+      const domainsNeedingTokens = domains.filter(d => !d.verification_token);
+
+      if (domainsNeedingTokens.length > 0) {
+        console.log(`🔧 Fixing ${domainsNeedingTokens.length} domains without verification tokens`);
+
+        for (const domain of domainsNeedingTokens) {
+          try {
+            const token = generateVerificationToken();
+            await updateDomain(domain.id, { verification_token: token });
+          } catch (error) {
+            console.error(`Failed to add token to ${domain.domain}:`, error);
+          }
+        }
+      }
+    };
+
+    if (domains.length > 0) {
+      fixMissingTokens().catch(console.error);
+    }
+  }, [domains]);
+
   const loadDomains = async () => {
     setLoading(true);
     try {
@@ -513,9 +537,44 @@ const DomainsPage = () => {
     };
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard!');
+  const copyToClipboard = async (text: string) => {
+    try {
+      // Try modern clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        toast.success('Copied to clipboard!');
+        return;
+      }
+
+      // Fallback for development/non-secure contexts
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+
+      if (successful) {
+        toast.success('Copied to clipboard!');
+      } else {
+        throw new Error('Copy command failed');
+      }
+    } catch (error) {
+      console.error('Copy to clipboard failed:', error);
+
+      // Final fallback - show text in a prompt
+      const message = `Copy this text manually:\n\n${text}`;
+      if (window.prompt) {
+        window.prompt(message, text);
+      } else {
+        toast.error(`Copy failed. Text: ${text}`);
+      }
+    }
   };
 
   const getStatusBadge = (domain: Domain) => {
@@ -558,32 +617,42 @@ const DomainsPage = () => {
     }
   };
 
-  const getDNSInstructions = (domain: Domain) => [
-    {
-      type: 'A',
-      name: '@',
-      value: hostingConfig.ip,
-      description: 'Points your domain to our hosting server',
-      validated: domain.a_record_validated,
-      required: true
-    },
-    {
-      type: 'CNAME',
-      name: 'www',
-      value: hostingConfig.cname,
-      description: 'Redirects www subdomain to main domain',
-      validated: domain.cname_validated,
-      required: false
-    },
-    {
-      type: 'TXT',
-      name: '@',
-      value: `blo-verification=${domain.verification_token}`,
-      description: 'Verifies domain ownership (required for activation)',
-      validated: domain.txt_record_validated,
-      required: true
+  const getDNSInstructions = (domain: Domain) => {
+    // Generate token if missing
+    const token = domain.verification_token || generateVerificationToken();
+
+    // If token was missing, update the domain
+    if (!domain.verification_token && domain.id) {
+      updateDomain(domain.id, { verification_token: token }).catch(console.error);
     }
-  ];
+
+    return [
+      {
+        type: 'A',
+        name: '@',
+        value: hostingConfig.ip,
+        description: 'Points your domain to our hosting server',
+        validated: domain.a_record_validated,
+        required: true
+      },
+      {
+        type: 'CNAME',
+        name: 'www',
+        value: hostingConfig.cname,
+        description: 'Redirects www subdomain to main domain',
+        validated: domain.cname_validated,
+        required: false
+      },
+      {
+        type: 'TXT',
+        name: '@',
+        value: `blo-verification=${token}`,
+        description: 'Verifies domain ownership (required for activation)',
+        validated: domain.txt_record_validated,
+        required: true
+      }
+    ];
+  };
 
   const exportDomains = () => {
     const csv = ['Domain,Status,Created,Pages Published,Blog Enabled,SSL Enabled']

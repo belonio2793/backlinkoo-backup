@@ -5,6 +5,12 @@
   publish = "dist"
   command = "npm run build"
 
+# Headers for security and permissions
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Permissions-Policy = "clipboard-write=(self)"
+
 [dev]
   command = "npm run dev"
   targetPort = 8080
