@@ -533,9 +533,9 @@ const DomainsPage = () => {
     toast.info('Page generation feature coming soon!');
   };
 
-  // Test function for debugging validation issues
+  // Test function for debugging DNS validation issues
   const testValidation = async () => {
-    console.log('🧪 Testing domain validation endpoint...');
+    console.log('🧪 Testing DNS validation service...');
     toast.info('Testing DNS validation service...');
 
     try {
@@ -547,37 +547,29 @@ const DomainsPage = () => {
         body: JSON.stringify({ domain_id: 'test-validation-123' })
       });
 
-      console.log('Response status:', response.status);
-      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+      console.log('📡 Response status:', response.status);
+      console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
 
       if (!response.ok) {
-        if (response.status === 404) {
-          toast.warning('DNS validation service not available - using development mode fallback');
-          console.log('✅ Development mode DNS validation is active');
-        } else {
-          const errorText = await response.text();
-          toast.error(`Test failed: HTTP ${response.status} - ${errorText}`);
-        }
+        const errorText = await response.text();
+        console.error('❌ Service error response:', errorText);
+        toast.error(`DNS validation service error: HTTP ${response.status}`);
         return;
       }
 
       const result = await response.json();
-      console.log('Test result:', result);
+      console.log('📋 Test result:', result);
 
-      if (result.success) {
-        toast.success('DNS validation service is working correctly!');
+      if (result.success === false && result.error === 'Domain not found') {
+        toast.success('✅ DNS validation service is working correctly! (Test domain not found as expected)');
+        console.log('✅ DNS validation service is operational');
       } else {
-        toast.warning(`Service responded but domain not found (expected for test): ${result.error}`);
+        toast.info(`Service response: ${JSON.stringify(result)}`);
       }
 
     } catch (error: any) {
-      console.error('Test validation error:', error);
-      if (error.message.includes('Failed to fetch')) {
-        toast.warning('DNS validation service not available - development mode will be used');
-        console.log('✅ Development mode DNS validation fallback is ready');
-      } else {
-        toast.error(`Test failed: ${error.message}`);
-      }
+      console.error('❌ Test validation error:', error);
+      toast.error(`DNS validation service test failed: ${error.message}`);
     }
   };
 
