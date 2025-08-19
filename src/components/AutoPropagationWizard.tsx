@@ -16,13 +16,6 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 import {
-  Steps,
-  StepsContent,
-  StepsItem,
-  StepsList,
-  StepsTrigger
-} from '@/components/ui/steps';
-import {
   Loader2,
   CheckCircle,
   AlertTriangle,
@@ -313,18 +306,18 @@ export function AutoPropagationWizard({
     switch (currentStep) {
       case 'detect':
         return (
-          <div className=\"space-y-6\">
-            <div className=\"text-center space-y-4\">
-              <div className=\"mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center\">
+          <div className="space-y-6">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
                 {loading ? (
-                  <Loader2 className=\"h-8 w-8 animate-spin text-blue-600\" />
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                 ) : (
-                  <Globe className=\"h-8 w-8 text-blue-600\" />
+                  <Globe className="h-8 w-8 text-blue-600" />
                 )}
               </div>
               <div>
-                <h3 className=\"text-lg font-semibold\">Detecting Registrar</h3>
-                <p className=\"text-gray-600\">
+                <h3 className="text-lg font-semibold">Detecting Registrar</h3>
+                <p className="text-gray-600">
                   {loading 
                     ? `Analyzing DNS settings for ${domain.domain}...`
                     : stepData.registrarInfo
@@ -336,9 +329,9 @@ export function AutoPropagationWizard({
             </div>
 
             {stepData.registrarInfo && (
-              <div className=\"p-4 bg-gray-50 rounded-lg\">
-                <div className=\"flex items-center justify-between mb-3\">
-                  <h4 className=\"font-medium\">Detection Results</h4>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-medium">Detection Results</h4>
                   <Badge 
                     variant={stepData.registrarInfo.autoUpdateAvailable ? 'default' : 'secondary'}
                     className={stepData.registrarInfo.autoUpdateAvailable ? 'bg-green-100 text-green-800' : ''}
@@ -346,11 +339,11 @@ export function AutoPropagationWizard({
                     {stepData.registrarInfo.autoUpdateAvailable ? 'Auto-Update Supported' : 'Manual Setup Required'}
                   </Badge>
                 </div>
-                <div className=\"space-y-2 text-sm\">
+                <div className="space-y-2 text-sm">
                   <div><strong>Registrar:</strong> {stepData.registrarInfo.registrar}</div>
                   <div><strong>Nameservers:</strong> {stepData.registrarInfo.nameservers.join(', ') || 'Not detected'}</div>
                   {stepData.registrarInfo.autoUpdateAvailable && (
-                    <div className=\"text-green-700 font-medium\">
+                    <div className="text-green-700 font-medium">
                       ✅ Ready for automatic DNS propagation
                     </div>
                   )}
@@ -360,12 +353,12 @@ export function AutoPropagationWizard({
 
             {stepData.registrarInfo && !stepData.registrarInfo.autoUpdateAvailable && (
               <Alert>
-                <AlertTriangle className=\"h-4 w-4\" />
+                <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                  <div className=\"space-y-2\">
-                    <p className=\"font-medium\">Manual DNS Setup Required</p>
+                  <div className="space-y-2">
+                    <p className="font-medium">Manual DNS Setup Required</p>
                     <p>Your registrar doesn't support automatic updates. You'll need to add DNS records manually.</p>
-                    <div className=\"space-y-1 text-sm\">
+                    <div className="space-y-1 text-sm">
                       {RegistrarDetectionService.getSetupInstructions(stepData.registrarInfo.registrarCode).map((instruction, index) => (
                         <div key={index}>• {instruction}</div>
                       ))}
@@ -380,37 +373,37 @@ export function AutoPropagationWizard({
       case 'configure':
         const config = getRegistrarConfig();
         return (
-          <div className=\"space-y-6\">
-            <div className=\"text-center space-y-4\">
-              <div className=\"mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center\">
-                <Settings className=\"h-8 w-8 text-blue-600\" />
+          <div className="space-y-6">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                <Settings className="h-8 w-8 text-blue-600" />
               </div>
               <div>
-                <h3 className=\"text-lg font-semibold\">Configure API Access</h3>
-                <p className=\"text-gray-600\">
+                <h3 className="text-lg font-semibold">Configure API Access</h3>
+                <p className="text-gray-600">
                   Enter your {stepData.registrarInfo?.registrar} API credentials
                 </p>
               </div>
             </div>
 
             {config && (
-              <div className=\"space-y-4\">
-                <div className=\"p-4 bg-blue-50 border border-blue-200 rounded-lg\">
-                  <div className=\"flex items-center gap-2 mb-2\">
-                    <Badge variant=\"outline\">{config.name}</Badge>
+              <div className="space-y-4">
+                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Badge variant="outline">{config.name}</Badge>
                     <a
                       href={config.docsUrl}
-                      target=\"_blank\"
-                      rel=\"noopener noreferrer\"
-                      className=\"text-blue-600 hover:underline text-sm flex items-center gap-1\"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline text-sm flex items-center gap-1"
                     >
-                      <ExternalLink className=\"h-3 w-3\" />
+                      <ExternalLink className="h-3 w-3" />
                       API Docs
                     </a>
                   </div>
-                  <div className=\"text-sm text-blue-700\">
-                    <p className=\"font-medium mb-2\">Setup Instructions:</p>
-                    <ol className=\"list-decimal list-inside space-y-1\">
+                  <div className="text-sm text-blue-700">
+                    <p className="font-medium mb-2">Setup Instructions:</p>
+                    <ol className="list-decimal list-inside space-y-1">
                       {config.setupInstructions.map((instruction, index) => (
                         <li key={index}>{instruction}</li>
                       ))}
@@ -418,29 +411,29 @@ export function AutoPropagationWizard({
                   </div>
                 </div>
 
-                <div className=\"space-y-4\">
+                <div className="space-y-4">
                   {config.authType === 'api_key' && (
                     <>
-                      <div className=\"space-y-2\">
-                        <Label htmlFor=\"apiKey\">API Key *</Label>
+                      <div className="space-y-2">
+                        <Label htmlFor="apiKey">API Key *</Label>
                         <Input
-                          id=\"apiKey\"
-                          type=\"password\"
+                          id="apiKey"
+                          type="password"
                           value={tempCredentials.apiKey || ''}
                           onChange={(e) => setTempCredentials(prev => ({ ...prev, apiKey: e.target.value }))}
-                          placeholder=\"Enter your API key\"
+                          placeholder="Enter your API key"
                         />
                       </div>
                       
                       {config.code === 'godaddy' && (
-                        <div className=\"space-y-2\">
-                          <Label htmlFor=\"apiSecret\">API Secret *</Label>
+                        <div className="space-y-2">
+                          <Label htmlFor="apiSecret">API Secret *</Label>
                           <Input
-                            id=\"apiSecret\"
-                            type=\"password\"
+                            id="apiSecret"
+                            type="password"
                             value={tempCredentials.apiSecret || ''}
                             onChange={(e) => setTempCredentials(prev => ({ ...prev, apiSecret: e.target.value }))}
-                            placeholder=\"Enter your API secret\"
+                            placeholder="Enter your API secret"
                           />
                         </div>
                       )}
@@ -448,45 +441,45 @@ export function AutoPropagationWizard({
                   )}
 
                   {config.authType === 'oauth' && (
-                    <div className=\"space-y-2\">
-                      <Label htmlFor=\"accessToken\">Access Token *</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="accessToken">Access Token *</Label>
                       <Input
-                        id=\"accessToken\"
-                        type=\"password\"
+                        id="accessToken"
+                        type="password"
                         value={tempCredentials.accessToken || ''}
                         onChange={(e) => setTempCredentials(prev => ({ ...prev, accessToken: e.target.value }))}
-                        placeholder=\"Enter your access token\"
+                        placeholder="Enter your access token"
                       />
                     </div>
                   )}
 
                   {config.code === 'cloudflare' && (
-                    <div className=\"space-y-2\">
-                      <Label htmlFor=\"zone\">Zone ID (Optional)</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="zone">Zone ID (Optional)</Label>
                       <Input
-                        id=\"zone\"
+                        id="zone"
                         value={tempCredentials.zone || ''}
                         onChange={(e) => setTempCredentials(prev => ({ ...prev, zone: e.target.value }))}
-                        placeholder=\"Auto-detected if not provided\"
+                        placeholder="Auto-detected if not provided"
                       />
                     </div>
                   )}
 
                   {config.code === 'namecheap' && (
-                    <div className=\"space-y-2\">
-                      <Label htmlFor=\"userId\">Username *</Label>
+                    <div className="space-y-2">
+                      <Label htmlFor="userId">Username *</Label>
                       <Input
-                        id=\"userId\"
+                        id="userId"
                         value={tempCredentials.userId || ''}
                         onChange={(e) => setTempCredentials(prev => ({ ...prev, userId: e.target.value }))}
-                        placeholder=\"Your Namecheap username\"
+                        placeholder="Your Namecheap username"
                       />
                     </div>
                   )}
                 </div>
 
                 <Alert>
-                  <Shield className=\"h-4 w-4\" />
+                  <Shield className="h-4 w-4" />
                   <AlertDescription>
                     Your credentials are encrypted before storage and used only for DNS management.
                   </AlertDescription>
@@ -498,18 +491,18 @@ export function AutoPropagationWizard({
 
       case 'preview':
         return (
-          <div className=\"space-y-6\">
-            <div className=\"text-center space-y-4\">
-              <div className=\"mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center\">
+          <div className="space-y-6">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
                 {loading ? (
-                  <Loader2 className=\"h-8 w-8 animate-spin text-blue-600\" />
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                 ) : (
-                  <Eye className=\"h-8 w-8 text-blue-600\" />
+                  <Eye className="h-8 w-8 text-blue-600" />
                 )}
               </div>
               <div>
-                <h3 className=\"text-lg font-semibold\">Preview Changes</h3>
-                <p className=\"text-gray-600\">
+                <h3 className="text-lg font-semibold">Preview Changes</h3>
+                <p className="text-gray-600">
                   {loading 
                     ? 'Analyzing current DNS settings...'
                     : 'Review the changes before applying them'
@@ -519,37 +512,37 @@ export function AutoPropagationWizard({
             </div>
 
             {stepData.preview && (
-              <div className=\"space-y-4\">
-                <div className=\"p-4 bg-gray-50 rounded-lg\">
-                  <div className=\"flex items-center justify-between mb-3\">
-                    <h4 className=\"font-medium\">Change Summary</h4>
-                    <div className=\"text-sm text-gray-600\">
+              <div className="space-y-4">
+                <div className="p-4 bg-gray-50 rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium">Change Summary</h4>
+                    <div className="text-sm text-gray-600">
                       {stepData.preview.toCreate.length + stepData.preview.toUpdate.length} changes
                     </div>
                   </div>
                   
-                  <div className=\"grid grid-cols-3 gap-4 text-center\">
-                    <div className=\"p-3 bg-green-50 border border-green-200 rounded\">
-                      <div className=\"text-2xl font-bold text-green-700\">{stepData.preview.toCreate.length}</div>
-                      <div className=\"text-sm text-green-600\">To Create</div>
+                  <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="p-3 bg-green-50 border border-green-200 rounded">
+                      <div className="text-2xl font-bold text-green-700">{stepData.preview.toCreate.length}</div>
+                      <div className="text-sm text-green-600">To Create</div>
                     </div>
-                    <div className=\"p-3 bg-blue-50 border border-blue-200 rounded\">
-                      <div className=\"text-2xl font-bold text-blue-700\">{stepData.preview.toUpdate.length}</div>
-                      <div className=\"text-sm text-blue-600\">To Update</div>
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded">
+                      <div className="text-2xl font-bold text-blue-700">{stepData.preview.toUpdate.length}</div>
+                      <div className="text-sm text-blue-600">To Update</div>
                     </div>
-                    <div className=\"p-3 bg-gray-50 border border-gray-200 rounded\">
-                      <div className=\"text-2xl font-bold text-gray-700\">{stepData.preview.toKeep.length}</div>
-                      <div className=\"text-sm text-gray-600\">To Keep</div>
+                    <div className="p-3 bg-gray-50 border border-gray-200 rounded">
+                      <div className="text-2xl font-bold text-gray-700">{stepData.preview.toKeep.length}</div>
+                      <div className="text-sm text-gray-600">To Keep</div>
                     </div>
                   </div>
                 </div>
 
                 {stepData.preview.toCreate.length > 0 && (
-                  <div className=\"space-y-2\">
-                    <h4 className=\"font-medium text-green-700\">Records to Create</h4>
-                    <div className=\"space-y-1\">
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-green-700">Records to Create</h4>
+                    <div className="space-y-1">
                       {stepData.preview.toCreate.map((record, index) => (
-                        <div key={index} className=\"p-2 bg-green-50 border border-green-200 rounded text-sm\">
+                        <div key={index} className="p-2 bg-green-50 border border-green-200 rounded text-sm">
                           <strong>{record.type}</strong> {record.name} → {record.content}
                         </div>
                       ))}
@@ -558,14 +551,14 @@ export function AutoPropagationWizard({
                 )}
 
                 {stepData.preview.toUpdate.length > 0 && (
-                  <div className=\"space-y-2\">
-                    <h4 className=\"font-medium text-blue-700\">Records to Update</h4>
-                    <div className=\"space-y-1\">
+                  <div className="space-y-2">
+                    <h4 className="font-medium text-blue-700">Records to Update</h4>
+                    <div className="space-y-1">
                       {stepData.preview.toUpdate.map((change, index) => (
-                        <div key={index} className=\"p-2 bg-blue-50 border border-blue-200 rounded text-sm\">
+                        <div key={index} className="p-2 bg-blue-50 border border-blue-200 rounded text-sm">
                           <div><strong>{change.from.type}</strong> {change.from.name}</div>
-                          <div className=\"text-red-600\">- {change.from.content}</div>
-                          <div className=\"text-green-600\">+ {change.to.content}</div>
+                          <div className="text-red-600">- {change.from.content}</div>
+                          <div className="text-green-600">+ {change.to.content}</div>
                         </div>
                       ))}
                     </div>
@@ -578,32 +571,32 @@ export function AutoPropagationWizard({
 
       case 'execute':
         return (
-          <div className=\"space-y-6\">
-            <div className=\"text-center space-y-4\">
-              <div className=\"mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center\">
+          <div className="space-y-6">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
                 {loading ? (
-                  <Loader2 className=\"h-8 w-8 animate-spin text-blue-600\" />
+                  <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
                 ) : (
-                  <Zap className=\"h-8 w-8 text-blue-600\" />
+                  <Zap className="h-8 w-8 text-blue-600" />
                 )}
               </div>
               <div>
-                <h3 className=\"text-lg font-semibold\">
+                <h3 className="text-lg font-semibold">
                   {loading ? 'Applying DNS Changes' : 'Ready to Execute'}
                 </h3>
-                <p className=\"text-gray-600\">
+                <p className="text-gray-600">
                   {loading 
                     ? 'Updating your DNS records via the registrar API...'
-                    : 'Click \"Execute\" to apply the DNS changes to your domain'
+                    : 'Click "Execute" to apply the DNS changes to your domain'
                   }
                 </p>
               </div>
             </div>
 
             {loading && (
-              <div className=\"space-y-4\">
-                <Progress value={progress} className=\"w-full\" />
-                <div className=\"text-center text-sm text-gray-600\">
+              <div className="space-y-4">
+                <Progress value={progress} className="w-full" />
+                <div className="text-center text-sm text-gray-600">
                   {progress < 30 && 'Connecting to registrar API...'}
                   {progress >= 30 && progress < 60 && 'Authenticating...'}
                   {progress >= 60 && progress < 90 && 'Updating DNS records...'}
@@ -614,12 +607,12 @@ export function AutoPropagationWizard({
 
             {!loading && stepData.preview && (
               <Alert>
-                <AlertTriangle className=\"h-4 w-4\" />
+                <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
-                  <div className=\"space-y-2\">
-                    <p className=\"font-medium\">Final Confirmation Required</p>
+                  <div className="space-y-2">
+                    <p className="font-medium">Final Confirmation Required</p>
                     <p>This will modify your live DNS settings. Changes may take time to propagate.</p>
-                    <ul className=\"text-sm space-y-1 list-disc list-inside\">
+                    <ul className="text-sm space-y-1 list-disc list-inside">
                       <li>{stepData.preview.toCreate.length} records will be created</li>
                       <li>{stepData.preview.toUpdate.length} records will be updated</li>
                       <li>Changes typically propagate within 1-48 hours</li>
@@ -633,41 +626,41 @@ export function AutoPropagationWizard({
 
       case 'complete':
         return (
-          <div className=\"space-y-6\">
-            <div className=\"text-center space-y-4\">
-              <div className=\"mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center\">
-                <CheckCircle className=\"h-8 w-8 text-green-600\" />
+          <div className="space-y-6">
+            <div className="text-center space-y-4">
+              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="h-8 w-8 text-green-600" />
               </div>
               <div>
-                <h3 className=\"text-lg font-semibold text-green-900\">Auto-Propagation Complete!</h3>
-                <p className=\"text-gray-600\">
+                <h3 className="text-lg font-semibold text-green-900">Auto-Propagation Complete!</h3>
+                <p className="text-gray-600">
                   Your DNS records have been successfully updated
                 </p>
               </div>
             </div>
 
             {stepData.result && (
-              <div className=\"space-y-4\">
-                <div className=\"p-4 bg-green-50 border border-green-200 rounded-lg\">
-                  <h4 className=\"font-medium text-green-900 mb-3\">Results Summary</h4>
-                  <div className=\"grid grid-cols-2 gap-4 text-sm\">
+              <div className="space-y-4">
+                <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <h4 className="font-medium text-green-900 mb-3">Results Summary</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
-                      <div className=\"font-medium\">Records Created:</div>
-                      <div className=\"text-green-700\">{stepData.result.recordsCreated}</div>
+                      <div className="font-medium">Records Created:</div>
+                      <div className="text-green-700">{stepData.result.recordsCreated}</div>
                     </div>
                     <div>
-                      <div className=\"font-medium\">Records Updated:</div>
-                      <div className=\"text-blue-700\">{stepData.result.recordsUpdated}</div>
+                      <div className="font-medium">Records Updated:</div>
+                      <div className="text-blue-700">{stepData.result.recordsUpdated}</div>
                     </div>
                   </div>
                 </div>
 
                 <Alert>
-                  <Clock className=\"h-4 w-4\" />
+                  <Clock className="h-4 w-4" />
                   <AlertDescription>
-                    <div className=\"space-y-2\">
-                      <p className=\"font-medium\">What happens next?</p>
-                      <ul className=\"text-sm space-y-1 list-disc list-inside\">
+                    <div className="space-y-2">
+                      <p className="font-medium">What happens next?</p>
+                      <ul className="text-sm space-y-1 list-disc list-inside">
                         <li>DNS changes are now live in your registrar</li>
                         <li>Propagation worldwide may take 1-48 hours</li>
                         <li>We'll automatically validate your domain once propagated</li>
@@ -718,10 +711,10 @@ export function AutoPropagationWizard({
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className=\"max-w-2xl max-h-[90vh] overflow-y-auto\">
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className=\"flex items-center gap-2\">
-            <Wifi className=\"h-5 w-5\" />
+          <DialogTitle className="flex items-center gap-2">
+            <Wifi className="h-5 w-5" />
             Auto DNS Propagation Wizard
           </DialogTitle>
           <DialogDescription>
@@ -729,53 +722,53 @@ export function AutoPropagationWizard({
           </DialogDescription>
         </DialogHeader>
 
-        <div className=\"py-6\">
+        <div className="py-6">
           {/* Progress indicator */}
-          <div className=\"mb-8\">
-            <div className=\"flex items-center justify-between mb-2\">
-              <span className=\"text-sm text-gray-600\">Progress</span>
-              <span className=\"text-sm text-gray-600\">{getStepNumber()}/5</span>
+          <div className="mb-8">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm text-gray-600">Progress</span>
+              <span className="text-sm text-gray-600">{getStepNumber()}/5</span>
             </div>
-            <Progress value={(getStepNumber() / 5) * 100} className=\"w-full\" />
+            <Progress value={(getStepNumber() / 5) * 100} className="w-full" />
           </div>
 
           {/* Step content */}
           {renderStepContent()}
         </div>
 
-        <DialogFooter className=\"flex items-center justify-between\">
-          <div className=\"flex items-center gap-2 text-sm text-gray-600\">
-            <Lock className=\"h-4 w-4\" />
+        <DialogFooter className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-gray-600">
+            <Lock className="h-4 w-4" />
             <span>Secure connection</span>
           </div>
-          <div className=\"flex gap-2\">
+          <div className="flex gap-2">
             {currentStep === 'complete' ? (
-              <Button onClick={onClose} className=\"flex items-center gap-2\">
-                <CheckCircle className=\"h-4 w-4\" />
+              <Button onClick={onClose} className="flex items-center gap-2">
+                <CheckCircle className="h-4 w-4" />
                 Done
               </Button>
             ) : (
               <>
                 <Button
-                  variant=\"outline\"
+                  variant="outline"
                   onClick={canGoPrev() ? prevStep : onClose}
                   disabled={loading}
-                  className=\"flex items-center gap-2\"
+                  className="flex items-center gap-2"
                 >
-                  <ArrowLeft className=\"h-4 w-4\" />
+                  <ArrowLeft className="h-4 w-4" />
                   {canGoPrev() ? 'Previous' : 'Cancel'}
                 </Button>
                 <Button
                   onClick={currentStep === 'execute' ? executeAutoPropagation : nextStep}
                   disabled={!canGoNext() || loading}
-                  className=\"flex items-center gap-2\"
+                  className="flex items-center gap-2"
                 >
                   {loading ? (
-                    <Loader2 className=\"h-4 w-4 animate-spin\" />
+                    <Loader2 className="h-4 w-4 animate-spin" />
                   ) : currentStep === 'execute' ? (
-                    <Zap className=\"h-4 w-4\" />
+                    <Zap className="h-4 w-4" />
                   ) : (
-                    <ArrowRight className=\"h-4 w-4\" />
+                    <ArrowRight className="h-4 w-4" />
                   )}
                   {currentStep === 'execute' 
                     ? (loading ? 'Executing...' : 'Execute') 
