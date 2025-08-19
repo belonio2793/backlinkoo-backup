@@ -62,13 +62,8 @@ export class DomainBlogTemplateService {
       const errorMessage = error instanceof Error ? error.message :
                           error && typeof error === 'object' ? JSON.stringify(error) :
                           String(error);
-
-      if (errorMessage.includes('does not exist') || errorMessage.includes('domain_blog_themes')) {
-        console.warn('⚠️ Domain blog themes table not set up. Run: npm run setup:blog-themes');
-      } else {
-        console.error('Error in getDomainTheme:', errorMessage, error);
-      }
-      return null;
+      console.error('Error in getDomainTheme:', errorMessage, error);
+      throw error;
     }
   }
 
