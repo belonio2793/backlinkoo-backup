@@ -142,8 +142,31 @@ const DomainsPage = () => {
         const errorMessage = error?.message || 'Unknown error occurred';
         toast.error(`Failed to load domains: ${errorMessage}`);
       });
+
+      // Check DNS service status on load
+      checkDNSServiceHealth();
     }
   }, [user?.id]);
+
+  // Check DNS service health
+  const checkDNSServiceHealth = async () => {
+    try {
+      const response = await fetch('/.netlify/functions/validate-domain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ domain_id: 'health-check' }),
+        signal: AbortSignal.timeout(5000)
+      });
+
+      if (response.status === 404) {
+        setDnsServiceStatus('offline');
+      } else {
+        setDnsServiceStatus('online');
+      }
+    } catch (error) {
+      setDnsServiceStatus('offline');
+    }
+  };
 
   // Fix domains missing verification tokens
   useEffect(() => {
