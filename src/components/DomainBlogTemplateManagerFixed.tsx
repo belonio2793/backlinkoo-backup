@@ -782,7 +782,7 @@ export function DomainBlogTemplateManagerFixed({
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              {saveStatus.isLoading ? 'Saving...' : 'Save Theme Settings'}
+              {saveStatus.isLoading ? 'Saving...' : saveStatus.lastSaved ? 'Save Changes' : 'Save Theme Settings'}
             </Button>
           </div>
 
