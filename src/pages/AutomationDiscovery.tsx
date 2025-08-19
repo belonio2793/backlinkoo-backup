@@ -126,15 +126,6 @@ const AutomationDiscovery = () => {
   }, [isAuthenticated, authLoading]);
 
   const startDiscovery = async () => {
-    if (!searchQuery.trim()) {
-      toast({
-        title: "Query Required",
-        description: "Please enter a search query to start discovery.",
-        variant: "destructive"
-      });
-      return;
-    }
-
     setIsDiscovering(true);
     setDiscoveryResults([]);
 
@@ -145,9 +136,7 @@ const AutomationDiscovery = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          campaignId: `discovery_${Date.now()}`,
-          keywords: [searchQuery],
-          platforms: selectedPlatforms,
+          campaignId: `automation_discovery_${Date.now()}`,
           maxResults,
           discoveryDepth
         }),
