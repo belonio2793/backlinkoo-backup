@@ -455,84 +455,35 @@ const DomainsPage = () => {
     setValidatingDomains(prev => new Set(prev).add(domainId));
 
     try {
-      // Try Netlify function first
+      toast.info('Performing DNS validation...');
+
+      const response = await fetch('/.netlify/functions/validate-domain', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ domain_id: domainId })
+      });
+
+      // Check if response is ok before reading body
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`);
+      }
+
+      // Read response body only once
       let result;
-      let isDevelopmentMode = false;
-
       try {
-        const response = await fetch('/.netlify/functions/validate-domain', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ domain_id: domainId })
-        });
-
-        if (!response.ok) {
-          if (response.status === 404) {
-            // Netlify functions not available, use development mode
-            isDevelopmentMode = true;
-          } else {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-          }
-        } else {
-          result = await response.json();
-        }
-      } catch (fetchError: any) {
-        if (fetchError.message.includes('Failed to fetch') || fetchError.message.includes('404')) {
-          isDevelopmentMode = true;
-        } else {
-          throw fetchError;
-        }
+        result = await response.json();
+      } catch (parseError: any) {
+        throw new Error('Invalid response from DNS validation service');
       }
 
-      // Development mode fallback
-      if (isDevelopmentMode) {
-        console.log('🛠️ Using development mode DNS validation');
-
-        // Get domain info for validation
-        const domain = domains.find(d => d.id === domainId);
-        if (!domain) {
-          throw new Error('Domain not found');
-        }
-
-        // Simulate validation process
-        toast.info('Simulating DNS validation in development mode...');
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        // Simulate realistic validation results
-        const isSuccess = Math.random() > 0.3; // 70% success rate
-
-        if (isSuccess) {
-          // Update domain status in database
-          await updateDomain(domainId, {
-            dns_validated: true,
-            txt_record_validated: true,
-            a_record_validated: true,
-            status: 'active',
-            last_validation_attempt: new Date().toISOString()
-          });
-          toast.success(`Domain ${domain.domain} validated successfully! (Development mode)`);
-        } else {
-          await updateDomain(domainId, {
-            dns_validated: false,
-            status: 'failed',
-            validation_error: 'DNS validation failed: Required records not found',
-            last_validation_attempt: new Date().toISOString()
-          });
-          toast.warning(`Domain ${domain.domain} validation failed. Check DNS records. (Development mode)`);
-        }
-
-        await loadDomains();
-        return;
-      }
-
-      // Process Netlify function response
       if (result.success) {
         if (result.validated) {
-          toast.success(`Domain ${result.domain} validated successfully!`);
+          toast.success(`✅ Domain ${result.domain} validated successfully! DNS records are properly configured.`);
         } else {
-          toast.warning(`Domain ${result.domain} validation failed. Check DNS records.`);
+          toast.warning(`❌ Domain ${result.domain} validation failed: ${result.message}`);
         }
 
         // Reload domains to get updated status
@@ -543,27 +494,31 @@ const DomainsPage = () => {
           // Don't throw - validation succeeded even if reload failed
         }
       } else {
-        const errorMsg = typeof result.message === 'string' ? result.message : 'Validation failed';
+        const errorMsg = result.message || result.error || 'DNS validation failed';
         throw new Error(errorMsg);
       }
 
     } catch (error: any) {
-      console.error('Validation error:', error);
+      console.error('DNS validation error:', error);
 
-      // Handle different error types
-      let errorMessage = 'Unknown validation error';
+      // Handle different error types with more specific messages
+      let errorMessage = 'DNS validation failed';
 
-      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        errorMessage = 'Network error: Please check your connection';
-      } else if (error instanceof TypeError && error.message.includes('body stream already read')) {
-        errorMessage = 'Request processing error: Please try again';
-      } else if (error.name === 'AbortError') {
-        errorMessage = 'Request timeout: Please try again';
+      if (error.message.includes('HTTP 404')) {
+        errorMessage = 'DNS validation service not available. Please contact support.';
+      } else if (error.message.includes('HTTP 502') || error.message.includes('HTTP 503')) {
+        errorMessage = 'DNS validation service temporarily unavailable. Please try again in a moment.';
+      } else if (error.message.includes('Failed to fetch')) {
+        errorMessage = 'Network error during DNS validation. Please check your connection and try again.';
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'DNS lookup timed out. This may indicate DNS propagation is still in progress.';
+      } else if (error.message.includes('Missing or invalid DNS records')) {
+        errorMessage = error.message; // Keep the specific DNS error message
       } else if (error?.message) {
         errorMessage = error.message;
       }
 
-      toast.error(`Validation failed: ${errorMessage}`);
+      toast.error(errorMessage);
     } finally {
       setValidatingDomains(prev => {
         const newSet = new Set(prev);
