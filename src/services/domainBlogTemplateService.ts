@@ -144,10 +144,8 @@ export class DomainBlogTemplateService {
         console.log(`✅ Default theme assigned to domain ${domainId}`);
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message :
-                          error && typeof error === 'object' ? JSON.stringify(error) :
-                          String(error);
-      console.error('Error ensuring default theme:', errorMessage, error);
+      // Don't throw errors for missing database setup - this is non-critical
+      console.warn(`⚠️ Could not ensure default theme for domain ${domainId}:`, error);
     }
   }
 
