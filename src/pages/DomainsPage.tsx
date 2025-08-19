@@ -652,10 +652,13 @@ const DomainsPage = () => {
 
         if (response.status === 502 || response.status === 503) {
           toast.warning('⚠️ DNS validation service is temporarily unavailable. Domains can still be added and will use fallback validation.');
+          setDnsServiceStatus('offline');
         } else if (response.status === 404) {
           toast.error('❌ DNS validation function not deployed. Contact support.');
+          setDnsServiceStatus('offline');
         } else {
           toast.error(`DNS validation service error: HTTP ${response.status}`);
+          setDnsServiceStatus('offline');
         }
         return;
       }
