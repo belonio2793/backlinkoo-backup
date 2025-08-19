@@ -12,15 +12,35 @@ const EXPECTED_HOST = "hosting.backlinkoo.com"; // Your CNAME target
 const EXPECTED_IP = "192.168.1.100"; // Your hosting IP (this should be your real IP)
 
 /**
- * Timeout wrapper for DNS queries
+ * Timeout wrapper for DNS queries with retry logic
  */
-function withTimeout(promise, ms = 5000) {
+function withTimeout(promise, ms = 10000) {
   return Promise.race([
     promise,
-    new Promise((_, reject) => 
+    new Promise((_, reject) =>
       setTimeout(() => reject(new Error(`DNS query timeout after ${ms}ms`)), ms)
     )
   ]);
+}
+
+/**
+ * Retry wrapper for DNS operations
+ */
+async function withRetry(operation, maxRetries = 3, delay = 1000) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      return await operation();
+    } catch (error) {
+      console.log(`DNS operation attempt ${attempt}/${maxRetries} failed:`, error.message);
+
+      if (attempt === maxRetries) {
+        throw error;
+      }
+
+      // Wait before retrying
+      await new Promise(resolve => setTimeout(resolve, delay * attempt));
+    }
+  }
 }
 
 /**
