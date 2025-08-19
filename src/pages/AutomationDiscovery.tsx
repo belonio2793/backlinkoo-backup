@@ -495,11 +495,20 @@ const AutomationDiscovery = () => {
           </TabsContent>
 
           <TabsContent value="results" className="space-y-6">
+            {/* Automation Compatibility Testing */}
+            <AutomationCompatibilityTester
+              results={discoveryResults}
+              onTestComplete={(testResults) => {
+                console.log('Automation compatibility testing complete:', testResults);
+              }}
+            />
+
+            <Separator />
+
             {/* URL Validation Section */}
             <UrlValidator
               results={discoveryResults}
               onValidationComplete={(validatedResults) => {
-                // Update results with validation data
                 console.log('Validation complete:', validatedResults);
               }}
             />
