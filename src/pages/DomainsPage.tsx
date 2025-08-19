@@ -144,6 +144,30 @@ const DomainsPage = () => {
     }
   }, [user?.id]);
 
+  // Fix domains missing verification tokens
+  useEffect(() => {
+    const fixMissingTokens = async () => {
+      const domainsNeedingTokens = domains.filter(d => !d.verification_token);
+
+      if (domainsNeedingTokens.length > 0) {
+        console.log(`🔧 Fixing ${domainsNeedingTokens.length} domains without verification tokens`);
+
+        for (const domain of domainsNeedingTokens) {
+          try {
+            const token = generateVerificationToken();
+            await updateDomain(domain.id, { verification_token: token });
+          } catch (error) {
+            console.error(`Failed to add token to ${domain.domain}:`, error);
+          }
+        }
+      }
+    };
+
+    if (domains.length > 0) {
+      fixMissingTokens().catch(console.error);
+    }
+  }, [domains]);
+
   const loadDomains = async () => {
     setLoading(true);
     try {
