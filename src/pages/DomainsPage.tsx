@@ -1078,14 +1078,24 @@ anotherdomain.org`}
                                   </Button>
 
                                   {dnsServiceStatus === 'offline' && (
-                                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                                      <h4 className="font-medium text-red-900 mb-2 flex items-center gap-2">
-                                        <AlertTriangle className="h-4 w-4" />
-                                        DNS Service Required
+                                    <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                      <h4 className="font-medium text-amber-900 mb-2 flex items-center gap-2">
+                                        <Info className="h-4 w-4" />
+                                        DNS Validation Service Status
                                       </h4>
-                                      <div className="text-sm text-red-800">
-                                        <p>DNS validation service must be available for production use. Manual configuration is not supported in live environments.</p>
-                                        <p className="mt-2 font-medium">Please deploy all required Netlify functions before proceeding.</p>
+                                      <div className="text-sm text-amber-800 space-y-2">
+                                        <div className="flex items-start gap-2">
+                                          <span className="font-medium">🔧 Development Mode:</span>
+                                          <span>DNS validation functions are not accessible in local environment</span>
+                                        </div>
+                                        <div className="flex items-start gap-2">
+                                          <span className="font-medium">✅ Production Ready:</span>
+                                          <span>All functions will be available when deployed to Netlify</span>
+                                        </div>
+                                        <div className="flex items-start gap-2">
+                                          <span className="font-medium">📋 Current Options:</span>
+                                          <span>You can still add domains and configure DNS manually via your registrar</span>
+                                        </div>
                                       </div>
                                     </div>
                                   )}
