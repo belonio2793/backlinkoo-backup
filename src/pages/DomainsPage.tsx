@@ -1397,7 +1397,7 @@ anotherdomain.org`}
             </p>
           </CardHeader>
           <CardContent>
-            <DomainBlogTemplateManager
+            <DomainBlogTemplateManagerFixed
               domains={domains}
               onThemeUpdate={(domainId, themeId) => {
                 toast({
