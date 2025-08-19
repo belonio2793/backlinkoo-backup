@@ -263,6 +263,7 @@ export const OptimizedAppWrapper = () => {
               <LazyAutomation />
             </Suspense>
           } />
+          <Route path="/domains" element={<DomainsPage />} />
           <Route path="/automation/discovery" element={
             <Suspense fallback={<PageLoader />}>
               <LazyPlatformDiscovery />
