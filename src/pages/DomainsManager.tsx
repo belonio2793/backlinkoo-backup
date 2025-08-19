@@ -138,12 +138,12 @@ const DomainsManager = () => {
 
   const deleteDomain = async (domainId: string) => {
     try {
-      // For now, remove from local state - replace with actual Supabase delete
+      await UserDomainsService.deleteDomain(domainId);
       setDomains(prev => prev.filter(d => d.id !== domainId));
       toast.success('Domain deleted successfully');
     } catch (error) {
       console.error('Error deleting domain:', error);
-      toast.error('Failed to delete domain');
+      toast.error(error instanceof Error ? error.message : 'Failed to delete domain');
     }
   };
 
