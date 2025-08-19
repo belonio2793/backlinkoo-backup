@@ -20,6 +20,7 @@ import "@/utils/emergencyDisable"; // Load emergency disable utilities
 // import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
 import { LazyBeautifulBlogPost } from "@/components/LazyComponents";
 import { DomainsAuthGuard } from "@/components/DomainsAuthGuard";
+import { DomainErrorBoundary } from "@/components/DomainErrorBoundary";
 import Index from "./pages/Index";
 
 const LazyEmergencyBlogPost = lazy(() => import("./components/EmergencyBlogPost"));
