@@ -59,7 +59,7 @@ import {
   Palette,
   Wand2
 } from 'lucide-react';
-import DomainBlogTemplateManagerFixed from '@/components/DomainBlogTemplateManagerFixed';
+import SimpleBlogTemplateManager from '@/components/SimpleBlogTemplateManager';
 import BlogTemplateDebug from '@/components/BlogTemplateDebug';
 import DNSValidationService from '@/services/dnsValidationService';
 import AutoDNSPropagation from '@/components/AutoDNSPropagation';
@@ -1138,7 +1138,7 @@ anotherdomain.org`}
                                           <span>All functions will be available when deployed to Netlify</span>
                                         </div>
                                         <div className="flex items-start gap-2">
-                                          <span className="font-medium">📋 Current Options:</span>
+                                          <span className="font-medium">��� Current Options:</span>
                                           <span>You can still add domains and configure DNS manually via your registrar</span>
                                         </div>
                                       </div>
@@ -1397,7 +1397,7 @@ anotherdomain.org`}
             </p>
           </CardHeader>
           <CardContent>
-            <DomainBlogTemplateManagerFixed
+            <SimpleBlogTemplateManager
               domains={domains}
               onThemeUpdate={(domainId, themeId) => {
                 toast({
