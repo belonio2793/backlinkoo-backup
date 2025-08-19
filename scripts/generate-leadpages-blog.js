@@ -25,6 +25,7 @@ const supabase = createClient(
 const DOMAIN_ID = 'leadpages-org';
 const DOMAIN_NAME = 'leadpages.org';
 const BLOG_SUBDIRECTORY = 'blog';
+const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000'; // System user UUID
 
 // Sample blog posts for leadpages.org
 const SAMPLE_BLOG_POSTS = [
