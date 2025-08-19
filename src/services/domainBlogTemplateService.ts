@@ -268,9 +268,9 @@ export class DomainBlogTemplateService {
 
       for (const domain of selectedDomains) {
         try {
-          // Generate unique content for each domain
-          const blogPost = await this.generateBlogPost(keywords, targetUrl, brandName);
-          
+          // Generate unique content for each domain using domain-specific theme
+          const blogPost = await this.generateBlogPost(keywords, targetUrl, brandName, undefined, domain.id);
+
           // Modify title slightly for uniqueness
           blogPost.title = this.varyTitle(blogPost.title, domain.domain);
           blogPost.slug = this.generateSlug(blogPost.title);
