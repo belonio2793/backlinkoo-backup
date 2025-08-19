@@ -219,6 +219,12 @@ export class DomainBlogTemplateService {
         .eq('domains.status', 'active');
 
       if (error) {
+        // Handle missing table gracefully
+        if (error.message?.includes('does not exist') || error.message?.includes('domain_blog_themes')) {
+          console.warn('⚠️ Domain blog themes table not set up. Run: npm run setup:blog-themes');
+          return [];
+        }
+
         const errorMessage = error.message || error.details || JSON.stringify(error);
         console.error('Error fetching all domain themes:', errorMessage, error);
         return [];
