@@ -47,7 +47,7 @@ const LazyPrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const LazyNotFound = lazy(() => import("./pages/NotFound"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
-const LazyDomainsPage = lazy(() => import("./pages/DomainsPage"));
+const LazyDomainsPage = lazy(() => import("./pages/DomainsPageMissing"));
 const LazyBlogGenerationTest = lazy(() => import("./components/BlogGenerationTest"));
 import BlogGenerationFixTestPage from "./pages/BlogGenerationFixTest";
 
