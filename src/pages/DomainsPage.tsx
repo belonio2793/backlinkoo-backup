@@ -1406,7 +1406,7 @@ anotherdomain.org`}
           </Card>
         )}
 
-        {/* Auto DNS Propagation Section */}
+        {/* Enhanced Auto DNS Propagation Section */}
         {domains.length > 0 && (
           <Card className="mt-8">
             <CardHeader>
@@ -1415,50 +1415,83 @@ anotherdomain.org`}
                 Automatic DNS Propagation
               </CardTitle>
               <CardDescription>
-                Automatically detect your registrar and update DNS records with confirmation
+                Automatically detect your registrar and update DNS records with step-by-step guidance
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {/* Domain Selection */}
-                <div className="space-y-2">
-                  <Label>Select Domain for Auto-Propagation</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a domain to auto-propagate" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {domains.map(domain => (
-                        <SelectItem key={domain.id} value={domain.id}>
-                          <div className="flex items-center justify-between w-full">
-                            <span>{domain.domain}</span>
-                            <Badge
-                              variant={domain.status === 'active' ? 'default' : 'secondary'}
-                              className="ml-2"
-                            >
-                              {domain.status}
-                            </Badge>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                {/* Quick Launch Section */}
+                <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-semibold text-blue-900">Launch Auto-Propagation Wizard</h3>
+                      <p className="text-blue-700 max-w-md">
+                        Our step-by-step wizard detects your registrar, guides you through API setup,
+                        and automatically configures your DNS records with full preview and confirmation.
+                      </p>
+                      <div className="flex items-center gap-4 text-sm text-blue-600">
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="h-4 w-4" />
+                          <span>Auto-detect registrar</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="h-4 w-4" />
+                          <span>Secure API setup</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="h-4 w-4" />
+                          <span>Change preview</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="text-right text-sm text-blue-600 mb-2">
+                        Select a domain to get started:
+                      </div>
+                      <Select onValueChange={(domainId) => {
+                        const domain = domains.find(d => d.id === domainId);
+                        if (domain) launchAutoPropagationWizard(domain);
+                      }}>
+                        <SelectTrigger className="w-64">
+                          <SelectValue placeholder="Choose domain for wizard..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {domains.filter(d => d.status !== 'active').map(domain => (
+                            <SelectItem key={domain.id} value={domain.id}>
+                              <div className="flex items-center justify-between w-full">
+                                <span>{domain.domain}</span>
+                                <Badge
+                                  variant={domain.status === 'pending' ? 'secondary' : 'outline'}
+                                  className="ml-2"
+                                >
+                                  {domain.status}
+                                </Badge>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Auto-propagation for first domain (demo) */}
-                {domains.length > 0 && (
-                  <AutoDNSPropagation
-                    domain={domains[0]}
-                    hostingConfig={hostingConfig}
-                    onSuccess={(domain) => {
-                      toast.success(`✅ Auto-propagation completed for ${domain.domain}`);
-                      loadDomains(); // Refresh domains list
-                    }}
-                    onError={(error) => {
-                      toast.error(`Auto-propagation failed: ${error}`);
-                    }}
-                  />
-                )}
+                {/* Legacy auto-propagation component for comparison */}
+                <div className="border-t pt-6">
+                  <h3 className="font-medium mb-4 text-gray-700">Alternative: Direct Auto-Propagation</h3>
+                  {domains.length > 0 && (
+                    <AutoDNSPropagation
+                      domain={domains[0]}
+                      hostingConfig={hostingConfig}
+                      onSuccess={(domain) => {
+                        toast.success(`✅ Auto-propagation completed for ${domain.domain}`);
+                        loadDomains(); // Refresh domains list
+                      }}
+                      onError={(error) => {
+                        toast.error(`Auto-propagation failed: ${error}`);
+                      }}
+                    />
+                  )}
+                </div>
 
                 {/* Info about auto-propagation */}
                 <Alert>
@@ -1468,7 +1501,8 @@ anotherdomain.org`}
                       <p className="font-medium">How Auto-Propagation Works:</p>
                       <ol className="list-decimal list-inside space-y-1 text-sm">
                         <li>Automatically detects your domain registrar (Cloudflare, Namecheap, GoDaddy, etc.)</li>
-                        <li>Shows you exactly what DNS changes will be made</li>
+                        <li>Guides you through secure API credential setup with instructions</li>
+                        <li>Shows you exactly what DNS changes will be made with detailed preview</li>
                         <li>Asks for confirmation before making any updates</li>
                         <li>Uses secure API integration to update your DNS records</li>
                         <li>Validates the changes immediately after propagation</li>
@@ -1487,7 +1521,9 @@ anotherdomain.org`}
                       'GoDaddy',
                       'Route 53',
                       'DigitalOcean',
-                      'Google Domains'
+                      'Google Domains',
+                      '1&1 IONOS',
+                      'SiteGround'
                     ].map(registrar => (
                       <div key={registrar} className="flex items-center gap-2 p-2 bg-white rounded border">
                         <CheckCircle className="h-4 w-4 text-green-600" />
