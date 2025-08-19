@@ -90,9 +90,10 @@ const DomainsPage = () => {
 
       if (error) throw error;
       setDomains(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading domains:', error);
-      toast.error('Failed to load domains');
+      const errorMessage = error?.message || 'Unknown error occurred';
+      toast.error(`Failed to load domains: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -113,31 +114,71 @@ const DomainsPage = () => {
 
   const addSingleDomain = async (domainName: string) => {
     const domain = cleanDomain(domainName);
-    
+
     if (!validateDomainFormat(domain)) {
       throw new Error(`Invalid domain format: ${domainName}`);
     }
 
-    const { data, error } = await supabase
-      .from('domains')
-      .insert({
-        user_id: user?.id,
-        domain,
-        status: 'pending',
-        required_a_record: HOSTING_CONFIG.ip,
-        required_cname: HOSTING_CONFIG.cname
-      })
-      .select()
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from('domains')
+        .insert({
+          user_id: user?.id,
+          domain,
+          status: 'pending',
+          required_a_record: HOSTING_CONFIG.ip,
+          required_cname: HOSTING_CONFIG.cname
+        })
+        .select()
+        .single();
 
-    if (error) {
-      if (error.code === '23505') {
-        throw new Error(`Domain ${domain} already exists`);
+      if (error) {
+        console.error('Supabase error adding domain:', error);
+
+        if (error.code === '23505') {
+          throw new Error(`Domain ${domain} already exists`);
+        }
+        if (error.code === 'PGRST301') {
+          throw new Error(`Database error: Please try again in a moment`);
+        }
+        if (error.message?.includes('Failed to fetch')) {
+          throw new Error(`Network error: Please check your connection and try again`);
+        }
+        if (error.message?.includes('timeout')) {
+          throw new Error(`Request timeout: Please try again`);
+        }
+
+        // Generic error with helpful message
+        const errorMsg = error.message || error.details || 'Unknown database error';
+        throw new Error(`Failed to add domain: ${errorMsg}`);
       }
-      throw error;
-    }
 
-    return data;
+      if (!data) {
+        throw new Error('Domain was added but no data returned');
+      }
+
+      return data;
+    } catch (networkError: any) {
+      console.error('Network error adding domain:', networkError);
+
+      if (networkError.message?.includes('Failed to fetch')) {
+        throw new Error('Network connection failed. Please check your internet connection and try again.');
+      }
+      if (networkError.name === 'AbortError') {
+        throw new Error('Request was cancelled due to timeout. Please try again.');
+      }
+      if (networkError.message?.includes('NetworkError')) {
+        throw new Error('Network error occurred. Please check your connection and try again.');
+      }
+
+      // Re-throw if it's already a formatted error
+      if (networkError.message && !networkError.message.includes('[object Object]')) {
+        throw networkError;
+      }
+
+      // Fallback for unknown errors
+      throw new Error(`Unexpected error adding domain: ${domain}. Please try again or contact support.`);
+    }
   };
 
   const addDomain = async () => {
@@ -152,9 +193,10 @@ const DomainsPage = () => {
       setDomains(prev => [data, ...prev]);
       setNewDomain('');
       toast.success(`Domain ${data.domain} added successfully!`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding domain:', error);
-      toast.error(`Failed to add domain: ${error.message}`);
+      const errorMessage = error?.message || 'Unknown error occurred';
+      toast.error(errorMessage);
     } finally {
       setAddingDomain(false);
     }
@@ -182,9 +224,10 @@ const DomainsPage = () => {
           const data = await addSingleDomain(domainName);
           setDomains(prev => [data, ...prev]);
           successCount++;
-        } catch (error) {
+        } catch (error: any) {
           errorCount++;
-          errors.push(`${domainName}: ${error.message}`);
+          const errorMessage = error?.message || 'Unknown error';
+          errors.push(`${domainName}: ${errorMessage}`);
         }
       }
 
@@ -200,9 +243,10 @@ const DomainsPage = () => {
         console.error('Bulk domain errors:', errors);
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Bulk add error:', error);
-      toast.error('Failed to process bulk domains');
+      const errorMessage = error?.message || 'Unknown error occurred';
+      toast.error(`Failed to process bulk domains: ${errorMessage}`);
     } finally {
       setAddingBulk(false);
     }
@@ -223,9 +267,10 @@ const DomainsPage = () => {
 
       setDomains(prev => prev.filter(d => d.id !== domainId));
       toast.success(`Domain ${domainName} deleted successfully`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting domain:', error);
-      toast.error(`Failed to delete domain: ${error.message}`);
+      const errorMessage = error?.message || 'Unknown error occurred';
+      toast.error(`Failed to delete domain: ${errorMessage}`);
     }
   };
 
@@ -255,9 +300,10 @@ const DomainsPage = () => {
         throw new Error(result.message || 'Validation failed');
       }
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Validation error:', error);
-      toast.error(`Validation failed: ${error.message}`);
+      const errorMessage = error?.message || 'Unknown validation error';
+      toast.error(`Validation failed: ${errorMessage}`);
     } finally {
       setValidatingDomains(prev => {
         const newSet = new Set(prev);
