@@ -684,7 +684,7 @@ export function AdminBlogManager() {
                             onClick={() => {
                               const url = post.published_url || `${window.location.origin}/blog/${post.slug}`;
                               navigator.clipboard.writeText(url);
-                              toast({ title: "URL copied to clipboard" });
+                              toast.success("URL copied to clipboard");
                             }}
                           >
                             📋
