@@ -1381,6 +1381,104 @@ anotherdomain.org`}
           </Card>
         )}
 
+        {/* Auto DNS Propagation Section */}
+        {domains.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wand2 className="h-5 w-5" />
+                Automatic DNS Propagation
+              </CardTitle>
+              <CardDescription>
+                Automatically detect your registrar and update DNS records with confirmation
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                {/* Domain Selection */}
+                <div className="space-y-2">
+                  <Label>Select Domain for Auto-Propagation</Label>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a domain to auto-propagate" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {domains.map(domain => (
+                        <SelectItem key={domain.id} value={domain.id}>
+                          <div className="flex items-center justify-between w-full">
+                            <span>{domain.domain}</span>
+                            <Badge
+                              variant={domain.status === 'active' ? 'default' : 'secondary'}
+                              className="ml-2"
+                            >
+                              {domain.status}
+                            </Badge>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Auto-propagation for first domain (demo) */}
+                {domains.length > 0 && (
+                  <AutoDNSPropagation
+                    domain={domains[0]}
+                    hostingConfig={hostingConfig}
+                    onSuccess={(domain) => {
+                      toast.success(`✅ Auto-propagation completed for ${domain.domain}`);
+                      loadDomains(); // Refresh domains list
+                    }}
+                    onError={(error) => {
+                      toast.error(`Auto-propagation failed: ${error}`);
+                    }}
+                  />
+                )}
+
+                {/* Info about auto-propagation */}
+                <Alert>
+                  <Info className="h-4 w-4" />
+                  <AlertDescription>
+                    <div className="space-y-2">
+                      <p className="font-medium">How Auto-Propagation Works:</p>
+                      <ol className="list-decimal list-inside space-y-1 text-sm">
+                        <li>Automatically detects your domain registrar (Cloudflare, Namecheap, GoDaddy, etc.)</li>
+                        <li>Shows you exactly what DNS changes will be made</li>
+                        <li>Asks for confirmation before making any updates</li>
+                        <li>Uses secure API integration to update your DNS records</li>
+                        <li>Validates the changes immediately after propagation</li>
+                      </ol>
+                    </div>
+                  </AlertDescription>
+                </Alert>
+
+                {/* Supported Registrars */}
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h3 className="font-medium mb-3">Supported Registrars</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {[
+                      'Cloudflare',
+                      'Namecheap',
+                      'GoDaddy',
+                      'Route 53',
+                      'DigitalOcean',
+                      'Google Domains'
+                    ].map(registrar => (
+                      <div key={registrar} className="flex items-center gap-2 p-2 bg-white rounded border">
+                        <CheckCircle className="h-4 w-4 text-green-600" />
+                        <span className="text-sm">{registrar}</span>
+                      </div>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-600 mt-3">
+                    Other registrars supported with manual DNS setup
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Blog Template Management Section */}
         <div className="mt-8">
           <DomainBlogTemplateManager
