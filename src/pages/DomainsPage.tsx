@@ -919,10 +919,10 @@ anotherdomain.org`}
                             )}
                           </Button>
                           
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             size="sm"
-                            onClick={() => generatePages(domain.id)}
+                            onClick={safeAsync(() => generatePages(domain.id))}
                             disabled={domain.status !== 'active'}
                             title="Generate Pages"
                           >
