@@ -413,6 +413,7 @@ requestIdleCallback(() => {
   if (import.meta.env.DEV) {
     import('./utils/testBlogGeneration');
     import('./utils/setupDomainDatabase');
+    import('./utils/testDomainDatabase');
 
     // Quick content generation status check
     setTimeout(async () => {
