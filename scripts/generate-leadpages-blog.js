@@ -147,6 +147,7 @@ async function ensureDomainExists() {
   const { data: newDomain, error: createError } = await supabase
     .from('domains')
     .insert({
+      user_id: SYSTEM_USER_ID,
       domain: DOMAIN_NAME,
       status: 'active',
       dns_validated: true,
