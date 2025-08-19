@@ -10,10 +10,16 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-// Initialize Supabase
+// Initialize Supabase with service role key to bypass RLS
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
-  process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
+  process.env.VITE_SUPABASE_SERVICE_ROLE_KEY,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
 );
 
 const DOMAIN_ID = 'leadpages-org';
