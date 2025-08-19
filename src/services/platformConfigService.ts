@@ -16,6 +16,8 @@ export interface PublishingPlatform {
 /**
  * Central platform configuration - Single source of truth
  * When adding new platforms, only update this list
+ *
+ * NOTE: Currently simplified to only Telegraph.ph + Domain-based blogs
  */
 export const AVAILABLE_PLATFORMS: PublishingPlatform[] = [
   {
@@ -28,58 +30,13 @@ export const AVAILABLE_PLATFORMS: PublishingPlatform[] = [
     capabilities: ['html', 'anonymous']
   },
   {
-    id: 'writeas',
-    name: 'Write.as',
+    id: 'domains',
+    name: 'Your Domains',
     isActive: true,
     maxPostsPerCampaign: -1,
     priority: 2,
-    description: 'Minimalist publishing platform',
-    capabilities: ['markdown', 'anonymous']
-  },
-  {
-    id: 'medium',
-    name: 'Medium.com',
-    isActive: true,
-    maxPostsPerCampaign: -1,
-    priority: 3,
-    description: 'Professional publishing platform',
-    capabilities: ['html', 'account_required']
-  },
-  {
-    id: 'devto',
-    name: 'Dev.to',
-    isActive: true,
-    maxPostsPerCampaign: -1,
-    priority: 4,
-    description: 'Developer community platform',
-    capabilities: ['markdown', 'account_required']
-  },
-  {
-    id: 'linkedin',
-    name: 'LinkedIn Articles',
-    isActive: true,
-    maxPostsPerCampaign: -1,
-    priority: 5,
-    description: 'Professional network articles',
-    capabilities: ['html', 'account_required']
-  },
-  {
-    id: 'hashnode',
-    name: 'Hashnode',
-    isActive: true,
-    maxPostsPerCampaign: -1,
-    priority: 6,
-    description: 'Developer blogging platform',
-    capabilities: ['markdown', 'account_required']
-  },
-  {
-    id: 'substack',
-    name: 'Substack',
-    isActive: true,
-    maxPostsPerCampaign: -1,
-    priority: 7,
-    description: 'Newsletter and publishing platform',
-    capabilities: ['html', 'account_required']
+    description: 'Publish blogs on your connected domains',
+    capabilities: ['html', 'domain_based', 'custom_branding']
   }
 ];
 
