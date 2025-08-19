@@ -157,7 +157,11 @@ async function postComment(formData, content, account, dryRun) {
     };
   }
 
-  const browser = await chromium.launch({ 
+  if (!chromium) {
+    throw new Error('Browser automation not available - Playwright not installed');
+  }
+
+  const browser = await chromium.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
   });
