@@ -30,18 +30,23 @@ export class DomainBlogTemplateService {
    * Generate a blog post for domain publishing
    */
   static async generateBlogPost(
-    keywords: string[], 
-    targetUrl: string, 
-    brandName?: string
+    keywords: string[],
+    targetUrl: string,
+    brandName?: string,
+    themeId: string = 'minimal'
   ): Promise<BlogTemplate> {
     const primaryKeyword = keywords[0] || 'business growth';
     const slug = this.generateSlug(primaryKeyword);
     const title = this.generateTitle(primaryKeyword, brandName);
-    const content = this.generateBlogContent(keywords, targetUrl, brandName);
-    
+    const rawContent = this.generateBlogContent(keywords, targetUrl, brandName);
+
+    // Apply theme to content
+    const theme = BlogThemesService.getThemeById(themeId) || BlogThemesService.getDefaultTheme();
+    const themedContent = BlogThemesService.generateThemedBlogPost(rawContent, title, theme);
+
     return {
       title,
-      content,
+      content: themedContent,
       slug,
       meta_description: this.generateMetaDescription(primaryKeyword, brandName),
       keywords,
