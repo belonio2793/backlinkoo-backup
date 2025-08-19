@@ -90,6 +90,16 @@ export function DomainBlogTemplateManagerFixed({
     }
   }, [blogEnabledDomains]);
 
+  // Load theme data when domain changes
+  useEffect(() => {
+    if (selectedDomain && domainThemeRecords[selectedDomain]) {
+      const record = domainThemeRecords[selectedDomain];
+      console.log('🔄 Loading theme for domain:', selectedDomain, record.theme_id);
+      setSelectedTheme(record.theme_id);
+      setCustomStyles(record.custom_styles || {});
+    }
+  }, [selectedDomain, domainThemeRecords]);
+
   // Check database setup status
   useEffect(() => {
     const checkDatabaseStatus = async () => {
@@ -364,7 +374,7 @@ export function DomainBlogTemplateManagerFixed({
 
       // Fallback to localStorage if database save failed or we're in fallback mode
       if (!success) {
-        console.log('�� Attempting localStorage save...');
+        console.log('💾 Attempting localStorage save...');
         success = saveToLocalStorage(selectedDomain, selectedTheme, customStyles);
         if (success) {
           saveMethod = 'localStorage';
