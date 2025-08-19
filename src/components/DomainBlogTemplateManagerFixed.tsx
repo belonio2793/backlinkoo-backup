@@ -147,12 +147,6 @@ export function DomainBlogTemplateManagerFixed({
         }
 
         setDomainThemeRecords(themeRecords);
-
-        if (selectedDomain && themeRecords[selectedDomain]) {
-          setSelectedTheme(themeRecords[selectedDomain].theme_id);
-          setCustomStyles(themeRecords[selectedDomain].custom_styles || {});
-        }
-
         setSaveStatus({ isLoading: false, hasError: false });
 
       } catch (error) {
@@ -165,7 +159,7 @@ export function DomainBlogTemplateManagerFixed({
     };
 
     loadDomainThemes();
-  }, [blogEnabledDomains, selectedDomain, fallbackMode]);
+  }, [blogEnabledDomains, fallbackMode]);
 
   // Load settings from localStorage as fallback
   const loadFromLocalStorage = () => {
@@ -174,7 +168,7 @@ export function DomainBlogTemplateManagerFixed({
       if (savedSettings) {
         const settings = JSON.parse(savedSettings);
         setDomainThemeSettings(settings);
-        
+
         // Create theme records from localStorage
         const themeRecords: Record<string, DomainThemeRecord> = {};
         blogEnabledDomains.forEach(domain => {
@@ -192,11 +186,6 @@ export function DomainBlogTemplateManagerFixed({
           };
         });
         setDomainThemeRecords(themeRecords);
-
-        if (selectedDomain && themeRecords[selectedDomain]) {
-          setSelectedTheme(themeRecords[selectedDomain].theme_id);
-          setCustomStyles(themeRecords[selectedDomain].custom_styles || {});
-        }
       } else {
         // Initialize with defaults
         const fallbackRecords: Record<string, DomainThemeRecord> = {};
@@ -271,6 +260,7 @@ export function DomainBlogTemplateManagerFixed({
   };
 
   const handleThemeChange = (themeId: string) => {
+    console.log('🎨 Theme change:', themeId);
     setSelectedTheme(themeId);
     const theme = ImprovedBlogThemesService.getThemeById(themeId);
     if (theme) {
@@ -374,7 +364,7 @@ export function DomainBlogTemplateManagerFixed({
 
       // Fallback to localStorage if database save failed or we're in fallback mode
       if (!success) {
-        console.log('💾 Attempting localStorage save...');
+        console.log('�� Attempting localStorage save...');
         success = saveToLocalStorage(selectedDomain, selectedTheme, customStyles);
         if (success) {
           saveMethod = 'localStorage';
