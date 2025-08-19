@@ -623,57 +623,236 @@ export class BlogThemesService {
 
   private static getElegantCSS(): string {
     return `
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         font-family: {{BODY_FONT}};
-        line-height: 1.8;
+        line-height: 1.9;
         color: {{TEXT_COLOR}};
-        background-color: {{BACKGROUND_COLOR}};
+        background: {{BACKGROUND_COLOR}};
         margin: 0;
-        padding: 2rem;
+        padding: 0;
+        font-size: 17px;
+        letter-spacing: 0.01em;
       }
-      
+
       .elegant-container {
-        max-width: 600px;
+        max-width: 680px;
         margin: 0 auto;
+        padding: 4rem 2rem;
+        min-height: 100vh;
       }
-      
-      .post-header.centered {
+
+      .post-header {
         text-align: center;
-        margin-bottom: 4rem;
+        margin-bottom: 5rem;
+        position: relative;
       }
-      
-      .post-title.serif {
+
+      .post-category {
+        font-size: 0.85rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.15em;
+        color: {{ACCENT_COLOR}};
+        margin-bottom: 1.5rem;
+      }
+
+      .post-title {
         font-family: {{HEADING_FONT}};
-        font-size: 2.8rem;
+        font-size: clamp(2.5rem, 7vw, 4.5rem);
         font-weight: 400;
         color: {{PRIMARY_COLOR}};
-        margin: 0 0 1rem 0;
-        line-height: 1.3;
+        margin: 0 0 2rem 0;
+        line-height: 1.2;
+        letter-spacing: -0.02em;
+        font-style: italic;
       }
-      
+
+      .post-subtitle {
+        font-size: 1.3rem;
+        color: {{SECONDARY_COLOR}};
+        font-style: italic;
+        margin-bottom: 2.5rem;
+        line-height: 1.5;
+      }
+
       .divider {
-        width: 60px;
-        height: 2px;
-        background-color: {{ACCENT_COLOR}};
+        width: 80px;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, {{ACCENT_COLOR}} 50%, transparent 100%);
         margin: 0 auto;
       }
-      
-      .post-content.narrow {
-        max-width: 500px;
-        margin: 0 auto;
+
+      .post-meta {
+        margin-top: 2rem;
+        font-size: 0.95rem;
+        color: {{SECONDARY_COLOR}};
+        font-weight: 500;
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
       }
-      
+
+      .post-content {
+        max-width: 580px;
+        margin: 0 auto;
+        font-size: 1.2rem;
+        line-height: 1.8;
+      }
+
+      .post-content::first-letter {
+        font-family: {{HEADING_FONT}};
+        font-size: 4rem;
+        font-weight: 400;
+        color: {{PRIMARY_COLOR}};
+        float: left;
+        line-height: 3rem;
+        margin: 0.5rem 0.5rem 0 0;
+        font-style: italic;
+      }
+
       .post-content h2 {
         font-family: {{HEADING_FONT}};
-        font-size: 2rem;
+        font-size: 2.5rem;
+        color: {{PRIMARY_COLOR}};
+        margin: 4rem 0 2rem 0;
+        font-weight: 400;
+        line-height: 1.3;
+        text-align: center;
+        font-style: italic;
+        position: relative;
+      }
+
+      .post-content h2::after {
+        content: '';
+        position: absolute;
+        bottom: -1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 1px;
+        background: {{ACCENT_COLOR}};
+      }
+
+      .post-content h3 {
+        font-family: {{HEADING_FONT}};
+        font-size: 1.8rem;
         color: {{PRIMARY_COLOR}};
         margin: 3rem 0 1.5rem 0;
         font-weight: 400;
+        font-style: italic;
       }
-      
+
       .post-content p {
-        margin-bottom: 2rem;
-        font-size: 1.1rem;
+        margin-bottom: 2.5rem;
+        color: {{TEXT_COLOR}};
+        text-align: justify;
+        hyphens: auto;
+      }
+
+      .post-content a {
+        color: {{ACCENT_COLOR}};
+        text-decoration: none;
+        font-weight: 500;
+        border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+        transition: all 0.3s ease;
+      }
+
+      .post-content a:hover {
+        color: {{PRIMARY_COLOR}};
+        border-bottom-color: {{PRIMARY_COLOR}};
+      }
+
+      .post-content blockquote {
+        margin: 3rem 0;
+        padding: 0;
+        background: none;
+        border: none;
+        font-family: {{HEADING_FONT}};
+        font-size: 1.5rem;
+        font-style: italic;
+        color: {{PRIMARY_COLOR}};
+        text-align: center;
+        line-height: 1.6;
+        position: relative;
+      }
+
+      .post-content blockquote::before {
+        content: '"';
+        font-size: 4rem;
+        color: {{ACCENT_COLOR}};
+        position: absolute;
+        top: -1rem;
+        left: 50%;
+        transform: translateX(-50%);
+        font-family: Georgia, serif;
+      }
+
+      .post-content blockquote::after {
+        content: '';
+        position: absolute;
+        bottom: -1.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 1px;
+        background: {{ACCENT_COLOR}};
+      }
+
+      .post-content ul, .post-content ol {
+        margin: 2.5rem 0;
+        padding-left: 0;
+        list-style: none;
+      }
+
+      .post-content ul li {
+        position: relative;
+        margin-bottom: 1rem;
+        padding-left: 2rem;
+      }
+
+      .post-content ul li::before {
+        content: '◆';
+        position: absolute;
+        left: 0;
+        color: {{ACCENT_COLOR}};
+        font-size: 0.8rem;
+      }
+
+      .pull-quote {
+        font-family: {{HEADING_FONT}};
+        font-size: 1.8rem;
+        font-style: italic;
+        color: {{PRIMARY_COLOR}};
+        text-align: center;
+        margin: 4rem 0;
+        padding: 2rem 0;
+        border-top: 1px solid {{ACCENT_COLOR}};
+        border-bottom: 1px solid {{ACCENT_COLOR}};
+        line-height: 1.4;
+      }
+
+      @media (max-width: 768px) {
+        .elegant-container {
+          padding: 3rem 1.5rem;
+        }
+
+        .post-content {
+          font-size: 1.1rem;
+        }
+
+        .post-content::first-letter {
+          font-size: 3rem;
+          line-height: 2.5rem;
+        }
+
+        .post-meta {
+          flex-direction: column;
+          gap: 0.5rem;
+        }
       }
     `;
   }
