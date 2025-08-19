@@ -297,52 +297,122 @@ export class BlogThemesService {
   // CSS styles for each theme
   private static getMinimalCSS(): string {
     return `
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         font-family: {{BODY_FONT}};
-        line-height: 1.7;
+        line-height: 1.8;
         color: {{TEXT_COLOR}};
         background-color: {{BACKGROUND_COLOR}};
         margin: 0;
-        padding: 20px;
+        padding: 0;
+        font-size: 16px;
+        font-weight: 400;
+        letter-spacing: -0.01em;
       }
-      
+
       .blog-post {
-        max-width: 650px;
+        max-width: 700px;
         margin: 0 auto;
+        padding: 3rem 2rem;
+        min-height: 100vh;
       }
-      
+
       .post-header {
-        text-align: center;
-        margin-bottom: 3rem;
+        text-align: left;
+        margin-bottom: 4rem;
+        padding-bottom: 2rem;
+        border-bottom: 1px solid #f1f5f9;
       }
-      
+
       .post-title {
         font-family: {{HEADING_FONT}};
-        font-size: 2.5rem;
-        font-weight: 700;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 600;
         color: {{PRIMARY_COLOR}};
-        margin: 0;
-        line-height: 1.2;
+        margin: 0 0 1rem 0;
+        line-height: 1.1;
+        letter-spacing: -0.025em;
       }
-      
+
+      .post-meta {
+        font-size: 0.9rem;
+        color: {{SECONDARY_COLOR}};
+        margin-top: 0.5rem;
+      }
+
+      .post-content {
+        font-size: 1.125rem;
+        max-width: 65ch;
+      }
+
       .post-content h2 {
         font-family: {{HEADING_FONT}};
-        font-size: 1.8rem;
+        font-size: 2rem;
+        font-weight: 600;
+        color: {{PRIMARY_COLOR}};
+        margin: 3rem 0 1.5rem 0;
+        line-height: 1.3;
+        letter-spacing: -0.02em;
+      }
+
+      .post-content h3 {
+        font-family: {{HEADING_FONT}};
+        font-size: 1.5rem;
+        font-weight: 600;
         color: {{PRIMARY_COLOR}};
         margin: 2.5rem 0 1rem 0;
+        line-height: 1.4;
       }
-      
+
       .post-content p {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.75rem;
+        color: {{TEXT_COLOR}};
       }
-      
+
       .post-content a {
         color: {{ACCENT_COLOR}};
         text-decoration: none;
+        border-bottom: 1px solid transparent;
+        transition: border-color 0.2s ease;
       }
-      
+
       .post-content a:hover {
-        text-decoration: underline;
+        border-bottom-color: {{ACCENT_COLOR}};
+      }
+
+      .post-content blockquote {
+        margin: 2rem 0;
+        padding: 1.5rem 2rem;
+        background: #f8fafc;
+        border-left: 4px solid {{ACCENT_COLOR}};
+        font-style: italic;
+        color: {{SECONDARY_COLOR}};
+      }
+
+      .post-content ul, .post-content ol {
+        margin: 1.5rem 0;
+        padding-left: 1.5rem;
+      }
+
+      .post-content li {
+        margin-bottom: 0.5rem;
+      }
+
+      @media (max-width: 768px) {
+        .blog-post {
+          padding: 2rem 1.5rem;
+        }
+
+        .post-header {
+          margin-bottom: 3rem;
+        }
+
+        .post-content {
+          font-size: 1rem;
+        }
       }
     `;
   }
