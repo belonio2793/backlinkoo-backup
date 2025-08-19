@@ -1102,7 +1102,7 @@ anotherdomain.org`}
                                   </div>
                                 ))}
 
-                                <div className="text-center pt-4">
+                                <div className="text-center pt-4 space-y-3">
                                   <Button
                                     onClick={safeAsync(() => validateDomain(domain.id))}
                                     disabled={validatingDomains.has(domain.id)}
@@ -1114,6 +1114,43 @@ anotherdomain.org`}
                                     )}
                                     Validate DNS Records
                                   </Button>
+
+                                  {dnsServiceStatus === 'offline' && (
+                                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                      <h4 className="font-medium text-yellow-900 mb-2 flex items-center gap-2">
+                                        <AlertTriangle className="h-4 w-4" />
+                                        Manual DNS Propagation Check
+                                      </h4>
+                                      <div className="text-sm text-yellow-800 space-y-2">
+                                        <p>DNS validation service is unavailable. Check propagation manually:</p>
+                                        <ul className="list-disc list-inside space-y-1 text-xs">
+                                          {DNSValidationService.getManualPropagationInstructions(domain.domain).map((instruction, i) => (
+                                            <li key={i}>{instruction}</li>
+                                          ))}
+                                        </ul>
+                                        <div className="flex gap-2 mt-3">
+                                          <a
+                                            href={`https://whatsmydns.net/#A/${domain.domain}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-600 text-white text-xs rounded hover:bg-yellow-700"
+                                          >
+                                            <ExternalLink className="h-3 w-3" />
+                                            Check A Record
+                                          </a>
+                                          <a
+                                            href={`https://whatsmydns.net/#TXT/${domain.domain}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-600 text-white text-xs rounded hover:bg-yellow-700"
+                                          >
+                                            <ExternalLink className="h-3 w-3" />
+                                            Check TXT Record
+                                          </a>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             </DialogContent>
