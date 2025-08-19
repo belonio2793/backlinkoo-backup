@@ -766,7 +766,18 @@ const DomainsPage = () => {
                 <Info className="h-4 w-4 text-amber-600" />
                 <AlertDescription className="text-amber-800">
                   <div className="space-y-2">
-                    <p className="font-medium text-sm">Domain Blog Database Setup</p>
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium text-sm">Domain Blog Database Setup</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={checkDomainBlogThemesTable}
+                        className="h-6 text-xs"
+                      >
+                        <RefreshCw className="h-3 w-3 mr-1" />
+                        Recheck
+                      </Button>
+                    </div>
                     <p className="text-xs">
                       Blog themes may run in fallback mode. For full functionality, ensure the domain_blog_themes table is created in Supabase.
                     </p>
