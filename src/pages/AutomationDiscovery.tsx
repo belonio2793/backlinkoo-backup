@@ -509,6 +509,17 @@ const AutomationDiscovery = () => {
           </TabsContent>
 
           <TabsContent value="results" className="space-y-6">
+            {/* URL Validation Section */}
+            <UrlValidator
+              results={discoveryResults}
+              onValidationComplete={(validatedResults) => {
+                // Update results with validation data
+                console.log('Validation complete:', validatedResults);
+              }}
+            />
+
+            <Separator />
+
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-2">
@@ -526,7 +537,7 @@ const AutomationDiscovery = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   <Label htmlFor="min-score">Min Score</Label>
                   <Input
