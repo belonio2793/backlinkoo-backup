@@ -51,14 +51,28 @@ export class DomainBlogTemplateService {
         .eq('is_active', true)
         .single();
 
-      if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-        const errorMessage = error.message || error.details || JSON.stringify(error);
-        console.error('Error fetching domain theme:', errorMessage, error);
-        throw new Error(`Failed to fetch domain theme: ${errorMessage}`);
+      if (error) {
+        // Handle missing table gracefully
+        if (error.code === '42P01') { // Table does not exist
+          console.warn('⚠️ domain_blog_themes table does not exist. Using default theme.');
+          return this.createDefaultThemeRecord(domainId);
+        }
+
+        if (error.code !== 'PGRST116') { // PGRST116 = no rows returned
+          const errorMessage = error.message || error.details || JSON.stringify(error);
+          console.error('Error fetching domain theme:', errorMessage, error);
+          throw new Error(`Failed to fetch domain theme: ${errorMessage}`);
+        }
       }
 
       return data;
     } catch (error) {
+      // Handle network errors and missing table
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        console.warn('⚠️ Network error accessing domain themes. Using default theme.');
+        return this.createDefaultThemeRecord(domainId);
+      }
+
       const errorMessage = error instanceof Error ? error.message :
                           error && typeof error === 'object' ? JSON.stringify(error) :
                           String(error);
