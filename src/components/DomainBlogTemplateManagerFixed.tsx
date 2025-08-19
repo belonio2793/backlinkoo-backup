@@ -815,15 +815,25 @@ export function DomainBlogTemplateManagerFixed({
                   </DialogTitle>
                 </DialogHeader>
                 <div className="flex justify-center p-4 bg-gray-100 rounded-lg">
-                  <div 
+                  <div
                     className="bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300"
                     style={getDevicePreviewStyle()}
                   >
-                    <iframe
-                      srcDoc={previewHtml}
-                      className="w-full h-full border-0"
-                      title="Theme Preview"
-                    />
+                    <div className="w-full h-full overflow-auto">
+                      <BlogTemplatePreview
+                        themeId={selectedTheme}
+                        customStyles={customStyles as Partial<ThemeStyles>}
+                        title="Sample Blog Post"
+                        onError={(error) => {
+                          console.error('Preview error:', error);
+                          toast({
+                            title: "Preview Error",
+                            description: "Failed to generate theme preview",
+                            variant: "destructive"
+                          });
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </DialogContent>
