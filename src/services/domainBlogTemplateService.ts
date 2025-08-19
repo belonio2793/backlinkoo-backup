@@ -122,17 +122,20 @@ export class DomainBlogTemplateService {
 
       return true;
     } catch (error) {
-      // Handle network errors
+      // Handle network errors gracefully - return false to trigger localStorage fallback
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        console.warn('⚠️ Network error setting domain theme. Using default configuration.');
-        return true; // Pretend success for now
+        console.warn('⚠️ Network error setting domain theme. Triggering localStorage fallback.');
+        return false; // Return false to trigger localStorage fallback
       }
 
-      const errorMessage = error instanceof Error ? error.message :
-                          error && typeof error === 'object' ? JSON.stringify(error) :
-                          String(error);
-      console.error('Error in setDomainTheme:', errorMessage, error);
-      throw error;
+      if (error instanceof Error && error.message.includes('fetch')) {
+        console.warn('⚠️ Database connection failed. Triggering localStorage fallback.');
+        return false; // Return false to trigger localStorage fallback
+      }
+
+      // For any network-related errors, trigger fallback instead of throwing
+      console.warn('⚠️ Database operation failed. Triggering localStorage fallback:', error);
+      return false; // Return false to trigger localStorage fallback
     }
   }
 
