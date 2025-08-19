@@ -57,6 +57,30 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { NetworkStatus } from '@/components/NetworkStatus';
 
+// Global error handler for unhandled promise rejections
+if (typeof window !== 'undefined') {
+  window.addEventListener('unhandledrejection', (event) => {
+    console.error('🚨 Unhandled Promise Rejection:', event.reason);
+
+    // Extract meaningful error message
+    let errorMessage = 'An unexpected error occurred';
+
+    if (event.reason instanceof Error) {
+      errorMessage = event.reason.message;
+    } else if (typeof event.reason === 'string') {
+      errorMessage = event.reason;
+    } else if (event.reason && typeof event.reason === 'object') {
+      errorMessage = event.reason.message || JSON.stringify(event.reason);
+    }
+
+    // Show user-friendly error
+    toast.error(`System Error: ${errorMessage}`);
+
+    // Prevent the default handling (console error)
+    event.preventDefault();
+  });
+}
+
 interface Domain {
   id: string;
   domain: string;
@@ -401,7 +425,7 @@ const DomainsPage = () => {
 
   const validateDomain = async (domainId: string) => {
     setValidatingDomains(prev => new Set(prev).add(domainId));
-    
+
     try {
       const response = await fetch('/.netlify/functions/validate-domain', {
         method: 'POST',
@@ -411,23 +435,54 @@ const DomainsPage = () => {
         body: JSON.stringify({ domain_id: domainId })
       });
 
-      const result = await response.json();
-      
+      // Check if response is ok before reading body
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      // Read response body only once
+      let result;
+      try {
+        result = await response.json();
+      } catch (parseError: any) {
+        throw new Error('Invalid response from validation service');
+      }
+
       if (result.success) {
         if (result.validated) {
           toast.success(`Domain ${result.domain} validated successfully!`);
         } else {
           toast.warning(`Domain ${result.domain} validation failed. Check DNS records.`);
         }
-        
-        await loadDomains();
+
+        // Reload domains to get updated status
+        try {
+          await loadDomains();
+        } catch (loadError: any) {
+          console.warn('Failed to reload domains after validation:', loadError);
+          // Don't throw - validation succeeded even if reload failed
+        }
       } else {
-        throw new Error(result.message || 'Validation failed');
+        const errorMsg = typeof result.message === 'string' ? result.message : 'Validation failed';
+        throw new Error(errorMsg);
       }
 
     } catch (error: any) {
       console.error('Validation error:', error);
-      const errorMessage = error?.message || 'Unknown validation error';
+
+      // Handle different error types
+      let errorMessage = 'Unknown validation error';
+
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        errorMessage = 'Network error: Please check your connection';
+      } else if (error instanceof TypeError && error.message.includes('body stream already read')) {
+        errorMessage = 'Request processing error: Please try again';
+      } else if (error.name === 'AbortError') {
+        errorMessage = 'Request timeout: Please try again';
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+
       toast.error(`Validation failed: ${errorMessage}`);
     } finally {
       setValidatingDomains(prev => {
