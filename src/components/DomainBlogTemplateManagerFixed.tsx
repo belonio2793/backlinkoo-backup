@@ -262,10 +262,10 @@ export function DomainBlogTemplateManagerFixed({
   }, [selectedTheme, customStyles]);
 
   const generatePreview = () => {
-    const theme = BlogThemesService.getThemeById(selectedTheme);
+    const theme = ImprovedBlogThemesService.getThemeById(selectedTheme);
     if (theme) {
-      const html = BlogThemesService.generateThemePreview(theme);
-      setPreviewHtml(html);
+      // Preview is now handled by BlogTemplatePreview component
+      console.log('Theme selected:', theme.name);
     }
   };
 
