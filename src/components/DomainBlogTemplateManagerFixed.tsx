@@ -559,50 +559,104 @@ export function DomainBlogTemplateManagerFixed({
           </div>
 
           {/* Theme Selection */}
-          <div className="space-y-4">
-            <Label>Choose Theme</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <Label className="text-lg font-semibold">Choose Theme</Label>
+              <Badge variant="outline" className="text-xs">
+                {allThemes.length} themes available
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {allThemes.map(theme => (
-                <Card 
-                  key={theme.id} 
-                  className={`cursor-pointer transition-all ${
-                    selectedTheme === theme.id 
-                      ? 'ring-2 ring-blue-500 border-blue-500' 
+                <Card
+                  key={theme.id}
+                  className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                    selectedTheme === theme.id
+                      ? 'ring-2 ring-blue-500 border-blue-500 shadow-md'
                       : 'hover:border-gray-300'
                   }`}
                   onClick={() => handleThemeChange(theme.id)}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h4 className="font-medium">{theme.name}</h4>
-                        <p className="text-sm text-gray-600">{theme.description}</p>
+                  {/* Theme Preview */}
+                  <div className="relative h-32 overflow-hidden rounded-t-lg">
+                    <div
+                      className="absolute inset-0 p-3 text-xs"
+                      style={{
+                        backgroundColor: theme.styles.backgroundColor,
+                        color: theme.styles.textColor,
+                        fontFamily: theme.styles.bodyFont
+                      }}
+                    >
+                      <div
+                        className="font-bold mb-1"
+                        style={{
+                          color: theme.styles.primaryColor,
+                          fontFamily: theme.styles.headingFont
+                        }}
+                      >
+                        Sample Title
                       </div>
-                      {selectedTheme === theme.id && (
-                        <Badge className="bg-blue-100 text-blue-800">Selected</Badge>
-                      )}
+                      <div className="text-xs opacity-75 mb-2">
+                        This is how your content will look with this theme...
+                      </div>
+                      <div
+                        className="w-8 h-1 rounded"
+                        style={{ backgroundColor: theme.styles.accentColor }}
+                      />
                     </div>
-                    <div className="flex gap-2 flex-wrap">
-                      {theme.features.map(feature => (
-                        <Badge key={feature} variant="outline" className="text-xs">
+
+                    {selectedTheme === theme.id && (
+                      <div className="absolute top-2 right-2">
+                        <Badge className="bg-blue-600 text-white text-xs px-2 py-1">
+                          Selected
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+
+                  <CardContent className="p-4">
+                    <div className="mb-3">
+                      <h4 className="font-semibold text-base mb-1">{theme.name}</h4>
+                      <p className="text-sm text-gray-600 leading-relaxed">{theme.description}</p>
+                    </div>
+
+                    {/* Features */}
+                    <div className="flex gap-1 flex-wrap mb-3">
+                      {theme.features.slice(0, 3).map(feature => (
+                        <Badge key={feature} variant="secondary" className="text-xs px-2 py-0.5">
                           {feature.replace('_', ' ')}
                         </Badge>
                       ))}
+                      {theme.features.length > 3 && (
+                        <Badge variant="outline" className="text-xs px-2 py-0.5">
+                          +{theme.features.length - 3} more
+                        </Badge>
+                      )}
                     </div>
-                    <div className="mt-3 flex items-center gap-2">
-                      <div 
-                        className="w-4 h-4 rounded-full border"
-                        style={{ backgroundColor: theme.styles.primaryColor }}
-                        title="Primary Color"
-                      />
-                      <div 
-                        className="w-4 h-4 rounded-full border"
-                        style={{ backgroundColor: theme.styles.accentColor }}
-                        title="Accent Color"
-                      />
-                      <span className="text-xs text-gray-500 ml-auto">
-                        {theme.layout.contentWidth} • {theme.layout.spacing}
-                      </span>
+
+                    {/* Color Palette and Layout Info */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-3 h-3 rounded-full border border-gray-200"
+                          style={{ backgroundColor: theme.styles.primaryColor }}
+                          title="Primary Color"
+                        />
+                        <div
+                          className="w-3 h-3 rounded-full border border-gray-200"
+                          style={{ backgroundColor: theme.styles.accentColor }}
+                          title="Accent Color"
+                        />
+                        <div
+                          className="w-3 h-3 rounded-full border border-gray-200"
+                          style={{ backgroundColor: theme.styles.backgroundColor }}
+                          title="Background Color"
+                        />
+                      </div>
+                      <div className="text-xs text-gray-500 capitalize">
+                        {theme.layout.contentWidth} · {theme.layout.spacing}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
