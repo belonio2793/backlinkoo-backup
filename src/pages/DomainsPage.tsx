@@ -6,7 +6,14 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
-import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   Table,
   TableBody,
@@ -15,6 +22,13 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 import { 
   Globe, 
   Plus, 
@@ -29,7 +43,12 @@ import {
   Terminal,
   Trash2,
   Upload,
-  Download
+  Download,
+  Settings,
+  Play,
+  Pause,
+  Edit3,
+  Save
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -55,6 +74,18 @@ interface Domain {
   created_at: string;
   required_a_record?: string;
   required_cname?: string;
+  hosting_provider?: string;
+  blog_subdirectory?: string;
+  auto_retry_count?: number;
+  max_retries?: number;
+}
+
+interface HostingConfig {
+  ip: string;
+  cname: string;
+  provider: string;
+  autoSSL: boolean;
+  defaultSubdirectory: string;
 }
 
 const DomainsPage = () => {
@@ -67,13 +98,17 @@ const DomainsPage = () => {
   const [addingBulk, setAddingBulk] = useState(false);
   const [validatingDomains, setValidatingDomains] = useState<Set<string>>(new Set());
   const [showBulkAdd, setShowBulkAdd] = useState(false);
+  const [editingDomain, setEditingDomain] = useState<string | null>(null);
+  const [showConfig, setShowConfig] = useState(false);
 
-  // Hosting configuration - replace with your actual values
-  const HOSTING_CONFIG = {
+  // Hosting configuration - editable
+  const [hostingConfig, setHostingConfig] = useState<HostingConfig>({
     ip: '192.168.1.100', // Replace with your actual hosting IP
     cname: 'hosting.backlinkoo.com', // Replace with your actual CNAME target
-    domain: 'backlinkoo.com' // Your main domain
-  };
+    provider: 'backlinkoo',
+    autoSSL: true,
+    defaultSubdirectory: 'blog'
+  });
 
   useEffect(() => {
     if (user?.id) {
@@ -89,7 +124,15 @@ const DomainsPage = () => {
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error loading domains:', error);
+        const errorMessage = typeof error === 'string' ? error : 
+                           error?.message || 
+                           error?.details || 
+                           'Unknown error occurred';
+        throw new Error(errorMessage);
+      }
+      
       setDomains(data || []);
     } catch (error: any) {
       console.error('Error loading domains:', error);
@@ -115,7 +158,7 @@ const DomainsPage = () => {
 
   const addSingleDomain = async (domainName: string) => {
     const domain = cleanDomain(domainName);
-
+    
     if (!validateDomainFormat(domain)) {
       throw new Error(`Invalid domain format: ${domainName}`);
     }
@@ -127,22 +170,26 @@ const DomainsPage = () => {
           user_id: user?.id,
           domain,
           status: 'pending',
-          required_a_record: HOSTING_CONFIG.ip,
-          required_cname: HOSTING_CONFIG.cname
+          required_a_record: hostingConfig.ip,
+          required_cname: hostingConfig.cname,
+          hosting_provider: hostingConfig.provider,
+          blog_subdirectory: hostingConfig.defaultSubdirectory,
+          ssl_enabled: hostingConfig.autoSSL,
+          blog_enabled: false
         })
         .select()
         .single();
 
       if (error) {
         console.error('Supabase error adding domain:', error);
-
+        
         // Handle Supabase error object properly
-        const errorMessage = typeof error === 'string' ? error :
-                           error?.message ||
-                           error?.details ||
+        const errorMessage = typeof error === 'string' ? error : 
+                           error?.message || 
+                           error?.details || 
                            error?.hint ||
                            JSON.stringify(error);
-
+        
         if (error.code === '23505') {
           throw new Error(`Domain ${domain} already exists`);
         }
@@ -161,7 +208,7 @@ const DomainsPage = () => {
         if (errorMessage?.includes('permission')) {
           throw new Error(`Permission denied: Please check your access rights`);
         }
-
+        
         // Generic error with helpful message
         throw new Error(`Failed to add domain: ${errorMessage}`);
       }
@@ -173,14 +220,14 @@ const DomainsPage = () => {
       return data;
     } catch (networkError: any) {
       console.error('Network error adding domain:', networkError);
-
+      
       // Handle error object properly
       const errorMessage = typeof networkError === 'string' ? networkError :
                           networkError?.message ||
                           networkError?.details ||
                           networkError?.toString() ||
                           'Unknown error';
-
+      
       if (errorMessage.includes('Failed to fetch')) {
         throw new Error('Network connection failed. Please check your internet connection and try again.');
       }
@@ -193,12 +240,12 @@ const DomainsPage = () => {
       if (errorMessage.includes('body stream already read')) {
         throw new Error('Request processing error. Please refresh the page and try again.');
       }
-
+      
       // Re-throw if it's already a formatted error
       if (networkError instanceof Error && networkError.message && !networkError.message.includes('[object Object]')) {
         throw networkError;
       }
-
+      
       // Fallback for unknown errors
       throw new Error(`Unexpected error adding domain: ${domain}. Error: ${errorMessage}`);
     }
@@ -275,6 +322,42 @@ const DomainsPage = () => {
     }
   };
 
+  const updateDomain = async (domainId: string, updates: Partial<Domain>) => {
+    try {
+      const { error } = await supabase
+        .from('domains')
+        .update(updates)
+        .eq('id', domainId);
+
+      if (error) {
+        console.error('Error updating domain:', error);
+        const errorMessage = typeof error === 'string' ? error : 
+                           error?.message || 
+                           error?.details || 
+                           'Unknown error occurred';
+        throw new Error(errorMessage);
+      }
+
+      setDomains(prev => prev.map(d => 
+        d.id === domainId ? { ...d, ...updates } : d
+      ));
+      
+      toast.success('Domain updated successfully');
+    } catch (error: any) {
+      console.error('Error updating domain:', error);
+      const errorMessage = error?.message || 'Unknown error occurred';
+      toast.error(`Failed to update domain: ${errorMessage}`);
+    }
+  };
+
+  const toggleBlogEnabled = async (domainId: string, enabled: boolean) => {
+    await updateDomain(domainId, { blog_enabled: enabled });
+  };
+
+  const toggleSSL = async (domainId: string, enabled: boolean) => {
+    await updateDomain(domainId, { ssl_enabled: enabled });
+  };
+
   const deleteDomain = async (domainId: string, domainName: string) => {
     if (!confirm(`Are you sure you want to delete ${domainName}?`)) {
       return;
@@ -286,7 +369,14 @@ const DomainsPage = () => {
         .delete()
         .eq('id', domainId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting domain:', error);
+        const errorMessage = typeof error === 'string' ? error : 
+                           error?.message || 
+                           error?.details || 
+                           'Unknown error occurred';
+        throw new Error(errorMessage);
+      }
 
       setDomains(prev => prev.filter(d => d.id !== domainId));
       toast.success(`Domain ${domainName} deleted successfully`);
@@ -334,6 +424,11 @@ const DomainsPage = () => {
         return newSet;
       });
     }
+  };
+
+  const generatePages = async (domainId: string) => {
+    // Placeholder for page generation functionality
+    toast.info('Page generation feature coming soon!');
   };
 
   const copyToClipboard = (text: string) => {
@@ -385,7 +480,7 @@ const DomainsPage = () => {
     {
       type: 'A',
       name: '@',
-      value: HOSTING_CONFIG.ip,
+      value: hostingConfig.ip,
       description: 'Points your domain to our hosting server',
       validated: domain.a_record_validated
     },
@@ -406,9 +501,9 @@ const DomainsPage = () => {
   ];
 
   const exportDomains = () => {
-    const csv = ['Domain,Status,Created,Pages Published']
+    const csv = ['Domain,Status,Created,Pages Published,Blog Enabled,SSL Enabled']
       .concat(domains.map(d => 
-        `${d.domain},${d.status},${new Date(d.created_at).toLocaleDateString()},${d.pages_published}`
+        `${d.domain},${d.status},${new Date(d.created_at).toLocaleDateString()},${d.pages_published},${d.blog_enabled},${d.ssl_enabled}`
       ))
       .join('\n');
     
@@ -447,17 +542,83 @@ const DomainsPage = () => {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
             <Globe className="h-10 w-10 text-blue-600" />
-            Domain Manager
+            Domain Hosting Manager
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Add and manage domains for automated content publishing. Bulk add dozens of domains seamlessly.
+            Add, configure, and manage domains for automated content publishing. Full hosting control with executable page generation.
           </p>
-
+          
           {/* Network Status */}
           <div className="mt-6 max-w-lg mx-auto">
             <NetworkStatus onRetry={loadDomains} />
           </div>
         </div>
+
+        {/* Hosting Configuration */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Hosting Configuration
+              </span>
+              <Button variant="outline" size="sm" onClick={() => setShowConfig(!showConfig)}>
+                {showConfig ? 'Hide' : 'Show'} Config
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          {showConfig && (
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="hosting-ip">Hosting IP Address</Label>
+                  <Input
+                    id="hosting-ip"
+                    value={hostingConfig.ip}
+                    onChange={(e) => setHostingConfig(prev => ({ ...prev, ip: e.target.value }))}
+                    placeholder="192.168.1.100"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="hosting-cname">CNAME Target</Label>
+                  <Input
+                    id="hosting-cname"
+                    value={hostingConfig.cname}
+                    onChange={(e) => setHostingConfig(prev => ({ ...prev, cname: e.target.value }))}
+                    placeholder="hosting.backlinkoo.com"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="hosting-provider">Provider</Label>
+                  <Input
+                    id="hosting-provider"
+                    value={hostingConfig.provider}
+                    onChange={(e) => setHostingConfig(prev => ({ ...prev, provider: e.target.value }))}
+                    placeholder="backlinkoo"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="default-subdirectory">Default Blog Subdirectory</Label>
+                  <Input
+                    id="default-subdirectory"
+                    value={hostingConfig.defaultSubdirectory}
+                    onChange={(e) => setHostingConfig(prev => ({ ...prev, defaultSubdirectory: e.target.value }))}
+                    placeholder="blog"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="auto-ssl"
+                  checked={hostingConfig.autoSSL}
+                  onCheckedChange={(checked) => setHostingConfig(prev => ({ ...prev, autoSSL: checked }))}
+                />
+                <Label htmlFor="auto-ssl">Enable Auto SSL for new domains</Label>
+              </div>
+            </CardContent>
+          )}
+        </Card>
 
         {/* Quick Add Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -599,6 +760,7 @@ anotherdomain.org`}
                     <TableHead>Domain</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>DNS Records</TableHead>
+                    <TableHead>Hosting</TableHead>
                     <TableHead>Stats</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -621,12 +783,6 @@ anotherdomain.org`}
                       <TableCell>
                         <div className="space-y-1">
                           {getStatusBadge(domain)}
-                          {domain.blog_enabled && (
-                            <Badge variant="outline" className="text-green-600 text-xs">
-                              <Terminal className="w-3 h-3 mr-1" />
-                              Blog Active
-                            </Badge>
-                          )}
                         </div>
                       </TableCell>
                       
@@ -635,6 +791,27 @@ anotherdomain.org`}
                           <div className={`w-3 h-3 rounded-full ${domain.a_record_validated ? 'bg-green-500' : 'bg-gray-300'}`} title="A Record" />
                           <div className={`w-3 h-3 rounded-full ${domain.txt_record_validated ? 'bg-green-500' : 'bg-gray-300'}`} title="TXT Record" />
                           <div className={`w-3 h-3 rounded-full ${domain.cname_validated ? 'bg-green-500' : 'bg-gray-300'}`} title="CNAME Record" />
+                        </div>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={domain.blog_enabled}
+                              onCheckedChange={(checked) => toggleBlogEnabled(domain.id, checked)}
+                              size="sm"
+                            />
+                            <span className="text-xs">Blog</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Switch
+                              checked={domain.ssl_enabled}
+                              onCheckedChange={(checked) => toggleSSL(domain.id, checked)}
+                              size="sm"
+                            />
+                            <span className="text-xs">SSL</span>
+                          </div>
                         </div>
                       </TableCell>
                       
@@ -651,6 +828,7 @@ anotherdomain.org`}
                             size="sm"
                             onClick={() => validateDomain(domain.id)}
                             disabled={validatingDomains.has(domain.id)}
+                            title="Validate DNS"
                           >
                             {validatingDomains.has(domain.id) ? (
                               <Loader2 className="h-3 w-3 animate-spin" />
@@ -659,8 +837,18 @@ anotherdomain.org`}
                             )}
                           </Button>
                           
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => generatePages(domain.id)}
+                            disabled={domain.status !== 'active'}
+                            title="Generate Pages"
+                          >
+                            <Play className="h-3 w-3" />
+                          </Button>
+                          
                           {domain.status === 'active' && (
-                            <Button variant="outline" size="sm" asChild>
+                            <Button variant="outline" size="sm" asChild title="Visit Domain">
                               <a href={`https://${domain.domain}`} target="_blank" rel="noopener noreferrer">
                                 <ExternalLink className="h-3 w-3" />
                               </a>
@@ -671,6 +859,7 @@ anotherdomain.org`}
                             variant="outline" 
                             size="sm"
                             onClick={() => deleteDomain(domain.id, domain.domain)}
+                            title="Delete Domain"
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -707,13 +896,13 @@ anotherdomain.org`}
                     <h4 className="font-semibold text-blue-900 mb-2">A Record</h4>
                     <div className="font-mono text-sm">
                       <div>Name: @</div>
-                      <div>Value: {HOSTING_CONFIG.ip}</div>
+                      <div>Value: {hostingConfig.ip}</div>
                     </div>
                     <Button 
                       variant="outline" 
                       size="sm" 
                       className="mt-2"
-                      onClick={() => copyToClipboard(HOSTING_CONFIG.ip)}
+                      onClick={() => copyToClipboard(hostingConfig.ip)}
                     >
                       <Copy className="h-3 w-3 mr-1" />
                       Copy IP
@@ -724,13 +913,13 @@ anotherdomain.org`}
                     <h4 className="font-semibold text-green-900 mb-2">CNAME Record</h4>
                     <div className="font-mono text-sm">
                       <div>Name: www</div>
-                      <div>Value: {HOSTING_CONFIG.cname}</div>
+                      <div>Value: {hostingConfig.cname}</div>
                     </div>
                     <Button 
                       variant="outline" 
                       size="sm" 
                       className="mt-2"
-                      onClick={() => copyToClipboard(HOSTING_CONFIG.cname)}
+                      onClick={() => copyToClipboard(hostingConfig.cname)}
                     >
                       <Copy className="h-3 w-3 mr-1" />
                       Copy CNAME
