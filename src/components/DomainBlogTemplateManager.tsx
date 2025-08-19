@@ -203,10 +203,13 @@ export function DomainBlogTemplateManager({
         throw new Error('Failed to save theme to database');
       }
     } catch (error) {
-      console.error('Error saving theme:', error);
+      const errorMessage = error instanceof Error ? error.message :
+                          error && typeof error === 'object' ? JSON.stringify(error) :
+                          String(error);
+      console.error('Error saving theme:', errorMessage, error);
       toast({
         title: "Save Failed",
-        description: "Failed to save theme settings. Please try again.",
+        description: `Failed to save theme settings: ${errorMessage}`,
         variant: "destructive"
       });
     } finally {
