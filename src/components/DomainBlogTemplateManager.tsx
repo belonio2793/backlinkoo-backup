@@ -177,8 +177,8 @@ export function DomainBlogTemplateManager({
         const errorMessage = error instanceof Error ? error.message :
                             error && typeof error === 'object' ? JSON.stringify(error) :
                             String(error);
-        console.error('Error loading domain themes:', errorMessage);
-        setSaveStatus({ isLoading: false, hasError: true, errorMessage });
+        console.warn('⚠️ Loading domain themes failed, switching to offline mode:', errorMessage);
+        setSaveStatus({ isLoading: false, hasError: false }); // Don't show as error, just switch to offline
         setFallbackMode(true);
         loadFromLocalStorage();
       }
