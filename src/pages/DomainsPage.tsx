@@ -136,22 +136,34 @@ const DomainsPage = () => {
       if (error) {
         console.error('Supabase error adding domain:', error);
 
+        // Handle Supabase error object properly
+        const errorMessage = typeof error === 'string' ? error :
+                           error?.message ||
+                           error?.details ||
+                           error?.hint ||
+                           JSON.stringify(error);
+
         if (error.code === '23505') {
           throw new Error(`Domain ${domain} already exists`);
         }
         if (error.code === 'PGRST301') {
           throw new Error(`Database error: Please try again in a moment`);
         }
-        if (error.message?.includes('Failed to fetch')) {
+        if (errorMessage?.includes('Failed to fetch')) {
           throw new Error(`Network error: Please check your connection and try again`);
         }
-        if (error.message?.includes('timeout')) {
+        if (errorMessage?.includes('timeout')) {
           throw new Error(`Request timeout: Please try again`);
+        }
+        if (errorMessage?.includes('JWT')) {
+          throw new Error(`Authentication error: Please sign in again`);
+        }
+        if (errorMessage?.includes('permission')) {
+          throw new Error(`Permission denied: Please check your access rights`);
         }
 
         // Generic error with helpful message
-        const errorMsg = error.message || error.details || 'Unknown database error';
-        throw new Error(`Failed to add domain: ${errorMsg}`);
+        throw new Error(`Failed to add domain: ${errorMessage}`);
       }
 
       if (!data) {
@@ -162,23 +174,33 @@ const DomainsPage = () => {
     } catch (networkError: any) {
       console.error('Network error adding domain:', networkError);
 
-      if (networkError.message?.includes('Failed to fetch')) {
+      // Handle error object properly
+      const errorMessage = typeof networkError === 'string' ? networkError :
+                          networkError?.message ||
+                          networkError?.details ||
+                          networkError?.toString() ||
+                          'Unknown error';
+
+      if (errorMessage.includes('Failed to fetch')) {
         throw new Error('Network connection failed. Please check your internet connection and try again.');
       }
       if (networkError.name === 'AbortError') {
         throw new Error('Request was cancelled due to timeout. Please try again.');
       }
-      if (networkError.message?.includes('NetworkError')) {
+      if (errorMessage.includes('NetworkError')) {
         throw new Error('Network error occurred. Please check your connection and try again.');
+      }
+      if (errorMessage.includes('body stream already read')) {
+        throw new Error('Request processing error. Please refresh the page and try again.');
       }
 
       // Re-throw if it's already a formatted error
-      if (networkError.message && !networkError.message.includes('[object Object]')) {
+      if (networkError instanceof Error && networkError.message && !networkError.message.includes('[object Object]')) {
         throw networkError;
       }
 
       // Fallback for unknown errors
-      throw new Error(`Unexpected error adding domain: ${domain}. Please try again or contact support.`);
+      throw new Error(`Unexpected error adding domain: ${domain}. Error: ${errorMessage}`);
     }
   };
 
