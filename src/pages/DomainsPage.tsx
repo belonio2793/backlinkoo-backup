@@ -113,9 +113,6 @@ const DomainsPage = () => {
   const [showBulkAdd, setShowBulkAdd] = useState(false);
   const [editingDomain, setEditingDomain] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState(false);
-  const [dnsServiceStatus, setDnsServiceStatus] = useState<'unknown' | 'online' | 'offline'>('unknown');
-  const [showAutoPropagationWizard, setShowAutoPropagationWizard] = useState(false);
-  const [selectedDomainForWizard, setSelectedDomainForWizard] = useState<Domain | null>(null);
   const [domainBlogThemesExists, setDomainBlogThemesExists] = useState<boolean | null>(null);
 
   // Calculate blog-enabled domains for UI messaging
