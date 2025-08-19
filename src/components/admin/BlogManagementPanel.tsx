@@ -64,7 +64,6 @@ export function BlogManagementPanel() {
   const [runningDiagnostic, setRunningDiagnostic] = useState(false);
   const [runningDebug, setRunningDebug] = useState(false);
   const [runningErrorTest, setRunningErrorTest] = useState(false);
-  const { toast } = useToast();
 
   useEffect(() => {
     const initializePanel = async () => {
