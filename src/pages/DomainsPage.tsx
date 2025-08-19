@@ -136,7 +136,11 @@ const DomainsPage = () => {
 
   useEffect(() => {
     if (user?.id) {
-      loadDomains();
+      loadDomains().catch((error) => {
+        console.error('Failed to load domains on mount:', error);
+        const errorMessage = error?.message || 'Unknown error occurred';
+        toast.error(`Failed to load domains: ${errorMessage}`);
+      });
     }
   }, [user?.id]);
 
