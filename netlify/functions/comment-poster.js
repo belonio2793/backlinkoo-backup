@@ -1,5 +1,12 @@
 const { createClient } = require('@supabase/supabase-js');
-const { chromium } = require('playwright');
+
+// Conditional Playwright import to prevent bundling errors
+let chromium;
+try {
+  chromium = require('playwright').chromium;
+} catch (error) {
+  console.warn('Playwright not available, browser automation disabled');
+}
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
