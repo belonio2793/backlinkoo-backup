@@ -70,29 +70,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { NetworkStatus } from '@/components/NetworkStatus';
 
-// Global error handler for unhandled promise rejections
-if (typeof window !== 'undefined') {
-  window.addEventListener('unhandledrejection', (event) => {
-    console.error('🚨 Unhandled Promise Rejection:', event.reason);
-
-    // Extract meaningful error message
-    let errorMessage = 'An unexpected error occurred';
-
-    if (event.reason instanceof Error) {
-      errorMessage = event.reason.message;
-    } else if (typeof event.reason === 'string') {
-      errorMessage = event.reason;
-    } else if (event.reason && typeof event.reason === 'object') {
-      errorMessage = event.reason.message || JSON.stringify(event.reason);
-    }
-
-    // Show user-friendly error
-    toast.error(`System Error: ${errorMessage}`);
-
-    // Prevent the default handling (console error)
-    event.preventDefault();
-  });
-}
+// Global error handler will be set up in useEffect
 
 interface Domain {
   id: string;
