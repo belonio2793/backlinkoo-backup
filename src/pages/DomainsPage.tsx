@@ -199,6 +199,12 @@ const DomainsPage = () => {
         if (error.code === '23505') {
           throw new Error(`Domain ${domain} already exists`);
         }
+        if (error.code === '23503') {
+          throw new Error(`Authentication error: Please sign out and sign in again`);
+        }
+        if (error.code === '23502') {
+          throw new Error(`Required field missing: Please try again or contact support`);
+        }
         if (error.code === 'PGRST301') {
           throw new Error(`Database error: Please try again in a moment`);
         }
