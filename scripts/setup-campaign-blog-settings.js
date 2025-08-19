@@ -1,12 +1,17 @@
 #!/usr/bin/env node
 
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { createClient } from '@supabase/supabase-js';
+import dotenv from 'dotenv';
 
 // Load environment variables
-require('dotenv').config();
+dotenv.config();
 
-const { createClient } = require('@supabase/supabase-js');
+// Get current directory for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Initialize Supabase client with service role key for admin operations
 const supabase = createClient(
@@ -91,7 +96,7 @@ async function setupCampaignBlogSettings() {
     console.log('');
     console.log('📋 What was created:');
     console.log('   • campaign_blog_settings table with RLS policies');
-    console.log('   ��� domain_blog_posts table for tracking published posts');
+    console.log('   • domain_blog_posts table for tracking published posts');
     console.log('   • Helper functions for blog statistics and settings');
     console.log('   • Updated increment_published_pages function');
     console.log('');
