@@ -434,9 +434,24 @@ export function DomainBlogTemplateManagerFixed({
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error('❌ Error saving theme:', errorMessage, error);
       setSaveStatus({ isLoading: false, hasError: true, errorMessage });
+
+      // Provide specific guidance based on error type
+      let description = `Unable to save theme settings: ${errorMessage}`;
+      let actionHint = '';
+
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('network')) {
+        actionHint = 'Check your internet connection and try again.';
+      } else if (errorMessage.includes('localStorage') || errorMessage.includes('storage')) {
+        actionHint = 'Browser storage may be full or disabled.';
+      } else if (errorMessage.includes('database') || errorMessage.includes('supabase')) {
+        actionHint = 'Database connection issues. Using local storage fallback.';
+      } else {
+        actionHint = 'Use the troubleshooter below to diagnose the issue.';
+      }
+
       toast({
         title: "Save Failed",
-        description: `Unable to save theme settings: ${errorMessage}. Please try again or contact support if the problem persists.`,
+        description: `${description} ${actionHint}`,
         variant: "destructive"
       });
     }
