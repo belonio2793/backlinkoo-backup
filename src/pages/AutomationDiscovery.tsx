@@ -39,6 +39,7 @@ import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
 import { useToast } from '@/hooks/use-toast';
 import FormDiscoveryWidget from '@/components/discovery/FormDiscoveryWidget';
+import UrlValidator from '@/components/discovery/UrlValidator';
 
 interface DiscoveryResult {
   id: string;
