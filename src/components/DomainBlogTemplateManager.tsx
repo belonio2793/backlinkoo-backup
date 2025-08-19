@@ -148,7 +148,7 @@ export function DomainBlogTemplateManager({
     }));
   };
 
-  const saveThemeSettings = () => {
+  const saveThemeSettings = async () => {
     if (!selectedDomain || !selectedTheme) {
       toast({
         title: "Selection Required",
@@ -158,24 +158,57 @@ export function DomainBlogTemplateManager({
       return;
     }
 
-    const settings: DomainThemeSettings = {
-      domain_id: selectedDomain,
-      theme_id: selectedTheme,
-      custom_styles: customStyles,
-      updated_at: new Date().toISOString()
-    };
+    setIsLoading(true);
+    try {
+      const success = await DomainBlogTemplateService.setDomainTheme(
+        selectedDomain,
+        selectedTheme,
+        customStyles,
+        {} // custom settings can be added later
+      );
 
-    setDomainThemeSettings(prev => ({
-      ...prev,
-      [selectedDomain]: settings
-    }));
+      if (success) {
+        // Update local state
+        const settings: DomainThemeSettings = {
+          domain_id: selectedDomain,
+          theme_id: selectedTheme,
+          custom_styles: customStyles,
+          updated_at: new Date().toISOString()
+        };
 
-    onThemeUpdate?.(selectedDomain, selectedTheme);
+        setDomainThemeSettings(prev => ({
+          ...prev,
+          [selectedDomain]: settings
+        }));
 
-    toast({
-      title: "Theme Saved",
-      description: "Blog theme settings have been saved for this domain",
-    });
+        // Reload theme record
+        const updatedTheme = await DomainBlogTemplateService.getDomainTheme(selectedDomain);
+        if (updatedTheme) {
+          setDomainThemeRecords(prev => ({
+            ...prev,
+            [selectedDomain]: updatedTheme
+          }));
+        }
+
+        onThemeUpdate?.(selectedDomain, selectedTheme);
+
+        toast({
+          title: "Theme Saved",
+          description: "Blog theme settings have been saved to database",
+        });
+      } else {
+        throw new Error('Failed to save theme to database');
+      }
+    } catch (error) {
+      console.error('Error saving theme:', error);
+      toast({
+        title: "Save Failed",
+        description: "Failed to save theme settings. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getDevicePreviewStyle = () => {
