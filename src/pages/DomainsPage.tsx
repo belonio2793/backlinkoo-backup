@@ -61,6 +61,8 @@ import {
 } from 'lucide-react';
 import DomainBlogTemplateManager from '@/components/DomainBlogTemplateManager';
 import DNSValidationService from '@/services/dnsValidationService';
+import AutoDNSPropagation from '@/components/AutoDNSPropagation';
+import AutoPropagationWizard from '@/components/AutoPropagationWizard';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -1449,7 +1451,7 @@ anotherdomain.org`}
                       domain={domains[0]}
                       hostingConfig={hostingConfig}
                       onSuccess={(domain) => {
-                        toast.success(`✅ Auto-propagation completed for ${domain.domain}`);
+                        toast.success(`�� Auto-propagation completed for ${domain.domain}`);
                         loadDomains(); // Refresh domains list
                       }}
                       onError={(error) => {
