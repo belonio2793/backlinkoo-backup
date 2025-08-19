@@ -926,6 +926,10 @@ anotherdomain.org`}
                   <Download className="h-4 w-4 mr-1" />
                   Export CSV
                 </Button>
+                <Button variant="outline" size="sm" onClick={testValidation}>
+                  <Terminal className="h-4 w-4 mr-1" />
+                  Test DNS Service
+                </Button>
                 <Button variant="outline" size="sm" onClick={loadDomains}>
                   <RefreshCw className="h-4 w-4 mr-1" />
                   Refresh
