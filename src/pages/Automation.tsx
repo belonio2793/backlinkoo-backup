@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2, Activity, MessageSquare, Search } from 'lucide-react';
+import { Loader2, Target, FileText, Link, BarChart3, CheckCircle, Info, Clock, Wand2, Activity, MessageSquare, Search, Globe } from 'lucide-react';
 import { getOrchestrator } from '@/services/automationOrchestrator';
 import { campaignMonitoringService } from '@/services/campaignMonitoringService';
 import { realTimeFeedService } from '@/services/realTimeFeedService';
@@ -416,27 +416,6 @@ const Automation = () => {
         {/* Development Mode Indicator */}
         <DevelopmentModeIndicator />
 
-        {/* Platform Discovery Announcement */}
-        <Alert className="border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50">
-          <Search className="h-4 w-4" />
-          <AlertDescription className="text-purple-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <strong>🆕 Platform Discovery Available!</strong>
-                <p className="text-sm mt-1">
-                  Use advanced footprint analysis to discover link building opportunities across WordPress blogs,
-                  guest posting sites, forums, directories, and more. Automatically validate and integrate platforms.
-                </p>
-              </div>
-              <a
-                href="/automation/discovery"
-                className="ml-4 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors whitespace-nowrap"
-              >
-                Explore Discovery
-              </a>
-            </div>
-          </AlertDescription>
-        </Alert>
 
         {/* Database Schema Fixer removed for cleaner UI */}
 
@@ -780,7 +759,7 @@ const Automation = () => {
               <div className="space-y-3">
                 <div className="bg-gray-50 border rounded-lg p-3">
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-medium text-sm text-gray-900">Active Platforms</h3>
+                    <h3 className="font-medium text-sm text-gray-900">Active Publishing Methods</h3>
                     <div className="text-xs text-green-700 bg-green-100 px-2 py-1 rounded">2 Available</div>
                   </div>
                   <div className="max-h-32 overflow-y-auto space-y-2">
@@ -789,7 +768,7 @@ const Automation = () => {
                         <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                         <div>
                           <div className="font-medium text-sm">telegraph.ph</div>
-                          <div className="text-xs text-gray-600">High authority publishing</div>
+                          <div className="text-xs text-gray-600">High authority anonymous publishing</div>
                         </div>
                       </div>
                       <div className="text-right">
@@ -800,79 +779,39 @@ const Automation = () => {
 
                     <div className="flex items-center justify-between p-3 bg-white border rounded">
                       <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                         <div>
-                          <div className="font-medium text-sm">write.as</div>
-                          <div className="text-xs text-gray-600">Anonymous publishing platform</div>
+                          <div className="font-medium text-sm">Your Domains</div>
+                          <div className="text-xs text-gray-600">Publish blogs on your connected domains</div>
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-xs font-medium text-green-700">DR 82</div>
-                        <div className="text-xs text-gray-500">Active</div>
+                        <div className="text-xs font-medium text-blue-700">Custom</div>
+                        <div className="text-xs text-gray-500">
+                          <a href="/domains" className="text-blue-600 hover:underline">Setup →</a>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-gray-50 border rounded-lg p-3">
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-medium text-sm text-gray-900">Coming Soon</h3>
-                    <div className="text-xs text-gray-600 bg-gray-200 px-2 py-1 rounded">4 Planned</div>
-                  </div>
-                  <div className="max-h-48 overflow-y-auto space-y-2">
-                    <div className="flex items-center justify-between p-3 bg-white border rounded">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                        <div>
-                          <div className="font-medium text-sm">medium.com</div>
-                          <div className="text-xs text-gray-600">Professional publishing</div>
-                        </div>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <Globe className="h-5 w-5 text-blue-600 mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-blue-900 mb-1">Domain-Based Blog Publishing</h4>
+                      <p className="text-sm text-blue-800 mb-3">
+                        Set up your domains in the <a href="/domains" className="font-medium underline">Domains section</a> to automatically publish blogs with your custom branding and SEO optimization.
+                      </p>
+                      <div className="flex gap-2">
+                        <a
+                          href="/domains"
+                          className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition-colors"
+                        >
+                          <Globe className="h-3 w-3" />
+                          Manage Domains
+                        </a>
                       </div>
-                      <div className="text-xs font-medium text-gray-700">DR 96</div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-white border rounded">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                        <div>
-                          <div className="font-medium text-sm">dev.to</div>
-                          <div className="text-xs text-gray-600">Developer community</div>
-                        </div>
-                      </div>
-                      <div className="text-xs font-medium text-gray-700">DR 86</div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-white border rounded">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                        <div>
-                          <div className="font-medium text-sm">linkedin.com</div>
-                          <div className="text-xs text-gray-600">Professional articles</div>
-                        </div>
-                      </div>
-                      <div className="text-xs font-medium text-gray-700">DR 100</div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-white border rounded">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                        <div>
-                          <div className="font-medium text-sm">hashnode.com</div>
-                          <div className="text-xs text-gray-600">Developer blogging</div>
-                        </div>
-                      </div>
-                      <div className="text-xs font-medium text-gray-700">DR 75</div>
-                    </div>
-
-                    <div className="flex items-center justify-between p-3 bg-white border rounded">
-                      <div className="flex items-center gap-3">
-                        <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                        <div>
-                          <div className="font-medium text-sm">substack.com</div>
-                          <div className="text-xs text-gray-600">Newsletter platform</div>
-                        </div>
-                      </div>
-                      <div className="text-xs font-medium text-gray-700">DR 88</div>
                     </div>
                   </div>
                 </div>

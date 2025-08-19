@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { getContentService, type ContentGenerationParams } from './automationContentService';
 import { getTelegraphService } from './telegraphService';
 import { workingCampaignProcessor } from './workingCampaignProcessor';
+import { DomainBlogTemplateService } from './domainBlogTemplateService';
 import { ProgressStep, CampaignProgress } from '@/components/CampaignProgressTracker';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { realTimeFeedService } from './realTimeFeedService';
@@ -636,6 +637,43 @@ export class AutomationOrchestrator {
               content: contentRecord.content,
               author_name: 'Link Builder'
             });
+          } else if (nextPlatform.id === 'domains') {
+            // Domain-based blog publishing
+            try {
+              const availableDomains = await DomainBlogTemplateService.getAvailableDomains();
+
+              if (availableDomains.length === 0) {
+                throw new Error('No blog-enabled domains available. Please set up domains in the Domains section first.');
+              }
+
+              // Select the first available domain (could be enhanced with rotation logic)
+              const selectedDomain = availableDomains[0];
+
+              // Generate blog post with theme
+              const blogPost = await DomainBlogTemplateService.generateBlogPost(
+                campaign.keywords,
+                campaign.target_url,
+                'Your Brand', // Could be made configurable
+                'minimal' // Default theme, could be made configurable per domain
+              );
+
+              // Publish to domain
+              const domainBlogPost = await DomainBlogTemplateService.publishToDomain(
+                selectedDomain.id,
+                blogPost
+              );
+
+              publishedPage = {
+                url: domainBlogPost.published_url,
+                title: domainBlogPost.title,
+                content: domainBlogPost.content
+              };
+
+              await this.logActivity(campaignId, 'info', `Successfully published blog to domain: ${selectedDomain.domain}`);
+            } catch (error) {
+              console.error('Domain publishing error:', error);
+              throw new Error(`Domain publishing failed: ${error.message}`);
+            }
           } else {
             // For future platforms, we'll implement their specific logic here
             throw new Error(`Publishing to ${nextPlatform.name} is not yet implemented`);
