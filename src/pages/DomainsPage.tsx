@@ -58,6 +58,7 @@ import {
   Palette
 } from 'lucide-react';
 import DomainBlogTemplateManager from '@/components/DomainBlogTemplateManager';
+import DNSValidationService from '@/services/dnsValidationService';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
