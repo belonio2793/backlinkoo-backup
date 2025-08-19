@@ -889,7 +889,7 @@ anotherdomain.org`}
                           <div className="flex items-center gap-2">
                             <Switch
                               checked={domain.ssl_enabled}
-                              onCheckedChange={(checked) => toggleSSL(domain.id, checked)}
+                              onCheckedChange={safeAsync((checked) => toggleSSL(domain.id, checked))}
                               size="sm"
                             />
                             <span className="text-xs">SSL</span>
