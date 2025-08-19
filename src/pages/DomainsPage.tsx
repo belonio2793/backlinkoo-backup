@@ -779,7 +779,7 @@ const DomainsPage = () => {
               ) : dnsServiceStatus === 'offline' ? (
                 <Badge className="bg-red-100 text-red-800 border-red-200">
                   <AlertTriangle className="w-3 h-3 mr-1" />
-                  Offline (Using Fallback)
+                  Service Required
                 </Badge>
               ) : (
                 <Badge className="bg-gray-100 text-gray-800 border-gray-200">
