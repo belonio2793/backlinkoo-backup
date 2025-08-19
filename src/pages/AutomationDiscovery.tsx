@@ -85,7 +85,7 @@ const AutomationDiscovery = () => {
   // Form state
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>(['all']);
-  const [discoveryDepth, setDiscoveryDepth] = useState('medium');
+  const [discoveryDepth, setDiscoveryDepth] = useState('deep');
   const [maxResults, setMaxResults] = useState(500);
   const [filterDifficulty, setFilterDifficulty] = useState('all');
   const [minOpportunityScore, setMinOpportunityScore] = useState(70);
