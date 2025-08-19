@@ -63,49 +63,17 @@ const DomainsManager = () => {
   const [newDomainNotes, setNewDomainNotes] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-  // Mock data for development - replace with actual database calls
-  const mockDomains: UserDomain[] = [
-    {
-      id: '1',
-      domain: 'example.com',
-      url: 'https://example.com',
-      status: 'active',
-      verified: true,
-      created_at: new Date().toISOString(),
-      notes: 'Main company website',
-      target_keywords: ['SEO', 'marketing', 'business']
-    },
-    {
-      id: '2',
-      domain: 'blog.example.com',
-      url: 'https://blog.example.com',
-      status: 'active',
-      verified: true,
-      created_at: new Date().toISOString(),
-      notes: 'Company blog for content marketing'
-    }
-  ];
-
   useEffect(() => {
-    loadDomains();
+    if (user?.id) {
+      loadDomains();
+    }
   }, [user?.id]);
 
   const loadDomains = async () => {
     setLoading(true);
     try {
-      // For now, use mock data - replace with actual Supabase query
-      // const { data, error } = await supabase
-      //   .from('user_domains')
-      //   .select('*')
-      //   .eq('user_id', user?.id)
-      //   .order('created_at', { ascending: false });
-      
-      // if (error) throw error;
-      // setDomains(data || []);
-      
-      // Mock delay for demo
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setDomains(mockDomains);
+      const domainsData = await UserDomainsService.getUserDomains();
+      setDomains(domainsData);
     } catch (error) {
       console.error('Error loading domains:', error);
       toast.error('Failed to load domains');
