@@ -35,88 +35,88 @@ export class BlogThemesService {
     {
       id: 'minimal',
       name: 'Minimal Clean',
-      description: 'Clean, minimal design perfect for professional content',
+      description: 'Ultra-clean minimalist design with elegant spacing and modern typography',
       styles: {
-        primaryColor: '#2563eb',
+        primaryColor: '#1e40af',
         secondaryColor: '#64748b',
         backgroundColor: '#ffffff',
-        textColor: '#1e293b',
-        headingFont: 'Inter, sans-serif',
-        bodyFont: 'Inter, sans-serif',
+        textColor: '#0f172a',
+        headingFont: 'Inter, -apple-system, sans-serif',
+        bodyFont: 'Inter, -apple-system, sans-serif',
         accentColor: '#3b82f6'
       },
       layout: {
         headerStyle: 'minimal',
         contentWidth: 'medium',
-        spacing: 'normal'
+        spacing: 'relaxed'
       },
-      features: ['responsive', 'seo_optimized', 'fast_loading'],
+      features: ['responsive', 'seo_optimized', 'fast_loading', 'minimal_ui', 'clean_typography'],
       template_html: this.getMinimalTemplate(),
       template_css: this.getMinimalCSS()
     },
     {
       id: 'modern',
       name: 'Modern Business',
-      description: 'Contemporary design with bold typography and clean lines',
+      description: 'Professional corporate design with bold visuals and engaging layouts',
       styles: {
         primaryColor: '#0f172a',
         secondaryColor: '#475569',
         backgroundColor: '#ffffff',
-        textColor: '#334155',
-        headingFont: 'Poppins, sans-serif',
-        bodyFont: 'Open Sans, sans-serif',
+        textColor: '#1e293b',
+        headingFont: 'Poppins, system-ui, sans-serif',
+        bodyFont: 'Open Sans, system-ui, sans-serif',
         accentColor: '#06b6d4'
       },
       layout: {
         headerStyle: 'bold',
-        contentWidth: 'medium',
+        contentWidth: 'wide',
         spacing: 'relaxed'
       },
-      features: ['responsive', 'seo_optimized', 'modern_design', 'social_sharing'],
+      features: ['responsive', 'seo_optimized', 'modern_design', 'social_sharing', 'corporate_style', 'hero_sections'],
       template_html: this.getModernTemplate(),
       template_css: this.getModernCSS()
     },
     {
       id: 'elegant',
       name: 'Elegant Editorial',
-      description: 'Sophisticated design inspired by premium publications',
+      description: 'Sophisticated magazine-style design with premium typography and refined layouts',
       styles: {
-        primaryColor: '#7c2d12',
-        secondaryColor: '#a3a3a3',
-        backgroundColor: '#fefefe',
-        textColor: '#262626',
-        headingFont: 'Playfair Display, serif',
-        bodyFont: 'Source Sans Pro, sans-serif',
-        accentColor: '#ea580c'
+        primaryColor: '#92400e',
+        secondaryColor: '#78716c',
+        backgroundColor: '#fffbf7',
+        textColor: '#1c1917',
+        headingFont: 'Playfair Display, Georgia, serif',
+        bodyFont: 'Source Sans Pro, system-ui, sans-serif',
+        accentColor: '#f59e0b'
       },
       layout: {
         headerStyle: 'centered',
         contentWidth: 'narrow',
         spacing: 'relaxed'
       },
-      features: ['responsive', 'seo_optimized', 'typography_focused', 'reading_optimized'],
+      features: ['responsive', 'seo_optimized', 'typography_focused', 'reading_optimized', 'magazine_style', 'premium_fonts'],
       template_html: this.getElegantTemplate(),
       template_css: this.getElegantCSS()
     },
     {
       id: 'tech',
       name: 'Tech Focus',
-      description: 'Modern tech-inspired design with syntax highlighting',
+      description: 'Cutting-edge developer-focused design with advanced code highlighting and dark mode support',
       styles: {
-        primaryColor: '#1f2937',
+        primaryColor: '#111827',
         secondaryColor: '#6b7280',
-        backgroundColor: '#f9fafb',
-        textColor: '#374151',
-        headingFont: 'JetBrains Mono, monospace',
-        bodyFont: 'Inter, sans-serif',
-        accentColor: '#10b981'
+        backgroundColor: '#f8fafc',
+        textColor: '#1f2937',
+        headingFont: 'JetBrains Mono, Consolas, monospace',
+        bodyFont: 'Inter, system-ui, sans-serif',
+        accentColor: '#059669'
       },
       layout: {
         headerStyle: 'minimal',
         contentWidth: 'wide',
-        spacing: 'normal'
+        spacing: 'compact'
       },
-      features: ['responsive', 'seo_optimized', 'syntax_highlighting', 'tech_focused'],
+      features: ['responsive', 'seo_optimized', 'syntax_highlighting', 'tech_focused', 'dark_mode', 'code_blocks', 'developer_friendly'],
       template_html: this.getTechTemplate(),
       template_css: this.getTechCSS()
     }
