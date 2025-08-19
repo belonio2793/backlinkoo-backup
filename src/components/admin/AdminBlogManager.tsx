@@ -31,7 +31,6 @@ import {
 } from 'lucide-react';
 
 export function AdminBlogManager() {
-  const { toast } = useToast();
   const [blogPosts, setBlogPosts] = useState<PublishedBlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
