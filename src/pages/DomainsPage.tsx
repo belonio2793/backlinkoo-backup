@@ -134,6 +134,9 @@ const DomainsPage = () => {
   const [showConfig, setShowConfig] = useState(false);
   const [dnsServiceStatus, setDnsServiceStatus] = useState<'unknown' | 'online' | 'offline'>('unknown');
 
+  // Calculate blog-enabled domains for UI messaging
+  const blogEnabledDomains = domains.filter(d => d.blog_enabled);
+
   // Hosting configuration - editable
   const [hostingConfig, setHostingConfig] = useState<HostingConfig>({
     ip: '192.168.1.100', // Replace with your actual hosting IP
