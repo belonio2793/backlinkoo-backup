@@ -228,40 +228,46 @@ async function performDNSValidation(domain, verificationToken, expectedIP, expec
     console.log(`Expected IP: ${expectedIP}, Expected Host: ${expectedHost}`);
     console.log(`Verification Token: ${verificationToken}`);
 
-    // Check TXT record for verification token
+    // Check TXT record for verification token with retry
     try {
-      const txtRecords = await withTimeout(dns.resolveTxt(domain), 5000);
+      const txtRecords = await withRetry(async () => {
+        return await withTimeout(dns.resolveTxt(domain), 8000);
+      });
       const flattened = txtRecords.flat().join(' ');
       results.txtValid = flattened.includes(verificationToken);
       results.details.txtRecords = txtRecords;
       console.log(`📝 TXT records found:`, txtRecords);
       console.log(`📝 TXT validation: ${results.txtValid}`);
     } catch (txtError) {
-      console.log(`❌ TXT record lookup failed:`, txtError.message);
+      console.log(`❌ TXT record lookup failed after retries:`, txtError.message);
       results.details.txtError = txtError.message;
     }
 
-    // Check A record
+    // Check A record with retry
     try {
-      const aRecords = await withTimeout(dns.resolve4(domain), 5000);
+      const aRecords = await withRetry(async () => {
+        return await withTimeout(dns.resolve4(domain), 8000);
+      });
       results.aValid = aRecords.includes(expectedIP);
       results.details.aRecords = aRecords;
       console.log(`🔗 A records found:`, aRecords);
       console.log(`🔗 A record validation: ${results.aValid}`);
     } catch (aError) {
-      console.log(`❌ A record lookup failed:`, aError.message);
+      console.log(`❌ A record lookup failed after retries:`, aError.message);
       results.details.aError = aError.message;
     }
 
-    // Check CNAME record for www subdomain
+    // Check CNAME record for www subdomain with retry
     try {
-      const cnameRecords = await withTimeout(dns.resolveCname(`www.${domain}`), 5000);
+      const cnameRecords = await withRetry(async () => {
+        return await withTimeout(dns.resolveCname(`www.${domain}`), 8000);
+      });
       results.cnameValid = cnameRecords.includes(expectedHost);
       results.details.cnameRecords = cnameRecords;
       console.log(`🌐 CNAME records found:`, cnameRecords);
       console.log(`🌐 CNAME validation: ${results.cnameValid}`);
     } catch (cnameError) {
-      console.log(`❌ CNAME record lookup failed:`, cnameError.message);
+      console.log(`❌ CNAME record lookup failed after retries:`, cnameError.message);
       results.details.cnameError = cnameError.message;
       // CNAME is optional, so don't fail validation for this
       results.cnameValid = true; // Consider CNAME as optional
