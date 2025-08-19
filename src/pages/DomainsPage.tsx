@@ -1391,6 +1391,16 @@ anotherdomain.org`}
             </CardContent>
           </Card>
         )}
+
+        {/* Blog Template Management Section */}
+        <div className="mt-8">
+          <DomainBlogTemplateManager
+            domains={domains}
+            onThemeUpdate={(domainId, themeId) => {
+              toast.success(`Theme updated to ${themeId} for domain`);
+            }}
+          />
+        </div>
       </div>
       <Footer />
     </div>
