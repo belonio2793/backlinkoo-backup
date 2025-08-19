@@ -40,6 +40,7 @@ import { useAuthState } from '@/hooks/useAuthState';
 import { useToast } from '@/hooks/use-toast';
 import FormDiscoveryWidget from '@/components/discovery/FormDiscoveryWidget';
 import UrlValidator from '@/components/discovery/UrlValidator';
+import AutomationCompatibilityTester from '@/components/discovery/AutomationCompatibilityTester';
 
 interface DiscoveryResult {
   id: string;
