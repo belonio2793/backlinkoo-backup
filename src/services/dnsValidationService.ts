@@ -131,19 +131,6 @@ export class DNSValidationService {
     }
   }
   
-  /**
-   * Manual DNS propagation check instructions
-   */
-  static getManualPropagationInstructions(domain: string): string[] {
-    return [
-      `Use online DNS checkers like whatsmydns.net or dnschecker.org`,
-      `Check if your A record points to the correct IP address`,
-      `Verify TXT record contains your verification token`,
-      `Allow 24-48 hours for full DNS propagation worldwide`,
-      `Contact your domain registrar if records don't update`,
-      `Try flushing your local DNS cache: ipconfig /flushdns (Windows) or sudo dscacheutil -flushcache (Mac)`
-    ];
-  }
 }
 
 export default DNSValidationService;
