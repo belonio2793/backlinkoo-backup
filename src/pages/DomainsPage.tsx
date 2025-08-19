@@ -350,8 +350,8 @@ const DomainsPage = () => {
         throw networkError;
       }
       
-      // Fallback for unknown errors
-      throw new Error(`Unexpected error adding domain: ${domain}. Error: ${errorMessage}`);
+      // Production error - no fallbacks allowed
+      throw new Error(`Failed to add domain: ${domain}. Error: ${errorMessage}`);
     }
   };
 
@@ -626,41 +626,15 @@ const DomainsPage = () => {
 
   const copyToClipboard = async (text: string) => {
     try {
-      // Try modern clipboard API first
-      if (navigator.clipboard && window.isSecureContext) {
-        await navigator.clipboard.writeText(text);
-        toast.success('Copied to clipboard!');
-        return;
+      if (!navigator.clipboard || !window.isSecureContext) {
+        throw new Error('Clipboard API requires HTTPS connection');
       }
 
-      // Fallback for development/non-secure contexts
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      textArea.style.position = 'fixed';
-      textArea.style.left = '-999999px';
-      textArea.style.top = '-999999px';
-      document.body.appendChild(textArea);
-      textArea.focus();
-      textArea.select();
-
-      const successful = document.execCommand('copy');
-      document.body.removeChild(textArea);
-
-      if (successful) {
-        toast.success('Copied to clipboard!');
-      } else {
-        throw new Error('Copy command failed');
-      }
+      await navigator.clipboard.writeText(text);
+      toast.success('Copied to clipboard!');
     } catch (error) {
       console.error('Copy to clipboard failed:', error);
-
-      // Final fallback - show text in a prompt
-      const message = `Copy this text manually:\n\n${text}`;
-      if (window.prompt) {
-        window.prompt(message, text);
-      } else {
-        toast.error(`Copy failed. Text: ${text}`);
-      }
+      toast.error('Clipboard copy failed. Please copy manually from the DNS instructions.');
     }
   };
 
@@ -1128,38 +1102,14 @@ anotherdomain.org`}
                                   </Button>
 
                                   {dnsServiceStatus === 'offline' && (
-                                    <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                                      <h4 className="font-medium text-yellow-900 mb-2 flex items-center gap-2">
+                                    <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                                      <h4 className="font-medium text-red-900 mb-2 flex items-center gap-2">
                                         <AlertTriangle className="h-4 w-4" />
-                                        Manual DNS Propagation Check
+                                        DNS Service Required
                                       </h4>
-                                      <div className="text-sm text-yellow-800 space-y-2">
-                                        <p>DNS validation service is unavailable. Check propagation manually:</p>
-                                        <ul className="list-disc list-inside space-y-1 text-xs">
-                                          {DNSValidationService.getManualPropagationInstructions(domain.domain).map((instruction, i) => (
-                                            <li key={i}>{instruction}</li>
-                                          ))}
-                                        </ul>
-                                        <div className="flex gap-2 mt-3">
-                                          <a
-                                            href={`https://whatsmydns.net/#A/${domain.domain}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-600 text-white text-xs rounded hover:bg-yellow-700"
-                                          >
-                                            <ExternalLink className="h-3 w-3" />
-                                            Check A Record
-                                          </a>
-                                          <a
-                                            href={`https://whatsmydns.net/#TXT/${domain.domain}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="inline-flex items-center gap-1 px-2 py-1 bg-yellow-600 text-white text-xs rounded hover:bg-yellow-700"
-                                          >
-                                            <ExternalLink className="h-3 w-3" />
-                                            Check TXT Record
-                                          </a>
-                                        </div>
+                                      <div className="text-sm text-red-800">
+                                        <p>DNS validation service must be available for production use. Manual configuration is not supported in live environments.</p>
+                                        <p className="mt-2 font-medium">Please deploy all required Netlify functions before proceeding.</p>
                                       </div>
                                     </div>
                                   )}
