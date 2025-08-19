@@ -41,14 +41,22 @@ async function validateDNSRecords(domain, verificationToken) {
       const txtRecords = await dns.resolveTxt(domain);
       const flatTxt = txtRecords.flat().join(' ');
       results.dns_responses.txt = txtRecords;
-      
+
       const expectedTxt = `${HOSTING_CONFIG.txt_prefix}${verificationToken}`;
+
+      if (HOSTING_CONFIG.debug_mode) {
+        console.log(`🔍 TXT Debug - Domain: ${domain}`);
+        console.log(`🔍 TXT Debug - Expected: ${expectedTxt}`);
+        console.log(`🔍 TXT Debug - Found: ${flatTxt}`);
+        console.log(`🔍 TXT Debug - All records:`, txtRecords);
+      }
+
       if (flatTxt.includes(expectedTxt)) {
         results.txt_validated = true;
         console.log(`✅ TXT record validated for ${domain}`);
       } else {
-        results.errors.push(`TXT record not found. Expected: ${expectedTxt}`);
-        console.log(`❌ TXT record validation failed for ${domain}. Found: ${flatTxt}`);
+        results.errors.push(`TXT record not found. Expected: ${expectedTxt}. Found: ${flatTxt}`);
+        console.log(`❌ TXT record validation failed for ${domain}. Expected: ${expectedTxt}, Found: ${flatTxt}`);
       }
     } catch (error) {
       results.errors.push(`TXT record lookup failed: ${error.message}`);
