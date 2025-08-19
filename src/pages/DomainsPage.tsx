@@ -601,13 +601,13 @@ const DomainsPage = () => {
       console.error('❌ Test validation error:', error);
 
       if (error.name === 'AbortError') {
-        toast.error('❌ DNS validation service timeout - service may be down');
+        toast.error('❌ DNS validation service timeout - service must be available for production');
         setDnsServiceStatus('offline');
       } else if (error.message.includes('Failed to fetch')) {
-        toast.warning('⚠️ Cannot reach DNS validation service. Network or deployment issue.');
+        toast.error('❌ Cannot reach DNS validation service. All services must be deployed.');
         setDnsServiceStatus('offline');
       } else {
-        toast.error(`DNS validation service test failed: ${error.message}`);
+        toast.error(`❌ DNS validation service failed: ${error.message}`);
         setDnsServiceStatus('offline');
       }
     }
