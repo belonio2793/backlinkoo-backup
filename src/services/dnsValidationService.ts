@@ -26,21 +26,14 @@ export interface DNSRecord {
 export class DNSValidationService {
   
   /**
-   * Validate domain DNS settings with fallback for development
+   * Validate domain DNS settings using production services only
    */
   static async validateDomain(domainId: string): Promise<DNSValidationResult> {
-    try {
-      // Try Netlify function first
-      const netlifyResult = await this.validateWithNetlifyFunction(domainId);
-      if (netlifyResult) {
-        return netlifyResult;
-      }
-    } catch (error) {
-      console.log('Netlify function unavailable, using fallback validation');
+    const result = await this.validateWithNetlifyFunction(domainId);
+    if (!result) {
+      throw new Error('DNS validation service is not available. Please ensure all services are deployed.');
     }
-    
-    // Use fallback validation
-    return await this.validateWithFallback(domainId);
+    return result;
   }
   
   /**
