@@ -422,21 +422,33 @@ export function DomainBlogTemplateManager({
 
   if (blogEnabledDomains.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Palette className="h-5 w-5" />
-            Blog Templates
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <Palette className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600 mb-2">No blog-enabled domains found</p>
-            <p className="text-sm text-gray-500">Enable blogging for your domains to access template customization</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <Alert>
+          <Palette className="h-4 w-4" />
+          <AlertDescription>
+            <div className="space-y-2">
+              <p><strong>No blog-enabled domains found</strong></p>
+              <p>Total domains: {domains.length}</p>
+              <p>Blog-enabled domains: {domains.filter(d => d.blog_enabled).length}</p>
+              {domains.length > 0 && (
+                <div>
+                  <p className="font-medium">Domain details:</p>
+                  <ul className="list-disc list-inside text-sm">
+                    {domains.map(domain => (
+                      <li key={domain.id}>
+                        {domain.domain} - Blog enabled: {domain.blog_enabled ? 'Yes' : 'No'}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              <p className="text-sm mt-2">
+                To enable blog templates, edit a domain above and toggle "Enable Blog" on.
+              </p>
+            </div>
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
