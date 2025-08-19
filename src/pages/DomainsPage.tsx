@@ -593,32 +593,42 @@ const DomainsPage = () => {
     }
   };
 
-  const getDNSInstructions = (domain: Domain) => [
-    {
-      type: 'A',
-      name: '@',
-      value: hostingConfig.ip,
-      description: 'Points your domain to our hosting server',
-      validated: domain.a_record_validated,
-      required: true
-    },
-    {
-      type: 'CNAME',
-      name: 'www',
-      value: hostingConfig.cname,
-      description: 'Redirects www subdomain to main domain',
-      validated: domain.cname_validated,
-      required: false
-    },
-    {
-      type: 'TXT',
-      name: '@',
-      value: `blo-verification=${domain.verification_token}`,
-      description: 'Verifies domain ownership (required for activation)',
-      validated: domain.txt_record_validated,
-      required: true
+  const getDNSInstructions = (domain: Domain) => {
+    // Generate token if missing
+    const token = domain.verification_token || generateVerificationToken();
+
+    // If token was missing, update the domain
+    if (!domain.verification_token && domain.id) {
+      updateDomain(domain.id, { verification_token: token }).catch(console.error);
     }
-  ];
+
+    return [
+      {
+        type: 'A',
+        name: '@',
+        value: hostingConfig.ip,
+        description: 'Points your domain to our hosting server',
+        validated: domain.a_record_validated,
+        required: true
+      },
+      {
+        type: 'CNAME',
+        name: 'www',
+        value: hostingConfig.cname,
+        description: 'Redirects www subdomain to main domain',
+        validated: domain.cname_validated,
+        required: false
+      },
+      {
+        type: 'TXT',
+        name: '@',
+        value: `blo-verification=${token}`,
+        description: 'Verifies domain ownership (required for activation)',
+        validated: domain.txt_record_validated,
+        required: true
+      }
+    ];
+  };
 
   const exportDomains = () => {
     const csv = ['Domain,Status,Created,Pages Published,Blog Enabled,SSL Enabled']
