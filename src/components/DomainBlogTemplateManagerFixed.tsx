@@ -38,8 +38,8 @@ import {
   Database
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import BlogThemesService, { BlogTheme, DomainThemeSettings } from '@/services/blogThemesService';
-import ImprovedBlogThemesService from '@/services/improvedBlogThemesService';
+import ImprovedBlogThemesService, { DomainThemeSettings } from '@/services/improvedBlogThemesService';
+import { ThemeConfig } from '@/types/blogTemplateTypes';
 import { DomainBlogTemplateService, DomainThemeRecord } from '@/services/domainBlogTemplateService';
 import { BlogTemplatePreview } from '@/components/BlogTemplateRenderer';
 import { ThemeStyles } from '@/types/blogTemplateTypes';
@@ -71,7 +71,7 @@ export function DomainBlogTemplateManagerFixed({
 }: DomainBlogTemplateManagerProps) {
   const [selectedDomain, setSelectedDomain] = useState<string>('');
   const [selectedTheme, setSelectedTheme] = useState<string>('minimal');
-  const [customStyles, setCustomStyles] = useState<Partial<BlogTheme['styles']>>({});
+  const [customStyles, setCustomStyles] = useState<Partial<ThemeConfig['styles']>>({});
   const [previewHtml, setPreviewHtml] = useState<string>('');
   const [devicePreview, setDevicePreview] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -187,7 +187,7 @@ export function DomainBlogTemplateManagerFixed({
             id: `local_${domain.id}`,
             domain_id: domain.id,
             theme_id: domainSettings?.theme_id || 'minimal',
-            theme_name: BlogThemesService.getThemeById(domainSettings?.theme_id || 'minimal')?.name || 'Minimal Clean',
+            theme_name: ImprovedBlogThemesService.getThemeById(domainSettings?.theme_id || 'minimal')?.name || 'Minimal Clean',
             custom_styles: domainSettings?.custom_styles || {},
             custom_settings: {},
             is_active: true,
@@ -278,7 +278,7 @@ export function DomainBlogTemplateManagerFixed({
     }
   };
 
-  const handleStyleChange = (property: keyof BlogTheme['styles'], value: string) => {
+  const handleStyleChange = (property: keyof ThemeConfig['styles'], value: string) => {
     setCustomStyles(prev => ({
       ...prev,
       [property]: value
