@@ -236,6 +236,30 @@ export class DomainBlogTemplateService {
         published_at: new Date().toISOString()
       };
 
+      // Store blog post in database
+      try {
+        const domainTheme = await this.getDomainTheme(domainId);
+
+        await supabase
+          .from('domain_blog_posts')
+          .insert({
+            domain_id: domainId,
+            domain_name: domain.domain,
+            title: blogPost.title,
+            slug: blogPost.slug,
+            content: blogPost.content,
+            published_url: publishedUrl,
+            theme_id: domainTheme?.theme_id || 'minimal',
+            status: 'published',
+            keywords: blogPost.keywords,
+            meta_description: blogPost.meta_description,
+            published_at: new Date().toISOString()
+          });
+      } catch (dbError) {
+        console.error('Error storing blog post in database:', dbError);
+        // Don't throw - the post was published successfully
+      }
+
       // Increment the published pages counter
       await DomainBlogService.incrementPublishedPages(domainId);
 
