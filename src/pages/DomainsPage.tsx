@@ -701,32 +701,7 @@ const DomainsPage = () => {
       updateDomain(domain.id, { verification_token: token }).catch(console.error);
     }
 
-    return [
-      {
-        type: 'A',
-        name: '@',
-        value: hostingConfig.ip,
-        description: 'Points your domain to our hosting server',
-        validated: domain.a_record_validated,
-        required: true
-      },
-      {
-        type: 'CNAME',
-        name: 'www',
-        value: hostingConfig.cname,
-        description: 'Redirects www subdomain to main domain',
-        validated: domain.cname_validated,
-        required: false
-      },
-      {
-        type: 'TXT',
-        name: '@',
-        value: `blo-verification=${token}`,
-        description: 'Verifies domain ownership (required for activation)',
-        validated: domain.txt_record_validated,
-        required: true
-      }
-    ];
+    return DNSValidationService.getDNSInstructions(domain, hostingConfig);
   };
 
   const exportDomains = () => {
