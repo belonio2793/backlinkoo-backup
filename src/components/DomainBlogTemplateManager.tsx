@@ -489,10 +489,19 @@ export function DomainBlogTemplateManager({
       )}
 
       {databaseStatus === 'error' && (
-        <Alert variant="destructive">
+        <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            Database connection error. Using local storage mode. Check your connection and try refreshing.
+            <div className="flex items-center justify-between">
+              <span>Database connection unavailable. Running in offline mode - settings will be saved locally.</span>
+              <Button
+                onClick={() => window.location.reload()}
+                size="sm"
+                variant="outline"
+              >
+                Retry Connection
+              </Button>
+            </div>
           </AlertDescription>
         </Alert>
       )}
