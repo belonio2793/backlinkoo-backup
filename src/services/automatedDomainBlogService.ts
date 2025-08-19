@@ -57,6 +57,22 @@ export class AutomatedDomainBlogService {
         maxDomains,
         params.brandName
       );
+
+      // Link blog posts to campaign in database
+      try {
+        for (const post of publishedPosts) {
+          await supabase
+            .from('domain_blog_posts')
+            .update({
+              campaign_id: params.campaignId,
+              target_url: params.targetUrl
+            })
+            .eq('published_url', post.published_url);
+        }
+      } catch (linkError) {
+        console.error('Error linking blog posts to campaign:', linkError);
+        // Don't throw - posts were published successfully
+      }
       
       // Log to campaign activity
       await this.logCampaignActivity(
