@@ -36,7 +36,8 @@
     "test:campaign": "node test-campaign-creation.js",
     "test:fix": "node test-campaign-fix.js",
     "test:final": "node final-campaign-test.js",
-    "force:beautiful": "node scripts/force-beautiful-content-structure.js"
+    "force:beautiful": "node scripts/force-beautiful-content-structure.js",
+    "setup:domains": "node scripts/create-user-domains-table.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
