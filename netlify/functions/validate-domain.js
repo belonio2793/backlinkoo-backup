@@ -68,10 +68,18 @@ async function validateDNSRecords(domain, verificationToken) {
     try {
       const aRecords = await dns.resolve4(domain);
       results.dns_responses.a = aRecords;
-      
-      if (aRecords.includes(HOSTING_CONFIG.ip)) {
+
+      if (HOSTING_CONFIG.debug_mode) {
+        console.log(`🔍 A Record Debug - Domain: ${domain}`);
+        console.log(`🔍 A Record Debug - Expected: ${HOSTING_CONFIG.ip}`);
+        console.log(`🔍 A Record Debug - Found: ${aRecords.join(', ')}`);
+        console.log(`🔍 A Record Debug - Allow any IP: ${HOSTING_CONFIG.allow_any_ip}`);
+      }
+
+      // For development/testing, allow any IP if configured
+      if (HOSTING_CONFIG.allow_any_ip || aRecords.includes(HOSTING_CONFIG.ip)) {
         results.a_validated = true;
-        console.log(`✅ A record validated for ${domain}`);
+        console.log(`✅ A record validated for ${domain}${HOSTING_CONFIG.allow_any_ip ? ' (development mode)' : ''}`);
       } else {
         results.errors.push(`A record doesn't point to our hosting IP: ${HOSTING_CONFIG.ip}. Found: ${aRecords.join(', ')}`);
         console.log(`❌ A record validation failed for ${domain}. Expected: ${HOSTING_CONFIG.ip}, Found: ${aRecords.join(', ')}`);
