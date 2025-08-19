@@ -199,6 +199,14 @@ const App = () => (
                 </Suspense>
               }
             />
+            <Route
+              path="/domains"
+              element={
+                <Suspense fallback={<LoadingSpinner />}>
+                  <LazyDomainsPage />
+                </Suspense>
+              }
+            />
 
             {/* Authentication routes */}
             <Route
