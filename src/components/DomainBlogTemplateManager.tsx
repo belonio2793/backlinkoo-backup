@@ -2,32 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
+import { 
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
+import { 
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger
+import { 
+  Tabs, 
+  TabsContent, 
+  TabsList, 
+  TabsTrigger 
 } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Palette,
-  Eye,
-  Settings,
+import { 
+  Palette, 
+  Eye, 
+  Settings, 
   Save,
   RefreshCw,
   Monitor,
@@ -61,9 +61,9 @@ interface SaveStatus {
   errorMessage?: string;
 }
 
-export function DomainBlogTemplateManager({
-  domains,
-  onThemeUpdate
+export function DomainBlogTemplateManager({ 
+  domains, 
+  onThemeUpdate 
 }: DomainBlogTemplateManagerProps) {
   const [selectedDomain, setSelectedDomain] = useState<string>('');
   const [selectedTheme, setSelectedTheme] = useState<string>('minimal');
@@ -133,29 +133,12 @@ export function DomainBlogTemplateManager({
             if (themeRecord) {
               themeRecords[domain.id] = themeRecord;
             } else {
-              // Ensure default theme if none exists
-              await DomainBlogTemplateService.ensureDefaultTheme(domain.id);
-              const defaultTheme = await DomainBlogTemplateService.getDomainTheme(domain.id);
-              if (defaultTheme) {
-                themeRecords[domain.id] = defaultTheme;
-              }
+              // Create default theme record
+              themeRecords[domain.id] = createDefaultThemeRecord(domain.id);
             }
           } catch (domainError) {
-            // Log error but continue with other domains
-            console.warn(`⚠️ Could not load theme for domain ${domain.domain}:`, domainError);
-
-            // Create a fallback theme record for this domain
-            themeRecords[domain.id] = {
-              id: `fallback_${domain.id}`,
-              domain_id: domain.id,
-              theme_id: 'minimal',
-              theme_name: 'Minimal Clean (Fallback)',
-              custom_styles: {},
-              custom_settings: {},
-              is_active: true,
-              created_at: new Date().toISOString(),
-              updated_at: new Date().toISOString()
-            };
+            console.warn(`Could not load theme for domain ${domain.domain}:`, domainError);
+            themeRecords[domain.id] = createDefaultThemeRecord(domain.id);
           }
         }
 
@@ -177,69 +160,72 @@ export function DomainBlogTemplateManager({
         setSaveStatus({ isLoading: false, hasError: true, errorMessage });
         setFallbackMode(true);
         loadFromLocalStorage();
-
-        // Create fallback theme records for all domains
-        const fallbackRecords: Record<string, DomainThemeRecord> = {};
-        blogEnabledDomains.forEach(domain => {
-          fallbackRecords[domain.id] = {
-            id: `fallback_${domain.id}`,
-            domain_id: domain.id,
-            theme_id: 'minimal',
-            theme_name: 'Minimal Clean (Fallback)',
-            custom_styles: {},
-            custom_settings: {},
-            is_active: true,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          };
-        });
-        setDomainThemeRecords(fallbackRecords);
-
-        // Check if this is a database setup issue
-        if (errorMessage.includes('does not exist') || errorMessage.includes('domain_blog_themes')) {
-          toast({
-            title: "Database Setup Required",
-            description: "Domain themes database not set up. Run setupDomainDatabase() in console or connect to Supabase MCP.",
-            variant: "destructive",
-            action: (
-              <button
-                onClick={async () => {
-                  const { setupDomainDatabase } = await import('@/utils/setupDomainDatabase');
-                  const result = await setupDomainDatabase();
-                  if (result.success) {
-                    toast({
-                      title: "Setup Complete",
-                      description: "Database set up successfully. Refreshing...",
-                    });
-                    window.location.reload();
-                  } else {
-                    toast({
-                      title: "Setup Failed",
-                      description: result.message,
-                      variant: "destructive"
-                    });
-                  }
-                }}
-                className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
-              >
-                Auto Setup
-              </button>
-            )
-          });
-        } else {
-          toast({
-            title: "Error Loading Themes",
-            description: `Failed to load domain theme settings: ${errorMessage}`,
-            variant: "destructive"
-          });
-        }
-      } finally {
-        setIsLoading(false);
       }
     };
 
     loadDomainThemes();
-  }, [blogEnabledDomains, selectedDomain]);
+  }, [blogEnabledDomains, selectedDomain, fallbackMode]);
+
+  // Load settings from localStorage as fallback
+  const loadFromLocalStorage = () => {
+    try {
+      const savedSettings = localStorage.getItem('domain-blog-theme-settings');
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        setDomainThemeSettings(settings);
+        
+        // Create theme records from localStorage
+        const themeRecords: Record<string, DomainThemeRecord> = {};
+        blogEnabledDomains.forEach(domain => {
+          const domainSettings = settings[domain.id];
+          themeRecords[domain.id] = {
+            id: `local_${domain.id}`,
+            domain_id: domain.id,
+            theme_id: domainSettings?.theme_id || 'minimal',
+            theme_name: BlogThemesService.getThemeById(domainSettings?.theme_id || 'minimal')?.name || 'Minimal Clean',
+            custom_styles: domainSettings?.custom_styles || {},
+            custom_settings: {},
+            is_active: true,
+            created_at: new Date().toISOString(),
+            updated_at: domainSettings?.updated_at || new Date().toISOString()
+          };
+        });
+        setDomainThemeRecords(themeRecords);
+
+        if (selectedDomain && themeRecords[selectedDomain]) {
+          setSelectedTheme(themeRecords[selectedDomain].theme_id);
+          setCustomStyles(themeRecords[selectedDomain].custom_styles || {});
+        }
+      } else {
+        // Initialize with defaults
+        const fallbackRecords: Record<string, DomainThemeRecord> = {};
+        blogEnabledDomains.forEach(domain => {
+          fallbackRecords[domain.id] = createDefaultThemeRecord(domain.id);
+        });
+        setDomainThemeRecords(fallbackRecords);
+      }
+    } catch (error) {
+      console.error('Error loading from localStorage:', error);
+    }
+  };
+
+  // Save to localStorage as fallback
+  const saveToLocalStorage = (domainId: string, themeId: string, styles: any) => {
+    try {
+      const currentSettings = JSON.parse(localStorage.getItem('domain-blog-theme-settings') || '{}');
+      currentSettings[domainId] = {
+        domain_id: domainId,
+        theme_id: themeId,
+        custom_styles: styles,
+        updated_at: new Date().toISOString()
+      };
+      localStorage.setItem('domain-blog-theme-settings', JSON.stringify(currentSettings));
+      return true;
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+      return false;
+    }
+  };
 
   useEffect(() => {
     if (selectedTheme) {
@@ -270,6 +256,43 @@ export function DomainBlogTemplateManager({
     }));
   };
 
+  const setupDatabase = async () => {
+    try {
+      setSaveStatus({ isLoading: true, hasError: false });
+      toast({
+        title: "Setting up database",
+        description: "Installing blog theme database components...",
+      });
+
+      // Dynamically import the setup function
+      const { setupDomainDatabase } = await import('@/utils/setupDomainDatabase');
+      const result = await setupDomainDatabase();
+
+      if (result.success) {
+        setDatabaseStatus('ready');
+        setFallbackMode(false);
+        setSaveStatus({ isLoading: false, hasError: false });
+        toast({
+          title: "Database Setup Complete",
+          description: "Blog theme database is now ready. Reloading settings...",
+        });
+        
+        // Reload the component
+        window.location.reload();
+      } else {
+        throw new Error(result.message || 'Setup failed');
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      setSaveStatus({ isLoading: false, hasError: true, errorMessage });
+      toast({
+        title: "Setup Failed",
+        description: `Failed to set up database: ${errorMessage}`,
+        variant: "destructive"
+      });
+    }
+  };
+
   const saveThemeSettings = async () => {
     if (!selectedDomain || !selectedTheme) {
       toast({
@@ -280,14 +303,44 @@ export function DomainBlogTemplateManager({
       return;
     }
 
-    setIsLoading(true);
+    setSaveStatus({ isLoading: true, hasError: false });
+    
     try {
-      const success = await DomainBlogTemplateService.setDomainTheme(
-        selectedDomain,
-        selectedTheme,
-        customStyles,
-        {} // custom settings can be added later
-      );
+      let success = false;
+
+      if (!fallbackMode && databaseStatus === 'ready') {
+        // Try to save to database
+        try {
+          success = await DomainBlogTemplateService.setDomainTheme(
+            selectedDomain,
+            selectedTheme,
+            customStyles,
+            {}
+          );
+          
+          if (success) {
+            toast({
+              title: "Theme Saved",
+              description: "Blog theme settings have been saved to database",
+            });
+          }
+        } catch (dbError) {
+          console.warn('Database save failed, falling back to localStorage:', dbError);
+          success = false;
+        }
+      }
+
+      // Fallback to localStorage if database save failed or we're in fallback mode
+      if (!success) {
+        success = saveToLocalStorage(selectedDomain, selectedTheme, customStyles);
+        if (success) {
+          toast({
+            title: "Settings Saved Locally",
+            description: "Theme settings saved to browser storage. Set up database for persistent storage.",
+            variant: "default"
+          });
+        }
+      }
 
       if (success) {
         // Update local state
@@ -303,37 +356,53 @@ export function DomainBlogTemplateManager({
           [selectedDomain]: settings
         }));
 
-        // Reload theme record
-        const updatedTheme = await DomainBlogTemplateService.getDomainTheme(selectedDomain);
-        if (updatedTheme) {
-          setDomainThemeRecords(prev => ({
-            ...prev,
-            [selectedDomain]: updatedTheme
-          }));
-        }
+        // Update theme record
+        const updatedTheme: DomainThemeRecord = {
+          id: `${fallbackMode ? 'local' : 'db'}_${selectedDomain}`,
+          domain_id: selectedDomain,
+          theme_id: selectedTheme,
+          theme_name: BlogThemesService.getThemeById(selectedTheme)?.name || 'Unknown',
+          custom_styles: customStyles,
+          custom_settings: {},
+          is_active: true,
+          created_at: domainThemeRecords[selectedDomain]?.created_at || new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        setDomainThemeRecords(prev => ({
+          ...prev,
+          [selectedDomain]: updatedTheme
+        }));
 
         onThemeUpdate?.(selectedDomain, selectedTheme);
-
-        toast({
-          title: "Theme Saved",
-          description: "Blog theme settings have been saved to database",
-        });
+        setSaveStatus({ isLoading: false, hasError: false, lastSaved: new Date() });
       } else {
-        throw new Error('Failed to save theme to database');
+        throw new Error('Failed to save theme settings');
       }
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message :
-                          error && typeof error === 'object' ? JSON.stringify(error) :
-                          String(error);
-      console.error('Error saving theme:', errorMessage, error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error('Error saving theme:', errorMessage);
+      setSaveStatus({ isLoading: false, hasError: true, errorMessage });
       toast({
         title: "Save Failed",
         description: `Failed to save theme settings: ${errorMessage}`,
         variant: "destructive"
       });
-    } finally {
-      setIsLoading(false);
     }
+  };
+
+  const createDefaultThemeRecord = (domainId: string): DomainThemeRecord => {
+    return {
+      id: `default_${domainId}`,
+      domain_id: domainId,
+      theme_id: 'minimal',
+      theme_name: 'Minimal Clean',
+      custom_styles: {},
+      custom_settings: {},
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
   };
 
   const getDevicePreviewStyle = () => {
@@ -373,14 +442,47 @@ export function DomainBlogTemplateManager({
 
   return (
     <div className="space-y-6">
+      {/* Database Status Alert */}
+      {databaseStatus === 'missing' && (
+        <Alert>
+          <Database className="h-4 w-4" />
+          <AlertDescription className="flex items-center justify-between">
+            <span>Blog theme database not set up. Settings will be saved locally.</span>
+            <Button onClick={setupDatabase} size="sm" disabled={saveStatus.isLoading}>
+              {saveStatus.isLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : 'Setup Database'}
+            </Button>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {databaseStatus === 'error' && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Database connection error. Using local storage mode. Check your connection and try refreshing.
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {fallbackMode && saveStatus.lastSaved && (
+        <Alert>
+          <CheckCircle className="h-4 w-4" />
+          <AlertDescription>
+            Settings saved locally at {saveStatus.lastSaved.toLocaleTimeString()}. Set up database for persistent storage.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Palette className="h-5 w-5" />
             Blog Template Manager
+            {fallbackMode && <Badge variant="outline">Local Mode</Badge>}
           </CardTitle>
           <p className="text-sm text-gray-600">
             Customize the look and feel of your domain blogs with professional themes
+            {fallbackMode && " (Currently using browser storage)"}
           </p>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -626,16 +728,26 @@ export function DomainBlogTemplateManager({
             <Button
               onClick={saveThemeSettings}
               className="flex items-center gap-2"
-              disabled={isLoading}
+              disabled={saveStatus.isLoading}
             >
-              {isLoading ? (
+              {saveStatus.isLoading ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              {isLoading ? 'Saving...' : 'Save Theme Settings'}
+              {saveStatus.isLoading ? 'Saving...' : 'Save Theme Settings'}
             </Button>
           </div>
+
+          {/* Save Status */}
+          {saveStatus.hasError && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Save failed: {saveStatus.errorMessage}
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
 
@@ -659,6 +771,9 @@ export function DomainBlogTemplateManager({
                   <Badge variant="outline">
                     {getCurrentThemeForDomain(domain.id)}
                   </Badge>
+                  {fallbackMode && domainThemeSettings[domain.id] && (
+                    <Badge variant="secondary" className="text-xs">Local</Badge>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
