@@ -615,7 +615,8 @@ const DomainsPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ domain_id: 'test-validation-123' })
+        body: JSON.stringify({ domain_id: 'test-validation-123' }),
+        signal: AbortSignal.timeout(15000) // 15 second timeout
       });
 
       console.log('📡 Response status:', response.status);
@@ -624,7 +625,14 @@ const DomainsPage = () => {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ Service error response:', errorText);
-        toast.error(`DNS validation service error: HTTP ${response.status}`);
+
+        if (response.status === 502 || response.status === 503) {
+          toast.warning('⚠️ DNS validation service is temporarily unavailable. Domains can still be added and will use fallback validation.');
+        } else if (response.status === 404) {
+          toast.error('❌ DNS validation function not deployed. Contact support.');
+        } else {
+          toast.error(`DNS validation service error: HTTP ${response.status}`);
+        }
         return;
       }
 
@@ -640,7 +648,14 @@ const DomainsPage = () => {
 
     } catch (error: any) {
       console.error('❌ Test validation error:', error);
-      toast.error(`DNS validation service test failed: ${error.message}`);
+
+      if (error.name === 'AbortError') {
+        toast.error('❌ DNS validation service timeout - service may be down');
+      } else if (error.message.includes('Failed to fetch')) {
+        toast.warning('⚠️ Cannot reach DNS validation service. Network or deployment issue.');
+      } else {
+        toast.error(`DNS validation service test failed: ${error.message}`);
+      }
     }
   };
 
