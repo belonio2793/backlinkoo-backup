@@ -18,7 +18,7 @@ import {
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import ImprovedBlogThemesService, { DomainThemeSettings } from '@/services/improvedBlogThemesService';
 import { ThemeConfig } from '@/types/blogTemplateTypes';
 import { Alert, AlertDescription } from '@/components/ui/alert';
