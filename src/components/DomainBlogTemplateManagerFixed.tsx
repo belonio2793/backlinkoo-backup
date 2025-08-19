@@ -40,9 +40,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 import BlogThemesService, { BlogTheme, DomainThemeSettings } from '@/services/blogThemesService';
 import { DomainBlogTemplateService, DomainThemeRecord } from '@/services/domainBlogTemplateService';
-import BlogTemplateStorageService from '@/services/blogTemplateStorageService';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { supabase } from '@/integrations/supabase/client';
 
 interface Domain {
   id: string;
@@ -63,7 +61,7 @@ interface SaveStatus {
   errorMessage?: string;
 }
 
-export function DomainBlogTemplateManager({ 
+export function DomainBlogTemplateManagerFixed({ 
   domains, 
   onThemeUpdate 
 }: DomainBlogTemplateManagerProps) {
@@ -93,42 +91,22 @@ export function DomainBlogTemplateManager({
     const checkDatabaseStatus = async () => {
       try {
         setDatabaseStatus('checking');
-
-        // Try a simple database connection test first
-        const { data: testData, error: testError } = await supabase
-          .from('domains')
-          .select('id')
-          .limit(1);
-
-        if (testError && testError.message.includes('Failed to fetch')) {
-          // Network connectivity issue
-          console.warn('⚠️ Database connection failed. Using offline mode.');
-          setDatabaseStatus('error');
-          setFallbackMode(true);
-          return;
-        }
-
-        // If we can connect, test the blog themes functionality
+        // Try to fetch a domain theme to test if database is set up
         if (blogEnabledDomains.length > 0) {
-          const themeResult = await DomainBlogTemplateService.getDomainTheme(blogEnabledDomains[0].id);
-          if (themeResult) {
-            setDatabaseStatus('ready');
-            setFallbackMode(false);
-          } else {
-            // Got null result but no error - database exists but may be empty
-            setDatabaseStatus('ready');
-            setFallbackMode(false);
-          }
-        } else {
-          // No blog-enabled domains, but database is working
+          await DomainBlogTemplateService.getDomainTheme(blogEnabledDomains[0].id);
           setDatabaseStatus('ready');
           setFallbackMode(false);
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        console.warn('⚠️ Database check failed, using offline mode:', errorMessage);
-        setDatabaseStatus('error');
-        setFallbackMode(true);
+        if (errorMessage.includes('does not exist') || errorMessage.includes('domain_blog_themes')) {
+          setDatabaseStatus('missing');
+          setFallbackMode(true);
+        } else {
+          setDatabaseStatus('error');
+          setFallbackMode(true);
+        }
+        console.warn('Database status check:', errorMessage);
       }
     };
 
@@ -166,7 +144,6 @@ export function DomainBlogTemplateManager({
 
         setDomainThemeRecords(themeRecords);
 
-        // Set selected theme based on loaded data
         if (selectedDomain && themeRecords[selectedDomain]) {
           setSelectedTheme(themeRecords[selectedDomain].theme_id);
           setCustomStyles(themeRecords[selectedDomain].custom_styles || {});
@@ -175,11 +152,9 @@ export function DomainBlogTemplateManager({
         setSaveStatus({ isLoading: false, hasError: false });
 
       } catch (error) {
-        const errorMessage = error instanceof Error ? error.message :
-                            error && typeof error === 'object' ? JSON.stringify(error) :
-                            String(error);
-        console.warn('⚠️ Loading domain themes failed, switching to offline mode:', errorMessage);
-        setSaveStatus({ isLoading: false, hasError: false }); // Don't show as error, just switch to offline
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        console.error('Error loading domain themes:', errorMessage);
+        setSaveStatus({ isLoading: false, hasError: true, errorMessage });
         setFallbackMode(true);
         loadFromLocalStorage();
       }
@@ -188,66 +163,66 @@ export function DomainBlogTemplateManager({
     loadDomainThemes();
   }, [blogEnabledDomains, selectedDomain, fallbackMode]);
 
-  // Load settings using improved storage service
-  const loadFromLocalStorage = async () => {
+  // Load settings from localStorage as fallback
+  const loadFromLocalStorage = () => {
     try {
-      const themeRecords: Record<string, DomainThemeRecord> = {};
-      const settingsRecords: Record<string, DomainThemeSettings> = {};
+      const savedSettings = localStorage.getItem('domain-blog-theme-settings');
+      if (savedSettings) {
+        const settings = JSON.parse(savedSettings);
+        setDomainThemeSettings(settings);
+        
+        // Create theme records from localStorage
+        const themeRecords: Record<string, DomainThemeRecord> = {};
+        blogEnabledDomains.forEach(domain => {
+          const domainSettings = settings[domain.id];
+          themeRecords[domain.id] = {
+            id: `local_${domain.id}`,
+            domain_id: domain.id,
+            theme_id: domainSettings?.theme_id || 'minimal',
+            theme_name: BlogThemesService.getThemeById(domainSettings?.theme_id || 'minimal')?.name || 'Minimal Clean',
+            custom_styles: domainSettings?.custom_styles || {},
+            custom_settings: {},
+            is_active: true,
+            created_at: new Date().toISOString(),
+            updated_at: domainSettings?.updated_at || new Date().toISOString()
+          };
+        });
+        setDomainThemeRecords(themeRecords);
 
-      for (const domain of blogEnabledDomains) {
-        try {
-          const savedSettings = await BlogTemplateStorageService.loadSettings(domain.id);
-
-          if (savedSettings) {
-            themeRecords[domain.id] = {
-              id: `storage_${domain.id}`,
-              domain_id: domain.id,
-              theme_id: savedSettings.themeId,
-              theme_name: BlogThemesService.getThemeById(savedSettings.themeId)?.name || 'Unknown Theme',
-              custom_styles: savedSettings.customStyles,
-              custom_settings: savedSettings.customSettings,
-              is_active: true,
-              created_at: new Date().toISOString(),
-              updated_at: savedSettings.lastUpdated
-            };
-
-            settingsRecords[domain.id] = {
-              domain_id: domain.id,
-              theme_id: savedSettings.themeId,
-              custom_styles: savedSettings.customStyles,
-              updated_at: savedSettings.lastUpdated
-            };
-          } else {
-            // Create default
-            themeRecords[domain.id] = createDefaultThemeRecord(domain.id);
-          }
-        } catch (error) {
-          console.warn(`Error loading settings for domain ${domain.domain}:`, error);
-          themeRecords[domain.id] = createDefaultThemeRecord(domain.id);
+        if (selectedDomain && themeRecords[selectedDomain]) {
+          setSelectedTheme(themeRecords[selectedDomain].theme_id);
+          setCustomStyles(themeRecords[selectedDomain].custom_styles || {});
         }
+      } else {
+        // Initialize with defaults
+        const fallbackRecords: Record<string, DomainThemeRecord> = {};
+        blogEnabledDomains.forEach(domain => {
+          fallbackRecords[domain.id] = createDefaultThemeRecord(domain.id);
+        });
+        setDomainThemeRecords(fallbackRecords);
       }
-
-      setDomainThemeRecords(themeRecords);
-      setDomainThemeSettings(settingsRecords);
-
-      // Set selected theme based on loaded data
-      if (selectedDomain && themeRecords[selectedDomain]) {
-        setSelectedTheme(themeRecords[selectedDomain].theme_id);
-        setCustomStyles(themeRecords[selectedDomain].custom_styles || {});
-      }
-
-      console.log(`✅ Loaded ${Object.keys(themeRecords).length} blog template settings`);
     } catch (error) {
-      console.error('Error loading from storage service:', error);
-      // Fallback to defaults
-      const fallbackRecords: Record<string, DomainThemeRecord> = {};
-      blogEnabledDomains.forEach(domain => {
-        fallbackRecords[domain.id] = createDefaultThemeRecord(domain.id);
-      });
-      setDomainThemeRecords(fallbackRecords);
+      console.error('Error loading from localStorage:', error);
     }
   };
 
+  // Save to localStorage as fallback
+  const saveToLocalStorage = (domainId: string, themeId: string, styles: any) => {
+    try {
+      const currentSettings = JSON.parse(localStorage.getItem('domain-blog-theme-settings') || '{}');
+      currentSettings[domainId] = {
+        domain_id: domainId,
+        theme_id: themeId,
+        custom_styles: styles,
+        updated_at: new Date().toISOString()
+      };
+      localStorage.setItem('domain-blog-theme-settings', JSON.stringify(currentSettings));
+      return true;
+    } catch (error) {
+      console.error('Error saving to localStorage:', error);
+      return false;
+    }
+  };
 
   useEffect(() => {
     if (selectedTheme) {
@@ -326,17 +301,43 @@ export function DomainBlogTemplateManager({
     }
 
     setSaveStatus({ isLoading: true, hasError: false });
-
+    
     try {
-      // Use the improved storage service
-      const result = await BlogTemplateStorageService.saveSettings(
-        selectedDomain,
-        selectedTheme,
-        customStyles,
-        {}
-      );
+      let success = false;
 
-      if (result.success) {
+      if (!fallbackMode && databaseStatus === 'ready') {
+        // Try to save to database
+        try {
+          success = await DomainBlogTemplateService.setDomainTheme(
+            selectedDomain,
+            selectedTheme,
+            customStyles,
+            {}
+          );
+        } catch (dbError) {
+          console.warn('Database save failed, falling back to localStorage:', dbError);
+          success = false;
+        }
+      }
+
+      // Fallback to localStorage if database save failed or we're in fallback mode
+      if (!success) {
+        success = saveToLocalStorage(selectedDomain, selectedTheme, customStyles);
+        if (success) {
+          toast({
+            title: "Settings Saved Locally",
+            description: "Theme settings saved to browser storage. Connect to database for persistent storage.",
+            variant: "default"
+          });
+        }
+      } else {
+        toast({
+          title: "Theme Saved",
+          description: "Blog theme settings have been saved to database",
+        });
+      }
+
+      if (success) {
         // Update local state
         const settings: DomainThemeSettings = {
           domain_id: selectedDomain,
@@ -352,7 +353,7 @@ export function DomainBlogTemplateManager({
 
         // Update theme record
         const updatedTheme: DomainThemeRecord = {
-          id: `${result.method}_${selectedDomain}`,
+          id: `${fallbackMode ? 'local' : 'db'}_${selectedDomain}`,
           domain_id: selectedDomain,
           theme_id: selectedTheme,
           theme_name: BlogThemesService.getThemeById(selectedTheme)?.name || 'Unknown',
@@ -370,21 +371,8 @@ export function DomainBlogTemplateManager({
 
         onThemeUpdate?.(selectedDomain, selectedTheme);
         setSaveStatus({ isLoading: false, hasError: false, lastSaved: new Date() });
-
-        // Show appropriate success message based on storage method
-        if (result.method === 'database') {
-          toast({
-            title: "Theme Saved",
-            description: "Blog theme settings have been saved to database",
-          });
-        } else {
-          toast({
-            title: "Settings Saved Locally",
-            description: "Theme settings saved to browser storage. Database backup available when connection is restored.",
-          });
-        }
       } else {
-        throw new Error(result.error || 'Failed to save theme settings');
+        throw new Error('Failed to save theme settings');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -429,33 +417,21 @@ export function DomainBlogTemplateManager({
 
   if (blogEnabledDomains.length === 0) {
     return (
-      <div className="space-y-4">
-        <Alert>
-          <Palette className="h-4 w-4" />
-          <AlertDescription>
-            <div className="space-y-2">
-              <p><strong>No blog-enabled domains found</strong></p>
-              <p>Total domains: {domains.length}</p>
-              <p>Blog-enabled domains: {domains.filter(d => d.blog_enabled).length}</p>
-              {domains.length > 0 && (
-                <div>
-                  <p className="font-medium">Domain details:</p>
-                  <ul className="list-disc list-inside text-sm">
-                    {domains.map(domain => (
-                      <li key={domain.id}>
-                        {domain.domain} - Blog enabled: {domain.blog_enabled ? 'Yes' : 'No'}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              <p className="text-sm mt-2">
-                To enable blog templates, edit a domain above and toggle "Enable Blog" on.
-              </p>
-            </div>
-          </AlertDescription>
-        </Alert>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Palette className="h-5 w-5" />
+            Blog Templates
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8">
+            <Palette className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-600 mb-2">No blog-enabled domains found</p>
+            <p className="text-sm text-gray-500">Enable blogging for your domains to access template customization</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -475,19 +451,10 @@ export function DomainBlogTemplateManager({
       )}
 
       {databaseStatus === 'error' && (
-        <Alert>
+        <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            <div className="flex items-center justify-between">
-              <span>Database connection unavailable. Running in offline mode - settings will be saved locally.</span>
-              <Button
-                onClick={() => window.location.reload()}
-                size="sm"
-                variant="outline"
-              >
-                Retry Connection
-              </Button>
-            </div>
+            Database connection error. Using local storage mode. Check your connection and try refreshing.
           </AlertDescription>
         </Alert>
       )}
@@ -819,4 +786,4 @@ export function DomainBlogTemplateManager({
   );
 }
 
-export default DomainBlogTemplateManager;
+export default DomainBlogTemplateManagerFixed;
