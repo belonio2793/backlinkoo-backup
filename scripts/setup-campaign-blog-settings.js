@@ -124,8 +124,8 @@ async function setupCampaignBlogSettings() {
 }
 
 // Run if called directly
-if (require.main === module) {
+if (import.meta.url === `file://${process.argv[1]}`) {
   setupCampaignBlogSettings();
 }
 
-module.exports = { setupCampaignBlogSettings };
+export { setupCampaignBlogSettings };
