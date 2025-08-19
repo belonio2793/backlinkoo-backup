@@ -55,7 +55,8 @@ import {
   Pause,
   Edit3,
   Save,
-  Palette
+  Palette,
+  Wand2
 } from 'lucide-react';
 import DomainBlogTemplateManager from '@/components/DomainBlogTemplateManager';
 import DNSValidationService from '@/services/dnsValidationService';
