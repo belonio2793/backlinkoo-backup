@@ -666,8 +666,10 @@ const DomainsPage = () => {
       if (result.success === false && result.error === 'Domain not found') {
         toast.success('✅ DNS validation service is working correctly! (Test domain not found as expected)');
         console.log('✅ DNS validation service is operational');
+        setDnsServiceStatus('online');
       } else {
         toast.info(`Service response: ${JSON.stringify(result)}`);
+        setDnsServiceStatus('online');
       }
 
     } catch (error: any) {
