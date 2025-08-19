@@ -545,7 +545,7 @@ ALTER TABLE blog_posts ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Public can read trial posts" ON blog_posts
   FOR SELECT USING (is_trial_post = true);`);
-                  toast({ title: "SQL Copied!", description: "Paste this in your Supabase SQL Editor" });
+                  toast.success("SQL Copied! Paste this in your Supabase SQL Editor");
                 }}
               >
                 📋 Copy SQL
