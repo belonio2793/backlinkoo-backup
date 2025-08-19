@@ -364,44 +364,31 @@ const AutomationDiscovery = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div>
-                    <Label htmlFor="search-query">Search Query</Label>
-                    <Input
-                      id="search-query"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      placeholder="e.g., technology blog, marketing tools, SaaS platforms"
-                      className="mt-1"
-                    />
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                    <h4 className="font-medium text-blue-800 mb-2">🚀 Automation Focus</h4>
+                    <p className="text-sm text-blue-700">
+                      This discovery engine finds URLs that are specifically compatible with your automation platform,
+                      focusing on technical requirements rather than topics. No search query needed!
+                    </p>
                   </div>
 
                   <div>
-                    <Label>Target Platforms</Label>
-                    <div className="grid grid-cols-2 gap-2 mt-2">
-                      {availablePlatforms.map(platform => (
-                        <button
+                    <Label>Automation Platform Types</Label>
+                    <div className="grid grid-cols-1 gap-2 mt-2">
+                      {[
+                        { id: 'api_platforms', name: '🔌 API Platforms (Telegraph, Medium, Dev.to)', desc: 'Instant publishing via APIs' },
+                        { id: 'form_platforms', name: '📝 Form Submission Sites', desc: 'Automated form completion' },
+                        { id: 'directory_sites', name: '📁 Directory Submissions', desc: 'Business/URL directories' },
+                        { id: 'comment_forms', name: '💬 Comment Forms', desc: 'Blog comment opportunities' },
+                        { id: 'profile_creation', name: '👤 Profile Creation', desc: 'Social/professional profiles' }
+                      ].map(platform => (
+                        <div
                           key={platform.id}
-                          onClick={() => {
-                            if (platform.id === 'all') {
-                              setSelectedPlatforms(['all']);
-                            } else {
-                              setSelectedPlatforms(prev => {
-                                const filtered = prev.filter(p => p !== 'all');
-                                return filtered.includes(platform.id)
-                                  ? filtered.filter(p => p !== platform.id)
-                                  : [...filtered, platform.id];
-                              });
-                            }
-                          }}
-                          className={`p-2 text-xs rounded-lg border transition-colors flex items-center gap-1 ${
-                            selectedPlatforms.includes(platform.id) || selectedPlatforms.includes('all')
-                              ? 'bg-blue-100 border-blue-300 text-blue-700'
-                              : 'bg-white border-gray-200 hover:bg-gray-50'
-                          }`}
+                          className="p-3 border rounded-lg bg-green-50 border-green-200"
                         >
-                          <span>{platform.icon}</span>
-                          <span>{platform.name}</span>
-                        </button>
+                          <div className="font-medium text-green-800">{platform.name}</div>
+                          <div className="text-xs text-green-600">{platform.desc}</div>
+                        </div>
                       ))}
                     </div>
                   </div>
