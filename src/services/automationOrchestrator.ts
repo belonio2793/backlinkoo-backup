@@ -511,6 +511,43 @@ export class AutomationOrchestrator {
         }
       }
 
+      // Additional Domain Blog Publishing
+      console.log('📝 Attempting domain blog publishing...');
+      try {
+        const hasAvailableDomains = await AutomatedDomainBlogService.hasAvailableDomains();
+
+        if (hasAvailableDomains) {
+          await this.logActivity(campaignId, 'info', 'Starting domain blog publishing...');
+
+          const blogResult = await AutomatedDomainBlogService.publishCampaignBlogs({
+            campaignId: campaign.id,
+            keywords: campaign.keywords || ['business growth'],
+            targetUrl: campaign.target_url,
+            brandName: undefined, // Could be extracted from user profile
+            maxDomains: 2 // Configurable per campaign
+          });
+
+          if (blogResult.success && blogResult.publishedUrls.length > 0) {
+            await this.logActivity(
+              campaignId,
+              'info',
+              `Successfully published ${blogResult.publishedUrls.length} domain blog posts: ${blogResult.domains.join(', ')}`
+            );
+            console.log(`✅ Domain blog publishing successful: ${blogResult.publishedUrls.length} posts`);
+          } else if (blogResult.error) {
+            await this.logActivity(campaignId, 'warning', `Domain blog publishing: ${blogResult.error}`);
+            console.log(`⚠️ Domain blog publishing note: ${blogResult.error}`);
+          }
+        } else {
+          console.log('📭 No blog-enabled domains available for additional publishing');
+          await this.logActivity(campaignId, 'info', 'No blog-enabled domains available for additional backlinks');
+        }
+      } catch (blogError) {
+        console.error('❌ Domain blog publishing failed:', blogError);
+        await this.logActivity(campaignId, 'warning', `Domain blog publishing failed: ${blogError.message || blogError}`);
+        // Don't throw error - domain blog publishing is supplementary
+      }
+
       // Continue to next platform immediately for continuous rotation
       console.log('🔄 Continuing to next platform for continuous rotation...');
       try {
