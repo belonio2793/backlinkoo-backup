@@ -48,9 +48,17 @@ export class DNSValidationService {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
       if (response.status === 404) {
         throw new Error('DNS validation service not deployed. Please deploy all required Netlify functions.');
+      }
+
+      // Clone response to read body safely
+      const responseClone = response.clone();
+      let errorText = '';
+      try {
+        errorText = await responseClone.text();
+      } catch {
+        errorText = 'Unable to read error details';
       }
       throw new Error(`DNS validation service error: HTTP ${response.status} - ${errorText}`);
     }
