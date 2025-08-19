@@ -157,8 +157,8 @@ const AutomationDiscovery = () => {
       const sessionId = data.sessionId;
 
       toast({
-        title: "Discovery Started",
-        description: `Searching for ${searchQuery} opportunities across platforms...`,
+        title: "Automation Discovery Started",
+        description: "Finding URLs compatible with your automation platform...",
       });
 
       // Start polling for results
