@@ -391,9 +391,9 @@ const AutomationDiscovery = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="light">Light (Fast)</SelectItem>
-                          <SelectItem value="medium">Medium (Balanced)</SelectItem>
-                          <SelectItem value="deep">Deep (Comprehensive)</SelectItem>
+                          <SelectItem value="light">Light (5 URLs per platform)</SelectItem>
+                          <SelectItem value="medium">Medium (10 URLs per platform)</SelectItem>
+                          <SelectItem value="deep">Deep (20 URLs per platform)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
