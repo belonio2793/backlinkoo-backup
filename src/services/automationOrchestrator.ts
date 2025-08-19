@@ -3,6 +3,7 @@ import { getContentService, type ContentGenerationParams } from './automationCon
 import { getTelegraphService } from './telegraphService';
 import { workingCampaignProcessor } from './workingCampaignProcessor';
 import { DomainBlogTemplateService } from './domainBlogTemplateService';
+import { AutomatedDomainBlogService } from './automatedDomainBlogService';
 import { ProgressStep, CampaignProgress } from '@/components/CampaignProgressTracker';
 import { formatErrorForUI, formatErrorForLogging } from '@/utils/errorUtils';
 import { realTimeFeedService } from './realTimeFeedService';
