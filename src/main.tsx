@@ -39,8 +39,8 @@ import './utils/silentErrorTest'
 // import './utils/fullstoryProtection'
 // Protect Vite client from FullStory interference in development - DISABLED
 // import './utils/viteClientProtection'
-// Fix malformed links at runtime
-import './utils/domLinkFixer'
+// Fix malformed links at runtime - DISABLED to reduce DOM interference
+// import './utils/domLinkFixer'
 
 // Clear previous console errors in development
 if (import.meta.env.DEV) {
@@ -240,7 +240,7 @@ if (import.meta.env.DEV) {
         (window as any).restoreOriginalFetch();
         console.log('✅ Original fetch restored');
       } else {
-        console.warn('��️ restoreOriginalFetch not available - loading fix...');
+        console.warn('⚠️ restoreOriginalFetch not available - loading fix...');
         import('./utils/fullstoryFix').then(() => {
           if ((window as any).restoreOriginalFetch) {
             (window as any).restoreOriginalFetch();
