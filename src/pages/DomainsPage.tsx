@@ -8,15 +8,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger,
-  DialogFooter
-} from '@/components/ui/dialog';
-import { 
   Table,
   TableBody,
   TableCell,
@@ -35,9 +26,10 @@ import {
   RefreshCw,
   ExternalLink,
   Info,
-  Settings,
-  Eye,
-  Terminal
+  Terminal,
+  Trash2,
+  Upload,
+  Download
 } from 'lucide-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -60,18 +52,20 @@ interface Domain {
   validation_error?: string;
   last_validation_attempt?: string;
   created_at: string;
+  required_a_record?: string;
+  required_cname?: string;
 }
 
 const DomainsPage = () => {
   const { isAuthenticated, user } = useAuthState();
   const [domains, setDomains] = useState<Domain[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newDomain, setNewDomain] = useState('');
+  const [bulkDomains, setBulkDomains] = useState('');
   const [addingDomain, setAddingDomain] = useState(false);
+  const [addingBulk, setAddingBulk] = useState(false);
   const [validatingDomains, setValidatingDomains] = useState<Set<string>>(new Set());
-  const [selectedDomain, setSelectedDomain] = useState<Domain | null>(null);
-  const [showDNSInstructions, setShowDNSInstructions] = useState<string | null>(null);
+  const [showBulkAdd, setShowBulkAdd] = useState(false);
 
   // Hosting configuration - replace with your actual values
   const HOSTING_CONFIG = {
@@ -104,6 +98,48 @@ const DomainsPage = () => {
     }
   };
 
+  const cleanDomain = (domain: string) => {
+    return domain.trim()
+      .toLowerCase()
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/\/$/, '');
+  };
+
+  const validateDomainFormat = (domain: string) => {
+    const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
+    return domainRegex.test(domain);
+  };
+
+  const addSingleDomain = async (domainName: string) => {
+    const domain = cleanDomain(domainName);
+    
+    if (!validateDomainFormat(domain)) {
+      throw new Error(`Invalid domain format: ${domainName}`);
+    }
+
+    const { data, error } = await supabase
+      .from('domains')
+      .insert({
+        user_id: user?.id,
+        domain,
+        status: 'pending',
+        required_a_record: HOSTING_CONFIG.ip,
+        required_cname: HOSTING_CONFIG.cname
+      })
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === '23505') {
+        throw new Error(`Domain ${domain} already exists`);
+      }
+      throw error;
+    }
+
+    return data;
+  };
+
   const addDomain = async () => {
     if (!newDomain.trim()) {
       toast.error('Please enter a domain name');
@@ -112,52 +148,84 @@ const DomainsPage = () => {
 
     setAddingDomain(true);
     try {
-      // Clean domain input
-      const domain = newDomain.trim()
-        .toLowerCase()
-        .replace(/^https?:\/\//, '')
-        .replace(/^www\./, '')
-        .replace(/\/$/, '');
-
-      // Validate domain format
-      const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
-      if (!domainRegex.test(domain)) {
-        toast.error('Please enter a valid domain name');
-        return;
-      }
-
-      const { data, error } = await supabase
-        .from('domains')
-        .insert({
-          user_id: user?.id,
-          domain,
-          status: 'pending',
-          required_a_record: HOSTING_CONFIG.ip,
-          required_cname: HOSTING_CONFIG.cname
-        })
-        .select()
-        .single();
-
-      if (error) {
-        if (error.code === '23505') {
-          toast.error('Domain already exists');
-        } else {
-          throw error;
-        }
-        return;
-      }
-
+      const data = await addSingleDomain(newDomain);
       setDomains(prev => [data, ...prev]);
       setNewDomain('');
-      setIsAddDialogOpen(false);
-      setShowDNSInstructions(data.id);
-      toast.success(`Domain ${domain} added! Configure DNS records to validate.`);
-
+      toast.success(`Domain ${data.domain} added successfully!`);
     } catch (error) {
       console.error('Error adding domain:', error);
-      toast.error('Failed to add domain');
+      toast.error(`Failed to add domain: ${error.message}`);
     } finally {
       setAddingDomain(false);
+    }
+  };
+
+  const addBulkDomains = async () => {
+    if (!bulkDomains.trim()) {
+      toast.error('Please enter domains to add');
+      return;
+    }
+
+    setAddingBulk(true);
+    const domainList = bulkDomains
+      .split('\n')
+      .map(d => d.trim())
+      .filter(d => d.length > 0);
+
+    let successCount = 0;
+    let errorCount = 0;
+    const errors: string[] = [];
+
+    try {
+      for (const domainName of domainList) {
+        try {
+          const data = await addSingleDomain(domainName);
+          setDomains(prev => [data, ...prev]);
+          successCount++;
+        } catch (error) {
+          errorCount++;
+          errors.push(`${domainName}: ${error.message}`);
+        }
+      }
+
+      setBulkDomains('');
+      setShowBulkAdd(false);
+      
+      if (successCount > 0) {
+        toast.success(`Successfully added ${successCount} domain${successCount > 1 ? 's' : ''}`);
+      }
+      
+      if (errorCount > 0) {
+        toast.error(`Failed to add ${errorCount} domain${errorCount > 1 ? 's' : ''}. Check console for details.`);
+        console.error('Bulk domain errors:', errors);
+      }
+
+    } catch (error) {
+      console.error('Bulk add error:', error);
+      toast.error('Failed to process bulk domains');
+    } finally {
+      setAddingBulk(false);
+    }
+  };
+
+  const deleteDomain = async (domainId: string, domainName: string) => {
+    if (!confirm(`Are you sure you want to delete ${domainName}?`)) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('domains')
+        .delete()
+        .eq('id', domainId);
+
+      if (error) throw error;
+
+      setDomains(prev => prev.filter(d => d.id !== domainId));
+      toast.success(`Domain ${domainName} deleted successfully`);
+    } catch (error) {
+      console.error('Error deleting domain:', error);
+      toast.error(`Failed to delete domain: ${error.message}`);
     }
   };
 
@@ -182,7 +250,6 @@ const DomainsPage = () => {
           toast.warning(`Domain ${result.domain} validation failed. Check DNS records.`);
         }
         
-        // Reload domains to get updated status
         await loadDomains();
       } else {
         throw new Error(result.message || 'Validation failed');
@@ -269,6 +336,22 @@ const DomainsPage = () => {
     }
   ];
 
+  const exportDomains = () => {
+    const csv = ['Domain,Status,Created,Pages Published']
+      .concat(domains.map(d => 
+        `${d.domain},${d.status},${new Date(d.created_at).toLocaleDateString()},${d.pages_published}`
+      ))
+      .join('\n');
+    
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `domains-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
@@ -295,310 +378,306 @@ const DomainsPage = () => {
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
             <Globe className="h-10 w-10 text-blue-600" />
-            Domain & DNS Manager
+            Domain Manager
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Connect your domains to our hosting platform. Add domains, configure DNS records, 
-            and validate propagation to start publishing automated content.
+            Add and manage domains for automated content publishing. Bulk add dozens of domains seamlessly.
           </p>
         </div>
 
-        {/* Add Domain */}
-        <div className="text-center mb-8">
-          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-            <DialogTrigger asChild>
-              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white">
-                <Plus className="h-5 w-5 mr-2" />
-                Connect New Domain
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Connect Your Domain</DialogTitle>
-                <DialogDescription>
-                  Enter your domain name to start the DNS configuration process.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="py-4">
-                <Label htmlFor="domain">Domain Name</Label>
+        {/* Quick Add Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+          {/* Single Domain Add */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Plus className="h-5 w-5" />
+                Add Single Domain
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-2">
                 <Input
-                  id="domain"
                   placeholder="example.com"
                   value={newDomain}
                   onChange={(e) => setNewDomain(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && !addingDomain && addDomain()}
+                  className="flex-1"
+                />
+                <Button onClick={addDomain} disabled={addingDomain}>
+                  {addingDomain ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Plus className="w-4 h-4" />
+                  )}
+                  Add Domain
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500 mt-2">
+                Enter domain without http:// or www. (e.g., example.com)
+              </p>
+            </CardContent>
+          </Card>
+
+          {/* Bulk Add Toggle */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Upload className="h-5 w-5" />
+                Bulk Add Domains
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Button 
+                onClick={() => setShowBulkAdd(!showBulkAdd)}
+                variant={showBulkAdd ? "secondary" : "default"}
+                className="w-full"
+              >
+                {showBulkAdd ? 'Hide' : 'Show'} Bulk Add Interface
+              </Button>
+              <p className="text-xs text-gray-500 mt-2">
+                Add multiple domains at once, one per line
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Bulk Add Interface */}
+        {showBulkAdd && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>Bulk Domain Addition</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="bulk-domains">Domains (one per line)</Label>
+                <Textarea
+                  id="bulk-domains"
+                  placeholder={`example1.com
+example2.com
+example3.com
+mydomain.net
+anotherdomain.org`}
+                  value={bulkDomains}
+                  onChange={(e) => setBulkDomains(e.target.value)}
+                  rows={8}
                   className="mt-1"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Enter domain without http:// or www. (e.g., example.com)
+                  Enter each domain on a new line. Duplicates will be automatically skipped.
                 </p>
               </div>
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                  Cancel
+              
+              <div className="flex gap-2">
+                <Button 
+                  onClick={addBulkDomains} 
+                  disabled={addingBulk || !bulkDomains.trim()}
+                  className="flex-1"
+                >
+                  {addingBulk ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : (
+                    <Upload className="w-4 h-4 mr-2" />
+                  )}
+                  Add All Domains
                 </Button>
-                <Button onClick={addDomain} disabled={addingDomain}>
-                  {addingDomain && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                  Connect Domain
+                <Button variant="outline" onClick={() => setBulkDomains('')}>
+                  Clear
                 </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
-        </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
-          
-          {/* Main Domains List */}
-          <div className="xl:col-span-3">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Your Connected Domains</span>
-                  <Button variant="outline" size="sm" onClick={loadDomains}>
-                    <RefreshCw className="h-4 w-4 mr-1" />
-                    Refresh
-                  </Button>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-blue-600 mr-3" />
-                    <span className="text-gray-600">Loading your domains...</span>
-                  </div>
-                ) : domains.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Globe className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No domains connected</h3>
-                    <p className="text-gray-500 mb-6">Connect your first domain to start publishing automated content.</p>
-                    <Button onClick={() => setIsAddDialogOpen(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Connect Your First Domain
-                    </Button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {domains.map((domain) => (
-                      <div key={domain.id} className="p-6 border rounded-lg hover:border-blue-200 transition-colors">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-4">
-                            <div className="p-2 bg-blue-100 rounded-lg">
-                              <Globe className="h-6 w-6 text-blue-600" />
-                            </div>
-                            <div>
-                              <h3 className="text-lg font-semibold text-gray-900">{domain.domain}</h3>
-                              <div className="flex items-center gap-3 mt-1">
-                                {getStatusBadge(domain)}
-                                {domain.blog_enabled && (
-                                  <Badge variant="outline" className="text-green-600">
-                                    <Terminal className="w-3 h-3 mr-1" />
-                                    Blog Active
-                                  </Badge>
-                                )}
-                                {domain.ssl_enabled && (
-                                  <Badge variant="outline" className="text-blue-600">
-                                    🔒 SSL
-                                  </Badge>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => setShowDNSInstructions(showDNSInstructions === domain.id ? null : domain.id)}
-                            >
-                              <Eye className="h-4 w-4 mr-1" />
-                              DNS Setup
-                            </Button>
-                            <Button 
-                              variant="outline" 
-                              size="sm"
-                              onClick={() => validateDomain(domain.id)}
-                              disabled={validatingDomains.has(domain.id)}
-                            >
-                              {validatingDomains.has(domain.id) ? (
-                                <Loader2 className="h-4 w-4 animate-spin mr-1" />
-                              ) : (
-                                <RefreshCw className="h-4 w-4 mr-1" />
-                              )}
-                              Validate DNS
-                            </Button>
-                            {domain.status === 'active' && (
-                              <Button variant="outline" size="sm" asChild>
-                                <a href={`https://${domain.domain}`} target="_blank" rel="noopener noreferrer">
-                                  <ExternalLink className="h-4 w-4 mr-1" />
-                                  Visit
-                                </a>
-                              </Button>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* DNS Status Grid */}
-                        <div className="grid grid-cols-3 gap-4 mb-4">
-                          <div className="text-center p-3 bg-gray-50 rounded-lg">
-                            <div className="text-sm font-medium text-gray-600">A Record</div>
-                            <div className="flex items-center justify-center mt-1">
-                              {domain.a_record_validated ? (
-                                <CheckCircle2 className="h-5 w-5 text-green-600" />
-                              ) : (
-                                <Clock className="h-5 w-5 text-gray-400" />
-                              )}
-                            </div>
-                          </div>
-                          <div className="text-center p-3 bg-gray-50 rounded-lg">
-                            <div className="text-sm font-medium text-gray-600">TXT Record</div>
-                            <div className="flex items-center justify-center mt-1">
-                              {domain.txt_record_validated ? (
-                                <CheckCircle2 className="h-5 w-5 text-green-600" />
-                              ) : (
-                                <Clock className="h-5 w-5 text-gray-400" />
-                              )}
-                            </div>
-                          </div>
-                          <div className="text-center p-3 bg-gray-50 rounded-lg">
-                            <div className="text-sm font-medium text-gray-600">CNAME Record</div>
-                            <div className="flex items-center justify-center mt-1">
-                              {domain.cname_validated ? (
-                                <CheckCircle2 className="h-5 w-5 text-green-600" />
-                              ) : (
-                                <Clock className="h-5 w-5 text-gray-400" />
-                              )}
+        {/* Domains List */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <span>Your Domains ({domains.length})</span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={exportDomains}>
+                  <Download className="h-4 w-4 mr-1" />
+                  Export CSV
+                </Button>
+                <Button variant="outline" size="sm" onClick={loadDomains}>
+                  <RefreshCw className="h-4 w-4 mr-1" />
+                  Refresh
+                </Button>
+              </div>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600 mr-3" />
+                <span className="text-gray-600">Loading domains...</span>
+              </div>
+            ) : domains.length === 0 ? (
+              <div className="text-center py-12">
+                <Globe className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No domains added yet</h3>
+                <p className="text-gray-500 mb-6">Add your first domain to start managing DNS and hosting.</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Domain</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>DNS Records</TableHead>
+                    <TableHead>Stats</TableHead>
+                    <TableHead>Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {domains.map((domain) => (
+                    <TableRow key={domain.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Globe className="h-4 w-4 text-blue-600" />
+                          <div>
+                            <div className="font-medium">{domain.domain}</div>
+                            <div className="text-xs text-gray-500">
+                              Added {new Date(domain.created_at).toLocaleDateString()}
                             </div>
                           </div>
                         </div>
-
-                        {/* Validation Error */}
-                        {domain.validation_error && (
-                          <Alert className="mb-4">
-                            <AlertTriangle className="h-4 w-4" />
-                            <AlertDescription>
-                              {domain.validation_error}
-                            </AlertDescription>
-                          </Alert>
-                        )}
-
-                        {/* DNS Instructions */}
-                        {showDNSInstructions === domain.id && (
-                          <div className="mt-4 p-4 bg-blue-50 rounded-lg border">
-                            <h4 className="font-semibold text-blue-900 mb-3">DNS Configuration Instructions</h4>
-                            <p className="text-sm text-blue-700 mb-4">
-                              Add these DNS records at your domain registrar (GoDaddy, Namecheap, Cloudflare, etc.):
-                            </p>
-                            <Table>
-                              <TableHeader>
-                                <TableRow>
-                                  <TableHead>Type</TableHead>
-                                  <TableHead>Name</TableHead>
-                                  <TableHead>Value</TableHead>
-                                  <TableHead>Status</TableHead>
-                                  <TableHead></TableHead>
-                                </TableRow>
-                              </TableHeader>
-                              <TableBody>
-                                {getDNSInstructions(domain).map((record, index) => (
-                                  <TableRow key={index}>
-                                    <TableCell className="font-mono text-sm">{record.type}</TableCell>
-                                    <TableCell className="font-mono text-sm">{record.name}</TableCell>
-                                    <TableCell className="font-mono text-sm max-w-xs truncate">{record.value}</TableCell>
-                                    <TableCell>
-                                      {record.validated ? (
-                                        <CheckCircle2 className="h-4 w-4 text-green-600" />
-                                      ) : (
-                                        <Clock className="h-4 w-4 text-gray-400" />
-                                      )}
-                                    </TableCell>
-                                    <TableCell>
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm"
-                                        onClick={() => copyToClipboard(record.value)}
-                                      >
-                                        <Copy className="h-3 w-3" />
-                                      </Button>
-                                    </TableCell>
-                                  </TableRow>
-                                ))}
-                              </TableBody>
-                            </Table>
-                          </div>
-                        )}
-
-                        {/* Stats */}
-                        <div className="flex items-center gap-6 text-sm text-gray-500 mt-4">
-                          <span>{domain.pages_published} pages published</span>
-                          <span>Added {new Date(domain.created_at).toLocaleDateString()}</span>
-                          {domain.last_validation_attempt && (
-                            <span>Last checked {new Date(domain.last_validation_attempt).toLocaleString()}</span>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <div className="space-y-1">
+                          {getStatusBadge(domain)}
+                          {domain.blog_enabled && (
+                            <Badge variant="outline" className="text-green-600 text-xs">
+                              <Terminal className="w-3 h-3 mr-1" />
+                              Blog Active
+                            </Badge>
                           )}
                         </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <div className={`w-3 h-3 rounded-full ${domain.a_record_validated ? 'bg-green-500' : 'bg-gray-300'}`} title="A Record" />
+                          <div className={`w-3 h-3 rounded-full ${domain.txt_record_validated ? 'bg-green-500' : 'bg-gray-300'}`} title="TXT Record" />
+                          <div className={`w-3 h-3 rounded-full ${domain.cname_validated ? 'bg-green-500' : 'bg-gray-300'}`} title="CNAME Record" />
+                        </div>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <div className="text-sm text-gray-600">
+                          {domain.pages_published} pages
+                        </div>
+                      </TableCell>
+                      
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => validateDomain(domain.id)}
+                            disabled={validatingDomains.has(domain.id)}
+                          >
+                            {validatingDomains.has(domain.id) ? (
+                              <Loader2 className="h-3 w-3 animate-spin" />
+                            ) : (
+                              <RefreshCw className="h-3 w-3" />
+                            )}
+                          </Button>
+                          
+                          {domain.status === 'active' && (
+                            <Button variant="outline" size="sm" asChild>
+                              <a href={`https://${domain.domain}`} target="_blank" rel="noopener noreferrer">
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            </Button>
+                          )}
+                          
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => deleteDomain(domain.id, domain.domain)}
+                          >
+                            <Trash2 className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
 
-          {/* Sidebar with Help */}
-          <div className="xl:col-span-1">
-            <div className="space-y-6 sticky top-8">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Quick Setup</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="text-sm">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">1</div>
-                      <span className="font-medium">Connect Domain</span>
+        {/* DNS Instructions Card */}
+        {domains.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Terminal className="h-5 w-5" />
+                DNS Configuration Instructions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertDescription>
+                  For each domain, add these DNS records at your registrar (GoDaddy, Namecheap, Cloudflare, etc.):
+                </AlertDescription>
+              </Alert>
+              
+              <div className="mt-4 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <h4 className="font-semibold text-blue-900 mb-2">A Record</h4>
+                    <div className="font-mono text-sm">
+                      <div>Name: @</div>
+                      <div>Value: {HOSTING_CONFIG.ip}</div>
                     </div>
-                    <p className="text-gray-600 text-xs ml-8">Add your domain to our system</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2"
+                      onClick={() => copyToClipboard(HOSTING_CONFIG.ip)}
+                    >
+                      <Copy className="h-3 w-3 mr-1" />
+                      Copy IP
+                    </Button>
                   </div>
                   
-                  <div className="text-sm">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">2</div>
-                      <span className="font-medium">Configure DNS</span>
+                  <div className="p-4 bg-green-50 rounded-lg">
+                    <h4 className="font-semibold text-green-900 mb-2">CNAME Record</h4>
+                    <div className="font-mono text-sm">
+                      <div>Name: www</div>
+                      <div>Value: {HOSTING_CONFIG.cname}</div>
                     </div>
-                    <p className="text-gray-600 text-xs ml-8">Add required DNS records at your registrar</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2"
+                      onClick={() => copyToClipboard(HOSTING_CONFIG.cname)}
+                    >
+                      <Copy className="h-3 w-3 mr-1" />
+                      Copy CNAME
+                    </Button>
                   </div>
                   
-                  <div className="text-sm">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">3</div>
-                      <span className="font-medium">Validate</span>
+                  <div className="p-4 bg-purple-50 rounded-lg">
+                    <h4 className="font-semibold text-purple-900 mb-2">TXT Record</h4>
+                    <div className="font-mono text-sm">
+                      <div>Name: @</div>
+                      <div>Value: blo-verification=[token]</div>
                     </div>
-                    <p className="text-gray-600 text-xs ml-8">Verify DNS propagation and activate domain</p>
+                    <p className="text-xs text-purple-600 mt-2">
+                      Each domain gets a unique token
+                    </p>
                   </div>
-                  
-                  <div className="text-sm">
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="w-6 h-6 bg-green-600 text-white rounded-full flex items-center justify-center text-xs font-bold">✓</div>
-                      <span className="font-medium">Publish Content</span>
-                    </div>
-                    <p className="text-gray-600 text-xs ml-8">Start publishing automated blog content</p>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Need Help?</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertDescription className="text-sm">
-                      DNS propagation can take 24-48 hours. You can check propagation status anytime using the "Validate DNS" button.
-                    </AlertDescription>
-                  </Alert>
-                </CardContent>
-              </Card>
-            </div>
-          </div>
-        </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
       <Footer />
     </div>
