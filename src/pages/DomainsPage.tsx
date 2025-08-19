@@ -1010,6 +1010,28 @@ anotherdomain.org`}
                   <Terminal className="h-4 w-4 mr-1" />
                   Test DNS Service
                 </Button>
+                <Button variant="outline" size="sm" onClick={() => {
+                  // Bulk validate all pending domains
+                  const pendingDomains = domains.filter(d =>
+                    d.status === 'pending' || d.status === 'failed'
+                  );
+
+                  if (pendingDomains.length === 0) {
+                    toast.info('No domains need validation');
+                    return;
+                  }
+
+                  toast.info(`Starting validation for ${pendingDomains.length} domains...`);
+
+                  pendingDomains.forEach((domain, index) => {
+                    setTimeout(() => {
+                      validateDomain(domain.id).catch(console.error);
+                    }, index * 2000); // Stagger requests by 2 seconds
+                  });
+                }}>
+                  <CheckCircle2 className="h-4 w-4 mr-1" />
+                  Validate All
+                </Button>
                 <Button variant="outline" size="sm" onClick={loadDomains}>
                   <RefreshCw className="h-4 w-4 mr-1" />
                   Refresh
