@@ -162,22 +162,8 @@ const DomainsPage = () => {
 
   // Check DNS service health
   const checkDNSServiceHealth = async () => {
-    try {
-      const response = await fetch('/.netlify/functions/validate-domain', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain_id: 'health-check' }),
-        signal: AbortSignal.timeout(5000)
-      });
-
-      if (response.status === 404) {
-        setDnsServiceStatus('offline');
-      } else {
-        setDnsServiceStatus('online');
-      }
-    } catch (error) {
-      setDnsServiceStatus('offline');
-    }
+    const status = await DNSValidationService.checkServiceHealth();
+    setDnsServiceStatus(status);
   };
 
   // Fix domains missing verification tokens
