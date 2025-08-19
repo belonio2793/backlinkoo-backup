@@ -166,7 +166,7 @@ const AutomationDiscovery = () => {
       // Start polling for results
       const pollInterval = setInterval(async () => {
         try {
-          const statusResponse = await fetch(`/.netlify/functions/test-discovery?sessionId=${sessionId}`);
+          const statusResponse = await fetch(`/.netlify/functions/discovery-engine?sessionId=${sessionId}`);
           if (statusResponse.ok) {
             const statusData = await statusResponse.json();
 
