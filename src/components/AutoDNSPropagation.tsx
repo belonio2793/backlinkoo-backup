@@ -42,7 +42,8 @@ import {
   Unlock,
   RefreshCw,
   Copy,
-  Info
+  Info,
+  X
 } from 'lucide-react';
 import RegistrarDetectionService, { RegistrarInfo } from '@/services/registrarDetectionService';
 import RegistrarAPIService, { RegistrarCredentials, DNSRecord } from '@/services/registrarAPIService';
