@@ -1215,7 +1215,18 @@ anotherdomain.org`}
                               <RefreshCw className="h-3 w-3" />
                             )}
                           </Button>
-                          
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => launchAutoPropagationWizard(domain)}
+                            disabled={domain.status === 'active'}
+                            title="Auto-Propagate DNS"
+                            className="bg-blue-50 border-blue-200 hover:bg-blue-100"
+                          >
+                            <Wand2 className="h-3 w-3" />
+                          </Button>
+
                           <Button
                             variant="outline"
                             size="sm"
@@ -1225,7 +1236,7 @@ anotherdomain.org`}
                           >
                             <Play className="h-3 w-3" />
                           </Button>
-                          
+
                           {domain.status === 'active' && (
                             <Button variant="outline" size="sm" asChild title="Visit Domain">
                               <a href={`https://${domain.domain}`} target="_blank" rel="noopener noreferrer">
@@ -1233,7 +1244,7 @@ anotherdomain.org`}
                               </a>
                             </Button>
                           )}
-                          
+
                           <Button
                             variant="outline"
                             size="sm"
