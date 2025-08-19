@@ -1393,6 +1393,9 @@ anotherdomain.org`}
               toast.success(`Theme updated to ${themeId} for domain`);
             }}
           />
+
+          {/* Debug Component - Remove after fixing */}
+          <BlogTemplateDebug />
         </div>
 
       </div>
