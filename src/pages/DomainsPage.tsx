@@ -564,21 +564,24 @@ const DomainsPage = () => {
       name: '@',
       value: hostingConfig.ip,
       description: 'Points your domain to our hosting server',
-      validated: domain.a_record_validated
+      validated: domain.a_record_validated,
+      required: true
     },
     {
       type: 'CNAME',
       name: 'www',
-      value: domain.domain,
+      value: hostingConfig.cname,
       description: 'Redirects www subdomain to main domain',
-      validated: domain.cname_validated
+      validated: domain.cname_validated,
+      required: false
     },
     {
       type: 'TXT',
       name: '@',
       value: `blo-verification=${domain.verification_token}`,
-      description: 'Verifies domain ownership',
-      validated: domain.txt_record_validated
+      description: 'Verifies domain ownership (required for activation)',
+      validated: domain.txt_record_validated,
+      required: true
     }
   ];
 
