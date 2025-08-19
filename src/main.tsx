@@ -396,6 +396,7 @@ if (import.meta.env.DEV) {
   console.log('  - testWorkingContentGenerator() - Test working-content-generator function');
   console.log('  - testContentGeneratorAvailability() - Check function accessibility');
   console.log('  - runContentGeneratorDiagnostics() - Full content generator diagnostic');
+  console.log('  - setupDomainDatabase() - Set up domain blog themes database automatically');
 }
 
 // Priority: Get React app rendering ASAP
