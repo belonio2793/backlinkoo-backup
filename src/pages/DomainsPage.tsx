@@ -1387,12 +1387,22 @@ anotherdomain.org`}
 
         {/* Blog Template Management Section */}
         <div className="mt-8">
-          <DomainBlogTemplateManager
-            domains={domains}
-            onThemeUpdate={(domainId, themeId) => {
-              toast.success(`Theme updated to ${themeId} for domain`);
-            }}
-          />
+          <Card>
+            <CardHeader>
+              <CardTitle>Blog Template Manager</CardTitle>
+              <p className="text-sm text-gray-600">
+                Domain count: {domains.length}, Blog-enabled: {domains.filter(d => d.blog_enabled).length}
+              </p>
+            </CardHeader>
+            <CardContent>
+              <DomainBlogTemplateManager
+                domains={domains}
+                onThemeUpdate={(domainId, themeId) => {
+                  toast.success(`Theme updated to ${themeId} for domain`);
+                }}
+              />
+            </CardContent>
+          </Card>
 
           {/* Debug Component - Remove after fixing */}
           <BlogTemplateDebug />
