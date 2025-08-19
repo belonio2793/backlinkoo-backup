@@ -82,76 +82,55 @@ const DomainsManager = () => {
     }
   };
 
-  const validateDomain = (domain: string): { isValid: boolean; url: string; error?: string } => {
-    try {
-      // Remove protocol if present
-      let cleanDomain = domain.replace(/^https?:\/\//, '').replace(/\/$/, '');
-      
-      // Basic domain validation
-      const domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-      
-      if (!domainRegex.test(cleanDomain)) {
-        return { isValid: false, url: '', error: 'Invalid domain format' };
-      }
-
-      const url = `https://${cleanDomain}`;
-      return { isValid: true, url };
-    } catch (error) {
-      return { isValid: false, url: '', error: 'Invalid domain' };
-    }
-  };
-
   const addDomain = async () => {
     if (!newDomain.trim()) {
       toast.error('Please enter a domain');
       return;
     }
 
-    const validation = validateDomain(newDomain.trim());
-    if (!validation.isValid) {
-      toast.error(validation.error || 'Invalid domain');
-      return;
-    }
-
     setAddingDomain(true);
     try {
       // Check if domain already exists
-      const existingDomain = domains.find(d => d.domain === validation.url.replace('https://', ''));
-      if (existingDomain) {
+      const exists = await UserDomainsService.domainExists(newDomain.trim());
+      if (exists) {
         toast.error('Domain already exists');
         return;
       }
 
-      // For now, add to local state - replace with actual Supabase insert
-      const newDomainRecord: UserDomain = {
-        id: Date.now().toString(),
-        domain: validation.url.replace('https://', ''),
-        url: validation.url,
-        status: 'verifying',
-        verified: false,
-        created_at: new Date().toISOString(),
+      // Create the domain
+      const newDomainRecord = await UserDomainsService.createDomain({
+        domain: newDomain.trim(),
+        url: '', // Will be set by the service
         notes: newDomainNotes.trim() || undefined
-      };
+      });
 
+      // Update local state
       setDomains(prev => [newDomainRecord, ...prev]);
       setNewDomain('');
       setNewDomainNotes('');
       setIsAddDialogOpen(false);
       toast.success('Domain added successfully');
 
-      // Simulate verification after 2 seconds
-      setTimeout(() => {
-        setDomains(prev => prev.map(d => 
-          d.id === newDomainRecord.id 
-            ? { ...d, status: 'active', verified: true }
-            : d
-        ));
-        toast.success(`Domain ${newDomainRecord.domain} verified`);
+      // Trigger verification after a short delay
+      setTimeout(async () => {
+        try {
+          const result = await UserDomainsService.verifyDomain(newDomainRecord.id);
+          if (result.verified) {
+            // Reload domains to get updated status
+            await loadDomains();
+            toast.success(`Domain ${newDomainRecord.domain} verified`);
+          } else {
+            toast.warning(`Domain verification failed: ${result.error || 'Unknown error'}`);
+          }
+        } catch (error) {
+          console.error('Verification error:', error);
+          toast.error('Domain verification failed');
+        }
       }, 2000);
 
     } catch (error) {
       console.error('Error adding domain:', error);
-      toast.error('Failed to add domain');
+      toast.error(error instanceof Error ? error.message : 'Failed to add domain');
     } finally {
       setAddingDomain(false);
     }
