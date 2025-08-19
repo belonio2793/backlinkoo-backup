@@ -723,7 +723,7 @@ export function DomainBlogTemplateManagerFixed({
             <Button
               onClick={saveThemeSettings}
               className="flex items-center gap-2"
-              disabled={saveStatus.isLoading}
+              disabled={saveStatus.isLoading || !selectedDomain || !selectedTheme}
             >
               {saveStatus.isLoading ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
