@@ -293,7 +293,7 @@ export const OptimizedAppWrapper = () => {
           } />
           <Route path="/domains" element={
             <InstantEmailVerificationGuard>
-              <LazyDomainsManager />
+              <DomainsPage />
             </InstantEmailVerificationGuard>
           } />
           <Route path="/affiliate" element={<SafeAffiliateProgram />} />
