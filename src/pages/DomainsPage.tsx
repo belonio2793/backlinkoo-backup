@@ -513,9 +513,44 @@ const DomainsPage = () => {
     };
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard!');
+  const copyToClipboard = async (text: string) => {
+    try {
+      // Try modern clipboard API first
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        toast.success('Copied to clipboard!');
+        return;
+      }
+
+      // Fallback for development/non-secure contexts
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';
+      textArea.style.left = '-999999px';
+      textArea.style.top = '-999999px';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+
+      if (successful) {
+        toast.success('Copied to clipboard!');
+      } else {
+        throw new Error('Copy command failed');
+      }
+    } catch (error) {
+      console.error('Copy to clipboard failed:', error);
+
+      // Final fallback - show text in a prompt
+      const message = `Copy this text manually:\n\n${text}`;
+      if (window.prompt) {
+        window.prompt(message, text);
+      } else {
+        toast.error(`Copy failed. Text: ${text}`);
+      }
+    }
   };
 
   const getStatusBadge = (domain: Domain) => {
