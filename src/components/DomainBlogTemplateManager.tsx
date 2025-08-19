@@ -83,16 +83,34 @@ export function DomainBlogTemplateManager({
         const themeRecords: Record<string, DomainThemeRecord> = {};
 
         for (const domain of blogEnabledDomains) {
-          const themeRecord = await DomainBlogTemplateService.getDomainTheme(domain.id);
-          if (themeRecord) {
-            themeRecords[domain.id] = themeRecord;
-          } else {
-            // Ensure default theme if none exists
-            await DomainBlogTemplateService.ensureDefaultTheme(domain.id);
-            const defaultTheme = await DomainBlogTemplateService.getDomainTheme(domain.id);
-            if (defaultTheme) {
-              themeRecords[domain.id] = defaultTheme;
+          try {
+            const themeRecord = await DomainBlogTemplateService.getDomainTheme(domain.id);
+            if (themeRecord) {
+              themeRecords[domain.id] = themeRecord;
+            } else {
+              // Ensure default theme if none exists
+              await DomainBlogTemplateService.ensureDefaultTheme(domain.id);
+              const defaultTheme = await DomainBlogTemplateService.getDomainTheme(domain.id);
+              if (defaultTheme) {
+                themeRecords[domain.id] = defaultTheme;
+              }
             }
+          } catch (domainError) {
+            // Log error but continue with other domains
+            console.warn(`⚠️ Could not load theme for domain ${domain.domain}:`, domainError);
+
+            // Create a fallback theme record for this domain
+            themeRecords[domain.id] = {
+              id: `fallback_${domain.id}`,
+              domain_id: domain.id,
+              theme_id: 'minimal',
+              theme_name: 'Minimal Clean (Fallback)',
+              custom_styles: {},
+              custom_settings: {},
+              is_active: true,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
           }
         }
 
