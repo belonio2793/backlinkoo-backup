@@ -39,7 +39,10 @@ import {
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import BlogThemesService, { BlogTheme, DomainThemeSettings } from '@/services/blogThemesService';
+import ImprovedBlogThemesService from '@/services/improvedBlogThemesService';
 import { DomainBlogTemplateService, DomainThemeRecord } from '@/services/domainBlogTemplateService';
+import { BlogTemplatePreview } from '@/components/BlogTemplateRenderer';
+import { ThemeStyles } from '@/types/blogTemplateTypes';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface Domain {
@@ -374,7 +377,7 @@ export function DomainBlogTemplateManagerFixed({
         success = saveToLocalStorage(selectedDomain, selectedTheme, customStyles);
         if (success) {
           saveMethod = 'localStorage';
-          console.log('✅ localStorage save successful');
+          console.log('��� localStorage save successful');
           toast({
             title: "Settings Saved Locally",
             description: "Theme settings saved to browser storage. Database backup will be available when connection is restored.",
