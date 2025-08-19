@@ -19,6 +19,8 @@ import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
 import "@/utils/emergencyDisable"; // Load emergency disable utilities
 // import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
 import { LazyBeautifulBlogPost } from "@/components/LazyComponents";
+import { DomainsAuthGuard } from "@/components/DomainsAuthGuard";
+import { DomainErrorBoundary } from "@/components/DomainErrorBoundary";
 import Index from "./pages/Index";
 
 const LazyEmergencyBlogPost = lazy(() => import("./components/EmergencyBlogPost"));
@@ -45,6 +47,7 @@ const LazyPrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const LazyNotFound = lazy(() => import("./pages/NotFound"));
 const LazyTwitterAdGenerator = lazy(() => import("./pages/TwitterAdGenerator"));
 const LazyAffiliate = lazy(() => import("./pages/Affiliate"));
+const LazyDomainsPage = lazy(() => import("./pages/DomainsPage"));
 const LazyBlogGenerationTest = lazy(() => import("./components/BlogGenerationTest"));
 import BlogGenerationFixTestPage from "./pages/BlogGenerationFixTest";
 
@@ -196,6 +199,18 @@ const App = () => (
                 <Suspense fallback={<LoadingSpinner />}>
                   <LazyAffiliate />
                 </Suspense>
+              }
+            />
+            <Route
+              path="/domains"
+              element={
+                <DomainErrorBoundary>
+                  <DomainsAuthGuard>
+                    <Suspense fallback={<LoadingSpinner />}>
+                      <LazyDomainsPage />
+                    </Suspense>
+                  </DomainsAuthGuard>
+                </DomainErrorBoundary>
               }
             />
 

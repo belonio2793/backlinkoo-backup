@@ -11,11 +11,14 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-// Your hosting configuration
+// Your hosting configuration - update these with your actual hosting details
 const HOSTING_CONFIG = {
-  ip: process.env.HOSTING_IP || '192.168.1.100', // Replace with your actual IP
-  cname_target: process.env.HOSTING_CNAME || 'hosting.backlinkoo.com', // Replace with your actual CNAME
-  txt_prefix: 'blo-verification='
+  ip: process.env.HOSTING_IP || '24d12611b1d842c3991e44b7832b3bca-e9bf40585b974daebd52c6201.fly.dev', // Netlify/Fly.io IP
+  cname_target: process.env.HOSTING_CNAME || 'backlinkoo.com', // Your main domain
+  txt_prefix: 'blo-verification=',
+  // Add validation options
+  allow_any_ip: process.env.ALLOW_ANY_IP === 'true', // For testing
+  debug_mode: process.env.DEBUG_DNS === 'true'
 };
 
 /**
@@ -38,14 +41,22 @@ async function validateDNSRecords(domain, verificationToken) {
       const txtRecords = await dns.resolveTxt(domain);
       const flatTxt = txtRecords.flat().join(' ');
       results.dns_responses.txt = txtRecords;
-      
+
       const expectedTxt = `${HOSTING_CONFIG.txt_prefix}${verificationToken}`;
+
+      if (HOSTING_CONFIG.debug_mode) {
+        console.log(`🔍 TXT Debug - Domain: ${domain}`);
+        console.log(`🔍 TXT Debug - Expected: ${expectedTxt}`);
+        console.log(`🔍 TXT Debug - Found: ${flatTxt}`);
+        console.log(`🔍 TXT Debug - All records:`, txtRecords);
+      }
+
       if (flatTxt.includes(expectedTxt)) {
         results.txt_validated = true;
         console.log(`✅ TXT record validated for ${domain}`);
       } else {
-        results.errors.push(`TXT record not found. Expected: ${expectedTxt}`);
-        console.log(`❌ TXT record validation failed for ${domain}. Found: ${flatTxt}`);
+        results.errors.push(`TXT record not found. Expected: ${expectedTxt}. Found: ${flatTxt}`);
+        console.log(`❌ TXT record validation failed for ${domain}. Expected: ${expectedTxt}, Found: ${flatTxt}`);
       }
     } catch (error) {
       results.errors.push(`TXT record lookup failed: ${error.message}`);
@@ -57,10 +68,18 @@ async function validateDNSRecords(domain, verificationToken) {
     try {
       const aRecords = await dns.resolve4(domain);
       results.dns_responses.a = aRecords;
-      
-      if (aRecords.includes(HOSTING_CONFIG.ip)) {
+
+      if (HOSTING_CONFIG.debug_mode) {
+        console.log(`🔍 A Record Debug - Domain: ${domain}`);
+        console.log(`🔍 A Record Debug - Expected: ${HOSTING_CONFIG.ip}`);
+        console.log(`🔍 A Record Debug - Found: ${aRecords.join(', ')}`);
+        console.log(`🔍 A Record Debug - Allow any IP: ${HOSTING_CONFIG.allow_any_ip}`);
+      }
+
+      // For development/testing, allow any IP if configured
+      if (HOSTING_CONFIG.allow_any_ip || aRecords.includes(HOSTING_CONFIG.ip)) {
         results.a_validated = true;
-        console.log(`✅ A record validated for ${domain}`);
+        console.log(`✅ A record validated for ${domain}${HOSTING_CONFIG.allow_any_ip ? ' (development mode)' : ''}`);
       } else {
         results.errors.push(`A record doesn't point to our hosting IP: ${HOSTING_CONFIG.ip}. Found: ${aRecords.join(', ')}`);
         console.log(`❌ A record validation failed for ${domain}. Expected: ${HOSTING_CONFIG.ip}, Found: ${aRecords.join(', ')}`);
