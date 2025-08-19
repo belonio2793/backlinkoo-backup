@@ -1,5 +1,6 @@
 import { DomainBlogService, ValidatedDomain } from './domainBlogService';
 import BlogThemesService, { BlogTheme } from './blogThemesService';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface BlogTemplate {
   title: string;
