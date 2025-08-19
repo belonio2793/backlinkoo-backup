@@ -742,6 +742,19 @@ const DomainsPage = () => {
           <div className="mt-6 max-w-lg mx-auto space-y-4">
             <NetworkStatus onRetry={loadDomains} />
 
+            {/* Database Setup Status */}
+            <Alert className="border-amber-200 bg-amber-50">
+              <Info className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-800">
+                <div className="space-y-2">
+                  <p className="font-medium text-sm">Domain Blog Database Setup</p>
+                  <p className="text-xs">
+                    Blog themes may run in fallback mode. For full functionality, ensure the domain_blog_themes table is created in Supabase.
+                  </p>
+                </div>
+              </AlertDescription>
+            </Alert>
+
             {/* DNS Service Status */}
             <div className="flex items-center justify-center gap-2 text-sm">
               <span>DNS Validation Service:</span>
