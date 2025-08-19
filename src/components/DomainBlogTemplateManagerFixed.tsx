@@ -410,7 +410,7 @@ export function DomainBlogTemplateManagerFixed({
           id: `${saveMethod}_${selectedDomain}`,
           domain_id: selectedDomain,
           theme_id: selectedTheme,
-          theme_name: BlogThemesService.getThemeById(selectedTheme)?.name || 'Unknown',
+          theme_name: ImprovedBlogThemesService.getThemeById(selectedTheme)?.name || 'Unknown',
           custom_styles: customStyles,
           custom_settings: {},
           is_active: true,
