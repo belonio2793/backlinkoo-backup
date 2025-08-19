@@ -169,6 +169,12 @@ export class DomainBlogTemplateService {
         .eq('domains.status', 'active');
 
       if (error) {
+        // Handle missing table gracefully
+        if (error.code === '42P01') { // Table does not exist
+          console.warn('⚠️ domain_blog_themes table does not exist. Returning empty themes list.');
+          return [];
+        }
+
         const errorMessage = error.message || error.details || JSON.stringify(error);
         console.error('Error fetching all domain themes:', errorMessage, error);
         throw new Error(`Failed to fetch domain themes: ${errorMessage}`);
@@ -176,6 +182,12 @@ export class DomainBlogTemplateService {
 
       return data || [];
     } catch (error) {
+      // Handle network errors
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        console.warn('⚠️ Network error fetching domain themes. Returning empty list.');
+        return [];
+      }
+
       const errorMessage = error instanceof Error ? error.message :
                           error && typeof error === 'object' ? JSON.stringify(error) :
                           String(error);
