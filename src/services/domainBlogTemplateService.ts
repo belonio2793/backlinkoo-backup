@@ -60,24 +60,28 @@ export class DomainBlogTemplateService {
 
         if (error.code !== 'PGRST116') { // PGRST116 = no rows returned
           const errorMessage = error.message || error.details || JSON.stringify(error);
-          console.error('Error fetching domain theme:', errorMessage, error);
-          throw new Error(`Failed to fetch domain theme: ${errorMessage}`);
+          console.warn('Database error fetching domain theme:', errorMessage);
+          // Return default instead of throwing for non-critical errors
+          return this.createDefaultThemeRecord(domainId);
         }
       }
 
       return data;
     } catch (error) {
-      // Handle network errors and missing table
+      // Handle network errors gracefully - don't throw, just return default
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
-        console.warn('⚠️ Network error accessing domain themes. Using default theme.');
+        console.warn('⚠️ Network error accessing domain themes. Using offline mode.');
         return this.createDefaultThemeRecord(domainId);
       }
 
-      const errorMessage = error instanceof Error ? error.message :
-                          error && typeof error === 'object' ? JSON.stringify(error) :
-                          String(error);
-      console.error('Error in getDomainTheme:', errorMessage, error);
-      throw error;
+      if (error instanceof Error && error.message.includes('fetch')) {
+        console.warn('⚠️ Database connection failed. Using offline mode.');
+        return this.createDefaultThemeRecord(domainId);
+      }
+
+      // For any other errors, also return default instead of throwing
+      console.warn('⚠️ Unexpected error accessing domain themes. Using offline mode:', error);
+      return this.createDefaultThemeRecord(domainId);
     }
   }
 
