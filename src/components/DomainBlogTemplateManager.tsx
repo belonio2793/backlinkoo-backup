@@ -223,7 +223,7 @@ export function DomainBlogTemplateManager({
   };
 
   const getCurrentThemeForDomain = (domainId: string): string => {
-    return domainThemeSettings[domainId]?.theme_id || 'minimal';
+    return domainThemeRecords[domainId]?.theme_id || domainThemeSettings[domainId]?.theme_id || 'minimal';
   };
 
   if (blogEnabledDomains.length === 0) {
