@@ -51,19 +51,8 @@ import {
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
-interface UserDomain {
-  id: string;
-  domain: string;
-  url: string;
-  status: 'active' | 'inactive' | 'verifying';
-  verified: boolean;
-  created_at: string;
-  notes?: string;
-  target_keywords?: string[];
-}
+import UserDomainsService, { UserDomain } from '@/services/userDomainsService';
 
 const DomainsManager = () => {
   const { isAuthenticated, user } = useAuthState();
