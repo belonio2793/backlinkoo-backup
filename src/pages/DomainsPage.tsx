@@ -137,6 +137,8 @@ const DomainsPage = () => {
   const [editingDomain, setEditingDomain] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState(false);
   const [dnsServiceStatus, setDnsServiceStatus] = useState<'unknown' | 'online' | 'offline'>('unknown');
+  const [showAutoPropagationWizard, setShowAutoPropagationWizard] = useState(false);
+  const [selectedDomainForWizard, setSelectedDomainForWizard] = useState<Domain | null>(null);
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
