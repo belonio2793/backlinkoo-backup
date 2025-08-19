@@ -156,9 +156,14 @@ const DomainsPage = () => {
     return domainRegex.test(domain);
   };
 
+  const generateVerificationToken = () => {
+    // Generate a unique verification token
+    return 'blo-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  };
+
   const addSingleDomain = async (domainName: string) => {
     const domain = cleanDomain(domainName);
-    
+
     if (!validateDomainFormat(domain)) {
       throw new Error(`Invalid domain format: ${domainName}`);
     }
@@ -170,6 +175,7 @@ const DomainsPage = () => {
           user_id: user?.id,
           domain,
           status: 'pending',
+          verification_token: generateVerificationToken(), // Explicitly set verification token
           required_a_record: hostingConfig.ip,
           required_cname: hostingConfig.cname,
           hosting_provider: hostingConfig.provider,
