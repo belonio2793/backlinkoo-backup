@@ -526,6 +526,44 @@ const DomainsPage = () => {
     toast.info('Page generation feature coming soon!');
   };
 
+  // Test function for debugging validation issues
+  const testValidation = async () => {
+    console.log('🧪 Testing domain validation endpoint...');
+    toast.info('Testing DNS validation service...');
+
+    try {
+      const response = await fetch('/.netlify/functions/validate-domain', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ domain_id: 'test-validation-123' })
+      });
+
+      console.log('Response status:', response.status);
+      console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        toast.error(`Test failed: HTTP ${response.status} - ${errorText}`);
+        return;
+      }
+
+      const result = await response.json();
+      console.log('Test result:', result);
+
+      if (result.success) {
+        toast.success('DNS validation service is working correctly!');
+      } else {
+        toast.warning(`Service responded but domain not found (expected for test): ${result.error}`);
+      }
+
+    } catch (error: any) {
+      console.error('Test validation error:', error);
+      toast.error(`Test failed: ${error.message}`);
+    }
+  };
+
   // Wrapper to handle async errors in event handlers
   const safeAsync = (asyncFn: (...args: any[]) => Promise<any>) => {
     return (...args: any[]) => {
