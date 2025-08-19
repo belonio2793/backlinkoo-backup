@@ -294,46 +294,69 @@ export function DomainBlogTemplateManagerFixed({
     if (!selectedDomain || !selectedTheme) {
       toast({
         title: "Selection Required",
-        description: "Please select both a domain and theme",
+        description: "Please select both a domain and theme before saving",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate that the selected domain exists
+    const domain = domains.find(d => d.id === selectedDomain);
+    if (!domain) {
+      toast({
+        title: "Invalid Domain",
+        description: "Selected domain is not valid. Please select a different domain.",
         variant: "destructive"
       });
       return;
     }
 
     setSaveStatus({ isLoading: true, hasError: false });
-    
+    console.log('🎨 Saving theme settings:', { selectedDomain, selectedTheme, customStyles });
+
     try {
       let success = false;
+      let saveMethod = 'unknown';
 
       if (!fallbackMode && databaseStatus === 'ready') {
         // Try to save to database
         try {
+          console.log('📊 Attempting database save...');
           success = await DomainBlogTemplateService.setDomainTheme(
             selectedDomain,
             selectedTheme,
             customStyles,
             {}
           );
+          if (success) {
+            saveMethod = 'database';
+            console.log('✅ Database save successful');
+          }
         } catch (dbError) {
-          console.warn('Database save failed, falling back to localStorage:', dbError);
+          console.warn('❌ Database save failed, falling back to localStorage:', dbError);
           success = false;
         }
+      } else {
+        console.log('⚠️ Skipping database save - fallback mode or database not ready');
       }
 
       // Fallback to localStorage if database save failed or we're in fallback mode
       if (!success) {
+        console.log('💾 Attempting localStorage save...');
         success = saveToLocalStorage(selectedDomain, selectedTheme, customStyles);
         if (success) {
+          saveMethod = 'localStorage';
+          console.log('✅ localStorage save successful');
           toast({
             title: "Settings Saved Locally",
-            description: "Theme settings saved to browser storage. Connect to database for persistent storage.",
+            description: "Theme settings saved to browser storage. Database backup will be available when connection is restored.",
             variant: "default"
           });
         }
       } else {
         toast({
           title: "Theme Saved",
-          description: "Blog theme settings have been saved to database",
+          description: "Blog theme settings have been saved to database successfully",
         });
       }
 
@@ -353,7 +376,7 @@ export function DomainBlogTemplateManagerFixed({
 
         // Update theme record
         const updatedTheme: DomainThemeRecord = {
-          id: `${fallbackMode ? 'local' : 'db'}_${selectedDomain}`,
+          id: `${saveMethod}_${selectedDomain}`,
           domain_id: selectedDomain,
           theme_id: selectedTheme,
           theme_name: BlogThemesService.getThemeById(selectedTheme)?.name || 'Unknown',
@@ -371,16 +394,17 @@ export function DomainBlogTemplateManagerFixed({
 
         onThemeUpdate?.(selectedDomain, selectedTheme);
         setSaveStatus({ isLoading: false, hasError: false, lastSaved: new Date() });
+        console.log('🎉 Theme settings saved successfully via', saveMethod);
       } else {
-        throw new Error('Failed to save theme settings');
+        throw new Error(`Failed to save theme settings - both database and localStorage failed`);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('Error saving theme:', errorMessage);
+      console.error('�� Error saving theme:', errorMessage, error);
       setSaveStatus({ isLoading: false, hasError: true, errorMessage });
       toast({
         title: "Save Failed",
-        description: `Failed to save theme settings: ${errorMessage}`,
+        description: `Unable to save theme settings: ${errorMessage}. Please try again or contact support if the problem persists.`,
         variant: "destructive"
       });
     }
