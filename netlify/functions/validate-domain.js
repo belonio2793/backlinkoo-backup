@@ -11,11 +11,14 @@ if (!supabaseUrl || !supabaseServiceKey) {
 
 const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-// Your hosting configuration
+// Your hosting configuration - update these with your actual hosting details
 const HOSTING_CONFIG = {
-  ip: process.env.HOSTING_IP || '192.168.1.100', // Replace with your actual IP
-  cname_target: process.env.HOSTING_CNAME || 'hosting.backlinkoo.com', // Replace with your actual CNAME
-  txt_prefix: 'blo-verification='
+  ip: process.env.HOSTING_IP || '24d12611b1d842c3991e44b7832b3bca-e9bf40585b974daebd52c6201.fly.dev', // Netlify/Fly.io IP
+  cname_target: process.env.HOSTING_CNAME || 'backlinkoo.com', // Your main domain
+  txt_prefix: 'blo-verification=',
+  // Add validation options
+  allow_any_ip: process.env.ALLOW_ANY_IP === 'true', // For testing
+  debug_mode: process.env.DEBUG_DNS === 'true'
 };
 
 /**
