@@ -25,16 +25,16 @@ import './utils/silentErrorTest'
 // import './utils/fixMissingColumns' // Disabled - using new blog comment system
 // Direct database fix
 // import './utils/directDatabaseFix' // Disabled - using new blog comment system
-// Emergency error fix (load first)
-import './utils/emergencyErrorFix'
-// Emergency fetch fix (load first)
-import './utils/emergencyFetchFix'
-// Emergency fetch conflict fix - fixes cascading fetch interceptors
-import './utils/emergencyFetchConflictFix'
-// Network error handler for user-friendly solutions
-import './utils/errorHandler'
-// Fix response body conflicts early
-import './utils/responseBodyFix'
+// Emergency error fix (load first) - DISABLED due to fetch conflicts
+// import './utils/emergencyErrorFix'
+// Emergency fetch fix (load first) - DISABLED due to conflicts
+// import './utils/emergencyFetchFix'
+// Emergency fetch conflict fix - DISABLED, was causing more conflicts
+// import './utils/emergencyFetchConflictFix'
+// Network error handler for user-friendly solutions - DISABLED due to fetch wrapping
+// import './utils/errorHandler'
+// Fix response body conflicts early - DISABLED due to fetch conflicts
+// import './utils/responseBodyFix'
 // Protect fetch from FullStory interference early
 import './utils/fullstoryProtection'
 // Protect Vite client from FullStory interference in development
