@@ -61,6 +61,8 @@ export function DomainBlogTemplateManager({
   const [devicePreview, setDevicePreview] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [domainThemeSettings, setDomainThemeSettings] = useState<Record<string, DomainThemeSettings>>({});
+  const [domainThemeRecords, setDomainThemeRecords] = useState<Record<string, DomainThemeRecord>>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
   const allThemes = BlogThemesService.getAllThemes();
