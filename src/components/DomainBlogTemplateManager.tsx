@@ -91,22 +91,42 @@ export function DomainBlogTemplateManager({
     const checkDatabaseStatus = async () => {
       try {
         setDatabaseStatus('checking');
-        // Try to fetch a domain theme to test if database is set up
+
+        // Try a simple database connection test first
+        const { data: testData, error: testError } = await supabase
+          .from('domains')
+          .select('id')
+          .limit(1);
+
+        if (testError && testError.message.includes('Failed to fetch')) {
+          // Network connectivity issue
+          console.warn('⚠️ Database connection failed. Using offline mode.');
+          setDatabaseStatus('error');
+          setFallbackMode(true);
+          return;
+        }
+
+        // If we can connect, test the blog themes functionality
         if (blogEnabledDomains.length > 0) {
-          await DomainBlogTemplateService.getDomainTheme(blogEnabledDomains[0].id);
+          const themeResult = await DomainBlogTemplateService.getDomainTheme(blogEnabledDomains[0].id);
+          if (themeResult) {
+            setDatabaseStatus('ready');
+            setFallbackMode(false);
+          } else {
+            // Got null result but no error - database exists but may be empty
+            setDatabaseStatus('ready');
+            setFallbackMode(false);
+          }
+        } else {
+          // No blog-enabled domains, but database is working
           setDatabaseStatus('ready');
           setFallbackMode(false);
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
-        if (errorMessage.includes('does not exist') || errorMessage.includes('domain_blog_themes')) {
-          setDatabaseStatus('missing');
-          setFallbackMode(true);
-        } else {
-          setDatabaseStatus('error');
-          setFallbackMode(true);
-        }
-        console.warn('Database status check:', errorMessage);
+        console.warn('⚠️ Database check failed, using offline mode:', errorMessage);
+        setDatabaseStatus('error');
+        setFallbackMode(true);
       }
     };
 
