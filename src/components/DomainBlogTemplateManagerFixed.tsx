@@ -81,7 +81,7 @@ export function DomainBlogTemplateManagerFixed({
   const [fallbackMode, setFallbackMode] = useState(false);
 
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
-  const allThemes = BlogThemesService.getAllThemes();
+  const allThemes = ImprovedBlogThemesService.getAllThemes();
 
   useEffect(() => {
     if (blogEnabledDomains.length > 0 && !selectedDomain) {
