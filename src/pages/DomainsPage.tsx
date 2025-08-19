@@ -881,7 +881,7 @@ anotherdomain.org`}
                           <div className="flex items-center gap-2">
                             <Switch
                               checked={domain.blog_enabled}
-                              onCheckedChange={(checked) => toggleBlogEnabled(domain.id, checked)}
+                              onCheckedChange={safeAsync((checked) => toggleBlogEnabled(domain.id, checked))}
                               size="sm"
                             />
                             <span className="text-xs">Blog</span>
