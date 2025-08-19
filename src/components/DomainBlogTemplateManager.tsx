@@ -54,9 +54,16 @@ interface DomainBlogTemplateManagerProps {
   onThemeUpdate?: (domainId: string, themeId: string) => void;
 }
 
-export function DomainBlogTemplateManager({ 
-  domains, 
-  onThemeUpdate 
+interface SaveStatus {
+  isLoading: boolean;
+  lastSaved?: Date;
+  hasError: boolean;
+  errorMessage?: string;
+}
+
+export function DomainBlogTemplateManager({
+  domains,
+  onThemeUpdate
 }: DomainBlogTemplateManagerProps) {
   const [selectedDomain, setSelectedDomain] = useState<string>('');
   const [selectedTheme, setSelectedTheme] = useState<string>('minimal');
@@ -66,7 +73,9 @@ export function DomainBlogTemplateManager({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [domainThemeSettings, setDomainThemeSettings] = useState<Record<string, DomainThemeSettings>>({});
   const [domainThemeRecords, setDomainThemeRecords] = useState<Record<string, DomainThemeRecord>>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<SaveStatus>({ isLoading: false, hasError: false });
+  const [databaseStatus, setDatabaseStatus] = useState<'checking' | 'ready' | 'missing' | 'error'>('checking');
+  const [fallbackMode, setFallbackMode] = useState(false);
 
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
   const allThemes = BlogThemesService.getAllThemes();
@@ -77,12 +86,44 @@ export function DomainBlogTemplateManager({
     }
   }, [blogEnabledDomains]);
 
-  // Load domain themes from database
+  // Check database setup status
+  useEffect(() => {
+    const checkDatabaseStatus = async () => {
+      try {
+        setDatabaseStatus('checking');
+        // Try to fetch a domain theme to test if database is set up
+        if (blogEnabledDomains.length > 0) {
+          await DomainBlogTemplateService.getDomainTheme(blogEnabledDomains[0].id);
+          setDatabaseStatus('ready');
+          setFallbackMode(false);
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (errorMessage.includes('does not exist') || errorMessage.includes('domain_blog_themes')) {
+          setDatabaseStatus('missing');
+          setFallbackMode(true);
+        } else {
+          setDatabaseStatus('error');
+          setFallbackMode(true);
+        }
+        console.warn('Database status check:', errorMessage);
+      }
+    };
+
+    checkDatabaseStatus();
+  }, [blogEnabledDomains]);
+
+  // Load domain themes from database or localStorage fallback
   useEffect(() => {
     const loadDomainThemes = async () => {
       if (blogEnabledDomains.length === 0) return;
 
-      setIsLoading(true);
+      if (fallbackMode) {
+        loadFromLocalStorage();
+        return;
+      }
+
+      setSaveStatus(prev => ({ ...prev, isLoading: true }));
       try {
         const themeRecords: Record<string, DomainThemeRecord> = {};
 
@@ -126,11 +167,16 @@ export function DomainBlogTemplateManager({
           setCustomStyles(themeRecords[selectedDomain].custom_styles || {});
         }
 
+        setSaveStatus({ isLoading: false, hasError: false });
+
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message :
                             error && typeof error === 'object' ? JSON.stringify(error) :
                             String(error);
-        console.warn('⚠️ Domain themes database not set up. Using fallback mode:', errorMessage);
+        console.error('Error loading domain themes:', errorMessage);
+        setSaveStatus({ isLoading: false, hasError: true, errorMessage });
+        setFallbackMode(true);
+        loadFromLocalStorage();
 
         // Create fallback theme records for all domains
         const fallbackRecords: Record<string, DomainThemeRecord> = {};
