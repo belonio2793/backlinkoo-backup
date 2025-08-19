@@ -13,6 +13,24 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// Check for required environment variables
+if (!process.env.VITE_SUPABASE_URL) {
+  console.error('❌ VITE_SUPABASE_URL environment variable is required');
+  process.exit(1);
+}
+
+if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+  console.error('❌ SUPABASE_SERVICE_ROLE_KEY environment variable is required for database setup');
+  console.error('');
+  console.error('🔧 Setup required:');
+  console.error('   1. Get your service role key from Supabase dashboard');
+  console.error('   2. Add SUPABASE_SERVICE_ROLE_KEY=your_key to your .env file');
+  console.error('   3. Or run: SUPABASE_SERVICE_ROLE_KEY=your_key npm run setup:blog-themes');
+  console.error('');
+  console.error('📋 Note: This is only needed for initial database setup');
+  process.exit(1);
+}
+
 // Initialize Supabase client with service role key for admin operations
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
