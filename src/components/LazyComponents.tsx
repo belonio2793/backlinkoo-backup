@@ -48,7 +48,7 @@ export const LazyScrapePage = lazy(() => import('@/pages/ScrapePage'));
 export const LazyAutomation = lazy(() => import('@/pages/Automation'));
 
 // Domains Manager component
-export const LazyDomainsManager = lazy(() => import('@/pages/DomainsManager'));
+export const LazyDomainsManager = lazy(() => import('@/pages/DomainsManagerTest'));
 
 
 // Admin campaign management component
