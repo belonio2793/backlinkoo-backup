@@ -649,11 +649,12 @@ export class AutomationOrchestrator {
               // Select the first available domain (could be enhanced with rotation logic)
               const selectedDomain = availableDomains[0];
 
-              // Generate blog post
+              // Generate blog post with theme
               const blogPost = await DomainBlogTemplateService.generateBlogPost(
                 campaign.keywords,
                 campaign.target_url,
-                'Your Brand' // Could be made configurable
+                'Your Brand', // Could be made configurable
+                'minimal' // Default theme, could be made configurable per domain
               );
 
               // Publish to domain
