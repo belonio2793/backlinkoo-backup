@@ -1065,17 +1065,33 @@ anotherdomain.org`}
                                 ))}
 
                                 <div className="text-center pt-4 space-y-3">
-                                  <Button
-                                    onClick={safeAsync(() => validateDomain(domain.id))}
-                                    disabled={validatingDomains.has(domain.id)}
-                                  >
-                                    {validatingDomains.has(domain.id) ? (
-                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                    ) : (
-                                      <RefreshCw className="h-4 w-4 mr-2" />
-                                    )}
-                                    Validate DNS Records
-                                  </Button>
+                                  <div className="flex gap-3 justify-center">
+                                    <Button
+                                      onClick={safeAsync(() => validateDomain(domain.id))}
+                                      disabled={validatingDomains.has(domain.id)}
+                                      variant="outline"
+                                    >
+                                      {validatingDomains.has(domain.id) ? (
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                      ) : (
+                                        <RefreshCw className="h-4 w-4 mr-2" />
+                                      )}
+                                      Validate DNS
+                                    </Button>
+
+                                    <Button
+                                      onClick={() => launchAutoPropagationWizard(domain)}
+                                      disabled={domain.status === 'active'}
+                                      className="bg-blue-600 hover:bg-blue-700"
+                                    >
+                                      <Wand2 className="h-4 w-4 mr-2" />
+                                      Auto-Propagate DNS
+                                    </Button>
+                                  </div>
+
+                                  <p className="text-xs text-gray-600">
+                                    Auto-propagation works with Cloudflare, Namecheap, GoDaddy, and other supported registrars
+                                  </p>
 
                                   {dnsServiceStatus === 'offline' && (
                                     <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-lg">
