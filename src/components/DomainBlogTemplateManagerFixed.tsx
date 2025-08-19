@@ -679,13 +679,13 @@ export function DomainBlogTemplateManagerFixed({
                     <div className="flex gap-2">
                       <Input
                         type="color"
-                        value={customStyles.primaryColor || BlogThemesService.getThemeById(selectedTheme)?.styles.primaryColor}
+                        value={customStyles.primaryColor || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.primaryColor}
                         onChange={(e) => handleStyleChange('primaryColor', e.target.value)}
                         className="w-12 h-8 p-1 border rounded"
                       />
                       <Input
                         type="text"
-                        value={customStyles.primaryColor || BlogThemesService.getThemeById(selectedTheme)?.styles.primaryColor}
+                        value={customStyles.primaryColor || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.primaryColor}
                         onChange={(e) => handleStyleChange('primaryColor', e.target.value)}
                         className="flex-1"
                         placeholder="#000000"
@@ -698,13 +698,13 @@ export function DomainBlogTemplateManagerFixed({
                     <div className="flex gap-2">
                       <Input
                         type="color"
-                        value={customStyles.accentColor || BlogThemesService.getThemeById(selectedTheme)?.styles.accentColor}
+                        value={customStyles.accentColor || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.accentColor}
                         onChange={(e) => handleStyleChange('accentColor', e.target.value)}
                         className="w-12 h-8 p-1 border rounded"
                       />
                       <Input
                         type="text"
-                        value={customStyles.accentColor || BlogThemesService.getThemeById(selectedTheme)?.styles.accentColor}
+                        value={customStyles.accentColor || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.accentColor}
                         onChange={(e) => handleStyleChange('accentColor', e.target.value)}
                         className="flex-1"
                         placeholder="#000000"
@@ -717,13 +717,13 @@ export function DomainBlogTemplateManagerFixed({
                     <div className="flex gap-2">
                       <Input
                         type="color"
-                        value={customStyles.backgroundColor || BlogThemesService.getThemeById(selectedTheme)?.styles.backgroundColor}
+                        value={customStyles.backgroundColor || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.backgroundColor}
                         onChange={(e) => handleStyleChange('backgroundColor', e.target.value)}
                         className="w-12 h-8 p-1 border rounded"
                       />
                       <Input
                         type="text"
-                        value={customStyles.backgroundColor || BlogThemesService.getThemeById(selectedTheme)?.styles.backgroundColor}
+                        value={customStyles.backgroundColor || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.backgroundColor}
                         onChange={(e) => handleStyleChange('backgroundColor', e.target.value)}
                         className="flex-1"
                         placeholder="#ffffff"
@@ -738,7 +738,7 @@ export function DomainBlogTemplateManagerFixed({
                   <div className="space-y-2">
                     <Label>Heading Font</Label>
                     <Select 
-                      value={customStyles.headingFont || BlogThemesService.getThemeById(selectedTheme)?.styles.headingFont}
+                      value={customStyles.headingFont || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.headingFont}
                       onValueChange={(value) => handleStyleChange('headingFont', value)}
                     >
                       <SelectTrigger>
@@ -757,7 +757,7 @@ export function DomainBlogTemplateManagerFixed({
                   <div className="space-y-2">
                     <Label>Body Font</Label>
                     <Select 
-                      value={customStyles.bodyFont || BlogThemesService.getThemeById(selectedTheme)?.styles.bodyFont}
+                      value={customStyles.bodyFont || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.bodyFont}
                       onValueChange={(value) => handleStyleChange('bodyFont', value)}
                     >
                       <SelectTrigger>
