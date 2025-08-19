@@ -430,6 +430,11 @@ const DomainsPage = () => {
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Add and manage domains for automated content publishing. Bulk add dozens of domains seamlessly.
           </p>
+
+          {/* Network Status */}
+          <div className="mt-6 max-w-lg mx-auto">
+            <NetworkStatus onRetry={loadDomains} />
+          </div>
         </div>
 
         {/* Quick Add Section */}
