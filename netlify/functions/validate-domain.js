@@ -1,4 +1,5 @@
 const { createClient } = require('@supabase/supabase-js');
+const dns = require('dns').promises;
 
 // Initialize Supabase
 const supabase = createClient(
@@ -6,8 +7,24 @@ const supabase = createClient(
   process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY
 );
 
+// Default hosting configuration - should match your actual hosting setup
+const EXPECTED_HOST = "hosting.backlinkoo.com"; // Your CNAME target
+const EXPECTED_IP = "192.168.1.100"; // Your hosting IP (this should be your real IP)
+
 /**
- * Validate DNS records for a domain
+ * Timeout wrapper for DNS queries
+ */
+function withTimeout(promise, ms = 5000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => 
+      setTimeout(() => reject(new Error(`DNS query timeout after ${ms}ms`)), ms)
+    )
+  ]);
+}
+
+/**
+ * Real DNS validation for domain records
  */
 exports.handler = async (event, context) => {
   // Set CORS headers
@@ -41,27 +58,31 @@ exports.handler = async (event, context) => {
 
   try {
     // Parse request body
-    const { domain_id } = JSON.parse(event.body || '{}');
+    const { domain_id, domain: domainName } = JSON.parse(event.body || '{}');
 
-    if (!domain_id) {
+    if (!domain_id && !domainName) {
       return {
         statusCode: 400,
         headers,
         body: JSON.stringify({
           success: false,
-          error: 'domain_id is required'
+          error: 'domain_id or domain is required'
         })
       };
     }
 
-    console.log(`🔍 Validating domain ID: ${domain_id}`);
+    console.log(`🔍 Starting DNS validation for domain ID: ${domain_id}`);
 
     // Get domain from database
-    const { data: domain, error: domainError } = await supabase
-      .from('domains')
-      .select('*')
-      .eq('id', domain_id)
-      .single();
+    let domainQuery = supabase.from('domains').select('*');
+    
+    if (domain_id) {
+      domainQuery = domainQuery.eq('id', domain_id);
+    } else {
+      domainQuery = domainQuery.eq('domain', domainName);
+    }
+
+    const { data: domain, error: domainError } = await domainQuery.single();
 
     if (domainError || !domain) {
       console.error('Domain not found:', domainError);
@@ -77,24 +98,45 @@ exports.handler = async (event, context) => {
 
     console.log(`📍 Validating domain: ${domain.domain}`);
 
-    // Simulate DNS validation (since we can't do real DNS queries in Netlify functions easily)
-    const validationResults = await mockDNSValidation(domain);
+    // Get expected values from domain record or use defaults
+    const expectedIP = domain.required_a_record || EXPECTED_IP;
+    const expectedHost = domain.required_cname || EXPECTED_HOST;
+    const verificationToken = domain.verification_token;
+
+    if (!verificationToken) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({
+          success: false,
+          error: 'Domain missing verification token. Please re-add the domain.'
+        })
+      };
+    }
+
+    // Perform real DNS validation
+    const validationResults = await performDNSValidation(
+      domain.domain, 
+      verificationToken, 
+      expectedIP, 
+      expectedHost
+    );
 
     // Update domain with validation results
     const updateData = {
-      dns_validated: validationResults.dns_validated,
-      txt_record_validated: validationResults.txt_validated,
-      a_record_validated: validationResults.a_validated,
-      cname_validated: validationResults.cname_validated,
+      dns_validated: validationResults.success,
+      txt_record_validated: validationResults.txtValid,
+      a_record_validated: validationResults.aValid,
+      cname_validated: validationResults.cnameValid,
       last_validation_attempt: new Date().toISOString(),
       validation_error: validationResults.error || null,
-      status: validationResults.dns_validated ? 'active' : 'failed'
+      status: validationResults.success ? 'active' : 'failed'
     };
 
     const { error: updateError } = await supabase
       .from('domains')
       .update(updateData)
-      .eq('id', domain_id);
+      .eq('id', domain.id);
 
     if (updateError) {
       console.error('Failed to update domain:', updateError);
@@ -108,34 +150,40 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Log validation attempt
-    await logValidationAttempt(domain_id, validationResults);
+    // Log validation attempt for debugging
+    await logValidationAttempt(domain.id, validationResults);
 
-    console.log(`✅ Domain validation completed for ${domain.domain}`);
+    console.log(`✅ DNS validation completed for ${domain.domain}:`, validationResults);
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         success: true,
-        validated: validationResults.dns_validated,
+        validated: validationResults.success,
         domain: domain.domain,
-        results: validationResults,
-        message: validationResults.dns_validated 
+        results: {
+          txt_validated: validationResults.txtValid,
+          a_validated: validationResults.aValid,
+          cname_validated: validationResults.cnameValid,
+          dns_validated: validationResults.success,
+          error: validationResults.error
+        },
+        message: validationResults.success 
           ? 'Domain validated successfully!' 
-          : 'DNS validation failed. Please check your DNS records.'
+          : `DNS validation failed: ${validationResults.error}`
       })
     };
 
   } catch (error) {
-    console.error('Domain validation error:', error);
+    console.error('DNS validation error:', error);
     
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({
         success: false,
-        error: 'Internal server error during validation',
+        error: 'Internal server error during DNS validation',
         details: error.message
       })
     };
@@ -143,34 +191,81 @@ exports.handler = async (event, context) => {
 };
 
 /**
- * Mock DNS validation (in production, you'd use real DNS lookup tools)
+ * Perform real DNS validation checks
  */
-async function mockDNSValidation(domain) {
-  console.log(`🔍 Running mock DNS validation for ${domain.domain}`);
-
-  // Simulate DNS lookup delay
-  await new Promise(resolve => setTimeout(resolve, 1000 + Math.random() * 2000));
-
-  // Mock validation logic
+async function performDNSValidation(domain, verificationToken, expectedIP, expectedHost) {
   const results = {
-    a_validated: Math.random() > 0.3, // 70% chance
-    txt_validated: Math.random() > 0.4, // 60% chance  
-    cname_validated: Math.random() > 0.5, // 50% chance
-    error: null
+    txtValid: false,
+    aValid: false,
+    cnameValid: false,
+    success: false,
+    error: null,
+    details: {}
   };
 
-  // A domain is fully validated if all required records pass
-  results.dns_validated = results.a_validated && results.txt_validated;
+  try {
+    console.log(`🔍 Checking DNS records for ${domain}`);
+    console.log(`Expected IP: ${expectedIP}, Expected Host: ${expectedHost}`);
+    console.log(`Verification Token: ${verificationToken}`);
 
-  if (!results.dns_validated) {
-    const missing = [];
-    if (!results.a_validated) missing.push('A record');
-    if (!results.txt_validated) missing.push('TXT record');
-    results.error = `Missing or invalid DNS records: ${missing.join(', ')}`;
+    // Check TXT record for verification token
+    try {
+      const txtRecords = await withTimeout(dns.resolveTxt(domain), 5000);
+      const flattened = txtRecords.flat().join(' ');
+      results.txtValid = flattened.includes(verificationToken);
+      results.details.txtRecords = txtRecords;
+      console.log(`📝 TXT records found:`, txtRecords);
+      console.log(`📝 TXT validation: ${results.txtValid}`);
+    } catch (txtError) {
+      console.log(`❌ TXT record lookup failed:`, txtError.message);
+      results.details.txtError = txtError.message;
+    }
+
+    // Check A record
+    try {
+      const aRecords = await withTimeout(dns.resolve4(domain), 5000);
+      results.aValid = aRecords.includes(expectedIP);
+      results.details.aRecords = aRecords;
+      console.log(`🔗 A records found:`, aRecords);
+      console.log(`🔗 A record validation: ${results.aValid}`);
+    } catch (aError) {
+      console.log(`❌ A record lookup failed:`, aError.message);
+      results.details.aError = aError.message;
+    }
+
+    // Check CNAME record for www subdomain
+    try {
+      const cnameRecords = await withTimeout(dns.resolveCname(`www.${domain}`), 5000);
+      results.cnameValid = cnameRecords.includes(expectedHost);
+      results.details.cnameRecords = cnameRecords;
+      console.log(`🌐 CNAME records found:`, cnameRecords);
+      console.log(`🌐 CNAME validation: ${results.cnameValid}`);
+    } catch (cnameError) {
+      console.log(`❌ CNAME record lookup failed:`, cnameError.message);
+      results.details.cnameError = cnameError.message;
+      // CNAME is optional, so don't fail validation for this
+      results.cnameValid = true; // Consider CNAME as optional
+    }
+
+    // Domain is valid if TXT and A records are correct
+    // CNAME is optional but recommended
+    results.success = results.txtValid && results.aValid;
+
+    if (!results.success) {
+      const missing = [];
+      if (!results.txtValid) missing.push(`TXT record with verification token`);
+      if (!results.aValid) missing.push(`A record pointing to ${expectedIP}`);
+      results.error = `Missing or invalid DNS records: ${missing.join(' and ')}`;
+    }
+
+    console.log(`📊 Final validation results:`, results);
+    
+  } catch (error) {
+    console.error('DNS validation error:', error);
+    results.error = `DNS validation error: ${error.message}`;
+    results.success = false;
   }
 
-  console.log(`📊 Validation results for ${domain.domain}:`, results);
-  
   return results;
 }
 
@@ -179,67 +274,19 @@ async function mockDNSValidation(domain) {
  */
 async function logValidationAttempt(domainId, results) {
   try {
+    // Try to insert validation log, but don't fail if table doesn't exist
     await supabase
       .from('domain_validation_logs')
       .insert({
         domain_id: domainId,
-        validation_type: 'full',
-        success: results.dns_validated,
+        validation_type: 'dns',
+        success: results.success,
         error_message: results.error,
-        dns_response: results
+        dns_response: results.details,
+        created_at: new Date().toISOString()
       });
   } catch (error) {
-    console.warn('Failed to log validation attempt:', error);
+    console.warn('Failed to log validation attempt (table may not exist):', error.message);
     // Don't fail the main operation if logging fails
   }
 }
-
-/**
- * Real DNS validation function (commented out - requires external DNS service)
- */
-/*
-async function realDNSValidation(domain) {
-  const dns = require('dns').promises;
-  const results = {
-    a_validated: false,
-    txt_validated: false,
-    cname_validated: false,
-    dns_validated: false,
-    error: null
-  };
-
-  try {
-    // Check A record
-    try {
-      const aRecords = await dns.resolve4(domain.domain);
-      results.a_validated = aRecords.some(ip => ip === domain.required_a_record);
-    } catch (e) {
-      console.log('A record lookup failed:', e.message);
-    }
-
-    // Check TXT record
-    try {
-      const txtRecords = await dns.resolveTxt(domain.domain);
-      const flatTxt = txtRecords.flat().join(' ');
-      results.txt_validated = flatTxt.includes(domain.verification_token);
-    } catch (e) {
-      console.log('TXT record lookup failed:', e.message);
-    }
-
-    // Check CNAME record
-    try {
-      const cnameRecords = await dns.resolveCname(`www.${domain.domain}`);
-      results.cname_validated = cnameRecords.some(cname => cname === domain.required_cname);
-    } catch (e) {
-      console.log('CNAME record lookup failed:', e.message);
-    }
-
-    results.dns_validated = results.a_validated && results.txt_validated;
-    
-  } catch (error) {
-    results.error = error.message;
-  }
-
-  return results;
-}
-*/

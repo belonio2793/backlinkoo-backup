@@ -1,5 +1,12 @@
 const { createClient } = require('@supabase/supabase-js');
-const { chromium } = require('playwright');
+
+// Conditional Playwright import to prevent bundling errors
+let chromium;
+try {
+  chromium = require('playwright').chromium;
+} catch (error) {
+  console.warn('Playwright not available, browser automation disabled');
+}
 
 const supabase = createClient(
   process.env.VITE_SUPABASE_URL,
@@ -150,7 +157,11 @@ async function postComment(formData, content, account, dryRun) {
     };
   }
 
-  const browser = await chromium.launch({ 
+  if (!chromium) {
+    throw new Error('Browser automation not available - Playwright not installed');
+  }
+
+  const browser = await chromium.launch({
     headless: true,
     args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
   });
