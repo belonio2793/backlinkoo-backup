@@ -160,9 +160,21 @@ export class DomainBlogTemplateService {
     const title = this.generateTitle(primaryKeyword, brandName);
     const rawContent = this.generateBlogContent(keywords, targetUrl, brandName);
 
+    // Get domain-specific theme if domainId is provided
+    let finalThemeId = themeId || 'minimal';
+    let customStyles = {};
+
+    if (domainId) {
+      const domainTheme = await this.getDomainTheme(domainId);
+      if (domainTheme) {
+        finalThemeId = domainTheme.theme_id;
+        customStyles = domainTheme.custom_styles || {};
+      }
+    }
+
     // Apply theme to content
-    const theme = BlogThemesService.getThemeById(themeId) || BlogThemesService.getDefaultTheme();
-    const themedContent = BlogThemesService.generateThemedBlogPost(rawContent, title, theme);
+    const theme = BlogThemesService.getThemeById(finalThemeId) || BlogThemesService.getDefaultTheme();
+    const themedContent = BlogThemesService.generateThemedBlogPost(rawContent, title, theme, customStyles);
 
     return {
       title,
