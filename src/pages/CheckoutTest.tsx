@@ -305,7 +305,7 @@ export default function CheckoutTest() {
         isOpen={premiumCheckoutOpen}
         onClose={() => setPremiumCheckoutOpen(false)}
         onSuccess={() => {
-          toast({ title: "Premium Checkout Success!", description: "Modal test completed" });
+          toast.success("Premium Checkout Success! Modal test completed");
         }}
       />
 
@@ -317,7 +317,7 @@ export default function CheckoutTest() {
         isLoggedIn={isAuthenticated}
         userName={user?.email}
         onUpgrade={() => {
-          toast({ title: "Trial Exhausted Success!", description: "Modal test completed" });
+          toast.success("Trial Exhausted Success! Modal test completed");
         }}
       />
 
@@ -325,7 +325,7 @@ export default function CheckoutTest() {
         isOpen={premiumPlanOpen}
         onClose={() => setPremiumPlanOpen(false)}
         onSuccess={() => {
-          toast({ title: "Premium Plan Success!", description: "Modal test completed" });
+          toast.success("Premium Plan Success! Modal test completed");
         }}
       />
 
@@ -333,7 +333,7 @@ export default function CheckoutTest() {
         open={guestUpsellOpen}
         onOpenChange={setGuestUpsellOpen}
         onUpgrade={() => {
-          toast({ title: "Guest Upsell Success!", description: "Modal test completed" });
+          toast.success("Guest Upsell Success! Modal test completed");
         }}
       />
 
@@ -341,7 +341,7 @@ export default function CheckoutTest() {
         isOpen={enhancedCheckoutOpen}
         onClose={() => setEnhancedCheckoutOpen(false)}
         onSuccess={() => {
-          toast({ title: "Enhanced Checkout Success!", description: "Modal test completed" });
+          toast.success("Enhanced Checkout Success! Modal test completed");
         }}
       />
 
@@ -349,7 +349,7 @@ export default function CheckoutTest() {
         isOpen={streamlinedCheckoutOpen}
         onClose={() => setStreamlinedCheckoutOpen(false)}
         onSuccess={() => {
-          toast({ title: "Streamlined Checkout Success!", description: "Modal test completed" });
+          toast.success("Streamlined Checkout Success! Modal test completed");
         }}
       />
     </div>
