@@ -1392,6 +1392,80 @@ anotherdomain.org`}
           </Card>
         )}
 
+        {/* Automation Integration Info */}
+        {blogEnabledDomains.length > 0 && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Automation Integration
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-green-900 mb-1">Domain Blog Integration Active</h4>
+                    <p className="text-sm text-green-800 mb-3">
+                      Your blog-enabled domains are automatically integrated with campaigns. Each campaign will publish additional themed blog posts across your domains, creating multiple high-quality backlinks.
+                    </p>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span>Automatic theme assignment</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span>Campaign blog rotation</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span>SEO-optimized content</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <Info className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-blue-900 mb-1">How Domain Blog Integration Works</h4>
+                    <p className="text-sm text-blue-800 mb-3">
+                      When you create campaigns in the automation system, the system will:
+                    </p>
+                    <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
+                      <li>Generate unique, themed blog posts for each domain</li>
+                      <li>Apply your custom themes and styling automatically</li>
+                      <li>Publish posts with natural backlinks to your target URLs</li>
+                      <li>Rotate across domains to diversify your backlink profile</li>
+                    </ol>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3">
+                <a
+                  href="/automation"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Play className="h-4 w-4" />
+                  Test Automation
+                </a>
+                <a
+                  href="/blog"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  View Published Blogs
+                </a>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Blog Template Management Section */}
         <div className="mt-8">
           <DomainBlogTemplateManager
