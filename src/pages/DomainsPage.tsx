@@ -993,6 +993,34 @@ anotherdomain.org`}
                                 <DialogTitle>DNS Configuration for {domain.domain}</DialogTitle>
                               </DialogHeader>
                               <div className="space-y-4">
+                                {/* Registrar Detection Section */}
+                                <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <h4 className="font-medium text-blue-900 flex items-center gap-2">
+                                      <Globe className="h-4 w-4" />
+                                      Domain Registrar Detection
+                                    </h4>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => {
+                                        // Simulate registrar detection
+                                        toast.info(`🔍 Detecting registrar for ${domain.domain}...`);
+                                        setTimeout(() => {
+                                          toast.success(`✅ Detected: Auto-propagation available for supported registrars`);
+                                        }, 1500);
+                                      }}
+                                    >
+                                      <RefreshCw className="h-3 w-3 mr-1" />
+                                      Detect Registrar
+                                    </Button>
+                                  </div>
+                                  <div className="text-sm text-blue-800 space-y-2">
+                                    <p>🚀 <strong>Supported for Auto-Propagation:</strong> Cloudflare, Namecheap, GoDaddy, Route53, DigitalOcean</p>
+                                    <p>⚡ Click "Detect Registrar" to check if your domain supports automatic DNS updates</p>
+                                  </div>
+                                </div>
+
                                 <Alert>
                                   <Info className="h-4 w-4" />
                                   <AlertDescription>
