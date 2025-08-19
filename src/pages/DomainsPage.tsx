@@ -132,6 +132,40 @@ const DomainsPage = () => {
   });
 
   useEffect(() => {
+    // Set up global error handler for unhandled promise rejections
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error('🚨 Unhandled Promise Rejection:', event.reason);
+
+      // Extract meaningful error message
+      let errorMessage = 'An unexpected error occurred';
+
+      if (event.reason instanceof Error) {
+        errorMessage = event.reason.message;
+      } else if (typeof event.reason === 'string') {
+        errorMessage = event.reason;
+      } else if (event.reason && typeof event.reason === 'object') {
+        errorMessage = event.reason.message || JSON.stringify(event.reason);
+      }
+
+      // Show user-friendly error
+      toast.error(`System Error: ${errorMessage}`);
+
+      // Prevent the default handling (console error)
+      event.preventDefault();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (user?.id) {
       loadDomains().catch((error) => {
         console.error('Failed to load domains on mount:', error);
