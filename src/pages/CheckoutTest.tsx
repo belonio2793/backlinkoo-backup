@@ -21,7 +21,6 @@ import { CheckoutRedirectManager } from '@/utils/checkoutRedirectManager';
 import { PopupBlockerDetection } from '@/utils/popupBlockerDetection';
 
 export default function CheckoutTest() {
-  const { toast } = useToast();
   const { user, isAuthenticated } = useAuth();
   
   // Modal states
