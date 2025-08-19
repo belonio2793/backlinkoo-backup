@@ -142,9 +142,16 @@ async function ensureDomainExists() {
     .insert({
       domain: DOMAIN_NAME,
       status: 'active',
-      dns_configured: true,
+      dns_validated: true,
+      txt_record_validated: true,
+      a_record_validated: true,
+      cname_validated: true,
+      ssl_enabled: true,
       blog_enabled: true,
       blog_subdirectory: BLOG_SUBDIRECTORY,
+      verification_token: `blo-leadpages-${Date.now()}`,
+      hosting_provider: 'backlinkoo',
+      pages_published: 0,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     })
