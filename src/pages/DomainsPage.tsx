@@ -502,6 +502,17 @@ const DomainsPage = () => {
     toast.info('Page generation feature coming soon!');
   };
 
+  // Wrapper to handle async errors in event handlers
+  const safeAsync = (asyncFn: (...args: any[]) => Promise<any>) => {
+    return (...args: any[]) => {
+      Promise.resolve(asyncFn(...args)).catch((error) => {
+        console.error('Async operation failed:', error);
+        const errorMessage = error?.message || error?.toString() || 'Unknown error occurred';
+        toast.error(`Operation failed: ${errorMessage}`);
+      });
+    };
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast.success('Copied to clipboard!');
