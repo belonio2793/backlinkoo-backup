@@ -59,7 +59,7 @@ import {
   Palette,
   Wand2
 } from 'lucide-react';
-import DomainBlogTemplateManager from '@/components/DomainBlogTemplateManager';
+import DomainBlogTemplateManagerFixed from '@/components/DomainBlogTemplateManagerFixed';
 import BlogTemplateDebug from '@/components/BlogTemplateDebug';
 import DNSValidationService from '@/services/dnsValidationService';
 import AutoDNSPropagation from '@/components/AutoDNSPropagation';
