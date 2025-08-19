@@ -498,6 +498,23 @@ export class DomainBlogTemplateService {
   }
 
   /**
+   * Create a default theme record for a domain when table doesn't exist
+   */
+  private static createDefaultThemeRecord(domainId: string): DomainThemeRecord {
+    return {
+      id: this.generateId(),
+      domain_id: domainId,
+      theme_id: 'minimal',
+      theme_name: 'Minimal Clean',
+      custom_styles: {},
+      custom_settings: {},
+      is_active: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+  }
+
+  /**
    * Get available domains for publishing
    */
   static async getAvailableDomains(): Promise<ValidatedDomain[]> {
