@@ -204,13 +204,13 @@ const App = () => (
             <Route
               path="/domains"
               element={
-                <DomainsErrorBoundary>
+                <DomainErrorBoundary>
                   <DomainsAuthGuard>
                     <Suspense fallback={<LoadingSpinner />}>
                       <LazyDomainsPage />
                     </Suspense>
                   </DomainsAuthGuard>
-                </DomainsErrorBoundary>
+                </DomainErrorBoundary>
               }
             />
 
