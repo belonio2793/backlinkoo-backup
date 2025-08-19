@@ -336,7 +336,7 @@ export function AutoPropagationWizard({
                     variant={stepData.registrarInfo.autoUpdateAvailable ? 'default' : 'secondary'}
                     className={stepData.registrarInfo.autoUpdateAvailable ? 'bg-green-100 text-green-800' : ''}
                   >
-                    {stepData.registrarInfo.autoUpdateAvailable ? 'Auto-Update Supported' : 'Manual Setup Required'}
+                    {stepData.registrarInfo.autoUpdateAvailable ? 'Auto-Update Supported' : 'Production Incompatible'}
                   </Badge>
                 </div>
                 <div className="space-y-2 text-sm">
@@ -356,8 +356,8 @@ export function AutoPropagationWizard({
                 <AlertTriangle className="h-4 w-4" />
                 <AlertDescription>
                   <div className="space-y-2">
-                    <p className="font-medium">Manual DNS Setup Required</p>
-                    <p>Your registrar doesn't support automatic updates. You'll need to add DNS records manually.</p>
+                    <p className="font-medium text-red-700">Production Deployment Incompatible</p>
+                    <p>Your registrar doesn't support automated DNS management required for production environments.</p>
                     <div className="space-y-1 text-sm">
                       {RegistrarDetectionService.getSetupInstructions(stepData.registrarInfo.registrarCode).map((instruction, index) => (
                         <div key={index}>• {instruction}</div>
