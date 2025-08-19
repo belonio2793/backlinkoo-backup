@@ -109,11 +109,45 @@ export function DomainBlogTemplateManager({
                             error && typeof error === 'object' ? JSON.stringify(error) :
                             String(error);
         console.error('Error loading domain themes:', errorMessage, error);
-        toast({
-          title: "Error Loading Themes",
-          description: `Failed to load domain theme settings: ${errorMessage}`,
-          variant: "destructive"
-        });
+
+        // Check if this is a database setup issue
+        if (errorMessage.includes('does not exist') || errorMessage.includes('domain_blog_themes')) {
+          toast({
+            title: "Database Setup Required",
+            description: "Domain themes database not set up. Run setupDomainDatabase() in console or connect to Supabase MCP.",
+            variant: "destructive",
+            action: (
+              <button
+                onClick={async () => {
+                  const { setupDomainDatabase } = await import('@/utils/setupDomainDatabase');
+                  const result = await setupDomainDatabase();
+                  if (result.success) {
+                    toast({
+                      title: "Setup Complete",
+                      description: "Database set up successfully. Refreshing...",
+                    });
+                    window.location.reload();
+                  } else {
+                    toast({
+                      title: "Setup Failed",
+                      description: result.message,
+                      variant: "destructive"
+                    });
+                  }
+                }}
+                className="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700"
+              >
+                Auto Setup
+              </button>
+            )
+          });
+        } else {
+          toast({
+            title: "Error Loading Themes",
+            description: `Failed to load domain theme settings: ${errorMessage}`,
+            variant: "destructive"
+          });
+        }
       } finally {
         setIsLoading(false);
       }

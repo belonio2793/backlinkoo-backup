@@ -54,7 +54,7 @@ export class DomainBlogTemplateService {
       if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
         const errorMessage = error.message || error.details || JSON.stringify(error);
         console.error('Error fetching domain theme:', errorMessage, error);
-        return null;
+        throw new Error(`Failed to fetch domain theme: ${errorMessage}`);
       }
 
       return data;
@@ -63,7 +63,7 @@ export class DomainBlogTemplateService {
                           error && typeof error === 'object' ? JSON.stringify(error) :
                           String(error);
       console.error('Error in getDomainTheme:', errorMessage, error);
-      return null;
+      throw error;
     }
   }
 
@@ -93,7 +93,7 @@ export class DomainBlogTemplateService {
       if (error) {
         const errorMessage = error.message || error.details || JSON.stringify(error);
         console.error('Error setting domain theme:', errorMessage, error);
-        return false;
+        throw new Error(`Failed to set domain theme: ${errorMessage}`);
       }
 
       return true;
@@ -102,7 +102,7 @@ export class DomainBlogTemplateService {
                           error && typeof error === 'object' ? JSON.stringify(error) :
                           String(error);
       console.error('Error in setDomainTheme:', errorMessage, error);
-      return false;
+      throw error;
     }
   }
 
@@ -147,7 +147,7 @@ export class DomainBlogTemplateService {
       if (error) {
         const errorMessage = error.message || error.details || JSON.stringify(error);
         console.error('Error fetching all domain themes:', errorMessage, error);
-        return [];
+        throw new Error(`Failed to fetch domain themes: ${errorMessage}`);
       }
 
       return data || [];
