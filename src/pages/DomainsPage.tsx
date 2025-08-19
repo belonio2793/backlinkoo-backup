@@ -634,7 +634,7 @@ const DomainsPage = () => {
       toast.success('Copied to clipboard!');
     } catch (error) {
       console.error('Copy to clipboard failed:', error);
-      toast.error('Clipboard copy failed. Please copy manually from the DNS instructions.');
+      toast.error('Clipboard API requires HTTPS connection. Please ensure secure connection.');
     }
   };
 
@@ -1479,7 +1479,7 @@ anotherdomain.org`}
                     ))}
                   </div>
                   <p className="text-xs text-gray-600 mt-3">
-                    Other registrars supported with manual DNS setup
+                    Production mode requires automatic DNS propagation
                   </p>
                 </div>
               </div>

@@ -106,7 +106,7 @@ export function AutoDNSPropagation({
       if (info.autoUpdateAvailable) {
         toast.success(`✅ Auto-propagation supported for ${info.registrar}`);
       } else {
-        toast.info(`ℹ️ Manual setup required for ${info.registrar}`);
+        toast.error(`❌ ${info.registrar} not supported for production deployment. Auto-propagation required.`);
       }
     } catch (error) {
       console.error('Registrar detection failed:', error);
@@ -585,8 +585,8 @@ export function AutoDNSPropagation({
                     Auto-Update Supported
                   </Badge>
                 ) : (
-                  <Badge variant="outline">
-                    Manual Setup Required
+                  <Badge variant="destructive">
+                    Production Incompatible
                   </Badge>
                 )}
               </div>
@@ -691,29 +691,32 @@ export function AutoDNSPropagation({
           </div>
         )}
 
-        {/* Manual Instructions */}
+        {/* Production Requirements */}
         {!registrarInfo?.autoUpdateAvailable && (
           <div className="space-y-4">
             <Separator />
-            
+
             <div className="space-y-4">
-              <h3 className="font-medium">Manual DNS Setup Required</h3>
-              
-              <Alert>
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  {registrarInfo?.registrar || 'Your registrar'} doesn't support automatic DNS updates. 
-                  Please add the DNS records manually in your registrar's control panel.
+              <h3 className="font-medium text-red-700">Production Deployment Incompatible</h3>
+
+              <Alert className="border-red-200 bg-red-50">
+                <AlertTriangle className="h-4 w-4 text-red-600" />
+                <AlertDescription className="text-red-800">
+                  {registrarInfo?.registrar || 'This registrar'} does not support automated DNS management required for production deployment.
+                  Please migrate to a supported registrar (Cloudflare, Namecheap, GoDaddy) for live domain integration.
                 </AlertDescription>
               </Alert>
 
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium">Setup Instructions:</h4>
-                <ol className="list-decimal list-inside space-y-1 text-sm text-gray-600">
-                  {RegistrarDetectionService.getSetupInstructions(registrarInfo?.registrarCode || 'unknown').map((instruction, index) => (
-                    <li key={index}>{instruction}</li>
-                  ))}
-                </ol>
+              <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <h4 className="font-medium text-blue-900 mb-2">Supported Production Registrars:</h4>
+                <ul className="list-disc list-inside space-y-1 text-sm text-blue-800">
+                  <li>Cloudflare (Recommended) - Real-time DNS updates</li>
+                  <li>Namecheap - API-based DNS management</li>
+                  <li>GoDaddy - Automated record updates</li>
+                </ul>
+                <p className="text-sm text-blue-700 mt-2">
+                  These registrars provide the API access required for automated domain deployment.
+                </p>
               </div>
             </div>
           </div>
