@@ -6,7 +6,6 @@ import { AlertTriangle, RefreshCw, ArrowLeft } from 'lucide-react';
 
 interface Props {
   children: ReactNode;
-  fallback?: ReactNode;
 }
 
 interface State {
@@ -47,9 +46,7 @@ export class DomainErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
-      if (this.props.fallback) {
-        return this.props.fallback;
-      }
+      // No fallback rendering in production - errors should be addressed directly
 
       const isNetworkError = this.state.error?.message?.includes('Failed to fetch') ||
                            this.state.error?.message?.includes('NetworkError') ||
