@@ -12,7 +12,6 @@ export interface DNSValidationResult {
     error?: string;
   };
   message: string;
-  isUsingFallback?: boolean;
 }
 
 export interface DNSRecord {
