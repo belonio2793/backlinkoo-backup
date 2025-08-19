@@ -40,7 +40,8 @@
     "setup:domains": "node scripts/create-user-domains-table.js",
     "setup:domains-table": "echo 'Run the SQL script: scripts/create-domains-table.sql in your Supabase dashboard'",
     "fix:deadlock": "node scripts/fix-database-deadlock.js",
-    "check:database": "node scripts/fix-database-deadlock.js check"
+    "check:database": "node scripts/fix-database-deadlock.js check",
+    "setup:blog-themes": "node scripts/setup-domain-blog-themes.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
