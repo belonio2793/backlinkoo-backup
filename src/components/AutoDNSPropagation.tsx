@@ -102,12 +102,9 @@ export function AutoDNSPropagation({
     try {
       const info = await RegistrarDetectionService.detectRegistrar(domain.domain);
       setRegistrarInfo(info);
-      
-      if (info.autoUpdateAvailable) {
-        toast.success(`✅ Auto-propagation supported for ${info.registrar}`);
-      } else {
-        toast.error(`❌ ${info.registrar} not supported for production deployment. Auto-propagation required.`);
-      }
+
+      // Removed toast notifications for auto-propagation support status
+      // The UI will show the status in the component itself
     } catch (error) {
       console.error('Registrar detection failed:', error);
       toast.error('Failed to detect registrar');

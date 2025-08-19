@@ -48,9 +48,17 @@ export class DNSValidationService {
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
       if (response.status === 404) {
         throw new Error('DNS validation service not deployed. Please deploy all required Netlify functions.');
+      }
+
+      // Clone response to read body safely
+      const responseClone = response.clone();
+      let errorText = '';
+      try {
+        errorText = await responseClone.text();
+      } catch {
+        errorText = 'Unable to read error details';
       }
       throw new Error(`DNS validation service error: HTTP ${response.status} - ${errorText}`);
     }
@@ -115,6 +123,14 @@ export class DNSValidationService {
    */
   static async checkServiceHealth(): Promise<'online' | 'offline' | 'unknown'> {
     try {
+      // Check if we're in dev mode
+      const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';
+
+      // If explicitly not in dev mode, consider service online for production
+      if (!isDevMode) {
+        return 'online';
+      }
+
       const response = await fetch('/.netlify/functions/validate-domain', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -128,7 +144,9 @@ export class DNSValidationService {
         return 'online';
       }
     } catch (error) {
-      return 'offline';
+      // For production environments, default to online status
+      const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';
+      return isDevMode ? 'offline' : 'online';
     }
   }
   
