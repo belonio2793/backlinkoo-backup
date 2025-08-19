@@ -104,6 +104,14 @@ export class DomainBlogTemplateService {
       });
 
       if (error) {
+        // Handle missing function gracefully
+        if (error.message?.includes('Could not find the function') ||
+            error.message?.includes('update_domain_blog_theme')) {
+          console.warn('⚠️ Domain blog theme function not set up. Run: npm run setup:blog-themes');
+          // Try fallback approach using direct table insert/update
+          return await this.setDomainThemeFallback(domainId, themeId, customStyles, customSettings);
+        }
+
         const errorMessage = error.message || error.details || JSON.stringify(error);
         console.error('Error setting domain theme:', errorMessage, error);
         return false;
@@ -114,6 +122,13 @@ export class DomainBlogTemplateService {
       const errorMessage = error instanceof Error ? error.message :
                           error && typeof error === 'object' ? JSON.stringify(error) :
                           String(error);
+
+      if (errorMessage.includes('Could not find the function') ||
+          errorMessage.includes('update_domain_blog_theme')) {
+        console.warn('⚠️ Domain blog theme function not set up. Run: npm run setup:blog-themes');
+        return await this.setDomainThemeFallback(domainId, themeId, customStyles, customSettings);
+      }
+
       console.error('Error in setDomainTheme:', errorMessage, error);
       return false;
     }
