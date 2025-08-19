@@ -508,22 +508,9 @@ const DomainsPage = () => {
 
       if (result.success) {
         if (result.validated) {
-          const successMessage = result.isUsingFallback
-            ? `✅ Domain ${result.domain} validated using fallback method`
-            : `✅ Domain ${result.domain} validated successfully! DNS records are properly configured.`;
-          toast.success(successMessage);
+          toast.success(`✅ Domain ${result.domain} validated successfully! DNS records are properly configured.`);
         } else {
-          const warningMessage = result.isUsingFallback
-            ? `⚠️ Domain ${result.domain} validation pending: ${result.message}`
-            : `❌ Domain ${result.domain} validation failed: ${result.message}`;
-          toast.warning(warningMessage);
-        }
-
-        // Show additional info for fallback validation
-        if (result.isUsingFallback) {
-          setTimeout(() => {
-            toast.info('💡 DNS service unavailable. Manual DNS propagation check recommended.');
-          }, 2000);
+          toast.error(`❌ Domain ${result.domain} validation failed: ${result.message}`);
         }
 
         // Reload domains to get updated status
