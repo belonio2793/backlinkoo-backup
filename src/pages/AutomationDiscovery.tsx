@@ -405,10 +405,10 @@ const AutomationDiscovery = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="50">50 Results</SelectItem>
-                          <SelectItem value="100">100 Results</SelectItem>
-                          <SelectItem value="250">250 Results</SelectItem>
-                          <SelectItem value="500">500 Results</SelectItem>
+                          <SelectItem value="100">100 URLs (Quick Test)</SelectItem>
+                          <SelectItem value="250">250 URLs (Standard)</SelectItem>
+                          <SelectItem value="500">500 URLs (Maximum Testing)</SelectItem>
+                          <SelectItem value="1000">1000 URLs (Comprehensive)</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
