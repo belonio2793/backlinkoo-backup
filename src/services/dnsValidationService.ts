@@ -37,31 +37,26 @@ export class DNSValidationService {
   }
   
   /**
-   * Validate using Netlify function
+   * Validate using Netlify function (production service required)
    */
   private static async validateWithNetlifyFunction(domainId: string): Promise<DNSValidationResult | null> {
-    try {
-      const response = await fetch('/.netlify/functions/validate-domain', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ domain_id: domainId }),
-        signal: AbortSignal.timeout(10000)
-      });
-      
-      if (!response.ok) {
-        if (response.status === 404) {
-          throw new Error('Function not deployed');
-        }
-        throw new Error(`HTTP ${response.status}`);
+    const response = await fetch('/.netlify/functions/validate-domain', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ domain_id: domainId }),
+      signal: AbortSignal.timeout(15000)
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      if (response.status === 404) {
+        throw new Error('DNS validation service not deployed. Please deploy all required Netlify functions.');
       }
-      
-      const result = await response.json();
-      return result;
-      
-    } catch (error) {
-      console.error('Netlify function validation failed:', error);
-      return null;
+      throw new Error(`DNS validation service error: HTTP ${response.status} - ${errorText}`);
     }
+
+    const result = await response.json();
+    return result;
   }
   
   /**
