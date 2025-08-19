@@ -6,18 +6,10 @@ import path from "path";
 export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
-    port: 8080,
+    port: 8081,
   },
   plugins: [
     react(),
-  ],
-  // Exclude test HTML files from Vite scanning
-  exclude: [
-    '**/test-*.html',
-    '**/debug-*.html',
-    '**/emergency-*.html',
-    '**/fix-*.html',
-    '**/investigate-*.html'
   ],
   resolve: {
     alias: {
@@ -31,6 +23,7 @@ export default defineConfig(({ mode }) => ({
     target: 'es2015',
     chunkSizeWarningLimit: 1500,
     rollupOptions: {
+      external: ['**/test-*.html', '**/debug-*.html', '**/emergency-*.html', '**/fix-*.html', '**/investigate-*.html'],
       output: {
         manualChunks: {
           // Core React chunks
