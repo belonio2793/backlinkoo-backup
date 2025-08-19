@@ -271,7 +271,7 @@ export function DomainBlogTemplateManagerFixed({
 
   const handleThemeChange = (themeId: string) => {
     setSelectedTheme(themeId);
-    const theme = BlogThemesService.getThemeById(themeId);
+    const theme = ImprovedBlogThemesService.getThemeById(themeId);
     if (theme) {
       setCustomStyles({}); // Reset custom styles when changing theme
     }
