@@ -326,45 +326,17 @@ export function DomainBlogTemplateManager({
     }
 
     setSaveStatus({ isLoading: true, hasError: false });
-    
+
     try {
-      let success = false;
+      // Use the improved storage service
+      const result = await BlogTemplateStorageService.saveSettings(
+        selectedDomain,
+        selectedTheme,
+        customStyles,
+        {}
+      );
 
-      if (!fallbackMode && databaseStatus === 'ready') {
-        // Try to save to database
-        try {
-          success = await DomainBlogTemplateService.setDomainTheme(
-            selectedDomain,
-            selectedTheme,
-            customStyles,
-            {}
-          );
-          
-          if (success) {
-            toast({
-              title: "Theme Saved",
-              description: "Blog theme settings have been saved to database",
-            });
-          }
-        } catch (dbError) {
-          console.warn('Database save failed, falling back to localStorage:', dbError);
-          success = false;
-        }
-      }
-
-      // Fallback to localStorage if database save failed or we're in fallback mode
-      if (!success) {
-        success = saveToLocalStorage(selectedDomain, selectedTheme, customStyles);
-        if (success) {
-          toast({
-            title: "Settings Saved Locally",
-            description: "Theme settings saved to browser storage. Set up database for persistent storage.",
-            variant: "default"
-          });
-        }
-      }
-
-      if (success) {
+      if (result.success) {
         // Update local state
         const settings: DomainThemeSettings = {
           domain_id: selectedDomain,
@@ -380,7 +352,7 @@ export function DomainBlogTemplateManager({
 
         // Update theme record
         const updatedTheme: DomainThemeRecord = {
-          id: `${fallbackMode ? 'local' : 'db'}_${selectedDomain}`,
+          id: `${result.method}_${selectedDomain}`,
           domain_id: selectedDomain,
           theme_id: selectedTheme,
           theme_name: BlogThemesService.getThemeById(selectedTheme)?.name || 'Unknown',
@@ -398,8 +370,21 @@ export function DomainBlogTemplateManager({
 
         onThemeUpdate?.(selectedDomain, selectedTheme);
         setSaveStatus({ isLoading: false, hasError: false, lastSaved: new Date() });
+
+        // Show appropriate success message based on storage method
+        if (result.method === 'database') {
+          toast({
+            title: "Theme Saved",
+            description: "Blog theme settings have been saved to database",
+          });
+        } else {
+          toast({
+            title: "Settings Saved Locally",
+            description: "Theme settings saved to browser storage. Database backup available when connection is restored.",
+          });
+        }
       } else {
-        throw new Error('Failed to save theme settings');
+        throw new Error(result.error || 'Failed to save theme settings');
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
