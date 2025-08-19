@@ -188,46 +188,63 @@ export function DomainBlogTemplateManager({
     loadDomainThemes();
   }, [blogEnabledDomains, selectedDomain, fallbackMode]);
 
-  // Load settings from localStorage as fallback
-  const loadFromLocalStorage = () => {
+  // Load settings using improved storage service
+  const loadFromLocalStorage = async () => {
     try {
-      const savedSettings = localStorage.getItem('domain-blog-theme-settings');
-      if (savedSettings) {
-        const settings = JSON.parse(savedSettings);
-        setDomainThemeSettings(settings);
-        
-        // Create theme records from localStorage
-        const themeRecords: Record<string, DomainThemeRecord> = {};
-        blogEnabledDomains.forEach(domain => {
-          const domainSettings = settings[domain.id];
-          themeRecords[domain.id] = {
-            id: `local_${domain.id}`,
-            domain_id: domain.id,
-            theme_id: domainSettings?.theme_id || 'minimal',
-            theme_name: BlogThemesService.getThemeById(domainSettings?.theme_id || 'minimal')?.name || 'Minimal Clean',
-            custom_styles: domainSettings?.custom_styles || {},
-            custom_settings: {},
-            is_active: true,
-            created_at: new Date().toISOString(),
-            updated_at: domainSettings?.updated_at || new Date().toISOString()
-          };
-        });
-        setDomainThemeRecords(themeRecords);
+      const themeRecords: Record<string, DomainThemeRecord> = {};
+      const settingsRecords: Record<string, DomainThemeSettings> = {};
 
-        if (selectedDomain && themeRecords[selectedDomain]) {
-          setSelectedTheme(themeRecords[selectedDomain].theme_id);
-          setCustomStyles(themeRecords[selectedDomain].custom_styles || {});
+      for (const domain of blogEnabledDomains) {
+        try {
+          const savedSettings = await BlogTemplateStorageService.loadSettings(domain.id);
+
+          if (savedSettings) {
+            themeRecords[domain.id] = {
+              id: `storage_${domain.id}`,
+              domain_id: domain.id,
+              theme_id: savedSettings.themeId,
+              theme_name: BlogThemesService.getThemeById(savedSettings.themeId)?.name || 'Unknown Theme',
+              custom_styles: savedSettings.customStyles,
+              custom_settings: savedSettings.customSettings,
+              is_active: true,
+              created_at: new Date().toISOString(),
+              updated_at: savedSettings.lastUpdated
+            };
+
+            settingsRecords[domain.id] = {
+              domain_id: domain.id,
+              theme_id: savedSettings.themeId,
+              custom_styles: savedSettings.customStyles,
+              updated_at: savedSettings.lastUpdated
+            };
+          } else {
+            // Create default
+            themeRecords[domain.id] = createDefaultThemeRecord(domain.id);
+          }
+        } catch (error) {
+          console.warn(`Error loading settings for domain ${domain.domain}:`, error);
+          themeRecords[domain.id] = createDefaultThemeRecord(domain.id);
         }
-      } else {
-        // Initialize with defaults
-        const fallbackRecords: Record<string, DomainThemeRecord> = {};
-        blogEnabledDomains.forEach(domain => {
-          fallbackRecords[domain.id] = createDefaultThemeRecord(domain.id);
-        });
-        setDomainThemeRecords(fallbackRecords);
       }
+
+      setDomainThemeRecords(themeRecords);
+      setDomainThemeSettings(settingsRecords);
+
+      // Set selected theme based on loaded data
+      if (selectedDomain && themeRecords[selectedDomain]) {
+        setSelectedTheme(themeRecords[selectedDomain].theme_id);
+        setCustomStyles(themeRecords[selectedDomain].custom_styles || {});
+      }
+
+      console.log(`✅ Loaded ${Object.keys(themeRecords).length} blog template settings`);
     } catch (error) {
-      console.error('Error loading from localStorage:', error);
+      console.error('Error loading from storage service:', error);
+      // Fallback to defaults
+      const fallbackRecords: Record<string, DomainThemeRecord> = {};
+      blogEnabledDomains.forEach(domain => {
+        fallbackRecords[domain.id] = createDefaultThemeRecord(domain.id);
+      });
+      setDomainThemeRecords(fallbackRecords);
     }
   };
 
