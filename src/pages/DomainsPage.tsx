@@ -607,7 +607,7 @@ const DomainsPage = () => {
       console.log('📋 Test result:', result);
 
       if (result.success === false && result.error === 'Domain not found') {
-        toast.success('✅ DNS validation service is working correctly! (Test domain not found as expected)');
+        toast.success('�� DNS validation service is working correctly! (Test domain not found as expected)');
         console.log('✅ DNS validation service is operational');
         setDnsServiceStatus('online');
       } else {
@@ -756,11 +756,8 @@ const DomainsPage = () => {
             Add, configure, and manage domains for automated content publishing. Full hosting control with executable page generation.
           </p>
           
-          {/* Network Status */}
+          {/* Database Setup Status - Only show if table doesn't exist */}
           <div className="mt-6 max-w-lg mx-auto space-y-4">
-            <NetworkStatus onRetry={loadDomains} />
-
-            {/* Database Setup Status - Only show if table doesn't exist */}
             {domainBlogThemesExists === false && (
               <Alert className="border-amber-200 bg-amber-50">
                 <Info className="h-4 w-4 text-amber-600" />
