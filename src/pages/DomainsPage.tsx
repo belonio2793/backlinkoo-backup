@@ -872,10 +872,83 @@ anotherdomain.org`}
                       </TableCell>
                       
                       <TableCell>
-                        <div className="flex gap-1">
-                          <div className={`w-3 h-3 rounded-full ${domain.a_record_validated ? 'bg-green-500' : 'bg-gray-300'}`} title="A Record" />
-                          <div className={`w-3 h-3 rounded-full ${domain.txt_record_validated ? 'bg-green-500' : 'bg-gray-300'}`} title="TXT Record" />
-                          <div className={`w-3 h-3 rounded-full ${domain.cname_validated ? 'bg-green-500' : 'bg-gray-300'}`} title="CNAME Record" />
+                        <div className="space-y-1">
+                          <div className="flex gap-1">
+                            <div className={`w-3 h-3 rounded-full ${domain.a_record_validated ? 'bg-green-500' : 'bg-gray-300'}`} title="A Record" />
+                            <div className={`w-3 h-3 rounded-full ${domain.txt_record_validated ? 'bg-green-500' : 'bg-gray-300'}`} title="TXT Record" />
+                            <div className={`w-3 h-3 rounded-full ${domain.cname_validated ? 'bg-green-500' : 'bg-gray-300'}`} title="CNAME Record" />
+                          </div>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button variant="outline" size="sm" className="text-xs">
+                                <Settings className="h-3 w-3 mr-1" />
+                                DNS Setup
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>DNS Configuration for {domain.domain}</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <Alert>
+                                  <Info className="h-4 w-4" />
+                                  <AlertDescription>
+                                    Add these DNS records at your domain registrar to complete setup:
+                                  </AlertDescription>
+                                </Alert>
+
+                                {getDNSInstructions(domain).map((record, index) => (
+                                  <div key={index} className={`p-4 rounded-lg border ${record.validated ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+                                    <div className="flex items-center justify-between mb-2">
+                                      <div className="flex items-center gap-2">
+                                        <Badge variant={record.required ? "default" : "outline"}>
+                                          {record.type}
+                                        </Badge>
+                                        {record.validated && <CheckCircle2 className="h-4 w-4 text-green-600" />}
+                                        {record.required && !record.validated && <Clock className="h-4 w-4 text-yellow-600" />}
+                                      </div>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => copyToClipboard(record.value)}
+                                      >
+                                        <Copy className="h-3 w-3 mr-1" />
+                                        Copy
+                                      </Button>
+                                    </div>
+                                    <div className="space-y-1">
+                                      <div className="text-sm">
+                                        <span className="font-medium">Name:</span> {record.name}
+                                      </div>
+                                      <div className="text-sm">
+                                        <span className="font-medium">Value:</span>
+                                        <code className="ml-2 bg-gray-100 px-2 py-1 rounded text-xs break-all">
+                                          {record.value}
+                                        </code>
+                                      </div>
+                                      <div className="text-xs text-gray-600">
+                                        {record.description}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+
+                                <div className="text-center pt-4">
+                                  <Button
+                                    onClick={safeAsync(() => validateDomain(domain.id))}
+                                    disabled={validatingDomains.has(domain.id)}
+                                  >
+                                    {validatingDomains.has(domain.id) ? (
+                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                    ) : (
+                                      <RefreshCw className="h-4 w-4 mr-2" />
+                                    )}
+                                    Validate DNS Records
+                                  </Button>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                         </div>
                       </TableCell>
                       
