@@ -203,9 +203,11 @@ const App = () => (
             <Route
               path="/domains"
               element={
-                <Suspense fallback={<LoadingSpinner />}>
-                  <LazyDomainsPage />
-                </Suspense>
+                <DomainsAuthGuard>
+                  <Suspense fallback={<LoadingSpinner />}>
+                    <LazyDomainsPage />
+                  </Suspense>
+                </DomainsAuthGuard>
               }
             />
 
