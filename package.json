@@ -38,7 +38,9 @@
     "test:final": "node final-campaign-test.js",
     "force:beautiful": "node scripts/force-beautiful-content-structure.js",
     "setup:domains": "node scripts/create-user-domains-table.js",
-    "setup:domains-table": "echo 'Run the SQL script: scripts/create-domains-table.sql in your Supabase dashboard'"
+    "setup:domains-table": "echo 'Run the SQL script: scripts/create-domains-table.sql in your Supabase dashboard'",
+    "fix:deadlock": "node scripts/fix-database-deadlock.js",
+    "check:database": "node scripts/fix-database-deadlock.js check"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
