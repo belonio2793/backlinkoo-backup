@@ -860,8 +860,32 @@ const DomainsPage = () => {
           </p>
           
           {/* Network Status */}
-          <div className="mt-6 max-w-lg mx-auto">
+          <div className="mt-6 max-w-lg mx-auto space-y-4">
             <NetworkStatus onRetry={loadDomains} />
+
+            {/* DNS Service Status */}
+            <div className="flex items-center justify-center gap-2 text-sm">
+              <span>DNS Validation Service:</span>
+              {dnsServiceStatus === 'online' ? (
+                <Badge className="bg-green-100 text-green-800 border-green-200">
+                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                  Online
+                </Badge>
+              ) : dnsServiceStatus === 'offline' ? (
+                <Badge className="bg-red-100 text-red-800 border-red-200">
+                  <AlertTriangle className="w-3 h-3 mr-1" />
+                  Offline (Using Fallback)
+                </Badge>
+              ) : (
+                <Badge className="bg-gray-100 text-gray-800 border-gray-200">
+                  <Clock className="w-3 h-3 mr-1" />
+                  Checking...
+                </Badge>
+              )}
+              <Button variant="ghost" size="sm" onClick={checkDNSServiceHealth}>
+                <RefreshCw className="w-3 h-3" />
+              </Button>
+            </div>
           </div>
         </div>
 
