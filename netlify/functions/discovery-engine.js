@@ -381,7 +381,10 @@ function generateAutomationPath(platform) {
 }
 
 async function addKnownWorkingPlatforms(sessionId) {
-  // Add some verified high-value automation-ready platforms
+  // First, get existing working URLs from database
+  const existingWorkingUrls = await getExistingWorkingUrls();
+
+  // Add verified high-value automation-ready platforms
   const knownPlatforms = [
     {
       url: 'https://telegra.ph',
@@ -418,8 +421,54 @@ async function addKnownWorkingPlatforms(sessionId) {
       link_type: 'oauth2',
       api_available: true,
       domain_authority: 96
+    },
+    {
+      url: 'https://hashnode.com/api',
+      domain: 'hashnode.com',
+      title: 'Hashnode - GraphQL Developer Platform',
+      description: 'Developer-focused platform with GraphQL API for automated publishing',
+      opportunity_score: 88,
+      automation_compatibility: 90,
+      publishing_method: 'hashnode_graphql',
+      link_type: 'graphql',
+      api_available: true,
+      domain_authority: 88
+    },
+    {
+      url: 'https://ghost.org/docs/admin-api/',
+      domain: 'ghost.org',
+      title: 'Ghost CMS - Admin API',
+      description: 'Professional publishing platform with robust Admin API',
+      opportunity_score: 85,
+      automation_compatibility: 85,
+      publishing_method: 'ghost_admin_api',
+      link_type: 'api_admin',
+      api_available: true,
+      domain_authority: 85
     }
   ];
+
+  // Add existing working URLs from database
+  for (const existingUrl of existingWorkingUrls.slice(0, 50)) { // Limit to avoid too many
+    const urlData = {
+      url: existingUrl.url,
+      domain: existingUrl.domain,
+      title: `${existingUrl.domain} - Verified Working Platform`,
+      description: `Database-verified platform with ${existingUrl.success_rate}% success rate`,
+      opportunity_score: existingUrl.success_rate || 70,
+      automation_compatibility: existingUrl.success_rate || 70,
+      publishing_method: existingUrl.posting_method || 'form_submission',
+      link_type: existingUrl.link_type || 'web2_platform',
+      domain_authority: existingUrl.domain_authority || 50,
+      discovery_method: 'database_verified',
+      status: 'verified'
+    };
+
+    const savedUrl = await saveDiscoveredUrl(urlData, sessionId);
+    if (savedUrl) {
+      global.discoveryResults[sessionId].push(savedUrl);
+    }
+  }
 
   for (const platform of knownPlatforms) {
     const urlData = {
