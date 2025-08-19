@@ -60,6 +60,7 @@ import {
   Wand2
 } from 'lucide-react';
 import DomainBlogTemplateManager from '@/components/DomainBlogTemplateManager';
+import BlogTemplateDebug from '@/components/BlogTemplateDebug';
 import DNSValidationService from '@/services/dnsValidationService';
 import AutoDNSPropagation from '@/components/AutoDNSPropagation';
 import AutoPropagationWizard from '@/components/AutoPropagationWizard';
