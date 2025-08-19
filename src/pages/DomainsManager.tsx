@@ -3,10 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
 import { 
   Dialog, 
   DialogContent, 
@@ -17,36 +15,15 @@ import {
   DialogFooter
 } from '@/components/ui/dialog';
 import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
-import { 
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { 
   Globe, 
   Plus, 
-  Trash2, 
-  ExternalLink, 
+  Copy, 
   CheckCircle2, 
+  Clock,
   AlertCircle,
   Loader2,
-  Settings,
-  Server,
-  Copy,
-  Info,
+  ExternalLink,
+  ArrowRight,
   Shield,
   Zap
 } from 'lucide-react';
@@ -58,16 +35,10 @@ import { toast } from 'sonner';
 interface HostedDomain {
   id: string;
   domain: string;
-  status: 'pending' | 'active' | 'configured' | 'error';
-  nameservers_configured: boolean;
+  status: 'setup' | 'active' | 'pending';
   ssl_enabled: boolean;
   pages_count: number;
   created_at: string;
-  dns_records?: {
-    type: string;
-    name: string;
-    value: string;
-  }[];
 }
 
 const DomainsManager = () => {
@@ -78,33 +49,29 @@ const DomainsManager = () => {
   const [newDomain, setNewDomain] = useState('');
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
 
-  // Your server nameservers (replace with actual values)
-  const SERVER_NAMESERVERS = [
-    'ns1.yourserver.com',
-    'ns2.yourserver.com'
+  // Your hosting nameservers - replace with real values
+  const NAMESERVERS = [
+    'ns1.yourhost.com',
+    'ns2.yourhost.com'
   ];
 
-  const SERVER_IP = '192.168.1.100'; // Replace with actual server IP
-
-  // Mock data for demo
-  const mockDomains: HostedDomain[] = [
+  // Sample domains for demo
+  const sampleDomains: HostedDomain[] = [
     {
       id: '1',
-      domain: 'example.com',
+      domain: 'mybusiness.com',
       status: 'active',
-      nameservers_configured: true,
       ssl_enabled: true,
-      pages_count: 5,
-      created_at: new Date().toISOString()
+      pages_count: 12,
+      created_at: '2024-01-15'
     },
     {
       id: '2',
-      domain: 'demo-site.net',
+      domain: 'startup-demo.net',
       status: 'pending',
-      nameservers_configured: false,
       ssl_enabled: false,
       pages_count: 0,
-      created_at: new Date().toISOString()
+      created_at: '2024-01-20'
     }
   ];
 
@@ -117,11 +84,10 @@ const DomainsManager = () => {
   const loadDomains = async () => {
     setLoading(true);
     try {
-      // TODO: Replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setDomains(mockDomains);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 800));
+      setDomains(sampleDomains);
     } catch (error) {
-      console.error('Error loading domains:', error);
       toast.error('Failed to load domains');
     } finally {
       setLoading(false);
@@ -130,87 +96,89 @@ const DomainsManager = () => {
 
   const addDomain = async () => {
     if (!newDomain.trim()) {
-      toast.error('Please enter a domain');
+      toast.error('Please enter a domain name');
       return;
     }
 
     setAddingDomain(true);
     try {
-      // Basic domain validation
       const domain = newDomain.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '');
       
-      // Check if domain already exists
-      const exists = domains.find(d => d.domain === domain);
-      if (exists) {
-        toast.error('Domain already exists');
-        return;
-      }
-
-      // TODO: Add to database
       const newDomainRecord: HostedDomain = {
         id: Date.now().toString(),
         domain,
-        status: 'pending',
-        nameservers_configured: false,
+        status: 'setup',
         ssl_enabled: false,
         pages_count: 0,
-        created_at: new Date().toISOString()
+        created_at: new Date().toLocaleDateString()
       };
 
       setDomains(prev => [newDomainRecord, ...prev]);
       setNewDomain('');
       setIsAddDialogOpen(false);
-      toast.success('Domain added! Configure nameservers to activate hosting.');
+      toast.success('Domain added! Follow the setup steps below.');
 
     } catch (error) {
-      console.error('Error adding domain:', error);
       toast.error('Failed to add domain');
     } finally {
       setAddingDomain(false);
     }
   };
 
-  const deleteDomain = async (domainId: string) => {
-    try {
-      setDomains(prev => prev.filter(d => d.id !== domainId));
-      toast.success('Domain removed successfully');
-    } catch (error) {
-      console.error('Error deleting domain:', error);
-      toast.error('Failed to delete domain');
-    }
+  const copyNameserver = (ns: string) => {
+    navigator.clipboard.writeText(ns);
+    toast.success('Nameserver copied!');
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard!');
-  };
-
-  const getStatusBadge = (domain: HostedDomain) => {
+  const getStatusDisplay = (domain: HostedDomain) => {
     switch (domain.status) {
       case 'active':
-        return <Badge className="bg-green-100 text-green-800"><CheckCircle2 className="w-3 h-3 mr-1" />Active</Badge>;
-      case 'configured':
-        return <Badge className="bg-blue-100 text-blue-800"><Server className="w-3 h-3 mr-1" />Configured</Badge>;
+        return (
+          <div className="flex items-center gap-2">
+            <Badge className="bg-green-100 text-green-800 border-green-200">
+              <CheckCircle2 className="w-3 h-3 mr-1" />
+              Live
+            </Badge>
+            {domain.ssl_enabled && (
+              <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                <Shield className="w-3 h-3 mr-1" />
+                SSL
+              </Badge>
+            )}
+          </div>
+        );
       case 'pending':
-        return <Badge variant="outline" className="text-yellow-600"><Loader2 className="w-3 h-3 mr-1" />Pending</Badge>;
-      case 'error':
-        return <Badge variant="destructive"><AlertCircle className="w-3 h-3 mr-1" />Error</Badge>;
+        return (
+          <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">
+            <Clock className="w-3 h-3 mr-1" />
+            Propagating
+          </Badge>
+        );
+      case 'setup':
+        return (
+          <Badge className="bg-gray-100 text-gray-800 border-gray-200">
+            <AlertCircle className="w-3 h-3 mr-1" />
+            Setup Required
+          </Badge>
+        );
       default:
-        return <Badge variant="outline">Unknown</Badge>;
+        return null;
     }
   };
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <Header />
-        <div className="container mx-auto px-4 py-8">
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              Please log in to manage your hosted domains.
-            </AlertDescription>
-          </Alert>
+        <div className="container mx-auto px-4 py-16">
+          <div className="max-w-md mx-auto">
+            <Alert className="border-blue-200 bg-blue-50">
+              <Globe className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-800">
+                Please sign in to manage your hosted domains.
+              </AlertDescription>
+            </Alert>
+          </div>
         </div>
         <Footer />
       </div>
@@ -218,295 +186,209 @@ const DomainsManager = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <Header />
       <div className="container mx-auto px-4 py-8 max-w-6xl">
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center gap-2">
-                <Server className="h-8 w-8 text-blue-600" />
-                Domain Hosting Manager
-              </h1>
-              <p className="text-gray-600">
-                Point your domains to our servers and build pages hosted on your custom domains.
-              </p>
+        
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center mb-4">
+            <div className="p-3 bg-blue-100 rounded-full">
+              <Globe className="h-8 w-8 text-blue-600" />
             </div>
-            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="flex items-center gap-2">
-                  <Plus className="h-4 w-4" />
+          </div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+            Host Your Domains
+          </h1>
+          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+            Point your domains to our servers and build beautiful pages with ease. 
+            No technical knowledge required.
+          </p>
+          
+          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3">
+                <Plus className="h-5 w-5 mr-2" />
+                Add Your Domain
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle className="text-xl">Add Your Domain</DialogTitle>
+                <DialogDescription>
+                  Enter your domain name to start hosting it on our platform.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div>
+                  <Label htmlFor="domain" className="text-sm font-medium">Domain Name</Label>
+                  <Input
+                    id="domain"
+                    placeholder="example.com"
+                    value={newDomain}
+                    onChange={(e) => setNewDomain(e.target.value)}
+                    className="mt-1"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Don't include http:// or www.
+                  </p>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={addDomain} disabled={addingDomain} className="bg-blue-600 hover:bg-blue-700">
+                  {addingDomain && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
                   Add Domain
                 </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Add Domain for Hosting</DialogTitle>
-                  <DialogDescription>
-                    Add a domain that you want to host on our servers. You'll need to configure nameservers.
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="domain">Domain Name</Label>
-                    <Input
-                      id="domain"
-                      placeholder="example.com"
-                      value={newDomain}
-                      onChange={(e) => setNewDomain(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                    Cancel
-                  </Button>
-                  <Button onClick={addDomain} disabled={addingDomain}>
-                    {addingDomain && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                    Add Domain
-                  </Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </div>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
 
-        <Tabs defaultValue="domains" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="domains">Hosted Domains</TabsTrigger>
-            <TabsTrigger value="nameservers">Nameserver Setup</TabsTrigger>
-            <TabsTrigger value="dns">DNS Management</TabsTrigger>
-            <TabsTrigger value="pages">Page Builder</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="domains" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Hosted Domains</CardTitle>
-                <CardDescription>
-                  Domains configured to be hosted on our infrastructure.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="flex items-center justify-center py-8">
-                    <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                    Loading domains...
-                  </div>
-                ) : domains.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Server className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No domains configured yet</h3>
-                    <p className="text-gray-600 mb-4">Add your first domain to start hosting pages.</p>
-                    <Button onClick={() => setIsAddDialogOpen(true)}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Add Your First Domain
-                    </Button>
-                  </div>
-                ) : (
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Domain</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>SSL</TableHead>
-                        <TableHead>Pages</TableHead>
-                        <TableHead>Added</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {domains.map((domain) => (
-                        <TableRow key={domain.id}>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Globe className="h-4 w-4 text-gray-400" />
-                              <div>
-                                <div className="font-medium">{domain.domain}</div>
-                                {domain.status === 'active' && (
-                                  <a 
-                                    href={`https://${domain.domain}`} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="text-sm text-blue-600 hover:underline flex items-center gap-1"
-                                  >
-                                    Visit <ExternalLink className="h-3 w-3" />
-                                  </a>
-                                )}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            {getStatusBadge(domain)}
-                          </TableCell>
-                          <TableCell>
-                            {domain.ssl_enabled ? (
-                              <Badge variant="outline" className="text-green-600">
-                                <Shield className="w-3 h-3 mr-1" />Enabled
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline" className="text-gray-600">
-                                <AlertCircle className="w-3 h-3 mr-1" />Disabled
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <span className="text-sm font-medium">{domain.pages_count}</span>
-                          </TableCell>
-                          <TableCell>
-                            {new Date(domain.created_at).toLocaleDateString()}
-                          </TableCell>
-                          <TableCell className="text-right">
-                            <div className="flex items-center gap-2 justify-end">
-                              <Button variant="outline" size="sm">
-                                <Settings className="h-4 w-4" />
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                <Zap className="h-4 w-4" />
-                              </Button>
-                              <AlertDialog>
-                                <AlertDialogTrigger asChild>
-                                  <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                    <AlertDialogTitle>Remove Domain</AlertDialogTitle>
-                                    <AlertDialogDescription>
-                                      Are you sure you want to remove "{domain.domain}" from hosting? This will disable all pages on this domain.
-                                    </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                    <AlertDialogAction onClick={() => deleteDomain(domain.id)}>
-                                      Remove
-                                    </AlertDialogAction>
-                                  </AlertDialogFooter>
-                                </AlertDialogContent>
-                              </AlertDialog>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="nameservers" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Server className="h-5 w-5" />
-                  Nameserver Configuration
-                </CardTitle>
-                <CardDescription>
-                  Configure your domain registrar to point to our nameservers.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <Alert>
-                    <Info className="h-4 w-4" />
-                    <AlertDescription>
-                      To host your domain on our servers, you need to update the nameservers at your domain registrar (GoDaddy, Namecheap, etc.) to point to our nameservers.
-                    </AlertDescription>
-                  </Alert>
-
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">Required Nameservers</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {SERVER_NAMESERVERS.map((ns, index) => (
-                        <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                          <span className="font-mono text-sm">{ns}</span>
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => copyToClipboard(ns)}
-                          >
-                            <Copy className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">Server IP Address</h3>
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg max-w-md">
-                      <span className="font-mono text-sm">{SERVER_IP}</span>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => copyToClipboard(SERVER_IP)}
-                      >
-                        <Copy className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="font-semibold text-blue-900 mb-2">Setup Instructions:</h4>
-                    <ol className="list-decimal list-inside space-y-2 text-sm text-blue-800">
-                      <li>Log into your domain registrar's control panel</li>
-                      <li>Find the "Nameservers" or "DNS" section</li>
-                      <li>Replace existing nameservers with our nameservers above</li>
-                      <li>Save changes (propagation may take 24-48 hours)</li>
-                      <li>Return here to verify and activate hosting</li>
-                    </ol>
-                  </div>
+        {/* Setup Instructions */}
+        <Card className="mb-8 border-blue-200 bg-blue-50/50">
+          <CardHeader>
+            <CardTitle className="text-blue-900 flex items-center gap-2">
+              <ArrowRight className="h-5 w-5" />
+              Quick Setup Guide
+            </CardTitle>
+            <CardDescription className="text-blue-700">
+              Follow these simple steps to get your domain live on our platform.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="text-center">
+                <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold">
+                  1
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="dns" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>DNS Management</CardTitle>
-                <CardDescription>
-                  Manage DNS records for your hosted domains.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Server className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">DNS Management Coming Soon</h3>
-                  <p className="text-gray-600">
-                    Advanced DNS record management will be available once domains are configured.
-                  </p>
+                <h3 className="font-semibold text-blue-900 mb-2">Add Domain</h3>
+                <p className="text-sm text-blue-700">
+                  Click "Add Your Domain" and enter your domain name.
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold">
+                  2
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
+                <h3 className="font-semibold text-blue-900 mb-2">Update Nameservers</h3>
+                <p className="text-sm text-blue-700">
+                  Point your domain to our nameservers at your registrar.
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="w-10 h-10 bg-blue-600 text-white rounded-full flex items-center justify-center mx-auto mb-3 font-bold">
+                  3
+                </div>
+                <h3 className="font-semibold text-blue-900 mb-2">Start Building</h3>
+                <p className="text-sm text-blue-700">
+                  Create beautiful pages with our page builder.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-          <TabsContent value="pages" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Page Builder Integration</CardTitle>
-                <CardDescription>
-                  Build and manage pages for your hosted domains.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Zap className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Page Builder Coming Soon</h3>
-                  <p className="text-gray-600 mb-4">
-                    Build beautiful pages directly on your hosted domains with our integrated page builder.
-                  </p>
-                  <Button disabled>
-                    <Zap className="h-4 w-4 mr-2" />
-                    Create Page
+        {/* Nameservers Section */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Your Nameservers</CardTitle>
+            <CardDescription>
+              Update these nameservers at your domain registrar (GoDaddy, Namecheap, etc.)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {NAMESERVERS.map((ns, index) => (
+                <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border">
+                  <div>
+                    <div className="text-sm text-gray-500">Nameserver {index + 1}</div>
+                    <div className="font-mono text-lg font-semibold">{ns}</div>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => copyNameserver(ns)}
+                    className="ml-4"
+                  >
+                    <Copy className="h-4 w-4 mr-1" />
+                    Copy
                   </Button>
                 </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-        </Tabs>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Domains List */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Your Hosted Domains</CardTitle>
+            <CardDescription>
+              Manage and monitor your domains hosted on our platform.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600 mr-3" />
+                <span className="text-gray-600">Loading your domains...</span>
+              </div>
+            ) : domains.length === 0 ? (
+              <div className="text-center py-12">
+                <Globe className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold text-gray-600 mb-2">No domains yet</h3>
+                <p className="text-gray-500 mb-6">Add your first domain to get started with hosting.</p>
+                <Button onClick={() => setIsAddDialogOpen(true)} className="bg-blue-600 hover:bg-blue-700">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Your First Domain
+                </Button>
+              </div>
+            ) : (
+              <div className="grid gap-4">
+                {domains.map((domain) => (
+                  <div key={domain.id} className="p-6 border rounded-lg hover:border-blue-200 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 bg-blue-100 rounded-lg">
+                          <Globe className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">{domain.domain}</h3>
+                          <div className="flex items-center gap-4 mt-1">
+                            {getStatusDisplay(domain)}
+                            <span className="text-sm text-gray-500">
+                              {domain.pages_count} pages
+                            </span>
+                            <span className="text-sm text-gray-500">
+                              Added {domain.created_at}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {domain.status === 'active' && (
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={`https://${domain.domain}`} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="h-4 w-4 mr-1" />
+                              Visit
+                            </a>
+                          </Button>
+                        )}
+                        <Button variant="outline" size="sm">
+                          <Zap className="h-4 w-4 mr-1" />
+                          Manage
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
       <Footer />
     </div>
