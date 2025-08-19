@@ -48,6 +48,7 @@ import {
   LazyBlogPost,
   LazyBlog,
   LazyBlogListing,
+  LazyDomainsManager,
   LazyBlogCreation,
   LazyBlogPostView,
   LazyEnhancedBlogListing,
