@@ -107,52 +107,6 @@ export class DomainBlogTemplateService {
   }
 
   /**
-   * Fallback method for setting domain theme without database function
-   */
-  private static async setDomainThemeFallback(
-    domainId: string,
-    themeId: string,
-    customStyles: Record<string, any> = {},
-    customSettings: Record<string, any> = {}
-  ): Promise<boolean> {
-    try {
-      const theme = BlogThemesService.getThemeById(themeId);
-      if (!theme) {
-        throw new Error(`Theme ${themeId} not found`);
-      }
-
-      // Deactivate current theme
-      await supabase
-        .from('domain_blog_themes')
-        .update({ is_active: false, updated_at: new Date().toISOString() })
-        .eq('domain_id', domainId)
-        .eq('is_active', true);
-
-      // Insert new active theme
-      const { error } = await supabase
-        .from('domain_blog_themes')
-        .insert({
-          domain_id: domainId,
-          theme_id: themeId,
-          theme_name: theme.name,
-          custom_styles: customStyles,
-          custom_settings: customSettings,
-          is_active: true
-        });
-
-      if (error) {
-        console.error('Error in fallback theme setting:', error);
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Error in setDomainThemeFallback:', error);
-      return false;
-    }
-  }
-
-  /**
    * Ensure default theme for domain when blog is enabled
    */
   static async ensureDefaultTheme(domainId: string): Promise<void> {
