@@ -498,9 +498,17 @@ export function DomainBlogTemplateManager({
               </DialogContent>
             </Dialog>
 
-            <Button onClick={saveThemeSettings} className="flex items-center gap-2">
-              <Save className="h-4 w-4" />
-              Save Theme Settings
+            <Button
+              onClick={saveThemeSettings}
+              className="flex items-center gap-2"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <RefreshCw className="h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="h-4 w-4" />
+              )}
+              {isLoading ? 'Saving...' : 'Save Theme Settings'}
             </Button>
           </div>
         </CardContent>
