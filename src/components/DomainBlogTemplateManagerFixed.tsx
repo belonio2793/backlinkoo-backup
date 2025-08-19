@@ -872,6 +872,13 @@ export function DomainBlogTemplateManagerFixed({
               </AlertDescription>
             </Alert>
           )}
+
+          {/* Troubleshooter - Show when there are persistent save issues */}
+          {(saveStatus.hasError || databaseStatus === 'error' || databaseStatus === 'missing') && (
+            <div className="mt-6">
+              <BlogTemplateSaveTroubleshooter />
+            </div>
+          )}
         </CardContent>
       </Card>
 
