@@ -22,16 +22,22 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { 
+import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { 
-  Globe, 
-  Plus, 
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger
+} from '@/components/ui/tabs';
+import {
+  Globe,
+  Plus,
   Copy,
   CheckCircle2,
   Clock,
@@ -48,8 +54,10 @@ import {
   Play,
   Pause,
   Edit3,
-  Save
+  Save,
+  Palette
 } from 'lucide-react';
+import DomainBlogTemplateManager from '@/components/DomainBlogTemplateManager';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
