@@ -490,6 +490,28 @@ async function addKnownWorkingPlatforms(sessionId) {
   }
 }
 
+async function getExistingWorkingUrls() {
+  try {
+    const { data, error } = await supabase
+      .from('discovered_urls')
+      .select('url, domain, link_type, domain_authority, success_rate, posting_method')
+      .in('status', ['working', 'verified'])
+      .gte('success_rate', 50)
+      .order('success_rate', { ascending: false })
+      .limit(100);
+
+    if (error) {
+      console.error('Error fetching existing working URLs:', error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Database error:', error);
+    return [];
+  }
+}
+
 async function saveDiscoveredUrl(urlData, sessionId) {
   try {
     // Check if URL already exists
