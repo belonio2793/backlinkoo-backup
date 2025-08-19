@@ -543,6 +543,16 @@ const DomainsPage = () => {
     toast.info('Page generation feature coming soon!');
   };
 
+  const launchAutoPropagationWizard = (domain: Domain) => {
+    setSelectedDomainForWizard(domain);
+    setShowAutoPropagationWizard(true);
+  };
+
+  const closeAutoPropagationWizard = () => {
+    setShowAutoPropagationWizard(false);
+    setSelectedDomainForWizard(null);
+  };
+
   // Test function for debugging DNS validation issues
   const testValidation = async () => {
     console.log('🧪 Testing DNS validation service...');
