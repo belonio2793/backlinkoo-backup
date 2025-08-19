@@ -83,16 +83,34 @@ export function DomainBlogTemplateManager({
         const themeRecords: Record<string, DomainThemeRecord> = {};
 
         for (const domain of blogEnabledDomains) {
-          const themeRecord = await DomainBlogTemplateService.getDomainTheme(domain.id);
-          if (themeRecord) {
-            themeRecords[domain.id] = themeRecord;
-          } else {
-            // Ensure default theme if none exists
-            await DomainBlogTemplateService.ensureDefaultTheme(domain.id);
-            const defaultTheme = await DomainBlogTemplateService.getDomainTheme(domain.id);
-            if (defaultTheme) {
-              themeRecords[domain.id] = defaultTheme;
+          try {
+            const themeRecord = await DomainBlogTemplateService.getDomainTheme(domain.id);
+            if (themeRecord) {
+              themeRecords[domain.id] = themeRecord;
+            } else {
+              // Ensure default theme if none exists
+              await DomainBlogTemplateService.ensureDefaultTheme(domain.id);
+              const defaultTheme = await DomainBlogTemplateService.getDomainTheme(domain.id);
+              if (defaultTheme) {
+                themeRecords[domain.id] = defaultTheme;
+              }
             }
+          } catch (domainError) {
+            // Log error but continue with other domains
+            console.warn(`⚠️ Could not load theme for domain ${domain.domain}:`, domainError);
+
+            // Create a fallback theme record for this domain
+            themeRecords[domain.id] = {
+              id: `fallback_${domain.id}`,
+              domain_id: domain.id,
+              theme_id: 'minimal',
+              theme_name: 'Minimal Clean (Fallback)',
+              custom_styles: {},
+              custom_settings: {},
+              is_active: true,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString()
+            };
           }
         }
 
@@ -108,7 +126,24 @@ export function DomainBlogTemplateManager({
         const errorMessage = error instanceof Error ? error.message :
                             error && typeof error === 'object' ? JSON.stringify(error) :
                             String(error);
-        console.error('Error loading domain themes:', errorMessage, error);
+        console.warn('⚠️ Domain themes database not set up. Using fallback mode:', errorMessage);
+
+        // Create fallback theme records for all domains
+        const fallbackRecords: Record<string, DomainThemeRecord> = {};
+        blogEnabledDomains.forEach(domain => {
+          fallbackRecords[domain.id] = {
+            id: `fallback_${domain.id}`,
+            domain_id: domain.id,
+            theme_id: 'minimal',
+            theme_name: 'Minimal Clean (Fallback)',
+            custom_styles: {},
+            custom_settings: {},
+            is_active: true,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+        });
+        setDomainThemeRecords(fallbackRecords);
 
         // Check if this is a database setup issue
         if (errorMessage.includes('does not exist') || errorMessage.includes('domain_blog_themes')) {

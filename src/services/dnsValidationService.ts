@@ -109,21 +109,6 @@ export class DNSValidationService {
     return 'blo-' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
   }
   
-  /**
-   * Get manual DNS propagation instructions for a domain
-   */
-  static getManualPropagationInstructions(domain: string): string[] {
-    return [
-      `Check if your domain ${domain} is pointing to our servers`,
-      `Verify A record points to the correct IP address`,
-      `Ensure CNAME record for www subdomain is configured`,
-      `Confirm TXT record for verification is present`,
-      `Use online DNS checker tools like whatsmydns.net`,
-      `Allow 24-48 hours for full global DNS propagation`,
-      `Clear your local DNS cache if changes aren't visible`,
-      `Check with your domain registrar if records aren't updating`
-    ];
-  }
 
   /**
    * Check DNS service health

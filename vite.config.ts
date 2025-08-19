@@ -11,6 +11,14 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
   ],
+  // Exclude test HTML files from Vite scanning
+  exclude: [
+    '**/test-*.html',
+    '**/debug-*.html',
+    '**/emergency-*.html',
+    '**/fix-*.html',
+    '**/investigate-*.html'
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
