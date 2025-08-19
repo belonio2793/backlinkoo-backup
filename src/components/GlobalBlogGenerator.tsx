@@ -69,7 +69,6 @@ export function GlobalBlogGenerator({
   const [selectedPrompt, setSelectedPrompt] = useState<string>('');
   const [promptIndex, setPromptIndex] = useState<number>(0);
 
-  const { toast } = useToast();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
 
