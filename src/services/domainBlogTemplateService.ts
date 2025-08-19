@@ -52,13 +52,17 @@ export class DomainBlogTemplateService {
         .single();
 
       if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-        console.error('Error fetching domain theme:', error);
+        const errorMessage = error.message || error.details || JSON.stringify(error);
+        console.error('Error fetching domain theme:', errorMessage, error);
         return null;
       }
 
       return data;
     } catch (error) {
-      console.error('Error in getDomainTheme:', error);
+      const errorMessage = error instanceof Error ? error.message :
+                          error && typeof error === 'object' ? JSON.stringify(error) :
+                          String(error);
+      console.error('Error in getDomainTheme:', errorMessage, error);
       return null;
     }
   }
