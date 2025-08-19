@@ -39,6 +39,7 @@ import {
   Globe,
   Plus,
   Copy,
+  CheckCircle,
   CheckCircle2,
   Clock,
   AlertTriangle,
