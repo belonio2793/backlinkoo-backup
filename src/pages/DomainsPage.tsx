@@ -680,10 +680,13 @@ const DomainsPage = () => {
 
       if (error.name === 'AbortError') {
         toast.error('❌ DNS validation service timeout - service may be down');
+        setDnsServiceStatus('offline');
       } else if (error.message.includes('Failed to fetch')) {
         toast.warning('⚠️ Cannot reach DNS validation service. Network or deployment issue.');
+        setDnsServiceStatus('offline');
       } else {
         toast.error(`DNS validation service test failed: ${error.message}`);
+        setDnsServiceStatus('offline');
       }
     }
   };
