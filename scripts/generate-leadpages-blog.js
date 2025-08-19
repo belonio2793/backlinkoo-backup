@@ -10,17 +10,33 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// Check for required environment variables
+const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = process.env.VITE_SUPABASE_SERVICE_ROLE_KEY ||
+                     process.env.SUPABASE_SERVICE_ROLE_KEY ||
+                     process.env.VITE_SUPABASE_ANON_KEY;
+
+if (!SUPABASE_URL) {
+  console.error('❌ VITE_SUPABASE_URL environment variable is required');
+  process.exit(1);
+}
+
+if (!SUPABASE_KEY) {
+  console.error('❌ Supabase key environment variable is required');
+  console.error('Available env vars:', Object.keys(process.env).filter(k => k.includes('SUPABASE')));
+  process.exit(1);
+}
+
+console.log('🔑 Using Supabase URL:', SUPABASE_URL);
+console.log('🔑 Using Supabase key type:', SUPABASE_KEY.substring(0, 20) + '...');
+
 // Initialize Supabase with service role key to bypass RLS
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.VITE_SUPABASE_SERVICE_ROLE_KEY,
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
   }
-);
+});
 
 const DOMAIN_ID = 'leadpages-org';
 const DOMAIN_NAME = 'leadpages.org';
