@@ -59,7 +59,7 @@ import {
   Palette,
   Wand2
 } from 'lucide-react';
-import DomainBlogTemplateManager from '@/components/DomainBlogTemplateManager';
+import DomainBlogTemplateManagerFixed from '@/components/DomainBlogTemplateManagerFixed';
 import BlogTemplateDebug from '@/components/BlogTemplateDebug';
 import DNSValidationService from '@/services/dnsValidationService';
 import AutoDNSPropagation from '@/components/AutoDNSPropagation';
@@ -1397,7 +1397,7 @@ anotherdomain.org`}
             </p>
           </CardHeader>
           <CardContent>
-            <DomainBlogTemplateManager
+            <DomainBlogTemplateManagerFixed
               domains={domains}
               onThemeUpdate={(domainId, themeId) => {
                 toast({

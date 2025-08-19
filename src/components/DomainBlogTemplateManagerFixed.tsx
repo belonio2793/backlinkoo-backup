@@ -39,7 +39,11 @@ import {
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import BlogThemesService, { BlogTheme, DomainThemeSettings } from '@/services/blogThemesService';
+import ImprovedBlogThemesService from '@/services/improvedBlogThemesService';
 import { DomainBlogTemplateService, DomainThemeRecord } from '@/services/domainBlogTemplateService';
+import { BlogTemplatePreview } from '@/components/BlogTemplateRenderer';
+import { ThemeStyles } from '@/types/blogTemplateTypes';
+import BlogTemplateSaveTroubleshooter from '@/components/BlogTemplateSaveTroubleshooter';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface Domain {
@@ -78,7 +82,7 @@ export function DomainBlogTemplateManagerFixed({
   const [fallbackMode, setFallbackMode] = useState(false);
 
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
-  const allThemes = BlogThemesService.getAllThemes();
+  const allThemes = ImprovedBlogThemesService.getAllThemes();
 
   useEffect(() => {
     if (blogEnabledDomains.length > 0 && !selectedDomain) {
@@ -209,17 +213,45 @@ export function DomainBlogTemplateManagerFixed({
   // Save to localStorage as fallback
   const saveToLocalStorage = (domainId: string, themeId: string, styles: any) => {
     try {
+      // Check if localStorage is available
+      if (typeof Storage === 'undefined') {
+        throw new Error('localStorage is not supported in this browser');
+      }
+
+      // Get current settings
       const currentSettings = JSON.parse(localStorage.getItem('domain-blog-theme-settings') || '{}');
-      currentSettings[domainId] = {
+
+      // Create the new setting
+      const newSetting = {
         domain_id: domainId,
         theme_id: themeId,
-        custom_styles: styles,
-        updated_at: new Date().toISOString()
+        custom_styles: styles || {},
+        updated_at: new Date().toISOString(),
+        saved_method: 'localStorage'
       };
+
+      currentSettings[domainId] = newSetting;
+
+      // Test write
+      const testKey = 'domain-blog-theme-settings-test';
+      localStorage.setItem(testKey, 'test');
+      localStorage.removeItem(testKey);
+
+      // Save the actual data
       localStorage.setItem('domain-blog-theme-settings', JSON.stringify(currentSettings));
+
+      console.log('🟢 localStorage save successful for domain:', domainId);
       return true;
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error('🔴 Error saving to localStorage:', error);
+      // Try to provide helpful error message
+      if (error instanceof Error) {
+        if (error.name === 'QuotaExceededError') {
+          console.error('localStorage quota exceeded - storage is full');
+        } else if (error.message.includes('localStorage')) {
+          console.error('localStorage is not available or disabled');
+        }
+      }
       return false;
     }
   };
@@ -231,16 +263,16 @@ export function DomainBlogTemplateManagerFixed({
   }, [selectedTheme, customStyles]);
 
   const generatePreview = () => {
-    const theme = BlogThemesService.getThemeById(selectedTheme);
+    const theme = ImprovedBlogThemesService.getThemeById(selectedTheme);
     if (theme) {
-      const html = BlogThemesService.generateThemePreview(theme);
-      setPreviewHtml(html);
+      // Preview is now handled by BlogTemplatePreview component
+      console.log('Theme selected:', theme.name);
     }
   };
 
   const handleThemeChange = (themeId: string) => {
     setSelectedTheme(themeId);
-    const theme = BlogThemesService.getThemeById(themeId);
+    const theme = ImprovedBlogThemesService.getThemeById(themeId);
     if (theme) {
       setCustomStyles({}); // Reset custom styles when changing theme
     }
@@ -294,46 +326,69 @@ export function DomainBlogTemplateManagerFixed({
     if (!selectedDomain || !selectedTheme) {
       toast({
         title: "Selection Required",
-        description: "Please select both a domain and theme",
+        description: "Please select both a domain and theme before saving",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate that the selected domain exists
+    const domain = domains.find(d => d.id === selectedDomain);
+    if (!domain) {
+      toast({
+        title: "Invalid Domain",
+        description: "Selected domain is not valid. Please select a different domain.",
         variant: "destructive"
       });
       return;
     }
 
     setSaveStatus({ isLoading: true, hasError: false });
-    
+    console.log('🎨 Saving theme settings:', { selectedDomain, selectedTheme, customStyles });
+
     try {
       let success = false;
+      let saveMethod = 'unknown';
 
       if (!fallbackMode && databaseStatus === 'ready') {
         // Try to save to database
         try {
+          console.log('📊 Attempting database save...');
           success = await DomainBlogTemplateService.setDomainTheme(
             selectedDomain,
             selectedTheme,
             customStyles,
             {}
           );
+          if (success) {
+            saveMethod = 'database';
+            console.log('✅ Database save successful');
+          }
         } catch (dbError) {
-          console.warn('Database save failed, falling back to localStorage:', dbError);
+          console.warn('❌ Database save failed, falling back to localStorage:', dbError);
           success = false;
         }
+      } else {
+        console.log('⚠️ Skipping database save - fallback mode or database not ready');
       }
 
       // Fallback to localStorage if database save failed or we're in fallback mode
       if (!success) {
+        console.log('💾 Attempting localStorage save...');
         success = saveToLocalStorage(selectedDomain, selectedTheme, customStyles);
         if (success) {
+          saveMethod = 'localStorage';
+          console.log('��� localStorage save successful');
           toast({
             title: "Settings Saved Locally",
-            description: "Theme settings saved to browser storage. Connect to database for persistent storage.",
+            description: "Theme settings saved to browser storage. Database backup will be available when connection is restored.",
             variant: "default"
           });
         }
       } else {
         toast({
           title: "Theme Saved",
-          description: "Blog theme settings have been saved to database",
+          description: "Blog theme settings have been saved to database successfully",
         });
       }
 
@@ -353,10 +408,10 @@ export function DomainBlogTemplateManagerFixed({
 
         // Update theme record
         const updatedTheme: DomainThemeRecord = {
-          id: `${fallbackMode ? 'local' : 'db'}_${selectedDomain}`,
+          id: `${saveMethod}_${selectedDomain}`,
           domain_id: selectedDomain,
           theme_id: selectedTheme,
-          theme_name: BlogThemesService.getThemeById(selectedTheme)?.name || 'Unknown',
+          theme_name: ImprovedBlogThemesService.getThemeById(selectedTheme)?.name || 'Unknown',
           custom_styles: customStyles,
           custom_settings: {},
           is_active: true,
@@ -371,16 +426,32 @@ export function DomainBlogTemplateManagerFixed({
 
         onThemeUpdate?.(selectedDomain, selectedTheme);
         setSaveStatus({ isLoading: false, hasError: false, lastSaved: new Date() });
+        console.log('🎉 Theme settings saved successfully via', saveMethod);
       } else {
-        throw new Error('Failed to save theme settings');
+        throw new Error(`Failed to save theme settings - both database and localStorage failed`);
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('Error saving theme:', errorMessage);
+      console.error('❌ Error saving theme:', errorMessage, error);
       setSaveStatus({ isLoading: false, hasError: true, errorMessage });
+
+      // Provide specific guidance based on error type
+      let description = `Unable to save theme settings: ${errorMessage}`;
+      let actionHint = '';
+
+      if (errorMessage.includes('Failed to fetch') || errorMessage.includes('network')) {
+        actionHint = 'Check your internet connection and try again.';
+      } else if (errorMessage.includes('localStorage') || errorMessage.includes('storage')) {
+        actionHint = 'Browser storage may be full or disabled.';
+      } else if (errorMessage.includes('database') || errorMessage.includes('supabase')) {
+        actionHint = 'Database connection issues. Using local storage fallback.';
+      } else {
+        actionHint = 'Use the troubleshooter below to diagnose the issue.';
+      }
+
       toast({
         title: "Save Failed",
-        description: `Failed to save theme settings: ${errorMessage}`,
+        description: `${description} ${actionHint}`,
         variant: "destructive"
       });
     }
@@ -504,50 +575,104 @@ export function DomainBlogTemplateManagerFixed({
           </div>
 
           {/* Theme Selection */}
-          <div className="space-y-4">
-            <Label>Choose Theme</Label>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <Label className="text-lg font-semibold">Choose Theme</Label>
+              <Badge variant="outline" className="text-xs">
+                {allThemes.length} themes available
+              </Badge>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {allThemes.map(theme => (
-                <Card 
-                  key={theme.id} 
-                  className={`cursor-pointer transition-all ${
-                    selectedTheme === theme.id 
-                      ? 'ring-2 ring-blue-500 border-blue-500' 
+                <Card
+                  key={theme.id}
+                  className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
+                    selectedTheme === theme.id
+                      ? 'ring-2 ring-blue-500 border-blue-500 shadow-md'
                       : 'hover:border-gray-300'
                   }`}
                   onClick={() => handleThemeChange(theme.id)}
                 >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <div>
-                        <h4 className="font-medium">{theme.name}</h4>
-                        <p className="text-sm text-gray-600">{theme.description}</p>
+                  {/* Theme Preview */}
+                  <div className="relative h-32 overflow-hidden rounded-t-lg">
+                    <div
+                      className="absolute inset-0 p-3 text-xs"
+                      style={{
+                        backgroundColor: theme.styles.backgroundColor,
+                        color: theme.styles.textColor,
+                        fontFamily: theme.styles.bodyFont
+                      }}
+                    >
+                      <div
+                        className="font-bold mb-1"
+                        style={{
+                          color: theme.styles.primaryColor,
+                          fontFamily: theme.styles.headingFont
+                        }}
+                      >
+                        Sample Title
                       </div>
-                      {selectedTheme === theme.id && (
-                        <Badge className="bg-blue-100 text-blue-800">Selected</Badge>
-                      )}
+                      <div className="text-xs opacity-75 mb-2">
+                        This is how your content will look with this theme...
+                      </div>
+                      <div
+                        className="w-8 h-1 rounded"
+                        style={{ backgroundColor: theme.styles.accentColor }}
+                      />
                     </div>
-                    <div className="flex gap-2 flex-wrap">
-                      {theme.features.map(feature => (
-                        <Badge key={feature} variant="outline" className="text-xs">
+
+                    {selectedTheme === theme.id && (
+                      <div className="absolute top-2 right-2">
+                        <Badge className="bg-blue-600 text-white text-xs px-2 py-1">
+                          Selected
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+
+                  <CardContent className="p-4">
+                    <div className="mb-3">
+                      <h4 className="font-semibold text-base mb-1">{theme.name}</h4>
+                      <p className="text-sm text-gray-600 leading-relaxed">{theme.description}</p>
+                    </div>
+
+                    {/* Features */}
+                    <div className="flex gap-1 flex-wrap mb-3">
+                      {theme.features.slice(0, 3).map(feature => (
+                        <Badge key={feature} variant="secondary" className="text-xs px-2 py-0.5">
                           {feature.replace('_', ' ')}
                         </Badge>
                       ))}
+                      {theme.features.length > 3 && (
+                        <Badge variant="outline" className="text-xs px-2 py-0.5">
+                          +{theme.features.length - 3} more
+                        </Badge>
+                      )}
                     </div>
-                    <div className="mt-3 flex items-center gap-2">
-                      <div 
-                        className="w-4 h-4 rounded-full border"
-                        style={{ backgroundColor: theme.styles.primaryColor }}
-                        title="Primary Color"
-                      />
-                      <div 
-                        className="w-4 h-4 rounded-full border"
-                        style={{ backgroundColor: theme.styles.accentColor }}
-                        title="Accent Color"
-                      />
-                      <span className="text-xs text-gray-500 ml-auto">
-                        {theme.layout.contentWidth} • {theme.layout.spacing}
-                      </span>
+
+                    {/* Color Palette and Layout Info */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-3 h-3 rounded-full border border-gray-200"
+                          style={{ backgroundColor: theme.styles.primaryColor }}
+                          title="Primary Color"
+                        />
+                        <div
+                          className="w-3 h-3 rounded-full border border-gray-200"
+                          style={{ backgroundColor: theme.styles.accentColor }}
+                          title="Accent Color"
+                        />
+                        <div
+                          className="w-3 h-3 rounded-full border border-gray-200"
+                          style={{ backgroundColor: theme.styles.backgroundColor }}
+                          title="Background Color"
+                        />
+                      </div>
+                      <div className="text-xs text-gray-500 capitalize">
+                        {theme.layout.contentWidth} · {theme.layout.spacing}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -570,13 +695,13 @@ export function DomainBlogTemplateManagerFixed({
                     <div className="flex gap-2">
                       <Input
                         type="color"
-                        value={customStyles.primaryColor || BlogThemesService.getThemeById(selectedTheme)?.styles.primaryColor}
+                        value={customStyles.primaryColor || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.primaryColor}
                         onChange={(e) => handleStyleChange('primaryColor', e.target.value)}
                         className="w-12 h-8 p-1 border rounded"
                       />
                       <Input
                         type="text"
-                        value={customStyles.primaryColor || BlogThemesService.getThemeById(selectedTheme)?.styles.primaryColor}
+                        value={customStyles.primaryColor || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.primaryColor}
                         onChange={(e) => handleStyleChange('primaryColor', e.target.value)}
                         className="flex-1"
                         placeholder="#000000"
@@ -589,13 +714,13 @@ export function DomainBlogTemplateManagerFixed({
                     <div className="flex gap-2">
                       <Input
                         type="color"
-                        value={customStyles.accentColor || BlogThemesService.getThemeById(selectedTheme)?.styles.accentColor}
+                        value={customStyles.accentColor || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.accentColor}
                         onChange={(e) => handleStyleChange('accentColor', e.target.value)}
                         className="w-12 h-8 p-1 border rounded"
                       />
                       <Input
                         type="text"
-                        value={customStyles.accentColor || BlogThemesService.getThemeById(selectedTheme)?.styles.accentColor}
+                        value={customStyles.accentColor || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.accentColor}
                         onChange={(e) => handleStyleChange('accentColor', e.target.value)}
                         className="flex-1"
                         placeholder="#000000"
@@ -608,13 +733,13 @@ export function DomainBlogTemplateManagerFixed({
                     <div className="flex gap-2">
                       <Input
                         type="color"
-                        value={customStyles.backgroundColor || BlogThemesService.getThemeById(selectedTheme)?.styles.backgroundColor}
+                        value={customStyles.backgroundColor || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.backgroundColor}
                         onChange={(e) => handleStyleChange('backgroundColor', e.target.value)}
                         className="w-12 h-8 p-1 border rounded"
                       />
                       <Input
                         type="text"
-                        value={customStyles.backgroundColor || BlogThemesService.getThemeById(selectedTheme)?.styles.backgroundColor}
+                        value={customStyles.backgroundColor || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.backgroundColor}
                         onChange={(e) => handleStyleChange('backgroundColor', e.target.value)}
                         className="flex-1"
                         placeholder="#ffffff"
@@ -629,7 +754,7 @@ export function DomainBlogTemplateManagerFixed({
                   <div className="space-y-2">
                     <Label>Heading Font</Label>
                     <Select 
-                      value={customStyles.headingFont || BlogThemesService.getThemeById(selectedTheme)?.styles.headingFont}
+                      value={customStyles.headingFont || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.headingFont}
                       onValueChange={(value) => handleStyleChange('headingFont', value)}
                     >
                       <SelectTrigger>
@@ -648,7 +773,7 @@ export function DomainBlogTemplateManagerFixed({
                   <div className="space-y-2">
                     <Label>Body Font</Label>
                     <Select 
-                      value={customStyles.bodyFont || BlogThemesService.getThemeById(selectedTheme)?.styles.bodyFont}
+                      value={customStyles.bodyFont || ImprovedBlogThemesService.getThemeById(selectedTheme)?.styles.bodyFont}
                       onValueChange={(value) => handleStyleChange('bodyFont', value)}
                     >
                       <SelectTrigger>
@@ -706,15 +831,25 @@ export function DomainBlogTemplateManagerFixed({
                   </DialogTitle>
                 </DialogHeader>
                 <div className="flex justify-center p-4 bg-gray-100 rounded-lg">
-                  <div 
+                  <div
                     className="bg-white shadow-lg rounded-lg overflow-hidden transition-all duration-300"
                     style={getDevicePreviewStyle()}
                   >
-                    <iframe
-                      srcDoc={previewHtml}
-                      className="w-full h-full border-0"
-                      title="Theme Preview"
-                    />
+                    <div className="w-full h-full overflow-auto">
+                      <BlogTemplatePreview
+                        themeId={selectedTheme}
+                        customStyles={customStyles as Partial<ThemeStyles>}
+                        title="Sample Blog Post"
+                        onError={(error) => {
+                          console.error('Preview error:', error);
+                          toast({
+                            title: "Preview Error",
+                            description: "Failed to generate theme preview",
+                            variant: "destructive"
+                          });
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
               </DialogContent>
@@ -723,14 +858,14 @@ export function DomainBlogTemplateManagerFixed({
             <Button
               onClick={saveThemeSettings}
               className="flex items-center gap-2"
-              disabled={saveStatus.isLoading}
+              disabled={saveStatus.isLoading || !selectedDomain || !selectedTheme}
             >
               {saveStatus.isLoading ? (
                 <RefreshCw className="h-4 w-4 animate-spin" />
               ) : (
                 <Save className="h-4 w-4" />
               )}
-              {saveStatus.isLoading ? 'Saving...' : 'Save Theme Settings'}
+              {saveStatus.isLoading ? 'Saving...' : saveStatus.lastSaved ? 'Save Changes' : 'Save Theme Settings'}
             </Button>
           </div>
 
@@ -742,6 +877,22 @@ export function DomainBlogTemplateManagerFixed({
                 Save failed: {saveStatus.errorMessage}
               </AlertDescription>
             </Alert>
+          )}
+
+          {saveStatus.lastSaved && !saveStatus.hasError && (
+            <Alert variant="default" className="border-green-200 bg-green-50">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                Theme settings saved successfully at {saveStatus.lastSaved.toLocaleTimeString()}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Troubleshooter - Show when there are persistent save issues */}
+          {(saveStatus.hasError || databaseStatus === 'error' || databaseStatus === 'missing') && (
+            <div className="mt-6">
+              <BlogTemplateSaveTroubleshooter />
+            </div>
           )}
         </CardContent>
       </Card>

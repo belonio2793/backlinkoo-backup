@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blog Template Manager Save Debug</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .log { margin: 10px 0; padding: 10px; border-left: 3px solid #ddd; }
+        .error { border-color: #ff4444; background: #fff5f5; }
+        .success { border-color: #44ff44; background: #f5fff5; }
+        .warning { border-color: #ffaa44; background: #fffaf5; }
+        .info { border-color: #4444ff; background: #f5f5ff; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔧 Blog Template Manager Save Debug</h1>
+    <p>Testing blog theme save functionality to identify issues</p>
+    
+    <div style="margin: 20px 0;">
+        <button onclick="testDatabaseConnection()">Test Database Connection</button>
+        <button onclick="testRPCFunction()">Test RPC Function</button>
+        <button onclick="testLocalStorageSave()">Test localStorage Save</button>
+        <button onclick="testFullSaveFlow()">Test Full Save Flow</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+    
+    <div id="output"></div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+        
+        // Get Supabase config from the environment
+        let supabaseUrl, supabaseKey;
+        try {
+            // Try to get from window if available (from main app)
+            supabaseUrl = window.location.origin.includes('localhost') ? 
+                'https://dfhanacsmsvvkpunurnp.supabase.co' : 
+                'https://dfhanacsmsvvkpunurnp.supabase.co';
+            supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ1NTY2MzIsImV4cCI6MjA1MDEzMjYzMn0.LJKoHdpNkXfK9nblNgj5vTQXGM0GhIoKD-F_2eJPL7g';
+        } catch (e) {
+            console.error('Failed to get Supabase config:', e);
+        }
+        
+        const supabase = createClient(supabaseUrl, supabaseKey);
+        
+        window.log = function(message, type = 'info') {
+            const output = document.getElementById('output');
+            const timestamp = new Date().toLocaleTimeString();
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            output.appendChild(div);
+            output.scrollTop = output.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        };
+        
+        window.testDatabaseConnection = async function() {
+            log('🔌 Testing Supabase database connection...', 'info');
+            try {
+                const { data, error } = await supabase.from('domains').select('count').limit(1);
+                if (error) {
+                    log(`❌ Database connection failed: ${error.message}`, 'error');
+                    return false;
+                } else {
+                    log('✅ Database connection successful', 'success');
+                    return true;
+                }
+            } catch (error) {
+                log(`❌ Database connection error: ${error.message}`, 'error');
+                return false;
+            }
+        };
+        
+        window.testRPCFunction = async function() {
+            log('📡 Testing update_domain_blog_theme RPC function...', 'info');
+            try {
+                const testDomainId = '00000000-0000-0000-0000-000000000000';
+                const { data, error } = await supabase.rpc('update_domain_blog_theme', {
+                    p_domain_id: testDomainId,
+                    p_theme_id: 'minimal',
+                    p_theme_name: 'Minimal Clean',
+                    p_custom_styles: {},
+                    p_custom_settings: {}
+                });
+                
+                if (error) {
+                    if (error.code === '42883') {
+                        log('⚠️ RPC function update_domain_blog_theme does not exist', 'warning');
+                        log('💡 This is expected if database is not set up yet', 'info');
+                    } else if (error.code === '42P01') {
+                        log('⚠️ domain_blog_themes table does not exist', 'warning');
+                        log('💡 Database needs to be set up', 'info');
+                    } else {
+                        log(`❌ RPC function error: ${error.message} (Code: ${error.code})`, 'error');
+                    }
+                    return false;
+                } else {
+                    log('✅ RPC function executed successfully', 'success');
+                    return true;
+                }
+            } catch (error) {
+                log(`❌ RPC function test error: ${error.message}`, 'error');
+                return false;
+            }
+        };
+        
+        window.testLocalStorageSave = function() {
+            log('💾 Testing localStorage save functionality...', 'info');
+            try {
+                const testData = {
+                    domain_id: 'test-domain',
+                    theme_id: 'minimal',
+                    custom_styles: { primaryColor: '#1e40af' },
+                    updated_at: new Date().toISOString()
+                };
+                
+                // Test localStorage availability
+                if (typeof Storage === 'undefined') {
+                    throw new Error('localStorage is not supported');
+                }
+                
+                // Test write
+                const testKey = 'domain-blog-theme-settings';
+                const currentSettings = JSON.parse(localStorage.getItem(testKey) || '{}');
+                currentSettings['test-domain'] = testData;
+                localStorage.setItem(testKey, JSON.stringify(currentSettings));
+                
+                // Test read
+                const saved = JSON.parse(localStorage.getItem(testKey) || '{}');
+                if (saved['test-domain'] && saved['test-domain'].theme_id === 'minimal') {
+                    log('✅ localStorage save/read successful', 'success');
+                    return true;
+                } else {
+                    throw new Error('Data not saved correctly');
+                }
+            } catch (error) {
+                log(`❌ localStorage test failed: ${error.message}`, 'error');
+                return false;
+            }
+        };
+        
+        window.testFullSaveFlow = async function() {
+            log('🔄 Testing full save flow...', 'info');
+            
+            // Test 1: Database connection
+            const dbConnected = await testDatabaseConnection();
+            
+            // Test 2: RPC function
+            const rpcWorking = await testRPCFunction();
+            
+            // Test 3: localStorage fallback
+            const localStorageWorking = testLocalStorageSave();
+            
+            // Summary
+            log('📊 Save Flow Test Summary:', 'info');
+            log(`- Database Connection: ${dbConnected ? '✅' : '❌'}`, dbConnected ? 'success' : 'error');
+            log(`- RPC Function: ${rpcWorking ? '✅' : '⚠️'}`, rpcWorking ? 'success' : 'warning');
+            log(`- localStorage Fallback: ${localStorageWorking ? '✅' : '❌'}`, localStorageWorking ? 'success' : 'error');
+            
+            if (!dbConnected) {
+                log('💡 Recommendation: Check Supabase connection and credentials', 'info');
+            } else if (!rpcWorking) {
+                log('💡 Recommendation: Set up domain blog themes database using setup button', 'info');
+            } else if (!localStorageWorking) {
+                log('💡 Recommendation: Check browser localStorage support', 'info');
+            } else {
+                log('✅ All save mechanisms are working correctly', 'success');
+            }
+        };
+        
+        window.clearLogs = function() {
+            document.getElementById('output').innerHTML = '';
+        };
+        
+        // Auto-run initial test
+        log('🚀 Blog Template Manager Debug Tool Loaded', 'info');
+        log('Click "Test Full Save Flow" to diagnose save issues', 'info');
+    </script>
+</body>
+</html>
