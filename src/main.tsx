@@ -42,10 +42,12 @@ import './utils/silentErrorTest'
 // Fix malformed links at runtime - DISABLED to reduce DOM interference
 // import './utils/domLinkFixer'
 
-// Clear previous console errors in development
+// Clear previous console errors and conflicts
+console.clear();
+console.log('🚀 Starting Backlinkoo application...');
+console.log('🔧 Fetch interceptors disabled to prevent conflicts');
+
 if (import.meta.env.DEV) {
-  console.clear();
-  console.log('🚀 Starting Backlinkoo application...');
 
   // Add helper functions to window for debugging
   (window as any).fixRLS = async () => {
