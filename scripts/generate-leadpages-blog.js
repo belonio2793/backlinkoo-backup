@@ -295,8 +295,4 @@ async function generateBlogContentForLeadpages() {
 }
 
 // Run the script
-if (require.main === module) {
-  generateBlogContentForLeadpages();
-}
-
-module.exports = { generateBlogContentForLeadpages };
+generateBlogContentForLeadpages();
