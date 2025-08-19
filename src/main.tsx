@@ -411,6 +411,7 @@ requestIdleCallback(() => {
   // Import test utilities for development
   if (import.meta.env.DEV) {
     import('./utils/testBlogGeneration');
+    import('./utils/setupDomainDatabase');
 
     // Quick content generation status check
     setTimeout(async () => {
