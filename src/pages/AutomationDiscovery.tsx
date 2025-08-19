@@ -154,7 +154,12 @@ const AutomationDiscovery = () => {
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
+        let errorText;
+        try {
+          errorText = await response.text();
+        } catch {
+          errorText = 'Unknown error';
+        }
         console.error('Discovery API Error:', response.status, errorText);
         throw new Error(`Discovery failed (${response.status}): ${errorText}`);
       }
