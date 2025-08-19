@@ -40,6 +40,7 @@ import {
 import { toast } from '@/hooks/use-toast';
 import BlogThemesService, { BlogTheme, DomainThemeSettings } from '@/services/blogThemesService';
 import { DomainBlogTemplateService, DomainThemeRecord } from '@/services/domainBlogTemplateService';
+import BlogTemplateStorageService from '@/services/blogTemplateStorageService';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { supabase } from '@/integrations/supabase/client';
 
