@@ -209,17 +209,45 @@ export function DomainBlogTemplateManagerFixed({
   // Save to localStorage as fallback
   const saveToLocalStorage = (domainId: string, themeId: string, styles: any) => {
     try {
+      // Check if localStorage is available
+      if (typeof Storage === 'undefined') {
+        throw new Error('localStorage is not supported in this browser');
+      }
+
+      // Get current settings
       const currentSettings = JSON.parse(localStorage.getItem('domain-blog-theme-settings') || '{}');
-      currentSettings[domainId] = {
+
+      // Create the new setting
+      const newSetting = {
         domain_id: domainId,
         theme_id: themeId,
-        custom_styles: styles,
-        updated_at: new Date().toISOString()
+        custom_styles: styles || {},
+        updated_at: new Date().toISOString(),
+        saved_method: 'localStorage'
       };
+
+      currentSettings[domainId] = newSetting;
+
+      // Test write
+      const testKey = 'domain-blog-theme-settings-test';
+      localStorage.setItem(testKey, 'test');
+      localStorage.removeItem(testKey);
+
+      // Save the actual data
       localStorage.setItem('domain-blog-theme-settings', JSON.stringify(currentSettings));
+
+      console.log('🟢 localStorage save successful for domain:', domainId);
       return true;
     } catch (error) {
-      console.error('Error saving to localStorage:', error);
+      console.error('🔴 Error saving to localStorage:', error);
+      // Try to provide helpful error message
+      if (error instanceof Error) {
+        if (error.name === 'QuotaExceededError') {
+          console.error('localStorage quota exceeded - storage is full');
+        } else if (error.message.includes('localStorage')) {
+          console.error('localStorage is not available or disabled');
+        }
+      }
       return false;
     }
   };
@@ -400,7 +428,7 @@ export function DomainBlogTemplateManagerFixed({
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error('�� Error saving theme:', errorMessage, error);
+      console.error('❌ Error saving theme:', errorMessage, error);
       setSaveStatus({ isLoading: false, hasError: true, errorMessage });
       toast({
         title: "Save Failed",
