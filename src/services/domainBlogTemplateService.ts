@@ -191,14 +191,14 @@ export class DomainBlogTemplateService {
    * Publish blog post to a specific domain
    */
   static async publishToDomain(
-    domainId: string, 
+    domainId: string,
     blogPost: BlogTemplate
   ): Promise<DomainBlogPost> {
     try {
       // Get domain info
       const domains = await DomainBlogService.getValidatedDomains();
       const domain = domains.find(d => d.id === domainId);
-      
+
       if (!domain) {
         throw new Error('Domain not found or not validated');
       }
@@ -206,6 +206,9 @@ export class DomainBlogTemplateService {
       if (!domain.blog_enabled) {
         throw new Error('Blog publishing not enabled for this domain');
       }
+
+      // Ensure domain has a default theme assigned
+      await this.ensureDefaultTheme(domainId);
 
       // Create blog URL
       const publishedUrl = DomainBlogService.createBlogURL(
