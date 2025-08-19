@@ -155,11 +155,7 @@ export function SimpleBlogTemplateManager({
 
   const saveThemeSettings = async () => {
     if (!selectedDomain || !selectedTheme) {
-      toast({
-        title: "Selection Required",
-        description: "Please select both a domain and theme before saving",
-        variant: "destructive"
-      });
+      toast.error("Please select both a domain and theme before saving");
       return;
     }
 
@@ -173,10 +169,7 @@ export function SimpleBlogTemplateManager({
         setSaveStatus({ isLoading: false, hasError: false, lastSaved: new Date() });
         onThemeUpdate?.(selectedDomain, selectedTheme);
         
-        toast({
-          title: "Theme Saved",
-          description: `Successfully saved ${getThemeName(selectedTheme)} theme`,
-        });
+        toast.success(`Successfully saved ${getThemeName(selectedTheme)} theme`);
       } else {
         throw new Error('Failed to save to localStorage');
       }
@@ -185,11 +178,7 @@ export function SimpleBlogTemplateManager({
       console.error('❌ Save failed:', errorMessage);
       
       setSaveStatus({ isLoading: false, hasError: true, errorMessage });
-      toast({
-        title: "Save Failed",
-        description: `Failed to save theme settings: ${errorMessage}`,
-        variant: "destructive"
-      });
+      toast.error(`Failed to save theme settings: ${errorMessage}`);
     }
   };
 
