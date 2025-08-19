@@ -319,10 +319,10 @@ const AutomationDiscovery = () => {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-2">
-            Automation Discovery Engine
+            Automation-Compatible URL Discovery
           </h1>
           <p className="text-lg text-gray-600">
-            Discover high-quality link building opportunities across platforms with AI-powered analysis
+            Find working URLs compatible with your automation platform for maximum link publishing success
           </p>
         </div>
 
