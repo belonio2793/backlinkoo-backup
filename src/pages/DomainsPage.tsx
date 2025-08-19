@@ -209,6 +209,20 @@ const DomainsPage = () => {
     }
   }, [domains]);
 
+  const checkDomainBlogThemesTable = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('domain_blog_themes')
+        .select('id')
+        .limit(1);
+
+      // If we can query the table without error, it exists
+      setDomainBlogThemesExists(!error);
+    } catch {
+      setDomainBlogThemesExists(false);
+    }
+  };
+
   const loadDomains = async () => {
     setLoading(true);
     try {
@@ -219,14 +233,17 @@ const DomainsPage = () => {
 
       if (error) {
         console.error('Error loading domains:', error);
-        const errorMessage = typeof error === 'string' ? error : 
-                           error?.message || 
-                           error?.details || 
+        const errorMessage = typeof error === 'string' ? error :
+                           error?.message ||
+                           error?.details ||
                            'Unknown error occurred';
         throw new Error(errorMessage);
       }
-      
+
       setDomains(data || []);
+
+      // Check if domain_blog_themes table exists
+      await checkDomainBlogThemesTable();
     } catch (error: any) {
       console.error('Error loading domains:', error);
       const errorMessage = error?.message || 'Unknown error occurred';
