@@ -110,6 +110,22 @@ export class DNSValidationService {
   }
   
   /**
+   * Get manual DNS propagation instructions for a domain
+   */
+  static getManualPropagationInstructions(domain: string): string[] {
+    return [
+      `Check if your domain ${domain} is pointing to our servers`,
+      `Verify A record points to the correct IP address`,
+      `Ensure CNAME record for www subdomain is configured`,
+      `Confirm TXT record for verification is present`,
+      `Use online DNS checker tools like whatsmydns.net`,
+      `Allow 24-48 hours for full global DNS propagation`,
+      `Clear your local DNS cache if changes aren't visible`,
+      `Check with your domain registrar if records aren't updating`
+    ];
+  }
+
+  /**
    * Check DNS service health
    */
   static async checkServiceHealth(): Promise<'online' | 'offline' | 'unknown'> {
@@ -120,7 +136,7 @@ export class DNSValidationService {
         body: JSON.stringify({ domain_id: 'health-check' }),
         signal: AbortSignal.timeout(5000)
       });
-      
+
       if (response.status === 404) {
         return 'offline';
       } else {
