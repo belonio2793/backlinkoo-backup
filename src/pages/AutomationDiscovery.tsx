@@ -139,7 +139,7 @@ const AutomationDiscovery = () => {
     setDiscoveryResults([]);
 
     try {
-      const response = await fetch('/.netlify/functions/test-discovery', {
+      const response = await fetch('/.netlify/functions/discovery-engine', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
