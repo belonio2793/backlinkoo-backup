@@ -36,6 +36,7 @@ import {
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import BlogThemesService, { BlogTheme, DomainThemeSettings } from '@/services/blogThemesService';
+import { DomainBlogTemplateService, DomainThemeRecord } from '@/services/domainBlogTemplateService';
 
 interface Domain {
   id: string;
