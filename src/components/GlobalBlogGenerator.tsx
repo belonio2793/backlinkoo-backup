@@ -137,7 +137,7 @@ export function GlobalBlogGenerator({
       new URL(formatted);
       if (formatted !== targetUrl) setTargetUrl(formatted);
     } catch {
-      toast({ title: "Invalid URL", description: "Please enter a valid URL.", variant: "destructive" });
+      toast.error("Invalid URL - Please enter a valid URL.");
       return false;
     }
 
@@ -164,7 +164,7 @@ export function GlobalBlogGenerator({
     }
 
     if (remainingRequests <= 0) {
-      toast({ title: "API Not Available", description: "Check API configuration.", variant: "destructive" });
+      toast.error("API Not Available - Check API configuration.");
       return;
     }
 
@@ -255,7 +255,7 @@ Return clean HTML content optimized for SEO.`;
         }
       } catch (error) {
         if (i === maxRetries - 1) {
-          toast({ title: "Generation Failed", description: "Multiple attempts failed. Please try again later.", variant: "destructive" });
+          toast.error("Generation Failed - Multiple attempts failed. Please try again later.");
           setIsGenerating(false);
           return;
         }
