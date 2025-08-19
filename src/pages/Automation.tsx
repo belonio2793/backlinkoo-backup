@@ -372,17 +372,6 @@ const Automation = () => {
               </div>
             )}
 
-            {/* Discovery Link */}
-            <div className="flex justify-center">
-              <a
-                href="/automation/discovery"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all font-medium"
-              >
-                <Search className="w-4 h-4" />
-                Platform Discovery
-                <span className="text-xs bg-white/20 px-2 py-0.5 rounded">Advanced</span>
-              </a>
-            </div>
           </div>
 
         {/* Saved form data notification */}
@@ -439,22 +428,14 @@ const Automation = () => {
           {/* Campaign Creation (Left Column) */}
           <div className="lg:col-span-1 flex flex-col min-h-[600px]">
             <Tabs defaultValue="create" className="w-full h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="create" className="flex items-center gap-2">
                   <Target className="w-4 h-4" />
                   New Campaign
                 </TabsTrigger>
-                <TabsTrigger value="wordpress" className="flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4" />
-                  WordPress
-                </TabsTrigger>
                 <TabsTrigger value="status" className="flex items-center gap-2">
                   <FileText className="w-4 h-4" />
                   Status
-                </TabsTrigger>
-                <TabsTrigger value="debug" className="flex items-center gap-2">
-                  <Activity className="w-4 h-4" />
-                  Debug Links
                 </TabsTrigger>
               </TabsList>
 
@@ -711,16 +692,8 @@ const Automation = () => {
                 )}
               </TabsContent>
 
-              <TabsContent value="wordpress" className="space-y-4 flex-1 flex flex-col">
-                <WordPressBlogDiscovery />
-              </TabsContent>
-
               <TabsContent value="status" className="space-y-4 flex-1 flex flex-col">
                 <AutomationServiceStatus />
-              </TabsContent>
-
-              <TabsContent value="debug" className="space-y-4 flex-1 flex flex-col">
-                <PublishedLinksDebugger />
               </TabsContent>
             </Tabs>
           </div>
