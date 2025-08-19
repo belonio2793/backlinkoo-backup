@@ -52,13 +52,17 @@ export class DomainBlogTemplateService {
         .single();
 
       if (error && error.code !== 'PGRST116') { // PGRST116 = no rows returned
-        console.error('Error fetching domain theme:', error);
+        const errorMessage = error.message || error.details || JSON.stringify(error);
+        console.error('Error fetching domain theme:', errorMessage, error);
         return null;
       }
 
       return data;
     } catch (error) {
-      console.error('Error in getDomainTheme:', error);
+      const errorMessage = error instanceof Error ? error.message :
+                          error && typeof error === 'object' ? JSON.stringify(error) :
+                          String(error);
+      console.error('Error in getDomainTheme:', errorMessage, error);
       return null;
     }
   }
@@ -87,13 +91,17 @@ export class DomainBlogTemplateService {
       });
 
       if (error) {
-        console.error('Error setting domain theme:', error);
+        const errorMessage = error.message || error.details || JSON.stringify(error);
+        console.error('Error setting domain theme:', errorMessage, error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error in setDomainTheme:', error);
+      const errorMessage = error instanceof Error ? error.message :
+                          error && typeof error === 'object' ? JSON.stringify(error) :
+                          String(error);
+      console.error('Error in setDomainTheme:', errorMessage, error);
       return false;
     }
   }
@@ -110,7 +118,10 @@ export class DomainBlogTemplateService {
         console.log(`✅ Default theme assigned to domain ${domainId}`);
       }
     } catch (error) {
-      console.error('Error ensuring default theme:', error);
+      const errorMessage = error instanceof Error ? error.message :
+                          error && typeof error === 'object' ? JSON.stringify(error) :
+                          String(error);
+      console.error('Error ensuring default theme:', errorMessage, error);
     }
   }
 
@@ -134,13 +145,17 @@ export class DomainBlogTemplateService {
         .eq('domains.status', 'active');
 
       if (error) {
-        console.error('Error fetching all domain themes:', error);
+        const errorMessage = error.message || error.details || JSON.stringify(error);
+        console.error('Error fetching all domain themes:', errorMessage, error);
         return [];
       }
 
       return data || [];
     } catch (error) {
-      console.error('Error in getAllDomainThemes:', error);
+      const errorMessage = error instanceof Error ? error.message :
+                          error && typeof error === 'object' ? JSON.stringify(error) :
+                          String(error);
+      console.error('Error in getAllDomainThemes:', errorMessage, error);
       return [];
     }
   }

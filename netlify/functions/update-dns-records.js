@@ -1,5 +1,5 @@
 /**
- * Update DNS records via registrar APIs
+ * Update DNS records via various registrar APIs
  */
 exports.handler = async (event, context) => {
   // Set CORS headers
@@ -45,9 +45,9 @@ exports.handler = async (event, context) => {
       };
     }
 
-    console.log(`🔄 Updating ${records.length} DNS records for ${domain}`);
+    console.log(`🔄 Updating ${records.length} DNS records for ${domain} via ${credentials.registrarCode}...`);
 
-    // Update records based on registrar
+    // Update DNS records based on registrar type
     const result = await updateDNSRecordsByRegistrar(domain, records, credentials);
 
     return {
@@ -66,7 +66,7 @@ exports.handler = async (event, context) => {
         success: false,
         recordsUpdated: 0,
         recordsCreated: 0,
-        recordsFailed: records?.length || 0,
+        recordsFailed: records ? records.length : 0,
         errors: [error.message],
         details: []
       })
@@ -75,24 +75,56 @@ exports.handler = async (event, context) => {
 };
 
 /**
- * Update DNS records for specific registrar
+ * Update DNS records for different registrars
  */
 async function updateDNSRecordsByRegistrar(domain, records, credentials) {
-  switch (credentials.registrarCode) {
-    case 'cloudflare':
-      return await updateCloudflareRecords(domain, records, credentials);
-    
-    case 'namecheap':
-      return await updateNamecheapRecords(domain, records, credentials);
-    
-    case 'godaddy':
-      return await updateGoDaddyRecords(domain, records, credentials);
-    
-    case 'digitalocean':
-      return await updateDigitalOceanRecords(domain, records, credentials);
-    
-    default:
-      throw new Error(`Updating records for ${credentials.registrarCode} not implemented yet`);
+  const { registrarCode } = credentials;
+
+  try {
+    switch (registrarCode) {
+      case 'cloudflare':
+        return await updateCloudflareRecords(domain, records, credentials);
+      
+      case 'namecheap':
+        return await updateNamecheapRecords(domain, records, credentials);
+      
+      case 'godaddy':
+        return await updateGoDaddyRecords(domain, records, credentials);
+      
+      case 'digitalocean':
+        return await updateDigitalOceanRecords(domain, records, credentials);
+      
+      case 'route53':
+        return await updateRoute53Records(domain, records, credentials);
+      
+      default:
+        return {
+          success: false,
+          recordsUpdated: 0,
+          recordsCreated: 0,
+          recordsFailed: records.length,
+          errors: [`DNS record updates not implemented for ${registrarCode}`],
+          details: records.map(record => ({
+            record,
+            action: 'failed',
+            error: `Registrar ${registrarCode} not supported`
+          }))
+        };
+    }
+  } catch (error) {
+    console.error(`Error updating ${registrarCode} DNS records:`, error);
+    return {
+      success: false,
+      recordsUpdated: 0,
+      recordsCreated: 0,
+      recordsFailed: records.length,
+      errors: [`Failed to update ${registrarCode} DNS records: ${error.message}`],
+      details: records.map(record => ({
+        record,
+        action: 'failed',
+        error: error.message
+      }))
+    };
   }
 }
 
@@ -100,31 +132,23 @@ async function updateDNSRecordsByRegistrar(domain, records, credentials) {
  * Update DNS records in Cloudflare
  */
 async function updateCloudflareRecords(domain, records, credentials) {
-  const result = {
-    success: false,
-    recordsUpdated: 0,
-    recordsCreated: 0,
-    recordsFailed: 0,
-    errors: [],
-    details: []
-  };
-
   try {
-    // Get zone ID
+    // First, get the zone ID if not provided
     let zoneId = credentials.zone;
     
     if (!zoneId) {
       const zonesResponse = await fetch(`https://api.cloudflare.com/client/v4/zones?name=${domain}`, {
+        method: 'GET',
         headers: {
           'Authorization': `Bearer ${credentials.apiKey}`,
           'Content-Type': 'application/json'
         }
       });
-      
+
       const zonesData = await zonesResponse.json();
       
       if (!zonesData.success || zonesData.result.length === 0) {
-        throw new Error('Domain not found in Cloudflare account');
+        throw new Error(`Zone not found for domain ${domain}`);
       }
       
       zoneId = zonesData.result[0].id;
@@ -132,6 +156,7 @@ async function updateCloudflareRecords(domain, records, credentials) {
 
     // Get existing records
     const existingResponse = await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/dns_records`, {
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${credentials.apiKey}`,
         'Content-Type': 'application/json'
@@ -139,14 +164,24 @@ async function updateCloudflareRecords(domain, records, credentials) {
     });
 
     const existingData = await existingResponse.json();
-    const existingRecords = existingData.success ? existingData.result : [];
+    if (!existingData.success) {
+      throw new Error('Failed to fetch existing DNS records');
+    }
+
+    const existingRecords = existingData.result;
+    
+    let recordsCreated = 0;
+    let recordsUpdated = 0;
+    let recordsFailed = 0;
+    const errors = [];
+    const details = [];
 
     // Process each record
     for (const record of records) {
       try {
         const recordName = record.name === '@' ? domain : `${record.name}.${domain}`;
         
-        // Find existing record
+        // Find existing record with same type and name
         const existing = existingRecords.find(r => 
           r.type === record.type && r.name === recordName
         );
@@ -163,20 +198,29 @@ async function updateCloudflareRecords(domain, records, credentials) {
               type: record.type,
               name: recordName,
               content: record.content,
-              ttl: record.ttl || 3600
+              ttl: record.ttl || 3600,
+              priority: record.priority
             })
           });
 
           const updateData = await updateResponse.json();
           
           if (updateData.success) {
-            result.recordsUpdated++;
-            result.details.push({
+            recordsUpdated++;
+            details.push({
               record,
-              action: 'updated'
+              action: 'updated',
+              recordId: existing.id
             });
           } else {
-            throw new Error(updateData.errors?.[0]?.message || 'Update failed');
+            recordsFailed++;
+            const error = updateData.errors?.[0]?.message || 'Update failed';
+            errors.push(`Failed to update ${record.type} record: ${error}`);
+            details.push({
+              record,
+              action: 'failed',
+              error
+            });
           }
         } else {
           // Create new record
@@ -190,26 +234,35 @@ async function updateCloudflareRecords(domain, records, credentials) {
               type: record.type,
               name: recordName,
               content: record.content,
-              ttl: record.ttl || 3600
+              ttl: record.ttl || 3600,
+              priority: record.priority
             })
           });
 
           const createData = await createResponse.json();
           
           if (createData.success) {
-            result.recordsCreated++;
-            result.details.push({
+            recordsCreated++;
+            details.push({
               record,
-              action: 'created'
+              action: 'created',
+              recordId: createData.result.id
             });
           } else {
-            throw new Error(createData.errors?.[0]?.message || 'Creation failed');
+            recordsFailed++;
+            const error = createData.errors?.[0]?.message || 'Creation failed';
+            errors.push(`Failed to create ${record.type} record: ${error}`);
+            details.push({
+              record,
+              action: 'failed',
+              error
+            });
           }
         }
       } catch (error) {
-        result.recordsFailed++;
-        result.errors.push(`${record.type} ${record.name}: ${error.message}`);
-        result.details.push({
+        recordsFailed++;
+        errors.push(`Failed to process ${record.type} record: ${error.message}`);
+        details.push({
           record,
           action: 'failed',
           error: error.message
@@ -217,13 +270,17 @@ async function updateCloudflareRecords(domain, records, credentials) {
       }
     }
 
-    result.success = result.recordsFailed === 0;
-    return result;
+    return {
+      success: recordsFailed === 0,
+      recordsUpdated,
+      recordsCreated,
+      recordsFailed,
+      errors,
+      details
+    };
 
   } catch (error) {
-    result.recordsFailed = records.length;
-    result.errors.push(error.message);
-    return result;
+    throw new Error(`Cloudflare DNS update error: ${error.message}`);
   }
 }
 
@@ -231,25 +288,20 @@ async function updateCloudflareRecords(domain, records, credentials) {
  * Update DNS records in GoDaddy
  */
 async function updateGoDaddyRecords(domain, records, credentials) {
-  const result = {
-    success: false,
-    recordsUpdated: 0,
-    recordsCreated: 0,
-    recordsFailed: 0,
-    errors: [],
-    details: []
-  };
-
   try {
-    // GoDaddy replaces all records of a given type
-    // Group records by type
+    let recordsCreated = 0;
+    let recordsUpdated = 0;
+    let recordsFailed = 0;
+    const errors = [];
+    const details = [];
+
+    // GoDaddy requires updating records by type
     const recordsByType = {};
     
     for (const record of records) {
       if (!recordsByType[record.type]) {
         recordsByType[record.type] = [];
       }
-      
       recordsByType[record.type].push({
         name: record.name,
         data: record.content,
@@ -271,21 +323,30 @@ async function updateGoDaddyRecords(domain, records, credentials) {
         });
 
         if (response.ok) {
-          result.recordsUpdated += typeRecords.length;
+          recordsUpdated += typeRecords.length;
           typeRecords.forEach(record => {
-            result.details.push({
+            details.push({
               record: { type, name: record.name, content: record.data },
               action: 'updated'
             });
           });
         } else {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+          recordsFailed += typeRecords.length;
+          const error = `HTTP ${response.status}: ${response.statusText}`;
+          errors.push(`Failed to update ${type} records: ${error}`);
+          typeRecords.forEach(record => {
+            details.push({
+              record: { type, name: record.name, content: record.data },
+              action: 'failed',
+              error
+            });
+          });
         }
       } catch (error) {
-        result.recordsFailed += typeRecords.length;
-        result.errors.push(`${type} records: ${error.message}`);
+        recordsFailed += typeRecords.length;
+        errors.push(`Failed to update ${type} records: ${error.message}`);
         typeRecords.forEach(record => {
-          result.details.push({
+          details.push({
             record: { type, name: record.name, content: record.data },
             action: 'failed',
             error: error.message
@@ -294,13 +355,17 @@ async function updateGoDaddyRecords(domain, records, credentials) {
       }
     }
 
-    result.success = result.recordsFailed === 0;
-    return result;
+    return {
+      success: recordsFailed === 0,
+      recordsUpdated,
+      recordsCreated: 0, // GoDaddy replaces all records of a type
+      recordsFailed,
+      errors,
+      details
+    };
 
   } catch (error) {
-    result.recordsFailed = records.length;
-    result.errors.push(error.message);
-    return result;
+    throw new Error(`GoDaddy DNS update error: ${error.message}`);
   }
 }
 
@@ -308,18 +373,10 @@ async function updateGoDaddyRecords(domain, records, credentials) {
  * Update DNS records in DigitalOcean
  */
 async function updateDigitalOceanRecords(domain, records, credentials) {
-  const result = {
-    success: false,
-    recordsUpdated: 0,
-    recordsCreated: 0,
-    recordsFailed: 0,
-    errors: [],
-    details: []
-  };
-
   try {
-    // Get existing records
+    // Get existing records first
     const existingResponse = await fetch(`https://api.digitalocean.com/v2/domains/${domain}/records`, {
+      method: 'GET',
       headers: {
         'Authorization': `Bearer ${credentials.apiKey}`,
         'Content-Type': 'application/json'
@@ -327,16 +384,22 @@ async function updateDigitalOceanRecords(domain, records, credentials) {
     });
 
     if (!existingResponse.ok) {
-      throw new Error(`Failed to get existing records: HTTP ${existingResponse.status}`);
+      throw new Error(`Failed to fetch existing records: HTTP ${existingResponse.status}`);
     }
 
     const existingData = await existingResponse.json();
-    const existingRecords = existingData.domain_records || [];
+    const existingRecords = existingData.domain_records;
+    
+    let recordsCreated = 0;
+    let recordsUpdated = 0;
+    let recordsFailed = 0;
+    const errors = [];
+    const details = [];
 
     // Process each record
     for (const record of records) {
       try {
-        // Find existing record
+        // Find existing record with same type and name
         const existing = existingRecords.find(r => 
           r.type === record.type && r.name === record.name
         );
@@ -353,18 +416,27 @@ async function updateDigitalOceanRecords(domain, records, credentials) {
               type: record.type,
               name: record.name,
               data: record.content,
-              ttl: record.ttl || 3600
+              ttl: record.ttl || 3600,
+              priority: record.priority
             })
           });
 
           if (updateResponse.ok) {
-            result.recordsUpdated++;
-            result.details.push({
+            recordsUpdated++;
+            details.push({
               record,
-              action: 'updated'
+              action: 'updated',
+              recordId: existing.id
             });
           } else {
-            throw new Error(`HTTP ${updateResponse.status}: ${updateResponse.statusText}`);
+            recordsFailed++;
+            const error = `HTTP ${updateResponse.status}: ${updateResponse.statusText}`;
+            errors.push(`Failed to update ${record.type} record: ${error}`);
+            details.push({
+              record,
+              action: 'failed',
+              error
+            });
           }
         } else {
           // Create new record
@@ -378,24 +450,34 @@ async function updateDigitalOceanRecords(domain, records, credentials) {
               type: record.type,
               name: record.name,
               data: record.content,
-              ttl: record.ttl || 3600
+              ttl: record.ttl || 3600,
+              priority: record.priority
             })
           });
 
           if (createResponse.ok) {
-            result.recordsCreated++;
-            result.details.push({
+            recordsCreated++;
+            const createData = await createResponse.json();
+            details.push({
               record,
-              action: 'created'
+              action: 'created',
+              recordId: createData.domain_record.id
             });
           } else {
-            throw new Error(`HTTP ${createResponse.status}: ${createResponse.statusText}`);
+            recordsFailed++;
+            const error = `HTTP ${createResponse.status}: ${createResponse.statusText}`;
+            errors.push(`Failed to create ${record.type} record: ${error}`);
+            details.push({
+              record,
+              action: 'failed',
+              error
+            });
           }
         }
       } catch (error) {
-        result.recordsFailed++;
-        result.errors.push(`${record.type} ${record.name}: ${error.message}`);
-        result.details.push({
+        recordsFailed++;
+        errors.push(`Failed to process ${record.type} record: ${error.message}`);
+        details.push({
           record,
           action: 'failed',
           error: error.message
@@ -403,32 +485,33 @@ async function updateDigitalOceanRecords(domain, records, credentials) {
       }
     }
 
-    result.success = result.recordsFailed === 0;
-    return result;
+    return {
+      success: recordsFailed === 0,
+      recordsUpdated,
+      recordsCreated,
+      recordsFailed,
+      errors,
+      details
+    };
 
   } catch (error) {
-    result.recordsFailed = records.length;
-    result.errors.push(error.message);
-    return result;
+    throw new Error(`DigitalOcean DNS update error: ${error.message}`);
   }
 }
 
 /**
- * Update DNS records in Namecheap (simplified approach)
+ * Update DNS records in Namecheap (simplified)
  */
 async function updateNamecheapRecords(domain, records, credentials) {
-  // Namecheap API is more complex and requires careful handling
-  // For now, return a "not implemented" response
-  return {
-    success: false,
-    recordsUpdated: 0,
-    recordsCreated: 0,
-    recordsFailed: records.length,
-    errors: ['Namecheap automatic updates require additional implementation'],
-    details: records.map(record => ({
-      record,
-      action: 'failed',
-      error: 'Namecheap automatic updates not yet implemented'
-    }))
-  };
+  // Note: Namecheap API is more complex and requires replacing all records at once
+  // This is a simplified implementation
+  throw new Error('Namecheap DNS record updates require complex XML API calls. Please use manual setup.');
+}
+
+/**
+ * Update DNS records in Route 53 (placeholder)
+ */
+async function updateRoute53Records(domain, records, credentials) {
+  // Note: Would need AWS SDK for proper Route 53 implementation
+  throw new Error('Route 53 DNS record updates require AWS SDK implementation');
 }

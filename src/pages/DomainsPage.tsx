@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -39,6 +39,7 @@ import {
   Globe,
   Plus,
   Copy,
+  CheckCircle,
   CheckCircle2,
   Clock,
   AlertTriangle,
@@ -61,6 +62,7 @@ import {
 import DomainBlogTemplateManager from '@/components/DomainBlogTemplateManager';
 import DNSValidationService from '@/services/dnsValidationService';
 import AutoDNSPropagation from '@/components/AutoDNSPropagation';
+import AutoPropagationWizard from '@/components/AutoPropagationWizard';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -68,29 +70,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { NetworkStatus } from '@/components/NetworkStatus';
 
-// Global error handler for unhandled promise rejections
-if (typeof window !== 'undefined') {
-  window.addEventListener('unhandledrejection', (event) => {
-    console.error('🚨 Unhandled Promise Rejection:', event.reason);
-
-    // Extract meaningful error message
-    let errorMessage = 'An unexpected error occurred';
-
-    if (event.reason instanceof Error) {
-      errorMessage = event.reason.message;
-    } else if (typeof event.reason === 'string') {
-      errorMessage = event.reason;
-    } else if (event.reason && typeof event.reason === 'object') {
-      errorMessage = event.reason.message || JSON.stringify(event.reason);
-    }
-
-    // Show user-friendly error
-    toast.error(`System Error: ${errorMessage}`);
-
-    // Prevent the default handling (console error)
-    event.preventDefault();
-  });
-}
+// Global error handler will be set up in useEffect
 
 interface Domain {
   id: string;
@@ -136,6 +116,8 @@ const DomainsPage = () => {
   const [editingDomain, setEditingDomain] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState(false);
   const [dnsServiceStatus, setDnsServiceStatus] = useState<'unknown' | 'online' | 'offline'>('unknown');
+  const [showAutoPropagationWizard, setShowAutoPropagationWizard] = useState(false);
+  const [selectedDomainForWizard, setSelectedDomainForWizard] = useState<Domain | null>(null);
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
@@ -148,6 +130,40 @@ const DomainsPage = () => {
     autoSSL: true,
     defaultSubdirectory: 'blog'
   });
+
+  useEffect(() => {
+    // Set up global error handler for unhandled promise rejections
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      console.error('🚨 Unhandled Promise Rejection:', event.reason);
+
+      // Extract meaningful error message
+      let errorMessage = 'An unexpected error occurred';
+
+      if (event.reason instanceof Error) {
+        errorMessage = event.reason.message;
+      } else if (typeof event.reason === 'string') {
+        errorMessage = event.reason;
+      } else if (event.reason && typeof event.reason === 'object') {
+        errorMessage = event.reason.message || JSON.stringify(event.reason);
+      }
+
+      // Show user-friendly error
+      toast.error(`System Error: ${errorMessage}`);
+
+      // Prevent the default handling (console error)
+      event.preventDefault();
+    };
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('unhandledrejection', handleUnhandledRejection);
+    }
+
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (user?.id) {
@@ -492,22 +508,9 @@ const DomainsPage = () => {
 
       if (result.success) {
         if (result.validated) {
-          const successMessage = result.isUsingFallback
-            ? `✅ Domain ${result.domain} validated using fallback method`
-            : `✅ Domain ${result.domain} validated successfully! DNS records are properly configured.`;
-          toast.success(successMessage);
+          toast.success(`✅ Domain ${result.domain} validated successfully! DNS records are properly configured.`);
         } else {
-          const warningMessage = result.isUsingFallback
-            ? `⚠️ Domain ${result.domain} validation pending: ${result.message}`
-            : `❌ Domain ${result.domain} validation failed: ${result.message}`;
-          toast.warning(warningMessage);
-        }
-
-        // Show additional info for fallback validation
-        if (result.isUsingFallback) {
-          setTimeout(() => {
-            toast.info('💡 DNS service unavailable. Manual DNS propagation check recommended.');
-          }, 2000);
+          toast.error(`❌ Domain ${result.domain} validation failed: ${result.message}`);
         }
 
         // Reload domains to get updated status
@@ -540,6 +543,16 @@ const DomainsPage = () => {
     toast.info('Page generation feature coming soon!');
   };
 
+  const launchAutoPropagationWizard = (domain: Domain) => {
+    setSelectedDomainForWizard(domain);
+    setShowAutoPropagationWizard(true);
+  };
+
+  const closeAutoPropagationWizard = () => {
+    setShowAutoPropagationWizard(false);
+    setSelectedDomainForWizard(null);
+  };
+
   // Test function for debugging DNS validation issues
   const testValidation = async () => {
     console.log('🧪 Testing DNS validation service...');
@@ -562,14 +575,11 @@ const DomainsPage = () => {
         const errorText = await response.text();
         console.error('❌ Service error response:', errorText);
 
-        if (response.status === 502 || response.status === 503) {
-          toast.warning('⚠️ DNS validation service is temporarily unavailable. Domains can still be added and will use fallback validation.');
-          setDnsServiceStatus('offline');
-        } else if (response.status === 404) {
-          toast.error('❌ DNS validation function not deployed. Contact support.');
+        if (response.status === 404) {
+          toast.error('❌ DNS validation function not deployed. All services must be deployed for production use.');
           setDnsServiceStatus('offline');
         } else {
-          toast.error(`DNS validation service error: HTTP ${response.status}`);
+          toast.error(`❌ DNS validation service error: HTTP ${response.status}. Service must be available for production.`);
           setDnsServiceStatus('offline');
         }
         return;
@@ -591,13 +601,13 @@ const DomainsPage = () => {
       console.error('❌ Test validation error:', error);
 
       if (error.name === 'AbortError') {
-        toast.error('❌ DNS validation service timeout - service may be down');
+        toast.error('❌ DNS validation service timeout - service must be available for production');
         setDnsServiceStatus('offline');
       } else if (error.message.includes('Failed to fetch')) {
-        toast.warning('⚠️ Cannot reach DNS validation service. Network or deployment issue.');
+        toast.error('❌ Cannot reach DNS validation service. All services must be deployed.');
         setDnsServiceStatus('offline');
       } else {
-        toast.error(`DNS validation service test failed: ${error.message}`);
+        toast.error(`❌ DNS validation service failed: ${error.message}`);
         setDnsServiceStatus('offline');
       }
     }
@@ -769,7 +779,7 @@ const DomainsPage = () => {
               ) : dnsServiceStatus === 'offline' ? (
                 <Badge className="bg-red-100 text-red-800 border-red-200">
                   <AlertTriangle className="w-3 h-3 mr-1" />
-                  Offline (Using Fallback)
+                  Service Required
                 </Badge>
               ) : (
                 <Badge className="bg-gray-100 text-gray-800 border-gray-200">
@@ -1202,7 +1212,18 @@ anotherdomain.org`}
                               <RefreshCw className="h-3 w-3" />
                             )}
                           </Button>
-                          
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => launchAutoPropagationWizard(domain)}
+                            disabled={domain.status === 'active'}
+                            title="Auto-Propagate DNS"
+                            className="bg-blue-50 border-blue-200 hover:bg-blue-100"
+                          >
+                            <Wand2 className="h-3 w-3" />
+                          </Button>
+
                           <Button
                             variant="outline"
                             size="sm"
@@ -1212,7 +1233,7 @@ anotherdomain.org`}
                           >
                             <Play className="h-3 w-3" />
                           </Button>
-                          
+
                           {domain.status === 'active' && (
                             <Button variant="outline" size="sm" asChild title="Visit Domain">
                               <a href={`https://${domain.domain}`} target="_blank" rel="noopener noreferrer">
@@ -1220,7 +1241,7 @@ anotherdomain.org`}
                               </a>
                             </Button>
                           )}
-                          
+
                           <Button
                             variant="outline"
                             size="sm"
@@ -1382,7 +1403,7 @@ anotherdomain.org`}
           </Card>
         )}
 
-        {/* Auto DNS Propagation Section */}
+        {/* Enhanced Auto DNS Propagation Section */}
         {domains.length > 0 && (
           <Card className="mt-8">
             <CardHeader>
@@ -1391,50 +1412,83 @@ anotherdomain.org`}
                 Automatic DNS Propagation
               </CardTitle>
               <CardDescription>
-                Automatically detect your registrar and update DNS records with confirmation
+                Automatically detect your registrar and update DNS records with step-by-step guidance
               </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {/* Domain Selection */}
-                <div className="space-y-2">
-                  <Label>Select Domain for Auto-Propagation</Label>
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Choose a domain to auto-propagate" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {domains.map(domain => (
-                        <SelectItem key={domain.id} value={domain.id}>
-                          <div className="flex items-center justify-between w-full">
-                            <span>{domain.domain}</span>
-                            <Badge
-                              variant={domain.status === 'active' ? 'default' : 'secondary'}
-                              className="ml-2"
-                            >
-                              {domain.status}
-                            </Badge>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                {/* Quick Launch Section */}
+                <div className="p-6 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-3">
+                      <h3 className="text-lg font-semibold text-blue-900">Launch Auto-Propagation Wizard</h3>
+                      <p className="text-blue-700 max-w-md">
+                        Our step-by-step wizard detects your registrar, guides you through API setup,
+                        and automatically configures your DNS records with full preview and confirmation.
+                      </p>
+                      <div className="flex items-center gap-4 text-sm text-blue-600">
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="h-4 w-4" />
+                          <span>Auto-detect registrar</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="h-4 w-4" />
+                          <span>Secure API setup</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <CheckCircle className="h-4 w-4" />
+                          <span>Change preview</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="text-right text-sm text-blue-600 mb-2">
+                        Select a domain to get started:
+                      </div>
+                      <Select onValueChange={(domainId) => {
+                        const domain = domains.find(d => d.id === domainId);
+                        if (domain) launchAutoPropagationWizard(domain);
+                      }}>
+                        <SelectTrigger className="w-64">
+                          <SelectValue placeholder="Choose domain for wizard..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {domains.filter(d => d.status !== 'active').map(domain => (
+                            <SelectItem key={domain.id} value={domain.id}>
+                              <div className="flex items-center justify-between w-full">
+                                <span>{domain.domain}</span>
+                                <Badge
+                                  variant={domain.status === 'pending' ? 'secondary' : 'outline'}
+                                  className="ml-2"
+                                >
+                                  {domain.status}
+                                </Badge>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
                 </div>
 
-                {/* Auto-propagation for first domain (demo) */}
-                {domains.length > 0 && (
-                  <AutoDNSPropagation
-                    domain={domains[0]}
-                    hostingConfig={hostingConfig}
-                    onSuccess={(domain) => {
-                      toast.success(`✅ Auto-propagation completed for ${domain.domain}`);
-                      loadDomains(); // Refresh domains list
-                    }}
-                    onError={(error) => {
-                      toast.error(`Auto-propagation failed: ${error}`);
-                    }}
-                  />
-                )}
+                {/* Legacy auto-propagation component for comparison */}
+                <div className="border-t pt-6">
+                  <h3 className="font-medium mb-4 text-gray-700">Alternative: Direct Auto-Propagation</h3>
+                  {domains.length > 0 && (
+                    <AutoDNSPropagation
+                      domain={domains[0]}
+                      hostingConfig={hostingConfig}
+                      onSuccess={(domain) => {
+                        toast.success(`✅ Auto-propagation completed for ${domain.domain}`);
+                        loadDomains(); // Refresh domains list
+                      }}
+                      onError={(error) => {
+                        toast.error(`Auto-propagation failed: ${error}`);
+                      }}
+                    />
+                  )}
+                </div>
 
                 {/* Info about auto-propagation */}
                 <Alert>
@@ -1444,7 +1498,8 @@ anotherdomain.org`}
                       <p className="font-medium">How Auto-Propagation Works:</p>
                       <ol className="list-decimal list-inside space-y-1 text-sm">
                         <li>Automatically detects your domain registrar (Cloudflare, Namecheap, GoDaddy, etc.)</li>
-                        <li>Shows you exactly what DNS changes will be made</li>
+                        <li>Guides you through secure API credential setup with instructions</li>
+                        <li>Shows you exactly what DNS changes will be made with detailed preview</li>
                         <li>Asks for confirmation before making any updates</li>
                         <li>Uses secure API integration to update your DNS records</li>
                         <li>Validates the changes immediately after propagation</li>
@@ -1463,7 +1518,9 @@ anotherdomain.org`}
                       'GoDaddy',
                       'Route 53',
                       'DigitalOcean',
-                      'Google Domains'
+                      'Google Domains',
+                      '1&1 IONOS',
+                      'SiteGround'
                     ].map(registrar => (
                       <div key={registrar} className="flex items-center gap-2 p-2 bg-white rounded border">
                         <CheckCircle className="h-4 w-4 text-green-600" />
@@ -1489,6 +1546,23 @@ anotherdomain.org`}
             }}
           />
         </div>
+
+        {/* Auto-Propagation Wizard */}
+        {showAutoPropagationWizard && selectedDomainForWizard && (
+          <AutoPropagationWizard
+            domain={selectedDomainForWizard}
+            hostingConfig={hostingConfig}
+            onSuccess={(domain) => {
+              toast.success(`✅ Auto-propagation completed for ${domain.domain}`);
+              loadDomains(); // Refresh domains list
+              closeAutoPropagationWizard();
+            }}
+            onError={(error) => {
+              toast.error(`Auto-propagation failed: ${error}`);
+            }}
+            onClose={closeAutoPropagationWizard}
+          />
+        )}
       </div>
       <Footer />
     </div>

@@ -24,19 +24,20 @@ export interface RegistrarConfig {
 
 export class RegistrarDetectionService {
   
-  // Major registrar configurations
+  // Comprehensive registrar configurations
   private static registrarConfigs: Record<string, RegistrarConfig> = {
     'cloudflare': {
       name: 'Cloudflare',
       code: 'cloudflare',
       apiEndpoint: 'https://api.cloudflare.com/client/v4',
       authType: 'api_key',
-      supportedOperations: ['dns_records', 'zone_settings', 'ssl'],
+      supportedOperations: ['dns_records', 'zone_settings', 'ssl', 'purge_cache'],
       docsUrl: 'https://developers.cloudflare.com/api/',
       setupInstructions: [
         'Go to Cloudflare Dashboard → My Profile → API Tokens',
         'Create a new API token with Zone:Edit permissions',
-        'Copy the token and save it securely'
+        'Copy the token and save it securely',
+        'Optionally add Zone:Read permissions for verification'
       ]
     },
     'namecheap': {
@@ -44,13 +45,14 @@ export class RegistrarDetectionService {
       code: 'namecheap',
       apiEndpoint: 'https://api.namecheap.com/xml.response',
       authType: 'api_key',
-      supportedOperations: ['dns_records', 'domain_info'],
+      supportedOperations: ['dns_records', 'domain_info', 'nameservers'],
       docsUrl: 'https://www.namecheap.com/support/api/',
       setupInstructions: [
         'Log into Namecheap account',
         'Go to Profile → Tools → API Access',
-        'Enable API access and whitelist your IP',
-        'Generate API key'
+        'Enable API access and whitelist your IP address',
+        'Generate API key and save username',
+        'Note: API requires IP whitelisting'
       ]
     },
     'godaddy': {
@@ -58,12 +60,13 @@ export class RegistrarDetectionService {
       code: 'godaddy',
       apiEndpoint: 'https://api.godaddy.com/v1',
       authType: 'api_key',
-      supportedOperations: ['dns_records', 'domain_info'],
+      supportedOperations: ['dns_records', 'domain_info', 'nameservers'],
       docsUrl: 'https://developer.godaddy.com/',
       setupInstructions: [
-        'Go to GoDaddy Developer Portal',
+        'Go to GoDaddy Developer Portal (developer.godaddy.com)',
         'Create a new API key',
-        'Note the API Key and Secret'
+        'Note both the API Key and Secret',
+        'Select production environment for live domains'
       ]
     },
     'route53': {
@@ -71,12 +74,13 @@ export class RegistrarDetectionService {
       code: 'route53',
       apiEndpoint: 'https://route53.amazonaws.com',
       authType: 'credentials',
-      supportedOperations: ['dns_records', 'hosted_zones'],
+      supportedOperations: ['dns_records', 'hosted_zones', 'health_checks'],
       docsUrl: 'https://docs.aws.amazon.com/route53/',
       setupInstructions: [
-        'Create AWS IAM user with Route53 permissions',
-        'Generate access key and secret',
-        'Note the AWS region'
+        'Create AWS IAM user with Route53FullAccess permissions',
+        'Generate access key and secret access key',
+        'Note the AWS region (usually us-east-1 for Route53)',
+        'Ensure domain is using Route 53 hosted zone'
       ]
     },
     'digitalocean': {
@@ -84,12 +88,112 @@ export class RegistrarDetectionService {
       code: 'digitalocean',
       apiEndpoint: 'https://api.digitalocean.com/v2',
       authType: 'api_key',
-      supportedOperations: ['dns_records', 'domains'],
+      supportedOperations: ['dns_records', 'domains', 'load_balancers'],
       docsUrl: 'https://docs.digitalocean.com/reference/api/',
       setupInstructions: [
         'Go to DigitalOcean Control Panel',
-        'Navigate to API → Tokens',
-        'Generate a new personal access token'
+        'Navigate to API → Personal Access Tokens',
+        'Generate a new personal access token',
+        'Ensure token has read and write permissions'
+      ]
+    },
+    'google': {
+      name: 'Google Domains',
+      code: 'google',
+      apiEndpoint: 'https://dns.googleapis.com/dns/v1',
+      authType: 'oauth',
+      supportedOperations: ['dns_records', 'zones'],
+      docsUrl: 'https://developers.google.com/domains/',
+      setupInstructions: [
+        'Go to Google Cloud Console',
+        'Enable Cloud DNS API',
+        'Create service account credentials',
+        'Download JSON key file',
+        'Note: Requires Google Cloud DNS setup'
+      ]
+    },
+    'hover': {
+      name: 'Hover',
+      code: 'hover',
+      apiEndpoint: 'https://www.hover.com/api',
+      authType: 'credentials',
+      supportedOperations: ['dns_records'],
+      docsUrl: 'https://hoverapi.docs.apiary.io/',
+      setupInstructions: [
+        'Contact Hover support for API access',
+        'API access is limited and requires approval',
+        'Use username and password authentication',
+        'Note: Manual DNS setup recommended for Hover'
+      ]
+    },
+    'networksolutions': {
+      name: 'Network Solutions',
+      code: 'networksolutions',
+      apiEndpoint: 'https://api.networksolutions.com',
+      authType: 'api_key',
+      supportedOperations: ['dns_records', 'domain_info'],
+      docsUrl: 'https://www.networksolutions.com/api/',
+      setupInstructions: [
+        'Contact Network Solutions for API access',
+        'API requires business account',
+        'Manual DNS setup recommended',
+        'Use web interface for DNS management'
+      ]
+    },
+    'ionos': {
+      name: '1&1 IONOS',
+      code: 'ionos',
+      apiEndpoint: 'https://api.ionos.com/cloudapi/v6',
+      authType: 'api_key',
+      supportedOperations: ['dns_records', 'domains'],
+      docsUrl: 'https://developer.ionos.com/',
+      setupInstructions: [
+        'Log into IONOS Control Panel',
+        'Go to Account → API Management',
+        'Create new API key',
+        'Select appropriate permissions for DNS management'
+      ]
+    },
+    'bluehost': {
+      name: 'Bluehost',
+      code: 'bluehost',
+      apiEndpoint: 'https://my.bluehost.com/api',
+      authType: 'credentials',
+      supportedOperations: ['dns_records'],
+      docsUrl: 'https://www.bluehost.com/help/',
+      setupInstructions: [
+        'Log into Bluehost cPanel',
+        'Navigate to Domains → Zone Editor',
+        'Manage DNS records manually',
+        'Note: Limited API access available'
+      ]
+    },
+    'siteground': {
+      name: 'SiteGround',
+      code: 'siteground',
+      apiEndpoint: 'https://api.siteground.com/general/v1',
+      authType: 'api_key',
+      supportedOperations: ['dns_records', 'domains'],
+      docsUrl: 'https://www.siteground.com/kb/api/',
+      setupInstructions: [
+        'Log into SiteGround User Area',
+        'Go to My Accounts → API',
+        'Generate API key',
+        'Enable DNS management permissions'
+      ]
+    },
+    'domain_com': {
+      name: 'Domain.com',
+      code: 'domain_com',
+      apiEndpoint: 'https://api.domain.com/v1',
+      authType: 'api_key',
+      supportedOperations: ['dns_records', 'domain_info'],
+      docsUrl: 'https://www.domain.com/help/',
+      setupInstructions: [
+        'Contact Domain.com support for API access',
+        'Manual DNS management recommended',
+        'Use control panel for DNS changes',
+        'Limited automation support'
       ]
     }
   };
@@ -214,43 +318,128 @@ export class RegistrarDetectionService {
   }
 
   /**
-   * Identify registrar by nameserver patterns
+   * Identify registrar by nameserver patterns with comprehensive detection
    */
-  private static identifyRegistrarByNameservers(nameservers: string[]): { name: string; code: string } {
+  private static identifyRegistrarByNameservers(nameservers: string[]): { name: string; code: string; confidence: number } {
     const nsString = nameservers.join(' ').toLowerCase();
-    
+
+    // High confidence matches (exact nameserver patterns)
+
     // Cloudflare
-    if (nsString.includes('cloudflare.com') || nsString.includes('ns.cloudflare.com')) {
-      return { name: 'Cloudflare', code: 'cloudflare' };
+    if (nsString.includes('cloudflare.com') ||
+        nsString.includes('ns.cloudflare.com') ||
+        /\b[a-z]+\.ns\.cloudflare\.com/.test(nsString)) {
+      return { name: 'Cloudflare', code: 'cloudflare', confidence: 0.95 };
     }
-    
+
     // Namecheap
-    if (nsString.includes('namecheap.com') || nsString.includes('registrar-servers.com')) {
-      return { name: 'Namecheap', code: 'namecheap' };
+    if (nsString.includes('namecheap.com') ||
+        nsString.includes('registrar-servers.com') ||
+        nsString.includes('dns1.registrar-servers.com') ||
+        nsString.includes('dns2.registrar-servers.com')) {
+      return { name: 'Namecheap', code: 'namecheap', confidence: 0.95 };
     }
-    
+
     // GoDaddy
-    if (nsString.includes('domaincontrol.com') || nsString.includes('godaddy.com')) {
-      return { name: 'GoDaddy', code: 'godaddy' };
+    if (nsString.includes('domaincontrol.com') ||
+        nsString.includes('godaddy.com') ||
+        nsString.includes('parkingcrew.net') ||
+        /ns\d+\.domaincontrol\.com/.test(nsString)) {
+      return { name: 'GoDaddy', code: 'godaddy', confidence: 0.95 };
     }
-    
-    // Route 53
-    if (nsString.includes('awsdns') || nsString.includes('amazonaws.com')) {
-      return { name: 'Amazon Route 53', code: 'route53' };
+
+    // Amazon Route 53
+    if (nsString.includes('awsdns') ||
+        nsString.includes('amazonaws.com') ||
+        /ns-\d+\.awsdns/.test(nsString)) {
+      return { name: 'Amazon Route 53', code: 'route53', confidence: 0.95 };
     }
-    
+
     // DigitalOcean
-    if (nsString.includes('digitalocean.com') || nsString.includes('ns1.digitalocean.com')) {
-      return { name: 'DigitalOcean', code: 'digitalocean' };
+    if (nsString.includes('digitalocean.com') ||
+        nsString.includes('ns1.digitalocean.com') ||
+        nsString.includes('ns2.digitalocean.com') ||
+        nsString.includes('ns3.digitalocean.com')) {
+      return { name: 'DigitalOcean', code: 'digitalocean', confidence: 0.95 };
     }
-    
-    // Google Cloud DNS
-    if (nsString.includes('googledomains.com') || nsString.includes('google.com')) {
-      return { name: 'Google Domains', code: 'google' };
+
+    // Google Domains/Cloud DNS
+    if (nsString.includes('googledomains.com') ||
+        nsString.includes('dns.google') ||
+        /ns-cloud-[a-z]\d+\.googledomains\.com/.test(nsString)) {
+      return { name: 'Google Domains', code: 'google', confidence: 0.95 };
     }
-    
-    // Default
-    return { name: 'Unknown Registrar', code: 'unknown' };
+
+    // Hover
+    if (nsString.includes('hover.com') ||
+        nsString.includes('dns.hover.com') ||
+        /ns\d+\.hover\.com/.test(nsString)) {
+      return { name: 'Hover', code: 'hover', confidence: 0.90 };
+    }
+
+    // Network Solutions
+    if (nsString.includes('worldnic.com') ||
+        nsString.includes('networksolutions.com') ||
+        /ns\d+\.worldnic\.com/.test(nsString)) {
+      return { name: 'Network Solutions', code: 'networksolutions', confidence: 0.90 };
+    }
+
+    // 1&1/IONOS
+    if (nsString.includes('1and1.com') ||
+        nsString.includes('ionos.com') ||
+        nsString.includes('ui-dns.com') ||
+        /ns\d+\.ui-dns\.com/.test(nsString)) {
+      return { name: '1&1 IONOS', code: 'ionos', confidence: 0.90 };
+    }
+
+    // Bluehost
+    if (nsString.includes('bluehost.com') ||
+        nsString.includes('hostmonster.com') ||
+        /ns\d+\.bluehost\.com/.test(nsString)) {
+      return { name: 'Bluehost', code: 'bluehost', confidence: 0.85 };
+    }
+
+    // SiteGround
+    if (nsString.includes('siteground.com') ||
+        /ns\d+\.siteground\.(net|com)/.test(nsString)) {
+      return { name: 'SiteGround', code: 'siteground', confidence: 0.85 };
+    }
+
+    // Domain.com
+    if (nsString.includes('domain.com') ||
+        /ns\d+\.domain\.com/.test(nsString)) {
+      return { name: 'Domain.com', code: 'domain_com', confidence: 0.80 };
+    }
+
+    // Medium confidence matches (partial patterns)
+
+    // Detect common hosting providers that may handle DNS
+    if (nsString.includes('hostgator.com')) {
+      return { name: 'HostGator', code: 'hostgator', confidence: 0.70 };
+    }
+
+    if (nsString.includes('dreamhost.com')) {
+      return { name: 'DreamHost', code: 'dreamhost', confidence: 0.70 };
+    }
+
+    if (nsString.includes('wpengine.com')) {
+      return { name: 'WP Engine', code: 'wpengine', confidence: 0.70 };
+    }
+
+    if (nsString.includes('squarespace.com')) {
+      return { name: 'Squarespace', code: 'squarespace', confidence: 0.70 };
+    }
+
+    if (nsString.includes('wix.com')) {
+      return { name: 'Wix', code: 'wix', confidence: 0.70 };
+    }
+
+    if (nsString.includes('shopify.com')) {
+      return { name: 'Shopify', code: 'shopify', confidence: 0.70 };
+    }
+
+    // Default fallback
+    return { name: 'Unknown Registrar', code: 'unknown', confidence: 0.0 };
   }
 
   /**
@@ -276,18 +465,33 @@ export class RegistrarDetectionService {
   }
 
   /**
-   * Get registrar code from registrar name
+   * Get registrar code from registrar name with enhanced mapping
    */
   private static getRegistrarCodeFromName(registrarName: string): string {
     const name = registrarName.toLowerCase();
-    
+
+    // Exact matches
     if (name.includes('cloudflare')) return 'cloudflare';
     if (name.includes('namecheap')) return 'namecheap';
-    if (name.includes('godaddy')) return 'godaddy';
-    if (name.includes('amazon') || name.includes('aws')) return 'route53';
-    if (name.includes('digitalocean')) return 'digitalocean';
+    if (name.includes('godaddy') || name.includes('go daddy')) return 'godaddy';
+    if (name.includes('amazon') || name.includes('aws') || name.includes('route 53')) return 'route53';
+    if (name.includes('digitalocean') || name.includes('digital ocean')) return 'digitalocean';
     if (name.includes('google')) return 'google';
-    
+    if (name.includes('hover')) return 'hover';
+    if (name.includes('network solutions') || name.includes('networksolutions')) return 'networksolutions';
+    if (name.includes('1&1') || name.includes('ionos') || name.includes('1and1')) return 'ionos';
+    if (name.includes('bluehost')) return 'bluehost';
+    if (name.includes('siteground')) return 'siteground';
+    if (name.includes('domain.com')) return 'domain_com';
+
+    // Additional hosting providers
+    if (name.includes('hostgator')) return 'hostgator';
+    if (name.includes('dreamhost')) return 'dreamhost';
+    if (name.includes('wpengine') || name.includes('wp engine')) return 'wpengine';
+    if (name.includes('squarespace')) return 'squarespace';
+    if (name.includes('wix')) return 'wix';
+    if (name.includes('shopify')) return 'shopify';
+
     return 'unknown';
   }
 

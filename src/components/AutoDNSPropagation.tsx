@@ -42,7 +42,8 @@ import {
   Unlock,
   RefreshCw,
   Copy,
-  Info
+  Info,
+  X
 } from 'lucide-react';
 import RegistrarDetectionService, { RegistrarInfo } from '@/services/registrarDetectionService';
 import RegistrarAPIService, { RegistrarCredentials, DNSRecord } from '@/services/registrarAPIService';
@@ -345,73 +346,198 @@ export function AutoDNSPropagation({
 
     const { toCreate, toUpdate, toKeep } = updatePreview;
     const totalChanges = toCreate.length + toUpdate.length;
+    const propagationTime = registrarInfo?.registrarCode === 'cloudflare' ? '1-5 minutes' :
+                           registrarInfo?.registrarCode === 'namecheap' ? '30 minutes - 2 hours' :
+                           registrarInfo?.registrarCode === 'godaddy' ? '1-8 hours' :
+                           '1-48 hours';
 
     return (
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-semibold">DNS Update Preview</h3>
-          <Badge variant={totalChanges > 0 ? 'default' : 'secondary'}>
-            {totalChanges} change{totalChanges !== 1 ? 's' : ''}
-          </Badge>
+      <div className="space-y-6">
+        {/* Header with summary */}
+        <div className="flex items-center justify-between p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <div>
+            <h3 className="text-lg font-semibold text-blue-900">DNS Update Preview</h3>
+            <p className="text-sm text-blue-700 mt-1">
+              Changes will be applied to your {registrarInfo?.registrar} account
+            </p>
+          </div>
+          <div className="text-right">
+            <Badge variant={totalChanges > 0 ? 'default' : 'secondary'} className="mb-2">
+              {totalChanges} change{totalChanges !== 1 ? 's' : ''}
+            </Badge>
+            <div className="text-xs text-blue-600">
+              Est. propagation: {propagationTime}
+            </div>
+          </div>
         </div>
 
+        {/* Impact warning for sensitive changes */}
+        {(toUpdate.length > 0 || toCreate.some(r => r.type === 'A')) && (
+          <Alert className="border-orange-200 bg-orange-50">
+            <AlertTriangle className="h-4 w-4 text-orange-600" />
+            <AlertDescription className="text-orange-800">
+              <div className="space-y-2">
+                <p className="font-medium">Important: This will modify your live DNS settings</p>
+                <ul className="text-sm space-y-1 list-disc list-inside">
+                  {toCreate.some(r => r.type === 'A') && (
+                    <li>A record changes will redirect your domain traffic to our hosting</li>
+                  )}
+                  {toUpdate.some(c => c.from.type === 'A') && (
+                    <li>Existing A record will be updated - your site may be temporarily unreachable</li>
+                  )}
+                  <li>Changes may take {propagationTime} to fully propagate worldwide</li>
+                  <li>We recommend making changes during low-traffic periods</li>
+                </ul>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* Records to Create */}
         {toCreate.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <h4 className="font-medium text-green-700 flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
               Records to Create ({toCreate.length})
             </h4>
-            <div className="space-y-1">
+            <div className="space-y-2">
               {toCreate.map((record, index) => (
-                <div key={index} className="p-2 bg-green-50 border border-green-200 rounded text-sm">
-                  <strong>{record.type}</strong> {record.name} → {record.content}
+                <div key={index} className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge className="bg-green-100 text-green-800">{record.type}</Badge>
+                    <div className="text-xs text-green-600">TTL: {record.ttl}s</div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
+                    <div>
+                      <span className="font-medium text-green-900">Name:</span>
+                      <code className="ml-2 bg-green-100 px-2 py-1 rounded text-xs">
+                        {record.name === '@' ? domain.domain : `${record.name}.${domain.domain}`}
+                      </code>
+                    </div>
+                    <div>
+                      <span className="font-medium text-green-900">Value:</span>
+                      <code className="ml-2 bg-green-100 px-2 py-1 rounded text-xs break-all">
+                        {record.content}
+                      </code>
+                    </div>
+                  </div>
+                  <div className="mt-2 text-xs text-green-700">
+                    {record.type === 'A' && 'Points your domain to our hosting servers'}
+                    {record.type === 'CNAME' && 'Creates an alias for the www subdomain'}
+                    {record.type === 'TXT' && 'Verifies domain ownership for our platform'}
+                    {record.type === 'MX' && 'Configures email routing for your domain'}
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
 
+        {/* Records to Update */}
         {toUpdate.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <h4 className="font-medium text-blue-700 flex items-center gap-2">
               <RefreshCw className="h-4 w-4" />
               Records to Update ({toUpdate.length})
             </h4>
-            <div className="space-y-1">
+            <div className="space-y-2">
               {toUpdate.map((change, index) => (
-                <div key={index} className="p-2 bg-blue-50 border border-blue-200 rounded text-sm">
-                  <div><strong>{change.from.type}</strong> {change.from.name}</div>
-                  <div className="text-red-600">- {change.from.content}</div>
-                  <div className="text-green-600">+ {change.to.content}</div>
+                <div key={index} className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center justify-between mb-2">
+                    <Badge className="bg-blue-100 text-blue-800">{change.from.type}</Badge>
+                    <div className="text-xs text-blue-600">TTL: {change.to.ttl}s</div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="p-2 bg-red-50 border border-red-200 rounded">
+                      <div className="text-sm text-red-700 font-medium mb-1">Current Value:</div>
+                      <code className="text-xs bg-red-100 px-2 py-1 rounded break-all">
+                        {change.from.content}
+                      </code>
+                    </div>
+                    <div className="flex justify-center">
+                      <RefreshCw className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <div className="p-2 bg-green-50 border border-green-200 rounded">
+                      <div className="text-sm text-green-700 font-medium mb-1">New Value:</div>
+                      <code className="text-xs bg-green-100 px-2 py-1 rounded break-all">
+                        {change.to.content}
+                      </code>
+                    </div>
+                  </div>
+                  <div className="mt-2 text-xs text-blue-700">
+                    This will update your existing {change.from.type} record to point to our hosting
+                  </div>
                 </div>
               ))}
             </div>
           </div>
         )}
 
+        {/* Records to Keep */}
         {toKeep.length > 0 && (
-          <div className="space-y-2">
+          <div className="space-y-3">
             <h4 className="font-medium text-gray-700 flex items-center gap-2">
               <CheckCircle className="h-4 w-4" />
               Records to Keep ({toKeep.length})
             </h4>
-            <div className="space-y-1">
-              {toKeep.map((record, index) => (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {toKeep.slice(0, 4).map((record, index) => (
                 <div key={index} className="p-2 bg-gray-50 border border-gray-200 rounded text-sm">
-                  <strong>{record.type}</strong> {record.name} → {record.content}
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">{record.type}</Badge>
+                    <span className="text-xs text-gray-600 truncate">
+                      {record.name} → {record.content.substring(0, 20)}{record.content.length > 20 ? '...' : ''}
+                    </span>
+                  </div>
                 </div>
               ))}
+              {toKeep.length > 4 && (
+                <div className="p-2 bg-gray-50 border border-gray-200 rounded text-sm flex items-center justify-center text-gray-500">
+                  +{toKeep.length - 4} more records
+                </div>
+              )}
             </div>
           </div>
         )}
 
+        {/* No changes needed */}
         {totalChanges === 0 && (
-          <Alert>
-            <CheckCircle className="h-4 w-4" />
-            <AlertDescription>
-              All required DNS records are already configured correctly. No changes needed.
+          <Alert className="border-green-200 bg-green-50">
+            <CheckCircle className="h-4 w-4 text-green-600" />
+            <AlertDescription className="text-green-800">
+              <div className="space-y-2">
+                <p className="font-medium">Perfect! Your DNS is already configured correctly.</p>
+                <p className="text-sm">
+                  All required DNS records are properly set up. No changes are needed.
+                </p>
+              </div>
             </AlertDescription>
           </Alert>
+        )}
+
+        {/* Rollback information */}
+        {totalChanges > 0 && (
+          <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+            <h4 className="font-medium text-gray-900 mb-2 flex items-center gap-2">
+              <Info className="h-4 w-4" />
+              Rollback Information
+            </h4>
+            <p className="text-sm text-gray-700 mb-2">
+              If you need to revert these changes, you can restore your original DNS settings:
+            </p>
+            <div className="space-y-1 text-xs text-gray-600">
+              {toUpdate.map((change, index) => (
+                <div key={index} className="font-mono">
+                  {change.from.type} {change.from.name} → {change.from.content}
+                </div>
+              ))}
+              {toCreate.map((record, index) => (
+                <div key={index} className="font-mono">
+                  Remove {record.type} {record.name}
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     );
@@ -593,32 +719,80 @@ export function AutoDNSPropagation({
           </div>
         )}
 
-        {/* Confirmation Dialog */}
+        {/* Enhanced Confirmation Dialog */}
         <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
-          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Confirm DNS Changes</DialogTitle>
+              <DialogTitle className="flex items-center gap-2">
+                <Shield className="h-5 w-5" />
+                Confirm DNS Auto-Propagation
+              </DialogTitle>
+              <div className="text-sm text-gray-600">
+                Review the changes below before applying them to your {registrarInfo?.registrar} account
+              </div>
             </DialogHeader>
-            
+
             <div className="py-4">
               {renderUpdatePreview()}
             </div>
 
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowConfirmation(false)}>
-                Cancel
-              </Button>
-              <Button 
-                onClick={performAutoPropagation}
-                disabled={loading}
-              >
-                {loading ? (
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                ) : (
-                  <Zap className="h-4 w-4 mr-2" />
-                )}
-                Confirm & Update DNS
-              </Button>
+            {/* Safety checklist */}
+            {updatePreview && (updatePreview.toCreate.length > 0 || updatePreview.toUpdate.length > 0) && (
+              <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <h4 className="font-medium text-yellow-900 mb-3 flex items-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  Safety Checklist - Please Confirm
+                </h4>
+                <div className="space-y-2 text-sm text-yellow-800">
+                  <label className="flex items-start gap-2">
+                    <input type="checkbox" className="mt-0.5" required />
+                    <span>I understand this will modify my live DNS settings</span>
+                  </label>
+                  <label className="flex items-start gap-2">
+                    <input type="checkbox" className="mt-0.5" required />
+                    <span>I have noted the rollback information above</span>
+                  </label>
+                  <label className="flex items-start gap-2">
+                    <input type="checkbox" className="mt-0.5" required />
+                    <span>I'm aware changes may take time to propagate globally</span>
+                  </label>
+                  {updatePreview.toUpdate.some(c => c.from.type === 'A') && (
+                    <label className="flex items-start gap-2">
+                      <input type="checkbox" className="mt-0.5" required />
+                      <span>I understand my site may be temporarily unreachable during A record changes</span>
+                    </label>
+                  )}
+                </div>
+              </div>
+            )}
+
+            <DialogFooter className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Lock className="h-4 w-4" />
+                <span>Secure API connection to {registrarInfo?.registrar}</span>
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowConfirmation(false)}
+                  className="flex items-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  Cancel
+                </Button>
+                <Button
+                  onClick={performAutoPropagation}
+                  disabled={loading}
+                  className="flex items-center gap-2"
+                >
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Zap className="h-4 w-4" />
+                  )}
+                  {loading ? 'Applying Changes...' : 'Confirm & Update DNS'}
+                </Button>
+              </div>
             </DialogFooter>
           </DialogContent>
         </Dialog>

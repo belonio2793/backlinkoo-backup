@@ -1,6 +1,5 @@
 /**
- * Test registrar API credentials
- * Supports Cloudflare, Namecheap, GoDaddy, DigitalOcean, Route 53
+ * Test registrar API credentials to verify they work correctly
  */
 exports.handler = async (event, context) => {
   // Set CORS headers
@@ -46,9 +45,9 @@ exports.handler = async (event, context) => {
       };
     }
 
-    console.log(`🔧 Testing credentials for ${credentials.registrarCode}`);
+    console.log(`🔧 Testing credentials for ${credentials.registrarCode}...`);
 
-    // Test credentials based on registrar
+    // Test credentials based on registrar type
     const result = await testCredentialsByRegistrar(credentials);
 
     return {
@@ -65,83 +64,114 @@ exports.handler = async (event, context) => {
       headers,
       body: JSON.stringify({
         success: false,
-        message: 'Internal server error during credential test',
-        details: error.message
+        message: 'Failed to test credentials',
+        error: error.message
       })
     };
   }
 };
 
 /**
- * Test credentials for specific registrar
+ * Test credentials for different registrars
  */
 async function testCredentialsByRegistrar(credentials) {
-  switch (credentials.registrarCode) {
-    case 'cloudflare':
-      return await testCloudflareCredentials(credentials);
-    
-    case 'namecheap':
-      return await testNamecheapCredentials(credentials);
-    
-    case 'godaddy':
-      return await testGoDaddyCredentials(credentials);
-    
-    case 'digitalocean':
-      return await testDigitalOceanCredentials(credentials);
-    
-    case 'route53':
-      return await testRoute53Credentials(credentials);
-    
-    default:
-      return {
-        success: false,
-        message: `Registrar ${credentials.registrarCode} not supported yet`
-      };
+  const { registrarCode, apiKey, apiSecret, accessToken, zone } = credentials;
+
+  try {
+    switch (registrarCode) {
+      case 'cloudflare':
+        return await testCloudflareCredentials(apiKey, zone);
+      
+      case 'namecheap':
+        return await testNamecheapCredentials(apiKey, credentials.userId);
+      
+      case 'godaddy':
+        return await testGoDaddyCredentials(apiKey, apiSecret);
+      
+      case 'route53':
+        return await testRoute53Credentials(credentials);
+      
+      case 'digitalocean':
+        return await testDigitalOceanCredentials(apiKey);
+      
+      case 'google':
+        return await testGoogleCredentials(accessToken);
+      
+      default:
+        return {
+          success: false,
+          message: `Testing not implemented for ${registrarCode}. Manual verification required.`
+        };
+    }
+  } catch (error) {
+    console.error(`Error testing ${registrarCode} credentials:`, error);
+    return {
+      success: false,
+      message: `Failed to test ${registrarCode} credentials: ${error.message}`
+    };
   }
 }
 
 /**
  * Test Cloudflare API credentials
  */
-async function testCloudflareCredentials(credentials) {
+async function testCloudflareCredentials(apiKey, zoneId) {
   try {
-    if (!credentials.apiKey) {
-      return {
-        success: false,
-        message: 'API key is required for Cloudflare'
-      };
-    }
-
-    // Test API access by getting user info
+    // Test by getting user info
     const response = await fetch('https://api.cloudflare.com/client/v4/user', {
+      method: 'GET',
       headers: {
-        'Authorization': `Bearer ${credentials.apiKey}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       }
     });
 
     const data = await response.json();
 
-    if (data.success) {
-      return {
-        success: true,
-        message: 'Cloudflare credentials verified successfully',
-        accountInfo: {
-          email: data.result.email,
-          id: data.result.id,
-          organization: data.result.organizations?.[0]?.name || 'Personal'
-        }
-      };
-    } else {
-      return {
-        success: false,
-        message: data.errors?.[0]?.message || 'Invalid Cloudflare credentials'
-      };
+    if (!response.ok) {
+      throw new Error(data.errors?.[0]?.message || 'API request failed');
     }
+
+    if (!data.success) {
+      throw new Error(data.errors?.[0]?.message || 'Authentication failed');
+    }
+
+    // If zone ID provided, test zone access
+    let zoneInfo = null;
+    if (zoneId) {
+      const zoneResponse = await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${apiKey}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (zoneResponse.ok) {
+        const zoneData = await zoneResponse.json();
+        if (zoneData.success) {
+          zoneInfo = {
+            name: zoneData.result.name,
+            status: zoneData.result.status
+          };
+        }
+      }
+    }
+
+    return {
+      success: true,
+      message: 'Cloudflare credentials verified successfully',
+      accountInfo: {
+        email: data.result.email,
+        name: data.result.first_name + ' ' + data.result.last_name,
+        zones: zoneInfo ? [zoneInfo] : 'Zone access not tested'
+      }
+    };
+
   } catch (error) {
     return {
       success: false,
-      message: `Cloudflare API error: ${error.message}`
+      message: `Cloudflare authentication failed: ${error.message}`
     };
   }
 }
@@ -149,50 +179,42 @@ async function testCloudflareCredentials(credentials) {
 /**
  * Test Namecheap API credentials
  */
-async function testNamecheapCredentials(credentials) {
+async function testNamecheapCredentials(apiKey, userId) {
   try {
-    if (!credentials.apiKey || !credentials.userId) {
-      return {
-        success: false,
-        message: 'API key and user ID are required for Namecheap'
-      };
+    const testUrl = new URL('https://api.namecheap.com/xml.response');
+    testUrl.searchParams.set('ApiUser', userId || 'testuser');
+    testUrl.searchParams.set('ApiKey', apiKey);
+    testUrl.searchParams.set('UserName', userId || 'testuser');
+    testUrl.searchParams.set('Command', 'namecheap.users.getBalances');
+    testUrl.searchParams.set('ClientIp', '127.0.0.1'); // This would need to be the actual client IP
+
+    const response = await fetch(testUrl.toString(), {
+      method: 'GET'
+    });
+
+    const xmlText = await response.text();
+    
+    // Basic XML parsing (would need proper parser in production)
+    if (xmlText.includes('<Status>ERROR</Status>')) {
+      throw new Error('API authentication failed');
     }
 
-    // Test API access by getting domain list (limited call)
-    const url = new URL('https://api.namecheap.com/xml.response');
-    url.searchParams.set('ApiUser', credentials.userId);
-    url.searchParams.set('ApiKey', credentials.apiKey);
-    url.searchParams.set('UserName', credentials.userId);
-    url.searchParams.set('Command', 'namecheap.domains.getList');
-    url.searchParams.set('ClientIp', '127.0.0.1'); // Placeholder IP
-
-    const response = await fetch(url.toString());
-    const text = await response.text();
-
-    // Simple XML parsing for success/error
-    if (text.includes('Status="OK"')) {
+    if (xmlText.includes('<Status>OK</Status>')) {
       return {
         success: true,
         message: 'Namecheap credentials verified successfully',
         accountInfo: {
-          userId: credentials.userId
+          note: 'Namecheap API requires IP whitelisting'
         }
       };
-    } else if (text.includes('Authentication failed') || text.includes('Invalid ApiKey')) {
-      return {
-        success: false,
-        message: 'Invalid Namecheap API credentials'
-      };
-    } else {
-      return {
-        success: false,
-        message: 'Namecheap API error - check your credentials and IP whitelist'
-      };
     }
+
+    throw new Error('Unexpected API response');
+
   } catch (error) {
     return {
       success: false,
-      message: `Namecheap API error: ${error.message}`
+      message: `Namecheap authentication failed: ${error.message}. Note: Ensure your IP is whitelisted in Namecheap API settings.`
     };
   }
 }
@@ -200,109 +222,126 @@ async function testNamecheapCredentials(credentials) {
 /**
  * Test GoDaddy API credentials
  */
-async function testGoDaddyCredentials(credentials) {
+async function testGoDaddyCredentials(apiKey, apiSecret) {
   try {
-    if (!credentials.apiKey || !credentials.apiSecret) {
-      return {
-        success: false,
-        message: 'API key and secret are required for GoDaddy'
-      };
-    }
-
-    // Test API access by getting domain list
     const response = await fetch('https://api.godaddy.com/v1/domains', {
+      method: 'GET',
       headers: {
-        'Authorization': `sso-key ${credentials.apiKey}:${credentials.apiSecret}`,
+        'Authorization': `sso-key ${apiKey}:${apiSecret}`,
         'Content-Type': 'application/json'
       }
     });
 
-    if (response.ok) {
-      const domains = await response.json();
-      return {
-        success: true,
-        message: 'GoDaddy credentials verified successfully',
-        accountInfo: {
-          domainCount: domains.length
-        }
-      };
-    } else if (response.status === 401) {
-      return {
-        success: false,
-        message: 'Invalid GoDaddy API credentials'
-      };
-    } else {
-      return {
-        success: false,
-        message: `GoDaddy API error: HTTP ${response.status}`
-      };
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Invalid API key or secret');
+      }
+      throw new Error(`API request failed with status ${response.status}`);
     }
+
+    const domains = await response.json();
+
+    return {
+      success: true,
+      message: 'GoDaddy credentials verified successfully',
+      accountInfo: {
+        domainsCount: domains.length,
+        sampleDomains: domains.slice(0, 3).map(d => d.domain)
+      }
+    };
+
   } catch (error) {
     return {
       success: false,
-      message: `GoDaddy API error: ${error.message}`
+      message: `GoDaddy authentication failed: ${error.message}`
     };
   }
+}
+
+/**
+ * Test Route 53 credentials (basic test)
+ */
+async function testRoute53Credentials(credentials) {
+  // Note: AWS SDK would be needed for proper Route 53 testing
+  // This is a placeholder implementation
+  return {
+    success: false,
+    message: 'Route 53 credential testing requires AWS SDK. Please verify manually in AWS console.'
+  };
 }
 
 /**
  * Test DigitalOcean API credentials
  */
-async function testDigitalOceanCredentials(credentials) {
+async function testDigitalOceanCredentials(apiKey) {
   try {
-    if (!credentials.apiKey) {
-      return {
-        success: false,
-        message: 'API key is required for DigitalOcean'
-      };
-    }
-
-    // Test API access by getting account info
     const response = await fetch('https://api.digitalocean.com/v2/account', {
+      method: 'GET',
       headers: {
-        'Authorization': `Bearer ${credentials.apiKey}`,
+        'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       }
     });
 
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        success: true,
-        message: 'DigitalOcean credentials verified successfully',
-        accountInfo: {
-          email: data.account.email,
-          uuid: data.account.uuid,
-          status: data.account.status
-        }
-      };
-    } else if (response.status === 401) {
-      return {
-        success: false,
-        message: 'Invalid DigitalOcean API token'
-      };
-    } else {
-      return {
-        success: false,
-        message: `DigitalOcean API error: HTTP ${response.status}`
-      };
+    if (!response.ok) {
+      if (response.status === 401) {
+        throw new Error('Invalid API token');
+      }
+      throw new Error(`API request failed with status ${response.status}`);
     }
+
+    const data = await response.json();
+
+    return {
+      success: true,
+      message: 'DigitalOcean credentials verified successfully',
+      accountInfo: {
+        email: data.account.email,
+        status: data.account.status,
+        droplets: data.account.droplet_limit
+      }
+    };
+
   } catch (error) {
     return {
       success: false,
-      message: `DigitalOcean API error: ${error.message}`
+      message: `DigitalOcean authentication failed: ${error.message}`
     };
   }
 }
 
 /**
- * Test AWS Route 53 credentials
+ * Test Google Cloud DNS credentials
  */
-async function testRoute53Credentials(credentials) {
-  // Route 53 requires AWS SDK and proper credential handling
-  // For now, return a placeholder response
-  return {
-    success: false,
-    message: 'Route 53 integration requires AWS SDK setup - contact support for configuration'
-  };
+async function testGoogleCredentials(accessToken) {
+  try {
+    // Test with a simple API call
+    const response = await fetch('https://dns.googleapis.com/dns/v1/projects', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    return {
+      success: true,
+      message: 'Google Cloud DNS credentials verified successfully',
+      accountInfo: {
+        projects: data.projects ? data.projects.length : 0
+      }
+    };
+
+  } catch (error) {
+    return {
+      success: false,
+      message: `Google Cloud DNS authentication failed: ${error.message}`
+    };
+  }
 }
