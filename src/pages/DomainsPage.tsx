@@ -1893,7 +1893,7 @@ anotherdomain.org`}
                             }}
                           >
                             <Plus className="w-3 h-3 mr-1" />
-                            Add to Netlify + DNS
+                            Add To Netlify
                           </Button>
                           {/* DNS Instructions Button */}
                           <Button
