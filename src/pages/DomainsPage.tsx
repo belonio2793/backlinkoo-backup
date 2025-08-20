@@ -301,9 +301,22 @@ const DomainsPage = () => {
   };
 
   // Test Supabase connection
-  const testSupabaseConnection = async () => {
+  const testSupabaseConnection = async (throwOnError: boolean = true) => {
     try {
       console.log('🔍 Testing Supabase connection...');
+
+      // Check if environment variables are available
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      if (!supabaseUrl || !supabaseKey) {
+        const errorMsg = 'Supabase environment variables not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.';
+        console.warn('���️', errorMsg);
+        if (throwOnError) {
+          throw new Error(errorMsg);
+        }
+        return false;
+      }
 
       // Simple connection test
       const { data, error } = await supabase
@@ -313,16 +326,28 @@ const DomainsPage = () => {
 
       if (error) {
         if (error.message?.includes('No API key found')) {
-          throw new Error('Supabase API key is missing. Please refresh the page.');
+          const errorMsg = 'Supabase API key is missing. Please refresh the page.';
+          console.warn('⚠️', errorMsg);
+          if (throwOnError) {
+            throw new Error(errorMsg);
+          }
+          return false;
         }
-        throw error;
+        if (throwOnError) {
+          throw error;
+        }
+        console.warn('⚠️ Supabase connection test failed:', error.message);
+        return false;
       }
 
       console.log('✅ Supabase connection test successful');
       return true;
     } catch (error: any) {
       console.error('❌ Supabase connection test failed:', error);
-      throw new Error(error.message || 'Database connection failed');
+      if (throwOnError) {
+        throw new Error(error.message || 'Database connection failed');
+      }
+      return false;
     }
   };
 
