@@ -135,6 +135,7 @@ const DomainsPage = () => {
   const [netlifyDNSSync, setNetlifyDNSSync] = useState<NetlifyDNSSync | null>(null); // Initialize Netlify DNS sync service
   const [netlifyDomainService, setNetlifyDomainService] = useState<NetlifyDomainService | null>(null); // Initialize Netlify domain service
   const [netlifyCustomDomainService, setNetlifyCustomDomainService] = useState<NetlifyCustomDomainService | null>(null); // Initialize Netlify custom domain service
+  const [enhancedNetlifyService, setEnhancedNetlifyService] = useState<EnhancedNetlifyDomainService | null>(null); // Enhanced Netlify service with DNS
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
