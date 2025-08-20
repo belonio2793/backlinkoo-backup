@@ -276,10 +276,8 @@ const DomainsPage = () => {
     const envToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
     if (envToken && envToken.length > 10) {
       setNetlifyEnvStatus('synced');
-      setNetlifyKeyValue(envToken.substring(0, 8) + '...' + envToken.substring(envToken.length - 4));
     } else {
       setNetlifyEnvStatus('missing');
-      setNetlifyKeyValue('');
     }
   };
 
@@ -918,7 +916,7 @@ const DomainsPage = () => {
           if (isDevMode && result.message.includes('simulated')) {
             toast.success(result.message);
           } else {
-            toast.warning(`⚠��� ${result.message}`);
+            toast.warning(`����� ${result.message}`);
           }
         }
 
