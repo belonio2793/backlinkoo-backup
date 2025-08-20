@@ -42,8 +42,25 @@ export class NetlifyCustomDomainService {
 
   /**
    * Check if the service is properly configured
+   * Uses server-side health check to verify configuration
    */
-  isConfigured(): boolean {
+  async isConfigured(): Promise<boolean> {
+    try {
+      const response = await fetch('/.netlify/functions/netlify-custom-domain?health=check');
+      if (!response.ok) return false;
+
+      const result = await response.json();
+      return result.success && result.environment?.hasToken;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Legacy synchronous check (for backward compatibility)
+   */
+  isConfiguredSync(): boolean {
+    // Basic client-side check - not as reliable as server-side
     return Boolean(this.token && this.siteId);
   }
 
