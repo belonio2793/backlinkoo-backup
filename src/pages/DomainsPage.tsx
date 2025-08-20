@@ -1261,20 +1261,30 @@ anotherdomain.org`}
               <div className="mt-4 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold text-blue-900 mb-2">A Record</h4>
-                    <div className="font-mono text-sm">
+                    <h4 className="font-semibold text-blue-900 mb-2">A Records (Netlify)</h4>
+                    <div className="font-mono text-sm space-y-1">
                       <div>Name: @</div>
-                      <div>Value: {hostingConfig.ip}</div>
+                      <div>Value: 75.2.60.5</div>
+                      <div>Value: 99.83.190.102</div>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="mt-2"
-                      onClick={() => copyToClipboard(hostingConfig.ip)}
-                    >
-                      <Copy className="h-3 w-3 mr-1" />
-                      Copy IP
-                    </Button>
+                    <div className="flex gap-2 mt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => copyToClipboard('75.2.60.5')}
+                      >
+                        <Copy className="h-3 w-3 mr-1" />
+                        Copy IP1
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => copyToClipboard('99.83.190.102')}
+                      >
+                        <Copy className="h-3 w-3 mr-1" />
+                        Copy IP2
+                      </Button>
+                    </div>
                   </div>
                   
                   <div className="p-4 bg-green-50 rounded-lg">
