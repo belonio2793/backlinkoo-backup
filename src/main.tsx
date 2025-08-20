@@ -172,6 +172,13 @@ if (import.meta.env.DEV) {
   console.log('  - testResponseBodyFix() - Test the response body fix methods');
   console.log('  - RobustContentProcessor - Content validation and repair utilities');
   console.log('  - DISABLE_VITE_PROTECTION=true - Disable Vite fetch protection');
+  console.log('');
+  console.log('🔧 Supabase Connection Helpers:');
+  console.log('  - fixSupabaseConnection() - Emergency fix for Supabase connection issues');
+  console.log('  - testSupabaseConnectivity() - Test network connectivity to Supabase');
+  console.log('  - SupabaseConnectionFixer.emergencyFix() - Full diagnostic and repair');
+  console.log('  - SupabaseConnectionFixer.checkConfiguration() - Validate environment variables');
+  console.log('  - SupabaseConnectionFixer.testConnectivity() - Test all network endpoints');
 
   // Add helper to disable fetch protection
   (window as any).disableViteProtection = () => {
@@ -519,7 +526,7 @@ if (typeof window !== 'undefined') {
           return obj; // Return successfully without throwing
         }
       } catch (e) {
-        console.warn(`��️ Error checking ${prop} property during redefinition:`, e);
+        console.warn(`⚠️ Error checking ${prop} property during redefinition:`, e);
       }
     }
 
