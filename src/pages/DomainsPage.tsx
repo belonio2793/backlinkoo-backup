@@ -94,6 +94,8 @@ interface Domain {
   blog_subdirectory?: string;
   auto_retry_count?: number;
   max_retries?: number;
+  netlify_id?: string;
+  netlify_synced?: boolean;
 }
 
 interface HostingConfig {
