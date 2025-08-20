@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useEffect } from 'react';
+import React, { Suspense, lazy, useEffect, useState } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -22,6 +22,8 @@ import { LazyBeautifulBlogPost } from "@/components/LazyComponents";
 import EmergencyErrorBoundary from "@/components/EmergencyErrorBoundary";
 import { DomainsAuthGuard } from "@/components/DomainsAuthGuard";
 import { DomainErrorBoundary } from "@/components/DomainErrorBoundary";
+import SupabaseErrorRecovery from "@/components/SupabaseErrorRecovery";
+import { SupabaseConnectionFixer } from "@/utils/supabaseConnectionFixer";
 import Index from "./pages/Index";
 
 const LazyEmergencyBlogPost = lazy(() => import("./components/EmergencyBlogPost"));
