@@ -125,6 +125,8 @@ const DomainsPage = () => {
   const [showAutoPropagationWizard, setShowAutoPropagationWizard] = useState(false);
   const [selectedDomainForWizard, setSelectedDomainForWizard] = useState<Domain | null>(null);
   const [domainBlogThemesExists, setDomainBlogThemesExists] = useState<boolean | null>(null);
+  const [showAutomationPanel, setShowAutomationPanel] = useState(false);
+  const [netlifyConfigured, setNetlifyConfigured] = useState(false);
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
