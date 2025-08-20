@@ -21,6 +21,7 @@ import "@/utils/emergencyDisable"; // Load emergency disable utilities
 import { LazyBeautifulBlogPost } from "@/components/LazyComponents";
 import { DomainsAuthGuard } from "@/components/DomainsAuthGuard";
 import { DomainErrorBoundary } from "@/components/DomainErrorBoundary";
+import { FullStoryEmergencyControls } from "@/components/debug/FullStoryEmergencyControls";
 import Index from "./pages/Index";
 
 const LazyEmergencyBlogPost = lazy(() => import("./components/EmergencyBlogPost"));
