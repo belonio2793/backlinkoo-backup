@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { getErrorMessage } from './errorUtils';
 
 export class BlogClaimMigration {
   /**
