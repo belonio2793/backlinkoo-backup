@@ -1053,7 +1053,7 @@ const DomainsPage = () => {
         const netlifyDNSResult = await netlifyDNSSync.autoSyncNewDomain(domain);
 
         if (netlifyDNSResult.success) {
-          console.log(`✅ ${domain.domain} synced to Netlify DNS zone: ${netlifyDNSResult.netlifyZoneId}`);
+          console.log(`�� ${domain.domain} synced to Netlify DNS zone: ${netlifyDNSResult.netlifyZoneId}`);
 
           // Update domain status to reflect DNS sync
           await updateDomain(domain.id, {
@@ -1601,7 +1601,7 @@ anotherdomain.org`}
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button variant="outline" size="sm" className="text-xs">
-                                <Settings className="h-3 w-3 mr-1" />
+                                <Terminal className="h-3 w-3 mr-1" />
                                 DNS Setup
                               </Button>
                             </DialogTrigger>
