@@ -926,7 +926,7 @@ const DomainsPage = () => {
         // Auto-add to Netlify if validation was successful and not already synced
         if (result.validated && !domain.netlify_synced && netlifyDomainService && netlifyDomainService.isConfigured()) {
           try {
-            console.log(`🌐 DNS validation successful - adding ${domain.domain} to Netlify automatically...`);
+            console.log(`�� DNS validation successful - adding ${domain.domain} to Netlify automatically...`);
             toast.info(`Adding ${domain.domain} to Netlify for SSL/TLS...`);
 
             const netlifyResult = await netlifyDomainService.addDomain(domain.domain);
@@ -1875,9 +1875,6 @@ anotherdomain.org`}
                                   return;
                                 } else if (token.length < 20) {
                                   toast.error(`❌ VITE_NETLIFY_ACCESS_TOKEN too short (${token.length} chars). Valid tokens are typically 50+ characters.`);
-                                  return;
-                                } else if (token.includes('demo')) {
-                                  toast.error('❌ Demo token detected. Please set your real Netlify access token.');
                                   return;
                                 } else {
                                   toast.info(`✅ Valid token found (${token.length} chars). Proceeding with real API call...`);
