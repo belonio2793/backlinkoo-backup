@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:netlify": "netlify dev",
+    "dev:simple": "vite --port 5173",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
