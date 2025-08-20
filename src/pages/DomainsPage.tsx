@@ -884,12 +884,40 @@ const DomainsPage = () => {
   // Auto-setup new domain with DNS and themes
   const autoSetupNewDomain = async (domain: Domain) => {
     try {
-      if (!netlifyConfigured) {
-        toast.info(`Domain ${domain.domain} added. Use automation panel for full setup.`);
+      // In auto-sync mode, always attempt configuration
+      const shouldAutoSetup = autoSyncEnabled || netlifyConfigured;
+
+      if (!shouldAutoSetup) {
+        toast.info(`Domain ${domain.domain} added. Enable auto-sync or use automation panel for full setup.`);
         return;
       }
 
-      toast.info(`🚀 Auto-configuring ${domain.domain}...`);
+      if (autoSyncEnabled) {
+        toast.info(`🚀 Auto-sync: Configuring ${domain.domain} automatically...`);
+      } else {
+        toast.info(`🚀 Auto-configuring ${domain.domain}...`);
+      }
+
+      // In auto-sync mode, also trigger DNS validation immediately
+      if (autoSyncEnabled) {
+        // Update domain status to indicate auto-processing
+        await updateDomain(domain.id, {
+          status: 'validating',
+          dns_validated: false,
+          a_record_validated: false,
+          txt_record_validated: false,
+          cname_validated: false
+        });
+
+        // Auto-validate DNS after a short delay
+        setTimeout(async () => {
+          try {
+            await validateDomain(domain.id);
+          } catch (error) {
+            console.error('Auto-validation failed:', error);
+          }
+        }, 2000);
+      }
 
       // Configure DNS
       const dnsManager = NetlifyDNSManager.getInstance();
@@ -904,7 +932,10 @@ const DomainsPage = () => {
         );
 
         if (themeResult.success) {
-          toast.success(`✅ ${domain.domain} fully configured for campaigns!`);
+          const message = autoSyncEnabled
+            ? `✅ Auto-sync: ${domain.domain} fully configured and ready for publishing!`
+            : `✅ ${domain.domain} fully configured for campaigns!`;
+          toast.success(message);
           loadDomains(); // Refresh the list
         } else {
           toast.warning(`DNS configured, but theme setup failed: ${themeResult.message}`);
@@ -914,7 +945,10 @@ const DomainsPage = () => {
       }
     } catch (error) {
       console.error('Auto-setup failed:', error);
-      toast.error(`Auto-setup failed for ${domain.domain}`);
+      const message = autoSyncEnabled
+        ? `Auto-sync setup failed for ${domain.domain}`
+        : `Auto-setup failed for ${domain.domain}`;
+      toast.error(message);
     }
   };
 
