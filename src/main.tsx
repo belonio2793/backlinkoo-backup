@@ -159,8 +159,8 @@ if (import.meta.env.DEV) {
   // Import beautiful content structure utility
   import('./utils/forceBeautifulContentStructure');
 
-  // Import and run one-time beautiful content migration
-  import('./utils/oneTimeBeautifulContentMigration');
+  // Import and run one-time beautiful content migration - DISABLED DUE TO AUTO-EXECUTION ERRORS
+  // import('./utils/oneTimeBeautifulContentMigration');
 
   // Import response body fix test
   import('./utils/testResponseBodyFix');
