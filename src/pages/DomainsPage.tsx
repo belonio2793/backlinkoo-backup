@@ -406,7 +406,7 @@ const DomainsPage = () => {
   // Auto-configure DNS for a specific domain
   const autoConfigureDomainDNS = async (domain: Domain, apiToken: string) => {
     try {
-      console.log(`🔧 Auto-configuring DNS for ${domain.domain}`);
+      console.log(`��� Auto-configuring DNS for ${domain.domain}`);
 
       // For demo mode, simulate DNS configuration
       if (apiToken.includes('demo')) {
@@ -1724,9 +1724,21 @@ anotherdomain.org`}
                                 className="text-xs h-5 px-2"
                                 onClick={async () => {
                                   try {
+                                    console.log('🔧 Add to Netlify button clicked for:', domain.domain);
+                                    console.log('🔧 NetlifyDomainService status:', {
+                                      exists: !!netlifyDomainService,
+                                      configured: netlifyDomainService?.isConfigured()
+                                    });
+
                                     // Check if already added
                                     if (domain.netlify_synced) {
                                       toast.warning(`⚠️ ${domain.domain} is already added to Netlify! No action needed.`);
+                                      return;
+                                    }
+
+                                    // Check if service is configured
+                                    if (!netlifyDomainService?.isConfigured()) {
+                                      toast.error('❌ Netlify integration not configured. Please set up your Netlify access token.');
                                       return;
                                     }
 
