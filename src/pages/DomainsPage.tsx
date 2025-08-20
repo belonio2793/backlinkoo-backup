@@ -57,7 +57,8 @@ import {
   Edit3,
   Save,
   Palette,
-  Wand2
+  Wand2,
+  Zap
 } from 'lucide-react';
 import SimpleBlogTemplateManager from '@/components/SimpleBlogTemplateManager';
 import BlogTemplateDebug from '@/components/BlogTemplateDebug';
