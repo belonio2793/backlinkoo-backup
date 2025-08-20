@@ -57,7 +57,7 @@ export class NetlifyDNSManager extends NetlifyDomainAPI {
    * Check if environment token is available
    */
   static isConfigured(): boolean {
-    const token = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN || process.env.NETLIFY_ACCESS_TOKEN;
+    const token = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
     return Boolean(token);
   }
 
