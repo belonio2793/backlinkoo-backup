@@ -1355,15 +1355,18 @@ anotherdomain.org`}
             <CardTitle className="flex items-center justify-between">
               <span>Your Domains ({domains.length})</span>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowAutomationPanel(!showAutomationPanel)}
-                  className="bg-blue-50 border-blue-200 hover:bg-blue-100"
-                >
-                  <Wand2 className="h-4 w-4 mr-1" />
-                  Automation
-                </Button>
+                {/* Automation button - Only show when auto-sync is disabled */}
+                {!autoSyncEnabled && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAutomationPanel(!showAutomationPanel)}
+                    className="bg-blue-50 border-blue-200 hover:bg-blue-100"
+                  >
+                    <Wand2 className="h-4 w-4 mr-1" />
+                    Automation
+                  </Button>
+                )}
                 {/* Enhanced Netlify Sync Button with DNS Propagation - Only show when auto-sync is disabled */}
                 {!autoSyncEnabled && (
                   <Button
@@ -1872,13 +1875,15 @@ anotherdomain.org`}
           </Card>
         )}
 
-        {/* Netlify Environment Sync Panel */}
-        <div className="mt-8">
-          <NetlifyEnvironmentSync onSyncComplete={handleSyncComplete} />
-        </div>
+        {/* Netlify Environment Sync Panel - Only show when auto-sync is disabled */}
+        {!autoSyncEnabled && (
+          <div className="mt-8">
+            <NetlifyEnvironmentSync onSyncComplete={handleSyncComplete} />
+          </div>
+        )}
 
-        {/* Domain Automation Panel */}
-        {showAutomationPanel && (
+        {/* Domain Automation Panel - Only show when auto-sync is disabled */}
+        {!autoSyncEnabled && showAutomationPanel && (
           <Card className="mt-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -1894,6 +1899,41 @@ anotherdomain.org`}
                 domains={domains}
                 onDomainsUpdated={loadDomains}
               />
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Auto-sync info panel when enabled */}
+        {autoSyncEnabled && (
+          <Card className="mt-8 border-blue-200 bg-blue-50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-blue-900">
+                <Zap className="h-5 w-5" />
+                Automatic Domain Sync Enabled
+              </CardTitle>
+              <CardDescription className="text-blue-700">
+                Domains are automatically configured with DNS settings and Netlify integration in the background.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center justify-between p-4 bg-white rounded-lg border border-blue-200">
+                <div className="flex items-center gap-3">
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                  <div>
+                    <p className="font-medium text-sm">Auto-sync is active</p>
+                    <p className="text-xs text-gray-600">New domains will be automatically configured for hosting and publishing</p>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setAutoSyncEnabled(false)}
+                  className="border-blue-300 text-blue-700 hover:bg-blue-100"
+                >
+                  <Settings className="w-4 h-4 mr-1" />
+                  Show Manual Controls
+                </Button>
+              </div>
             </CardContent>
           </Card>
         )}
