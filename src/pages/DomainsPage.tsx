@@ -141,7 +141,7 @@ const DomainsPage = () => {
   // Hosting configuration - editable
   const [hostingConfig, setHostingConfig] = useState<HostingConfig>({
     ip: '75.2.60.5', // Netlify's primary IP address
-    cname: 'builder-io-domains.netlify.app', // Your Netlify site domain
+    cname: 'backlinkoo.domains.netlify.app', // Your Netlify site domain
     provider: 'netlify',
     autoSSL: true,
     defaultSubdirectory: 'blog'

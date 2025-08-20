@@ -128,7 +128,7 @@ export class NetlifyDNSSync {
     try {
       // Demo mode simulation
       if (this.apiToken.includes('demo') || this.apiToken.length < 20) {
-        console.log(`🧪 Demo mode: Simulating DNS zone creation for ${domain}`);
+        console.log(`��� Demo mode: Simulating DNS zone creation for ${domain}`);
         return {
           id: `demo-zone-${Date.now()}`,
           name: domain,
@@ -222,7 +222,7 @@ export class NetlifyDNSSync {
         {
           type: 'CNAME',
           hostname: 'www',
-          value: 'builder-io-domains.netlify.app',
+          value: 'backlinkoo.domains.netlify.app',
           ttl: 3600
         },
         // TXT record for domain verification

@@ -244,7 +244,7 @@ export class NetlifyDNSManager extends NetlifyDomainAPI {
   }> {
     const defaultConfig: AutoDNSConfig = {
       aRecords: ['75.2.60.5', '99.83.190.102'], // Netlify IPs
-      cnameTarget: 'builder-io-domains.netlify.app',
+      cnameTarget: 'backlinkoo.domains.netlify.app',
       txtVerification: this.generateVerificationToken(),
       enableSSL: true,
       ...config
