@@ -267,11 +267,16 @@ const DomainsPage = () => {
       return;
     }
 
+    setDnsConfiguring(true);
+    setDnsProgress({ current: 0, total: domainsNeedingDNS.length, domain: '' });
+
     toast.info(`⚙️ Configuring DNS for ${domainsNeedingDNS.length} domains...`);
 
     const results = [];
 
-    for (const domain of domainsNeedingDNS) {
+    for (let i = 0; i < domainsNeedingDNS.length; i++) {
+      const domain = domainsNeedingDNS[i];
+      setDnsProgress({ current: i + 1, total: domainsNeedingDNS.length, domain: domain.domain });
       try {
         console.log(`🔧 Processing ${domain.domain}...`);
 
