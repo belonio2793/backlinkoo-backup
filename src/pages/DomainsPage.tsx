@@ -978,7 +978,11 @@ const DomainsPage = () => {
     try {
       // Test connection before attempting to add domain
       console.log('🔍 Testing connection before domain addition...');
-      await testSupabaseConnection();
+      const connectionWorking = await testSupabaseConnection(false);
+
+      if (!connectionWorking) {
+        throw new Error('Cannot add domain: Database connection is not available. Please check your Supabase configuration.');
+      }
       console.log('✅ Connection test passed, proceeding with domain addition');
 
       const data = await addSingleDomain(newDomain);
