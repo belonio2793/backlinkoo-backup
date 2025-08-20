@@ -323,6 +323,11 @@ const App = () => (
             </Routes>
                 </ReportSyncProvider>
               </PremiumUpgradeProvider>
+
+              {/* FullStory Emergency Controls - only show in development or when needed */}
+              {(import.meta.env.DEV || new URLSearchParams(window.location.search).get('debug') === 'true') && (
+                <FullStoryEmergencyControls />
+              )}
             </BrowserRouter>
             </TextCleanerProvider>
           </SymbolCleanerProvider>
