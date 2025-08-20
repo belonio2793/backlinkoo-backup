@@ -69,7 +69,7 @@ export class NetlifyDomainService {
 
       // Demo mode simulation
       if (!this.token || this.token.includes('demo') || this.token.length < 20) {
-        console.log(`🔧 Demo mode: Simulating domain addition for ${domain}`);
+        console.warn(`⚠️ DEMO MODE: No valid Netlify token found. Token length: ${this.token?.length || 0}. Simulating domain addition for ${domain}`);
         
         const mockResponse: NetlifyDomainResponse = {
           id: `demo-domain-${Date.now()}`,
