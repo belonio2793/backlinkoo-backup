@@ -1,0 +1,10 @@
+{
+  "domains": [
+    "example.com",
+    "test.org", 
+    "mydomain.net",
+    "sample-site.com",
+    "demo.io"
+  ],
+  "notes": "Example domains configuration file for bulk domain addition"
+}
