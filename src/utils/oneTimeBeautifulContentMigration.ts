@@ -39,7 +39,8 @@ export async function runOneTimeBeautifulContentMigration(): Promise<void> {
       }
       posts = data;
     } catch (fetchError: any) {
-      console.error('❌ Network error fetching blog posts for migration:', fetchError.message);
+      console.error('❌ Network error fetching blog posts for migration:', getErrorMessage(fetchError));
+      console.error('❌ Full network error details:', formatErrorForLogging(fetchError, 'Blog Migration Network'));
       return;
     }
 
