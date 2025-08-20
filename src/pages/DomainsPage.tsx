@@ -1030,13 +1030,6 @@ const DomainsPage = () => {
     }
   };
 
-  const toggleBlogEnabled = async (domainId: string, enabled: boolean) => {
-    await updateDomain(domainId, { blog_enabled: enabled });
-  };
-
-  const toggleSSL = async (domainId: string, enabled: boolean) => {
-    await updateDomain(domainId, { ssl_enabled: enabled });
-  };
 
   const deleteDomain = async (domainId: string, domainName: string) => {
     if (!confirm(`Are you sure you want to delete ${domainName}?`)) {
