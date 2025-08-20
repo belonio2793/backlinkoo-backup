@@ -278,6 +278,41 @@ const DomainsPage = () => {
     initializeDomains();
   }, []); // Remove user dependency
 
+  // Test complete domain setup
+  const testDomainSetup = async () => {
+    try {
+      console.log('🧪 Testing complete domain setup...');
+      toast.info('Testing domain management system...');
+
+      const result = await DomainManager.testDomainSetup();
+
+      if (result.success) {
+        toast.success('✅ Domain management system is working correctly!');
+        console.log('✅ Domain setup test results:', result.results);
+      } else {
+        toast.error('❌ Domain setup test failed');
+        console.error('❌ Domain setup test errors:', result.results.errors);
+
+        // Show specific issues
+        if (!result.results.netlifyConnection) {
+          toast.warning('Netlify API connection failed. Check your access token.');
+        }
+        if (!result.results.databaseConnection) {
+          toast.warning('Database connection failed. Check your Supabase configuration.');
+        }
+        if (!result.results.configurationValid) {
+          toast.warning('Netlify configuration missing. Set VITE_NETLIFY_ACCESS_TOKEN and VITE_NETLIFY_SITE_ID.');
+        }
+      }
+
+      return result.success;
+    } catch (error: any) {
+      console.error('❌ Domain setup test failed:', error);
+      toast.error(`Setup test failed: ${error.message}`);
+      return false;
+    }
+  };
+
   // Test Supabase connection
   const testSupabaseConnection = async () => {
     try {
