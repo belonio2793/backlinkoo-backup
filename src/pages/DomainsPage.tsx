@@ -1717,13 +1717,6 @@ anotherdomain.org`}
                             onClick={async () => {
                               try {
                                 console.log('🔧 Checking Netlify status for:', domain.domain);
-
-                                // Check if service is configured
-                                if (!netlifyDomainService?.isConfigured()) {
-                                  toast.error('❌ Netlify integration not configured. Please set up your Netlify access token.');
-                                  return;
-                                }
-
                                 toast.info(`Checking ${domain.domain} status on Netlify...`);
 
                                 // First, check if domain already exists in Netlify
