@@ -18,6 +18,8 @@
 
 [functions]
   directory = "netlify/functions"
+  # Ensure environment variables are passed to functions
+  included_files = ["**/*"]
 
 # Note: Scheduled functions are now configured directly in function files
 # using the schedule() function from @netlify/functions
