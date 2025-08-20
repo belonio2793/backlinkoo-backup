@@ -15,6 +15,7 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string>('');
+  const [connectionError, setConnectionError] = useState<Error | null>(null);
 
   const AUTHORIZED_EMAIL = 'support@backlinkoo.com';
 
@@ -32,9 +33,14 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
 
   const checkAuthStatus = async () => {
     setIsLoading(true);
+    setConnectionError(null);
 
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
+      // Use enhanced auth operations with retry logic
+      const { data: { user }, error } = await SupabaseConnectionFixer.wrapSupabaseOperation(
+        () => supabase.auth.getUser(),
+        'Domains auth check'
+      );
 
       if (error || !user) {
         setIsAuthenticated(false);
@@ -54,11 +60,18 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
 
       console.log(`🔐 Domains access check: ${user.email} -> ${authorized ? 'AUTHORIZED' : 'DENIED'}`);
 
-    } catch (error) {
-      console.error('Domains auth check failed:', error);
-      setIsAuthenticated(false);
-      setIsAuthorized(false);
-      setUserEmail('');
+    } catch (error: any) {
+      console.error('❌ Domains auth check failed:', error);
+
+      // Check if this is a network error
+      if (SupabaseConnectionFixer.isSupabaseNetworkError(error)) {
+        setConnectionError(error);
+        console.warn('⚠️ Network error during domains auth check');
+      } else {
+        setIsAuthenticated(false);
+        setIsAuthorized(false);
+        setUserEmail('');
+      }
     } finally {
       setIsLoading(false);
     }
