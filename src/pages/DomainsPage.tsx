@@ -824,7 +824,7 @@ const DomainsPage = () => {
     }
   };
 
-  const loadDomains = async () => {
+  const loadDomains = async (showToastOnError: boolean = true) => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -851,7 +851,7 @@ const DomainsPage = () => {
 
         // Handle specific Supabase errors
         if (errorMessage.includes('No API key found')) {
-          errorMessage = 'Database connection failed: Missing API key. Please refresh the page.';
+          errorMessage = 'Database connection failed: Missing API key. Please check environment configuration.';
         } else if (errorMessage.includes('JWT')) {
           errorMessage = 'Authentication expired. Please sign in again.';
         } else if (errorMessage.includes('Failed to fetch')) {
@@ -863,12 +863,23 @@ const DomainsPage = () => {
 
       setDomains(data || []);
 
-      // Check if domain_blog_themes table exists
-      await checkDomainBlogThemesTable();
+      // Check if domain_blog_themes table exists (only if we have data)
+      if (data) {
+        await checkDomainBlogThemesTable();
+      }
     } catch (error: any) {
       console.error('Error loading domains:', error);
       const errorMessage = error?.message || 'Unknown error occurred';
-      toast.error(`Failed to load domains: ${errorMessage}`);
+
+      // Only show toast error if explicitly requested (not during initialization)
+      if (showToastOnError) {
+        toast.error(`Failed to load domains: ${errorMessage}`);
+      } else {
+        console.warn('⚠️ Domain loading failed during initialization:', errorMessage);
+      }
+
+      // Set empty domains array on error to allow page to function
+      setDomains([]);
     } finally {
       setLoading(false);
     }
