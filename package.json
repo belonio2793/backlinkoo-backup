@@ -50,7 +50,8 @@
     "setup:domains-full": "npm run setup:blog-themes && npm run setup:campaign-blogs && npm run setup:auto-propagation",
     "generate:leadpages-blog": "node scripts/generate-leadpages-blog.js",
     "verify:leadpages-dns": "node scripts/verify-leadpages-dns.js",
-    "test:blog-functions": "node scripts/test-blog-functions.js"
+    "test:blog-functions": "node scripts/test-blog-functions.js",
+    "test:blog-html": "node scripts/test-blog-html.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",
