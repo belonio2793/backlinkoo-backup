@@ -142,10 +142,10 @@ const DomainsPage = () => {
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
 
-  // Hosting configuration - editable
+  // Hosting configuration - matches backlinkoo.com exactly
   const [hostingConfig, setHostingConfig] = useState<HostingConfig>({
-    ip: '75.2.60.5', // Netlify's primary IP address
-    cname: 'backlinkoo.domains.netlify.app', // Your Netlify site domain
+    ip: '75.2.60.5', // Same IP as backlinkoo.com
+    cname: 'backlinkoo.netlify.app', // Same Netlify app as backlinkoo.com
     provider: 'netlify',
     autoSSL: true,
     defaultSubdirectory: 'blog'
