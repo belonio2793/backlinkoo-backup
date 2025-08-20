@@ -913,7 +913,7 @@ const DomainsPage = () => {
       }
 
       // Step 1: Sync domain to Netlify DNS automatically
-      if (autoSyncEnabled && netlifyDNSSync.isConfigured()) {
+      if (autoSyncEnabled && netlifyDNSSync && netlifyDNSSync.isConfigured()) {
         console.log(`🌐 Syncing ${domain.domain} to Netlify DNS management...`);
 
         const netlifyDNSResult = await netlifyDNSSync.autoSyncNewDomain(domain);
@@ -971,7 +971,7 @@ const DomainsPage = () => {
           toast.warning(`Netlify DNS configured, but theme setup failed: ${themeResult.message}`);
         }
       } else {
-        if (autoSyncEnabled && netlifyDNSSync.isConfigured()) {
+        if (autoSyncEnabled && netlifyDNSSync && netlifyDNSSync.isConfigured()) {
           // If Netlify DNS sync was successful but DNS manager failed, still consider it a success
           toast.success(`✅ ${domain.domain} configured in Netlify DNS! Some additional setup may be needed.`);
           loadDomains();
