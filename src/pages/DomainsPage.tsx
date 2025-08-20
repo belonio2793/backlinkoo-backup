@@ -789,16 +789,16 @@ const DomainsPage = () => {
 
             {/* DNS Service Status */}
             <div className="flex items-center justify-center gap-2 text-sm">
-              <span>DNS Auto-Propagation:</span>
+              <span>DNS Validation Service:</span>
               {dnsServiceStatus === 'online' ? (
                 <Badge className="bg-green-100 text-green-800 border-green-200">
                   <CheckCircle2 className="w-3 h-3 mr-1" />
-                  Available
+                  Production Ready
                 </Badge>
               ) : dnsServiceStatus === 'offline' ? (
-                <Badge className="bg-amber-100 text-amber-800 border-amber-200">
+                <Badge className="bg-blue-100 text-blue-800 border-blue-200">
                   <Info className="w-3 h-3 mr-1" />
-                  Dev Mode
+                  Development Mode
                 </Badge>
               ) : (
                 <Badge className="bg-gray-100 text-gray-800 border-gray-200">
