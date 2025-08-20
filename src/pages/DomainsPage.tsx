@@ -67,6 +67,7 @@ import AutoPropagationWizard from '@/components/AutoPropagationWizard';
 import NetlifyDNSManager from '@/services/netlifyDNSManager';
 import NetlifyDNSSync from '@/services/netlifyDNSSync';
 import NetlifyDomainService from '@/services/netlifyDomainService';
+import NetlifyCustomDomainService from '@/services/netlifyCustomDomainService';
 import AutoDomainBlogThemeService from '@/services/autoDomainBlogThemeService';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -134,6 +135,7 @@ const DomainsPage = () => {
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true); // Enable auto-sync by default
   const [netlifyDNSSync, setNetlifyDNSSync] = useState<NetlifyDNSSync | null>(null); // Initialize Netlify DNS sync service
   const [netlifyDomainService, setNetlifyDomainService] = useState<NetlifyDomainService | null>(null); // Initialize Netlify domain service
+  const [netlifyCustomDomainService, setNetlifyCustomDomainService] = useState<NetlifyCustomDomainService | null>(null); // Initialize Netlify custom domain service
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
@@ -202,6 +204,11 @@ const DomainsPage = () => {
       const domainService = new NetlifyDomainService();
       setNetlifyDomainService(domainService);
       console.log('✅ NetlifyDomainService initialized');
+
+      // Initialize NetlifyCustomDomainService
+      const customDomainService = new NetlifyCustomDomainService();
+      setNetlifyCustomDomainService(customDomainService);
+      console.log('✅ NetlifyCustomDomainService initialized');
 
       // Quick verification if configured
       if (domainService.isConfigured()) {
@@ -394,7 +401,7 @@ const DomainsPage = () => {
     }
 
     if (failed > 0) {
-      toast.warning(`���️ ${failed} domains had DNS configuration issues`);
+      toast.warning(`����️ ${failed} domains had DNS configuration issues`);
       console.warn('Failed DNS configurations:', results.filter(r => !r.success));
     }
 
