@@ -365,6 +365,7 @@ if (import.meta.env.DEV) {
 
   // Import fetch test helper
   import('./utils/fetchTestHelper');
+  import('./utils/automationPipelineTest');
   import('./utils/testResponseBodyFix');
   import('./utils/testBacklinkNotification');
   import('./utils/testRealTimeFeedFix');
