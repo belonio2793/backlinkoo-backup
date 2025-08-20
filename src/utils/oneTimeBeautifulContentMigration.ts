@@ -140,13 +140,15 @@ export function retryBeautifulContentMigration(): void {
   runOneTimeBeautifulContentMigration();
 }
 
-// Auto-run migration when imported (with delay to not block app startup)
+// Auto-run migration when imported (with delay to not block app startup) - DISABLED TO PREVENT AUTO-EXECUTION ERRORS
 if (typeof window !== 'undefined') {
   // Make retry function available globally for debugging
   (window as any).retryBeautifulContentMigration = retryBeautifulContentMigration;
 
-  // Run after a delay to not block initial app load
-  setTimeout(() => {
-    runOneTimeBeautifulContentMigration().catch(console.error);
-  }, 3000);
+  // Run after a delay to not block initial app load - DISABLED
+  // setTimeout(() => {
+  //   runOneTimeBeautifulContentMigration().catch(console.error);
+  // }, 3000);
+
+  console.log('📚 Beautiful content migration utility loaded (auto-execution disabled)');
 }
