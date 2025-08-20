@@ -29,11 +29,12 @@ export class NetlifyDomainService {
   private baseUrl = 'https://api.netlify.com/api/v1';
 
   constructor(token?: string, siteId?: string) {
-    // Try multiple environment variable sources
+    // Try multiple token sources: provided, environment variables, localStorage
     this.token = token ||
                  import.meta.env.VITE_NETLIFY_ACCESS_TOKEN ||
                  import.meta.env.VITE_NETLIFY_TOKEN ||
                  import.meta.env.NETLIFY_ACCESS_TOKEN ||
+                 (typeof window !== 'undefined' ? localStorage.getItem('netlify_token_temp') : null) ||
                  '';
     this.siteId = siteId || import.meta.env.VITE_NETLIFY_SITE_ID || 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809';
 
