@@ -877,54 +877,8 @@ const DomainsPage = () => {
         toast.success(`✅ Domain added to database. Netlify integration available.`);
       }
 
-      // Add domain to Netlify for SSL/TLS and hosting
-      if (netlifyDomainService && netlifyDomainService.isConfigured()) {
-        try {
-          console.log(`🌐 Adding ${domain} to Netlify site...`);
-          toast.info(`Adding ${domain} to Netlify for SSL/TLS...`);
-
-          const netlifyResult = await netlifyDomainService.addDomain(domain);
-
-          if (netlifyResult.success) {
-            console.log('✅ Domain added to Netlify:', netlifyResult.data);
-
-            // Update domain record with Netlify information
-            const updateData: any = {
-              netlify_id: netlifyResult.data?.id,
-              netlify_synced: true
-            };
-
-            // Add SSL status if available
-            if (netlifyResult.status) {
-              updateData.ssl_enabled = netlifyResult.status.ssl.status === 'verified';
-            }
-
-            await supabase
-              .from('domains')
-              .update(updateData)
-              .eq('id', data.id);
-
-            toast.success(`✅ ${domain} added to Netlify! SSL certificate will be provisioned automatically.`);
-
-            // Show setup instructions
-            const instructions = netlifyDomainService.getSetupInstructions(domain, netlifyResult.status);
-            console.log('📋 Setup Instructions:', instructions);
-
-          } else {
-            console.warn('⚠️ Failed to add domain to Netlify:', netlifyResult.error);
-            toast.warning(`Domain added to database but Netlify setup failed: ${netlifyResult.error}`);
-          }
-
-        } catch (netlifyError) {
-          console.error('Error adding to Netlify:', netlifyError);
-          toast.warning('Domain added to database but Netlify setup failed. You can retry later.');
-        }
-      } else {
-        console.log('⚠️ NetlifyDomainService not configured - skipping Netlify domain addition');
-        if (!netlifyDomainService) {
-          toast.info('Domain added. To enable automatic SSL, connect your Netlify token in settings.');
-        }
-      }
+      // DomainManager already handled Netlify integration
+      console.log('✅ Domain added with full Netlify integration via DomainManager');
 
       return data;
     } catch (networkError: any) {
