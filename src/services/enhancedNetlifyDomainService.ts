@@ -294,26 +294,35 @@ export class EnhancedNetlifyDomainService {
   }> {
     try {
       const records: NetlifyDNSRecord[] = [];
+      // Use the exact same DNS records as backlinkoo.com
+      const backlinkooDomain = 'backlinkoo.netlify.app'; // Main Netlify app domain
       const recordsToCreate = [
-        // A record pointing to Netlify's IP
+        // A record pointing to the same IP as backlinkoo.com
         {
           type: 'A',
           hostname: domain,
-          value: '75.2.60.5', // Netlify's primary IP
+          value: '75.2.60.5', // Netlify's IP that backlinkoo.com uses
           ttl: 3600
         },
-        // CNAME for www subdomain
+        // CNAME for www subdomain - point to the same place as backlinkoo.com
         {
           type: 'CNAME',
           hostname: `www.${domain}`,
-          value: `${this.siteId}--${domain.replace(/\./g, '-')}.netlify.app`,
+          value: backlinkooDomain,
           ttl: 3600
         },
-        // CNAME for blog subdomain (if needed)
+        // CNAME for blog subdomain - point to the same place as backlinkoo.com
         {
           type: 'CNAME',
           hostname: `blog.${domain}`,
-          value: `${this.siteId}--${domain.replace(/\./g, '-')}.netlify.app`,
+          value: backlinkooDomain,
+          ttl: 3600
+        },
+        // Wildcard CNAME to catch all subdomains
+        {
+          type: 'CNAME',
+          hostname: `*.${domain}`,
+          value: backlinkooDomain,
           ttl: 3600
         }
       ];
