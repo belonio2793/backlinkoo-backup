@@ -1423,6 +1423,22 @@ anotherdomain.org`}
         )}
 
 
+        {/* Netlify Domain Sync */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="h-5 w-5" />
+              Netlify Domain Sync
+            </CardTitle>
+            <CardDescription>
+              Automatically sync your domains to Netlify for proper hosting and propagation
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <NetlifyDomainSync />
+          </CardContent>
+        </Card>
+
         {/* Blog Template Management Section - Always Show */}
         <Card className="mt-8">
           <CardHeader>
