@@ -1957,19 +1957,56 @@ anotherdomain.org`}
                               size="sm"
                               onClick={async () => {
                                 try {
-                                  // First test Netlify connectivity
-                                  toast.info('Testing Netlify connectivity...');
-                                  const debugResponse = await fetch('/.netlify/functions/netlify-debug');
-                                  const debugResult = await debugResponse.json();
+                                  toast.info('Checking Netlify configuration...');
 
-                                  if (!debugResult.success) {
-                                    toast.error(`Netlify configuration issue: ${debugResult.error}`);
-                                    console.error('Debug info:', debugResult.debug);
+                                  // Test if the functions are even available
+                                  try {
+                                    const testResponse = await fetch('/.netlify/functions/netlify-custom-domain?health=check');
+                                    if (!testResponse.ok) {
+                                      if (testResponse.status === 404) {
+                                        toast.error('❌ Netlify functions not deployed. Please deploy your functions first.');
+                                        return;
+                                      } else {
+                                        toast.error(`❌ Function error: ${testResponse.status} ${testResponse.statusText}`);
+                                        return;
+                                      }
+                                    }
+
+                                    const healthCheck = await testResponse.json();
+                                    console.log('Health check result:', healthCheck);
+
+                                    if (!healthCheck.environment?.hasToken) {
+                                      toast.error('❌ NETLIFY_ACCESS_TOKEN not configured in environment variables');
+                                      console.error('Environment info:', healthCheck.environment);
+                                      return;
+                                    }
+                                  } catch (fetchError) {
+                                    toast.error('❌ Cannot reach Netlify functions. Are they deployed?');
+                                    console.error('Function fetch error:', fetchError);
                                     return;
                                   }
 
                                   toast.info(`Adding ${domain.domain} as custom domain to Netlify...`);
-                                  const result = await netlifyCustomDomainService.addCustomDomain(domain.domain);
+
+                                  // Use the server-side function instead of client-side service
+                                  const addResponse = await fetch('/.netlify/functions/netlify-custom-domain', {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                      domain: domain.domain
+                                    }),
+                                  });
+
+                                  if (!addResponse.ok) {
+                                    const errorText = await addResponse.text();
+                                    toast.error(`❌ HTTP ${addResponse.status}: ${errorText}`);
+                                    console.error('Add domain response error:', errorText);
+                                    return;
+                                  }
+
+                                  const result = await addResponse.json();
 
                                   if (result.success) {
                                     // Update domain record
@@ -1993,10 +2030,11 @@ anotherdomain.org`}
                                     await loadDomains(); // Refresh the list
                                   } else {
                                     toast.error(`Failed to add custom domain: ${result.error}`);
+                                    console.error('Add domain result error:', result);
                                   }
                                 } catch (error) {
                                   console.error('Add to Netlify error:', error);
-                                  toast.error('Failed to add domain to Netlify');
+                                  toast.error(`Failed to add domain to Netlify: ${error.message}`);
                                 }
                               }}
                               title="Add to Netlify for SSL/TLS"
