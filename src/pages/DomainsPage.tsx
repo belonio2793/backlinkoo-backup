@@ -214,7 +214,7 @@ const DomainsPage = () => {
       if (domainService.isConfigured()) {
         console.log('🔗 Netlify integration is configured and ready');
       } else {
-        console.log('⚠️ Netlify integration not configured - using demo mode');
+        console.log('⚠️ Netlify integration not configured');
       }
     } catch (error) {
       console.error('Failed to initialize NetlifyDomainService:', error);
