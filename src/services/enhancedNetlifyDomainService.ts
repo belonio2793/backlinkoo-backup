@@ -11,6 +11,10 @@ export class EnhancedNetlifyDomainService {
   static async getEnhancedDomains(): Promise<any[]> {
     return [];
   }
+
+  static isConfigured(): boolean {
+    return false;
+  }
 }
 
 export default EnhancedNetlifyDomainService;
