@@ -64,7 +64,6 @@ import AutoDNSPropagation from '@/components/AutoDNSPropagation';
 import AutoPropagationWizard from '@/components/AutoPropagationWizard';
 import NetlifyDNSManager from '@/services/netlifyDNSManager';
 import NetlifyDNSSync from '@/services/netlifyDNSSync';
-import NetlifyDomainService from '@/services/netlifyDomainService';
 import NetlifyCustomDomainService from '@/services/netlifyCustomDomainService';
 import EnhancedNetlifyDomainService from '@/services/enhancedNetlifyDomainService';
 import AutoDomainBlogThemeService from '@/services/autoDomainBlogThemeService';
@@ -73,6 +72,8 @@ import { Footer } from '@/components/Footer';
 import DNSSetupInstructions from '@/components/DNSSetupInstructions';
 import { useAuthState } from '@/hooks/useAuthState';
 import { supabase } from '@/integrations/supabase/client';
+import { DomainManager } from '@/services/domainManager';
+import { netlifyDomainService } from '@/services/netlifyDomainService';
 import { toast } from 'sonner';
 
 // Global error handler will be set up in useEffect
@@ -133,7 +134,6 @@ const DomainsPage = () => {
   const [dnsProgress, setDnsProgress] = useState({ current: 0, total: 0, domain: '' });
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true); // Enable auto-sync by default
   const [netlifyDNSSync, setNetlifyDNSSync] = useState<NetlifyDNSSync | null>(null); // Initialize Netlify DNS sync service
-  const [netlifyDomainService, setNetlifyDomainService] = useState<NetlifyDomainService | null>(null); // Initialize Netlify domain service
   const [netlifyCustomDomainService, setNetlifyCustomDomainService] = useState<NetlifyCustomDomainService | null>(null); // Initialize Netlify custom domain service
   const [enhancedNetlifyService, setEnhancedNetlifyService] = useState<EnhancedNetlifyDomainService | null>(null); // Enhanced Netlify service with DNS
   const [showDNSInstructions, setShowDNSInstructions] = useState<{domain: string, scenario: 'registrar' | 'domains-page' | 'subdomain'} | null>(null);
@@ -231,29 +231,85 @@ const DomainsPage = () => {
   }, []);
 
   useEffect(() => {
-    if (user?.id) {
-      // Test connection first, then load domains
-      testSupabaseConnection().then(() => {
-        loadDomains().catch((error) => {
-          console.error('Failed to load domains on mount:', error);
-          const errorMessage = error?.message || 'Unknown error occurred';
-          toast.error(`Failed to load domains: ${errorMessage}`);
-        });
-      }).catch((connectionError) => {
-        console.error('Supabase connection test failed:', connectionError);
-        toast.error('Database connection failed. Please refresh the page.', {
+    // Initialize domains functionality
+    const initializeDomains = async () => {
+      try {
+        console.log('🔧 Initializing domains functionality...');
+
+        // First ensure domains table exists
+        const { ensureDomainsTable } = await import('@/utils/ensureDomainsTable');
+        const tableResult = await ensureDomainsTable();
+
+        if (!tableResult.success) {
+          console.error('❌ Failed to ensure domains table:', tableResult.error);
+          toast.error(`Database setup failed: ${tableResult.error}`, { duration: 10000 });
+          return;
+        }
+
+        if (tableResult.created) {
+          toast.success('✅ Domains table created successfully!', { duration: 5000 });
+        }
+
+        // Test connection
+        await testSupabaseConnection();
+
+        // Load domains
+        await loadDomains();
+
+        // Check DNS service status
+        checkDNSServiceHealth();
+
+        console.log('✅ Domains initialization complete');
+
+      } catch (error: any) {
+        console.error('❌ Domains initialization failed:', error);
+        toast.error(`Initialization failed: ${error.message}`, {
           duration: 10000,
           action: {
-            label: 'Refresh',
+            label: 'Retry',
             onClick: () => window.location.reload()
           }
         });
-      });
+      }
+    };
 
-      // Check DNS service status on load
-      checkDNSServiceHealth();
+    initializeDomains();
+  }, []); // Remove user dependency
+
+  // Test complete domain setup
+  const testDomainSetup = async () => {
+    try {
+      console.log('🧪 Testing complete domain setup...');
+      toast.info('Testing domain management system...');
+
+      const result = await DomainManager.testDomainSetup();
+
+      if (result.success) {
+        toast.success('✅ Domain management system is working correctly!');
+        console.log('✅ Domain setup test results:', result.results);
+      } else {
+        toast.error('❌ Domain setup test failed');
+        console.error('❌ Domain setup test errors:', result.results.errors);
+
+        // Show specific issues
+        if (!result.results.netlifyConnection) {
+          toast.warning('Netlify API connection failed. Check your access token.');
+        }
+        if (!result.results.databaseConnection) {
+          toast.warning('Database connection failed. Check your Supabase configuration.');
+        }
+        if (!result.results.configurationValid) {
+          toast.warning('Netlify configuration missing. Set VITE_NETLIFY_ACCESS_TOKEN and VITE_NETLIFY_SITE_ID.');
+        }
+      }
+
+      return result.success;
+    } catch (error: any) {
+      console.error('❌ Domain setup test failed:', error);
+      toast.error(`Setup test failed: ${error.message}`);
+      return false;
     }
-  }, [user?.id]);
+  };
 
   // Test Supabase connection
   const testSupabaseConnection = async () => {
@@ -825,126 +881,37 @@ const DomainsPage = () => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('domains')
-        .insert({
-          user_id: user?.id,
-          domain,
-          status: 'pending',
-          verification_token: generateVerificationToken(), // Explicitly set verification token
-          required_a_record: hostingConfig.ip,
-          required_cname: hostingConfig.cname,
-          hosting_provider: hostingConfig.provider,
-          blog_subdirectory: hostingConfig.defaultSubdirectory,
-          ssl_enabled: true, // Automatically enable SSL for all domains
-          blog_enabled: true // Automatically enable blog for all domains
-        })
-        .select()
-        .single();
+      console.log(`🚀 Adding domain via DomainManager: ${domain}`);
 
-      if (error) {
-        console.error('Supabase error adding domain:', error);
+      const result = await DomainManager.addDomain({
+        domain,
+        enableBlog: true,
+        blogSubdirectory: hostingConfig.defaultSubdirectory,
+        enableSSL: true,
+        autoValidate: true
+      });
 
-        // Enhanced error message extraction
-        let errorMessage = 'Unknown error occurred';
-
-        if (typeof error === 'string') {
-          errorMessage = error;
-        } else if (error && typeof error === 'object') {
-          errorMessage = error.message ||
-                        error.details ||
-                        error.hint ||
-                        error.code ||
-                        'Database operation failed';
-        }
-
-        // Handle specific error codes
-        if (error.code === '23505') {
-          throw new Error(`Domain ${domain} already exists`);
-        }
-        if (error.code === '23503') {
-          throw new Error(`Authentication error: Please sign out and sign in again`);
-        }
-        if (error.code === '23502') {
-          throw new Error(`Required field missing: Please try again or contact support`);
-        }
-        if (error.code === 'PGRST301') {
-          throw new Error(`Database error: Please try again in a moment`);
-        }
-
-        // Handle specific error messages
-        if (errorMessage.includes('No API key found')) {
-          throw new Error(`Database connection failed: Missing API key. Please refresh the page and try again.`);
-        }
-        if (errorMessage.includes('Failed to fetch')) {
-          throw new Error(`Network error: Please check your connection and try again`);
-        }
-        if (errorMessage.includes('timeout')) {
-          throw new Error(`Request timeout: Please try again`);
-        }
-        if (errorMessage.includes('JWT')) {
-          throw new Error(`Authentication error: Please sign in again`);
-        }
-        if (errorMessage.includes('permission')) {
-          throw new Error(`Permission denied: Please check your access rights`);
-        }
-
-        // Generic error with helpful message
-        throw new Error(`Failed to add domain: ${errorMessage}`);
+      if (!result.success) {
+        throw new Error(result.error);
       }
+
+      const data = result.domain;
 
       if (!data) {
         throw new Error('Domain was added but no data returned');
       }
 
-      // Add domain to Netlify for SSL/TLS and hosting
-      if (netlifyDomainService && netlifyDomainService.isConfigured()) {
-        try {
-          console.log(`🌐 Adding ${domain} to Netlify site...`);
-          toast.info(`Adding ${domain} to Netlify for SSL/TLS...`);
+      console.log(`✅ Domain ${domain} added successfully via DomainManager`);
 
-          const netlifyResult = await netlifyDomainService.addDomain(domain);
-
-          if (netlifyResult.success) {
-            console.log('✅ Domain added to Netlify:', netlifyResult.data);
-
-            // Update domain record with Netlify information
-            const updateData: any = {
-              netlify_id: netlifyResult.data?.id,
-              netlify_synced: true
-            };
-
-            // Add SSL status if available
-            if (netlifyResult.status) {
-              updateData.ssl_enabled = netlifyResult.status.ssl.status === 'verified';
-            }
-
-            await supabase
-              .from('domains')
-              .update(updateData)
-              .eq('id', data.id);
-
-            toast.success(`✅ ${domain} added to Netlify! SSL certificate will be provisioned automatically.`);
-
-            // Show setup instructions
-            const instructions = netlifyDomainService.getSetupInstructions(domain, netlifyResult.status);
-            console.log('📋 Setup Instructions:', instructions);
-
-          } else {
-            console.warn('⚠️ Failed to add domain to Netlify:', netlifyResult.error);
-            toast.warning(`Domain added to database but Netlify setup failed: ${netlifyResult.error}`);
-          }
-
-        } catch (netlifyError) {
-          console.error('Error adding to Netlify:', netlifyError);
-          toast.warning('Domain added to database but Netlify setup failed. You can retry later.');
-        }
+      // Show success message with Netlify status
+      if (result.netlifyDomain) {
+        toast.success(`✅ Domain added to both database and Netlify!`);
       } else {
-        console.log('⚠️ NetlifyDomainService not configured - skipping Netlify domain addition');
-        if (!netlifyDomainService) {
-          toast.info('Domain added. To enable automatic SSL, connect your Netlify token in settings.');
-        }
+        toast.success(`✅ Domain added to database. Netlify integration available.`);
       }
+
+      // DomainManager already handled Netlify integration
+      console.log('✅ Domain added with full Netlify integration via DomainManager');
 
       return data;
     } catch (networkError: any) {
@@ -999,7 +966,7 @@ const DomainsPage = () => {
       setDomains(prev => [data, ...prev]);
       setNewDomain('');
       toast.success(`✅ Domain ${data.domain} added successfully!`);
-      console.log(`✅ Domain addition completed:`, data);
+      console.log(`��� Domain addition completed:`, data);
 
       // Auto-configure if automation is enabled and domain was added successfully
       if (autoSyncEnabled && (netlifyConfigured || netlifyEnvStatus === 'synced')) {
@@ -1556,22 +1523,6 @@ const DomainsPage = () => {
     URL.revokeObjectURL(url);
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-        <Header />
-        <div className="container mx-auto px-4 py-16">
-          <Alert className="max-w-md mx-auto">
-            <Globe className="h-4 w-4" />
-            <AlertDescription>
-              Please sign in to manage your domains and DNS settings.
-            </AlertDescription>
-          </Alert>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">

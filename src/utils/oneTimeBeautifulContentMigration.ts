@@ -7,6 +7,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { applyBeautifulContentStructure } from './forceBeautifulContentStructure';
+import { getErrorMessage, formatErrorForLogging } from './errorUtils';
 
 const MIGRATION_KEY = 'beautiful_content_migration_completed';
 const MIGRATION_VERSION = '1.0.0';
@@ -32,12 +33,14 @@ export async function runOneTimeBeautifulContentMigration(): Promise<void> {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('❌ Failed to fetch blog posts for migration:', error);
+        console.error('❌ Failed to fetch blog posts for migration:', getErrorMessage(error));
+        console.error('❌ Full error details:', formatErrorForLogging(error, 'Blog Migration'));
         return;
       }
       posts = data;
     } catch (fetchError: any) {
-      console.error('❌ Network error fetching blog posts for migration:', fetchError.message);
+      console.error('❌ Network error fetching blog posts for migration:', getErrorMessage(fetchError));
+      console.error('❌ Full network error details:', formatErrorForLogging(fetchError, 'Blog Migration Network'));
       return;
     }
 
@@ -78,23 +81,26 @@ export async function runOneTimeBeautifulContentMigration(): Promise<void> {
                 .eq('id', post.id);
 
               if (updateError) {
-                console.error(`❌ Failed to update post ${post.id} (${post.title?.substring(0, 30)}):`, updateError.message);
-                return { success: false, error: updateError.message };
+                const errorMsg = getErrorMessage(updateError);
+                console.error(`❌ Failed to update post ${post.id} (${post.title?.substring(0, 30)}):`, errorMsg);
+                return { success: false, error: errorMsg };
               }
 
               console.log(`✅ Migrated: "${post.title?.substring(0, 50)}..."`);
               return { success: true };
             } catch (updateError: any) {
-              console.error(`❌ Network error updating post ${post.id}:`, updateError.message);
-              return { success: false, error: updateError.message };
+              const errorMsg = getErrorMessage(updateError);
+              console.error(`❌ Network error updating post ${post.id}:`, errorMsg);
+              return { success: false, error: errorMsg };
             }
           } else {
             console.log(`⏭️ Skipped: "${post.title?.substring(0, 50)}..." (no changes needed)`);
             return { success: true };
           }
         } catch (error: any) {
-          console.error(`💥 Error processing post ${post.id}:`, error.message);
-          return { success: false, error: error.message };
+          const errorMsg = getErrorMessage(error);
+          console.error(`💥 Error processing post ${post.id}:`, errorMsg);
+          return { success: false, error: errorMsg };
         }
       });
 
@@ -122,7 +128,8 @@ export async function runOneTimeBeautifulContentMigration(): Promise<void> {
     localStorage.setItem(MIGRATION_KEY, MIGRATION_VERSION);
 
   } catch (error: any) {
-    console.error('💥 Beautiful content migration failed:', error.message);
+    console.error('💥 Beautiful content migration failed:', getErrorMessage(error));
+    console.error('💥 Full migration error details:', formatErrorForLogging(error, 'Beautiful Content Migration'));
   }
 }
 

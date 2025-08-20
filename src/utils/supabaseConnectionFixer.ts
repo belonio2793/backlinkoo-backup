@@ -16,10 +16,10 @@ export class SupabaseConnectionFixer {
    */
   static isSupabaseNetworkError(error: any): boolean {
     if (!error) return false;
-    
+
     const errorMessage = error.message || error.toString?.() || '';
     const errorStack = error.stack || '';
-    
+
     return (
       errorMessage.includes('Failed to fetch') ||
       errorMessage.includes('NetworkError') ||
@@ -30,6 +30,21 @@ export class SupabaseConnectionFixer {
       errorMessage.includes('ERR_INTERNET_DISCONNECTED') ||
       errorStack.includes('supabase-js.js') ||
       errorStack.includes('@supabase')
+    );
+  }
+
+  /**
+   * Check if error is an auth session missing error (normal for unauthenticated users)
+   */
+  static isAuthSessionMissingError(error: any): boolean {
+    if (!error) return false;
+
+    const errorMessage = error.message || error.toString?.() || '';
+
+    return (
+      errorMessage.includes('Auth session missing') ||
+      errorMessage.includes('AuthSessionMissingError') ||
+      error.name === 'AuthSessionMissingError'
     );
   }
 
@@ -295,16 +310,22 @@ export class SupabaseConnectionFixer {
       try {
         return await operation();
       } catch (error) {
+        // Handle auth session missing errors gracefully (don't retry, don't show as error)
+        if (this.isAuthSessionMissingError(error)) {
+          console.log(`ℹ️ ${context}: No auth session (user not signed in) - this is normal for unauthenticated requests`);
+          throw error; // Still throw so calling code can handle appropriately
+        }
+
         if (this.isSupabaseNetworkError(error)) {
           console.error(`❌ ${context} network error:`, error);
-          
+
           // Show user-friendly error message
           if (this.retryAttempts === 0) {
             toast.error('Connection issue detected. Attempting to reconnect...', {
               duration: 3000
             });
           }
-          
+
           this.retryAttempts++;
         }
         throw error;

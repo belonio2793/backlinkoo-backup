@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { supabase, resilientAuthOperations, SupabaseConnectionFixer } from '@/integrations/supabase/client';
+import { supabase, SupabaseConnectionFixer } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { toast } from 'sonner';
+import { SafeAuth } from '@/utils/safeAuth';
 
 export const useAuthState = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -15,30 +16,23 @@ export const useAuthState = () => {
       try {
         console.log('🔐 Getting initial auth state...');
 
-        // Use resilient auth operations
-        const { data: { user: initialUser }, error } = await resilientAuthOperations.getUser();
+        // Use SafeAuth to handle auth session missing errors gracefully
+        const result = await SafeAuth.getCurrentUser();
 
-        if (error) {
-          throw error;
+        if (result.errorType === 'no_session') {
+          // This is normal - user is not signed in
+          console.log('👤 No authenticated user (no session)');
+          setUser(null);
+          setIsAuthenticated(false);
+          setConnectionError(null);
+          return;
         }
 
-        setUser(initialUser);
-        setIsAuthenticated(!!initialUser);
-        setConnectionError(null);
-
-        if (initialUser) {
-          console.log('✅ User authenticated:', initialUser.email);
-        } else {
-          console.log('👤 No authenticated user');
-        }
-
-      } catch (error: any) {
-        console.error('❌ Auth state error:', error);
-
-        // Handle network errors gracefully
-        if (SupabaseConnectionFixer.isSupabaseNetworkError(error)) {
+        if (result.errorType === 'network_error') {
           console.warn('⚠️ Network error during auth check, working offline mode');
           setConnectionError('Connection issues detected. Some features may be limited.');
+          setUser(null);
+          setIsAuthenticated(false);
 
           // Don't show toast immediately - wait to see if connection recovers
           setTimeout(() => {
@@ -48,18 +42,48 @@ export const useAuthState = () => {
               });
             }
           }, 2000);
+          return;
+        }
 
-        } else {
-          console.error('Error getting initial auth state:', error);
+        if (result.errorType === 'invalid_token') {
+          console.warn('⚠️ Invalid token - clearing session');
+          setUser(null);
+          setIsAuthenticated(false);
+          setConnectionError(null);
+          // Clear invalid token
+          localStorage.removeItem('supabase.auth.token');
+          return;
+        }
+
+        if (result.error && result.errorType !== 'no_session') {
+          console.error('❌ Auth error:', result.error);
           setConnectionError('Authentication error occurred.');
+          setUser(null);
+          setIsAuthenticated(false);
 
           toast.error('Authentication error. Please refresh and try again.', {
             duration: 5000
           });
+          return;
         }
 
+        // Successful auth check
+        setUser(result.user);
+        setIsAuthenticated(!!result.user);
+        setConnectionError(null);
+
+        if (result.user) {
+          console.log('✅ User authenticated:', result.user.email);
+        } else {
+          console.log('👤 No authenticated user');
+        }
+
+      } catch (error: any) {
+        // This shouldn't happen with SafeAuth, but just in case
+        console.error('❌ Unexpected auth state error:', error);
         setUser(null);
         setIsAuthenticated(false);
+        setConnectionError('Authentication check failed.');
       } finally {
         setIsLoading(false);
       }
@@ -108,14 +132,27 @@ export const useAuthState = () => {
       setIsLoading(true);
       console.log('🚪 Signing out user...');
 
-      const { error } = await resilientAuthOperations.signOut();
+      const result = await SafeAuth.signOut();
 
-      if (error) {
-        console.error('❌ Sign out error:', error);
-        throw error;
+      if (!result.success) {
+        console.error('❌ Sign out error:', result.error);
+
+        // Even if sign out fails on server, clear local state
+        if (result.error?.includes('Network') || result.error?.includes('Failed to fetch')) {
+          console.warn('⚠️ Network error during sign out, clearing local session');
+          localStorage.removeItem('supabase.auth.token');
+          setUser(null);
+          setIsAuthenticated(false);
+          setConnectionError(null);
+          toast.warning('Signed out locally due to connection issues', { duration: 3000 });
+          return;
+        }
+
+        toast.error('Sign out failed. Please try again.', { duration: 3000 });
+        throw new Error(result.error);
       }
 
-      // Clear local state immediately
+      // Clear local state
       setUser(null);
       setIsAuthenticated(false);
       setConnectionError(null);
@@ -124,19 +161,8 @@ export const useAuthState = () => {
 
     } catch (error: any) {
       console.error('❌ Error during sign out:', error);
-
-      // If it's a network error, still clear local state
-      if (SupabaseConnectionFixer.isSupabaseNetworkError(error)) {
-        console.warn('⚠️ Network error during sign out, clearing local session');
-        localStorage.removeItem('supabase.auth.token');
-        setUser(null);
-        setIsAuthenticated(false);
-        setConnectionError(null);
-        toast.warning('Signed out locally due to connection issues', { duration: 3000 });
-      } else {
-        toast.error('Sign out failed. Please try again.', { duration: 3000 });
-        throw error;
-      }
+      toast.error('Sign out failed. Please try again.', { duration: 3000 });
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -147,31 +173,53 @@ export const useAuthState = () => {
       setIsLoading(true);
       console.log('🔄 Refreshing auth state...');
 
-      const { data: { user: refreshedUser }, error } = await resilientAuthOperations.getUser();
+      const result = await SafeAuth.getCurrentUser();
 
-      if (error) {
-        throw error;
+      if (result.errorType === 'no_session') {
+        // This is normal - user is not signed in
+        console.log('👤 No authenticated user during refresh');
+        setUser(null);
+        setIsAuthenticated(false);
+        setConnectionError(null);
+        return null;
       }
 
-      setUser(refreshedUser);
-      setIsAuthenticated(!!refreshedUser);
-      setConnectionError(null);
-
-      console.log('✅ Auth refresh successful');
-      return refreshedUser;
-
-    } catch (error: any) {
-      console.error('❌ Error refreshing auth:', error);
-
-      if (SupabaseConnectionFixer.isSupabaseNetworkError(error)) {
+      if (result.errorType === 'network_error') {
         setConnectionError('Unable to verify authentication due to connection issues');
         console.warn('⚠️ Auth refresh failed due to network issues');
-      } else {
+        return null;
+      }
+
+      if (result.errorType === 'invalid_token') {
+        console.warn('⚠️ Invalid token during refresh - clearing session');
+        setUser(null);
+        setIsAuthenticated(false);
+        setConnectionError(null);
+        localStorage.removeItem('supabase.auth.token');
+        return null;
+      }
+
+      if (result.error) {
+        console.error('❌ Error refreshing auth:', result.error);
         setUser(null);
         setIsAuthenticated(false);
         setConnectionError('Authentication verification failed');
+        return null;
       }
 
+      // Successful refresh
+      setUser(result.user);
+      setIsAuthenticated(!!result.user);
+      setConnectionError(null);
+
+      console.log('✅ Auth refresh successful');
+      return result.user;
+
+    } catch (error: any) {
+      console.error('❌ Unexpected error refreshing auth:', error);
+      setUser(null);
+      setIsAuthenticated(false);
+      setConnectionError('Authentication verification failed');
       return null;
     } finally {
       setIsLoading(false);
