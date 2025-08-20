@@ -848,22 +848,21 @@ const DomainsPage = () => {
     }
 
     try {
-      const { data, error } = await supabase
-        .from('domains')
-        .insert({
-          user_id: user?.id,
-          domain,
-          status: 'pending',
-          verification_token: generateVerificationToken(), // Explicitly set verification token
-          required_a_record: hostingConfig.ip,
-          required_cname: hostingConfig.cname,
-          hosting_provider: hostingConfig.provider,
-          blog_subdirectory: hostingConfig.defaultSubdirectory,
-          ssl_enabled: true, // Automatically enable SSL for all domains
-          blog_enabled: true // Automatically enable blog for all domains
-        })
-        .select()
-        .single();
+      console.log(`🚀 Adding domain via DomainManager: ${domain}`);
+
+      const result = await DomainManager.addDomain({
+        domain,
+        enableBlog: true,
+        blogSubdirectory: hostingConfig.defaultSubdirectory,
+        enableSSL: true,
+        autoValidate: true
+      });
+
+      if (!result.success) {
+        throw new Error(result.error);
+      }
+
+      const data = result.domain;
 
       if (error) {
         console.error('Supabase error adding domain:', error);
