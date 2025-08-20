@@ -212,13 +212,10 @@ export class DNSValidationService {
    */
   static async checkServiceHealth(): Promise<'online' | 'offline' | 'unknown'> {
     try {
-      // Check if we're in dev mode
-      const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';
-
-      // If explicitly not in dev mode, consider service online for production
-      if (!isDevMode) {
-        return 'online';
-      }
+      // Check if we're in development mode
+      const isDevMode = window.location.hostname.includes('localhost') ||
+                       window.location.hostname.includes('127.0.0.1') ||
+                       import.meta.env.DEV;
 
       const response = await fetch('/.netlify/functions/validate-domain', {
         method: 'POST',
@@ -228,14 +225,17 @@ export class DNSValidationService {
       });
 
       if (response.status === 404) {
-        return 'offline';
+        return isDevMode ? 'offline' : 'unknown';
       } else {
         return 'online';
       }
     } catch (error) {
-      // For production environments, default to online status
-      const isDevMode = import.meta.env.VITE_DEV_MODE === 'true';
-      return isDevMode ? 'offline' : 'online';
+      // For development, mark as offline. For production, mark as unknown
+      const isDevMode = window.location.hostname.includes('localhost') ||
+                       window.location.hostname.includes('127.0.0.1') ||
+                       import.meta.env.DEV;
+
+      return isDevMode ? 'offline' : 'unknown';
     }
   }
   
