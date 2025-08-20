@@ -681,7 +681,12 @@ const DomainsPage = () => {
       toast.success(`Domain ${data.domain} added successfully!`);
 
       // Auto-configure if automation is enabled and domain was added successfully
-      if (netlifyConfigured) {
+      if (autoSyncEnabled && (netlifyConfigured || netlifyEnvStatus === 'synced')) {
+        console.log(`🚀 Auto-sync enabled: Configuring ${data.domain} automatically...`);
+        setTimeout(() => {
+          autoSetupNewDomain(data);
+        }, 1000);
+      } else if (netlifyConfigured) {
         setTimeout(() => {
           autoSetupNewDomain(data);
         }, 1000);
