@@ -1750,7 +1750,7 @@ anotherdomain.org`}
                                   }}
                                 >
                                   <Plus className="w-3 h-3 mr-1" />
-                                  Add
+                                  Add to Netlify
                                 </Button>
                               )}
                             </div>
