@@ -124,7 +124,8 @@ const App = () => (
   <EmergencyErrorBoundary>
     <QueryClientProvider client={queryClient}>
     <SupabaseErrorBoundary>
-      <TooltipProvider>
+      <SupabaseErrorMonitor>
+        <TooltipProvider>
       <ModalProvider>
         <UserFlowProvider>
           <SymbolCleanerProvider>
@@ -376,7 +377,8 @@ const App = () => (
           </SymbolCleanerProvider>
         </UserFlowProvider>
       </ModalProvider>
-      </TooltipProvider>
+        </TooltipProvider>
+      </SupabaseErrorMonitor>
     </SupabaseErrorBoundary>
     </QueryClientProvider>
   </EmergencyErrorBoundary>
