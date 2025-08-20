@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import React, { useState, useEffect } from 'react';
+import { supabase, SupabaseConnectionFixer } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Shield, Lock, Globe } from 'lucide-react';
+import SupabaseErrorRecovery from '@/components/SupabaseErrorRecovery';
 
 interface DomainsAuthGuardProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [userEmail, setUserEmail] = useState<string>('');
+  const [connectionError, setConnectionError] = useState<Error | null>(null);
 
   const AUTHORIZED_EMAIL = 'support@backlinkoo.com';
 
@@ -31,9 +33,14 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
 
   const checkAuthStatus = async () => {
     setIsLoading(true);
+    setConnectionError(null);
 
     try {
-      const { data: { user }, error } = await supabase.auth.getUser();
+      // Use enhanced auth operations with retry logic
+      const { data: { user }, error } = await SupabaseConnectionFixer.wrapSupabaseOperation(
+        () => supabase.auth.getUser(),
+        'Domains auth check'
+      );
 
       if (error || !user) {
         setIsAuthenticated(false);
@@ -53,11 +60,18 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
 
       console.log(`🔐 Domains access check: ${user.email} -> ${authorized ? 'AUTHORIZED' : 'DENIED'}`);
 
-    } catch (error) {
-      console.error('Domains auth check failed:', error);
-      setIsAuthenticated(false);
-      setIsAuthorized(false);
-      setUserEmail('');
+    } catch (error: any) {
+      console.error('❌ Domains auth check failed:', error);
+
+      // Check if this is a network error
+      if (SupabaseConnectionFixer.isSupabaseNetworkError(error)) {
+        setConnectionError(error);
+        console.warn('⚠️ Network error during domains auth check');
+      } else {
+        setIsAuthenticated(false);
+        setIsAuthorized(false);
+        setUserEmail('');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -69,10 +83,24 @@ export const DomainsAuthGuard = ({ children }: DomainsAuthGuardProps) => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-          <span className="text-gray-600">Verifying domain access permissions...</span>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
+        <div className="w-full max-w-md space-y-4">
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <span className="text-gray-600">Verifying domain access permissions...</span>
+          </div>
+
+          {connectionError && (
+            <SupabaseErrorRecovery
+              error={connectionError}
+              onRecovery={() => {
+                setConnectionError(null);
+                checkAuthStatus();
+              }}
+              onRetry={checkAuthStatus}
+              compact={true}
+            />
+          )}
         </div>
       </div>
     );
