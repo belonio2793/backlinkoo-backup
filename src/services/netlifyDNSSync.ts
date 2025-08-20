@@ -132,17 +132,9 @@ export class NetlifyDNSSync {
    */
   private async createOrGetDNSZone(domain: string): Promise<NetlifyDNSZone | null> {
     try {
-      // Demo mode simulation
-      if (this.apiToken.includes('demo') || this.apiToken.length < 20) {
-        console.log(`��� Demo mode: Simulating DNS zone creation for ${domain}`);
-        return {
-          id: `demo-zone-${Date.now()}`,
-          name: domain,
-          account_slug: 'demo-account',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          records: []
-        };
+      // Check if we have a valid token
+      if (!this.apiToken || this.apiToken.length < 20) {
+        throw new Error('NETLIFY_ACCESS_TOKEN not configured or invalid. Cannot create DNS zone.');
       }
 
       // First, check if zone already exists
