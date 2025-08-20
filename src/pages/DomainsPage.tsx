@@ -1367,6 +1367,33 @@ anotherdomain.org`}
               </div>
             </CardTitle>
           </CardHeader>
+
+          {/* DNS Configuration Progress */}
+          {dnsConfiguring && (
+            <div className="px-6 py-4 bg-blue-50 border-b border-blue-200">
+              <div className="flex items-center gap-3 mb-2">
+                <Loader2 className="h-4 w-4 animate-spin text-blue-600" />
+                <span className="font-medium text-blue-900">
+                  Configuring DNS Propagation ({dnsProgress.current}/{dnsProgress.total})
+                </span>
+              </div>
+              {dnsProgress.domain && (
+                <p className="text-sm text-blue-700 mb-2">
+                  Currently processing: <span className="font-mono">{dnsProgress.domain}</span>
+                </p>
+              )}
+              <div className="w-full bg-blue-200 rounded-full h-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${(dnsProgress.current / dnsProgress.total) * 100}%` }}
+                />
+              </div>
+              <p className="text-xs text-blue-600 mt-1">
+                Setting up A records, CNAME records, and TXT verification for each domain...
+              </p>
+            </div>
+          )}
+
           <CardContent>
             {loading ? (
               <div className="flex items-center justify-center py-12">
@@ -1547,7 +1574,7 @@ anotherdomain.org`}
                                           <span>All functions will be available when deployed to Netlify</span>
                                         </div>
                                         <div className="flex items-start gap-2">
-                                          <span className="font-medium">��� Current Options:</span>
+                                          <span className="font-medium">����� Current Options:</span>
                                           <span>You can still add domains and configure DNS manually via your registrar</span>
                                         </div>
                                       </div>
