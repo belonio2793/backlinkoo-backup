@@ -236,19 +236,8 @@ const DomainsPage = () => {
       try {
         console.log('🔧 Initializing domains functionality...');
 
-        // First ensure domains table exists
-        const { ensureDomainsTable } = await import('@/utils/ensureDomainsTable');
-        const tableResult = await ensureDomainsTable();
-
-        if (!tableResult.success) {
-          console.error('❌ Failed to ensure domains table:', tableResult.error);
-          toast.error(`Database setup failed: ${tableResult.error}`, { duration: 10000 });
-          return;
-        }
-
-        if (tableResult.created) {
-          toast.success('✅ Domains table created successfully!', { duration: 5000 });
-        }
+        // Skip domains table auto-creation to prevent access errors
+        console.log('🔧 Domains initialization started (table auto-creation disabled)...');
 
         // Test connection
         await testSupabaseConnection();
