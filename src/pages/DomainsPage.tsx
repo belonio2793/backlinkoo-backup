@@ -718,7 +718,7 @@ const DomainsPage = () => {
           toast.success(`✅ DNS records automatically configured for ${domain.domain} via Netlify DNS`);
           return { success: true, method: 'netlify-dns' };
         } else {
-          console.warn(`⚠️ Netlify DNS sync failed: ${dnsResult.error}`);
+          console.warn(`⚠�� Netlify DNS sync failed: ${dnsResult.error}`);
         }
       }
 
@@ -1619,6 +1619,50 @@ const DomainsPage = () => {
           </div>
         </div>
 
+        {/* Configuration Status Banner */}
+        {supabaseConnected === false && (
+          <Card className="mb-8 border-yellow-200 bg-yellow-50/50">
+            <CardContent className="pt-6">
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="space-y-2">
+                    <div className="font-medium">Database Configuration Required</div>
+                    <div className="text-sm">
+                      Supabase connection is not available. Please configure your environment variables or use the Environment Configuration panel below.
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        onClick={() => setShowEnvironmentManager(true)}
+                        className="bg-yellow-600 hover:bg-yellow-700"
+                      >
+                        Configure Environment
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          const connectionWorking = await testSupabaseConnection(false);
+                          setSupabaseConnected(connectionWorking);
+                          if (connectionWorking) {
+                            toast.success('✅ Database connection restored!');
+                            await loadDomains();
+                          } else {
+                            toast.error('❌ Database connection still not available');
+                          }
+                        }}
+                      >
+                        <RefreshCw className="h-3 w-3 mr-1" />
+                        Retry Connection
+                      </Button>
+                    </div>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quick Add Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
