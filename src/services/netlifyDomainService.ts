@@ -35,13 +35,10 @@ export class NetlifyDomainService {
                  import.meta.env.VITE_NETLIFY_TOKEN ||
                  import.meta.env.NETLIFY_ACCESS_TOKEN ||
                  '';
-    this.siteId = siteId || import.meta.env.VITE_NETLIFY_SITE_ID || '';
+    this.siteId = siteId || import.meta.env.VITE_NETLIFY_SITE_ID || 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809';
 
     if (!this.token) {
       console.warn('⚠️ NETLIFY_ACCESS_TOKEN or VITE_NETLIFY_TOKEN not set - Netlify domain operations will be simulated');
-    }
-    if (!this.siteId) {
-      throw new Error('VITE_NETLIFY_SITE_ID is required for Netlify domain operations');
     }
   }
 
