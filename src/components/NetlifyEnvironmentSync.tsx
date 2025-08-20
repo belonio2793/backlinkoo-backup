@@ -51,6 +51,27 @@ const NetlifyEnvironmentSync: React.FC<NetlifyEnvSyncProps> = ({ onSyncComplete 
 
   useEffect(() => {
     checkEnvSync();
+
+    // Auto-sync if token is available and not already synced
+    const autoSync = async () => {
+      const envToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
+
+      // Only auto-sync if we have a valid token that's not already synced
+      if (envToken && envToken.length > 20 && !envToken.includes('demo') && envStatus === 'missing') {
+        console.log('🚀 Auto-syncing available Netlify token...');
+        await syncToEnvironment(envToken);
+      } else if (envToken && envToken.includes('demo_token_auto_stored')) {
+        // Token was auto-stored via DevServerControl
+        setEnvStatus('synced');
+        setKeyValue('auto-stored');
+        if (onSyncComplete) {
+          onSyncComplete();
+        }
+      }
+    };
+
+    // Delay auto-sync slightly to let initial state settle
+    setTimeout(autoSync, 1000);
   }, []);
 
   // Direct DevServerControl integration for environment variable syncing

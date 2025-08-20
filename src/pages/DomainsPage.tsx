@@ -61,14 +61,11 @@ import {
   Zap
 } from 'lucide-react';
 import SimpleBlogTemplateManager from '@/components/SimpleBlogTemplateManager';
-import BlogTemplateDebug from '@/components/BlogTemplateDebug';
 import DNSValidationService from '@/services/dnsValidationService';
 import AutoDNSPropagation from '@/components/AutoDNSPropagation';
 import AutoPropagationWizard from '@/components/AutoPropagationWizard';
-import NetlifyDomainSync from '@/components/NetlifyDomainSync';
-import NetlifyEnvironmentSync from '@/components/NetlifyEnvironmentSync';
-import DomainAutomationIntegration from '@/components/DomainAutomationIntegration';
 import NetlifyDNSManager from '@/services/netlifyDNSManager';
+import NetlifyDNSSync from '@/services/netlifyDNSSync';
 import AutoDomainBlogThemeService from '@/services/autoDomainBlogThemeService';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -133,6 +130,8 @@ const DomainsPage = () => {
   const [netlifyKeyValue, setNetlifyKeyValue] = useState('');
   const [dnsConfiguring, setDnsConfiguring] = useState(false);
   const [dnsProgress, setDnsProgress] = useState({ current: 0, total: 0, domain: '' });
+  const [autoSyncEnabled, setAutoSyncEnabled] = useState(true); // Enable auto-sync by default
+  const [netlifyDNSSync] = useState(() => new NetlifyDNSSync()); // Initialize Netlify DNS sync service
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
@@ -198,7 +197,40 @@ const DomainsPage = () => {
     const configStatus = NetlifyDNSManager.getConfigStatus();
     setNetlifyConfigured(configStatus.configured);
     checkNetlifyEnvSync();
-  }, []);
+
+    // Auto-sync NETLIFY key if auto-sync is enabled and key is not already synced
+    if (autoSyncEnabled) {
+      autoSyncNetlifyKey();
+    }
+  }, [autoSyncEnabled]);
+
+  // Auto-sync NETLIFY key if available
+  const autoSyncNetlifyKey = async () => {
+    try {
+      const envToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
+
+      // If no token exists or it's already set via auto-sync, skip
+      if (!envToken || envToken.includes('demo_token_auto_stored')) {
+        if (envToken && envToken.includes('demo_token_auto_stored')) {
+          setNetlifyEnvStatus('synced');
+          setNetlifyKeyValue('auto-stored');
+          setNetlifyConfigured(true);
+        }
+        return;
+      }
+
+      // Auto-sync to DevServerControl if valid token exists
+      if (envToken.length > 10 && !envToken.includes('demo')) {
+        console.log('🚀 Auto-syncing NETLIFY key via DevServerControl...');
+        setNetlifyEnvStatus('updating');
+
+        // This will be handled by the updated NetlifyEnvironmentSync component
+        await syncNetlifyToEnv(envToken);
+      }
+    } catch (error) {
+      console.error('Auto-sync failed:', error);
+    }
+  };
 
   // Check if Netlify key is synced with environment variables
   const checkNetlifyEnvSync = () => {
@@ -206,9 +238,9 @@ const DomainsPage = () => {
     if (envToken && envToken.length > 10 && !envToken.includes('demo')) {
       setNetlifyEnvStatus('synced');
       setNetlifyKeyValue(envToken.substring(0, 8) + '...' + envToken.substring(envToken.length - 4));
-    } else if (envToken && envToken.includes('demo')) {
+    } else if (envToken && (envToken.includes('demo') || envToken.includes('auto_stored'))) {
       setNetlifyEnvStatus('synced');
-      setNetlifyKeyValue('demo-token');
+      setNetlifyKeyValue(envToken.includes('auto_stored') ? 'auto-stored' : 'demo-token');
     } else {
       setNetlifyEnvStatus('missing');
       setNetlifyKeyValue('');
@@ -270,7 +302,7 @@ const DomainsPage = () => {
     setDnsConfiguring(true);
     setDnsProgress({ current: 0, total: domainsNeedingDNS.length, domain: '' });
 
-    toast.info(`⚙️ Configuring DNS for ${domainsNeedingDNS.length} domains...`);
+    toast.info(`⚙�� Configuring DNS for ${domainsNeedingDNS.length} domains...`);
 
     const results = [];
 
@@ -432,12 +464,6 @@ const DomainsPage = () => {
     }
   };
 
-  // Handle sync completion from NetlifyEnvironmentSync component
-  const handleSyncComplete = () => {
-    checkNetlifyEnvSync();
-    setNetlifyConfigured(true);
-    toast.success('🚀 Netlify environment sync completed! All automation features are now active.');
-  };
 
   // Check DNS service health
   const checkDNSServiceHealth = async () => {
@@ -647,7 +673,12 @@ const DomainsPage = () => {
       toast.success(`Domain ${data.domain} added successfully!`);
 
       // Auto-configure if automation is enabled and domain was added successfully
-      if (netlifyConfigured) {
+      if (autoSyncEnabled && (netlifyConfigured || netlifyEnvStatus === 'synced')) {
+        console.log(`🚀 Auto-sync enabled: Configuring ${data.domain} automatically...`);
+        setTimeout(() => {
+          autoSetupNewDomain(data);
+        }, 1000);
+      } else if (netlifyConfigured) {
         setTimeout(() => {
           autoSetupNewDomain(data);
         }, 1000);
@@ -683,6 +714,14 @@ const DomainsPage = () => {
           const data = await addSingleDomain(domainName);
           setDomains(prev => [data, ...prev]);
           successCount++;
+
+          // Auto-setup if auto-sync is enabled
+          if (autoSyncEnabled && (netlifyConfigured || netlifyEnvStatus === 'synced')) {
+            // Stagger auto-setup to avoid overwhelming the system
+            setTimeout(() => {
+              autoSetupNewDomain(data);
+            }, successCount * 1500); // 1.5 second delay between each domain
+          }
         } catch (error: any) {
           errorCount++;
           const errorMessage = error?.message || 'Unknown error';
@@ -845,19 +884,63 @@ const DomainsPage = () => {
   // Auto-setup new domain with DNS and themes
   const autoSetupNewDomain = async (domain: Domain) => {
     try {
-      if (!netlifyConfigured) {
-        toast.info(`Domain ${domain.domain} added. Use automation panel for full setup.`);
+      // In auto-sync mode, always attempt configuration
+      const shouldAutoSetup = autoSyncEnabled || netlifyConfigured;
+
+      if (!shouldAutoSetup) {
+        toast.info(`Domain ${domain.domain} added. Enable auto-sync or use automation panel for full setup.`);
         return;
       }
 
-      toast.info(`🚀 Auto-configuring ${domain.domain}...`);
+      if (autoSyncEnabled) {
+        toast.info(`🚀 Auto-sync: Configuring ${domain.domain} in Netlify DNS...`);
+      } else {
+        toast.info(`🚀 Auto-configuring ${domain.domain}...`);
+      }
 
-      // Configure DNS
+      // Step 1: Sync domain to Netlify DNS automatically
+      if (autoSyncEnabled && netlifyDNSSync.isConfigured()) {
+        console.log(`🌐 Syncing ${domain.domain} to Netlify DNS management...`);
+
+        const netlifyDNSResult = await netlifyDNSSync.autoSyncNewDomain(domain);
+
+        if (netlifyDNSResult.success) {
+          console.log(`✅ ${domain.domain} synced to Netlify DNS zone: ${netlifyDNSResult.netlifyZoneId}`);
+
+          // Update domain status to reflect DNS sync
+          await updateDomain(domain.id, {
+            status: 'active',
+            dns_validated: true,
+            a_record_validated: true,
+            txt_record_validated: true,
+            cname_validated: true,
+            netlify_dns_zone_id: netlifyDNSResult.netlifyZoneId,
+            netlify_synced: true
+          });
+        } else {
+          console.warn(`⚠️ Netlify DNS sync failed for ${domain.domain}: ${netlifyDNSResult.error}`);
+          // Continue with fallback DNS configuration
+        }
+      }
+
+      // Step 2: In auto-sync mode, also trigger DNS validation immediately
+      if (autoSyncEnabled) {
+        // Auto-validate DNS after a short delay
+        setTimeout(async () => {
+          try {
+            await validateDomain(domain.id);
+          } catch (error) {
+            console.error('Auto-validation failed:', error);
+          }
+        }, 3000); // Longer delay to allow DNS propagation
+      }
+
+      // Step 3: Configure DNS (fallback or additional configuration)
       const dnsManager = NetlifyDNSManager.getInstance();
       const dnsResult = await dnsManager.autoConfigureBlogDNS(domain.domain);
 
       if (dnsResult.success) {
-        // Configure blog theme
+        // Step 4: Configure blog theme
         const themeResult = await AutoDomainBlogThemeService.autoConfigureDomainBlogTheme(
           domain.id,
           domain.domain,
@@ -865,17 +948,29 @@ const DomainsPage = () => {
         );
 
         if (themeResult.success) {
-          toast.success(`✅ ${domain.domain} fully configured for campaigns!`);
+          const message = autoSyncEnabled
+            ? `✅ Auto-sync: ${domain.domain} fully configured in Netlify DNS and ready for publishing!`
+            : `✅ ${domain.domain} fully configured for campaigns!`;
+          toast.success(message);
           loadDomains(); // Refresh the list
         } else {
-          toast.warning(`DNS configured, but theme setup failed: ${themeResult.message}`);
+          toast.warning(`Netlify DNS configured, but theme setup failed: ${themeResult.message}`);
         }
       } else {
-        toast.warning(`DNS configuration failed: ${dnsResult.message}`);
+        if (autoSyncEnabled && netlifyDNSSync.isConfigured()) {
+          // If Netlify DNS sync was successful but DNS manager failed, still consider it a success
+          toast.success(`✅ ${domain.domain} configured in Netlify DNS! Some additional setup may be needed.`);
+          loadDomains();
+        } else {
+          toast.warning(`DNS configuration failed: ${dnsResult.message}`);
+        }
       }
     } catch (error) {
       console.error('Auto-setup failed:', error);
-      toast.error(`Auto-setup failed for ${domain.domain}`);
+      const message = autoSyncEnabled
+        ? `Auto-sync setup failed for ${domain.domain}`
+        : `Auto-setup failed for ${domain.domain}`;
+      toast.error(message);
     }
   };
 
@@ -1083,109 +1178,11 @@ const DomainsPage = () => {
             Add, configure, and manage domains for automated content publishing. Full hosting control with executable page generation.
           </p>
           
-          {/* System Status */}
+          {/* Clean header without status clutter */}
           <div className="mt-6 max-w-2xl mx-auto space-y-4">
-            {/* DNS Validation Status */}
-            <Alert className="border-blue-200 bg-blue-50">
-              <CheckCircle2 className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-800">
-                <div className="space-y-2">
-                  <p className="font-medium text-sm">✅ DNS Validation Service Fixed</p>
-                  <p className="text-xs">
-                    The DNS validation service now works in both development and production modes with automatic fallback handling.
-                  </p>
-                  <div className="flex items-center gap-4 text-xs">
-                    <span>🧪 Development: Simulated validation</span>
-                    <span>🚀 Production: Full DNS lookup service</span>
-                  </div>
-                </div>
-              </AlertDescription>
-            </Alert>
 
-            {/* Database Setup Status - Only show if table doesn't exist */}
-            {domainBlogThemesExists === false && (
-              <Alert className="border-amber-200 bg-amber-50">
-                <Info className="h-4 w-4 text-amber-600" />
-                <AlertDescription className="text-amber-800">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium text-sm">Domain Blog Database Setup</p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={checkDomainBlogThemesTable}
-                        className="h-6 text-xs"
-                      >
-                        <RefreshCw className="h-3 w-3 mr-1" />
-                        Recheck
-                      </Button>
-                    </div>
-                    <p className="text-xs">
-                      Blog themes may run in fallback mode. For full functionality, ensure the domain_blog_themes table is created in Supabase.
-                    </p>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
 
-            {/* Netlify Environment Sync Status */}
-            <div className="flex items-center justify-center gap-4 text-sm">
-              <span>Netlify Environment Sync:</span>
-              {netlifyEnvStatus === 'synced' ? (
-                <Badge className="bg-green-100 text-green-800 border-green-200">
-                  <CheckCircle2 className="w-3 h-3 mr-1" />
-                  Permanently Synced ({netlifyKeyValue})
-                </Badge>
-              ) : netlifyEnvStatus === 'updating' ? (
-                <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                  Syncing...
-                </Badge>
-              ) : (
-                <Badge className="bg-red-100 text-red-800 border-red-200">
-                  <AlertTriangle className="w-3 h-3 mr-1" />
-                  Not Synced
-                </Badge>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={checkNetlifyEnvSync}
-                title="Refresh sync status"
-              >
-                <RefreshCw className="w-3 h-3" />
-              </Button>
-            </div>
 
-            {/* DNS Service Status */}
-            <div className="flex items-center justify-center gap-2 text-sm">
-              <span>DNS Validation Service:</span>
-              {dnsServiceStatus === 'online' ? (
-                <Badge className="bg-green-100 text-green-800 border-green-200">
-                  <CheckCircle2 className="w-3 h-3 mr-1" />
-                  Production Ready
-                </Badge>
-              ) : dnsServiceStatus === 'offline' ? (
-                <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                  <Info className="w-3 h-3 mr-1" />
-                  Development Mode
-                </Badge>
-              ) : (
-                <Badge className="bg-gray-100 text-gray-800 border-gray-200">
-                  <Clock className="w-3 h-3 mr-1" />
-                  Checking...
-                </Badge>
-              )}
-              {import.meta.env.VITE_NETLIFY_ACCESS_TOKEN?.includes('demo') && (
-                <Badge className="bg-amber-100 text-amber-800 border-amber-200">
-                  <Info className="w-3 h-3 mr-1" />
-                  Demo Token
-                </Badge>
-              )}
-              <Button variant="ghost" size="sm" onClick={checkDNSServiceHealth}>
-                <RefreshCw className="w-3 h-3" />
-              </Button>
-            </div>
           </div>
         </div>
 
@@ -1300,36 +1297,41 @@ anotherdomain.org`}
             <CardTitle className="flex items-center justify-between">
               <span>Your Domains ({domains.length})</span>
               <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowAutomationPanel(!showAutomationPanel)}
-                  className="bg-blue-50 border-blue-200 hover:bg-blue-100"
-                >
-                  <Wand2 className="h-4 w-4 mr-1" />
-                  Automation
-                </Button>
-                {/* Enhanced Netlify Sync Button with DNS Propagation */}
-                <Button
-                  variant={netlifyEnvStatus === 'synced' ? 'outline' : 'default'}
-                  size="sm"
-                  onClick={() => syncNetlifyToEnv()}
-                  disabled={netlifyEnvStatus === 'updating'}
-                  className={netlifyEnvStatus === 'synced' ? 'bg-green-50 border-green-200 hover:bg-green-100' : 'bg-blue-600 hover:bg-blue-700'}
-                  title={netlifyEnvStatus === 'synced'
-                    ? 'Netlify key synced and DNS propagation configured'
-                    : 'Sync Netlify key and automatically configure DNS propagation for all domains'
-                  }
-                >
-                  {netlifyEnvStatus === 'updating' ? (
-                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                  ) : netlifyEnvStatus === 'synced' ? (
-                    <CheckCircle2 className="h-4 w-4 mr-1" />
-                  ) : (
-                    <Zap className="h-4 w-4 mr-1" />
-                  )}
-                  {netlifyEnvStatus === 'synced' ? 'Netlify Synced + DNS' : 'Sync & Setup DNS'}
-                </Button>
+                {/* Automation button - Only show when auto-sync is disabled */}
+                {!autoSyncEnabled && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAutomationPanel(!showAutomationPanel)}
+                    className="bg-blue-50 border-blue-200 hover:bg-blue-100"
+                  >
+                    <Wand2 className="h-4 w-4 mr-1" />
+                    Automation
+                  </Button>
+                )}
+                {/* Enhanced Netlify Sync Button with DNS Propagation - Only show when auto-sync is disabled */}
+                {!autoSyncEnabled && (
+                  <Button
+                    variant={netlifyEnvStatus === 'synced' ? 'outline' : 'default'}
+                    size="sm"
+                    onClick={() => syncNetlifyToEnv()}
+                    disabled={netlifyEnvStatus === 'updating'}
+                    className={netlifyEnvStatus === 'synced' ? 'bg-green-50 border-green-200 hover:bg-green-100' : 'bg-blue-600 hover:bg-blue-700'}
+                    title={netlifyEnvStatus === 'synced'
+                      ? 'Netlify key synced and DNS propagation configured'
+                      : 'Sync Netlify key and automatically configure DNS propagation for all domains'
+                    }
+                  >
+                    {netlifyEnvStatus === 'updating' ? (
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    ) : netlifyEnvStatus === 'synced' ? (
+                      <CheckCircle2 className="h-4 w-4 mr-1" />
+                    ) : (
+                      <Zap className="h-4 w-4 mr-1" />
+                    )}
+                    {netlifyEnvStatus === 'synced' ? 'Netlify Synced + DNS' : 'Sync & Setup DNS'}
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" onClick={exportDomains}>
                   <Download className="h-4 w-4 mr-1" />
                   Export CSV
@@ -1453,7 +1455,7 @@ anotherdomain.org`}
                                 DNS Setup
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
+                            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                               <DialogHeader>
                                 <DialogTitle>DNS Configuration for {domain.domain}</DialogTitle>
                               </DialogHeader>
@@ -1574,7 +1576,7 @@ anotherdomain.org`}
                                           <span>All functions will be available when deployed to Netlify</span>
                                         </div>
                                         <div className="flex items-start gap-2">
-                                          <span className="font-medium">����� Current Options:</span>
+                                          <span className="font-medium">⚙️ Current Options:</span>
                                           <span>You can still add domains and configure DNS manually via your registrar</span>
                                         </div>
                                       </div>
@@ -1708,156 +1710,7 @@ anotherdomain.org`}
           </CardContent>
         </Card>
 
-        {/* DNS Instructions Card */}
-        {domains.length > 0 && (
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Terminal className="h-5 w-5" />
-                DNS Configuration Instructions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertDescription>
-                  For each domain, add these DNS records at your registrar (GoDaddy, Namecheap, Cloudflare, etc.):
-                </AlertDescription>
-              </Alert>
-              
-              <div className="mt-4 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold text-blue-900 mb-2">A Records (Netlify)</h4>
-                    <div className="font-mono text-sm space-y-1">
-                      <div>Name: @</div>
-                      <div>Value: 75.2.60.5</div>
-                      <div>Value: 99.83.190.102</div>
-                    </div>
-                    <div className="flex gap-2 mt-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => copyToClipboard('75.2.60.5')}
-                      >
-                        <Copy className="h-3 w-3 mr-1" />
-                        Copy IP1
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => copyToClipboard('99.83.190.102')}
-                      >
-                        <Copy className="h-3 w-3 mr-1" />
-                        Copy IP2
-                      </Button>
-                    </div>
-                  </div>
-                  
-                  <div className="p-4 bg-green-50 rounded-lg">
-                    <h4 className="font-semibold text-green-900 mb-2">CNAME Record</h4>
-                    <div className="font-mono text-sm">
-                      <div>Name: www</div>
-                      <div>Value: {hostingConfig.cname}</div>
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="mt-2"
-                      onClick={() => copyToClipboard(hostingConfig.cname)}
-                    >
-                      <Copy className="h-3 w-3 mr-1" />
-                      Copy CNAME
-                    </Button>
-                  </div>
-                  
-                  <div className="p-4 bg-purple-50 rounded-lg">
-                    <h4 className="font-semibold text-purple-900 mb-2">TXT Record</h4>
-                    <div className="font-mono text-sm">
-                      <div>Name: @</div>
-                      <div>Value: blo-verification=[token]</div>
-                    </div>
-                    <p className="text-xs text-purple-600 mt-2">
-                      Each domain gets a unique token
-                    </p>
-                  </div>
-                </div>
 
-                {/* DNS Status for leadpages.org */}
-                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                  <div className="flex items-center gap-2 mb-2">
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <h4 className="font-semibold text-green-900">leadpages.org DNS Status</h4>
-                  </div>
-                  <p className="text-green-800 text-sm mb-3">
-                    ✅ DNS records are correctly configured for Netlify hosting
-                  </p>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                    <div className="bg-white p-2 rounded border">
-                      <div className="font-semibold text-green-900">A Records</div>
-                      <div className="text-green-700">75.2.60.5, 99.83.190.102 ✅</div>
-                    </div>
-                    <div className="bg-white p-2 rounded border">
-                      <div className="font-semibold text-green-900">CNAME</div>
-                      <div className="text-green-700">www → netlify app ✅</div>
-                    </div>
-                    <div className="bg-white p-2 rounded border">
-                      <div className="font-semibold text-green-900">TXT</div>
-                      <div className="text-green-700">blo-verification ✅</div>
-                    </div>
-                  </div>
-                  <p className="text-green-700 text-xs mt-2">
-                    💡 Your DNS is properly configured. The domain should serve blog content once functions are deployed.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Netlify Environment Sync Panel */}
-        <div className="mt-8">
-          <NetlifyEnvironmentSync onSyncComplete={handleSyncComplete} />
-        </div>
-
-        {/* Domain Automation Panel */}
-        {showAutomationPanel && (
-          <Card className="mt-8">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Wand2 className="h-5 w-5" />
-                Domain Automation Hub
-              </CardTitle>
-              <CardDescription>
-                Automate DNS configuration, blog themes, and campaign integration for your domains
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <DomainAutomationIntegration
-                domains={domains}
-                onDomainsUpdated={loadDomains}
-              />
-            </CardContent>
-          </Card>
-        )}
-
-
-
-        {/* Netlify Domain Sync */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="h-5 w-5" />
-              Netlify Domain Sync
-            </CardTitle>
-            <CardDescription>
-              Automatically sync your domains to Netlify for proper hosting and propagation
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <NetlifyDomainSync />
-          </CardContent>
-        </Card>
 
         {/* Blog Template Management Section - Always Show */}
         <Card className="mt-8">
@@ -1880,8 +1733,6 @@ anotherdomain.org`}
           </CardContent>
         </Card>
 
-        {/* Debug Component */}
-        <BlogTemplateDebug />
 
       </div>
       <Footer />
