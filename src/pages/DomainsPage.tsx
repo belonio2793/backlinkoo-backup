@@ -193,6 +193,18 @@ const DomainsPage = () => {
         toast.error(`DNS Service initialization failed: ${error.message}`);
       }
     }
+
+    // Initialize NetlifyDomainService
+    try {
+      const domainService = new NetlifyDomainService();
+      setNetlifyDomainService(domainService);
+      console.log('✅ NetlifyDomainService initialized');
+    } catch (error) {
+      console.error('Failed to initialize NetlifyDomainService:', error);
+      if (error instanceof Error) {
+        toast.error(`Domain Service initialization failed: ${error.message}`);
+      }
+    }
   }, []);
 
   useEffect(() => {
@@ -372,7 +384,7 @@ const DomainsPage = () => {
     }
 
     if (failed > 0) {
-      toast.warning(`⚠️ ${failed} domains had DNS configuration issues`);
+      toast.warning(`���️ ${failed} domains had DNS configuration issues`);
       console.warn('Failed DNS configurations:', results.filter(r => !r.success));
     }
 
