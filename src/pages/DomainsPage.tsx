@@ -1744,7 +1744,6 @@ anotherdomain.org`}
                     <TableHead>Status</TableHead>
                     <TableHead>DNS Records</TableHead>
                     <TableHead>Netlify</TableHead>
-                    <TableHead>Hosting</TableHead>
                     <TableHead>Stats</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -2104,26 +2103,6 @@ anotherdomain.org`}
                         </div>
                       </TableCell>
 
-                      <TableCell>
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              checked={domain.blog_enabled}
-                              onCheckedChange={safeAsync((checked) => toggleBlogEnabled(domain.id, checked))}
-                              size="sm"
-                            />
-                            <span className="text-xs">Blog</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              checked={domain.ssl_enabled}
-                              onCheckedChange={safeAsync((checked) => toggleSSL(domain.id, checked))}
-                              size="sm"
-                            />
-                            <span className="text-xs">SSL</span>
-                          </div>
-                        </div>
-                      </TableCell>
                       
                       <TableCell>
                         <div className="text-sm text-gray-600">
