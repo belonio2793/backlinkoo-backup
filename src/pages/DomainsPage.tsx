@@ -56,7 +56,8 @@ import {
   Save,
   Palette,
   Wand2,
-  Zap
+  Zap,
+  Settings
 } from 'lucide-react';
 import SimpleBlogTemplateManager from '@/components/SimpleBlogTemplateManager';
 import DNSValidationService from '@/services/dnsValidationService';
