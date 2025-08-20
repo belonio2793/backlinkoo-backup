@@ -148,26 +148,12 @@ export class NetlifyCustomDomainService {
     error?: string;
   }> {
     try {
-      // Demo mode simulation
-      if (!this.token || this.token.includes('demo') || this.token.length < 20) {
-        console.warn('⚠️ DEMO MODE: Cannot fetch real site info');
-        return {
-          success: true,
-          data: {
-            id: this.siteId,
-            name: 'demo-site',
-            custom_domain: '',
-            url: 'https://demo-site.netlify.app',
-            admin_url: `https://app.netlify.com/sites/${this.siteId}`,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          }
-        };
-      }
+      console.log('🔍 Getting site info via server-side function...');
 
-      const response = await fetch(`${this.baseUrl}/sites/${this.siteId}`, {
+      const response = await fetch('/.netlify/functions/netlify-custom-domain', {
+        method: 'GET',
         headers: {
-          'Authorization': `Bearer ${this.token}`,
+          'Content-Type': 'application/json',
         },
       });
 
@@ -178,10 +164,18 @@ export class NetlifyCustomDomainService {
         };
       }
 
-      const siteData: NetlifySiteUpdateResponse = await response.json();
+      const result = await response.json();
+
+      if (!result.success) {
+        return {
+          success: false,
+          error: result.error || 'Unknown error occurred'
+        };
+      }
+
       return {
         success: true,
-        data: siteData
+        data: result.data
       };
 
     } catch (error) {
