@@ -411,14 +411,6 @@ const DomainsPage = () => {
       console.log(`����� Auto-configuring DNS for ${domain.domain}`);
 
       // For demo mode, simulate DNS configuration
-      if (apiToken.includes('demo')) {
-        console.log(`��� Demo mode: Simulating DNS configuration for ${domain.domain}`);
-        return {
-          success: true,
-          message: `Demo: DNS configured for ${domain.domain}`,
-          records: ['A', 'CNAME', 'TXT']
-        };
-      }
 
       // Step 1: Configure Netlify DNS via API
       const netlifyDNSResult = await configureNetlifyDNS(domain, apiToken);
@@ -514,7 +506,7 @@ const DomainsPage = () => {
       const domainsNeedingTokens = domains.filter(d => !d.verification_token);
 
       if (domainsNeedingTokens.length > 0) {
-        console.log(`🔧 Fixing ${domainsNeedingTokens.length} domains without verification tokens`);
+        console.log(`��� Fixing ${domainsNeedingTokens.length} domains without verification tokens`);
 
         for (const domain of domainsNeedingTokens) {
           try {
