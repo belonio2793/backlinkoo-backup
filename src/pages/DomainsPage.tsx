@@ -722,6 +722,14 @@ const DomainsPage = () => {
           const data = await addSingleDomain(domainName);
           setDomains(prev => [data, ...prev]);
           successCount++;
+
+          // Auto-setup if auto-sync is enabled
+          if (autoSyncEnabled && (netlifyConfigured || netlifyEnvStatus === 'synced')) {
+            // Stagger auto-setup to avoid overwhelming the system
+            setTimeout(() => {
+              autoSetupNewDomain(data);
+            }, successCount * 1500); // 1.5 second delay between each domain
+          }
         } catch (error: any) {
           errorCount++;
           const errorMessage = error?.message || 'Unknown error';
