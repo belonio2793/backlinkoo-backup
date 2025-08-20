@@ -335,13 +335,14 @@ const DNSSetupInstructions: React.FC<DNSSetupInstructionsProps> = ({
                     <div className="space-y-3">
                       <div className="p-3 bg-gray-50 rounded-md">
                         <div className="text-xs font-mono space-y-1">
-                          <div><strong>www.{domain}</strong> → {siteId}--{domain.replace(/\./g, '-')}.netlify.app</div>
-                          <div><strong>blog.{domain}</strong> → {siteId}--{domain.replace(/\./g, '-')}.netlify.app</div>
+                          <div><strong>www.{domain}</strong> → {backlinkooDomain}</div>
+                          <div><strong>blog.{domain}</strong> → {backlinkooDomain}</div>
+                          <div><strong>*.{domain}</strong> → {backlinkooDomain}</div>
                         </div>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => copyToClipboard(`${siteId}--${domain.replace(/\./g, '-')}.netlify.app`, 'Netlify URL')}
+                          onClick={() => copyToClipboard(backlinkooDomain, 'Backlinkoo Netlify URL')}
                           className="mt-2 h-6"
                         >
                           <Copy className="h-3 w-3 mr-1" />
