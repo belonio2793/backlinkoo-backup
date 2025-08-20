@@ -1666,7 +1666,46 @@ anotherdomain.org`}
                           </Dialog>
                         </div>
                       </TableCell>
-                      
+
+                      <TableCell>
+                        <div className="space-y-1">
+                          {domain.netlify_synced ? (
+                            <div className="flex items-center gap-1">
+                              <div className="w-2 h-2 bg-green-500 rounded-full" />
+                              <span className="text-xs text-green-600">Synced</span>
+                            </div>
+                          ) : (
+                            <div className="flex items-center gap-1">
+                              <div className="w-2 h-2 bg-gray-300 rounded-full" />
+                              <span className="text-xs text-gray-500">Not synced</span>
+                            </div>
+                          )}
+                          {domain.netlify_id && (
+                            <div className="text-xs text-gray-400 truncate" title={domain.netlify_id}>
+                              ID: {domain.netlify_id.substring(0, 8)}...
+                            </div>
+                          )}
+                          {netlifyDomainService && netlifyDomainService.isConfigured() && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-xs h-6"
+                              onClick={async () => {
+                                const result = await netlifyDomainService.getDomainStatus(domain.domain);
+                                if (result.success && result.status) {
+                                  const instructions = netlifyDomainService.getSetupInstructions(domain.domain, result.status);
+                                  toast.info(`${instructions.title}: ${instructions.instructions[0]}`);
+                                } else {
+                                  toast.error(result.error || 'Failed to get status');
+                                }
+                              }}
+                            >
+                              Check Status
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+
                       <TableCell>
                         <div className="space-y-1">
                           <div className="flex items-center gap-2">
