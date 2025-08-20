@@ -133,6 +133,7 @@ const DomainsPage = () => {
   const [dnsProgress, setDnsProgress] = useState({ current: 0, total: 0, domain: '' });
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true); // Enable auto-sync by default
   const [netlifyDNSSync, setNetlifyDNSSync] = useState<NetlifyDNSSync | null>(null); // Initialize Netlify DNS sync service
+  const [netlifyDomainService, setNetlifyDomainService] = useState<NetlifyDomainService | null>(null); // Initialize Netlify domain service
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
