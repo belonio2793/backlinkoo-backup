@@ -81,8 +81,9 @@ export async function runOneTimeBeautifulContentMigration(): Promise<void> {
                 .eq('id', post.id);
 
               if (updateError) {
-                console.error(`❌ Failed to update post ${post.id} (${post.title?.substring(0, 30)}):`, updateError.message);
-                return { success: false, error: updateError.message };
+                const errorMsg = getErrorMessage(updateError);
+                console.error(`❌ Failed to update post ${post.id} (${post.title?.substring(0, 30)}):`, errorMsg);
+                return { success: false, error: errorMsg };
               }
 
               console.log(`✅ Migrated: "${post.title?.substring(0, 50)}..."`);
