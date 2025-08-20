@@ -64,7 +64,6 @@ import AutoDNSPropagation from '@/components/AutoDNSPropagation';
 import AutoPropagationWizard from '@/components/AutoPropagationWizard';
 import NetlifyDNSManager from '@/services/netlifyDNSManager';
 import NetlifyDNSSync from '@/services/netlifyDNSSync';
-import NetlifyDomainService from '@/services/netlifyDomainService';
 import NetlifyCustomDomainService from '@/services/netlifyCustomDomainService';
 import EnhancedNetlifyDomainService from '@/services/enhancedNetlifyDomainService';
 import AutoDomainBlogThemeService from '@/services/autoDomainBlogThemeService';
@@ -674,7 +673,7 @@ const DomainsPage = () => {
   // Auto-fix DNS discrepancies
   const autoFixDNSDiscrepancies = async (domain: Domain, expectedRecords: any[], netlifyStatus: any) => {
     try {
-      console.log(`🔧 Auto-fixing DNS discrepancies for ${domain.domain}...`);
+      console.log(`���� Auto-fixing DNS discrepancies for ${domain.domain}...`);
       toast.info(`🔧 Auto-configuring DNS records for ${domain.domain}...`);
 
       // If Netlify DNS service is available and configured, use it
