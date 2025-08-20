@@ -67,9 +67,11 @@ import NetlifyDNSManager from '@/services/netlifyDNSManager';
 import NetlifyDNSSync from '@/services/netlifyDNSSync';
 import NetlifyDomainService from '@/services/netlifyDomainService';
 import NetlifyCustomDomainService from '@/services/netlifyCustomDomainService';
+import EnhancedNetlifyDomainService from '@/services/enhancedNetlifyDomainService';
 import AutoDomainBlogThemeService from '@/services/autoDomainBlogThemeService';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import DNSSetupInstructions from '@/components/DNSSetupInstructions';
 import { useAuthState } from '@/hooks/useAuthState';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -134,14 +136,16 @@ const DomainsPage = () => {
   const [netlifyDNSSync, setNetlifyDNSSync] = useState<NetlifyDNSSync | null>(null); // Initialize Netlify DNS sync service
   const [netlifyDomainService, setNetlifyDomainService] = useState<NetlifyDomainService | null>(null); // Initialize Netlify domain service
   const [netlifyCustomDomainService, setNetlifyCustomDomainService] = useState<NetlifyCustomDomainService | null>(null); // Initialize Netlify custom domain service
+  const [enhancedNetlifyService, setEnhancedNetlifyService] = useState<EnhancedNetlifyDomainService | null>(null); // Enhanced Netlify service with DNS
+  const [showDNSInstructions, setShowDNSInstructions] = useState<{domain: string, scenario: 'registrar' | 'domains-page' | 'subdomain'} | null>(null);
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
 
-  // Hosting configuration - editable
+  // Hosting configuration - matches backlinkoo.com exactly
   const [hostingConfig, setHostingConfig] = useState<HostingConfig>({
-    ip: '75.2.60.5', // Netlify's primary IP address
-    cname: 'backlinkoo.domains.netlify.app', // Your Netlify site domain
+    ip: '75.2.60.5', // Same IP as backlinkoo.com
+    cname: 'backlinkoo.netlify.app', // Same Netlify app as backlinkoo.com
     provider: 'netlify',
     autoSSL: true,
     defaultSubdirectory: 'blog'
@@ -207,6 +211,11 @@ const DomainsPage = () => {
       const customDomainService = new NetlifyCustomDomainService();
       setNetlifyCustomDomainService(customDomainService);
       console.log('✅ NetlifyCustomDomainService initialized');
+
+      // Initialize Enhanced Netlify Domain Service
+      const enhancedService = new EnhancedNetlifyDomainService();
+      setEnhancedNetlifyService(enhancedService);
+      console.log('✅ EnhancedNetlifyDomainService initialized');
 
       // Quick verification if configured
       if (domainService.isConfigured()) {
@@ -1816,25 +1825,66 @@ anotherdomain.org`}
                                   return;
                                 }
 
-                                // Domain doesn't exist in Netlify, add it
-                                toast.info(`Adding ${domain.domain} to Netlify...`);
-                                const addResult = await netlifyDomainService.addDomain(domain.domain);
+                                // Use enhanced service for complete domain + DNS setup
+                                if (enhancedNetlifyService && enhancedNetlifyService.isConfigured()) {
+                                  toast.info(`🚀 Setting up ${domain.domain} with Netlify + DNS...`);
+                                  const setupResult = await enhancedNetlifyService.setupDomainComplete(domain.domain);
 
-                                if (addResult.success) {
-                                  // Update domain record with Netlify info
-                                  await supabase
-                                    .from('domains')
-                                    .update({
-                                      netlify_id: addResult.data?.id,
+                                  if (setupResult.success) {
+                                    // Update domain record with all Netlify info
+                                    const updateData: any = {
                                       netlify_synced: true,
-                                      ssl_enabled: addResult.status?.ssl?.status === 'verified'
-                                    })
-                                    .eq('id', domain.id);
+                                      ssl_enabled: false // Will be updated once SSL is verified
+                                    };
 
-                                  toast.success(`✅ ${domain.domain} added to Netlify! SSL certificate will be provisioned automatically.`);
-                                  await loadDomains(); // Refresh the list
+                                    if (setupResult.netlifyDomainId) {
+                                      updateData.netlify_id = setupResult.netlifyDomainId;
+                                    }
+
+                                    if (setupResult.dnsZoneId) {
+                                      updateData.netlify_dns_zone_id = setupResult.dnsZoneId;
+                                    }
+
+                                    await supabase
+                                      .from('domains')
+                                      .update(updateData)
+                                      .eq('id', domain.id);
+
+                                    // Show detailed success with DNS instructions
+                                    const instructions = setupResult.setupInstructions?.join('\n') || '';
+                                    toast.success(`✅ ${domain.domain} setup complete! DNS zone created.`, {
+                                      description: 'Click "View DNS Instructions" for nameserver setup',
+                                      duration: 10000
+                                    });
+
+                                    // Store instructions for later access
+                                    (window as any).dnsInstructions = (window as any).dnsInstructions || {};
+                                    (window as any).dnsInstructions[domain.domain] = instructions;
+
+                                    await loadDomains();
+                                  } else {
+                                    toast.error(`Enhanced setup failed: ${setupResult.error}`);
+                                  }
                                 } else {
-                                  toast.error(`Failed to add to Netlify: ${addResult.error}`);
+                                  // Fallback to basic domain addition
+                                  toast.info(`Adding ${domain.domain} to Netlify...`);
+                                  const addResult = await netlifyDomainService.addDomain(domain.domain);
+
+                                  if (addResult.success) {
+                                    await supabase
+                                      .from('domains')
+                                      .update({
+                                        netlify_id: addResult.data?.id,
+                                        netlify_synced: true,
+                                        ssl_enabled: addResult.status?.ssl?.status === 'verified'
+                                      })
+                                      .eq('id', domain.id);
+
+                                    toast.success(`✅ ${domain.domain} added to Netlify! SSL certificate will be provisioned automatically.`);
+                                    await loadDomains();
+                                  } else {
+                                    toast.error(`Failed to add to Netlify: ${addResult.error}`);
+                                  }
                                 }
                               } catch (error) {
                                 console.error('Error with Netlify operation:', error);
@@ -1843,7 +1893,22 @@ anotherdomain.org`}
                             }}
                           >
                             <Plus className="w-3 h-3 mr-1" />
-                            Add to Netlify
+                            Add To Netlify
+                          </Button>
+                          {/* DNS Instructions Button */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs h-6 bg-blue-50 border-blue-200 hover:bg-blue-100"
+                            onClick={() => {
+                              setShowDNSInstructions({
+                                domain: domain.domain,
+                                scenario: 'registrar' // Default to registrar scenario
+                              });
+                            }}
+                          >
+                            <Info className="w-3 h-3 mr-1" />
+                            DNS Instructions
                           </Button>
                           {netlifyDomainService && netlifyDomainService.isConfigured() && (
                             <Button
@@ -2205,6 +2270,15 @@ anotherdomain.org`}
 
       </div>
       <Footer />
+
+      {/* DNS Setup Instructions Modal */}
+      {showDNSInstructions && (
+        <DNSSetupInstructions
+          domain={showDNSInstructions.domain}
+          scenario={showDNSInstructions.scenario}
+          onClose={() => setShowDNSInstructions(null)}
+        />
+      )}
     </div>
   );
 };
