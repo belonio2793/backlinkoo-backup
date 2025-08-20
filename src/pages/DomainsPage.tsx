@@ -1168,22 +1168,6 @@ const DomainsPage = () => {
 
 
 
-            {/* Only show manual controls access when auto-sync is enabled */}
-            {autoSyncEnabled && (
-              <div className="flex items-center justify-center gap-2 text-sm">
-                <span className="text-gray-600">Auto-sync active</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setAutoSyncEnabled(false)}
-                  title="Show manual controls"
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <Settings className="w-3 h-3 mr-1" />
-                  Manual mode
-                </Button>
-              </div>
-            )}
           </div>
         </div>
 
