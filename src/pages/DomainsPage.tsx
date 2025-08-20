@@ -75,6 +75,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { DomainManager } from '@/services/domainManager';
 import { netlifyDomainService } from '@/services/netlifyDomainService';
 import { toast } from 'sonner';
+import NetlifyControlPanel from '@/components/NetlifyControlPanel';
+import EnvironmentVariablesManager from '@/components/EnvironmentVariablesManager';
 
 // Global error handler will be set up in useEffect
 
@@ -600,7 +602,7 @@ const DomainsPage = () => {
         ssl_status: netlifyStatus.ssl?.status
       };
 
-      console.log(`📊 Current DNS status for ${domain.domain}:`, currentDNSStatus);
+      console.log(`���� Current DNS status for ${domain.domain}:`, currentDNSStatus);
 
       let needsDNSUpdate = false;
       const discrepancies = [];
