@@ -247,8 +247,8 @@ const DomainsPage = () => {
         const connectionWorking = await testSupabaseConnection(false);
 
         if (connectionWorking) {
-          // Load domains only if connection is working
-          await loadDomains();
+          // Load domains only if connection is working (don't show toast on error during init)
+          await loadDomains(false);
         } else {
           console.warn('⚠️ Skipping domain loading due to Supabase connection issues');
           setLoading(false); // Make sure to set loading to false
