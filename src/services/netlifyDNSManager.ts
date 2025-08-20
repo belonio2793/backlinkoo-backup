@@ -274,6 +274,16 @@ export class NetlifyDNSManager extends NetlifyDomainAPI {
       }
     ];
 
+    // Return success for demo mode
+    if (this.isDemoToken()) {
+      return {
+        success: true,
+        message: `Demo mode: DNS configuration simulated for ${domain}. In production, this would configure ${records.length} DNS records.`,
+        records,
+        verificationToken: defaultConfig.txtVerification
+      };
+    }
+
     try {
       // First add domain to Netlify site
       await this.addDomain(domain, { autoSSL: defaultConfig.enableSSL });
