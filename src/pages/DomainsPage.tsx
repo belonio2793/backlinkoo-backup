@@ -864,59 +864,17 @@ const DomainsPage = () => {
 
       const data = result.domain;
 
-      if (error) {
-        console.error('Supabase error adding domain:', error);
-
-        // Enhanced error message extraction
-        let errorMessage = 'Unknown error occurred';
-
-        if (typeof error === 'string') {
-          errorMessage = error;
-        } else if (error && typeof error === 'object') {
-          errorMessage = error.message ||
-                        error.details ||
-                        error.hint ||
-                        error.code ||
-                        'Database operation failed';
-        }
-
-        // Handle specific error codes
-        if (error.code === '23505') {
-          throw new Error(`Domain ${domain} already exists`);
-        }
-        if (error.code === '23503') {
-          throw new Error(`Authentication error: Please sign out and sign in again`);
-        }
-        if (error.code === '23502') {
-          throw new Error(`Required field missing: Please try again or contact support`);
-        }
-        if (error.code === 'PGRST301') {
-          throw new Error(`Database error: Please try again in a moment`);
-        }
-
-        // Handle specific error messages
-        if (errorMessage.includes('No API key found')) {
-          throw new Error(`Database connection failed: Missing API key. Please refresh the page and try again.`);
-        }
-        if (errorMessage.includes('Failed to fetch')) {
-          throw new Error(`Network error: Please check your connection and try again`);
-        }
-        if (errorMessage.includes('timeout')) {
-          throw new Error(`Request timeout: Please try again`);
-        }
-        if (errorMessage.includes('JWT')) {
-          throw new Error(`Authentication error: Please sign in again`);
-        }
-        if (errorMessage.includes('permission')) {
-          throw new Error(`Permission denied: Please check your access rights`);
-        }
-
-        // Generic error with helpful message
-        throw new Error(`Failed to add domain: ${errorMessage}`);
-      }
-
       if (!data) {
         throw new Error('Domain was added but no data returned');
+      }
+
+      console.log(`✅ Domain ${domain} added successfully via DomainManager`);
+
+      // Show success message with Netlify status
+      if (result.netlifyDomain) {
+        toast.success(`✅ Domain added to both database and Netlify!`);
+      } else {
+        toast.success(`✅ Domain added to database. Netlify integration available.`);
       }
 
       // Add domain to Netlify for SSL/TLS and hosting
@@ -1021,7 +979,7 @@ const DomainsPage = () => {
       setDomains(prev => [data, ...prev]);
       setNewDomain('');
       toast.success(`✅ Domain ${data.domain} added successfully!`);
-      console.log(`✅ Domain addition completed:`, data);
+      console.log(`��� Domain addition completed:`, data);
 
       // Auto-configure if automation is enabled and domain was added successfully
       if (autoSyncEnabled && (netlifyConfigured || netlifyEnvStatus === 'synced')) {
