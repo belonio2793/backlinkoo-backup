@@ -60,7 +60,13 @@ export class NetlifyDNSSync {
 
   constructor() {
     this.apiToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN || '';
-    this.dnsManager = NetlifyDNSManager.getInstance();
+    try {
+      this.dnsManager = NetlifyDNSManager.getInstance();
+    } catch (error) {
+      console.warn('⚠️ NetlifyDNSSync: Failed to initialize DNS manager, running in limited mode:', error);
+      // Create a fallback DNS manager that won't crash
+      this.dnsManager = new NetlifyDNSManager('demo-token');
+    }
   }
 
   /**
