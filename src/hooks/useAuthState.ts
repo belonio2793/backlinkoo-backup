@@ -132,14 +132,27 @@ export const useAuthState = () => {
       setIsLoading(true);
       console.log('🚪 Signing out user...');
 
-      const { error } = await resilientAuthOperations.signOut();
+      const result = await SafeAuth.signOut();
 
-      if (error) {
-        console.error('❌ Sign out error:', error);
-        throw error;
+      if (!result.success) {
+        console.error('❌ Sign out error:', result.error);
+
+        // Even if sign out fails on server, clear local state
+        if (result.error?.includes('Network') || result.error?.includes('Failed to fetch')) {
+          console.warn('⚠️ Network error during sign out, clearing local session');
+          localStorage.removeItem('supabase.auth.token');
+          setUser(null);
+          setIsAuthenticated(false);
+          setConnectionError(null);
+          toast.warning('Signed out locally due to connection issues', { duration: 3000 });
+          return;
+        }
+
+        toast.error('Sign out failed. Please try again.', { duration: 3000 });
+        throw new Error(result.error);
       }
 
-      // Clear local state immediately
+      // Clear local state
       setUser(null);
       setIsAuthenticated(false);
       setConnectionError(null);
@@ -148,19 +161,8 @@ export const useAuthState = () => {
 
     } catch (error: any) {
       console.error('❌ Error during sign out:', error);
-
-      // If it's a network error, still clear local state
-      if (SupabaseConnectionFixer.isSupabaseNetworkError(error)) {
-        console.warn('⚠️ Network error during sign out, clearing local session');
-        localStorage.removeItem('supabase.auth.token');
-        setUser(null);
-        setIsAuthenticated(false);
-        setConnectionError(null);
-        toast.warning('Signed out locally due to connection issues', { duration: 3000 });
-      } else {
-        toast.error('Sign out failed. Please try again.', { duration: 3000 });
-        throw error;
-      }
+      toast.error('Sign out failed. Please try again.', { duration: 3000 });
+      throw error;
     } finally {
       setIsLoading(false);
     }
