@@ -41,18 +41,45 @@ export const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
     const testConnection = async () => {
       try {
         const start = Date.now();
-        await fetch('/favicon.svg', { method: 'HEAD', cache: 'no-cache' });
+        const response = await fetch('/favicon.svg', {
+          method: 'HEAD',
+          cache: 'no-cache',
+          signal: AbortSignal.timeout(10000) // 10 second timeout
+        });
         const duration = Date.now() - start;
-        
-        if (duration > 5000) {
+
+        if (!response.ok) {
           setConnectionQuality('poor');
+          setLastNetworkError(`Server responded with ${response.status}`);
+          setShowNetworkError(true);
+        } else if (duration > 5000) {
+          setConnectionQuality('poor');
+          setLastNetworkError('Slow connection detected');
+          setShowNetworkError(true);
         } else {
           setConnectionQuality('good');
+          setShowNetworkError(false);
+          setLastNetworkError(null);
         }
-      } catch {
+      } catch (error: any) {
         setConnectionQuality('poor');
+        setLastNetworkError(error.message || 'Network connection failed');
+        setShowNetworkError(true);
       }
     };
+
+    // Listen for global error events to detect network failures
+    const handleGlobalError = (event: ErrorEvent) => {
+      if (event.message?.includes('Failed to fetch') ||
+          event.message?.includes('NetworkError') ||
+          event.message?.includes('Network request blocked')) {
+        setConnectionQuality('poor');
+        setLastNetworkError(event.message);
+        setShowNetworkError(true);
+      }
+    };
+
+    window.addEventListener('error', handleGlobalError);
 
     // Test connection every 30 seconds if online
     const interval = setInterval(() => {
