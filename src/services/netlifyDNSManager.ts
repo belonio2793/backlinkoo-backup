@@ -465,8 +465,8 @@ export class NetlifyDNSManager extends NetlifyDomainAPI {
     source: 'environment' | 'manual' | 'none';
     message: string;
   } {
-    const envToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN || process.env.NETLIFY_ACCESS_TOKEN;
-    
+    const envToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
+
     if (envToken) {
       return {
         configured: true,
