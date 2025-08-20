@@ -434,7 +434,7 @@ const DomainsPage = () => {
       const domain = domainsNeedingDNS[i];
       setDnsProgress({ current: i + 1, total: domainsNeedingDNS.length, domain: domain.domain });
       try {
-        console.log(`��� Processing ${domain.domain}...`);
+        console.log(`🔧 Processing ${domain.domain}...`);
 
         // Step 1: Add domain to Netlify if not already synced
         if (!domain.netlify_synced) {
@@ -2064,7 +2064,7 @@ anotherdomain.org`}
                                   toast.info(`📡 Configuring DNS records for ${domain.domain}...`);
 
                                   // Get the updated domain status from Netlify
-                                  const newStatusResult = await netlifyDomainService?.getDomainStatus(domain.domain);
+                                  const newStatusResult = await netlifyDomainService?.verifyDomain(domain.domain);
                                   if (newStatusResult?.success && newStatusResult.status) {
                                     await checkAndFixDNSDiscrepancies(domain, newStatusResult.status);
                                   }
