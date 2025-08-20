@@ -257,13 +257,8 @@ const DomainsPage = () => {
 
       } catch (error: any) {
         console.error('❌ Domains initialization failed:', error);
-        toast.error(`Initialization failed: ${error.message}`, {
-          duration: 10000,
-          action: {
-            label: 'Retry',
-            onClick: () => window.location.reload()
-          }
-        });
+        // Don't show toast during initialization to prevent setState warnings
+        console.warn('⚠️ Domains initialization had issues:', error.message || 'Unknown error');
       }
     };
 
