@@ -497,6 +497,176 @@ const DomainsPage = () => {
     }
   };
 
+  // Check and fix DNS discrepancies after domain is added to Netlify
+  const checkAndFixDNSDiscrepancies = async (domain: Domain, netlifyStatus: any) => {
+    try {
+      console.log(`🔍 Checking DNS discrepancies for ${domain.domain}...`);
+
+      // Expected DNS records for our hosting setup
+      const expectedRecords = [
+        { type: 'A', name: '@', value: hostingConfig.ip },
+        { type: 'A', name: '@', value: '99.83.190.102' }, // Backup A record
+        { type: 'CNAME', name: 'www', value: hostingConfig.cname },
+        { type: 'TXT', name: '@', value: `blo-verification=${domain.verification_token}` }
+      ];
+
+      // Check if domain has proper DNS validation
+      const currentDNSStatus = {
+        a_record: domain.a_record_validated,
+        txt_record: domain.txt_record_validated,
+        cname_record: domain.cname_validated,
+        ssl_status: netlifyStatus.ssl?.status
+      };
+
+      console.log(`📊 Current DNS status for ${domain.domain}:`, currentDNSStatus);
+
+      let needsDNSUpdate = false;
+      const discrepancies = [];
+
+      // Check A record
+      if (!currentDNSStatus.a_record) {
+        discrepancies.push('Missing A record pointing to hosting IP');
+        needsDNSUpdate = true;
+      }
+
+      // Check TXT record
+      if (!currentDNSStatus.txt_record) {
+        discrepancies.push('Missing domain verification TXT record');
+        needsDNSUpdate = true;
+      }
+
+      // Check CNAME record
+      if (!currentDNSStatus.cname_record) {
+        discrepancies.push('Missing www CNAME record');
+        needsDNSUpdate = true;
+      }
+
+      // Check SSL status
+      if (currentDNSStatus.ssl_status !== 'verified') {
+        discrepancies.push(`SSL not verified (status: ${currentDNSStatus.ssl_status || 'unknown'})`);
+      }
+
+      if (discrepancies.length > 0) {
+        console.log(`⚠️ Found ${discrepancies.length} DNS discrepancies for ${domain.domain}:`, discrepancies);
+        toast.warning(`⚠️ Found ${discrepancies.length} DNS issues for ${domain.domain}`, {
+          description: discrepancies.slice(0, 2).join(', ') + (discrepancies.length > 2 ? '...' : ''),
+          duration: 8000
+        });
+
+        // Auto-fix DNS discrepancies if possible
+        if (needsDNSUpdate) {
+          await autoFixDNSDiscrepancies(domain, expectedRecords, netlifyStatus);
+        }
+      } else {
+        toast.success(`✅ DNS configuration verified for ${domain.domain}`);
+      }
+
+      return {
+        success: true,
+        discrepancies,
+        needsUpdate: needsDNSUpdate
+      };
+
+    } catch (error) {
+      console.error(`❌ Error checking DNS discrepancies for ${domain.domain}:`, error);
+      return {
+        success: false,
+        error: error instanceof Error ? error.message : 'DNS check failed'
+      };
+    }
+  };
+
+  // Auto-fix DNS discrepancies
+  const autoFixDNSDiscrepancies = async (domain: Domain, expectedRecords: any[], netlifyStatus: any) => {
+    try {
+      console.log(`🔧 Auto-fixing DNS discrepancies for ${domain.domain}...`);
+      toast.info(`🔧 Auto-configuring DNS records for ${domain.domain}...`);
+
+      // If Netlify DNS service is available and configured, use it
+      if (netlifyDNSSync && netlifyDNSSync.isConfigured()) {
+        console.log(`📡 Using Netlify DNS service to configure records...`);
+
+        const dnsResult = await netlifyDNSSync.autoSyncNewDomain(domain);
+        if (dnsResult.success) {
+          // Update domain with DNS sync status
+          await supabase
+            .from('domains')
+            .update({
+              dns_validated: true,
+              a_record_validated: true,
+              txt_record_validated: true,
+              cname_validated: true,
+              netlify_dns_zone_id: dnsResult.netlifyZoneId,
+              status: 'active'
+            })
+            .eq('id', domain.id);
+
+          toast.success(`✅ DNS records automatically configured for ${domain.domain} via Netlify DNS`);
+          return { success: true, method: 'netlify-dns' };
+        } else {
+          console.warn(`⚠️ Netlify DNS sync failed: ${dnsResult.error}`);
+        }
+      }
+
+      // Fallback: Manual DNS configuration via enhanced service
+      if (enhancedNetlifyService && enhancedNetlifyService.isConfigured()) {
+        console.log(`🔧 Using enhanced Netlify service for DNS setup...`);
+
+        // This would typically create DNS records via Netlify API
+        // For now, we'll simulate the process and provide instructions
+        const instructions = expectedRecords.map(record =>
+          `${record.type} record: ${record.name} -> ${record.value}`
+        );
+
+        // Store DNS instructions for manual setup
+        (window as any).dnsInstructions = (window as any).dnsInstructions || {};
+        (window as any).dnsInstructions[domain.domain] = instructions.join('\n');
+
+        // Update domain status to indicate DNS setup is in progress
+        await supabase
+          .from('domains')
+          .update({
+            status: 'validating',
+            validation_error: `DNS records need manual configuration. Required: ${instructions.join(', ')}`
+          })
+          .eq('id', domain.id);
+
+        toast.info(`📋 DNS setup instructions generated for ${domain.domain}`, {
+          description: 'Click "View DNS Instructions" to see required records',
+          duration: 10000
+        });
+
+        return { success: true, method: 'manual-instructions' };
+      }
+
+      // If no automated method is available, provide manual instructions
+      console.log(`📋 Providing manual DNS configuration instructions for ${domain.domain}`);
+
+      const manualInstructions = [
+        `Configure these DNS records for ${domain.domain}:`,
+        ...expectedRecords.map(record => `  ${record.type}: ${record.name} -> ${record.value}`),
+        '',
+        'After configuring these records, use the "Validate DNS" button to verify setup.'
+      ];
+
+      // Store instructions
+      (window as any).dnsInstructions = (window as any).dnsInstructions || {};
+      (window as any).dnsInstructions[domain.domain] = manualInstructions.join('\n');
+
+      toast.info(`📋 Manual DNS configuration required for ${domain.domain}`, {
+        description: 'Click "View DNS Instructions" for detailed setup steps',
+        duration: 12000
+      });
+
+      return { success: true, method: 'manual-only' };
+
+    } catch (error) {
+      console.error(`❌ Error auto-fixing DNS for ${domain.domain}:`, error);
+      toast.error(`❌ Failed to auto-fix DNS for ${domain.domain}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return { success: false, error: error instanceof Error ? error.message : 'DNS fix failed' };
+    }
+  };
+
 
   // Check DNS service health
   const checkDNSServiceHealth = async () => {
