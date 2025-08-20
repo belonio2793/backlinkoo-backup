@@ -163,7 +163,12 @@ export function NetlifyDomainSync() {
 
         try {
           // Check if domain already exists in Netlify
-          const existingDomains = await apiService.getDomains();
+          let existingDomains: any[] = [];
+          try {
+            existingDomains = await apiService.getDomains();
+          } catch (domainError) {
+            console.warn('Could not fetch existing domains, proceeding with add:', domainError);
+          }
           const existingDomain = existingDomains.find(d => d.domain === domain.domain);
 
           if (existingDomain) {
