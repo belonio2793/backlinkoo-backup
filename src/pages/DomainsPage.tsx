@@ -1515,6 +1515,33 @@ anotherdomain.org`}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              {/* Enhanced Environment Status */}
+              <Alert className={`border-2 ${netlifyConfigured ? 'border-green-200 bg-green-50' : 'border-amber-200 bg-amber-50'}`}>
+                <Globe className={`h-4 w-4 ${netlifyConfigured ? 'text-green-600' : 'text-amber-600'}`} />
+                <AlertDescription className={netlifyConfigured ? 'text-green-800' : 'text-amber-800'}>
+                  <div className="space-y-2">
+                    <p className="font-medium">
+                      {netlifyConfigured
+                        ? '🚀 NETLIFY_ACCESS_TOKEN configured - Full automation available'
+                        : '⚠️ NETLIFY_ACCESS_TOKEN not found - Limited automation mode'
+                      }
+                    </p>
+                    <div className="flex gap-3 text-xs">
+                      <span>✅ Theme Configuration</span>
+                      <span>✅ Campaign Integration</span>
+                      <span className={netlifyConfigured ? 'text-green-600' : 'text-amber-600'}>
+                        {netlifyConfigured ? '✅' : '⚠️'} DNS Automation
+                      </span>
+                    </div>
+                    {!netlifyConfigured && (
+                      <p className="text-xs mt-2">
+                        To enable DNS automation, set NETLIFY_ACCESS_TOKEN in your environment variables or DevServerControl tool.
+                      </p>
+                    )}
+                  </div>
+                </AlertDescription>
+              </Alert>
+
               <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                 <div className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
