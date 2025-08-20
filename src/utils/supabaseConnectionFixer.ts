@@ -16,10 +16,10 @@ export class SupabaseConnectionFixer {
    */
   static isSupabaseNetworkError(error: any): boolean {
     if (!error) return false;
-    
+
     const errorMessage = error.message || error.toString?.() || '';
     const errorStack = error.stack || '';
-    
+
     return (
       errorMessage.includes('Failed to fetch') ||
       errorMessage.includes('NetworkError') ||
@@ -30,6 +30,21 @@ export class SupabaseConnectionFixer {
       errorMessage.includes('ERR_INTERNET_DISCONNECTED') ||
       errorStack.includes('supabase-js.js') ||
       errorStack.includes('@supabase')
+    );
+  }
+
+  /**
+   * Check if error is an auth session missing error (normal for unauthenticated users)
+   */
+  static isAuthSessionMissingError(error: any): boolean {
+    if (!error) return false;
+
+    const errorMessage = error.message || error.toString?.() || '';
+
+    return (
+      errorMessage.includes('Auth session missing') ||
+      errorMessage.includes('AuthSessionMissingError') ||
+      error.name === 'AuthSessionMissingError'
     );
   }
 
