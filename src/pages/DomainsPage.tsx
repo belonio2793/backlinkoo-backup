@@ -721,10 +721,30 @@ const DomainsPage = () => {
 
       if (error) {
         console.error('Error loading domains:', error);
-        const errorMessage = typeof error === 'string' ? error :
-                           error?.message ||
-                           error?.details ||
-                           'Unknown error occurred';
+
+        // Enhanced error message extraction
+        let errorMessage = 'Unknown error occurred';
+
+        if (typeof error === 'string') {
+          errorMessage = error;
+        } else if (error && typeof error === 'object') {
+          // Try different error properties in order of preference
+          errorMessage = error.message ||
+                        error.details ||
+                        error.hint ||
+                        error.code ||
+                        JSON.stringify(error);
+        }
+
+        // Handle specific Supabase errors
+        if (errorMessage.includes('No API key found')) {
+          errorMessage = 'Database connection failed: Missing API key. Please refresh the page.';
+        } else if (errorMessage.includes('JWT')) {
+          errorMessage = 'Authentication expired. Please sign in again.';
+        } else if (errorMessage.includes('Failed to fetch')) {
+          errorMessage = 'Network connection failed. Please check your internet connection.';
+        }
+
         throw new Error(errorMessage);
       }
 
@@ -2264,7 +2284,7 @@ anotherdomain.org`}
                                     console.error('API error details:', debugResult.debug);
                                   }
                                 } else {
-                                  toast.warning('⚠️ Basic function works, but debug function unavailable');
+                                  toast.warning('⚠�� Basic function works, but debug function unavailable');
                                 }
 
                               } catch (error) {
