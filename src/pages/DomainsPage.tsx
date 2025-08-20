@@ -1012,7 +1012,7 @@ const DomainsPage = () => {
   // Add custom domain to Netlify using the official API
   const addCustomDomainToNetlify = async (domain: Domain, txtRecordValue?: string) => {
     try {
-      if (!netlifyCustomDomainService || !netlifyCustomDomainService.isConfigured()) {
+      if (!netlifyCustomDomainService || !netlifyCustomDomainService.isConfiguredSync()) {
         toast.error('Netlify custom domain service not configured. Please check your NETLIFY_ACCESS_TOKEN.');
         return;
       }
