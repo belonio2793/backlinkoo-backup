@@ -1492,6 +1492,7 @@ anotherdomain.org`}
                     <TableHead>Domain</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>DNS Records</TableHead>
+                    <TableHead>Netlify</TableHead>
                     <TableHead>Hosting</TableHead>
                     <TableHead>Stats</TableHead>
                     <TableHead>Actions</TableHead>
