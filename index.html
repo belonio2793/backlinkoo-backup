@@ -44,6 +44,29 @@
         script.src = '/disable-fullstory.js';
         document.head.appendChild(script);
       }
+
+      // Emergency error handler for FullStory fetch interference
+      window.addEventListener('error', function(event) {
+        if (event.error && event.error.stack &&
+            (event.error.stack.includes('fullstory') ||
+             event.error.stack.includes('fs.js') ||
+             event.error.stack.includes('edge.fullstory.com')) &&
+            event.error.message.includes('Failed to fetch')) {
+          console.warn('🚫 FullStory fetch interference detected - auto-disabling');
+          localStorage.setItem('disable_fullstory', 'true');
+          // Show user-friendly message
+          const notification = document.createElement('div');
+          notification.innerHTML = '🔧 Fixed fetch interference - page will reload';
+          notification.style.cssText = `
+            position: fixed; top: 20px; right: 20px; z-index: 10000;
+            background: #ff6b35; color: white; padding: 12px 20px;
+            border-radius: 8px; font-family: system-ui; font-size: 14px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+          `;
+          document.body.appendChild(notification);
+          setTimeout(() => window.location.reload(), 2000);
+        }
+      });
     </script>
 
     <!-- Prevent wallet extension conflicts -->
