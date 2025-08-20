@@ -49,7 +49,7 @@ export class NetlifyCustomDomainService {
 
   /**
    * Add a custom domain to the Netlify site using the official API
-   * Uses PATCH /sites/{site_id} with custom_domain field
+   * Uses server-side function for security
    */
   async addCustomDomain(domain: string, txtRecordValue?: string): Promise<{
     success: boolean;
@@ -75,45 +75,17 @@ export class NetlifyCustomDomainService {
         };
       }
 
-      // Demo mode simulation
-      if (!this.token || this.token.includes('demo') || this.token.length < 20) {
-        console.warn(`⚠️ DEMO MODE: Simulating custom domain addition for ${domain}`);
-        
-        const mockResponse: NetlifySiteUpdateResponse = {
-          id: this.siteId,
-          name: 'demo-site',
-          custom_domain: domain,
-          url: `https://${domain}`,
-          admin_url: `https://app.netlify.com/sites/${this.siteId}`,
-          ssl_url: `https://${domain}`,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
+      console.log(`🚀 Adding custom domain ${domain} via server-side function...`);
 
-        return {
-          success: true,
-          data: mockResponse,
-          instructions: this.getSetupInstructions(domain, false)
-        };
-      }
-
-      // Prepare the request payload
-      const payload: NetlifyDomainVerificationRequest = {
-        custom_domain: domain
-      };
-
-      // Add TXT record value if provided (for subdomain verification)
+      // Use server-side Netlify function for security
+      const payload = { domain };
       if (txtRecordValue) {
         payload.txt_record_value = txtRecordValue;
       }
 
-      console.log(`🚀 Adding custom domain ${domain} to Netlify site ${this.siteId}...`);
-
-      // Make the PATCH request to update the site with custom domain
-      const response = await fetch(`${this.baseUrl}/sites/${this.siteId}`, {
-        method: 'PATCH',
+      const response = await fetch('/.netlify/functions/netlify-custom-domain', {
+        method: 'POST',
         headers: {
-          'Authorization': `Bearer ${this.token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(payload),
@@ -122,11 +94,11 @@ export class NetlifyCustomDomainService {
       if (!response.ok) {
         const errorData = await response.text();
         let errorMessage = `${response.status} ${response.statusText}`;
-        
+
         try {
           const errorJson = JSON.parse(errorData);
-          if (errorJson.message) {
-            errorMessage = errorJson.message;
+          if (errorJson.error) {
+            errorMessage = errorJson.error;
           }
         } catch {
           // Use text error if JSON parsing fails
@@ -141,13 +113,21 @@ export class NetlifyCustomDomainService {
         };
       }
 
-      const updatedSite: NetlifySiteUpdateResponse = await response.json();
-      console.log('✅ Custom domain added to Netlify:', updatedSite);
+      const result = await response.json();
+
+      if (!result.success) {
+        return {
+          success: false,
+          error: result.error || 'Unknown error occurred'
+        };
+      }
+
+      console.log('✅ Custom domain added via server function:', result.data);
 
       return {
         success: true,
-        data: updatedSite,
-        instructions: this.getSetupInstructions(domain, true)
+        data: result.data,
+        instructions: result.instructions
       };
 
     } catch (error) {
