@@ -101,12 +101,12 @@ export class BlogClaimMigration {
       const { error } = await supabase.rpc('exec_sql', { sql: migrationSQL });
 
       if (error) {
-        return { success: false, error: error.message };
+        return { success: false, error: getErrorMessage(error) };
       }
 
       return { success: true };
     } catch (error: any) {
-      return { success: false, error: error.message };
+      return { success: false, error: getErrorMessage(error) };
     }
   }
 
