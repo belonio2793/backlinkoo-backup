@@ -266,6 +266,37 @@ export class NetlifyDomainService {
   }
 
   /**
+   * Check if a domain exists in Netlify site
+   */
+  async domainExists(domain: string): Promise<{
+    exists: boolean;
+    error?: string;
+  }> {
+    try {
+      // Demo mode simulation
+      if (!this.token || this.token.includes('demo') || this.token.length < 20) {
+        return { exists: Math.random() > 0.5 };
+      }
+
+      const response = await fetch(
+        `${this.baseUrl}/sites/${this.siteId}/domains/${domain}`,
+        {
+          headers: { 'Authorization': `Bearer ${this.token}` },
+        }
+      );
+
+      return { exists: response.ok };
+
+    } catch (error) {
+      console.error('❌ Error checking domain existence:', error);
+      return {
+        exists: false,
+        error: error instanceof Error ? error.message : 'Unknown error occurred'
+      };
+    }
+  }
+
+  /**
    * Remove a domain from the Netlify site
    */
   async removeDomain(domain: string): Promise<{
