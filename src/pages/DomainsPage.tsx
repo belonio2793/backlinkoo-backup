@@ -64,9 +64,6 @@ import SimpleBlogTemplateManager from '@/components/SimpleBlogTemplateManager';
 import DNSValidationService from '@/services/dnsValidationService';
 import AutoDNSPropagation from '@/components/AutoDNSPropagation';
 import AutoPropagationWizard from '@/components/AutoPropagationWizard';
-import NetlifyDomainSync from '@/components/NetlifyDomainSync';
-import NetlifyEnvironmentSync from '@/components/NetlifyEnvironmentSync';
-import DomainAutomationIntegration from '@/components/DomainAutomationIntegration';
 import NetlifyDNSManager from '@/services/netlifyDNSManager';
 import AutoDomainBlogThemeService from '@/services/autoDomainBlogThemeService';
 import { Header } from '@/components/Header';
@@ -465,12 +462,6 @@ const DomainsPage = () => {
     }
   };
 
-  // Handle sync completion from NetlifyEnvironmentSync component
-  const handleSyncComplete = () => {
-    checkNetlifyEnvSync();
-    setNetlifyConfigured(true);
-    toast.success('🚀 Netlify environment sync completed! All automation features are now active.');
-  };
 
   // Check DNS service health
   const checkDNSServiceHealth = async () => {
