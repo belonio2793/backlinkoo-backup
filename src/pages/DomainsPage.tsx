@@ -2336,7 +2336,7 @@ anotherdomain.org`}
                                     console.error('API error details:', debugResult.debug);
                                   }
                                 } else {
-                                  toast.warning('⚠�� Basic function works, but debug function unavailable');
+                                  toast.warning('����� Basic function works, but debug function unavailable');
                                 }
 
                               } catch (error) {
@@ -2429,7 +2429,59 @@ anotherdomain.org`}
           </CardContent>
         </Card>
 
+        {/* Environment Variables Manager */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Environment Configuration
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowEnvironmentManager(!showEnvironmentManager)}
+              >
+                {showEnvironmentManager ? 'Hide' : 'Configure'} Environment
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          {showEnvironmentManager && (
+            <CardContent>
+              <EnvironmentVariablesManager
+                onConfigurationChange={setEnvironmentConfig}
+              />
+            </CardContent>
+          )}
+        </Card>
 
+        {/* Netlify Control Panel for Selected Domain */}
+        {selectedDomainForControl && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-blue-600" />
+                  Netlify Control Panel for {selectedDomainForControl.domain}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedDomainForControl(null)}
+                >
+                  Close Panel
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <NetlifyControlPanel
+                domain={selectedDomainForControl}
+                onDomainUpdate={updateDomain}
+                onRefresh={loadDomains}
+              />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Blog Template Management Section - Always Show */}
         <Card className="mt-8">
