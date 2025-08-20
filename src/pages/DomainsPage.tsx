@@ -2336,7 +2336,7 @@ anotherdomain.org`}
                                     console.error('API error details:', debugResult.debug);
                                   }
                                 } else {
-                                  toast.warning('����� Basic function works, but debug function unavailable');
+                                  toast.warning('⚠�� Basic function works, but debug function unavailable');
                                 }
 
                               } catch (error) {
@@ -2410,6 +2410,16 @@ anotherdomain.org`}
                               </a>
                             </Button>
                           )}
+
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSelectedDomainForControl(domain)}
+                            title="Open Netlify Control Panel"
+                            className="bg-blue-50 border-blue-200 hover:bg-blue-100"
+                          >
+                            <Settings className="h-3 w-3" />
+                          </Button>
 
                           <Button
                             variant="outline"
