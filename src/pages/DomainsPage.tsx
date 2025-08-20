@@ -1718,7 +1718,7 @@ anotherdomain.org`}
                                       </h4>
                                       <div className="text-sm text-amber-800 space-y-2">
                                         <div className="flex items-start gap-2">
-                                          <span className="font-medium">🔧 Development Mode:</span>
+                                          <span className="font-medium">���� Development Mode:</span>
                                           <span>DNS validation functions are not accessible in local environment</span>
                                         </div>
                                         <div className="flex items-start gap-2">
@@ -1951,7 +1951,7 @@ anotherdomain.org`}
                             <Wand2 className="h-3 w-3" />
                           </Button>
 
-                          {!domain.netlify_synced && netlifyCustomDomainService && netlifyCustomDomainService.isConfiguredSync() && (
+                          {!domain.netlify_synced && (
                             <Button
                               variant="outline"
                               size="sm"
