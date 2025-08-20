@@ -42,18 +42,62 @@ class UserService {
         return null;
       }
 
-      const { data: { user } } = await supabase.auth.getUser();
+      let user;
+      try {
+        const { data: { user: authUser } } = await supabase.auth.getUser();
+        user = authUser;
+      } catch (authError: any) {
+        // Handle network errors during authentication
+        if (authError.message && (
+          authError.message.includes('Failed to fetch') ||
+          authError.message.includes('NetworkError') ||
+          authError.message.includes('fetch is not defined') ||
+          authError.message.includes('ENOTFOUND') ||
+          authError.message.includes('ECONNREFUSED')
+        )) {
+          console.warn('⚠️ userService: Network error during authentication, working offline');
+          return null;
+        }
+        throw authError; // Re-throw if it's not a network error
+      }
       if (!user) {
         console.log('❌ userService: No authenticated user');
         return null;
       }
 
       console.log('🔄 userService: Fetching profile for user:', user.email);
-      const { data: profile, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single();
+
+      let profile, error;
+      try {
+        const result = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .single();
+        profile = result.data;
+        error = result.error;
+      } catch (profileError: any) {
+        // Handle network errors during profile fetch
+        if (profileError.message && (
+          profileError.message.includes('Failed to fetch') ||
+          profileError.message.includes('NetworkError') ||
+          profileError.message.includes('fetch is not defined') ||
+          profileError.message.includes('ENOTFOUND') ||
+          profileError.message.includes('ECONNREFUSED')
+        )) {
+          console.warn('⚠️ userService: Network error during profile fetch, using fallback profile');
+          return {
+            id: user.id,
+            user_id: user.id,
+            email: user.email || '',
+            role: 'user' as const,
+            subscription_tier: 'free' as const,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          };
+        }
+        throw profileError; // Re-throw if it's not a network error
+      }
 
       if (error) {
         const errorMessage = formatErrorForUI(error);

@@ -43,6 +43,21 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, 
   },
 });
 
+// Global network error handler for development
+const handleNetworkError = (error: any, context: string) => {
+  if (error && typeof error === 'object' && (
+    error.message?.includes('Failed to fetch') ||
+    error.message?.includes('NetworkError') ||
+    error.message?.includes('fetch is not defined') ||
+    error.message?.includes('ENOTFOUND') ||
+    error.message?.includes('ECONNREFUSED')
+  )) {
+    console.warn(`⚠️ Network error in ${context}:`, error.message);
+    return true; // Indicates this was a network error
+  }
+  return false; // Not a network error
+};
+
 // Test connection in development
 if (import.meta.env.DEV) {
   setTimeout(async () => {
@@ -54,14 +69,21 @@ if (import.meta.env.DEV) {
         .limit(1);
 
       if (error) {
-        console.warn('⚠️ Database connection test failed:', error.message);
+        if (!handleNetworkError(error, 'connection test')) {
+          console.warn('⚠️ Database connection test failed:', error.message);
+        }
       } else {
         console.log('✅ Supabase connection test successful');
       }
     } catch (testError: any) {
-      console.warn('⚠️ Supabase connection test error:', testError.message);
+      if (!handleNetworkError(testError, 'connection test')) {
+        console.warn('⚠️ Supabase connection test error:', testError.message);
+      }
     }
   }, 1000);
 }
+
+// Export the network error handler for use in other parts of the app
+export { handleNetworkError };
 
 console.log('✅ Clean Supabase client initialized');

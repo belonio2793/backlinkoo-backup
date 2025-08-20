@@ -40,9 +40,22 @@ export class NetlifyDomainAPI {
   }
 
   /**
+   * Check if we're using a demo/test token
+   */
+  private isDemoToken(): boolean {
+    return this.apiToken.includes('demo') || this.apiToken.includes('test') || this.apiToken.length < 20;
+  }
+
+  /**
    * Get all domains for the site
    */
   async getDomains(): Promise<NetlifyAPIResponse[]> {
+    // Return empty array for demo/development mode
+    if (this.isDemoToken()) {
+      console.warn('Using demo token - returning empty domains list');
+      return [];
+    }
+
     try {
       const response = await fetch(`${this.baseUrl}/sites/${this.siteId}/domains`, {
         headers: {
@@ -52,6 +65,15 @@ export class NetlifyDomainAPI {
       });
 
       if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`Netlify site not found (${this.siteId}). Please check your site ID and API token.`);
+        }
+        if (response.status === 401) {
+          throw new Error(`Netlify API authentication failed. Please check your API token permissions.`);
+        }
+        if (response.status === 403) {
+          throw new Error(`Netlify API access forbidden. Please ensure your token has domain management permissions.`);
+        }
         throw new Error(`Netlify API error: ${response.status} ${response.statusText}`);
       }
 
@@ -66,9 +88,26 @@ export class NetlifyDomainAPI {
    * Add a single domain to Netlify
    */
   async addDomain(domain: string, options: { autoSSL?: boolean } = {}): Promise<NetlifyAPIResponse> {
+    const cleanDomain = domain.replace(/^https?:\/\//, '').replace(/^www\./, '');
+
+    // Return mock response for demo/development mode
+    if (this.isDemoToken()) {
+      console.warn(`Demo mode: Simulating domain addition for ${cleanDomain}`);
+      return {
+        id: `demo-${Date.now()}`,
+        domain: cleanDomain,
+        state: 'pending',
+        dns_zone_id: 'demo-zone',
+        certificate: options.autoSSL ? {
+          state: 'pending',
+          expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+        } : undefined
+      };
+    }
+
     try {
       const domainConfig: NetlifyDomainConfig = {
-        domain: domain.replace(/^https?:\/\//, '').replace(/^www\./, ''),
+        domain: cleanDomain,
         ...(options.autoSSL && {
           certificate: {
             type: 'lets_encrypt'
@@ -87,12 +126,21 @@ export class NetlifyDomainAPI {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          throw new Error(`Netlify API authentication failed. Please check your API token.`);
+        }
+        if (response.status === 403) {
+          throw new Error(`Insufficient permissions. Please ensure your token can manage domains.`);
+        }
+        if (response.status === 422) {
+          throw new Error(`Domain ${cleanDomain} is invalid or already exists in another site.`);
+        }
         throw new Error(`Netlify API error: ${response.status} - ${errorData.message || response.statusText}`);
       }
 
       return await response.json();
     } catch (error) {
-      console.error(`Error adding domain ${domain} to Netlify:`, error);
+      console.error(`Error adding domain ${cleanDomain} to Netlify:`, error);
       throw error;
     }
   }
@@ -343,6 +391,16 @@ export class NetlifyDomainAPI {
     permissions: string[];
     error?: string;
   }> {
+    // Return demo success for demo/development mode
+    if (this.isDemoToken()) {
+      return {
+        connected: true,
+        siteExists: true,
+        permissions: ['sites:read', 'domains:read', 'domains:write', 'demo:mode'],
+        error: undefined
+      };
+    }
+
     try {
       // Test basic site access
       const siteResponse = await fetch(`${this.baseUrl}/sites/${this.siteId}`, {
@@ -353,11 +411,17 @@ export class NetlifyDomainAPI {
       });
 
       if (!siteResponse.ok) {
+        if (siteResponse.status === 404) {
+          throw new Error(`Site not found (${this.siteId}). Please check your site ID.`);
+        }
+        if (siteResponse.status === 401) {
+          throw new Error(`Authentication failed. Please check your API token.`);
+        }
         throw new Error(`Site access failed: ${siteResponse.status}`);
       }
 
       const siteData = await siteResponse.json();
-      
+
       // Test domain permissions
       const domainsResponse = await fetch(`${this.baseUrl}/sites/${this.siteId}/domains`, {
         headers: {

@@ -57,7 +57,8 @@ import {
   Edit3,
   Save,
   Palette,
-  Wand2
+  Wand2,
+  Zap
 } from 'lucide-react';
 import SimpleBlogTemplateManager from '@/components/SimpleBlogTemplateManager';
 import BlogTemplateDebug from '@/components/BlogTemplateDebug';
@@ -65,6 +66,9 @@ import DNSValidationService from '@/services/dnsValidationService';
 import AutoDNSPropagation from '@/components/AutoDNSPropagation';
 import AutoPropagationWizard from '@/components/AutoPropagationWizard';
 import NetlifyDomainSync from '@/components/NetlifyDomainSync';
+import DomainAutomationIntegration from '@/components/DomainAutomationIntegration';
+import NetlifyDNSManager from '@/services/netlifyDNSManager';
+import AutoDomainBlogThemeService from '@/services/autoDomainBlogThemeService';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { useAuthState } from '@/hooks/useAuthState';
@@ -122,6 +126,8 @@ const DomainsPage = () => {
   const [showAutoPropagationWizard, setShowAutoPropagationWizard] = useState(false);
   const [selectedDomainForWizard, setSelectedDomainForWizard] = useState<Domain | null>(null);
   const [domainBlogThemesExists, setDomainBlogThemesExists] = useState<boolean | null>(null);
+  const [showAutomationPanel, setShowAutomationPanel] = useState(false);
+  const [netlifyConfigured, setNetlifyConfigured] = useState(false);
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
@@ -181,6 +187,12 @@ const DomainsPage = () => {
       checkDNSServiceHealth();
     }
   }, [user?.id]);
+
+  // Check Netlify configuration separately
+  useEffect(() => {
+    const configStatus = NetlifyDNSManager.getConfigStatus();
+    setNetlifyConfigured(configStatus.configured);
+  }, []);
 
   // Check DNS service health
   const checkDNSServiceHealth = async () => {
@@ -388,6 +400,13 @@ const DomainsPage = () => {
       setDomains(prev => [data, ...prev]);
       setNewDomain('');
       toast.success(`Domain ${data.domain} added successfully!`);
+
+      // Auto-configure if automation is enabled and domain was added successfully
+      if (netlifyConfigured) {
+        setTimeout(() => {
+          autoSetupNewDomain(data);
+        }, 1000);
+      }
     } catch (error: any) {
       console.error('Error adding domain:', error);
       const errorMessage = error?.message || 'Unknown error occurred';
@@ -578,6 +597,43 @@ const DomainsPage = () => {
     toast.info('Page generation feature coming soon!');
   };
 
+  // Auto-setup new domain with DNS and themes
+  const autoSetupNewDomain = async (domain: Domain) => {
+    try {
+      if (!netlifyConfigured) {
+        toast.info(`Domain ${domain.domain} added. Use automation panel for full setup.`);
+        return;
+      }
+
+      toast.info(`🚀 Auto-configuring ${domain.domain}...`);
+
+      // Configure DNS
+      const dnsManager = NetlifyDNSManager.getInstance();
+      const dnsResult = await dnsManager.autoConfigureBlogDNS(domain.domain);
+
+      if (dnsResult.success) {
+        // Configure blog theme
+        const themeResult = await AutoDomainBlogThemeService.autoConfigureDomainBlogTheme(
+          domain.id,
+          domain.domain,
+          { enableCampaignIntegration: true }
+        );
+
+        if (themeResult.success) {
+          toast.success(`✅ ${domain.domain} fully configured for campaigns!`);
+          loadDomains(); // Refresh the list
+        } else {
+          toast.warning(`DNS configured, but theme setup failed: ${themeResult.message}`);
+        }
+      } else {
+        toast.warning(`DNS configuration failed: ${dnsResult.message}`);
+      }
+    } catch (error) {
+      console.error('Auto-setup failed:', error);
+      toast.error(`Auto-setup failed for ${domain.domain}`);
+    }
+  };
+
   const launchAutoPropagationWizard = (domain: Domain) => {
     setSelectedDomainForWizard(domain);
     setShowAutoPropagationWizard(true);
@@ -642,7 +698,7 @@ const DomainsPage = () => {
       }
 
     } catch (error: any) {
-      console.error('❌ Test validation error:', error);
+      console.error('��� Test validation error:', error);
 
       if (error.name === 'AbortError') {
         toast.error('❌ DNS validation service timeout - service must be available for production');
@@ -846,6 +902,12 @@ const DomainsPage = () => {
                   Checking...
                 </Badge>
               )}
+              {import.meta.env.VITE_NETLIFY_ACCESS_TOKEN?.includes('demo') && (
+                <Badge className="bg-amber-100 text-amber-800 border-amber-200">
+                  <Info className="w-3 h-3 mr-1" />
+                  Demo Token
+                </Badge>
+              )}
               <Button variant="ghost" size="sm" onClick={checkDNSServiceHealth}>
                 <RefreshCw className="w-3 h-3" />
               </Button>
@@ -964,6 +1026,15 @@ anotherdomain.org`}
             <CardTitle className="flex items-center justify-between">
               <span>Your Domains ({domains.length})</span>
               <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAutomationPanel(!showAutomationPanel)}
+                  className="bg-blue-50 border-blue-200 hover:bg-blue-100"
+                >
+                  <Wand2 className="h-4 w-4 mr-1" />
+                  Automation
+                </Button>
                 <Button variant="outline" size="sm" onClick={exportDomains}>
                   <Download className="h-4 w-4 mr-1" />
                   Export CSV
@@ -1248,6 +1319,19 @@ anotherdomain.org`}
                             <Wand2 className="h-3 w-3" />
                           </Button>
 
+                          {(!domain.blog_enabled || !domain.netlify_synced) && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => autoSetupNewDomain(domain)}
+                              disabled={!netlifyConfigured}
+                              title="Auto-Setup Domain"
+                              className="bg-green-50 border-green-200 hover:bg-green-100"
+                            >
+                              <Zap className="h-3 w-3" />
+                            </Button>
+                          )}
+
                           <Button
                             variant="outline"
                             size="sm"
@@ -1409,79 +1493,27 @@ anotherdomain.org`}
           </Card>
         )}
 
-        {/* Automation Integration Info */}
-        {blogEnabledDomains.length > 0 && (
+        {/* Domain Automation Panel */}
+        {showAutomationPanel && (
           <Card className="mt-8">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Automation Integration
+                <Wand2 className="h-5 w-5" />
+                Domain Automation Hub
               </CardTitle>
+              <CardDescription>
+                Automate DNS configuration, blog themes, and campaign integration for your domains
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-green-900 mb-1">Domain Blog Integration Active</h4>
-                    <p className="text-sm text-green-800 mb-3">
-                      Your blog-enabled domains are automatically integrated with campaigns. Each campaign will publish additional themed blog posts across your domains, creating multiple high-quality backlinks.
-                    </p>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span>Automatic theme assignment</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span>Campaign blog rotation</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        <span>SEO-optimized content</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <Info className="h-5 w-5 text-blue-600 mt-0.5" />
-                  <div>
-                    <h4 className="font-medium text-blue-900 mb-1">How Domain Blog Integration Works</h4>
-                    <p className="text-sm text-blue-800 mb-3">
-                      When you create campaigns in the automation system, the system will:
-                    </p>
-                    <ol className="text-sm text-blue-800 space-y-1 list-decimal list-inside">
-                      <li>Generate unique, themed blog posts for each domain</li>
-                      <li>Apply your custom themes and styling automatically</li>
-                      <li>Publish posts with natural backlinks to your target URLs</li>
-                      <li>Rotate across domains to diversify your backlink profile</li>
-                    </ol>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <a
-                  href="/automation"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Play className="h-4 w-4" />
-                  Test Automation
-                </a>
-                <a
-                  href="/blog"
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  View Published Blogs
-                </a>
-              </div>
+            <CardContent>
+              <DomainAutomationIntegration
+                domains={domains}
+                onDomainsUpdated={loadDomains}
+              />
             </CardContent>
           </Card>
         )}
+
 
 
         {/* Netlify Domain Sync */}

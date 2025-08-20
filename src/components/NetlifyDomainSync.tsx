@@ -108,16 +108,22 @@ export function NetlifyDomainSync() {
     }
 
     setConnectionStatus('testing');
-    
+
     try {
       const service = new NetlifyDomainAPI(netlifyConfig.apiToken, netlifyConfig.siteId);
       const result = await service.testConnection();
-      
+
       if (result.connected) {
         setConnectionStatus('connected');
         setApiService(service);
-        toast.success(`Connected to Netlify! Permissions: ${result.permissions.join(', ')}`);
-        
+
+        const isDemoMode = result.permissions.includes('demo:mode');
+        if (isDemoMode) {
+          toast.success(`Demo mode active! Netlify operations will be simulated. Permissions: ${result.permissions.filter(p => p !== 'demo:mode').join(', ')}`);
+        } else {
+          toast.success(`Connected to Netlify! Permissions: ${result.permissions.join(', ')}`);
+        }
+
         // Save config to localStorage for persistence
         localStorage.setItem('netlify_domain_config', JSON.stringify(netlifyConfig));
       } else {
@@ -157,7 +163,12 @@ export function NetlifyDomainSync() {
 
         try {
           // Check if domain already exists in Netlify
-          const existingDomains = await apiService.getDomains();
+          let existingDomains: any[] = [];
+          try {
+            existingDomains = await apiService.getDomains();
+          } catch (domainError) {
+            console.warn('Could not fetch existing domains, proceeding with add:', domainError);
+          }
           const existingDomain = existingDomains.find(d => d.domain === domain.domain);
 
           if (existingDomain) {
@@ -320,13 +331,22 @@ export function NetlifyDomainSync() {
         <AlertDescription className="text-blue-800">
           <div className="space-y-2">
             <p className="font-medium">🚀 Netlify API Integration</p>
-            <p className="text-sm">
-              For automatic domain management, you can either:
-            </p>
-            <ul className="text-sm space-y-1 ml-4">
-              <li>• <strong>Option 1:</strong> <a href="#open-mcp-popover" className="text-blue-600 hover:underline">Connect to Netlify MCP</a> for automatic API credentials</li>
-              <li>• <strong>Option 2:</strong> Manually configure your API token below</li>
-            </ul>
+            {netlifyConfig.apiToken.includes('demo') ? (
+              <div className="p-2 bg-amber-100 border border-amber-200 rounded text-amber-800">
+                <p className="text-sm font-medium">⚠️ Demo Mode Active</p>
+                <p className="text-xs">Using demo token - Netlify operations will be simulated. Set a real NETLIFY_ACCESS_TOKEN for production use.</p>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm">
+                  For automatic domain management, you can either:
+                </p>
+                <ul className="text-sm space-y-1 ml-4">
+                  <li>• <strong>Option 1:</strong> <a href="#open-mcp-popover" className="text-blue-600 hover:underline">Connect to Netlify MCP</a> for automatic API credentials</li>
+                  <li>• <strong>Option 2:</strong> Manually configure your API token below</li>
+                </ul>
+              </>
+            )}
           </div>
         </AlertDescription>
       </Alert>
