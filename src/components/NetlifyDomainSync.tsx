@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { 
   Globe, 
   Upload, 
@@ -198,7 +199,7 @@ export function NetlifyDomainSync() {
         site.custom_domain
       ) || sites[0];
 
-      console.log(`��� Auto-detected site: ${domainSite.name} (${domainSite.id})`);
+      console.log(`✅ Auto-detected site: ${domainSite.name} (${domainSite.id})`);
 
       setNetlifyConfig(prev => ({
         ...prev,
