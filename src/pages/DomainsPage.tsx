@@ -188,6 +188,12 @@ const DomainsPage = () => {
     }
   }, [user?.id]);
 
+  // Check Netlify configuration separately
+  useEffect(() => {
+    const configStatus = NetlifyDNSManager.getConfigStatus();
+    setNetlifyConfigured(configStatus.configured);
+  }, []);
+
   // Check DNS service health
   const checkDNSServiceHealth = async () => {
     const status = await DNSValidationService.checkServiceHealth();
@@ -692,7 +698,7 @@ const DomainsPage = () => {
       }
 
     } catch (error: any) {
-      console.error('❌ Test validation error:', error);
+      console.error('��� Test validation error:', error);
 
       if (error.name === 'AbortError') {
         toast.error('❌ DNS validation service timeout - service must be available for production');
