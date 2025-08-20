@@ -128,7 +128,8 @@ export async function runOneTimeBeautifulContentMigration(): Promise<void> {
     localStorage.setItem(MIGRATION_KEY, MIGRATION_VERSION);
 
   } catch (error: any) {
-    console.error('💥 Beautiful content migration failed:', error.message);
+    console.error('💥 Beautiful content migration failed:', getErrorMessage(error));
+    console.error('💥 Full migration error details:', formatErrorForLogging(error, 'Beautiful Content Migration'));
   }
 }
 
