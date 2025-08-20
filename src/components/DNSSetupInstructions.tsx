@@ -48,8 +48,8 @@ const DNSSetupInstructions: React.FC<DNSSetupInstructionsProps> = ({
     'dns4.p01.nsone.net'
   ];
 
-  const netlifyIP = '75.2.60.5';
-  const siteId = 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809'; // From package.json
+  const netlifyIP = '75.2.60.5'; // Same IP as backlinkoo.com
+  const backlinkooDomain = 'backlinkoo.netlify.app'; // Exact same Netlify app as backlinkoo.com
 
   const getScenarioTitle = () => {
     switch (scenario) {
