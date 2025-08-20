@@ -1694,7 +1694,38 @@ anotherdomain.org`}
                                 const result = await netlifyDomainService.getDomainStatus(domain.domain);
                                 if (result.success && result.status) {
                                   const instructions = netlifyDomainService.getSetupInstructions(domain.domain, result.status);
-                                  toast.info(`${instructions.title}: ${instructions.instructions[0]}`);
+                                  toast.success(`${instructions.title}: ${instructions.instructions[0]}`);
+                                } else if (result.error && result.error.includes('not found in Netlify')) {
+                                  // Domain not in Netlify yet - offer to add it
+                                  toast.error(`${result.error}`, {
+                                    action: {
+                                      label: 'Add Now',
+                                      onClick: async () => {
+                                        try {
+                                          toast.info(`Adding ${domain.domain} to Netlify...`);
+                                          const addResult = await netlifyDomainService.addDomain(domain.domain);
+
+                                          if (addResult.success) {
+                                            // Update domain record
+                                            await supabase
+                                              .from('domains')
+                                              .update({
+                                                netlify_id: addResult.data?.id,
+                                                netlify_synced: true
+                                              })
+                                              .eq('id', domain.id);
+
+                                            toast.success(`✅ ${domain.domain} added to Netlify!`);
+                                            await loadDomains(); // Refresh the list
+                                          } else {
+                                            toast.error(`Failed to add to Netlify: ${addResult.error}`);
+                                          }
+                                        } catch (error) {
+                                          toast.error('Failed to add domain to Netlify');
+                                        }
+                                      }
+                                    }
+                                  });
                                 } else {
                                   toast.error(result.error || 'Failed to get status');
                                 }
