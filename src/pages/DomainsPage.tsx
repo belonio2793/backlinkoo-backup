@@ -1807,8 +1807,17 @@ anotherdomain.org`}
                                 console.log('🔧 Checking Netlify status for:', domain.domain);
 
                                 // Comprehensive environment debugging
-                                const token = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
+                                const envToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
+                                const localToken = localStorage.getItem('netlify_token_temp');
+                                const token = envToken || localToken;
                                 const siteId = import.meta.env.VITE_NETLIFY_SITE_ID;
+
+                                // Reinitialize service if we have a local token
+                                if (localToken && !envToken) {
+                                  console.log('🔄 Reinitializing NetlifyDomainService with localStorage token');
+                                  const newService = new NetlifyDomainService();
+                                  setNetlifyDomainService(newService);
+                                }
 
                                 console.log('🔍 Full Environment Debug:', {
                                   token: {
