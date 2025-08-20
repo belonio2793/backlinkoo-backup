@@ -11,6 +11,10 @@ export class NetlifyDomainService {
   static async listDomains(): Promise<any[]> {
     return [];
   }
+
+  static isConfigured(): boolean {
+    return false;
+  }
 }
 
 export default NetlifyDomainService;
