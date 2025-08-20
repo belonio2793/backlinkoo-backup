@@ -1721,18 +1721,42 @@ anotherdomain.org`}
                               try {
                                 console.log('🔧 Checking Netlify status for:', domain.domain);
 
-                                // Debug token status
+                                // Comprehensive environment debugging
                                 const token = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
-                                console.log('🔍 Token debug:', {
-                                  exists: !!token,
-                                  length: token?.length || 0,
-                                  isDemo: token?.includes('demo'),
-                                  preview: token ? token.substring(0, 10) + '...' : 'none'
+                                const siteId = import.meta.env.VITE_NETLIFY_SITE_ID;
+
+                                console.log('🔍 Full Environment Debug:', {
+                                  token: {
+                                    exists: !!token,
+                                    length: token?.length || 0,
+                                    isDemo: token?.includes('demo'),
+                                    startsWith: token ? token.substring(0, 4) : 'none',
+                                    type: typeof token,
+                                    value: token || 'undefined'
+                                  },
+                                  siteId: {
+                                    exists: !!siteId,
+                                    value: siteId || 'undefined'
+                                  },
+                                  netlifyDomainService: {
+                                    exists: !!netlifyDomainService,
+                                    configured: netlifyDomainService?.isConfigured()
+                                  },
+                                  allEnvVars: Object.keys(import.meta.env).filter(key => key.includes('NETLIFY'))
                                 });
 
-                                if (!token || token.length < 20) {
-                                  toast.error('❌ Valid VITE_NETLIFY_ACCESS_TOKEN required. Current token is too short or missing.');
+                                // Show detailed status in toast
+                                if (!token) {
+                                  toast.error('❌ VITE_NETLIFY_ACCESS_TOKEN is undefined or empty');
                                   return;
+                                } else if (token.length < 20) {
+                                  toast.error(`❌ VITE_NETLIFY_ACCESS_TOKEN too short (${token.length} chars). Valid tokens are typically 50+ characters.`);
+                                  return;
+                                } else if (token.includes('demo')) {
+                                  toast.error('❌ Demo token detected. Please set your real Netlify access token.');
+                                  return;
+                                } else {
+                                  toast.info(`✅ Valid token found (${token.length} chars). Proceeding with real API call...`);
                                 }
 
                                 toast.info(`Checking ${domain.domain} status on Netlify...`);
