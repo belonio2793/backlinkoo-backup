@@ -186,11 +186,14 @@ const DomainsPage = () => {
     try {
       const syncService = new NetlifyDNSSync();
       setNetlifyDNSSync(syncService);
+      console.log('✅ NetlifyDNSSync initialized successfully');
     } catch (error) {
       console.error('Failed to initialize NetlifyDNSSync:', error);
-      // Only show error if it's not a demo token issue
-      if (error instanceof Error && !error.message.includes('demo')) {
+      // Only show error toast for critical failures, not configuration issues
+      if (error instanceof Error && !error.message.includes('demo') && !error.message.includes('token')) {
         toast.error(`DNS Service initialization failed: ${error.message}`);
+      } else {
+        console.warn('⚠️ NetlifyDNSSync running in limited mode due to missing configuration');
       }
     }
 
