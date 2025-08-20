@@ -959,7 +959,12 @@ const DomainsPage = () => {
       const data = await addSingleDomain(newDomain);
       setDomains(prev => [data, ...prev]);
       setNewDomain('');
+
+      // Show Netlify control panel for the new domain
+      setSelectedDomainForControl(data);
+
       toast.success(`✅ Domain ${data.domain} added successfully!`);
+      toast.info(`🎛️ Netlify control panel opened for ${data.domain}`);
       console.log(`��� Domain addition completed:`, data);
 
       // Auto-configure if automation is enabled and domain was added successfully
