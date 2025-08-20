@@ -134,7 +134,6 @@ const DomainsPage = () => {
   const [dnsProgress, setDnsProgress] = useState({ current: 0, total: 0, domain: '' });
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true); // Enable auto-sync by default
   const [netlifyDNSSync, setNetlifyDNSSync] = useState<NetlifyDNSSync | null>(null); // Initialize Netlify DNS sync service
-  const [netlifyDomainService, setNetlifyDomainService] = useState<NetlifyDomainService | null>(null); // Initialize Netlify domain service
   const [netlifyCustomDomainService, setNetlifyCustomDomainService] = useState<NetlifyCustomDomainService | null>(null); // Initialize Netlify custom domain service
   const [enhancedNetlifyService, setEnhancedNetlifyService] = useState<EnhancedNetlifyDomainService | null>(null); // Enhanced Netlify service with DNS
   const [showDNSInstructions, setShowDNSInstructions] = useState<{domain: string, scenario: 'registrar' | 'domains-page' | 'subdomain'} | null>(null);
@@ -673,7 +672,7 @@ const DomainsPage = () => {
   // Auto-fix DNS discrepancies
   const autoFixDNSDiscrepancies = async (domain: Domain, expectedRecords: any[], netlifyStatus: any) => {
     try {
-      console.log(`���� Auto-fixing DNS discrepancies for ${domain.domain}...`);
+      console.log(`🔧 Auto-fixing DNS discrepancies for ${domain.domain}...`);
       toast.info(`🔧 Auto-configuring DNS records for ${domain.domain}...`);
 
       // If Netlify DNS service is available and configured, use it
