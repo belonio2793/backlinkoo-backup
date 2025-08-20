@@ -779,8 +779,8 @@ const DomainsPage = () => {
           required_cname: hostingConfig.cname,
           hosting_provider: hostingConfig.provider,
           blog_subdirectory: hostingConfig.defaultSubdirectory,
-          ssl_enabled: hostingConfig.autoSSL,
-          blog_enabled: false
+          ssl_enabled: true, // Automatically enable SSL for all domains
+          blog_enabled: true // Automatically enable blog for all domains
         })
         .select()
         .single();
