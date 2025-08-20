@@ -1717,6 +1717,21 @@ anotherdomain.org`}
                             onClick={async () => {
                               try {
                                 console.log('🔧 Checking Netlify status for:', domain.domain);
+
+                                // Debug token status
+                                const token = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
+                                console.log('🔍 Token debug:', {
+                                  exists: !!token,
+                                  length: token?.length || 0,
+                                  isDemo: token?.includes('demo'),
+                                  preview: token ? token.substring(0, 10) + '...' : 'none'
+                                });
+
+                                if (!token || token.length < 20) {
+                                  toast.error('❌ Valid VITE_NETLIFY_ACCESS_TOKEN required. Current token is too short or missing.');
+                                  return;
+                                }
+
                                 toast.info(`Checking ${domain.domain} status on Netlify...`);
 
                                 // First, check if domain already exists in Netlify
