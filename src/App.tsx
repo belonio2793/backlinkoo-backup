@@ -74,7 +74,8 @@ const TextCleanerProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
+  <EmergencyErrorBoundary>
+    <QueryClientProvider client={queryClient}>
     <SupabaseErrorBoundary>
       <TooltipProvider>
       <ModalProvider>
@@ -330,7 +331,8 @@ const App = () => (
       </ModalProvider>
       </TooltipProvider>
     </SupabaseErrorBoundary>
-  </QueryClientProvider>
+    </QueryClientProvider>
+  </EmergencyErrorBoundary>
 );
 
 export default App;
