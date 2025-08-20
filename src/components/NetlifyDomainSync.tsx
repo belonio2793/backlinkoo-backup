@@ -198,7 +198,7 @@ export function NetlifyDomainSync() {
         site.custom_domain
       ) || sites[0];
 
-      console.log(`✅ Auto-detected site: ${domainSite.name} (${domainSite.id})`);
+      console.log(`��� Auto-detected site: ${domainSite.name} (${domainSite.id})`);
 
       setNetlifyConfig(prev => ({
         ...prev,
@@ -484,6 +484,116 @@ export function NetlifyDomainSync() {
 
   return (
     <div className="space-y-6">
+      {/* Netlify Configuration Panel */}
+      <Card className="border-blue-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-blue-900">
+            <Globe className="h-5 w-5" />
+            Netlify Configuration
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="api-token">API Token</Label>
+              <div className="flex gap-2 mt-1">
+                <input
+                  id="api-token"
+                  type="password"
+                  placeholder="nfp_... or 'demo-token' for testing"
+                  value={netlifyConfig.apiToken}
+                  onChange={(e) => setNetlifyConfig(prev => ({ ...prev, apiToken: e.target.value }))}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setNetlifyConfig(prev => ({ ...prev, apiToken: 'demo-token' }))}
+                >
+                  Demo
+                </Button>
+              </div>
+              <p className="text-xs text-gray-600 mt-1">
+                Get your token from <a href="https://app.netlify.com/user/applications#personal-access-tokens" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Netlify Personal Access Tokens</a>
+              </p>
+            </div>
+
+            <div>
+              <Label htmlFor="site-id">Site ID (optional)</Label>
+              <div className="flex gap-2 mt-1">
+                <input
+                  id="site-id"
+                  type="text"
+                  placeholder="Auto-detect or enter manually"
+                  value={netlifyConfig.siteId === 'demo-site-id' ? '' : netlifyConfig.siteId}
+                  onChange={(e) => setNetlifyConfig(prev => ({ ...prev, siteId: e.target.value || 'demo-site-id' }))}
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={autoDetectSiteId}
+                  disabled={!netlifyConfig.apiToken || netlifyConfig.apiToken.includes('demo')}
+                >
+                  Auto-Detect
+                </Button>
+              </div>
+              <p className="text-xs text-gray-600 mt-1">
+                Leave empty for auto-detection or find it in your <a href="https://app.netlify.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Netlify dashboard</a>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={netlifyConfig.autoSSL}
+                onCheckedChange={(checked) => setNetlifyConfig(prev => ({ ...prev, autoSSL: checked }))}
+              />
+              <Label>Auto-enable SSL certificates</Label>
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                onClick={testConnection}
+                disabled={connectionStatus === 'testing' || !netlifyConfig.apiToken}
+                variant="outline"
+              >
+                {connectionStatus === 'testing' ? (
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                ) : connectionStatus === 'connected' ? (
+                  <CheckCircle2 className="h-4 w-4 mr-2 text-green-600" />
+                ) : connectionStatus === 'failed' ? (
+                  <XCircle className="h-4 w-4 mr-2 text-red-600" />
+                ) : (
+                  <AlertCircle className="h-4 w-4 mr-2" />
+                )}
+                {connectionStatus === 'testing' ? 'Testing...' : 'Test Connection'}
+              </Button>
+            </div>
+          </div>
+
+          {/* Connection Status */}
+          {connectionStatus === 'connected' && (
+            <Alert className="border-green-200 bg-green-50">
+              <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <AlertDescription className="text-green-800">
+                ✅ Successfully connected to Netlify! You can now sync domains.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {connectionStatus === 'failed' && (
+            <Alert className="border-red-200 bg-red-50">
+              <XCircle className="h-4 w-4 text-red-600" />
+              <AlertDescription className="text-red-800">
+                ❌ Connection failed. Please check your API token and site ID, or use demo mode for testing.
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Netlify MCP Connection Notice */}
       <Alert className="border-blue-200 bg-blue-50">
         <Globe className="h-4 w-4 text-blue-600" />
