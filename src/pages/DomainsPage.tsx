@@ -73,6 +73,8 @@ import { Footer } from '@/components/Footer';
 import DNSSetupInstructions from '@/components/DNSSetupInstructions';
 import { useAuthState } from '@/hooks/useAuthState';
 import { supabase } from '@/integrations/supabase/client';
+import { DomainManager } from '@/services/domainManager';
+import { netlifyDomainService } from '@/services/netlifyDomainService';
 import { toast } from 'sonner';
 
 // Global error handler will be set up in useEffect
