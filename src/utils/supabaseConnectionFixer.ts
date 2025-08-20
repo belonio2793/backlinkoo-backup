@@ -310,16 +310,22 @@ export class SupabaseConnectionFixer {
       try {
         return await operation();
       } catch (error) {
+        // Handle auth session missing errors gracefully (don't retry, don't show as error)
+        if (this.isAuthSessionMissingError(error)) {
+          console.log(`ℹ️ ${context}: No auth session (user not signed in) - this is normal for unauthenticated requests`);
+          throw error; // Still throw so calling code can handle appropriately
+        }
+
         if (this.isSupabaseNetworkError(error)) {
           console.error(`❌ ${context} network error:`, error);
-          
+
           // Show user-friendly error message
           if (this.retryAttempts === 0) {
             toast.error('Connection issue detected. Attempting to reconnect...', {
               duration: 3000
             });
           }
-          
+
           this.retryAttempts++;
         }
         throw error;
