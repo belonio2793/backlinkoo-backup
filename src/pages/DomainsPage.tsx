@@ -61,7 +61,6 @@ import {
   Zap
 } from 'lucide-react';
 import SimpleBlogTemplateManager from '@/components/SimpleBlogTemplateManager';
-import BlogTemplateDebug from '@/components/BlogTemplateDebug';
 import DNSValidationService from '@/services/dnsValidationService';
 import AutoDNSPropagation from '@/components/AutoDNSPropagation';
 import AutoPropagationWizard from '@/components/AutoPropagationWizard';
@@ -1923,8 +1922,6 @@ anotherdomain.org`}
           </CardContent>
         </Card>
 
-        {/* Debug Component */}
-        <BlogTemplateDebug />
 
       </div>
       <Footer />
