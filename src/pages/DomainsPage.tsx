@@ -973,6 +973,15 @@ anotherdomain.org`}
             <CardTitle className="flex items-center justify-between">
               <span>Your Domains ({domains.length})</span>
               <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAutomationPanel(!showAutomationPanel)}
+                  className="bg-blue-50 border-blue-200 hover:bg-blue-100"
+                >
+                  <Wand2 className="h-4 w-4 mr-1" />
+                  Automation
+                </Button>
                 <Button variant="outline" size="sm" onClick={exportDomains}>
                   <Download className="h-4 w-4 mr-1" />
                   Export CSV
