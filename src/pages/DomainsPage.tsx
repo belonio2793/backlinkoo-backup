@@ -1957,25 +1957,45 @@ anotherdomain.org`}
                               size="sm"
                               onClick={async () => {
                                 try {
-                                  toast.info(`Adding ${domain.domain} to Netlify...`);
-                                  const result = await netlifyDomainService.addDomain(domain.domain);
+                                  // First test Netlify connectivity
+                                  toast.info('Testing Netlify connectivity...');
+                                  const debugResponse = await fetch('/.netlify/functions/netlify-debug');
+                                  const debugResult = await debugResponse.json();
+
+                                  if (!debugResult.success) {
+                                    toast.error(`Netlify configuration issue: ${debugResult.error}`);
+                                    console.error('Debug info:', debugResult.debug);
+                                    return;
+                                  }
+
+                                  toast.info(`Adding ${domain.domain} as custom domain to Netlify...`);
+                                  const result = await netlifyCustomDomainService.addCustomDomain(domain.domain);
 
                                   if (result.success) {
                                     // Update domain record
                                     await supabase
                                       .from('domains')
                                       .update({
-                                        netlify_id: result.data?.id,
-                                        netlify_synced: true
+                                        netlify_synced: true,
+                                        hosting_provider: 'netlify',
+                                        status: 'active'
                                       })
                                       .eq('id', domain.id);
 
-                                    toast.success(`✅ ${domain.domain} added to Netlify!`);
+                                    toast.success(`✅ ${domain.domain} added as custom domain to Netlify!`);
+
+                                    // Show setup instructions if available
+                                    if (result.instructions) {
+                                      console.log('📋 Setup Instructions:', result.instructions);
+                                      toast.info(`Next: ${result.instructions.steps[0]}`);
+                                    }
+
                                     await loadDomains(); // Refresh the list
                                   } else {
-                                    toast.error(`Failed to add to Netlify: ${result.error}`);
+                                    toast.error(`Failed to add custom domain: ${result.error}`);
                                   }
                                 } catch (error) {
+                                  console.error('Add to Netlify error:', error);
                                   toast.error('Failed to add domain to Netlify');
                                 }
                               }}
