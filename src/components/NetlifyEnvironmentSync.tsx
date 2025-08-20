@@ -53,96 +53,48 @@ const NetlifyEnvironmentSync: React.FC<NetlifyEnvSyncProps> = ({ onSyncComplete 
   const syncToEnvironment = async (apiKey: string) => {
     try {
       setEnvStatus('updating');
-      
+
       // Validate the key format
       if (!apiKey || apiKey.length < 20) {
         throw new Error('Invalid Netlify Access Token format (must be at least 20 characters)');
       }
 
       console.log('🔧 Syncing Netlify key to environment variables...');
-      
-      // Method 1: Try to use the browser's DevServerControl if available
-      if (typeof window !== 'undefined' && (window as any).devServerControl) {
-        console.log('📡 Using DevServerControl browser API');
-        
-        const devControl = (window as any).devServerControl;
-        const result = await devControl.setEnvVariable('NETLIFY_ACCESS_TOKEN', apiKey);
-        
-        if (result.success) {
-          // Also set the VITE_ version for frontend access
-          await devControl.setEnvVariable('VITE_NETLIFY_ACCESS_TOKEN', apiKey);
-          
-          setEnvStatus('synced');
-          setKeyValue(apiKey.substring(0, 8) + '...' + apiKey.substring(apiKey.length - 4));
-          setShowInput(false);
-          
-          toast.success('✅ Netlify key permanently synced via DevServerControl!');
-          
-          if (onSyncComplete) {
-            onSyncComplete();
-          }
-          
-          return;
+
+      // Use the DevServerEnvironment utility for permanent syncing
+      const result = await DevServerEnvironment.syncNetlifyToken(apiKey);
+
+      if (result.success) {
+        setEnvStatus('synced');
+        setKeyValue(result.value || (apiKey.substring(0, 8) + '...' + apiKey.substring(apiKey.length - 4)));
+        setShowInput(false);
+
+        // Show success message based on the method used
+        const methodMessages = {
+          'dev_server_control': '✅ Netlify key permanently synced via DevServerControl!',
+          'admin_endpoint': '✅ Netlify key synced to environment variables!',
+          'localStorage_simulation': '✅ Netlify key stored locally. Deploy for permanent persistence.',
+          'dual_sync': '✅ Netlify key synced to both server and client environments!'
+        };
+
+        const message = methodMessages[result.method as keyof typeof methodMessages] || '✅ Netlify key synced successfully!';
+        toast.success(message);
+
+        if (onSyncComplete) {
+          onSyncComplete();
         }
-      }
 
-      // Method 2: Use fetch to admin endpoint (if available)
-      try {
-        const response = await fetch('/.netlify/functions/admin-environment-manager', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            action: 'set_env_variable',
-            key: 'NETLIFY_ACCESS_TOKEN',
-            value: apiKey,
-            sync_to_vite: true
-          })
-        });
-
-        if (response.ok) {
-          const result = await response.json();
-          if (result.success) {
-            setEnvStatus('synced');
-            setKeyValue(apiKey.substring(0, 8) + '...' + apiKey.substring(apiKey.length - 4));
-            setShowInput(false);
-            
-            toast.success('✅ Netlify key synced to environment variables!');
-            
-            if (onSyncComplete) {
-              onSyncComplete();
+        // If using admin endpoint, suggest refresh
+        if (result.method === 'admin_endpoint') {
+          setTimeout(() => {
+            if (confirm('Environment variables updated. Refresh the page to apply changes?')) {
+              window.location.reload();
             }
-            
-            // Recommend refresh to pick up new env vars
-            setTimeout(() => {
-              if (confirm('Environment variables updated. Refresh the page to apply changes?')) {
-                window.location.reload();
-              }
-            }, 1500);
-            
-            return;
-          }
+          }, 1500);
         }
-      } catch (fetchError) {
-        console.warn('Admin endpoint not available, continuing with local storage fallback');
-      }
 
-      // Method 3: Local storage fallback with manual instruction
-      console.log('💾 Using local storage fallback with manual instructions');
-      
-      // Store in localStorage as backup
-      localStorage.setItem('netlify_api_token_backup', apiKey);
-      
-      setEnvStatus('synced');
-      setKeyValue(apiKey.substring(0, 8) + '...' + apiKey.substring(apiKey.length - 4));
-      setShowInput(false);
-      
-      // Show manual instructions
-      toast.success('✅ Netlify key stored locally. See instructions below for permanent sync.');
-      
-      if (onSyncComplete) {
-        onSyncComplete();
+      } else {
+        throw new Error(result.message);
       }
 
     } catch (error: any) {
