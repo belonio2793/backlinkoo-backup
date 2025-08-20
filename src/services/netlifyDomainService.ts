@@ -29,19 +29,17 @@ export class NetlifyDomainService {
   private baseUrl = 'https://api.netlify.com/api/v1';
 
   constructor(token?: string, siteId?: string) {
-    // Try multiple environment variable sources
+    // Try multiple token sources: provided, environment variables, localStorage
     this.token = token ||
                  import.meta.env.VITE_NETLIFY_ACCESS_TOKEN ||
                  import.meta.env.VITE_NETLIFY_TOKEN ||
                  import.meta.env.NETLIFY_ACCESS_TOKEN ||
+                 (typeof window !== 'undefined' ? localStorage.getItem('netlify_token_temp') : null) ||
                  '';
-    this.siteId = siteId || import.meta.env.VITE_NETLIFY_SITE_ID || '';
+    this.siteId = siteId || import.meta.env.VITE_NETLIFY_SITE_ID || 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809';
 
     if (!this.token) {
       console.warn('⚠️ NETLIFY_ACCESS_TOKEN or VITE_NETLIFY_TOKEN not set - Netlify domain operations will be simulated');
-    }
-    if (!this.siteId) {
-      throw new Error('VITE_NETLIFY_SITE_ID is required for Netlify domain operations');
     }
   }
 
@@ -72,7 +70,7 @@ export class NetlifyDomainService {
 
       // Demo mode simulation
       if (!this.token || this.token.includes('demo') || this.token.length < 20) {
-        console.log(`🔧 Demo mode: Simulating domain addition for ${domain}`);
+        console.warn(`⚠️ DEMO MODE: No valid Netlify token found. Token length: ${this.token?.length || 0}. Simulating domain addition for ${domain}`);
         
         const mockResponse: NetlifyDomainResponse = {
           id: `demo-domain-${Date.now()}`,
@@ -159,16 +157,10 @@ export class NetlifyDomainService {
     try {
       // Demo mode simulation
       if (!this.token || this.token.includes('demo') || this.token.length < 20) {
+        console.warn(`⚠️ DEMO MODE: Cannot check real Netlify status. Token length: ${this.token?.length || 0}. Please set valid VITE_NETLIFY_ACCESS_TOKEN.`);
         return {
-          success: true,
-          status: {
-            domain,
-            verified: Math.random() > 0.5,
-            dns_check: Math.random() > 0.5 ? 'verified' : 'pending',
-            ssl: { status: Math.random() > 0.5 ? 'verified' : 'pending_dns_verification' },
-            id: `demo-${domain}`,
-            site_id: this.siteId
-          }
+          success: false,
+          error: `Demo mode active - cannot check real Netlify status. Please configure valid VITE_NETLIFY_ACCESS_TOKEN (current length: ${this.token?.length || 0} chars)`
         };
       }
 

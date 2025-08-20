@@ -60,7 +60,13 @@ export class NetlifyDNSSync {
 
   constructor() {
     this.apiToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN || '';
-    this.dnsManager = NetlifyDNSManager.getInstance();
+    try {
+      this.dnsManager = NetlifyDNSManager.getInstance();
+    } catch (error) {
+      console.warn('⚠️ NetlifyDNSSync: Failed to initialize DNS manager, running in limited mode:', error);
+      // Create a fallback DNS manager that won't crash
+      this.dnsManager = new NetlifyDNSManager('demo-token');
+    }
   }
 
   /**
@@ -128,7 +134,7 @@ export class NetlifyDNSSync {
     try {
       // Demo mode simulation
       if (this.apiToken.includes('demo') || this.apiToken.length < 20) {
-        console.log(`🧪 Demo mode: Simulating DNS zone creation for ${domain}`);
+        console.log(`��� Demo mode: Simulating DNS zone creation for ${domain}`);
         return {
           id: `demo-zone-${Date.now()}`,
           name: domain,
@@ -222,7 +228,7 @@ export class NetlifyDNSSync {
         {
           type: 'CNAME',
           hostname: 'www',
-          value: 'builder-io-domains.netlify.app',
+          value: 'backlinkoo.domains.netlify.app',
           ttl: 3600
         },
         // TXT record for domain verification

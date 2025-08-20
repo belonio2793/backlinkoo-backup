@@ -33,11 +33,11 @@ export class NetlifyDNSManager extends NetlifyDomainAPI {
 
   constructor(apiToken?: string, siteId?: string) {
     // Use environment variable if available, fallback to provided token
-    const token = apiToken || import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
+    const token = apiToken || import.meta.env.VITE_NETLIFY_ACCESS_TOKEN || 'demo-token';
     const site = siteId || 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809'; // Default site ID
 
-    if (!token) {
-      throw new Error('NETLIFY_ACCESS_TOKEN environment variable is required for DNS management');
+    if (!token || token === 'demo-token') {
+      console.warn('⚠️ NetlifyDNSManager: No valid token found, running in demo mode');
     }
 
     super(token, site);
@@ -244,7 +244,7 @@ export class NetlifyDNSManager extends NetlifyDomainAPI {
   }> {
     const defaultConfig: AutoDNSConfig = {
       aRecords: ['75.2.60.5', '99.83.190.102'], // Netlify IPs
-      cnameTarget: 'builder-io-domains.netlify.app',
+      cnameTarget: 'backlinkoo.domains.netlify.app',
       txtVerification: this.generateVerificationToken(),
       enableSSL: true,
       ...config
