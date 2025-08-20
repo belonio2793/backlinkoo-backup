@@ -30,95 +30,93 @@ export const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
   }
 
   useEffect(() => {
-    const handleOnline = () => {
-      setIsOnline(true);
-      setConnectionQuality('good');
-      setShowNetworkError(false);
-    };
+    try {
+      const handleOnline = () => {
+        setIsOnline(true);
+        setConnectionQuality('good');
+        setShowNetworkError(false);
+      };
 
-    const handleOffline = () => {
-      setIsOnline(false);
-      setConnectionQuality('offline');
-    };
+      const handleOffline = () => {
+        setIsOnline(false);
+        setConnectionQuality('offline');
+      };
 
-    // Listen for browser online/offline events
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+      // Listen for browser online/offline events (safe)
+      window.addEventListener('online', handleOnline);
+      window.addEventListener('offline', handleOffline);
 
-    // Monitor network quality without overriding fetch
-    // Use a safer approach that doesn't modify global fetch
+      // Test connection quality periodically without overriding fetch
+      const testConnection = async () => {
+        try {
+          const start = Date.now();
+          // Use a simple controller for timeout - no global fetch override
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 10000);
 
-    // Test connection quality periodically
-    const testConnection = async () => {
-      try {
-        const start = Date.now();
-        // Create timeout signal with fallback for older browsers
-        let timeoutId: NodeJS.Timeout;
-        const controller = new AbortController();
+          const response = await fetch('/favicon.svg', {
+            method: 'HEAD',
+            cache: 'no-cache',
+            signal: controller.signal
+          });
 
-        const timeoutPromise = new Promise((_, reject) => {
-          timeoutId = setTimeout(() => {
-            controller.abort();
-            reject(new Error('Request timeout'));
-          }, 10000);
-        });
+          clearTimeout(timeoutId);
+          const duration = Date.now() - start;
 
-        const fetchPromise = fetch('/favicon.svg', {
-          method: 'HEAD',
-          cache: 'no-cache',
-          signal: controller.signal
-        });
-
-        const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
-        clearTimeout(timeoutId);
-        const duration = Date.now() - start;
-
-        if (!response.ok) {
+          if (!response.ok) {
+            setConnectionQuality('poor');
+            setLastNetworkError(`Server responded with ${response.status}`);
+            setShowNetworkError(true);
+          } else if (duration > 5000) {
+            setConnectionQuality('poor');
+            setLastNetworkError('Slow connection detected');
+            setShowNetworkError(true);
+          } else {
+            setConnectionQuality('good');
+            setShowNetworkError(false);
+            setLastNetworkError(null);
+          }
+        } catch (error: any) {
           setConnectionQuality('poor');
-          setLastNetworkError(`Server responded with ${response.status}`);
+          setLastNetworkError(error.message || 'Network connection failed');
           setShowNetworkError(true);
-        } else if (duration > 5000) {
-          setConnectionQuality('poor');
-          setLastNetworkError('Slow connection detected');
-          setShowNetworkError(true);
-        } else {
-          setConnectionQuality('good');
-          setShowNetworkError(false);
-          setLastNetworkError(null);
         }
-      } catch (error: any) {
-        setConnectionQuality('poor');
-        setLastNetworkError(error.message || 'Network connection failed');
-        setShowNetworkError(true);
-      }
-    };
+      };
 
-    // Listen for global error events to detect network failures
-    const handleGlobalError = (event: ErrorEvent) => {
-      if (event.message?.includes('Failed to fetch') ||
-          event.message?.includes('NetworkError') ||
-          event.message?.includes('Network request blocked')) {
-        setConnectionQuality('poor');
-        setLastNetworkError(event.message);
-        setShowNetworkError(true);
-      }
-    };
+      // Listen for unhandled promise rejections that might indicate network issues
+      const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+        const reason = event.reason?.toString() || '';
+        if (reason.includes('Failed to fetch') ||
+            reason.includes('NetworkError') ||
+            reason.includes('Network request blocked')) {
+          setConnectionQuality('poor');
+          setLastNetworkError(reason);
+          setShowNetworkError(true);
+        }
+      };
 
-    window.addEventListener('error', handleGlobalError);
+      window.addEventListener('unhandledrejection', handleUnhandledRejection);
 
-    // Test connection every 30 seconds if online
-    const interval = setInterval(() => {
-      if (isOnline) {
-        testConnection();
-      }
-    }, 30000);
+      // Test connection every 30 seconds if online
+      const interval = setInterval(() => {
+        if (isOnline) {
+          testConnection().catch(console.warn);
+        }
+      }, 30000);
 
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-      window.removeEventListener('error', handleGlobalError);
-      clearInterval(interval);
-    };
+      // Initial connection test
+      testConnection().catch(console.warn);
+
+      return () => {
+        window.removeEventListener('online', handleOnline);
+        window.removeEventListener('offline', handleOffline);
+        window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+        clearInterval(interval);
+      };
+    } catch (error: any) {
+      console.warn('NetworkStatusIndicator setup failed:', error);
+      setComponentError(error.message);
+    }
   }, [isOnline]);
 
   const getStatusBadge = () => {
