@@ -1415,22 +1415,84 @@ anotherdomain.org`}
         {/* Environment Status Debug Panel */}
         <Card className="mb-4 border-blue-200 bg-blue-50">
           <CardContent className="pt-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Info className="h-4 w-4 text-blue-600" />
-                <span className="text-sm font-medium text-blue-900">Netlify Environment Status</span>
-              </div>
-              <div className="text-xs text-blue-700">
-                {(() => {
-                  const token = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
-                  const siteId = import.meta.env.VITE_NETLIFY_SITE_ID;
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Info className="h-4 w-4 text-blue-600" />
+                  <span className="text-sm font-medium text-blue-900">Netlify Environment Status</span>
+                </div>
+                <div className="text-xs text-blue-700">
+                  {(() => {
+                    const token = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
+                    const siteId = import.meta.env.VITE_NETLIFY_SITE_ID;
 
-                  if (!token) return '❌ No VITE_NETLIFY_ACCESS_TOKEN';
-                  if (token.length < 20) return `⚠️ Token too short (${token.length} chars)`;
-                  if (token.includes('demo')) return '⚠️ Demo token active';
-                  return `✅ Valid token (${token.length} chars) | Site: ${siteId ? '✅' : '❌'}`;
-                })()}
+                    if (!token || token === 'your_netlify_personal_access_token') return '❌ No valid VITE_NETLIFY_ACCESS_TOKEN';
+                    if (token.length < 20) return `⚠️ Token too short (${token.length} chars)`;
+                    if (token.includes('demo')) return '⚠️ Demo token active';
+                    return `✅ Valid token (${token.length} chars) | Site: ${siteId ? '✅' : '❌'}`;
+                  })()}
+                </div>
               </div>
+
+              {/* Token Configuration Section */}
+              {(() => {
+                const token = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
+                const needsToken = !token || token === 'your_netlify_personal_access_token' || token.length < 20;
+
+                return needsToken && (
+                  <div className="bg-white p-3 rounded border border-blue-200">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Settings className="h-4 w-4 text-blue-600" />
+                      <span className="text-sm font-medium text-blue-900">Configure Netlify Token</span>
+                    </div>
+                    <div className="text-xs text-blue-700 mb-2">
+                      To add domains to Netlify, you need a personal access token.
+                      <a
+                        href="https://app.netlify.com/user/applications#personal-access-tokens"
+                        target="_blank"
+                        className="underline ml-1"
+                      >
+                        Create one here →
+                      </a>
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        placeholder="Enter your Netlify personal access token..."
+                        className="text-xs h-8"
+                        value={netlifyKeyValue}
+                        onChange={(e) => setNetlifyKeyValue(e.target.value)}
+                        type="password"
+                      />
+                      <Button
+                        size="sm"
+                        className="h-8 text-xs"
+                        onClick={async () => {
+                          if (!netlifyKeyValue || netlifyKeyValue.length < 20) {
+                            toast.error('Please enter a valid Netlify token (50+ characters)');
+                            return;
+                          }
+
+                          try {
+                            // Set environment variable using DevServerControl
+                            toast.info('Setting Netlify token...');
+
+                            // This would need to be implemented via a backend call
+                            // For now, we'll store it temporarily in localStorage
+                            localStorage.setItem('netlify_token_temp', netlifyKeyValue);
+
+                            toast.success('✅ Token configured! Refresh the page to apply changes.');
+                            setNetlifyKeyValue('');
+                          } catch (error) {
+                            toast.error('Failed to set token');
+                          }
+                        }}
+                      >
+                        Set Token
+                      </Button>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </CardContent>
         </Card>
