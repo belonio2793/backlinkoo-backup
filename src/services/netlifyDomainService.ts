@@ -68,31 +68,11 @@ export class NetlifyDomainService {
         };
       }
 
-      // Demo mode simulation
-      if (!this.token || this.token.includes('demo') || this.token.length < 20) {
-        console.warn(`⚠️ DEMO MODE: No valid Netlify token found. Token length: ${this.token?.length || 0}. Simulating domain addition for ${domain}`);
-        
-        const mockResponse: NetlifyDomainResponse = {
-          id: `demo-domain-${Date.now()}`,
-          domain,
-          site_id: this.siteId,
-          verified: false,
-          created_at: new Date().toISOString()
-        };
-
-        const mockStatus: NetlifyDomainStatus = {
-          domain,
-          verified: false,
-          dns_check: 'pending',
-          ssl: { status: 'pending_dns_verification' },
-          id: mockResponse.id,
-          site_id: this.siteId
-        };
-
+      // Check if token is configured
+      if (!this.token || this.token.length < 20) {
         return {
-          success: true,
-          data: mockResponse,
-          status: mockStatus
+          success: false,
+          error: 'NETLIFY_ACCESS_TOKEN not configured or invalid. Please set a valid token in environment variables.'
         };
       }
 
@@ -155,12 +135,11 @@ export class NetlifyDomainService {
     error?: string;
   }> {
     try {
-      // Demo mode simulation
-      if (!this.token || this.token.includes('demo') || this.token.length < 20) {
-        console.warn(`⚠️ DEMO MODE: Cannot check real Netlify status. Token length: ${this.token?.length || 0}. Please set valid VITE_NETLIFY_ACCESS_TOKEN.`);
+      // Check if token is configured
+      if (!this.token || this.token.length < 20) {
         return {
           success: false,
-          error: `Demo mode active - cannot check real Netlify status. Please configure valid VITE_NETLIFY_ACCESS_TOKEN (current length: ${this.token?.length || 0} chars)`
+          error: 'NETLIFY_ACCESS_TOKEN not configured or invalid. Please set a valid token in environment variables.'
         };
       }
 
@@ -208,28 +187,11 @@ export class NetlifyDomainService {
     error?: string;
   }> {
     try {
-      // Demo mode simulation
-      if (!this.token || this.token.includes('demo') || this.token.length < 20) {
+      // Check if token is configured
+      if (!this.token || this.token.length < 20) {
         return {
-          success: true,
-          domains: [
-            {
-              domain: 'example.com',
-              verified: true,
-              dns_check: 'verified',
-              ssl: { status: 'verified' },
-              id: 'demo-1',
-              site_id: this.siteId
-            },
-            {
-              domain: 'demo.com',
-              verified: false,
-              dns_check: 'pending',
-              ssl: { status: 'pending_dns_verification' },
-              id: 'demo-2',
-              site_id: this.siteId
-            }
-          ]
+          success: false,
+          error: 'NETLIFY_ACCESS_TOKEN not configured or invalid. Please set a valid token in environment variables.'
         };
       }
 
@@ -270,9 +232,12 @@ export class NetlifyDomainService {
     error?: string;
   }> {
     try {
-      // Demo mode simulation
-      if (!this.token || this.token.includes('demo') || this.token.length < 20) {
-        return { exists: Math.random() > 0.5 };
+      // Check if token is configured
+      if (!this.token || this.token.length < 20) {
+        return {
+          exists: false,
+          error: 'NETLIFY_ACCESS_TOKEN not configured or invalid'
+        };
       }
 
       const response = await fetch(
@@ -301,10 +266,12 @@ export class NetlifyDomainService {
     error?: string;
   }> {
     try {
-      // Demo mode simulation
-      if (!this.token || this.token.includes('demo') || this.token.length < 20) {
-        console.log(`🔧 Demo mode: Simulating domain removal for ${domain}`);
-        return { success: true };
+      // Check if token is configured
+      if (!this.token || this.token.length < 20) {
+        return {
+          success: false,
+          error: 'NETLIFY_ACCESS_TOKEN not configured or invalid. Please set a valid token in environment variables.'
+        };
       }
 
       const response = await fetch(
