@@ -232,16 +232,54 @@ const DomainsPage = () => {
 
   useEffect(() => {
     if (user?.id) {
-      loadDomains().catch((error) => {
-        console.error('Failed to load domains on mount:', error);
-        const errorMessage = error?.message || 'Unknown error occurred';
-        toast.error(`Failed to load domains: ${errorMessage}`);
+      // Test connection first, then load domains
+      testSupabaseConnection().then(() => {
+        loadDomains().catch((error) => {
+          console.error('Failed to load domains on mount:', error);
+          const errorMessage = error?.message || 'Unknown error occurred';
+          toast.error(`Failed to load domains: ${errorMessage}`);
+        });
+      }).catch((connectionError) => {
+        console.error('Supabase connection test failed:', connectionError);
+        toast.error('Database connection failed. Please refresh the page.', {
+          duration: 10000,
+          action: {
+            label: 'Refresh',
+            onClick: () => window.location.reload()
+          }
+        });
       });
 
       // Check DNS service status on load
       checkDNSServiceHealth();
     }
   }, [user?.id]);
+
+  // Test Supabase connection
+  const testSupabaseConnection = async () => {
+    try {
+      console.log('🔍 Testing Supabase connection...');
+
+      // Simple connection test
+      const { data, error } = await supabase
+        .from('domains')
+        .select('id')
+        .limit(1);
+
+      if (error) {
+        if (error.message?.includes('No API key found')) {
+          throw new Error('Supabase API key is missing. Please refresh the page.');
+        }
+        throw error;
+      }
+
+      console.log('✅ Supabase connection test successful');
+      return true;
+    } catch (error: any) {
+      console.error('❌ Supabase connection test failed:', error);
+      throw new Error(error.message || 'Database connection failed');
+    }
+  };
 
   // Check Netlify configuration and environment sync status
   useEffect(() => {
