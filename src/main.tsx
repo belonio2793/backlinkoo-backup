@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import './styles/mobile-payment-fix.css'
+// Enhanced Supabase connection fixer - HIGHEST PRIORITY
+import './utils/supabaseConnectionFixer'
 // Emergency fetch protection - HIGHEST PRIORITY - FIXES FULLSTORY INTERFERENCE
 import './utils/emergencyFetchFix'
 // Enhanced FullStory fix - must load FIRST
@@ -517,7 +519,7 @@ if (typeof window !== 'undefined') {
           return obj; // Return successfully without throwing
         }
       } catch (e) {
-        console.warn(`⚠️ Error checking ${prop} property during redefinition:`, e);
+        console.warn(`��️ Error checking ${prop} property during redefinition:`, e);
       }
     }
 
