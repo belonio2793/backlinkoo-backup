@@ -1760,6 +1760,41 @@ anotherdomain.org`}
                             <Wand2 className="h-3 w-3" />
                           </Button>
 
+                          {!domain.netlify_synced && netlifyDomainService && netlifyDomainService.isConfigured() && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={async () => {
+                                try {
+                                  toast.info(`Adding ${domain.domain} to Netlify...`);
+                                  const result = await netlifyDomainService.addDomain(domain.domain);
+
+                                  if (result.success) {
+                                    // Update domain record
+                                    await supabase
+                                      .from('domains')
+                                      .update({
+                                        netlify_id: result.data?.id,
+                                        netlify_synced: true
+                                      })
+                                      .eq('id', domain.id);
+
+                                    toast.success(`✅ ${domain.domain} added to Netlify!`);
+                                    await loadDomains(); // Refresh the list
+                                  } else {
+                                    toast.error(`Failed to add to Netlify: ${result.error}`);
+                                  }
+                                } catch (error) {
+                                  toast.error('Failed to add domain to Netlify');
+                                }
+                              }}
+                              title="Add to Netlify for SSL/TLS"
+                              className="bg-purple-50 border-purple-200 hover:bg-purple-100"
+                            >
+                              <Globe className="h-3 w-3" />
+                            </Button>
+                          )}
+
                           {(!domain.blog_enabled || !domain.netlify_synced) && (
                             <Button
                               variant="outline"
