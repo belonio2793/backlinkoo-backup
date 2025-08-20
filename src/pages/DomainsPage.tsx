@@ -1710,73 +1710,73 @@ anotherdomain.org`}
 
                       <TableCell>
                         <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            {domain.netlify_synced && (
-                              <div className="flex items-center gap-1">
-                                <div className="w-2 h-2 bg-green-500 rounded-full" />
-                                <span className="text-xs text-green-600">Synced</span>
-                              </div>
-                            )}
-                            {netlifyDomainService && (
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="text-xs h-5 px-2"
-                                onClick={async () => {
-                                  try {
-                                    console.log('🔧 Add to Netlify button clicked for:', domain.domain);
-                                    console.log('🔧 NetlifyDomainService status:', {
-                                      exists: !!netlifyDomainService,
-                                      configured: netlifyDomainService?.isConfigured()
-                                    });
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs h-6 px-3 w-full"
+                            onClick={async () => {
+                              try {
+                                console.log('🔧 Checking Netlify status for:', domain.domain);
 
-                                    // Check if already added
-                                    if (domain.netlify_synced) {
-                                      toast.warning(`⚠️ ${domain.domain} is already added to Netlify! No action needed.`);
-                                      return;
-                                    }
+                                // Check if service is configured
+                                if (!netlifyDomainService?.isConfigured()) {
+                                  toast.error('❌ Netlify integration not configured. Please set up your Netlify access token.');
+                                  return;
+                                }
 
-                                    // Check if service is configured
-                                    if (!netlifyDomainService?.isConfigured()) {
-                                      toast.error('❌ Netlify integration not configured. Please set up your Netlify access token.');
-                                      return;
-                                    }
+                                toast.info(`Checking ${domain.domain} status on Netlify...`);
 
-                                    toast.info(`Adding ${domain.domain} to Netlify...`);
-                                    const addResult = await netlifyDomainService.addDomain(domain.domain);
+                                // First, check if domain already exists in Netlify
+                                const statusResult = await netlifyDomainService.getDomainStatus(domain.domain);
 
-                                    if (addResult.success) {
-                                      // Update domain record
-                                      await supabase
-                                        .from('domains')
-                                        .update({
-                                          netlify_id: addResult.data?.id,
-                                          netlify_synced: true,
-                                          ssl_enabled: addResult.status?.ssl.status === 'verified'
-                                        })
-                                        .eq('id', domain.id);
+                                if (statusResult.success && statusResult.status) {
+                                  // Domain exists in Netlify
+                                  const netlifyStatus = statusResult.status;
+                                  toast.success(`✅ ${domain.domain} is already on Netlify! Status: ${netlifyStatus.status || 'Active'}`);
 
-                                      toast.success(`✅ ${domain.domain} added to Netlify! SSL certificate will be provisioned automatically.`);
-                                      await loadDomains(); // Refresh the list
-                                    } else {
-                                      toast.error(`Failed to add to Netlify: ${addResult.error}`);
-                                    }
-                                  } catch (error) {
-                                    console.error('Error adding domain to Netlify:', error);
-                                    toast.error('Failed to add domain to Netlify');
-                                  }
-                                }}
-                              >
-                                <Plus className="w-3 h-3 mr-1" />
-                                Add to Netlify
-                              </Button>
-                            )}
-                          </div>
-                          {domain.netlify_id && (
-                            <div className="text-xs text-gray-400 truncate" title={domain.netlify_id}>
-                              ID: {domain.netlify_id.substring(0, 8)}...
-                            </div>
-                          )}
+                                  // Update local database with Netlify info if needed
+                                  await supabase
+                                    .from('domains')
+                                    .update({
+                                      netlify_id: netlifyStatus.id,
+                                      netlify_synced: true,
+                                      ssl_enabled: netlifyStatus.ssl?.status === 'verified'
+                                    })
+                                    .eq('id', domain.id);
+
+                                  await loadDomains(); // Refresh the list
+                                  return;
+                                }
+
+                                // Domain doesn't exist in Netlify, add it
+                                toast.info(`Adding ${domain.domain} to Netlify...`);
+                                const addResult = await netlifyDomainService.addDomain(domain.domain);
+
+                                if (addResult.success) {
+                                  // Update domain record with Netlify info
+                                  await supabase
+                                    .from('domains')
+                                    .update({
+                                      netlify_id: addResult.data?.id,
+                                      netlify_synced: true,
+                                      ssl_enabled: addResult.status?.ssl?.status === 'verified'
+                                    })
+                                    .eq('id', domain.id);
+
+                                  toast.success(`✅ ${domain.domain} added to Netlify! SSL certificate will be provisioned automatically.`);
+                                  await loadDomains(); // Refresh the list
+                                } else {
+                                  toast.error(`Failed to add to Netlify: ${addResult.error}`);
+                                }
+                              } catch (error) {
+                                console.error('Error with Netlify operation:', error);
+                                toast.error('Failed to communicate with Netlify');
+                              }
+                            }}
+                          >
+                            <Plus className="w-3 h-3 mr-1" />
+                            Add to Netlify
+                          </Button>
                           {netlifyDomainService && netlifyDomainService.isConfigured() && (
                             <Button
                               variant="outline"
