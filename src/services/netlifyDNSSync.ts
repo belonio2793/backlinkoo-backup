@@ -63,9 +63,9 @@ export class NetlifyDNSSync {
     try {
       this.dnsManager = NetlifyDNSManager.getInstance();
     } catch (error) {
-      console.warn('⚠️ NetlifyDNSSync: Failed to initialize DNS manager, running in limited mode:', error);
-      // Create a fallback DNS manager that won't crash
-      this.dnsManager = new NetlifyDNSManager('demo-token');
+      console.warn('⚠��� NetlifyDNSSync: Failed to initialize DNS manager, running in limited mode:', error);
+      // Create a fallback DNS manager
+      this.dnsManager = new NetlifyDNSManager();
     }
   }
 
