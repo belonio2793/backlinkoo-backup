@@ -1310,6 +1310,19 @@ anotherdomain.org`}
                             <Wand2 className="h-3 w-3" />
                           </Button>
 
+                          {(!domain.blog_enabled || !domain.netlify_synced) && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => autoSetupNewDomain(domain)}
+                              disabled={!netlifyConfigured}
+                              title="Auto-Setup Domain"
+                              className="bg-green-50 border-green-200 hover:bg-green-100"
+                            >
+                              <Zap className="h-3 w-3" />
+                            </Button>
+                          )}
+
                           <Button
                             variant="outline"
                             size="sm"
