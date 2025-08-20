@@ -397,6 +397,13 @@ const DomainsPage = () => {
       setDomains(prev => [data, ...prev]);
       setNewDomain('');
       toast.success(`Domain ${data.domain} added successfully!`);
+
+      // Auto-configure if automation is enabled and domain was added successfully
+      if (netlifyConfigured) {
+        setTimeout(() => {
+          autoSetupNewDomain(data);
+        }, 1000);
+      }
     } catch (error: any) {
       console.error('Error adding domain:', error);
       const errorMessage = error?.message || 'Unknown error occurred';
@@ -697,7 +704,7 @@ const DomainsPage = () => {
         toast.error('❌ Cannot reach DNS validation service. All services must be deployed.');
         setDnsServiceStatus('offline');
       } else {
-        toast.error(`❌ DNS validation service failed: ${error.message}`);
+        toast.error(`��� DNS validation service failed: ${error.message}`);
         setDnsServiceStatus('offline');
       }
     }
