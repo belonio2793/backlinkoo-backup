@@ -33,7 +33,8 @@ export async function runOneTimeBeautifulContentMigration(): Promise<void> {
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('❌ Failed to fetch blog posts for migration:', error);
+        console.error('❌ Failed to fetch blog posts for migration:', getErrorMessage(error));
+        console.error('❌ Full error details:', formatErrorForLogging(error, 'Blog Migration'));
         return;
       }
       posts = data;
