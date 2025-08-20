@@ -269,7 +269,8 @@ const DomainsPage = () => {
   const testDomainSetup = async () => {
     try {
       console.log('🧪 Testing complete domain setup...');
-      toast.info('Testing domain management system...');
+      // Defer toast to prevent setState warnings if called during render
+      setTimeout(() => toast.info('Testing domain management system...'), 0);
 
       const result = await DomainManager.testDomainSetup();
 
@@ -959,7 +960,7 @@ const DomainsPage = () => {
       setSelectedDomainForControl(data);
 
       toast.success(`✅ Domain ${data.domain} added successfully!`);
-      toast.info(`🎛️ Netlify control panel opened for ${data.domain}`);
+      toast.info(`🎛�� Netlify control panel opened for ${data.domain}`);
       console.log(`��� Domain addition completed:`, data);
 
       // Auto-configure if automation is enabled and domain was added successfully
