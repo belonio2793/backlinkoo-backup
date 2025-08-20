@@ -1,0 +1,12 @@
+# Example domains file
+# One domain per line
+# Lines starting with # are comments
+
+example.com
+test.org
+mydomain.net
+sample-site.com
+demo.io
+
+# You can add as many domains as needed
+# The script will validate each domain before processing
