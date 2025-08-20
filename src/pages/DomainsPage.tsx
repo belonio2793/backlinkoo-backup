@@ -230,9 +230,8 @@ const DomainsPage = () => {
       }
     } catch (error) {
       console.error('Failed to initialize NetlifyDomainService:', error);
-      if (error instanceof Error) {
-        toast.error(`Domain Service initialization failed: ${error.message}`);
-      }
+      // Don't show toast during initialization to prevent setState warnings
+      console.warn('⚠️ Domain Service initialization had issues:', error instanceof Error ? error.message : 'Unknown error');
     }
   }, []);
 
