@@ -718,7 +718,7 @@ const DomainsPage = () => {
           toast.success(`✅ DNS records automatically configured for ${domain.domain} via Netlify DNS`);
           return { success: true, method: 'netlify-dns' };
         } else {
-          console.warn(`⚠�� Netlify DNS sync failed: ${dnsResult.error}`);
+          console.warn(`⚠️ Netlify DNS sync failed: ${dnsResult.error}`);
         }
       }
 
@@ -775,7 +775,7 @@ const DomainsPage = () => {
       return { success: true, method: 'manual-only' };
 
     } catch (error) {
-      console.error(`❌ Error auto-fixing DNS for ${domain.domain}:`, error);
+      console.error(`��� Error auto-fixing DNS for ${domain.domain}:`, error);
       toast.error(`❌ Failed to auto-fix DNS for ${domain.domain}: ${error instanceof Error ? error.message : 'Unknown error'}`);
       return { success: false, error: error instanceof Error ? error.message : 'DNS fix failed' };
     }
@@ -1444,7 +1444,7 @@ const DomainsPage = () => {
       }
 
       const result = await response.json();
-      console.log('📋 Test result:', result);
+      console.log('�� Test result:', result);
 
       if (result.success && result.message) {
         toast.success('✅ DNS validation service is working correctly!');
@@ -1588,9 +1588,11 @@ const DomainsPage = () => {
                 size="sm"
                 onClick={async () => {
                   try {
-                    await testSupabaseConnection();
+                    const connectionWorking = await testSupabaseConnection(true);
+                    setSupabaseConnected(connectionWorking);
                     toast.success('✅ Database connection is working!');
                   } catch (error: any) {
+                    setSupabaseConnected(false);
                     toast.error(`❌ Connection failed: ${error.message}`);
                   }
                 }}
