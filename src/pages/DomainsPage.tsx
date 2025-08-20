@@ -143,6 +143,7 @@ const DomainsPage = () => {
   const [selectedDomainForControl, setSelectedDomainForControl] = useState<Domain | null>(null);
   const [showEnvironmentManager, setShowEnvironmentManager] = useState(false);
   const [environmentConfig, setEnvironmentConfig] = useState<{ [key: string]: string }>({});
+  const [supabaseConnected, setSupabaseConnected] = useState<boolean | null>(null); // null = unknown, true = connected, false = disconnected
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
