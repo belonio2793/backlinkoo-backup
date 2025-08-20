@@ -2100,7 +2100,7 @@ anotherdomain.org`}
                             <Info className="h-3 w-3" />
                           </Button>
 
-                          {!domain.netlify_synced && netlifyCustomDomainService && netlifyCustomDomainService.isConfiguredSync() && (
+                          {!domain.netlify_synced && (
                             <Button
                               variant="outline"
                               size="sm"
