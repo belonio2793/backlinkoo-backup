@@ -31,6 +31,7 @@ export class NetlifyDomainService {
   constructor(token?: string, siteId?: string) {
     // Try multiple environment variable sources
     this.token = token ||
+                 import.meta.env.VITE_NETLIFY_ACCESS_TOKEN ||
                  import.meta.env.VITE_NETLIFY_TOKEN ||
                  import.meta.env.NETLIFY_ACCESS_TOKEN ||
                  '';
