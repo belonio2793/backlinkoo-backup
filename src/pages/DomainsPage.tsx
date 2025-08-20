@@ -212,7 +212,7 @@ const DomainsPage = () => {
 
       // Quick verification if configured
       if (domainService.isConfigured()) {
-        console.log('��� Netlify integration is configured and ready');
+        console.log('🔗 Netlify integration is configured and ready');
       } else {
         console.log('⚠️ Netlify integration not configured - using demo mode');
       }
@@ -401,7 +401,7 @@ const DomainsPage = () => {
     }
 
     if (failed > 0) {
-      toast.warning(`����️ ${failed} domains had DNS configuration issues`);
+      toast.warning(`������ ${failed} domains had DNS configuration issues`);
       console.warn('Failed DNS configurations:', results.filter(r => !r.success));
     }
 
@@ -1500,7 +1500,7 @@ anotherdomain.org`}
                         target="_blank"
                         className="underline ml-1"
                       >
-                        Create one here ��
+                        Create one here →
                       </a>
                     </div>
                     <div className="flex gap-2">
@@ -1739,7 +1739,7 @@ anotherdomain.org`}
                                   </div>
                                   <div className="text-sm text-blue-800 space-y-2">
                                     <p>🚀 <strong>Supported for Auto-Propagation:</strong> Cloudflare, Namecheap, GoDaddy, Route53, DigitalOcean</p>
-                                    <p>⚡ Click "Detect Registrar" to check if your domain supports automatic DNS updates</p>
+                                    <p>��� Click "Detect Registrar" to check if your domain supports automatic DNS updates</p>
                                   </div>
                                 </div>
 
@@ -2092,6 +2092,18 @@ anotherdomain.org`}
                               className="bg-purple-50 border-purple-200 hover:bg-purple-100"
                             >
                               <Globe className="h-3 w-3" />
+                            </Button>
+                          )}
+
+                          {!domain.netlify_synced && netlifyCustomDomainService && netlifyCustomDomainService.isConfigured() && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => addCustomDomainToNetlify(domain)}
+                              title="Add as Netlify Custom Domain (Official API)"
+                              className="bg-emerald-50 border-emerald-200 hover:bg-emerald-100"
+                            >
+                              <ExternalLink className="h-3 w-3" />
                             </Button>
                           )}
 
