@@ -331,13 +331,22 @@ export function NetlifyDomainSync() {
         <AlertDescription className="text-blue-800">
           <div className="space-y-2">
             <p className="font-medium">🚀 Netlify API Integration</p>
-            <p className="text-sm">
-              For automatic domain management, you can either:
-            </p>
-            <ul className="text-sm space-y-1 ml-4">
-              <li>• <strong>Option 1:</strong> <a href="#open-mcp-popover" className="text-blue-600 hover:underline">Connect to Netlify MCP</a> for automatic API credentials</li>
-              <li>• <strong>Option 2:</strong> Manually configure your API token below</li>
-            </ul>
+            {netlifyConfig.apiToken.includes('demo') ? (
+              <div className="p-2 bg-amber-100 border border-amber-200 rounded text-amber-800">
+                <p className="text-sm font-medium">⚠️ Demo Mode Active</p>
+                <p className="text-xs">Using demo token - Netlify operations will be simulated. Set a real NETLIFY_ACCESS_TOKEN for production use.</p>
+              </div>
+            ) : (
+              <>
+                <p className="text-sm">
+                  For automatic domain management, you can either:
+                </p>
+                <ul className="text-sm space-y-1 ml-4">
+                  <li>• <strong>Option 1:</strong> <a href="#open-mcp-popover" className="text-blue-600 hover:underline">Connect to Netlify MCP</a> for automatic API credentials</li>
+                  <li>• <strong>Option 2:</strong> Manually configure your API token below</li>
+                </ul>
+              </>
+            )}
           </div>
         </AlertDescription>
       </Alert>
