@@ -391,6 +391,16 @@ export class NetlifyDomainAPI {
     permissions: string[];
     error?: string;
   }> {
+    // Return demo success for demo/development mode
+    if (this.isDemoToken()) {
+      return {
+        connected: true,
+        siteExists: true,
+        permissions: ['sites:read', 'domains:read', 'domains:write', 'demo:mode'],
+        error: undefined
+      };
+    }
+
     try {
       // Test basic site access
       const siteResponse = await fetch(`${this.baseUrl}/sites/${this.siteId}`, {
@@ -401,11 +411,17 @@ export class NetlifyDomainAPI {
       });
 
       if (!siteResponse.ok) {
+        if (siteResponse.status === 404) {
+          throw new Error(`Site not found (${this.siteId}). Please check your site ID.`);
+        }
+        if (siteResponse.status === 401) {
+          throw new Error(`Authentication failed. Please check your API token.`);
+        }
         throw new Error(`Site access failed: ${siteResponse.status}`);
       }
 
       const siteData = await siteResponse.json();
-      
+
       // Test domain permissions
       const domainsResponse = await fetch(`${this.baseUrl}/sites/${this.siteId}/domains`, {
         headers: {
