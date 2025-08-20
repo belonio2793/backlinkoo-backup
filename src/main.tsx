@@ -13,12 +13,12 @@ import './utils/fullstoryFix'
 import './utils/fetchErrorDiagnostic'
 // Unified error handler - fixes all [object Object] displays
 import './utils/unifiedErrorHandler'
-// Test blog migration error fix
-import './utils/testBlogMigrationErrorFix'
-// Test auth session missing error fix
-import './utils/testAuthSessionFix'
-// Test domain environment configuration
-import './utils/testDomainEnvironment'
+// Test blog migration error fix - DISABLED DUE TO AUTO-EXECUTION
+// import './utils/testBlogMigrationErrorFix'
+// Test auth session missing error fix - DISABLED DUE TO AUTO-EXECUTION
+// import './utils/testAuthSessionFix'
+// Test domain environment configuration - DISABLED DUE TO AUTO-EXECUTION
+// import './utils/testDomainEnvironment'
 // Immediate fix for Supabase connection blocks
 import './utils/clearSupabaseBlock'
 // Campaign-specific error handling
@@ -159,8 +159,8 @@ if (import.meta.env.DEV) {
   // Import beautiful content structure utility
   import('./utils/forceBeautifulContentStructure');
 
-  // Import and run one-time beautiful content migration
-  import('./utils/oneTimeBeautifulContentMigration');
+  // Import and run one-time beautiful content migration - DISABLED DUE TO AUTO-EXECUTION ERRORS
+  // import('./utils/oneTimeBeautifulContentMigration');
 
   // Import response body fix test
   import('./utils/testResponseBodyFix');

@@ -56,7 +56,8 @@ import {
   Save,
   Palette,
   Wand2,
-  Zap
+  Zap,
+  Settings
 } from 'lucide-react';
 import SimpleBlogTemplateManager from '@/components/SimpleBlogTemplateManager';
 import DNSValidationService from '@/services/dnsValidationService';
@@ -75,6 +76,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { DomainManager } from '@/services/domainManager';
 import { netlifyDomainService } from '@/services/netlifyDomainService';
 import { toast } from 'sonner';
+import NetlifyControlPanel from '@/components/NetlifyControlPanel';
+import EnvironmentVariablesManager from '@/components/EnvironmentVariablesManager';
 
 // Global error handler will be set up in useEffect
 
@@ -137,6 +140,10 @@ const DomainsPage = () => {
   const [netlifyCustomDomainService, setNetlifyCustomDomainService] = useState<NetlifyCustomDomainService | null>(null); // Initialize Netlify custom domain service
   const [enhancedNetlifyService, setEnhancedNetlifyService] = useState<EnhancedNetlifyDomainService | null>(null); // Enhanced Netlify service with DNS
   const [showDNSInstructions, setShowDNSInstructions] = useState<{domain: string, scenario: 'registrar' | 'domains-page' | 'subdomain'} | null>(null);
+  const [selectedDomainForControl, setSelectedDomainForControl] = useState<Domain | null>(null);
+  const [showEnvironmentManager, setShowEnvironmentManager] = useState(false);
+  const [environmentConfig, setEnvironmentConfig] = useState<{ [key: string]: string }>({});
+  const [supabaseConnected, setSupabaseConnected] = useState<boolean | null>(null); // null = unknown, true = connected, false = disconnected
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
@@ -200,11 +207,10 @@ const DomainsPage = () => {
       }
     }
 
-    // Initialize NetlifyDomainService
+    // Initialize Netlify services
     try {
-      const domainService = new NetlifyDomainService();
-      setNetlifyDomainService(domainService);
-      console.log('✅ NetlifyDomainService initialized');
+      // NetlifyDomainService is already available as singleton import
+      console.log('✅ NetlifyDomainService available as singleton');
 
       // Initialize NetlifyCustomDomainService
       const customDomainService = new NetlifyCustomDomainService();
@@ -217,16 +223,15 @@ const DomainsPage = () => {
       console.log('✅ EnhancedNetlifyDomainService initialized');
 
       // Quick verification if configured
-      if (domainService.isConfigured()) {
+      if (netlifyDomainService.isConfigured()) {
         console.log('🔗 Netlify integration is configured and ready');
       } else {
         console.log('⚠️ Netlify integration not configured');
       }
     } catch (error) {
-      console.error('Failed to initialize NetlifyDomainService:', error);
-      if (error instanceof Error) {
-        toast.error(`Domain Service initialization failed: ${error.message}`);
-      }
+      console.error('Failed to initialize Netlify services:', error);
+      // Don't show toast during initialization to prevent setState warnings
+      console.warn('⚠️ Domain Service initialization had issues:', error instanceof Error ? error.message : 'Unknown error');
     }
   }, []);
 
@@ -236,25 +241,20 @@ const DomainsPage = () => {
       try {
         console.log('🔧 Initializing domains functionality...');
 
-        // First ensure domains table exists
-        const { ensureDomainsTable } = await import('@/utils/ensureDomainsTable');
-        const tableResult = await ensureDomainsTable();
+        // Skip domains table auto-creation to prevent access errors
+        console.log('🔧 Domains initialization started (table auto-creation disabled)...');
 
-        if (!tableResult.success) {
-          console.error('❌ Failed to ensure domains table:', tableResult.error);
-          toast.error(`Database setup failed: ${tableResult.error}`, { duration: 10000 });
-          return;
+        // Test connection (don't fail initialization if this fails)
+        const connectionWorking = await testSupabaseConnection(false);
+        setSupabaseConnected(connectionWorking);
+
+        if (connectionWorking) {
+          // Load domains only if connection is working (don't show toast on error during init)
+          await loadDomains(false);
+        } else {
+          console.warn('⚠️ Skipping domain loading due to Supabase connection issues');
+          setLoading(false); // Make sure to set loading to false
         }
-
-        if (tableResult.created) {
-          toast.success('✅ Domains table created successfully!', { duration: 5000 });
-        }
-
-        // Test connection
-        await testSupabaseConnection();
-
-        // Load domains
-        await loadDomains();
 
         // Check DNS service status
         checkDNSServiceHealth();
@@ -263,13 +263,8 @@ const DomainsPage = () => {
 
       } catch (error: any) {
         console.error('❌ Domains initialization failed:', error);
-        toast.error(`Initialization failed: ${error.message}`, {
-          duration: 10000,
-          action: {
-            label: 'Retry',
-            onClick: () => window.location.reload()
-          }
-        });
+        // Don't show toast during initialization to prevent setState warnings
+        console.warn('⚠️ Domains initialization had issues:', error.message || 'Unknown error');
       }
     };
 
@@ -280,7 +275,8 @@ const DomainsPage = () => {
   const testDomainSetup = async () => {
     try {
       console.log('🧪 Testing complete domain setup...');
-      toast.info('Testing domain management system...');
+      // Defer toast to prevent setState warnings if called during render
+      setTimeout(() => toast.info('Testing domain management system...'), 0);
 
       const result = await DomainManager.testDomainSetup();
 
@@ -312,9 +308,32 @@ const DomainsPage = () => {
   };
 
   // Test Supabase connection
-  const testSupabaseConnection = async () => {
+  const testSupabaseConnection = async (throwOnError: boolean = true) => {
     try {
       console.log('🔍 Testing Supabase connection...');
+
+      // Check if environment variables are available
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+      // Debug environment variables in development
+      if (import.meta.env.DEV) {
+        console.log('🔧 Environment variables check:', {
+          hasUrl: !!supabaseUrl,
+          hasKey: !!supabaseKey,
+          urlPreview: supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'missing',
+          keyPreview: supabaseKey ? supabaseKey.substring(0, 20) + '...' : 'missing'
+        });
+      }
+
+      if (!supabaseUrl || !supabaseKey) {
+        const errorMsg = 'Supabase environment variables not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.';
+        console.warn('⚠️', errorMsg);
+        if (throwOnError) {
+          throw new Error(errorMsg);
+        }
+        return false;
+      }
 
       // Simple connection test
       const { data, error } = await supabase
@@ -324,16 +343,28 @@ const DomainsPage = () => {
 
       if (error) {
         if (error.message?.includes('No API key found')) {
-          throw new Error('Supabase API key is missing. Please refresh the page.');
+          const errorMsg = 'Supabase API key is missing. Please refresh the page.';
+          console.warn('⚠️', errorMsg);
+          if (throwOnError) {
+            throw new Error(errorMsg);
+          }
+          return false;
         }
-        throw error;
+        if (throwOnError) {
+          throw error;
+        }
+        console.warn('⚠️ Supabase connection test failed:', error.message);
+        return false;
       }
 
       console.log('✅ Supabase connection test successful');
       return true;
     } catch (error: any) {
       console.error('❌ Supabase connection test failed:', error);
-      throw new Error(error.message || 'Database connection failed');
+      if (throwOnError) {
+        throw new Error(error.message || 'Database connection failed');
+      }
+      return false;
     }
   };
 
@@ -805,7 +836,7 @@ const DomainsPage = () => {
     }
   };
 
-  const loadDomains = async () => {
+  const loadDomains = async (showToastOnError: boolean = true) => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -832,7 +863,7 @@ const DomainsPage = () => {
 
         // Handle specific Supabase errors
         if (errorMessage.includes('No API key found')) {
-          errorMessage = 'Database connection failed: Missing API key. Please refresh the page.';
+          errorMessage = 'Database connection failed: Missing API key. Please check environment configuration.';
         } else if (errorMessage.includes('JWT')) {
           errorMessage = 'Authentication expired. Please sign in again.';
         } else if (errorMessage.includes('Failed to fetch')) {
@@ -844,12 +875,23 @@ const DomainsPage = () => {
 
       setDomains(data || []);
 
-      // Check if domain_blog_themes table exists
-      await checkDomainBlogThemesTable();
+      // Check if domain_blog_themes table exists (only if we have data)
+      if (data) {
+        await checkDomainBlogThemesTable();
+      }
     } catch (error: any) {
       console.error('Error loading domains:', error);
       const errorMessage = error?.message || 'Unknown error occurred';
-      toast.error(`Failed to load domains: ${errorMessage}`);
+
+      // Only show toast error if explicitly requested (not during initialization)
+      if (showToastOnError) {
+        toast.error(`Failed to load domains: ${errorMessage}`);
+      } else {
+        console.warn('⚠️ Domain loading failed during initialization:', errorMessage);
+      }
+
+      // Set empty domains array on error to allow page to function
+      setDomains([]);
     } finally {
       setLoading(false);
     }
@@ -959,13 +1001,22 @@ const DomainsPage = () => {
     try {
       // Test connection before attempting to add domain
       console.log('🔍 Testing connection before domain addition...');
-      await testSupabaseConnection();
+      const connectionWorking = await testSupabaseConnection(false);
+
+      if (!connectionWorking) {
+        throw new Error('Cannot add domain: Database connection is not available. Please check your Supabase configuration.');
+      }
       console.log('✅ Connection test passed, proceeding with domain addition');
 
       const data = await addSingleDomain(newDomain);
       setDomains(prev => [data, ...prev]);
       setNewDomain('');
+
+      // Show Netlify control panel for the new domain
+      setSelectedDomainForControl(data);
+
       toast.success(`✅ Domain ${data.domain} added successfully!`);
+      toast.info(`🎛️ Netlify control panel opened for ${data.domain}`);
       console.log(`��� Domain addition completed:`, data);
 
       // Auto-configure if automation is enabled and domain was added successfully
@@ -1547,9 +1598,11 @@ const DomainsPage = () => {
                 size="sm"
                 onClick={async () => {
                   try {
-                    await testSupabaseConnection();
+                    const connectionWorking = await testSupabaseConnection(true);
+                    setSupabaseConnected(connectionWorking);
                     toast.success('✅ Database connection is working!');
                   } catch (error: any) {
+                    setSupabaseConnected(false);
                     toast.error(`❌ Connection failed: ${error.message}`);
                   }
                 }}
@@ -1578,6 +1631,50 @@ const DomainsPage = () => {
           </div>
         </div>
 
+        {/* Configuration Status Banner */}
+        {supabaseConnected === false && (
+          <Card className="mb-8 border-yellow-200 bg-yellow-50/50">
+            <CardContent className="pt-6">
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="space-y-2">
+                    <div className="font-medium">Database Configuration Required</div>
+                    <div className="text-sm">
+                      Supabase connection is not available. Please configure your environment variables or use the Environment Configuration panel below.
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        onClick={() => setShowEnvironmentManager(true)}
+                        className="bg-yellow-600 hover:bg-yellow-700"
+                      >
+                        Configure Environment
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={async () => {
+                          const connectionWorking = await testSupabaseConnection(false);
+                          setSupabaseConnected(connectionWorking);
+                          if (connectionWorking) {
+                            toast.success('✅ Database connection restored!');
+                            await loadDomains();
+                          } else {
+                            toast.error('❌ Database connection still not available');
+                          }
+                        }}
+                      >
+                        <RefreshCw className="h-3 w-3 mr-1" />
+                        Retry Connection
+                      </Button>
+                    </div>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quick Add Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -2009,7 +2106,7 @@ anotherdomain.org`}
                                 toast.info(`🚀 Adding ${domain.domain} to Netlify with DNS setup...`);
 
                                 // Step 1: Check if domain already exists in Netlify
-                                const statusResult = await netlifyDomainService?.getDomainStatus(domain.domain);
+                                const statusResult = await netlifyDomainService?.verifyDomain(domain.domain);
 
                                 if (statusResult?.success && statusResult.status) {
                                   // Domain exists - update local database and check DNS
@@ -2069,7 +2166,7 @@ anotherdomain.org`}
                                   toast.info(`📡 Configuring DNS records for ${domain.domain}...`);
 
                                   // Get the updated domain status from Netlify
-                                  const newStatusResult = await netlifyDomainService?.getDomainStatus(domain.domain);
+                                  const newStatusResult = await netlifyDomainService?.verifyDomain(domain.domain);
                                   if (newStatusResult?.success && newStatusResult.status) {
                                     await checkAndFixDNSDiscrepancies(domain, newStatusResult.status);
                                   }
@@ -2122,11 +2219,11 @@ anotherdomain.org`}
                               size="sm"
                               className="text-xs h-6"
                               onClick={async () => {
-                                const result = await netlifyDomainService.getDomainStatus(domain.domain);
-                                if (result.success && result.status) {
-                                  const instructions = netlifyDomainService.getSetupInstructions(domain.domain, result.status);
-                                  toast.success(`${instructions.title}: ${instructions.instructions[0]}`);
-                                } else if (result.error && result.error.includes('not found in Netlify')) {
+                                const result = await netlifyDomainService.verifyDomain(domain.domain);
+                                if (result.success && result.data) {
+                                  const instructions = netlifyDomainService.getDNSInstructions(domain.domain);
+                                  toast.success(`Domain verified! DNS: A record -> ${instructions.aRecord}`);
+                                } else if (result.error && result.error.includes('not found')) {
                                   // Domain not in Netlify yet - offer to add it
                                   toast.error(`${result.error}`, {
                                     action: {
@@ -2415,6 +2512,16 @@ anotherdomain.org`}
                           <Button
                             variant="outline"
                             size="sm"
+                            onClick={() => setSelectedDomainForControl(domain)}
+                            title="Open Netlify Control Panel"
+                            className="bg-blue-50 border-blue-200 hover:bg-blue-100"
+                          >
+                            <Settings className="h-3 w-3" />
+                          </Button>
+
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={safeAsync(() => deleteDomain(domain.id, domain.domain))}
                             title="Delete Domain"
                           >
@@ -2430,7 +2537,59 @@ anotherdomain.org`}
           </CardContent>
         </Card>
 
+        {/* Environment Variables Manager */}
+        <Card className="mt-8">
+          <CardHeader>
+            <CardTitle className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Settings className="h-5 w-5" />
+                Environment Configuration
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowEnvironmentManager(!showEnvironmentManager)}
+              >
+                {showEnvironmentManager ? 'Hide' : 'Configure'} Environment
+              </Button>
+            </CardTitle>
+          </CardHeader>
+          {showEnvironmentManager && (
+            <CardContent>
+              <EnvironmentVariablesManager
+                onConfigurationChange={setEnvironmentConfig}
+              />
+            </CardContent>
+          )}
+        </Card>
 
+        {/* Netlify Control Panel for Selected Domain */}
+        {selectedDomainForControl && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-blue-600" />
+                  Netlify Control Panel for {selectedDomainForControl.domain}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setSelectedDomainForControl(null)}
+                >
+                  Close Panel
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <NetlifyControlPanel
+                domain={selectedDomainForControl}
+                onDomainUpdate={updateDomain}
+                onRefresh={loadDomains}
+              />
+            </CardContent>
+          </Card>
+        )}
 
         {/* Blog Template Management Section - Always Show */}
         <Card className="mt-8">
