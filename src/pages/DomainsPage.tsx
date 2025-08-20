@@ -133,6 +133,7 @@ const DomainsPage = () => {
   const [netlifyKeyValue, setNetlifyKeyValue] = useState('');
   const [dnsConfiguring, setDnsConfiguring] = useState(false);
   const [dnsProgress, setDnsProgress] = useState({ current: 0, total: 0, domain: '' });
+  const [autoSyncEnabled, setAutoSyncEnabled] = useState(true); // Enable auto-sync by default
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
@@ -198,7 +199,40 @@ const DomainsPage = () => {
     const configStatus = NetlifyDNSManager.getConfigStatus();
     setNetlifyConfigured(configStatus.configured);
     checkNetlifyEnvSync();
-  }, []);
+
+    // Auto-sync NETLIFY key if auto-sync is enabled and key is not already synced
+    if (autoSyncEnabled) {
+      autoSyncNetlifyKey();
+    }
+  }, [autoSyncEnabled]);
+
+  // Auto-sync NETLIFY key if available
+  const autoSyncNetlifyKey = async () => {
+    try {
+      const envToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
+
+      // If no token exists or it's already set via auto-sync, skip
+      if (!envToken || envToken.includes('demo_token_auto_stored')) {
+        if (envToken && envToken.includes('demo_token_auto_stored')) {
+          setNetlifyEnvStatus('synced');
+          setNetlifyKeyValue('auto-stored');
+          setNetlifyConfigured(true);
+        }
+        return;
+      }
+
+      // Auto-sync to DevServerControl if valid token exists
+      if (envToken.length > 10 && !envToken.includes('demo')) {
+        console.log('🚀 Auto-syncing NETLIFY key via DevServerControl...');
+        setNetlifyEnvStatus('updating');
+
+        // This will be handled by the updated NetlifyEnvironmentSync component
+        await syncNetlifyToEnv(envToken);
+      }
+    } catch (error) {
+      console.error('Auto-sync failed:', error);
+    }
+  };
 
   // Check if Netlify key is synced with environment variables
   const checkNetlifyEnvSync = () => {
@@ -206,9 +240,9 @@ const DomainsPage = () => {
     if (envToken && envToken.length > 10 && !envToken.includes('demo')) {
       setNetlifyEnvStatus('synced');
       setNetlifyKeyValue(envToken.substring(0, 8) + '...' + envToken.substring(envToken.length - 4));
-    } else if (envToken && envToken.includes('demo')) {
+    } else if (envToken && (envToken.includes('demo') || envToken.includes('auto_stored'))) {
       setNetlifyEnvStatus('synced');
-      setNetlifyKeyValue('demo-token');
+      setNetlifyKeyValue(envToken.includes('auto_stored') ? 'auto-stored' : 'demo-token');
     } else {
       setNetlifyEnvStatus('missing');
       setNetlifyKeyValue('');
@@ -1128,34 +1162,55 @@ const DomainsPage = () => {
               </Alert>
             )}
 
-            {/* Netlify Environment Sync Status */}
-            <div className="flex items-center justify-center gap-4 text-sm">
-              <span>Netlify Environment Sync:</span>
-              {netlifyEnvStatus === 'synced' ? (
-                <Badge className="bg-green-100 text-green-800 border-green-200">
-                  <CheckCircle2 className="w-3 h-3 mr-1" />
-                  Permanently Synced ({netlifyKeyValue})
-                </Badge>
-              ) : netlifyEnvStatus === 'updating' ? (
+            {/* Netlify Environment Sync Status - Only show when auto-sync is disabled */}
+            {!autoSyncEnabled && (
+              <div className="flex items-center justify-center gap-4 text-sm">
+                <span>Netlify Environment Sync:</span>
+                {netlifyEnvStatus === 'synced' ? (
+                  <Badge className="bg-green-100 text-green-800 border-green-200">
+                    <CheckCircle2 className="w-3 h-3 mr-1" />
+                    Permanently Synced ({netlifyKeyValue})
+                  </Badge>
+                ) : netlifyEnvStatus === 'updating' ? (
+                  <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                    Syncing...
+                  </Badge>
+                ) : (
+                  <Badge className="bg-red-100 text-red-800 border-red-200">
+                    <AlertTriangle className="w-3 h-3 mr-1" />
+                    Not Synced
+                  </Badge>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={checkNetlifyEnvSync}
+                  title="Refresh sync status"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                </Button>
+              </div>
+            )}
+
+            {/* Auto-sync status when enabled */}
+            {autoSyncEnabled && (
+              <div className="flex items-center justify-center gap-4 text-sm">
+                <span>Domain Auto-Sync:</span>
                 <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                  Syncing...
+                  <Zap className="w-3 h-3 mr-1" />
+                  Automatic ({netlifyKeyValue || 'Ready'})
                 </Badge>
-              ) : (
-                <Badge className="bg-red-100 text-red-800 border-red-200">
-                  <AlertTriangle className="w-3 h-3 mr-1" />
-                  Not Synced
-                </Badge>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={checkNetlifyEnvSync}
-                title="Refresh sync status"
-              >
-                <RefreshCw className="w-3 h-3" />
-              </Button>
-            </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setAutoSyncEnabled(false)}
+                  title="Disable auto-sync and show manual controls"
+                >
+                  <Settings className="w-3 h-3" />
+                </Button>
+              </div>
+            )}
 
             {/* DNS Service Status */}
             <div className="flex items-center justify-center gap-2 text-sm">
@@ -1309,27 +1364,29 @@ anotherdomain.org`}
                   <Wand2 className="h-4 w-4 mr-1" />
                   Automation
                 </Button>
-                {/* Enhanced Netlify Sync Button with DNS Propagation */}
-                <Button
-                  variant={netlifyEnvStatus === 'synced' ? 'outline' : 'default'}
-                  size="sm"
-                  onClick={() => syncNetlifyToEnv()}
-                  disabled={netlifyEnvStatus === 'updating'}
-                  className={netlifyEnvStatus === 'synced' ? 'bg-green-50 border-green-200 hover:bg-green-100' : 'bg-blue-600 hover:bg-blue-700'}
-                  title={netlifyEnvStatus === 'synced'
-                    ? 'Netlify key synced and DNS propagation configured'
-                    : 'Sync Netlify key and automatically configure DNS propagation for all domains'
-                  }
-                >
-                  {netlifyEnvStatus === 'updating' ? (
-                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                  ) : netlifyEnvStatus === 'synced' ? (
-                    <CheckCircle2 className="h-4 w-4 mr-1" />
-                  ) : (
-                    <Zap className="h-4 w-4 mr-1" />
-                  )}
-                  {netlifyEnvStatus === 'synced' ? 'Netlify Synced + DNS' : 'Sync & Setup DNS'}
-                </Button>
+                {/* Enhanced Netlify Sync Button with DNS Propagation - Only show when auto-sync is disabled */}
+                {!autoSyncEnabled && (
+                  <Button
+                    variant={netlifyEnvStatus === 'synced' ? 'outline' : 'default'}
+                    size="sm"
+                    onClick={() => syncNetlifyToEnv()}
+                    disabled={netlifyEnvStatus === 'updating'}
+                    className={netlifyEnvStatus === 'synced' ? 'bg-green-50 border-green-200 hover:bg-green-100' : 'bg-blue-600 hover:bg-blue-700'}
+                    title={netlifyEnvStatus === 'synced'
+                      ? 'Netlify key synced and DNS propagation configured'
+                      : 'Sync Netlify key and automatically configure DNS propagation for all domains'
+                    }
+                  >
+                    {netlifyEnvStatus === 'updating' ? (
+                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                    ) : netlifyEnvStatus === 'synced' ? (
+                      <CheckCircle2 className="h-4 w-4 mr-1" />
+                    ) : (
+                      <Zap className="h-4 w-4 mr-1" />
+                    )}
+                    {netlifyEnvStatus === 'synced' ? 'Netlify Synced + DNS' : 'Sync & Setup DNS'}
+                  </Button>
+                )}
                 <Button variant="outline" size="sm" onClick={exportDomains}>
                   <Download className="h-4 w-4 mr-1" />
                   Export CSV
