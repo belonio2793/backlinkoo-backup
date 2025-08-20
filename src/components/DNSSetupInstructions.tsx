@@ -354,12 +354,21 @@ const DNSSetupInstructions: React.FC<DNSSetupInstructionsProps> = ({
                 </Card>
               </div>
 
+              <Alert className="border-blue-200 bg-blue-50">
+                <Info className="h-4 w-4" />
+                <AlertDescription>
+                  <strong>Backlinkoo Infrastructure:</strong> All domains use the exact same DNS records as backlinkoo.com.
+                  This ensures unified hosting on <code className="px-1 py-0.5 bg-white rounded text-xs">{backlinkooDomain}</code>
+                  with shared SSL certificates and CDN configuration.
+                </AlertDescription>
+              </Alert>
+
               {scenario === 'domains-page' && (
-                <Alert className="border-blue-200 bg-blue-50">
+                <Alert className="border-green-200 bg-green-50">
                   <Info className="h-4 w-4" />
                   <AlertDescription>
                     <strong>Domains Page Setup:</strong> When adding domains through /domains page,
-                    ensure the A record points to <code className="px-1 py-0.5 bg-white rounded text-xs">{netlifyIP}</code> for direct server connection.
+                    ensure the A record points to <code className="px-1 py-0.5 bg-white rounded text-xs">{netlifyIP}</code> (same as backlinkoo.com).
                   </AlertDescription>
                 </Alert>
               )}
