@@ -275,12 +275,9 @@ const DomainsPage = () => {
   // Check if Netlify key is synced with environment variables
   const checkNetlifyEnvSync = () => {
     const envToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
-    if (envToken && envToken.length > 10 && !envToken.includes('demo')) {
+    if (envToken && envToken.length > 10) {
       setNetlifyEnvStatus('synced');
       setNetlifyKeyValue(envToken.substring(0, 8) + '...' + envToken.substring(envToken.length - 4));
-    } else if (envToken && (envToken.includes('demo') || envToken.includes('auto_stored'))) {
-      setNetlifyEnvStatus('synced');
-      setNetlifyKeyValue(envToken.includes('auto_stored') ? 'auto-stored' : 'demo-token');
     } else {
       setNetlifyEnvStatus('missing');
       setNetlifyKeyValue('');
@@ -411,7 +408,7 @@ const DomainsPage = () => {
   // Auto-configure DNS for a specific domain
   const autoConfigureDomainDNS = async (domain: Domain, apiToken: string) => {
     try {
-      console.log(`��� Auto-configuring DNS for ${domain.domain}`);
+      console.log(`����� Auto-configuring DNS for ${domain.domain}`);
 
       // For demo mode, simulate DNS configuration
       if (apiToken.includes('demo')) {
