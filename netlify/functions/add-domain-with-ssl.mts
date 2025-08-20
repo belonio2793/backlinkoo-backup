@@ -37,11 +37,20 @@ export default async (req: Request, context: Context): Promise<Response> => {
 
     // Use provided siteId or default to the main site
     const targetSiteId = siteId || 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809';
-    const netlifyToken = Netlify.env.get('NETLIFY_ACCESS_TOKEN');
+
+    // Try multiple ways to get the Netlify token
+    const netlifyToken = Netlify.env.get('NETLIFY_ACCESS_TOKEN') ||
+                        process.env.NETLIFY_ACCESS_TOKEN ||
+                        context.clientContext?.environment?.NETLIFY_ACCESS_TOKEN;
 
     if (!netlifyToken) {
-      return new Response(JSON.stringify({ 
-        error: 'Netlify access token not configured' 
+      return new Response(JSON.stringify({
+        error: 'Netlify access token not configured',
+        debug: {
+          netlify_env: typeof Netlify !== 'undefined' ? 'available' : 'not available',
+          process_env_keys: Object.keys(process.env).filter(key => key.includes('NETLIFY')),
+          suggestion: 'Set NETLIFY_ACCESS_TOKEN environment variable in Netlify dashboard or via DevServerControl'
+        }
       }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' }
