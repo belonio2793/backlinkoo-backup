@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, SupabaseConnectionFixer } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, Shield, Lock, Globe } from 'lucide-react';
+import SupabaseErrorRecovery from '@/components/SupabaseErrorRecovery';
 
 interface DomainsAuthGuardProps {
   children: React.ReactNode;
