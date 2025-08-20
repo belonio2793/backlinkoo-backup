@@ -16,6 +16,7 @@ import {
   Globe
 } from 'lucide-react';
 import { toast } from 'sonner';
+import DevServerEnvironment from '@/utils/devServerEnvironment';
 
 interface NetlifyEnvSyncProps {
   onSyncComplete?: () => void;
