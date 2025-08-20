@@ -1893,6 +1893,44 @@ anotherdomain.org`}
                             <Plus className="w-3 h-3 mr-1" />
                             Add to Netlify + DNS
                           </Button>
+                          {/* DNS Instructions Button */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs h-6 bg-blue-50 border-blue-200 hover:bg-blue-100"
+                            onClick={() => {
+                              const instructions = enhancedNetlifyService?.generateSetupInstructions(domain.domain, true) || [
+                                '📋 DNS Setup Instructions:',
+                                '1. Login to your domain registrar',
+                                '2. Update nameservers to Netlify DNS:',
+                                '   - dns1.p01.nsone.net',
+                                '   - dns2.p01.nsone.net',
+                                '   - dns3.p01.nsone.net',
+                                '   - dns4.p01.nsone.net',
+                                '3. Wait 24-48 hours for propagation',
+                                '4. SSL certificates will be auto-provisioned'
+                              ];
+
+                              // Create a modal with instructions
+                              const instructionModal = document.createElement('div');
+                              instructionModal.innerHTML = `
+                                <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 9999; display: flex; align-items: center; justify-content: center;">
+                                  <div style="background: white; padding: 25px; border-radius: 12px; max-width: 700px; max-height: 80vh; overflow-y: auto; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+                                    <h3 style="margin: 0 0 20px 0; font-size: 20px; font-weight: bold; color: #333;">🌐 DNS Setup Instructions for ${domain.domain}</h3>
+                                    <div style="white-space: pre-wrap; font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace; font-size: 13px; background: #f8f9fa; padding: 16px; border-radius: 6px; border-left: 4px solid #007bff; line-height: 1.5;">${instructions.join('\n')}</div>
+                                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                                      <button onclick="navigator.clipboard.writeText('dns1.p01.nsone.net\\ndns2.p01.nsone.net\\ndns3.p01.nsone.net\\ndns4.p01.nsone.net'); alert('Nameservers copied to clipboard!')" style="padding: 8px 16px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">Copy Nameservers</button>
+                                      <button onclick="this.parentElement.parentElement.parentElement.remove()" style="padding: 8px 16px; background: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">Close</button>
+                                    </div>
+                                  </div>
+                                </div>
+                              `;
+                              document.body.appendChild(instructionModal);
+                            }}
+                          >
+                            <Info className="w-3 h-3 mr-1" />
+                            DNS Instructions
+                          </Button>
                           {netlifyDomainService && netlifyDomainService.isConfigured() && (
                             <Button
                               variant="outline"
