@@ -13,6 +13,8 @@ import './utils/fullstoryFix'
 import './utils/fetchErrorDiagnostic'
 // Unified error handler - fixes all [object Object] displays
 import './utils/unifiedErrorHandler'
+// Test blog migration error fix
+import './utils/testBlogMigrationErrorFix'
 // Immediate fix for Supabase connection blocks
 import './utils/clearSupabaseBlock'
 // Campaign-specific error handling
