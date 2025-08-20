@@ -2044,29 +2044,57 @@ anotherdomain.org`}
                             </Button>
                           )}
 
-                          {/* Debug Netlify Button - Temporary */}
+                          {/* Debug Netlify Button */}
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={async () => {
                               try {
-                                toast.info('Testing Netlify API connection...');
-                                const response = await fetch('/.netlify/functions/netlify-debug');
-                                const result = await response.json();
+                                toast.info('🔍 Testing Netlify setup...');
 
-                                if (result.success) {
-                                  toast.success('✅ Netlify API connection successful!');
-                                  console.log('Netlify Debug Info:', result.debug);
-                                } else {
-                                  toast.error(`❌ Netlify API issue: ${result.error}`);
-                                  console.error('Netlify Debug Error:', result.debug);
+                                // Test 1: Check if functions are deployed
+                                const healthResponse = await fetch('/.netlify/functions/netlify-custom-domain?health=check');
+                                if (!healthResponse.ok) {
+                                  if (healthResponse.status === 404) {
+                                    toast.error('❌ Netlify functions not deployed');
+                                    console.error('Functions not found - need to deploy');
+                                    return;
+                                  }
+                                  toast.error(`❌ Function error: ${healthResponse.status}`);
+                                  return;
                                 }
+
+                                const healthResult = await healthResponse.json();
+                                console.log('Health check:', healthResult);
+
+                                // Test 2: Check environment configuration
+                                if (!healthResult.environment?.hasToken) {
+                                  toast.error('❌ NETLIFY_ACCESS_TOKEN not configured');
+                                  console.error('Missing token in environment:', healthResult.environment);
+                                  return;
+                                }
+
+                                // Test 3: Check site access via debug function
+                                const debugResponse = await fetch('/.netlify/functions/netlify-debug');
+                                if (debugResponse.ok) {
+                                  const debugResult = await debugResponse.json();
+                                  if (debugResult.success) {
+                                    toast.success('✅ All Netlify checks passed!');
+                                    console.log('Full debug info:', debugResult.debug);
+                                  } else {
+                                    toast.error(`❌ API Error: ${debugResult.error}`);
+                                    console.error('API error details:', debugResult.debug);
+                                  }
+                                } else {
+                                  toast.warning('⚠️ Basic function works, but debug function unavailable');
+                                }
+
                               } catch (error) {
-                                toast.error('Failed to test Netlify connection');
+                                toast.error(`❌ Test failed: ${error.message}`);
                                 console.error('Debug test error:', error);
                               }
                             }}
-                            title="Test Netlify API Connection"
+                            title="Test Netlify Setup (Click this first!)"
                             className="bg-yellow-50 border-yellow-200 hover:bg-yellow-100"
                           >
                             <Info className="h-3 w-3" />
