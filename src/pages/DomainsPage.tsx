@@ -2006,6 +2006,34 @@ anotherdomain.org`}
                             </Button>
                           )}
 
+                          {/* Debug Netlify Button - Temporary */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                              try {
+                                toast.info('Testing Netlify API connection...');
+                                const response = await fetch('/.netlify/functions/netlify-debug');
+                                const result = await response.json();
+
+                                if (result.success) {
+                                  toast.success('✅ Netlify API connection successful!');
+                                  console.log('Netlify Debug Info:', result.debug);
+                                } else {
+                                  toast.error(`❌ Netlify API issue: ${result.error}`);
+                                  console.error('Netlify Debug Error:', result.debug);
+                                }
+                              } catch (error) {
+                                toast.error('Failed to test Netlify connection');
+                                console.error('Debug test error:', error);
+                              }
+                            }}
+                            title="Test Netlify API Connection"
+                            className="bg-yellow-50 border-yellow-200 hover:bg-yellow-100"
+                          >
+                            <Info className="h-3 w-3" />
+                          </Button>
+
                           {!domain.netlify_synced && netlifyCustomDomainService && netlifyCustomDomainService.isConfiguredSync() && (
                             <Button
                               variant="outline"
