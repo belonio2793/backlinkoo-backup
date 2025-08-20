@@ -40,9 +40,22 @@ export class NetlifyDomainAPI {
   }
 
   /**
+   * Check if we're using a demo/test token
+   */
+  private isDemoToken(): boolean {
+    return this.apiToken.includes('demo') || this.apiToken.includes('test') || this.apiToken.length < 20;
+  }
+
+  /**
    * Get all domains for the site
    */
   async getDomains(): Promise<NetlifyAPIResponse[]> {
+    // Return empty array for demo/development mode
+    if (this.isDemoToken()) {
+      console.warn('Using demo token - returning empty domains list');
+      return [];
+    }
+
     try {
       const response = await fetch(`${this.baseUrl}/sites/${this.siteId}/domains`, {
         headers: {
@@ -52,6 +65,15 @@ export class NetlifyDomainAPI {
       });
 
       if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error(`Netlify site not found (${this.siteId}). Please check your site ID and API token.`);
+        }
+        if (response.status === 401) {
+          throw new Error(`Netlify API authentication failed. Please check your API token permissions.`);
+        }
+        if (response.status === 403) {
+          throw new Error(`Netlify API access forbidden. Please ensure your token has domain management permissions.`);
+        }
         throw new Error(`Netlify API error: ${response.status} ${response.statusText}`);
       }
 
