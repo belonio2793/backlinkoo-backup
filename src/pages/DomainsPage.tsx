@@ -246,6 +246,7 @@ const DomainsPage = () => {
 
         // Test connection (don't fail initialization if this fails)
         const connectionWorking = await testSupabaseConnection(false);
+        setSupabaseConnected(connectionWorking);
 
         if (connectionWorking) {
           // Load domains only if connection is working (don't show toast on error during init)
