@@ -67,6 +67,7 @@ import NetlifyDNSManager from '@/services/netlifyDNSManager';
 import NetlifyDNSSync from '@/services/netlifyDNSSync';
 import NetlifyDomainService from '@/services/netlifyDomainService';
 import NetlifyCustomDomainService from '@/services/netlifyCustomDomainService';
+import EnhancedNetlifyDomainService from '@/services/enhancedNetlifyDomainService';
 import AutoDomainBlogThemeService from '@/services/autoDomainBlogThemeService';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
