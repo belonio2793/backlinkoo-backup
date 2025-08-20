@@ -212,7 +212,7 @@ const DomainsPage = () => {
 
       // Quick verification if configured
       if (domainService.isConfigured()) {
-        console.log('🔗 Netlify integration is configured and ready');
+        console.log('��� Netlify integration is configured and ready');
       } else {
         console.log('⚠️ Netlify integration not configured - using demo mode');
       }
@@ -1009,6 +1009,47 @@ const DomainsPage = () => {
     toast.info('Page generation feature coming soon!');
   };
 
+  // Add custom domain to Netlify using the official API
+  const addCustomDomainToNetlify = async (domain: Domain, txtRecordValue?: string) => {
+    try {
+      if (!netlifyCustomDomainService || !netlifyCustomDomainService.isConfigured()) {
+        toast.error('Netlify custom domain service not configured. Please check your NETLIFY_ACCESS_TOKEN.');
+        return;
+      }
+
+      toast.info(`Adding ${domain.domain} as custom domain to Netlify...`);
+
+      const result = await netlifyCustomDomainService.addCustomDomain(domain.domain, txtRecordValue);
+
+      if (result.success) {
+        // Update domain record with Netlify info
+        await supabase
+          .from('domains')
+          .update({
+            netlify_synced: true,
+            hosting_provider: 'netlify',
+            status: 'active'
+          })
+          .eq('id', domain.id);
+
+        toast.success(`✅ ${domain.domain} added as custom domain to Netlify!`);
+
+        // Show setup instructions if available
+        if (result.instructions) {
+          console.log('📋 Setup Instructions:', result.instructions);
+          toast.info(`Next steps: ${result.instructions.steps[0]}`);
+        }
+
+        await loadDomains(); // Refresh the list
+      } else {
+        toast.error(`Failed to add custom domain: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error adding custom domain:', error);
+      toast.error('Failed to add custom domain to Netlify');
+    }
+  };
+
   // Auto-setup new domain with DNS and themes
   const autoSetupNewDomain = async (domain: Domain) => {
     try {
@@ -1459,7 +1500,7 @@ anotherdomain.org`}
                         target="_blank"
                         className="underline ml-1"
                       >
-                        Create one here →
+                        Create one here ��
                       </a>
                     </div>
                     <div className="flex gap-2">
