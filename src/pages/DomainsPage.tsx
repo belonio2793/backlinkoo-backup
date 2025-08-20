@@ -231,26 +231,49 @@ const DomainsPage = () => {
   }, []);
 
   useEffect(() => {
-    // Load domains for everyone (authenticated and guests)
-    testSupabaseConnection().then(() => {
-      loadDomains().catch((error) => {
-        console.error('Failed to load domains on mount:', error);
-        const errorMessage = error?.message || 'Unknown error occurred';
-        toast.error(`Failed to load domains: ${errorMessage}`);
-      });
-    }).catch((connectionError) => {
-      console.error('Supabase connection test failed:', connectionError);
-      toast.error('Database connection failed. Please refresh the page.', {
-        duration: 10000,
-        action: {
-          label: 'Refresh',
-          onClick: () => window.location.reload()
-        }
-      });
-    });
+    // Initialize domains functionality
+    const initializeDomains = async () => {
+      try {
+        console.log('🔧 Initializing domains functionality...');
 
-    // Check DNS service status on load
-    checkDNSServiceHealth();
+        // First ensure domains table exists
+        const { ensureDomainsTable } = await import('@/utils/ensureDomainsTable');
+        const tableResult = await ensureDomainsTable();
+
+        if (!tableResult.success) {
+          console.error('❌ Failed to ensure domains table:', tableResult.error);
+          toast.error(`Database setup failed: ${tableResult.error}`, { duration: 10000 });
+          return;
+        }
+
+        if (tableResult.created) {
+          toast.success('✅ Domains table created successfully!', { duration: 5000 });
+        }
+
+        // Test connection
+        await testSupabaseConnection();
+
+        // Load domains
+        await loadDomains();
+
+        // Check DNS service status
+        checkDNSServiceHealth();
+
+        console.log('✅ Domains initialization complete');
+
+      } catch (error: any) {
+        console.error('❌ Domains initialization failed:', error);
+        toast.error(`Initialization failed: ${error.message}`, {
+          duration: 10000,
+          action: {
+            label: 'Retry',
+            onClick: () => window.location.reload()
+          }
+        });
+      }
+    };
+
+    initializeDomains();
   }, []); // Remove user dependency
 
   // Test Supabase connection
