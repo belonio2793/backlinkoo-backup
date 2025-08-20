@@ -1823,25 +1823,66 @@ anotherdomain.org`}
                                   return;
                                 }
 
-                                // Domain doesn't exist in Netlify, add it
-                                toast.info(`Adding ${domain.domain} to Netlify...`);
-                                const addResult = await netlifyDomainService.addDomain(domain.domain);
+                                // Use enhanced service for complete domain + DNS setup
+                                if (enhancedNetlifyService && enhancedNetlifyService.isConfigured()) {
+                                  toast.info(`🚀 Setting up ${domain.domain} with Netlify + DNS...`);
+                                  const setupResult = await enhancedNetlifyService.setupDomainComplete(domain.domain);
 
-                                if (addResult.success) {
-                                  // Update domain record with Netlify info
-                                  await supabase
-                                    .from('domains')
-                                    .update({
-                                      netlify_id: addResult.data?.id,
+                                  if (setupResult.success) {
+                                    // Update domain record with all Netlify info
+                                    const updateData: any = {
                                       netlify_synced: true,
-                                      ssl_enabled: addResult.status?.ssl?.status === 'verified'
-                                    })
-                                    .eq('id', domain.id);
+                                      ssl_enabled: false // Will be updated once SSL is verified
+                                    };
 
-                                  toast.success(`✅ ${domain.domain} added to Netlify! SSL certificate will be provisioned automatically.`);
-                                  await loadDomains(); // Refresh the list
+                                    if (setupResult.netlifyDomainId) {
+                                      updateData.netlify_id = setupResult.netlifyDomainId;
+                                    }
+
+                                    if (setupResult.dnsZoneId) {
+                                      updateData.netlify_dns_zone_id = setupResult.dnsZoneId;
+                                    }
+
+                                    await supabase
+                                      .from('domains')
+                                      .update(updateData)
+                                      .eq('id', domain.id);
+
+                                    // Show detailed success with DNS instructions
+                                    const instructions = setupResult.setupInstructions?.join('\n') || '';
+                                    toast.success(`✅ ${domain.domain} setup complete! DNS zone created.`, {
+                                      description: 'Click "View DNS Instructions" for nameserver setup',
+                                      duration: 10000
+                                    });
+
+                                    // Store instructions for later access
+                                    (window as any).dnsInstructions = (window as any).dnsInstructions || {};
+                                    (window as any).dnsInstructions[domain.domain] = instructions;
+
+                                    await loadDomains();
+                                  } else {
+                                    toast.error(`Enhanced setup failed: ${setupResult.error}`);
+                                  }
                                 } else {
-                                  toast.error(`Failed to add to Netlify: ${addResult.error}`);
+                                  // Fallback to basic domain addition
+                                  toast.info(`Adding ${domain.domain} to Netlify...`);
+                                  const addResult = await netlifyDomainService.addDomain(domain.domain);
+
+                                  if (addResult.success) {
+                                    await supabase
+                                      .from('domains')
+                                      .update({
+                                        netlify_id: addResult.data?.id,
+                                        netlify_synced: true,
+                                        ssl_enabled: addResult.status?.ssl?.status === 'verified'
+                                      })
+                                      .eq('id', domain.id);
+
+                                    toast.success(`✅ ${domain.domain} added to Netlify! SSL certificate will be provisioned automatically.`);
+                                    await loadDomains();
+                                  } else {
+                                    toast.error(`Failed to add to Netlify: ${addResult.error}`);
+                                  }
                                 }
                               } catch (error) {
                                 console.error('Error with Netlify operation:', error);
