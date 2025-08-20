@@ -199,6 +199,13 @@ const DomainsPage = () => {
       const domainService = new NetlifyDomainService();
       setNetlifyDomainService(domainService);
       console.log('✅ NetlifyDomainService initialized');
+
+      // Quick verification if configured
+      if (domainService.isConfigured()) {
+        console.log('🔗 Netlify integration is configured and ready');
+      } else {
+        console.log('⚠️ Netlify integration not configured - using demo mode');
+      }
     } catch (error) {
       console.error('Failed to initialize NetlifyDomainService:', error);
       if (error instanceof Error) {
