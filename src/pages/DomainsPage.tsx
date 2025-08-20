@@ -254,18 +254,13 @@ const DomainsPage = () => {
     try {
       const envToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
 
-      // If no token exists or it's already set via auto-sync, skip
-      if (!envToken || envToken.includes('demo_token_auto_stored')) {
-        if (envToken && envToken.includes('demo_token_auto_stored')) {
-          setNetlifyEnvStatus('synced');
-          setNetlifyKeyValue('auto-stored');
-          setNetlifyConfigured(true);
-        }
+      // If no token exists, skip
+      if (!envToken) {
         return;
       }
 
       // Auto-sync to DevServerControl if valid token exists
-      if (envToken.length > 10 && !envToken.includes('demo')) {
+      if (envToken.length > 10) {
         console.log('🚀 Auto-syncing NETLIFY key via DevServerControl...');
         setNetlifyEnvStatus('updating');
 
