@@ -156,16 +156,10 @@ export class NetlifyDomainService {
     try {
       // Demo mode simulation
       if (!this.token || this.token.includes('demo') || this.token.length < 20) {
+        console.warn(`⚠️ DEMO MODE: Cannot check real Netlify status. Token length: ${this.token?.length || 0}. Please set valid VITE_NETLIFY_ACCESS_TOKEN.`);
         return {
-          success: true,
-          status: {
-            domain,
-            verified: Math.random() > 0.5,
-            dns_check: Math.random() > 0.5 ? 'verified' : 'pending',
-            ssl: { status: Math.random() > 0.5 ? 'verified' : 'pending_dns_verification' },
-            id: `demo-${domain}`,
-            site_id: this.siteId
-          }
+          success: false,
+          error: `Demo mode active - cannot check real Netlify status. Please configure valid VITE_NETLIFY_ACCESS_TOKEN (current length: ${this.token?.length || 0} chars)`
         };
       }
 
