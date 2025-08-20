@@ -14,8 +14,19 @@ export const useAuthState = () => {
         const { data: { user: initialUser } } = await supabase.auth.getUser();
         setUser(initialUser);
         setIsAuthenticated(!!initialUser);
-      } catch (error) {
-        console.error('Error getting initial auth state:', error);
+      } catch (error: any) {
+        // Handle network errors gracefully
+        if (error.message && (
+          error.message.includes('Failed to fetch') ||
+          error.message.includes('NetworkError') ||
+          error.message.includes('fetch is not defined') ||
+          error.message.includes('ENOTFOUND') ||
+          error.message.includes('ECONNREFUSED')
+        )) {
+          console.warn('⚠️ Network error during auth check, working offline');
+        } else {
+          console.error('Error getting initial auth state:', error);
+        }
         setUser(null);
         setIsAuthenticated(false);
       } finally {
