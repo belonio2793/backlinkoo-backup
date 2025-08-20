@@ -175,6 +175,12 @@ export class NetlifyDomainService {
       );
 
       if (!response.ok) {
+        if (response.status === 404) {
+          return {
+            success: false,
+            error: `Domain not found in Netlify site. Use "Add to Netlify" to add it first.`
+          };
+        }
         return {
           success: false,
           error: `Failed to get domain status: ${response.status} ${response.statusText}`
