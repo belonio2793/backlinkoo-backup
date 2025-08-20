@@ -29,11 +29,15 @@ export class NetlifyDomainService {
   private baseUrl = 'https://api.netlify.com/api/v1';
 
   constructor(token?: string, siteId?: string) {
-    this.token = token || import.meta.env.VITE_NETLIFY_TOKEN || '';
+    // Try multiple environment variable sources
+    this.token = token ||
+                 import.meta.env.VITE_NETLIFY_TOKEN ||
+                 import.meta.env.NETLIFY_ACCESS_TOKEN ||
+                 '';
     this.siteId = siteId || import.meta.env.VITE_NETLIFY_SITE_ID || '';
 
     if (!this.token) {
-      console.warn('⚠️ VITE_NETLIFY_TOKEN not set - Netlify domain operations will be simulated');
+      console.warn('⚠️ NETLIFY_ACCESS_TOKEN or VITE_NETLIFY_TOKEN not set - Netlify domain operations will be simulated');
     }
     if (!this.siteId) {
       throw new Error('VITE_NETLIFY_SITE_ID is required for Netlify domain operations');
