@@ -195,10 +195,9 @@ export class NetlifyDNSSync {
     verificationToken: string
   ): Promise<{ recordsAdded: number; created: boolean }> {
     
-    // Demo mode simulation
-    if (this.apiToken.includes('demo') || this.apiToken.length < 20) {
-      console.log(`🧪 Demo mode: Simulating DNS records for ${domain}`);
-      return { recordsAdded: 4, created: true };
+    // Check if we have a valid token
+    if (!this.apiToken || this.apiToken.length < 20) {
+      throw new Error('NETLIFY_ACCESS_TOKEN not configured or invalid. Cannot create DNS records.');
     }
 
     try {
