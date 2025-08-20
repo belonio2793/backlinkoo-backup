@@ -1951,7 +1951,7 @@ anotherdomain.org`}
                             <Wand2 className="h-3 w-3" />
                           </Button>
 
-                          {!domain.netlify_synced && netlifyDomainService && netlifyDomainService.isConfigured() && (
+                          {!domain.netlify_synced && netlifyCustomDomainService && netlifyCustomDomainService.isConfiguredSync() && (
                             <Button
                               variant="outline"
                               size="sm"
