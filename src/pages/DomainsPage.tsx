@@ -139,6 +139,9 @@ const DomainsPage = () => {
   const [netlifyCustomDomainService, setNetlifyCustomDomainService] = useState<NetlifyCustomDomainService | null>(null); // Initialize Netlify custom domain service
   const [enhancedNetlifyService, setEnhancedNetlifyService] = useState<EnhancedNetlifyDomainService | null>(null); // Enhanced Netlify service with DNS
   const [showDNSInstructions, setShowDNSInstructions] = useState<{domain: string, scenario: 'registrar' | 'domains-page' | 'subdomain'} | null>(null);
+  const [selectedDomainForControl, setSelectedDomainForControl] = useState<Domain | null>(null);
+  const [showEnvironmentManager, setShowEnvironmentManager] = useState(false);
+  const [environmentConfig, setEnvironmentConfig] = useState<{ [key: string]: string }>({});
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
@@ -602,7 +605,7 @@ const DomainsPage = () => {
         ssl_status: netlifyStatus.ssl?.status
       };
 
-      console.log(`���� Current DNS status for ${domain.domain}:`, currentDNSStatus);
+      console.log(`📊 Current DNS status for ${domain.domain}:`, currentDNSStatus);
 
       let needsDNSUpdate = false;
       const discrepancies = [];
