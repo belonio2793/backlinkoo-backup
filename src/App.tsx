@@ -75,6 +75,51 @@ const TextCleanerProvider = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// Global Supabase Error Monitor
+const SupabaseErrorMonitor = ({ children }: { children: React.ReactNode }) => {
+  const [globalSupabaseError, setGlobalSupabaseError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    // Global handler for Supabase network errors
+    const handleGlobalError = (event: ErrorEvent | PromiseRejectionEvent) => {
+      const error = 'reason' in event ? event.reason : event.error;
+
+      if (SupabaseConnectionFixer.isSupabaseNetworkError(error)) {
+        console.error('🚨 Global Supabase error detected:', error);
+        setGlobalSupabaseError(error);
+
+        // Auto-clear error after 10 seconds
+        setTimeout(() => {
+          setGlobalSupabaseError(null);
+        }, 10000);
+      }
+    };
+
+    window.addEventListener('error', handleGlobalError);
+    window.addEventListener('unhandledrejection', handleGlobalError);
+
+    return () => {
+      window.removeEventListener('error', handleGlobalError);
+      window.removeEventListener('unhandledrejection', handleGlobalError);
+    };
+  }, []);
+
+  return (
+    <>
+      {children}
+      {globalSupabaseError && (
+        <div className="fixed top-4 right-4 z-50 w-96">
+          <SupabaseErrorRecovery
+            error={globalSupabaseError}
+            onRecovery={() => setGlobalSupabaseError(null)}
+            compact={true}
+          />
+        </div>
+      )}
+    </>
+  );
+};
+
 const App = () => (
   <EmergencyErrorBoundary>
     <QueryClientProvider client={queryClient}>
