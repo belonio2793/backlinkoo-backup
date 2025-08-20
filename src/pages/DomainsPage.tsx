@@ -128,6 +128,8 @@ const DomainsPage = () => {
   const [domainBlogThemesExists, setDomainBlogThemesExists] = useState<boolean | null>(null);
   const [showAutomationPanel, setShowAutomationPanel] = useState(false);
   const [netlifyConfigured, setNetlifyConfigured] = useState(false);
+  const [netlifyEnvStatus, setNetlifyEnvStatus] = useState<'unknown' | 'synced' | 'missing' | 'updating'>('unknown');
+  const [netlifyKeyValue, setNetlifyKeyValue] = useState('');
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
@@ -188,11 +190,98 @@ const DomainsPage = () => {
     }
   }, [user?.id]);
 
-  // Check Netlify configuration separately
+  // Check Netlify configuration and environment sync status
   useEffect(() => {
     const configStatus = NetlifyDNSManager.getConfigStatus();
     setNetlifyConfigured(configStatus.configured);
+    checkNetlifyEnvSync();
   }, []);
+
+  // Check if Netlify key is synced with environment variables
+  const checkNetlifyEnvSync = () => {
+    const envToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
+    if (envToken && envToken.length > 10 && !envToken.includes('demo')) {
+      setNetlifyEnvStatus('synced');
+      setNetlifyKeyValue(envToken.substring(0, 8) + '...' + envToken.substring(envToken.length - 4));
+    } else if (envToken && envToken.includes('demo')) {
+      setNetlifyEnvStatus('synced');
+      setNetlifyKeyValue('demo-token');
+    } else {
+      setNetlifyEnvStatus('missing');
+      setNetlifyKeyValue('');
+    }
+  };
+
+  // Sync Netlify key to environment variables permanently
+  const syncNetlifyToEnv = async (apiKey?: string) => {
+    try {
+      setNetlifyEnvStatus('updating');
+
+      // Get the API key either from parameter or detect from current config
+      let keyToSync = apiKey;
+
+      if (!keyToSync) {
+        // Try to get from current Netlify config or prompt user
+        const currentToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
+        if (currentToken && !currentToken.includes('demo')) {
+          keyToSync = currentToken;
+        } else {
+          // Prompt user for key if not available
+          keyToSync = prompt('Enter your Netlify Access Token for permanent sync:');
+          if (!keyToSync) {
+            setNetlifyEnvStatus('missing');
+            toast.error('Netlify Access Token is required for permanent sync');
+            return;
+          }
+        }
+      }
+
+      // Validate the key format
+      if (!keyToSync || keyToSync.length < 20) {
+        throw new Error('Invalid Netlify Access Token format');
+      }
+
+      // Use DevServerControl to set the environment variable permanently
+      const response = await fetch('/.netlify/functions/admin-environment-manager', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'set_env_variable',
+          key: 'NETLIFY_ACCESS_TOKEN',
+          value: keyToSync,
+          sync_to_vite: true // Also sync to VITE_NETLIFY_ACCESS_TOKEN
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to sync environment variable');
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        setNetlifyEnvStatus('synced');
+        setNetlifyKeyValue(keyToSync.substring(0, 8) + '...' + keyToSync.substring(keyToSync.length - 4));
+        setNetlifyConfigured(true);
+
+        toast.success('✅ Netlify key permanently synced to environment variables!');
+
+        // Refresh the page to load new environment variables
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      } else {
+        throw new Error(result.message || 'Failed to sync environment variable');
+      }
+
+    } catch (error: any) {
+      console.error('Failed to sync Netlify key to environment:', error);
+      setNetlifyEnvStatus('missing');
+      toast.error(`Failed to sync Netlify key: ${error.message}`);
+    }
+  };
 
   // Check DNS service health
   const checkDNSServiceHealth = async () => {
@@ -883,6 +972,35 @@ const DomainsPage = () => {
               </Alert>
             )}
 
+            {/* Netlify Environment Sync Status */}
+            <div className="flex items-center justify-center gap-4 text-sm">
+              <span>Netlify Environment Sync:</span>
+              {netlifyEnvStatus === 'synced' ? (
+                <Badge className="bg-green-100 text-green-800 border-green-200">
+                  <CheckCircle2 className="w-3 h-3 mr-1" />
+                  Permanently Synced ({netlifyKeyValue})
+                </Badge>
+              ) : netlifyEnvStatus === 'updating' ? (
+                <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                  Syncing...
+                </Badge>
+              ) : (
+                <Badge className="bg-red-100 text-red-800 border-red-200">
+                  <AlertTriangle className="w-3 h-3 mr-1" />
+                  Not Synced
+                </Badge>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={checkNetlifyEnvSync}
+                title="Refresh sync status"
+              >
+                <RefreshCw className="w-3 h-3" />
+              </Button>
+            </div>
+
             {/* DNS Service Status */}
             <div className="flex items-center justify-center gap-2 text-sm">
               <span>DNS Validation Service:</span>
@@ -1034,6 +1152,23 @@ anotherdomain.org`}
                 >
                   <Wand2 className="h-4 w-4 mr-1" />
                   Automation
+                </Button>
+                {/* Netlify Environment Sync Button */}
+                <Button
+                  variant={netlifyEnvStatus === 'synced' ? 'outline' : 'default'}
+                  size="sm"
+                  onClick={() => syncNetlifyToEnv()}
+                  disabled={netlifyEnvStatus === 'updating'}
+                  className={netlifyEnvStatus === 'synced' ? 'bg-green-50 border-green-200 hover:bg-green-100' : 'bg-blue-600 hover:bg-blue-700'}
+                >
+                  {netlifyEnvStatus === 'updating' ? (
+                    <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                  ) : netlifyEnvStatus === 'synced' ? (
+                    <CheckCircle2 className="h-4 w-4 mr-1" />
+                  ) : (
+                    <Zap className="h-4 w-4 mr-1" />
+                  )}
+                  {netlifyEnvStatus === 'synced' ? 'Netlify Synced' : 'Sync Netlify Key'}
                 </Button>
                 <Button variant="outline" size="sm" onClick={exportDomains}>
                   <Download className="h-4 w-4 mr-1" />
