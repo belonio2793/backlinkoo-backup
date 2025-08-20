@@ -41,11 +41,25 @@ export const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
     const testConnection = async () => {
       try {
         const start = Date.now();
-        const response = await fetch('/favicon.svg', {
+        // Create timeout signal with fallback for older browsers
+        let timeoutId: NodeJS.Timeout;
+        const controller = new AbortController();
+
+        const timeoutPromise = new Promise((_, reject) => {
+          timeoutId = setTimeout(() => {
+            controller.abort();
+            reject(new Error('Request timeout'));
+          }, 10000);
+        });
+
+        const fetchPromise = fetch('/favicon.svg', {
           method: 'HEAD',
           cache: 'no-cache',
-          signal: AbortSignal.timeout(10000) // 10 second timeout
+          signal: controller.signal
         });
+
+        const response = await Promise.race([fetchPromise, timeoutPromise]) as Response;
+        clearTimeout(timeoutId);
         const duration = Date.now() - start;
 
         if (!response.ok) {
