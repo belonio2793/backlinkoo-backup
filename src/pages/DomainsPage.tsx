@@ -633,7 +633,7 @@ const DomainsPage = () => {
       console.log('📋 Test result:', result);
 
       if (result.success && result.message) {
-        toast.success('�� DNS validation service is working correctly! (Test domain not found as expected)');
+        toast.success('✅ DNS validation service is working correctly!');
         console.log('✅ DNS validation service is operational');
         setDnsServiceStatus('online');
       } else {
