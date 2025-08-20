@@ -434,7 +434,7 @@ const DomainsPage = () => {
       const domain = domainsNeedingDNS[i];
       setDnsProgress({ current: i + 1, total: domainsNeedingDNS.length, domain: domain.domain });
       try {
-        console.log(`🔧 Processing ${domain.domain}...`);
+        console.log(`��� Processing ${domain.domain}...`);
 
         // Step 1: Add domain to Netlify if not already synced
         if (!domain.netlify_synced) {
@@ -960,7 +960,7 @@ const DomainsPage = () => {
       setSelectedDomainForControl(data);
 
       toast.success(`✅ Domain ${data.domain} added successfully!`);
-      toast.info(`🎛�� Netlify control panel opened for ${data.domain}`);
+      toast.info(`🎛️ Netlify control panel opened for ${data.domain}`);
       console.log(`��� Domain addition completed:`, data);
 
       // Auto-configure if automation is enabled and domain was added successfully
@@ -2004,7 +2004,7 @@ anotherdomain.org`}
                                 toast.info(`🚀 Adding ${domain.domain} to Netlify with DNS setup...`);
 
                                 // Step 1: Check if domain already exists in Netlify
-                                const statusResult = await netlifyDomainService?.getDomainStatus(domain.domain);
+                                const statusResult = await netlifyDomainService?.verifyDomain(domain.domain);
 
                                 if (statusResult?.success && statusResult.status) {
                                   // Domain exists - update local database and check DNS
