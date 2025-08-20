@@ -587,6 +587,43 @@ const DomainsPage = () => {
     toast.info('Page generation feature coming soon!');
   };
 
+  // Auto-setup new domain with DNS and themes
+  const autoSetupNewDomain = async (domain: Domain) => {
+    try {
+      if (!netlifyConfigured) {
+        toast.info(`Domain ${domain.domain} added. Use automation panel for full setup.`);
+        return;
+      }
+
+      toast.info(`🚀 Auto-configuring ${domain.domain}...`);
+
+      // Configure DNS
+      const dnsManager = NetlifyDNSManager.getInstance();
+      const dnsResult = await dnsManager.autoConfigureBlogDNS(domain.domain);
+
+      if (dnsResult.success) {
+        // Configure blog theme
+        const themeResult = await AutoDomainBlogThemeService.autoConfigureDomainBlogTheme(
+          domain.id,
+          domain.domain,
+          { enableCampaignIntegration: true }
+        );
+
+        if (themeResult.success) {
+          toast.success(`✅ ${domain.domain} fully configured for campaigns!`);
+          loadDomains(); // Refresh the list
+        } else {
+          toast.warning(`DNS configured, but theme setup failed: ${themeResult.message}`);
+        }
+      } else {
+        toast.warning(`DNS configuration failed: ${dnsResult.message}`);
+      }
+    } catch (error) {
+      console.error('Auto-setup failed:', error);
+      toast.error(`Auto-setup failed for ${domain.domain}`);
+    }
+  };
+
   const launchAutoPropagationWizard = (domain: Domain) => {
     setSelectedDomainForWizard(domain);
     setShowAutoPropagationWizard(true);
