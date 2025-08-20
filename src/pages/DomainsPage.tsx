@@ -304,7 +304,7 @@ const DomainsPage = () => {
     setDnsConfiguring(true);
     setDnsProgress({ current: 0, total: domainsNeedingDNS.length, domain: '' });
 
-    toast.info(`⚙️ Configuring DNS for ${domainsNeedingDNS.length} domains...`);
+    toast.info(`⚙�� Configuring DNS for ${domainsNeedingDNS.length} domains...`);
 
     const results = [];
 
@@ -1164,130 +1164,27 @@ const DomainsPage = () => {
             Add, configure, and manage domains for automated content publishing. Full hosting control with executable page generation.
           </p>
           
-          {/* System Status */}
+          {/* Clean header without status clutter */}
           <div className="mt-6 max-w-2xl mx-auto space-y-4">
-            {/* DNS Validation Status */}
-            <Alert className="border-blue-200 bg-blue-50">
-              <CheckCircle2 className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-800">
-                <div className="space-y-2">
-                  <p className="font-medium text-sm">✅ DNS Validation Service Fixed</p>
-                  <p className="text-xs">
-                    The DNS validation service now works in both development and production modes with automatic fallback handling.
-                  </p>
-                  <div className="flex items-center gap-4 text-xs">
-                    <span>🧪 Development: Simulated validation</span>
-                    <span>🚀 Production: Full DNS lookup service</span>
-                  </div>
-                </div>
-              </AlertDescription>
-            </Alert>
 
-            {/* Database Setup Status - Only show if table doesn't exist */}
-            {domainBlogThemesExists === false && (
-              <Alert className="border-amber-200 bg-amber-50">
-                <Info className="h-4 w-4 text-amber-600" />
-                <AlertDescription className="text-amber-800">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium text-sm">Domain Blog Database Setup</p>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={checkDomainBlogThemesTable}
-                        className="h-6 text-xs"
-                      >
-                        <RefreshCw className="h-3 w-3 mr-1" />
-                        Recheck
-                      </Button>
-                    </div>
-                    <p className="text-xs">
-                      Blog themes may run in fallback mode. For full functionality, ensure the domain_blog_themes table is created in Supabase.
-                    </p>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
 
-            {/* Netlify Environment Sync Status - Only show when auto-sync is disabled */}
-            {!autoSyncEnabled && (
-              <div className="flex items-center justify-center gap-4 text-sm">
-                <span>Netlify Environment Sync:</span>
-                {netlifyEnvStatus === 'synced' ? (
-                  <Badge className="bg-green-100 text-green-800 border-green-200">
-                    <CheckCircle2 className="w-3 h-3 mr-1" />
-                    Permanently Synced ({netlifyKeyValue})
-                  </Badge>
-                ) : netlifyEnvStatus === 'updating' ? (
-                  <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                    Syncing...
-                  </Badge>
-                ) : (
-                  <Badge className="bg-red-100 text-red-800 border-red-200">
-                    <AlertTriangle className="w-3 h-3 mr-1" />
-                    Not Synced
-                  </Badge>
-                )}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={checkNetlifyEnvSync}
-                  title="Refresh sync status"
-                >
-                  <RefreshCw className="w-3 h-3" />
-                </Button>
-              </div>
-            )}
 
-            {/* Auto-sync status when enabled */}
+            {/* Only show manual controls access when auto-sync is enabled */}
             {autoSyncEnabled && (
-              <div className="flex items-center justify-center gap-4 text-sm">
-                <span>Domain Auto-Sync:</span>
-                <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                  <Zap className="w-3 h-3 mr-1" />
-                  Automatic ({netlifyKeyValue || 'Ready'})
-                </Badge>
+              <div className="flex items-center justify-center gap-2 text-sm">
+                <span className="text-gray-600">Auto-sync active</span>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setAutoSyncEnabled(false)}
-                  title="Disable auto-sync and show manual controls"
+                  title="Show manual controls"
+                  className="text-gray-500 hover:text-gray-700"
                 >
-                  <Settings className="w-3 h-3" />
+                  <Settings className="w-3 h-3 mr-1" />
+                  Manual mode
                 </Button>
               </div>
             )}
-
-            {/* DNS Service Status */}
-            <div className="flex items-center justify-center gap-2 text-sm">
-              <span>DNS Validation Service:</span>
-              {dnsServiceStatus === 'online' ? (
-                <Badge className="bg-green-100 text-green-800 border-green-200">
-                  <CheckCircle2 className="w-3 h-3 mr-1" />
-                  Production Ready
-                </Badge>
-              ) : dnsServiceStatus === 'offline' ? (
-                <Badge className="bg-blue-100 text-blue-800 border-blue-200">
-                  <Info className="w-3 h-3 mr-1" />
-                  Development Mode
-                </Badge>
-              ) : (
-                <Badge className="bg-gray-100 text-gray-800 border-gray-200">
-                  <Clock className="w-3 h-3 mr-1" />
-                  Checking...
-                </Badge>
-              )}
-              {import.meta.env.VITE_NETLIFY_ACCESS_TOKEN?.includes('demo') && (
-                <Badge className="bg-amber-100 text-amber-800 border-amber-200">
-                  <Info className="w-3 h-3 mr-1" />
-                  Demo Token
-                </Badge>
-              )}
-              <Button variant="ghost" size="sm" onClick={checkDNSServiceHealth}>
-                <RefreshCw className="w-3 h-3" />
-              </Button>
-            </div>
           </div>
         </div>
 
