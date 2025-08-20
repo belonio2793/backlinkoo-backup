@@ -206,11 +206,10 @@ const DomainsPage = () => {
       }
     }
 
-    // Initialize NetlifyDomainService
+    // Initialize Netlify services
     try {
-      const domainService = new NetlifyDomainService();
-      setNetlifyDomainService(domainService);
-      console.log('✅ NetlifyDomainService initialized');
+      // NetlifyDomainService is already available as singleton import
+      console.log('✅ NetlifyDomainService available as singleton');
 
       // Initialize NetlifyCustomDomainService
       const customDomainService = new NetlifyCustomDomainService();
@@ -223,13 +222,13 @@ const DomainsPage = () => {
       console.log('✅ EnhancedNetlifyDomainService initialized');
 
       // Quick verification if configured
-      if (domainService.isConfigured()) {
+      if (netlifyDomainService.isConfigured()) {
         console.log('🔗 Netlify integration is configured and ready');
       } else {
         console.log('⚠️ Netlify integration not configured');
       }
     } catch (error) {
-      console.error('Failed to initialize NetlifyDomainService:', error);
+      console.error('Failed to initialize Netlify services:', error);
       // Don't show toast during initialization to prevent setState warnings
       console.warn('⚠️ Domain Service initialization had issues:', error instanceof Error ? error.message : 'Unknown error');
     }
