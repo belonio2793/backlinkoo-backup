@@ -286,11 +286,11 @@ export class NetlifyCustomDomainService {
     
     if (!isAdded) {
       return {
-        title: 'Demo Mode - Setup Instructions',
+        title: 'Setup Required',
         steps: [
-          `Would add custom domain: ${domain}`,
-          'Real implementation requires valid NETLIFY_ACCESS_TOKEN',
-          'DNS configuration would be provided after successful addition'
+          `Domain ${domain} could not be added`,
+          'Please ensure NETLIFY_ACCESS_TOKEN is properly configured',
+          'DNS configuration will be provided after successful addition'
         ]
       };
     }
