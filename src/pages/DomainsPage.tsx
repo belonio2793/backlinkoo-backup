@@ -2270,6 +2270,15 @@ anotherdomain.org`}
 
       </div>
       <Footer />
+
+      {/* DNS Setup Instructions Modal */}
+      {showDNSInstructions && (
+        <DNSSetupInstructions
+          domain={showDNSInstructions.domain}
+          scenario={showDNSInstructions.scenario}
+          onClose={() => setShowDNSInstructions(null)}
+        />
+      )}
     </div>
   );
 };
