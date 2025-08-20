@@ -1298,13 +1298,17 @@ anotherdomain.org`}
                   <Wand2 className="h-4 w-4 mr-1" />
                   Automation
                 </Button>
-                {/* Netlify Environment Sync Button */}
+                {/* Enhanced Netlify Sync Button with DNS Propagation */}
                 <Button
                   variant={netlifyEnvStatus === 'synced' ? 'outline' : 'default'}
                   size="sm"
                   onClick={() => syncNetlifyToEnv()}
                   disabled={netlifyEnvStatus === 'updating'}
                   className={netlifyEnvStatus === 'synced' ? 'bg-green-50 border-green-200 hover:bg-green-100' : 'bg-blue-600 hover:bg-blue-700'}
+                  title={netlifyEnvStatus === 'synced'
+                    ? 'Netlify key synced and DNS propagation configured'
+                    : 'Sync Netlify key and automatically configure DNS propagation for all domains'
+                  }
                 >
                   {netlifyEnvStatus === 'updating' ? (
                     <Loader2 className="h-4 w-4 mr-1 animate-spin" />
