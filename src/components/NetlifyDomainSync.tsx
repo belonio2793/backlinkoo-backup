@@ -522,13 +522,13 @@ export function NetlifyDomainSync() {
             <div>
               <Label htmlFor="site-id">Site ID (optional)</Label>
               <div className="flex gap-2 mt-1">
-                <input
+                <Input
                   id="site-id"
                   type="text"
                   placeholder="Auto-detect or enter manually"
                   value={netlifyConfig.siteId === 'demo-site-id' ? '' : netlifyConfig.siteId}
                   onChange={(e) => setNetlifyConfig(prev => ({ ...prev, siteId: e.target.value || 'demo-site-id' }))}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1"
                 />
                 <Button
                   variant="outline"
