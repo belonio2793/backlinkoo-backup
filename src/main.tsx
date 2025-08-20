@@ -419,7 +419,16 @@ requestIdleCallback(() => {
     // Quick content generation status check
     setTimeout(async () => {
       try {
-        const response = await fetch('/.netlify/functions/working-content-generator', {
+        // Skip if not in Netlify dev environment
+        if (window.location.port !== '8888' && !window.location.hostname.includes('netlify')) {
+          console.log('🔧 Skipping function test - not in Netlify dev environment');
+          return;
+        }
+
+        // Import safe fetch to handle FullStory interference
+        const { safeFetch } = await import('./utils/fullstoryWorkaround');
+
+        const response = await safeFetch('/.netlify/functions/working-content-generator', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -437,8 +446,17 @@ requestIdleCallback(() => {
         } else {
           console.warn(`⚠️ Content generation status: ${response.status}`);
         }
-      } catch (error) {
-        console.warn('⚠️ Could not check content generation status');
+      } catch (error: any) {
+        console.warn('⚠️ Could not check content generation status:', error.message);
+        // Check if FullStory is interfering
+        try {
+          const { isFullStoryPresent } = await import('./utils/fullstoryWorkaround');
+          if (isFullStoryPresent()) {
+            console.warn('🚫 FullStory interference detected - functions test skipped');
+          }
+        } catch (e) {
+          // Ignore import errors
+        }
       }
     }, 3000);
 
