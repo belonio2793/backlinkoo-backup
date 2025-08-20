@@ -1,32 +1,63 @@
 import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, resilientAuthOperations, SupabaseConnectionFixer } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
+import { toast } from 'sonner';
 
 export const useAuthState = () => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [connectionError, setConnectionError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Get initial auth state
+    // Get initial auth state with enhanced error handling
     const getInitialAuth = async () => {
       try {
-        const { data: { user: initialUser } } = await supabase.auth.getUser();
+        console.log('🔐 Getting initial auth state...');
+
+        // Use resilient auth operations
+        const { data: { user: initialUser }, error } = await resilientAuthOperations.getUser();
+
+        if (error) {
+          throw error;
+        }
+
         setUser(initialUser);
         setIsAuthenticated(!!initialUser);
+        setConnectionError(null);
+
+        if (initialUser) {
+          console.log('✅ User authenticated:', initialUser.email);
+        } else {
+          console.log('👤 No authenticated user');
+        }
+
       } catch (error: any) {
+        console.error('❌ Auth state error:', error);
+
         // Handle network errors gracefully
-        if (error.message && (
-          error.message.includes('Failed to fetch') ||
-          error.message.includes('NetworkError') ||
-          error.message.includes('fetch is not defined') ||
-          error.message.includes('ENOTFOUND') ||
-          error.message.includes('ECONNREFUSED')
-        )) {
-          console.warn('⚠️ Network error during auth check, working offline');
+        if (SupabaseConnectionFixer.isSupabaseNetworkError(error)) {
+          console.warn('⚠️ Network error during auth check, working offline mode');
+          setConnectionError('Connection issues detected. Some features may be limited.');
+
+          // Don't show toast immediately - wait to see if connection recovers
+          setTimeout(() => {
+            if (connectionError) {
+              toast.warning('Connection issues detected. Retrying...', {
+                duration: 3000
+              });
+            }
+          }, 2000);
+
         } else {
           console.error('Error getting initial auth state:', error);
+          setConnectionError('Authentication error occurred.');
+
+          toast.error('Authentication error. Please refresh and try again.', {
+            duration: 5000
+          });
         }
+
         setUser(null);
         setIsAuthenticated(false);
       } finally {
