@@ -108,16 +108,22 @@ export function NetlifyDomainSync() {
     }
 
     setConnectionStatus('testing');
-    
+
     try {
       const service = new NetlifyDomainAPI(netlifyConfig.apiToken, netlifyConfig.siteId);
       const result = await service.testConnection();
-      
+
       if (result.connected) {
         setConnectionStatus('connected');
         setApiService(service);
-        toast.success(`Connected to Netlify! Permissions: ${result.permissions.join(', ')}`);
-        
+
+        const isDemoMode = result.permissions.includes('demo:mode');
+        if (isDemoMode) {
+          toast.success(`Demo mode active! Netlify operations will be simulated. Permissions: ${result.permissions.filter(p => p !== 'demo:mode').join(', ')}`);
+        } else {
+          toast.success(`Connected to Netlify! Permissions: ${result.permissions.join(', ')}`);
+        }
+
         // Save config to localStorage for persistence
         localStorage.setItem('netlify_domain_config', JSON.stringify(netlifyConfig));
       } else {
