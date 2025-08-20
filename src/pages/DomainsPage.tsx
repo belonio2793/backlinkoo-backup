@@ -192,7 +192,7 @@ const DomainsPage = () => {
     } catch (error) {
       console.error('Failed to initialize NetlifyDNSSync:', error);
       // Only show error toast for critical failures, not configuration issues
-      if (error instanceof Error && !error.message.includes('demo') && !error.message.includes('token')) {
+      if (error instanceof Error && !error.message.includes('token')) {
         toast.error(`DNS Service initialization failed: ${error.message}`);
       } else {
         console.warn('⚠️ NetlifyDNSSync running in limited mode due to missing configuration');
