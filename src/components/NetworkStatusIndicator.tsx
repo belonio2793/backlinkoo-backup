@@ -13,10 +13,21 @@ export const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
   className = '',
   showDetails = false
 }) => {
-  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [isOnline, setIsOnline] = useState(navigator?.onLine ?? true);
   const [connectionQuality, setConnectionQuality] = useState<'good' | 'poor' | 'offline'>('good');
   const [lastNetworkError, setLastNetworkError] = useState<string | null>(null);
   const [showNetworkError, setShowNetworkError] = useState(false);
+  const [componentError, setComponentError] = useState<string | null>(null);
+
+  // If there's a component error, show a minimal indicator
+  if (componentError) {
+    return (
+      <Badge variant="outline" className={`flex items-center gap-1 ${className}`}>
+        <Wifi className="w-3 h-3" />
+        Network Status
+      </Badge>
+    );
+  }
 
   useEffect(() => {
     const handleOnline = () => {
