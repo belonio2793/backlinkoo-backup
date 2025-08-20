@@ -929,6 +929,40 @@ const DomainsPage = () => {
           }
         }
 
+        // Auto-add to Netlify if validation was successful and not already synced
+        if (result.validated && !domain.netlify_synced && netlifyDomainService && netlifyDomainService.isConfigured()) {
+          try {
+            console.log(`🌐 DNS validation successful - adding ${domain.domain} to Netlify automatically...`);
+            toast.info(`Adding ${domain.domain} to Netlify for SSL/TLS...`);
+
+            const netlifyResult = await netlifyDomainService.addDomain(domain.domain);
+
+            if (netlifyResult.success) {
+              console.log('✅ Domain added to Netlify after DNS validation:', netlifyResult.data);
+
+              // Update domain record with Netlify information
+              await supabase
+                .from('domains')
+                .update({
+                  netlify_id: netlifyResult.data?.id,
+                  netlify_synced: true,
+                  ssl_enabled: netlifyResult.status?.ssl.status === 'verified'
+                })
+                .eq('id', domain.id);
+
+              toast.success(`✅ ${domain.domain} added to Netlify! SSL certificate will be provisioned automatically.`);
+
+            } else {
+              console.warn('⚠️ Failed to add domain to Netlify after DNS validation:', netlifyResult.error);
+              toast.warning(`DNS validation successful, but Netlify setup failed: ${netlifyResult.error}`);
+            }
+
+          } catch (netlifyError) {
+            console.error('Error adding to Netlify after DNS validation:', netlifyError);
+            toast.warning('DNS validation successful, but Netlify setup failed. You can retry manually.');
+          }
+        }
+
         // Reload domains to get updated status
         try {
           await loadDomains();
