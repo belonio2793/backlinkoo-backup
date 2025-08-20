@@ -196,19 +196,13 @@ export class NetlifyCustomDomainService {
     error?: string;
   }> {
     try {
-      // Demo mode simulation
-      if (!this.token || this.token.includes('demo') || this.token.length < 20) {
-        console.log('🔧 Demo mode: Simulating custom domain removal');
-        return { success: true };
-      }
+      console.log('🗑️ Removing custom domain via server-side function...');
 
-      const response = await fetch(`${this.baseUrl}/sites/${this.siteId}`, {
-        method: 'PATCH',
+      const response = await fetch('/.netlify/functions/netlify-custom-domain', {
+        method: 'DELETE',
         headers: {
-          'Authorization': `Bearer ${this.token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ custom_domain: '' }),
       });
 
       if (!response.ok) {
@@ -218,10 +212,18 @@ export class NetlifyCustomDomainService {
         };
       }
 
-      const updatedSite: NetlifySiteUpdateResponse = await response.json();
+      const result = await response.json();
+
+      if (!result.success) {
+        return {
+          success: false,
+          error: result.error || 'Unknown error occurred'
+        };
+      }
+
       return {
         success: true,
-        data: updatedSite
+        data: result.data
       };
 
     } catch (error) {
