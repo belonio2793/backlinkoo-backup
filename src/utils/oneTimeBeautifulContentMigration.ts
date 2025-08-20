@@ -98,8 +98,9 @@ export async function runOneTimeBeautifulContentMigration(): Promise<void> {
             return { success: true };
           }
         } catch (error: any) {
-          console.error(`💥 Error processing post ${post.id}:`, error.message);
-          return { success: false, error: error.message };
+          const errorMsg = getErrorMessage(error);
+          console.error(`💥 Error processing post ${post.id}:`, errorMsg);
+          return { success: false, error: errorMsg };
         }
       });
 
