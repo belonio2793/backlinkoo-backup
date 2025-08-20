@@ -89,8 +89,9 @@ export async function runOneTimeBeautifulContentMigration(): Promise<void> {
               console.log(`✅ Migrated: "${post.title?.substring(0, 50)}..."`);
               return { success: true };
             } catch (updateError: any) {
-              console.error(`❌ Network error updating post ${post.id}:`, updateError.message);
-              return { success: false, error: updateError.message };
+              const errorMsg = getErrorMessage(updateError);
+              console.error(`❌ Network error updating post ${post.id}:`, errorMsg);
+              return { success: false, error: errorMsg };
             }
           } else {
             console.log(`⏭️ Skipped: "${post.title?.substring(0, 50)}..." (no changes needed)`);
