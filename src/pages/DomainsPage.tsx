@@ -243,11 +243,16 @@ const DomainsPage = () => {
         // Skip domains table auto-creation to prevent access errors
         console.log('🔧 Domains initialization started (table auto-creation disabled)...');
 
-        // Test connection
-        await testSupabaseConnection();
+        // Test connection (don't fail initialization if this fails)
+        const connectionWorking = await testSupabaseConnection(false);
 
-        // Load domains
-        await loadDomains();
+        if (connectionWorking) {
+          // Load domains only if connection is working
+          await loadDomains();
+        } else {
+          console.warn('⚠️ Skipping domain loading due to Supabase connection issues');
+          setLoading(false); // Make sure to set loading to false
+        }
 
         // Check DNS service status
         checkDNSServiceHealth();
@@ -311,7 +316,7 @@ const DomainsPage = () => {
 
       if (!supabaseUrl || !supabaseKey) {
         const errorMsg = 'Supabase environment variables not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.';
-        console.warn('���️', errorMsg);
+        console.warn('⚠️', errorMsg);
         if (throwOnError) {
           throw new Error(errorMsg);
         }
