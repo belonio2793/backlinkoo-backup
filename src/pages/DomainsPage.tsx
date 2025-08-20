@@ -1756,62 +1756,33 @@ anotherdomain.org`}
                             className="text-xs h-6 px-3 w-full"
                             onClick={async () => {
                               try {
-                                console.log('🔧 Checking Netlify status for:', domain.domain);
+                                console.log('🚀 Starting comprehensive Netlify domain setup for:', domain.domain);
 
-                                // Comprehensive environment debugging
+                                // Get environment token
                                 const envToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
                                 const localToken = localStorage.getItem('netlify_token_temp');
                                 const token = envToken || localToken;
-                                const siteId = import.meta.env.VITE_NETLIFY_SITE_ID;
 
-                                // Reinitialize service if we have a local token
-                                if (localToken && !envToken) {
-                                  console.log('🔄 Reinitializing NetlifyDomainService with localStorage token');
-                                  const newService = new NetlifyDomainService();
-                                  setNetlifyDomainService(newService);
-                                }
-
-                                console.log('🔍 Full Environment Debug:', {
-                                  token: {
-                                    exists: !!token,
-                                    length: token?.length || 0,
-                                    startsWith: token ? token.substring(0, 4) : 'none',
-                                    type: typeof token,
-                                    value: token || 'undefined'
-                                  },
-                                  siteId: {
-                                    exists: !!siteId,
-                                    value: siteId || 'undefined'
-                                  },
-                                  netlifyDomainService: {
-                                    exists: !!netlifyDomainService,
-                                    configured: netlifyDomainService?.isConfigured()
-                                  },
-                                  allEnvVars: Object.keys(import.meta.env).filter(key => key.includes('NETLIFY'))
-                                });
-
-                                // Show detailed status in toast
+                                // Validate token
                                 if (!token) {
-                                  toast.error('❌ VITE_NETLIFY_ACCESS_TOKEN is undefined or empty');
+                                  toast.error('❌ VITE_NETLIFY_ACCESS_TOKEN is required. Please set it in environment variables or use the sync panel below.');
                                   return;
                                 } else if (token.length < 20) {
-                                  toast.error(`❌ VITE_NETLIFY_ACCESS_TOKEN too short (${token.length} chars). Valid tokens are typically 50+ characters.`);
+                                  toast.error(`❌ Invalid VITE_NETLIFY_ACCESS_TOKEN (${token.length} chars). Valid tokens are typically 50+ characters.`);
                                   return;
-                                } else {
-                                  toast.info(`✅ Valid token found (${token.length} chars). Proceeding with real API call...`);
                                 }
 
-                                toast.info(`Checking ${domain.domain} status on Netlify...`);
+                                toast.info(`🚀 Adding ${domain.domain} to Netlify with DNS setup...`);
 
-                                // First, check if domain already exists in Netlify
-                                const statusResult = await netlifyDomainService.getDomainStatus(domain.domain);
+                                // Step 1: Check if domain already exists in Netlify
+                                const statusResult = await netlifyDomainService?.getDomainStatus(domain.domain);
 
-                                if (statusResult.success && statusResult.status) {
-                                  // Domain exists in Netlify
+                                if (statusResult?.success && statusResult.status) {
+                                  // Domain exists - update local database and check DNS
                                   const netlifyStatus = statusResult.status;
-                                  toast.success(`✅ ${domain.domain} is already on Netlify! Status: ${netlifyStatus.status || 'Active'}`);
+                                  toast.info(`⚡ ${domain.domain} already exists on Netlify. Checking DNS configuration...`);
 
-                                  // Update local database with Netlify info if needed
+                                  // Update local database with current Netlify info
                                   await supabase
                                     .from('domains')
                                     .update({
@@ -1821,74 +1792,75 @@ anotherdomain.org`}
                                     })
                                     .eq('id', domain.id);
 
-                                  await loadDomains(); // Refresh the list
+                                  // Check for DNS discrepancies and auto-fix
+                                  await checkAndFixDNSDiscrepancies(domain, netlifyStatus);
+                                  await loadDomains();
                                   return;
                                 }
 
-                                // Use enhanced service for complete domain + DNS setup
-                                if (enhancedNetlifyService && enhancedNetlifyService.isConfigured()) {
-                                  toast.info(`🚀 Setting up ${domain.domain} with Netlify + DNS...`);
-                                  const setupResult = await enhancedNetlifyService.setupDomainComplete(domain.domain);
+                                // Step 2: Add domain to Netlify
+                                let addResult;
+                                if (enhancedNetlifyService?.isConfigured()) {
+                                  // Use enhanced service for complete setup
+                                  addResult = await enhancedNetlifyService.setupDomainComplete(domain.domain);
+                                } else if (netlifyDomainService?.isConfigured()) {
+                                  // Use basic service
+                                  addResult = await netlifyDomainService.addDomain(domain.domain);
+                                } else {
+                                  toast.error('❌ Netlify services not properly configured. Please check your VITE_NETLIFY_ACCESS_TOKEN.');
+                                  return;
+                                }
 
-                                  if (setupResult.success) {
-                                    // Update domain record with all Netlify info
-                                    const updateData: any = {
-                                      netlify_synced: true,
-                                      ssl_enabled: false // Will be updated once SSL is verified
-                                    };
+                                if (addResult.success) {
+                                  // Step 3: Update database with Netlify info
+                                  const updateData: any = {
+                                    netlify_synced: true,
+                                    ssl_enabled: false // Will be updated once SSL is verified
+                                  };
 
-                                    if (setupResult.netlifyDomainId) {
-                                      updateData.netlify_id = setupResult.netlifyDomainId;
-                                    }
+                                  if (addResult.netlifyDomainId || addResult.data?.id) {
+                                    updateData.netlify_id = addResult.netlifyDomainId || addResult.data?.id;
+                                  }
 
-                                    if (setupResult.dnsZoneId) {
-                                      updateData.netlify_dns_zone_id = setupResult.dnsZoneId;
-                                    }
+                                  if (addResult.dnsZoneId) {
+                                    updateData.netlify_dns_zone_id = addResult.dnsZoneId;
+                                  }
 
-                                    await supabase
-                                      .from('domains')
-                                      .update(updateData)
-                                      .eq('id', domain.id);
+                                  await supabase
+                                    .from('domains')
+                                    .update(updateData)
+                                    .eq('id', domain.id);
 
-                                    // Show detailed success with DNS instructions
-                                    const instructions = setupResult.setupInstructions?.join('\n') || '';
-                                    toast.success(`✅ ${domain.domain} setup complete! DNS zone created.`, {
-                                      description: 'Click "View DNS Instructions" for nameserver setup',
-                                      duration: 10000
+                                  // Step 4: Setup DNS records and check for discrepancies
+                                  toast.info(`📡 Configuring DNS records for ${domain.domain}...`);
+
+                                  // Get the updated domain status from Netlify
+                                  const newStatusResult = await netlifyDomainService?.getDomainStatus(domain.domain);
+                                  if (newStatusResult?.success && newStatusResult.status) {
+                                    await checkAndFixDNSDiscrepancies(domain, newStatusResult.status);
+                                  }
+
+                                  // Step 5: Show success message with instructions
+                                  if (addResult.setupInstructions && addResult.setupInstructions.length > 0) {
+                                    toast.success(`✅ ${domain.domain} added to Netlify with DNS zone!`, {
+                                      description: 'DNS records configured. View DNS Instructions for nameserver setup.',
+                                      duration: 12000
                                     });
 
                                     // Store instructions for later access
                                     (window as any).dnsInstructions = (window as any).dnsInstructions || {};
-                                    (window as any).dnsInstructions[domain.domain] = instructions;
-
-                                    await loadDomains();
+                                    (window as any).dnsInstructions[domain.domain] = addResult.setupInstructions.join('\n');
                                   } else {
-                                    toast.error(`Enhanced setup failed: ${setupResult.error}`);
-                                  }
-                                } else {
-                                  // Fallback to basic domain addition
-                                  toast.info(`Adding ${domain.domain} to Netlify...`);
-                                  const addResult = await netlifyDomainService.addDomain(domain.domain);
-
-                                  if (addResult.success) {
-                                    await supabase
-                                      .from('domains')
-                                      .update({
-                                        netlify_id: addResult.data?.id,
-                                        netlify_synced: true,
-                                        ssl_enabled: addResult.status?.ssl?.status === 'verified'
-                                      })
-                                      .eq('id', domain.id);
-
                                     toast.success(`✅ ${domain.domain} added to Netlify! SSL certificate will be provisioned automatically.`);
-                                    await loadDomains();
-                                  } else {
-                                    toast.error(`Failed to add to Netlify: ${addResult.error}`);
                                   }
+
+                                  await loadDomains();
+                                } else {
+                                  toast.error(`❌ Failed to add ${domain.domain} to Netlify: ${addResult.error || 'Unknown error'}`);
                                 }
                               } catch (error) {
-                                console.error('Error with Netlify operation:', error);
-                                toast.error('Failed to communicate with Netlify');
+                                console.error('Error adding domain to Netlify:', error);
+                                toast.error(`❌ Failed to add domain to Netlify: ${error instanceof Error ? error.message : 'Unknown error'}`);
                               }
                             }}
                           >
