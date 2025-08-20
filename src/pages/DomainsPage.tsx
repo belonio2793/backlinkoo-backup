@@ -538,7 +538,7 @@ const DomainsPage = () => {
           if (isDevMode && result.message.includes('simulated')) {
             toast.success(result.message);
           } else {
-            toast.warning(`⚠️ ${result.message}`);
+            toast.warning(`⚠��� ${result.message}`);
           }
         }
 
@@ -1262,6 +1262,24 @@ anotherdomain.org`}
                             <Button variant="outline" size="sm" asChild title="Visit Domain">
                               <a href={`https://${domain.domain}`} target="_blank" rel="noopener noreferrer">
                                 <ExternalLink className="h-3 w-3" />
+                              </a>
+                            </Button>
+                          )}
+
+                          {domain.netlify_synced && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              asChild
+                              title="View on Netlify"
+                              className="bg-teal-50 border-teal-200 hover:bg-teal-100"
+                            >
+                              <a
+                                href={`https://app.netlify.com/sites/ca6261e6-0a59-40b5-a2bc-5b5481ac8809/settings/domain-management`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Globe className="h-3 w-3" />
                               </a>
                             </Button>
                           )}
