@@ -44,6 +44,13 @@ export class NetlifyDNSManager extends NetlifyDomainAPI {
   }
 
   /**
+   * Check if we're using a demo/test token
+   */
+  private isDemoToken(): boolean {
+    return this.apiToken.includes('demo') || this.apiToken.includes('test') || this.apiToken.length < 20;
+  }
+
+  /**
    * Get singleton instance with environment token
    */
   static getInstance(): NetlifyDNSManager {
