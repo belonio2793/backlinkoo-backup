@@ -1566,12 +1566,43 @@ const DomainsPage = () => {
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Add, configure, and manage domains for automated content publishing. Full hosting control with executable page generation.
           </p>
-          
-          {/* Clean header without status clutter */}
+
+          {/* Connection Status */}
           <div className="mt-6 max-w-2xl mx-auto space-y-4">
+            <div className="flex justify-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  try {
+                    await testSupabaseConnection();
+                    toast.success('✅ Database connection is working!');
+                  } catch (error: any) {
+                    toast.error(`❌ Connection failed: ${error.message}`);
+                  }
+                }}
+                className="text-xs"
+              >
+                <RefreshCw className="h-3 w-3 mr-1" />
+                Test Connection
+              </Button>
 
-
-
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  loadDomains().then(() => {
+                    toast.success('✅ Domains refreshed!');
+                  }).catch((error) => {
+                    toast.error(`❌ Failed to refresh: ${error.message}`);
+                  });
+                }}
+                className="text-xs"
+              >
+                <RefreshCw className="h-3 w-3 mr-1" />
+                Refresh Domains
+              </Button>
+            </div>
           </div>
         </div>
 
