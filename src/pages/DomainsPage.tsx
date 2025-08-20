@@ -1455,7 +1455,7 @@ anotherdomain.org`}
                                 DNS Setup
                               </Button>
                             </DialogTrigger>
-                            <DialogContent className="max-w-2xl">
+                            <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
                               <DialogHeader>
                                 <DialogTitle>DNS Configuration for {domain.domain}</DialogTitle>
                               </DialogHeader>
@@ -1576,7 +1576,7 @@ anotherdomain.org`}
                                           <span>All functions will be available when deployed to Netlify</span>
                                         </div>
                                         <div className="flex items-start gap-2">
-                                          <span className="font-medium">����� Current Options:</span>
+                                          <span className="font-medium">⚙️ Current Options:</span>
                                           <span>You can still add domains and configure DNS manually via your registrar</span>
                                         </div>
                                       </div>
