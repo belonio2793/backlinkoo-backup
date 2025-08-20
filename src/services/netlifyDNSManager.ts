@@ -33,13 +33,13 @@ export class NetlifyDNSManager extends NetlifyDomainAPI {
 
   constructor(apiToken?: string, siteId?: string) {
     // Use environment variable if available, fallback to provided token
-    const token = apiToken || import.meta.env.VITE_NETLIFY_ACCESS_TOKEN || process.env.NETLIFY_ACCESS_TOKEN;
+    const token = apiToken || import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
     const site = siteId || 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809'; // Default site ID
-    
+
     if (!token) {
       throw new Error('NETLIFY_ACCESS_TOKEN environment variable is required for DNS management');
     }
-    
+
     super(token, site);
   }
 
