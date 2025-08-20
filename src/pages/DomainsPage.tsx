@@ -253,10 +253,6 @@ const DomainsPage = () => {
 
       // Check if domain_blog_themes table exists
       await checkDomainBlogThemesTable();
-
-      // Check Netlify configuration
-      const configStatus = NetlifyDNSManager.getConfigStatus();
-      setNetlifyConfigured(configStatus.configured);
     } catch (error: any) {
       console.error('Error loading domains:', error);
       const errorMessage = error?.message || 'Unknown error occurred';
