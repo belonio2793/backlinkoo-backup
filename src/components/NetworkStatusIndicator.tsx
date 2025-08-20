@@ -34,26 +34,8 @@ export const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
 
-    // Listen for fetch errors to detect network issues
-    const originalFetch = window.fetch;
-    window.fetch = async (...args) => {
-      try {
-        const response = await originalFetch(...args);
-        if (!response.ok && response.status >= 500) {
-          setConnectionQuality('poor');
-        }
-        return response;
-      } catch (error: any) {
-        if (error.message?.includes('Failed to fetch') || 
-            error.message?.includes('NetworkError') ||
-            error.message?.includes('Network request blocked')) {
-          setConnectionQuality('poor');
-          setLastNetworkError(error.message);
-          setShowNetworkError(true);
-        }
-        throw error;
-      }
-    };
+    // Monitor network quality without overriding fetch
+    // Use a safer approach that doesn't modify global fetch
 
     // Test connection quality periodically
     const testConnection = async () => {
