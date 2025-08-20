@@ -7,6 +7,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { applyBeautifulContentStructure } from './forceBeautifulContentStructure';
+import { getErrorMessage, formatErrorForLogging } from './errorUtils';
 
 const MIGRATION_KEY = 'beautiful_content_migration_completed';
 const MIGRATION_VERSION = '1.0.0';
