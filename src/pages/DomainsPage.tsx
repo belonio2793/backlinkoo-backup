@@ -1854,7 +1854,6 @@ anotherdomain.org`}
                                   token: {
                                     exists: !!token,
                                     length: token?.length || 0,
-                                    isDemo: token?.includes('demo'),
                                     startsWith: token ? token.substring(0, 4) : 'none',
                                     type: typeof token,
                                     value: token || 'undefined'
