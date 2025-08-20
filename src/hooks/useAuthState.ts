@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { supabase, resilientAuthOperations, SupabaseConnectionFixer } from '@/integrations/supabase/client';
+import { supabase, SupabaseConnectionFixer } from '@/integrations/supabase/client';
 import type { User } from '@supabase/supabase-js';
 import { toast } from 'sonner';
+import { SafeAuth } from '@/utils/safeAuth';
 
 export const useAuthState = () => {
   const [user, setUser] = useState<User | null>(null);
