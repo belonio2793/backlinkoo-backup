@@ -704,7 +704,7 @@ const DomainsPage = () => {
         toast.error('❌ Cannot reach DNS validation service. All services must be deployed.');
         setDnsServiceStatus('offline');
       } else {
-        toast.error(`��� DNS validation service failed: ${error.message}`);
+        toast.error(`❌ DNS validation service failed: ${error.message}`);
         setDnsServiceStatus('offline');
       }
     }
@@ -1467,6 +1467,27 @@ anotherdomain.org`}
                   </p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Domain Automation Panel */}
+        {showAutomationPanel && (
+          <Card className="mt-8">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wand2 className="h-5 w-5" />
+                Domain Automation Hub
+              </CardTitle>
+              <CardDescription>
+                Automate DNS configuration, blog themes, and campaign integration for your domains
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <DomainAutomationIntegration
+                domains={domains}
+                onDomainsUpdated={loadDomains}
+              />
             </CardContent>
           </Card>
         )}
