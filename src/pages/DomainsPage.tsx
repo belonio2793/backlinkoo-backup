@@ -302,7 +302,6 @@ const DomainsPage = () => {
       localStorage.setItem('netlify_env_key_preview', keyToSync.substring(0, 8) + '...' + keyToSync.substring(keyToSync.length - 4));
 
       setNetlifyEnvStatus('synced');
-      setNetlifyKeyValue(keyToSync.substring(0, 8) + '...' + keyToSync.substring(keyToSync.length - 4));
       setNetlifyConfigured(true);
 
       // Step 2: Auto-configure DNS for all domains that need it
@@ -916,7 +915,7 @@ const DomainsPage = () => {
           if (isDevMode && result.message.includes('simulated')) {
             toast.success(result.message);
           } else {
-            toast.warning(`����� ${result.message}`);
+            toast.warning(`⚠��� ${result.message}`);
           }
         }
 
