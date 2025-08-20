@@ -97,7 +97,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.9.0",
-    "@playwright/test": "^1.54.2",
     "@tailwindcss/typography": "^0.5.15",
     "@types/html2pdf.js": "^0.10.0",
     "@types/node": "^22.5.5",
@@ -115,7 +114,6 @@
     "html2pdf.js": "^0.10.3",
     "input-otp": "^1.2.4",
     "netlify-cli": "^23.1.4",
-    "playwright": "^1.54.2",
     "postcss": "^8.4.47",
     "react-day-picker": "^8.10.1",
     "react-resizable-panels": "^2.1.3",
