@@ -31,14 +31,18 @@ const NetlifyEnvironmentSync: React.FC<NetlifyEnvSyncProps> = ({ onSyncComplete 
   // Check current environment sync status
   const checkEnvSync = () => {
     const envToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
-    const serverToken = process.env.NETLIFY_ACCESS_TOKEN;
-    
+    const syncStatus = DevServerEnvironment.getSyncStatus();
+
     if (envToken && envToken.length > 10 && !envToken.includes('demo')) {
       setEnvStatus('synced');
       setKeyValue(envToken.substring(0, 8) + '...' + envToken.substring(envToken.length - 4));
     } else if (envToken && envToken.includes('demo')) {
       setEnvStatus('synced');
       setKeyValue('demo-token');
+    } else if (syncStatus.synced) {
+      // Check if we have a backup in DevServerEnvironment
+      setEnvStatus('synced');
+      setKeyValue('stored-locally');
     } else {
       setEnvStatus('missing');
       setKeyValue('');
