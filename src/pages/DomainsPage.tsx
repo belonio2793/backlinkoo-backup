@@ -328,6 +328,10 @@ const DomainsPage = () => {
       console.warn('Failed DNS configurations:', results.filter(r => !r.success));
     }
 
+    // Reset progress state
+    setDnsConfiguring(false);
+    setDnsProgress({ current: 0, total: 0, domain: '' });
+
     // Refresh domains list to show updated status
     await loadDomains();
   };
@@ -942,7 +946,7 @@ const DomainsPage = () => {
       console.error('����� Test validation error:', error);
 
       if (error.name === 'AbortError') {
-        toast.error('❌ DNS validation service timeout - service must be available for production');
+        toast.error('�� DNS validation service timeout - service must be available for production');
         setDnsServiceStatus('offline');
       } else if (error.message.includes('Failed to fetch')) {
         toast.error('❌ Cannot reach DNS validation service. All services must be deployed.');
