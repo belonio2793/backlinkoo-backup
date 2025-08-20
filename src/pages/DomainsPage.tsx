@@ -210,6 +210,11 @@ const DomainsPage = () => {
       setNetlifyCustomDomainService(customDomainService);
       console.log('✅ NetlifyCustomDomainService initialized');
 
+      // Initialize Enhanced Netlify Domain Service
+      const enhancedService = new EnhancedNetlifyDomainService();
+      setEnhancedNetlifyService(enhancedService);
+      console.log('✅ EnhancedNetlifyDomainService initialized');
+
       // Quick verification if configured
       if (domainService.isConfigured()) {
         console.log('🔗 Netlify integration is configured and ready');
