@@ -7,6 +7,10 @@ export class NetlifyDNSSync {
   static async getSyncStatus(domain: string): Promise<string> {
     return 'disabled';
   }
+
+  static isConfigured(): boolean {
+    return false;
+  }
 }
 
 export default NetlifyDNSSync;
