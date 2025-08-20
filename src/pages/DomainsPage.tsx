@@ -1556,22 +1556,6 @@ const DomainsPage = () => {
     URL.revokeObjectURL(url);
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-        <Header />
-        <div className="container mx-auto px-4 py-16">
-          <Alert className="max-w-md mx-auto">
-            <Globe className="h-4 w-4" />
-            <AlertDescription>
-              Please sign in to manage your domains and DNS settings.
-            </AlertDescription>
-          </Alert>
-        </div>
-        <Footer />
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
