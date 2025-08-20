@@ -600,7 +600,7 @@ const DomainsPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ domain_id: 'test-validation-123' }),
+        body: JSON.stringify({ domain_id: 'health-check' }),
         signal: AbortSignal.timeout(15000) // 15 second timeout
       });
 
