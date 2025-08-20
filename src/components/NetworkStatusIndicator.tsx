@@ -65,7 +65,6 @@ export const NetworkStatusIndicator: React.FC<NetworkStatusIndicatorProps> = ({
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
       clearInterval(interval);
-      window.fetch = originalFetch;
     };
   }, [isOnline]);
 
