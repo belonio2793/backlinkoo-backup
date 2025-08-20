@@ -986,12 +986,20 @@ const DomainsPage = () => {
       return;
     }
 
+    console.log(`🔄 Starting domain addition process for: ${newDomain}`);
     setAddingDomain(true);
+
     try {
+      // Test connection before attempting to add domain
+      console.log('🔍 Testing connection before domain addition...');
+      await testSupabaseConnection();
+      console.log('✅ Connection test passed, proceeding with domain addition');
+
       const data = await addSingleDomain(newDomain);
       setDomains(prev => [data, ...prev]);
       setNewDomain('');
-      toast.success(`Domain ${data.domain} added successfully!`);
+      toast.success(`✅ Domain ${data.domain} added successfully!`);
+      console.log(`✅ Domain addition completed:`, data);
 
       // Auto-configure if automation is enabled and domain was added successfully
       if (autoSyncEnabled && (netlifyConfigured || netlifyEnvStatus === 'synced')) {
@@ -1000,14 +1008,27 @@ const DomainsPage = () => {
           autoSetupNewDomain(data);
         }, 1000);
       } else if (netlifyConfigured) {
+        console.log(`🔧 Netlify configured: Setting up ${data.domain}...`);
         setTimeout(() => {
           autoSetupNewDomain(data);
         }, 1000);
       }
     } catch (error: any) {
-      console.error('Error adding domain:', error);
+      console.error('❌ Error adding domain:', error);
       const errorMessage = error?.message || 'Unknown error occurred';
-      toast.error(errorMessage);
+
+      // Provide specific guidance based on error type
+      if (errorMessage.includes('API key')) {
+        toast.error('Database connection failed. Please refresh the page and try again.', {
+          duration: 8000,
+          action: {
+            label: 'Refresh',
+            onClick: () => window.location.reload()
+          }
+        });
+      } else {
+        toast.error(`Failed to add domain: ${errorMessage}`, { duration: 6000 });
+      }
     } finally {
       setAddingDomain(false);
     }
