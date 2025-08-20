@@ -384,14 +384,9 @@ export class NetlifyDNSSync {
     nameservers?: string[];
   }> {
     try {
-      // Demo mode simulation
-      if (this.apiToken.includes('demo') || this.apiToken.length < 20) {
-        return {
-          exists: true,
-          zoneId: `demo-zone-${domain}`,
-          recordCount: 4,
-          nameservers: ['dns1.netlify.com', 'dns2.netlify.com', 'dns3.netlify.com', 'dns4.netlify.com']
-        };
+      // Check if we have a valid token
+      if (!this.apiToken || this.apiToken.length < 20) {
+        throw new Error('NETLIFY_ACCESS_TOKEN not configured or invalid. Cannot check DNS zone.');
       }
 
       const response = await fetch(`${this.baseUrl}/dns_zones`, {
