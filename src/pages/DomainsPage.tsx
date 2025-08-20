@@ -51,7 +51,6 @@ import {
   Trash2,
   Upload,
   Download,
-  Settings,
   Play,
   Pause,
   Edit3,
