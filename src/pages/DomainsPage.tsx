@@ -2117,9 +2117,9 @@ anotherdomain.org`}
                               size="sm"
                               className="text-xs h-6"
                               onClick={async () => {
-                                const result = await netlifyDomainService.getDomainStatus(domain.domain);
-                                if (result.success && result.status) {
-                                  const instructions = netlifyDomainService.getSetupInstructions(domain.domain, result.status);
+                                const result = await netlifyDomainService.verifyDomain(domain.domain);
+                                if (result.success && result.data) {
+                                  const instructions = netlifyDomainService.getDNSInstructions(domain.domain);
                                   toast.success(`${instructions.title}: ${instructions.instructions[0]}`);
                                 } else if (result.error && result.error.includes('not found in Netlify')) {
                                   // Domain not in Netlify yet - offer to add it
