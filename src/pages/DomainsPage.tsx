@@ -179,6 +179,20 @@ const DomainsPage = () => {
     };
   }, []);
 
+  // Initialize NetlifyDNSSync safely after component mounts
+  useEffect(() => {
+    try {
+      const syncService = new NetlifyDNSSync();
+      setNetlifyDNSSync(syncService);
+    } catch (error) {
+      console.error('Failed to initialize NetlifyDNSSync:', error);
+      // Only show error if it's not a demo token issue
+      if (error instanceof Error && !error.message.includes('demo')) {
+        toast.error(`DNS Service initialization failed: ${error.message}`);
+      }
+    }
+  }, []);
+
   useEffect(() => {
     if (user?.id) {
       loadDomains().catch((error) => {
