@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { openAIService } from '@/services/api/openai';
 import { blogService, BlogPostGenerationData } from '@/services/blogService';
@@ -69,7 +69,6 @@ export function GlobalBlogGenerator({
   const [selectedPrompt, setSelectedPrompt] = useState<string>('');
   const [promptIndex, setPromptIndex] = useState<number>(0);
 
-  const { toast } = useToast();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
 
@@ -138,7 +137,7 @@ export function GlobalBlogGenerator({
       new URL(formatted);
       if (formatted !== targetUrl) setTargetUrl(formatted);
     } catch {
-      toast({ title: "Invalid URL", description: "Please enter a valid URL.", variant: "destructive" });
+      toast.error("Invalid URL - Please enter a valid URL.");
       return false;
     }
 
@@ -165,7 +164,7 @@ export function GlobalBlogGenerator({
     }
 
     if (remainingRequests <= 0) {
-      toast({ title: "API Not Available", description: "Check API configuration.", variant: "destructive" });
+      toast.error("API Not Available - Check API configuration.");
       return;
     }
 
@@ -256,7 +255,7 @@ Return clean HTML content optimized for SEO.`;
         }
       } catch (error) {
         if (i === maxRetries - 1) {
-          toast({ title: "Generation Failed", description: "Multiple attempts failed. Please try again later.", variant: "destructive" });
+          toast.error("Generation Failed - Multiple attempts failed. Please try again later.");
           setIsGenerating(false);
           return;
         }

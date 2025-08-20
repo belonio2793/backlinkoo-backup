@@ -38,8 +38,8 @@ import {
   Database
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import BlogThemesService, { BlogTheme, DomainThemeSettings } from '@/services/blogThemesService';
-import ImprovedBlogThemesService from '@/services/improvedBlogThemesService';
+import ImprovedBlogThemesService, { DomainThemeSettings } from '@/services/improvedBlogThemesService';
+import { ThemeConfig } from '@/types/blogTemplateTypes';
 import { DomainBlogTemplateService, DomainThemeRecord } from '@/services/domainBlogTemplateService';
 import { BlogTemplatePreview } from '@/components/BlogTemplateRenderer';
 import { ThemeStyles } from '@/types/blogTemplateTypes';
@@ -71,7 +71,7 @@ export function DomainBlogTemplateManagerFixed({
 }: DomainBlogTemplateManagerProps) {
   const [selectedDomain, setSelectedDomain] = useState<string>('');
   const [selectedTheme, setSelectedTheme] = useState<string>('minimal');
-  const [customStyles, setCustomStyles] = useState<Partial<BlogTheme['styles']>>({});
+  const [customStyles, setCustomStyles] = useState<Partial<ThemeConfig['styles']>>({});
   const [previewHtml, setPreviewHtml] = useState<string>('');
   const [devicePreview, setDevicePreview] = useState<'desktop' | 'tablet' | 'mobile'>('desktop');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -89,6 +89,16 @@ export function DomainBlogTemplateManagerFixed({
       setSelectedDomain(blogEnabledDomains[0].id);
     }
   }, [blogEnabledDomains]);
+
+  // Load theme data when domain changes
+  useEffect(() => {
+    if (selectedDomain && domainThemeRecords[selectedDomain]) {
+      const record = domainThemeRecords[selectedDomain];
+      console.log('🔄 Loading theme for domain:', selectedDomain, record.theme_id);
+      setSelectedTheme(record.theme_id);
+      setCustomStyles(record.custom_styles || {});
+    }
+  }, [selectedDomain, domainThemeRecords]);
 
   // Check database setup status
   useEffect(() => {
@@ -147,12 +157,6 @@ export function DomainBlogTemplateManagerFixed({
         }
 
         setDomainThemeRecords(themeRecords);
-
-        if (selectedDomain && themeRecords[selectedDomain]) {
-          setSelectedTheme(themeRecords[selectedDomain].theme_id);
-          setCustomStyles(themeRecords[selectedDomain].custom_styles || {});
-        }
-
         setSaveStatus({ isLoading: false, hasError: false });
 
       } catch (error) {
@@ -165,7 +169,7 @@ export function DomainBlogTemplateManagerFixed({
     };
 
     loadDomainThemes();
-  }, [blogEnabledDomains, selectedDomain, fallbackMode]);
+  }, [blogEnabledDomains, fallbackMode]);
 
   // Load settings from localStorage as fallback
   const loadFromLocalStorage = () => {
@@ -174,7 +178,7 @@ export function DomainBlogTemplateManagerFixed({
       if (savedSettings) {
         const settings = JSON.parse(savedSettings);
         setDomainThemeSettings(settings);
-        
+
         // Create theme records from localStorage
         const themeRecords: Record<string, DomainThemeRecord> = {};
         blogEnabledDomains.forEach(domain => {
@@ -183,7 +187,7 @@ export function DomainBlogTemplateManagerFixed({
             id: `local_${domain.id}`,
             domain_id: domain.id,
             theme_id: domainSettings?.theme_id || 'minimal',
-            theme_name: BlogThemesService.getThemeById(domainSettings?.theme_id || 'minimal')?.name || 'Minimal Clean',
+            theme_name: ImprovedBlogThemesService.getThemeById(domainSettings?.theme_id || 'minimal')?.name || 'Minimal Clean',
             custom_styles: domainSettings?.custom_styles || {},
             custom_settings: {},
             is_active: true,
@@ -192,11 +196,6 @@ export function DomainBlogTemplateManagerFixed({
           };
         });
         setDomainThemeRecords(themeRecords);
-
-        if (selectedDomain && themeRecords[selectedDomain]) {
-          setSelectedTheme(themeRecords[selectedDomain].theme_id);
-          setCustomStyles(themeRecords[selectedDomain].custom_styles || {});
-        }
       } else {
         // Initialize with defaults
         const fallbackRecords: Record<string, DomainThemeRecord> = {};
@@ -271,6 +270,7 @@ export function DomainBlogTemplateManagerFixed({
   };
 
   const handleThemeChange = (themeId: string) => {
+    console.log('🎨 Theme change:', themeId);
     setSelectedTheme(themeId);
     const theme = ImprovedBlogThemesService.getThemeById(themeId);
     if (theme) {
@@ -278,7 +278,7 @@ export function DomainBlogTemplateManagerFixed({
     }
   };
 
-  const handleStyleChange = (property: keyof BlogTheme['styles'], value: string) => {
+  const handleStyleChange = (property: keyof ThemeConfig['styles'], value: string) => {
     setCustomStyles(prev => ({
       ...prev,
       [property]: value

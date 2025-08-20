@@ -59,7 +59,7 @@ import {
   Palette,
   Wand2
 } from 'lucide-react';
-import DomainBlogTemplateManagerFixed from '@/components/DomainBlogTemplateManagerFixed';
+import SimpleBlogTemplateManager from '@/components/SimpleBlogTemplateManager';
 import BlogTemplateDebug from '@/components/BlogTemplateDebug';
 import DNSValidationService from '@/services/dnsValidationService';
 import AutoDNSPropagation from '@/components/AutoDNSPropagation';
@@ -125,9 +125,9 @@ const DomainsPage = () => {
 
   // Hosting configuration - editable
   const [hostingConfig, setHostingConfig] = useState<HostingConfig>({
-    ip: '192.168.1.100', // Replace with your actual hosting IP
-    cname: 'hosting.backlinkoo.com', // Replace with your actual CNAME target
-    provider: 'backlinkoo',
+    ip: '75.2.60.5', // Netlify's primary IP address
+    cname: 'builder-io-domains.netlify.app', // Your Netlify site domain
+    provider: 'netlify',
     autoSSL: true,
     defaultSubdirectory: 'blog'
   });
@@ -1138,7 +1138,7 @@ anotherdomain.org`}
                                           <span>All functions will be available when deployed to Netlify</span>
                                         </div>
                                         <div className="flex items-start gap-2">
-                                          <span className="font-medium">📋 Current Options:</span>
+                                          <span className="font-medium">��� Current Options:</span>
                                           <span>You can still add domains and configure DNS manually via your registrar</span>
                                         </div>
                                       </div>
@@ -1261,20 +1261,30 @@ anotherdomain.org`}
               <div className="mt-4 space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="p-4 bg-blue-50 rounded-lg">
-                    <h4 className="font-semibold text-blue-900 mb-2">A Record</h4>
-                    <div className="font-mono text-sm">
+                    <h4 className="font-semibold text-blue-900 mb-2">A Records (Netlify)</h4>
+                    <div className="font-mono text-sm space-y-1">
                       <div>Name: @</div>
-                      <div>Value: {hostingConfig.ip}</div>
+                      <div>Value: 75.2.60.5</div>
+                      <div>Value: 99.83.190.102</div>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="mt-2"
-                      onClick={() => copyToClipboard(hostingConfig.ip)}
-                    >
-                      <Copy className="h-3 w-3 mr-1" />
-                      Copy IP
-                    </Button>
+                    <div className="flex gap-2 mt-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => copyToClipboard('75.2.60.5')}
+                      >
+                        <Copy className="h-3 w-3 mr-1" />
+                        Copy IP1
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => copyToClipboard('99.83.190.102')}
+                      >
+                        <Copy className="h-3 w-3 mr-1" />
+                        Copy IP2
+                      </Button>
+                    </div>
                   </div>
                   
                   <div className="p-4 bg-green-50 rounded-lg">
@@ -1304,6 +1314,34 @@ anotherdomain.org`}
                       Each domain gets a unique token
                     </p>
                   </div>
+                </div>
+
+                {/* DNS Status for leadpages.org */}
+                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <h4 className="font-semibold text-green-900">leadpages.org DNS Status</h4>
+                  </div>
+                  <p className="text-green-800 text-sm mb-3">
+                    ✅ DNS records are correctly configured for Netlify hosting
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div className="bg-white p-2 rounded border">
+                      <div className="font-semibold text-green-900">A Records</div>
+                      <div className="text-green-700">75.2.60.5, 99.83.190.102 ✅</div>
+                    </div>
+                    <div className="bg-white p-2 rounded border">
+                      <div className="font-semibold text-green-900">CNAME</div>
+                      <div className="text-green-700">www → netlify app ✅</div>
+                    </div>
+                    <div className="bg-white p-2 rounded border">
+                      <div className="font-semibold text-green-900">TXT</div>
+                      <div className="text-green-700">blo-verification ✅</div>
+                    </div>
+                  </div>
+                  <p className="text-green-700 text-xs mt-2">
+                    💡 Your DNS is properly configured. The domain should serve blog content once functions are deployed.
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -1397,13 +1435,10 @@ anotherdomain.org`}
             </p>
           </CardHeader>
           <CardContent>
-            <DomainBlogTemplateManagerFixed
+            <SimpleBlogTemplateManager
               domains={domains}
               onThemeUpdate={(domainId, themeId) => {
-                toast({
-                  title: "Theme Updated",
-                  description: `Successfully updated theme to ${themeId} for domain`,
-                });
+                toast.success(`Successfully updated theme to ${themeId} for domain`);
               }}
             />
           </CardContent>

@@ -29,7 +29,28 @@
   to = "/.netlify/functions/:splat"
   status = 200
 
-# SPA fallback - this handles all routes including blog posts
+# Domain-specific blog content routing for leadpages.org
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/domain-blog-server"
+  status = 200
+  conditions = {Host = ["leadpages.org"]}
+
+# Domain-specific blog content routing for other blog domains
+[[redirects]]
+  from = "/*"
+  to = "/.netlify/functions/domain-blog-server"
+  status = 200
+  conditions = {Host = ["backlinks.org", "seo-tools.org"]}
+
+# Individual blog post routing for domains
+[[redirects]]
+  from = "/blog/*"
+  to = "/.netlify/functions/blog-post-server?slug=:splat"
+  status = 200
+  conditions = {Host = ["leadpages.org", "backlinks.org", "seo-tools.org"]}
+
+# SPA fallback - this handles all routes for the admin interface
 [[redirects]]
   from = "/*"
   to = "/index.html"

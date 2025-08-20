@@ -1,0 +1,41 @@
+{
+  "domain": "leadpages.org",
+  "timestamp": "2025-08-19T23:59:46.713Z",
+  "checks": {
+    "aRecords": {
+      "success": true,
+      "records": [
+        "192.168.1.100"
+      ]
+    },
+    "cnameRecords": {
+      "success": false,
+      "error": "queryCname ENODATA leadpages.org",
+      "records": []
+    },
+    "wwwRecords": {
+      "success": true,
+      "records": [
+        "hosting.backlinkoo.com"
+      ]
+    },
+    "txtRecords": {
+      "success": true,
+      "records": [
+        [
+          "blo-verification=blo-yfzyau2mkr9f8r8yjy6iwg"
+        ]
+      ]
+    },
+    "mxRecords": {
+      "success": false,
+      "error": "queryMx ENODATA leadpages.org",
+      "records": []
+    }
+  },
+  "recommendations": [
+    "Update A records to point to hosting provider",
+    "Set WWW CNAME to point to main domain or hosting"
+  ],
+  "status": "excellent"
+}

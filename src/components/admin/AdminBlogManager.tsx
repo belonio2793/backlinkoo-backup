@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { publishedBlogService, type PublishedBlogPost } from '@/services/publishedBlogService';
 import { contentFilterService } from '@/services/contentFilterService';
 import { contentModerationService } from '@/services/contentModerationService';
@@ -31,7 +31,6 @@ import {
 } from 'lucide-react';
 
 export function AdminBlogManager() {
-  const { toast } = useToast();
   const [blogPosts, setBlogPosts] = useState<PublishedBlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -685,7 +684,7 @@ export function AdminBlogManager() {
                             onClick={() => {
                               const url = post.published_url || `${window.location.origin}/blog/${post.slug}`;
                               navigator.clipboard.writeText(url);
-                              toast({ title: "URL copied to clipboard" });
+                              toast.success("URL copied to clipboard");
                             }}
                           >
                             📋
