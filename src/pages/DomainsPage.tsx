@@ -2120,8 +2120,8 @@ anotherdomain.org`}
                                 const result = await netlifyDomainService.verifyDomain(domain.domain);
                                 if (result.success && result.data) {
                                   const instructions = netlifyDomainService.getDNSInstructions(domain.domain);
-                                  toast.success(`${instructions.title}: ${instructions.instructions[0]}`);
-                                } else if (result.error && result.error.includes('not found in Netlify')) {
+                                  toast.success(`Domain verified! DNS: A record -> ${instructions.aRecord}`);
+                                } else if (result.error && result.error.includes('not found')) {
                                   // Domain not in Netlify yet - offer to add it
                                   toast.error(`${result.error}`, {
                                     action: {
