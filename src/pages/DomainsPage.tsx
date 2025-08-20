@@ -316,6 +316,16 @@ const DomainsPage = () => {
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+      // Debug environment variables in development
+      if (import.meta.env.DEV) {
+        console.log('🔧 Environment variables check:', {
+          hasUrl: !!supabaseUrl,
+          hasKey: !!supabaseKey,
+          urlPreview: supabaseUrl ? supabaseUrl.substring(0, 30) + '...' : 'missing',
+          keyPreview: supabaseKey ? supabaseKey.substring(0, 20) + '...' : 'missing'
+        });
+      }
+
       if (!supabaseUrl || !supabaseKey) {
         const errorMsg = 'Supabase environment variables not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.';
         console.warn('⚠️', errorMsg);
@@ -775,7 +785,7 @@ const DomainsPage = () => {
       return { success: true, method: 'manual-only' };
 
     } catch (error) {
-      console.error(`��� Error auto-fixing DNS for ${domain.domain}:`, error);
+      console.error(`❌ Error auto-fixing DNS for ${domain.domain}:`, error);
       toast.error(`❌ Failed to auto-fix DNS for ${domain.domain}: ${error instanceof Error ? error.message : 'Unknown error'}`);
       return { success: false, error: error instanceof Error ? error.message : 'DNS fix failed' };
     }
@@ -1444,7 +1454,7 @@ const DomainsPage = () => {
       }
 
       const result = await response.json();
-      console.log('�� Test result:', result);
+      console.log('📋 Test result:', result);
 
       if (result.success && result.message) {
         toast.success('✅ DNS validation service is working correctly!');
