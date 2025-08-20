@@ -1717,7 +1717,7 @@ anotherdomain.org`}
                                 <span className="text-xs text-green-600">Synced</span>
                               </div>
                             )}
-                            {netlifyDomainService && netlifyDomainService.isConfigured() && (
+                            {netlifyDomainService && (
                               <Button
                                 variant="outline"
                                 size="sm"
