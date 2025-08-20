@@ -1412,6 +1412,29 @@ anotherdomain.org`}
           </Card>
         )}
 
+        {/* Environment Status Debug Panel */}
+        <Card className="mb-4 border-blue-200 bg-blue-50">
+          <CardContent className="pt-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Info className="h-4 w-4 text-blue-600" />
+                <span className="text-sm font-medium text-blue-900">Netlify Environment Status</span>
+              </div>
+              <div className="text-xs text-blue-700">
+                {(() => {
+                  const token = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
+                  const siteId = import.meta.env.VITE_NETLIFY_SITE_ID;
+
+                  if (!token) return '❌ No VITE_NETLIFY_ACCESS_TOKEN';
+                  if (token.length < 20) return `⚠️ Token too short (${token.length} chars)`;
+                  if (token.includes('demo')) return '⚠️ Demo token active';
+                  return `✅ Valid token (${token.length} chars) | Site: ${siteId ? '✅' : '❌'}`;
+                })()}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Domains List */}
         <Card>
           <CardHeader>
