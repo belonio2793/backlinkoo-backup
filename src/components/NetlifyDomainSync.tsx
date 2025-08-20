@@ -498,13 +498,13 @@ export function NetlifyDomainSync() {
             <div>
               <Label htmlFor="api-token">API Token</Label>
               <div className="flex gap-2 mt-1">
-                <input
+                <Input
                   id="api-token"
                   type="password"
                   placeholder="nfp_... or 'demo-token' for testing"
                   value={netlifyConfig.apiToken}
                   onChange={(e) => setNetlifyConfig(prev => ({ ...prev, apiToken: e.target.value }))}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="flex-1"
                 />
                 <Button
                   variant="outline"
