@@ -376,17 +376,45 @@ export function NetlifyDomainSync() {
     try {
       toast.info(`Adding ${domainName} to Netlify...`);
 
-      // Check if domain exists in Netlify
-      const existingDomains = await apiService.getDomains();
+      // For demo mode, simulate the process
+      if (netlifyConfig.apiToken.includes('demo')) {
+        console.log(`🧪 Demo mode: Simulating Netlify sync for ${domainName}`);
+
+        // Simulate delay
+        await new Promise(resolve => setTimeout(resolve, 1500));
+
+        // Update Supabase record with demo data
+        await supabase
+          .from('domains')
+          .update({
+            netlify_id: `demo-${Date.now()}`,
+            netlify_synced: true
+          })
+          .eq('id', domain.id);
+
+        toast.success(`✅ Demo mode: ${domainName} simulated sync to Netlify`);
+        await loadDomains();
+        return;
+      }
+
+      // Check if domain exists in Netlify (with error handling)
+      let existingDomains: any[] = [];
+      try {
+        existingDomains = await apiService.getDomains();
+      } catch (getDomainError) {
+        console.warn('Could not fetch existing domains:', getDomainError);
+        // Continue with add operation if we can't check existing domains
+      }
+
       const existingDomain = existingDomains.find(d => d.domain === domainName);
 
       if (existingDomain) {
         // Update Supabase record
         await supabase
           .from('domains')
-          .update({ 
+          .update({
             netlify_id: existingDomain.id,
-            netlify_synced: true 
+            netlify_synced: true
           })
           .eq('id', domain.id);
 
@@ -400,9 +428,9 @@ export function NetlifyDomainSync() {
         // Update Supabase record
         await supabase
           .from('domains')
-          .update({ 
+          .update({
             netlify_id: netlifyResult.id,
-            netlify_synced: true 
+            netlify_synced: true
           })
           .eq('id', domain.id);
 
@@ -412,7 +440,24 @@ export function NetlifyDomainSync() {
       // Reload domains
       await loadDomains();
     } catch (error) {
-      toast.error(`Failed to sync ${domainName}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      console.error(`❌ Failed to sync ${domainName}:`, error);
+
+      // Provide more specific error messages
+      if (errorMessage.includes('404') || errorMessage.includes('not found')) {
+        toast.error(`❌ Netlify site not found. Please check your site ID configuration.`);
+      } else if (errorMessage.includes('401') || errorMessage.includes('authentication')) {
+        toast.error(`❌ Authentication failed. Please check your Netlify API token.`);
+      } else if (errorMessage.includes('403') || errorMessage.includes('permission')) {
+        toast.error(`❌ Permission denied. Please ensure your API token has domain management permissions.`);
+      } else {
+        toast.error(`❌ Failed to sync ${domainName}: ${errorMessage}`);
+      }
+
+      // Suggest demo mode if real API is having issues
+      setTimeout(() => {
+        toast.info('💡 Tip: You can use demo mode by setting API token to "demo-token" to test the interface.');
+      }, 3000);
     }
   };
 
