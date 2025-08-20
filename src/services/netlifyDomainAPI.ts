@@ -88,9 +88,26 @@ export class NetlifyDomainAPI {
    * Add a single domain to Netlify
    */
   async addDomain(domain: string, options: { autoSSL?: boolean } = {}): Promise<NetlifyAPIResponse> {
+    const cleanDomain = domain.replace(/^https?:\/\//, '').replace(/^www\./, '');
+
+    // Return mock response for demo/development mode
+    if (this.isDemoToken()) {
+      console.warn(`Demo mode: Simulating domain addition for ${cleanDomain}`);
+      return {
+        id: `demo-${Date.now()}`,
+        domain: cleanDomain,
+        state: 'pending',
+        dns_zone_id: 'demo-zone',
+        certificate: options.autoSSL ? {
+          state: 'pending',
+          expires_at: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()
+        } : undefined
+      };
+    }
+
     try {
       const domainConfig: NetlifyDomainConfig = {
-        domain: domain.replace(/^https?:\/\//, '').replace(/^www\./, ''),
+        domain: cleanDomain,
         ...(options.autoSSL && {
           certificate: {
             type: 'lets_encrypt'
@@ -109,12 +126,21 @@ export class NetlifyDomainAPI {
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
+        if (response.status === 401) {
+          throw new Error(`Netlify API authentication failed. Please check your API token.`);
+        }
+        if (response.status === 403) {
+          throw new Error(`Insufficient permissions. Please ensure your token can manage domains.`);
+        }
+        if (response.status === 422) {
+          throw new Error(`Domain ${cleanDomain} is invalid or already exists in another site.`);
+        }
         throw new Error(`Netlify API error: ${response.status} - ${errorData.message || response.statusText}`);
       }
 
       return await response.json();
     } catch (error) {
-      console.error(`Error adding domain ${domain} to Netlify:`, error);
+      console.error(`Error adding domain ${cleanDomain} to Netlify:`, error);
       throw error;
     }
   }
