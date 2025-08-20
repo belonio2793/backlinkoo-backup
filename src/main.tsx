@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import './styles/mobile-payment-fix.css'
+// Emergency fetch protection - HIGHEST PRIORITY - FIXES FULLSTORY INTERFERENCE
+import './utils/emergencyFetchFix'
 // Enhanced FullStory fix - must load FIRST
 import './utils/fullstoryFix'
 // Fetch error diagnostics - helps debug network issues
@@ -379,7 +381,7 @@ if (import.meta.env.DEV) {
   console.log('  - testClientContent() - Test client-side content generation');
   console.log('  - testClientTelegraph() - Test client-side Telegraph publishing');
   console.log('  - testFullPipeline() - Test complete automation pipeline');
-  console.log('  - testAutomationPipeline() - Test complete automation: Content → Telegraph → DB');
+  console.log('  - testAutomationPipeline() - Test complete automation: Content → Telegraph ��� DB');
   console.log('  - testApiKey() - Test OpenAI API key configuration');
   console.log('  - testErrorFixes() - Test all error fixes and formatting');
   console.log('  - testRealTimeFeed() - Test real-time feed integration');

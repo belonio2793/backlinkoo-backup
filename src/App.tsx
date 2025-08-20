@@ -19,6 +19,7 @@ import { useGlobalAutoCleaner } from "@/hooks/useTextCleaner";
 import "@/utils/emergencyDisable"; // Load emergency disable utilities
 // import "@/utils/testReplacementCharacter"; // Disabled to prevent errors when cleaners are off
 import { LazyBeautifulBlogPost } from "@/components/LazyComponents";
+import EmergencyErrorBoundary from "@/components/EmergencyErrorBoundary";
 import { DomainsAuthGuard } from "@/components/DomainsAuthGuard";
 import { DomainErrorBoundary } from "@/components/DomainErrorBoundary";
 import Index from "./pages/Index";
@@ -73,7 +74,8 @@ const TextCleanerProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
+  <EmergencyErrorBoundary>
+    <QueryClientProvider client={queryClient}>
     <SupabaseErrorBoundary>
       <TooltipProvider>
       <ModalProvider>
@@ -329,7 +331,8 @@ const App = () => (
       </ModalProvider>
       </TooltipProvider>
     </SupabaseErrorBoundary>
-  </QueryClientProvider>
+    </QueryClientProvider>
+  </EmergencyErrorBoundary>
 );
 
 export default App;
