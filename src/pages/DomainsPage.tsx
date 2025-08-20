@@ -401,7 +401,7 @@ const DomainsPage = () => {
     }
 
     if (failed > 0) {
-      toast.warning(`������ ${failed} domains had DNS configuration issues`);
+      toast.warning(`����️ ${failed} domains had DNS configuration issues`);
       console.warn('Failed DNS configurations:', results.filter(r => !r.success));
     }
 
@@ -1739,7 +1739,7 @@ anotherdomain.org`}
                                   </div>
                                   <div className="text-sm text-blue-800 space-y-2">
                                     <p>🚀 <strong>Supported for Auto-Propagation:</strong> Cloudflare, Namecheap, GoDaddy, Route53, DigitalOcean</p>
-                                    <p>��� Click "Detect Registrar" to check if your domain supports automatic DNS updates</p>
+                                    <p>⚡ Click "Detect Registrar" to check if your domain supports automatic DNS updates</p>
                                   </div>
                                 </div>
 
@@ -2095,7 +2095,7 @@ anotherdomain.org`}
                             </Button>
                           )}
 
-                          {!domain.netlify_synced && netlifyCustomDomainService && netlifyCustomDomainService.isConfigured() && (
+                          {!domain.netlify_synced && netlifyCustomDomainService && netlifyCustomDomainService.isConfiguredSync() && (
                             <Button
                               variant="outline"
                               size="sm"
