@@ -131,6 +131,8 @@ const DomainsPage = () => {
   const [netlifyConfigured, setNetlifyConfigured] = useState(false);
   const [netlifyEnvStatus, setNetlifyEnvStatus] = useState<'unknown' | 'synced' | 'missing' | 'updating'>('unknown');
   const [netlifyKeyValue, setNetlifyKeyValue] = useState('');
+  const [dnsConfiguring, setDnsConfiguring] = useState(false);
+  const [dnsProgress, setDnsProgress] = useState({ current: 0, total: 0, domain: '' });
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
