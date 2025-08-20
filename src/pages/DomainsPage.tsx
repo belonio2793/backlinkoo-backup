@@ -806,14 +806,21 @@ const DomainsPage = () => {
 
       if (error) {
         console.error('Supabase error adding domain:', error);
-        
-        // Handle Supabase error object properly
-        const errorMessage = typeof error === 'string' ? error : 
-                           error?.message || 
-                           error?.details || 
-                           error?.hint ||
-                           JSON.stringify(error);
-        
+
+        // Enhanced error message extraction
+        let errorMessage = 'Unknown error occurred';
+
+        if (typeof error === 'string') {
+          errorMessage = error;
+        } else if (error && typeof error === 'object') {
+          errorMessage = error.message ||
+                        error.details ||
+                        error.hint ||
+                        error.code ||
+                        'Database operation failed';
+        }
+
+        // Handle specific error codes
         if (error.code === '23505') {
           throw new Error(`Domain ${domain} already exists`);
         }
@@ -826,19 +833,24 @@ const DomainsPage = () => {
         if (error.code === 'PGRST301') {
           throw new Error(`Database error: Please try again in a moment`);
         }
-        if (errorMessage?.includes('Failed to fetch')) {
+
+        // Handle specific error messages
+        if (errorMessage.includes('No API key found')) {
+          throw new Error(`Database connection failed: Missing API key. Please refresh the page and try again.`);
+        }
+        if (errorMessage.includes('Failed to fetch')) {
           throw new Error(`Network error: Please check your connection and try again`);
         }
-        if (errorMessage?.includes('timeout')) {
+        if (errorMessage.includes('timeout')) {
           throw new Error(`Request timeout: Please try again`);
         }
-        if (errorMessage?.includes('JWT')) {
+        if (errorMessage.includes('JWT')) {
           throw new Error(`Authentication error: Please sign in again`);
         }
-        if (errorMessage?.includes('permission')) {
+        if (errorMessage.includes('permission')) {
           throw new Error(`Permission denied: Please check your access rights`);
         }
-        
+
         // Generic error with helpful message
         throw new Error(`Failed to add domain: ${errorMessage}`);
       }
