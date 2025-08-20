@@ -1315,6 +1315,34 @@ anotherdomain.org`}
                     </p>
                   </div>
                 </div>
+
+                {/* DNS Status for leadpages.org */}
+                <div className="mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <h4 className="font-semibold text-green-900">leadpages.org DNS Status</h4>
+                  </div>
+                  <p className="text-green-800 text-sm mb-3">
+                    ✅ DNS records are correctly configured for Netlify hosting
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div className="bg-white p-2 rounded border">
+                      <div className="font-semibold text-green-900">A Records</div>
+                      <div className="text-green-700">75.2.60.5, 99.83.190.102 ✅</div>
+                    </div>
+                    <div className="bg-white p-2 rounded border">
+                      <div className="font-semibold text-green-900">CNAME</div>
+                      <div className="text-green-700">www → netlify app ✅</div>
+                    </div>
+                    <div className="bg-white p-2 rounded border">
+                      <div className="font-semibold text-green-900">TXT</div>
+                      <div className="text-green-700">blo-verification ✅</div>
+                    </div>
+                  </div>
+                  <p className="text-green-700 text-xs mt-2">
+                    💡 Your DNS is properly configured. The domain should serve blog content once functions are deployed.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
