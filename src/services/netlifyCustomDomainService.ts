@@ -11,6 +11,10 @@ export class NetlifyCustomDomainService {
   static async getCustomDomains(): Promise<any[]> {
     return [];
   }
+
+  static isConfiguredSync(): boolean {
+    return false;
+  }
 }
 
 export default NetlifyCustomDomainService;
