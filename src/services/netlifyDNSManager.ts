@@ -11,6 +11,10 @@ export class NetlifyDNSManager {
   static async getDomains(): Promise<any[]> {
     return [];
   }
+
+  static getConfigStatus(): { configured: boolean; message: string } {
+    return { configured: false, message: 'Netlify DNS features have been removed' };
+  }
 }
 
 export default NetlifyDNSManager;
