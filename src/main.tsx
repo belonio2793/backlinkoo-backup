@@ -15,6 +15,8 @@ import './utils/fetchErrorDiagnostic'
 import './utils/unifiedErrorHandler'
 // Test blog migration error fix
 import './utils/testBlogMigrationErrorFix'
+// Test auth session missing error fix
+import './utils/testAuthSessionFix'
 // Immediate fix for Supabase connection blocks
 import './utils/clearSupabaseBlock'
 // Campaign-specific error handling
