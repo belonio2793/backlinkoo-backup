@@ -63,9 +63,9 @@ export class NetlifyDNSSync {
     try {
       this.dnsManager = NetlifyDNSManager.getInstance();
     } catch (error) {
-      console.warn('⚠️ NetlifyDNSSync: Failed to initialize DNS manager, running in limited mode:', error);
-      // Create a fallback DNS manager that won't crash
-      this.dnsManager = new NetlifyDNSManager('demo-token');
+      console.warn('⚠��� NetlifyDNSSync: Failed to initialize DNS manager, running in limited mode:', error);
+      // Create a fallback DNS manager
+      this.dnsManager = new NetlifyDNSManager();
     }
   }
 
@@ -132,17 +132,9 @@ export class NetlifyDNSSync {
    */
   private async createOrGetDNSZone(domain: string): Promise<NetlifyDNSZone | null> {
     try {
-      // Demo mode simulation
-      if (this.apiToken.includes('demo') || this.apiToken.length < 20) {
-        console.log(`��� Demo mode: Simulating DNS zone creation for ${domain}`);
-        return {
-          id: `demo-zone-${Date.now()}`,
-          name: domain,
-          account_slug: 'demo-account',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          records: []
-        };
+      // Check if we have a valid token
+      if (!this.apiToken || this.apiToken.length < 20) {
+        throw new Error('NETLIFY_ACCESS_TOKEN not configured or invalid. Cannot create DNS zone.');
       }
 
       // First, check if zone already exists
@@ -203,10 +195,9 @@ export class NetlifyDNSSync {
     verificationToken: string
   ): Promise<{ recordsAdded: number; created: boolean }> {
     
-    // Demo mode simulation
-    if (this.apiToken.includes('demo') || this.apiToken.length < 20) {
-      console.log(`🧪 Demo mode: Simulating DNS records for ${domain}`);
-      return { recordsAdded: 4, created: true };
+    // Check if we have a valid token
+    if (!this.apiToken || this.apiToken.length < 20) {
+      throw new Error('NETLIFY_ACCESS_TOKEN not configured or invalid. Cannot create DNS records.');
     }
 
     try {
@@ -393,14 +384,9 @@ export class NetlifyDNSSync {
     nameservers?: string[];
   }> {
     try {
-      // Demo mode simulation
-      if (this.apiToken.includes('demo') || this.apiToken.length < 20) {
-        return {
-          exists: true,
-          zoneId: `demo-zone-${domain}`,
-          recordCount: 4,
-          nameservers: ['dns1.netlify.com', 'dns2.netlify.com', 'dns3.netlify.com', 'dns4.netlify.com']
-        };
+      // Check if we have a valid token
+      if (!this.apiToken || this.apiToken.length < 20) {
+        throw new Error('NETLIFY_ACCESS_TOKEN not configured or invalid. Cannot check DNS zone.');
       }
 
       const response = await fetch(`${this.baseUrl}/dns_zones`, {

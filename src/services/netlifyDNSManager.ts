@@ -33,21 +33,21 @@ export class NetlifyDNSManager extends NetlifyDomainAPI {
 
   constructor(apiToken?: string, siteId?: string) {
     // Use environment variable if available, fallback to provided token
-    const token = apiToken || import.meta.env.VITE_NETLIFY_ACCESS_TOKEN || 'demo-token';
+    const token = apiToken || import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
     const site = siteId || 'ca6261e6-0a59-40b5-a2bc-5b5481ac8809'; // Default site ID
 
-    if (!token || token === 'demo-token') {
-      console.warn('⚠️ NetlifyDNSManager: No valid token found, running in demo mode');
+    if (!token) {
+      console.warn('⚠️ NetlifyDNSManager: No valid token found');
     }
 
     super(token, site);
   }
 
   /**
-   * Check if we're using a demo/test token
+   * Check if we have a valid token
    */
-  private isDemoToken(): boolean {
-    return this.apiToken.includes('demo') || this.apiToken.includes('test') || this.apiToken.length < 20;
+  private hasValidToken(): boolean {
+    return this.apiToken && this.apiToken.length >= 20;
   }
 
   /**
@@ -274,12 +274,12 @@ export class NetlifyDNSManager extends NetlifyDomainAPI {
       }
     ];
 
-    // Return success for demo mode
-    if (this.isDemoToken()) {
+    // Check if we have a valid token
+    if (!this.hasValidToken()) {
       return {
-        success: true,
-        message: `Demo mode: DNS configuration simulated for ${domain}. In production, this would configure ${records.length} DNS records.`,
-        records,
+        success: false,
+        message: `NETLIFY_ACCESS_TOKEN not configured or invalid. Cannot configure DNS for ${domain}.`,
+        records: [],
         verificationToken: defaultConfig.txtVerification
       };
     }

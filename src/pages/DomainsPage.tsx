@@ -51,7 +51,6 @@ import {
   Trash2,
   Upload,
   Download,
-  Settings,
   Play,
   Pause,
   Edit3,
@@ -67,6 +66,7 @@ import AutoPropagationWizard from '@/components/AutoPropagationWizard';
 import NetlifyDNSManager from '@/services/netlifyDNSManager';
 import NetlifyDNSSync from '@/services/netlifyDNSSync';
 import NetlifyDomainService from '@/services/netlifyDomainService';
+import NetlifyCustomDomainService from '@/services/netlifyCustomDomainService';
 import AutoDomainBlogThemeService from '@/services/autoDomainBlogThemeService';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -128,12 +128,12 @@ const DomainsPage = () => {
   const [showAutomationPanel, setShowAutomationPanel] = useState(false);
   const [netlifyConfigured, setNetlifyConfigured] = useState(false);
   const [netlifyEnvStatus, setNetlifyEnvStatus] = useState<'unknown' | 'synced' | 'missing' | 'updating'>('unknown');
-  const [netlifyKeyValue, setNetlifyKeyValue] = useState('');
   const [dnsConfiguring, setDnsConfiguring] = useState(false);
   const [dnsProgress, setDnsProgress] = useState({ current: 0, total: 0, domain: '' });
   const [autoSyncEnabled, setAutoSyncEnabled] = useState(true); // Enable auto-sync by default
   const [netlifyDNSSync, setNetlifyDNSSync] = useState<NetlifyDNSSync | null>(null); // Initialize Netlify DNS sync service
   const [netlifyDomainService, setNetlifyDomainService] = useState<NetlifyDomainService | null>(null); // Initialize Netlify domain service
+  const [netlifyCustomDomainService, setNetlifyCustomDomainService] = useState<NetlifyCustomDomainService | null>(null); // Initialize Netlify custom domain service
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
@@ -190,7 +190,7 @@ const DomainsPage = () => {
     } catch (error) {
       console.error('Failed to initialize NetlifyDNSSync:', error);
       // Only show error toast for critical failures, not configuration issues
-      if (error instanceof Error && !error.message.includes('demo') && !error.message.includes('token')) {
+      if (error instanceof Error && !error.message.includes('token')) {
         toast.error(`DNS Service initialization failed: ${error.message}`);
       } else {
         console.warn('⚠️ NetlifyDNSSync running in limited mode due to missing configuration');
@@ -203,11 +203,16 @@ const DomainsPage = () => {
       setNetlifyDomainService(domainService);
       console.log('✅ NetlifyDomainService initialized');
 
+      // Initialize NetlifyCustomDomainService
+      const customDomainService = new NetlifyCustomDomainService();
+      setNetlifyCustomDomainService(customDomainService);
+      console.log('✅ NetlifyCustomDomainService initialized');
+
       // Quick verification if configured
       if (domainService.isConfigured()) {
         console.log('🔗 Netlify integration is configured and ready');
       } else {
-        console.log('⚠️ Netlify integration not configured - using demo mode');
+        console.log('⚠️ Netlify integration not configured');
       }
     } catch (error) {
       console.error('Failed to initialize NetlifyDomainService:', error);
@@ -247,18 +252,13 @@ const DomainsPage = () => {
     try {
       const envToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
 
-      // If no token exists or it's already set via auto-sync, skip
-      if (!envToken || envToken.includes('demo_token_auto_stored')) {
-        if (envToken && envToken.includes('demo_token_auto_stored')) {
-          setNetlifyEnvStatus('synced');
-          setNetlifyKeyValue('auto-stored');
-          setNetlifyConfigured(true);
-        }
+      // If no token exists, skip
+      if (!envToken) {
         return;
       }
 
       // Auto-sync to DevServerControl if valid token exists
-      if (envToken.length > 10 && !envToken.includes('demo')) {
+      if (envToken.length > 10) {
         console.log('🚀 Auto-syncing NETLIFY key via DevServerControl...');
         setNetlifyEnvStatus('updating');
 
@@ -273,15 +273,10 @@ const DomainsPage = () => {
   // Check if Netlify key is synced with environment variables
   const checkNetlifyEnvSync = () => {
     const envToken = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
-    if (envToken && envToken.length > 10 && !envToken.includes('demo')) {
+    if (envToken && envToken.length > 10) {
       setNetlifyEnvStatus('synced');
-      setNetlifyKeyValue(envToken.substring(0, 8) + '...' + envToken.substring(envToken.length - 4));
-    } else if (envToken && (envToken.includes('demo') || envToken.includes('auto_stored'))) {
-      setNetlifyEnvStatus('synced');
-      setNetlifyKeyValue(envToken.includes('auto_stored') ? 'auto-stored' : 'demo-token');
     } else {
       setNetlifyEnvStatus('missing');
-      setNetlifyKeyValue('');
     }
   };
 
@@ -306,7 +301,6 @@ const DomainsPage = () => {
       localStorage.setItem('netlify_env_key_preview', keyToSync.substring(0, 8) + '...' + keyToSync.substring(keyToSync.length - 4));
 
       setNetlifyEnvStatus('synced');
-      setNetlifyKeyValue(keyToSync.substring(0, 8) + '...' + keyToSync.substring(keyToSync.length - 4));
       setNetlifyConfigured(true);
 
       // Step 2: Auto-configure DNS for all domains that need it
@@ -394,7 +388,7 @@ const DomainsPage = () => {
     }
 
     if (failed > 0) {
-      toast.warning(`���️ ${failed} domains had DNS configuration issues`);
+      toast.warning(`����️ ${failed} domains had DNS configuration issues`);
       console.warn('Failed DNS configurations:', results.filter(r => !r.success));
     }
 
@@ -409,17 +403,9 @@ const DomainsPage = () => {
   // Auto-configure DNS for a specific domain
   const autoConfigureDomainDNS = async (domain: Domain, apiToken: string) => {
     try {
-      console.log(`��� Auto-configuring DNS for ${domain.domain}`);
+      console.log(`����� Auto-configuring DNS for ${domain.domain}`);
 
       // For demo mode, simulate DNS configuration
-      if (apiToken.includes('demo')) {
-        console.log(`��� Demo mode: Simulating DNS configuration for ${domain.domain}`);
-        return {
-          success: true,
-          message: `Demo: DNS configured for ${domain.domain}`,
-          records: ['A', 'CNAME', 'TXT']
-        };
-      }
 
       // Step 1: Configure Netlify DNS via API
       const netlifyDNSResult = await configureNetlifyDNS(domain, apiToken);
@@ -515,7 +501,7 @@ const DomainsPage = () => {
       const domainsNeedingTokens = domains.filter(d => !d.verification_token);
 
       if (domainsNeedingTokens.length > 0) {
-        console.log(`🔧 Fixing ${domainsNeedingTokens.length} domains without verification tokens`);
+        console.log(`��� Fixing ${domainsNeedingTokens.length} domains without verification tokens`);
 
         for (const domain of domainsNeedingTokens) {
           try {
@@ -935,7 +921,7 @@ const DomainsPage = () => {
         // Auto-add to Netlify if validation was successful and not already synced
         if (result.validated && !domain.netlify_synced && netlifyDomainService && netlifyDomainService.isConfigured()) {
           try {
-            console.log(`🌐 DNS validation successful - adding ${domain.domain} to Netlify automatically...`);
+            console.log(`�� DNS validation successful - adding ${domain.domain} to Netlify automatically...`);
             toast.info(`Adding ${domain.domain} to Netlify for SSL/TLS...`);
 
             const netlifyResult = await netlifyDomainService.addDomain(domain.domain);
@@ -1002,6 +988,47 @@ const DomainsPage = () => {
     toast.info('Page generation feature coming soon!');
   };
 
+  // Add custom domain to Netlify using the official API
+  const addCustomDomainToNetlify = async (domain: Domain, txtRecordValue?: string) => {
+    try {
+      if (!netlifyCustomDomainService || !netlifyCustomDomainService.isConfiguredSync()) {
+        toast.error('Netlify custom domain service not configured. Please check your NETLIFY_ACCESS_TOKEN.');
+        return;
+      }
+
+      toast.info(`Adding ${domain.domain} as custom domain to Netlify...`);
+
+      const result = await netlifyCustomDomainService.addCustomDomain(domain.domain, txtRecordValue);
+
+      if (result.success) {
+        // Update domain record with Netlify info
+        await supabase
+          .from('domains')
+          .update({
+            netlify_synced: true,
+            hosting_provider: 'netlify',
+            status: 'active'
+          })
+          .eq('id', domain.id);
+
+        toast.success(`✅ ${domain.domain} added as custom domain to Netlify!`);
+
+        // Show setup instructions if available
+        if (result.instructions) {
+          console.log('📋 Setup Instructions:', result.instructions);
+          toast.info(`Next steps: ${result.instructions.steps[0]}`);
+        }
+
+        await loadDomains(); // Refresh the list
+      } else {
+        toast.error(`Failed to add custom domain: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error adding custom domain:', error);
+      toast.error('Failed to add custom domain to Netlify');
+    }
+  };
+
   // Auto-setup new domain with DNS and themes
   const autoSetupNewDomain = async (domain: Domain) => {
     try {
@@ -1026,7 +1053,7 @@ const DomainsPage = () => {
         const netlifyDNSResult = await netlifyDNSSync.autoSyncNewDomain(domain);
 
         if (netlifyDNSResult.success) {
-          console.log(`✅ ${domain.domain} synced to Netlify DNS zone: ${netlifyDNSResult.netlifyZoneId}`);
+          console.log(`�� ${domain.domain} synced to Netlify DNS zone: ${netlifyDNSResult.netlifyZoneId}`);
 
           // Update domain status to reflect DNS sync
           await updateDomain(domain.id, {
@@ -1412,90 +1439,6 @@ anotherdomain.org`}
           </Card>
         )}
 
-        {/* Environment Status Debug Panel */}
-        <Card className="mb-4 border-blue-200 bg-blue-50">
-          <CardContent className="pt-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Info className="h-4 w-4 text-blue-600" />
-                  <span className="text-sm font-medium text-blue-900">Netlify Environment Status</span>
-                </div>
-                <div className="text-xs text-blue-700">
-                  {(() => {
-                    const token = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
-                    const siteId = import.meta.env.VITE_NETLIFY_SITE_ID;
-
-                    if (!token || token === 'your_netlify_personal_access_token') return '❌ No valid VITE_NETLIFY_ACCESS_TOKEN';
-                    if (token.length < 20) return `⚠️ Token too short (${token.length} chars)`;
-                    if (token.includes('demo')) return '⚠️ Demo token active';
-                    return `✅ Valid token (${token.length} chars) | Site: ${siteId ? '✅' : '❌'}`;
-                  })()}
-                </div>
-              </div>
-
-              {/* Token Configuration Section */}
-              {(() => {
-                const token = import.meta.env.VITE_NETLIFY_ACCESS_TOKEN;
-                const needsToken = !token || token === 'your_netlify_personal_access_token' || token.length < 20;
-
-                return needsToken && (
-                  <div className="bg-white p-3 rounded border border-blue-200">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Settings className="h-4 w-4 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-900">Configure Netlify Token</span>
-                    </div>
-                    <div className="text-xs text-blue-700 mb-2">
-                      To add domains to Netlify, you need a personal access token.
-                      <a
-                        href="https://app.netlify.com/user/applications#personal-access-tokens"
-                        target="_blank"
-                        className="underline ml-1"
-                      >
-                        Create one here →
-                      </a>
-                    </div>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="Enter your Netlify personal access token..."
-                        className="text-xs h-8"
-                        value={netlifyKeyValue}
-                        onChange={(e) => setNetlifyKeyValue(e.target.value)}
-                        type="password"
-                      />
-                      <Button
-                        size="sm"
-                        className="h-8 text-xs"
-                        onClick={async () => {
-                          if (!netlifyKeyValue || netlifyKeyValue.length < 20) {
-                            toast.error('Please enter a valid Netlify token (50+ characters)');
-                            return;
-                          }
-
-                          try {
-                            // Set environment variable using DevServerControl
-                            toast.info('Setting Netlify token...');
-
-                            // This would need to be implemented via a backend call
-                            // For now, we'll store it temporarily in localStorage
-                            localStorage.setItem('netlify_token_temp', netlifyKeyValue);
-
-                            toast.success('✅ Token configured! Refresh the page to apply changes.');
-                            setNetlifyKeyValue('');
-                          } catch (error) {
-                            toast.error('Failed to set token');
-                          }
-                        }}
-                      >
-                        Set Token
-                      </Button>
-                    </div>
-                  </div>
-                );
-              })()}
-            </div>
-          </CardContent>
-        </Card>
 
         {/* Domains List */}
         <Card>
@@ -1658,7 +1601,7 @@ anotherdomain.org`}
                           <Dialog>
                             <DialogTrigger asChild>
                               <Button variant="outline" size="sm" className="text-xs">
-                                <Settings className="h-3 w-3 mr-1" />
+                                <Terminal className="h-3 w-3 mr-1" />
                                 DNS Setup
                               </Button>
                             </DialogTrigger>
@@ -1775,7 +1718,7 @@ anotherdomain.org`}
                                       </h4>
                                       <div className="text-sm text-amber-800 space-y-2">
                                         <div className="flex items-start gap-2">
-                                          <span className="font-medium">🔧 Development Mode:</span>
+                                          <span className="font-medium">���� Development Mode:</span>
                                           <span>DNS validation functions are not accessible in local environment</span>
                                         </div>
                                         <div className="flex items-start gap-2">
@@ -1823,7 +1766,6 @@ anotherdomain.org`}
                                   token: {
                                     exists: !!token,
                                     length: token?.length || 0,
-                                    isDemo: token?.includes('demo'),
                                     startsWith: token ? token.substring(0, 4) : 'none',
                                     type: typeof token,
                                     value: token || 'undefined'
@@ -1845,9 +1787,6 @@ anotherdomain.org`}
                                   return;
                                 } else if (token.length < 20) {
                                   toast.error(`❌ VITE_NETLIFY_ACCESS_TOKEN too short (${token.length} chars). Valid tokens are typically 50+ characters.`);
-                                  return;
-                                } else if (token.includes('demo')) {
-                                  toast.error('❌ Demo token detected. Please set your real Netlify access token.');
                                   return;
                                 } else {
                                   toast.info(`✅ Valid token found (${token.length} chars). Proceeding with real API call...`);
@@ -2012,38 +1951,164 @@ anotherdomain.org`}
                             <Wand2 className="h-3 w-3" />
                           </Button>
 
-                          {!domain.netlify_synced && netlifyDomainService && netlifyDomainService.isConfigured() && (
+                          {!domain.netlify_synced && (
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={async () => {
                                 try {
-                                  toast.info(`Adding ${domain.domain} to Netlify...`);
-                                  const result = await netlifyDomainService.addDomain(domain.domain);
+                                  toast.info('Checking Netlify configuration...');
+
+                                  // Test if the functions are even available
+                                  try {
+                                    const testResponse = await fetch('/.netlify/functions/netlify-custom-domain?health=check');
+                                    if (!testResponse.ok) {
+                                      if (testResponse.status === 404) {
+                                        toast.error('❌ Netlify functions not deployed. Please deploy your functions first.');
+                                        return;
+                                      } else {
+                                        toast.error(`❌ Function error: ${testResponse.status} ${testResponse.statusText}`);
+                                        return;
+                                      }
+                                    }
+
+                                    const healthCheck = await testResponse.json();
+                                    console.log('Health check result:', healthCheck);
+
+                                    if (!healthCheck.environment?.hasToken) {
+                                      toast.error('❌ NETLIFY_ACCESS_TOKEN not configured in environment variables');
+                                      console.error('Environment info:', healthCheck.environment);
+                                      return;
+                                    }
+                                  } catch (fetchError) {
+                                    toast.error('❌ Cannot reach Netlify functions. Are they deployed?');
+                                    console.error('Function fetch error:', fetchError);
+                                    return;
+                                  }
+
+                                  toast.info(`Adding ${domain.domain} as custom domain to Netlify...`);
+
+                                  // Use the server-side function instead of client-side service
+                                  const addResponse = await fetch('/.netlify/functions/netlify-custom-domain', {
+                                    method: 'POST',
+                                    headers: {
+                                      'Content-Type': 'application/json',
+                                    },
+                                    body: JSON.stringify({
+                                      domain: domain.domain
+                                    }),
+                                  });
+
+                                  if (!addResponse.ok) {
+                                    const errorText = await addResponse.text();
+                                    toast.error(`❌ HTTP ${addResponse.status}: ${errorText}`);
+                                    console.error('Add domain response error:', errorText);
+                                    return;
+                                  }
+
+                                  const result = await addResponse.json();
 
                                   if (result.success) {
                                     // Update domain record
                                     await supabase
                                       .from('domains')
                                       .update({
-                                        netlify_id: result.data?.id,
-                                        netlify_synced: true
+                                        netlify_synced: true,
+                                        hosting_provider: 'netlify',
+                                        status: 'active'
                                       })
                                       .eq('id', domain.id);
 
-                                    toast.success(`✅ ${domain.domain} added to Netlify!`);
+                                    toast.success(`✅ ${domain.domain} added as custom domain to Netlify!`);
+
+                                    // Show setup instructions if available
+                                    if (result.instructions) {
+                                      console.log('📋 Setup Instructions:', result.instructions);
+                                      toast.info(`Next: ${result.instructions.steps[0]}`);
+                                    }
+
                                     await loadDomains(); // Refresh the list
                                   } else {
-                                    toast.error(`Failed to add to Netlify: ${result.error}`);
+                                    toast.error(`Failed to add custom domain: ${result.error}`);
+                                    console.error('Add domain result error:', result);
                                   }
                                 } catch (error) {
-                                  toast.error('Failed to add domain to Netlify');
+                                  console.error('Add to Netlify error:', error);
+                                  toast.error(`Failed to add domain to Netlify: ${error.message}`);
                                 }
                               }}
                               title="Add to Netlify for SSL/TLS"
                               className="bg-purple-50 border-purple-200 hover:bg-purple-100"
                             >
                               <Globe className="h-3 w-3" />
+                            </Button>
+                          )}
+
+                          {/* Debug Netlify Button */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={async () => {
+                              try {
+                                toast.info('🔍 Testing Netlify setup...');
+
+                                // Test 1: Check if functions are deployed
+                                const healthResponse = await fetch('/.netlify/functions/netlify-custom-domain?health=check');
+                                if (!healthResponse.ok) {
+                                  if (healthResponse.status === 404) {
+                                    toast.error('❌ Netlify functions not deployed');
+                                    console.error('Functions not found - need to deploy');
+                                    return;
+                                  }
+                                  toast.error(`❌ Function error: ${healthResponse.status}`);
+                                  return;
+                                }
+
+                                const healthResult = await healthResponse.json();
+                                console.log('Health check:', healthResult);
+
+                                // Test 2: Check environment configuration
+                                if (!healthResult.environment?.hasToken) {
+                                  toast.error('❌ NETLIFY_ACCESS_TOKEN not configured');
+                                  console.error('Missing token in environment:', healthResult.environment);
+                                  return;
+                                }
+
+                                // Test 3: Check site access via debug function
+                                const debugResponse = await fetch('/.netlify/functions/netlify-debug');
+                                if (debugResponse.ok) {
+                                  const debugResult = await debugResponse.json();
+                                  if (debugResult.success) {
+                                    toast.success('✅ All Netlify checks passed!');
+                                    console.log('Full debug info:', debugResult.debug);
+                                  } else {
+                                    toast.error(`❌ API Error: ${debugResult.error}`);
+                                    console.error('API error details:', debugResult.debug);
+                                  }
+                                } else {
+                                  toast.warning('⚠️ Basic function works, but debug function unavailable');
+                                }
+
+                              } catch (error) {
+                                toast.error(`❌ Test failed: ${error.message}`);
+                                console.error('Debug test error:', error);
+                              }
+                            }}
+                            title="Test Netlify Setup (Click this first!)"
+                            className="bg-yellow-50 border-yellow-200 hover:bg-yellow-100"
+                          >
+                            <Info className="h-3 w-3" />
+                          </Button>
+
+                          {!domain.netlify_synced && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => addCustomDomainToNetlify(domain)}
+                              title="Add as Netlify Custom Domain (Official API)"
+                              className="bg-emerald-50 border-emerald-200 hover:bg-emerald-100"
+                            >
+                              <ExternalLink className="h-3 w-3" />
                             </Button>
                           )}
 
