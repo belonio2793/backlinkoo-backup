@@ -137,6 +137,7 @@ const DomainsPage = () => {
   const [netlifyDomainService, setNetlifyDomainService] = useState<NetlifyDomainService | null>(null); // Initialize Netlify domain service
   const [netlifyCustomDomainService, setNetlifyCustomDomainService] = useState<NetlifyCustomDomainService | null>(null); // Initialize Netlify custom domain service
   const [enhancedNetlifyService, setEnhancedNetlifyService] = useState<EnhancedNetlifyDomainService | null>(null); // Enhanced Netlify service with DNS
+  const [showDNSInstructions, setShowDNSInstructions] = useState<{domain: string, scenario: 'registrar' | 'domains-page' | 'subdomain'} | null>(null);
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
@@ -1171,7 +1172,7 @@ const DomainsPage = () => {
             toast.success('✅ Development mode: DNS validation service using fallback (working correctly)');
             setDnsServiceStatus('offline');
           } else {
-            toast.warning('⚠️ DNS validation function not deployed. Using fallback mode.');
+            toast.warning('��️ DNS validation function not deployed. Using fallback mode.');
             setDnsServiceStatus('offline');
           }
         } else {
@@ -1726,7 +1727,7 @@ anotherdomain.org`}
                                       </h4>
                                       <div className="text-sm text-amber-800 space-y-2">
                                         <div className="flex items-start gap-2">
-                                          <span className="font-medium">���� Development Mode:</span>
+                                          <span className="font-medium">������ Development Mode:</span>
                                           <span>DNS validation functions are not accessible in local environment</span>
                                         </div>
                                         <div className="flex items-start gap-2">
