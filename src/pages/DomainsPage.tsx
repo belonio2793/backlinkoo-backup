@@ -1460,7 +1460,6 @@ anotherdomain.org`}
 
                     if (!token || token === 'your_netlify_personal_access_token') return '❌ No valid VITE_NETLIFY_ACCESS_TOKEN';
                     if (token.length < 20) return `⚠️ Token too short (${token.length} chars)`;
-                    if (token.includes('demo')) return '⚠️ Demo token active';
                     return `✅ Valid token (${token.length} chars) | Site: ${siteId ? '✅' : '❌'}`;
                   })()}
                 </div>
