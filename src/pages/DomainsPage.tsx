@@ -902,6 +902,12 @@ const DomainsPage = () => {
                   Checking...
                 </Badge>
               )}
+              {import.meta.env.VITE_NETLIFY_ACCESS_TOKEN?.includes('demo') && (
+                <Badge className="bg-amber-100 text-amber-800 border-amber-200">
+                  <Info className="w-3 h-3 mr-1" />
+                  Demo Token
+                </Badge>
+              )}
               <Button variant="ghost" size="sm" onClick={checkDNSServiceHealth}>
                 <RefreshCw className="w-3 h-3" />
               </Button>
