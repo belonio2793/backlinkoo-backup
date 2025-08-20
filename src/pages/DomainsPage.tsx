@@ -231,29 +231,27 @@ const DomainsPage = () => {
   }, []);
 
   useEffect(() => {
-    if (user?.id) {
-      // Test connection first, then load domains
-      testSupabaseConnection().then(() => {
-        loadDomains().catch((error) => {
-          console.error('Failed to load domains on mount:', error);
-          const errorMessage = error?.message || 'Unknown error occurred';
-          toast.error(`Failed to load domains: ${errorMessage}`);
-        });
-      }).catch((connectionError) => {
-        console.error('Supabase connection test failed:', connectionError);
-        toast.error('Database connection failed. Please refresh the page.', {
-          duration: 10000,
-          action: {
-            label: 'Refresh',
-            onClick: () => window.location.reload()
-          }
-        });
+    // Load domains for everyone (authenticated and guests)
+    testSupabaseConnection().then(() => {
+      loadDomains().catch((error) => {
+        console.error('Failed to load domains on mount:', error);
+        const errorMessage = error?.message || 'Unknown error occurred';
+        toast.error(`Failed to load domains: ${errorMessage}`);
       });
+    }).catch((connectionError) => {
+      console.error('Supabase connection test failed:', connectionError);
+      toast.error('Database connection failed. Please refresh the page.', {
+        duration: 10000,
+        action: {
+          label: 'Refresh',
+          onClick: () => window.location.reload()
+        }
+      });
+    });
 
-      // Check DNS service status on load
-      checkDNSServiceHealth();
-    }
-  }, [user?.id]);
+    // Check DNS service status on load
+    checkDNSServiceHealth();
+  }, []); // Remove user dependency
 
   // Test Supabase connection
   const testSupabaseConnection = async () => {
