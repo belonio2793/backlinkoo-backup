@@ -15,6 +15,7 @@ import { Footer } from '@/components/Footer';
 import { FetchErrorBoundary } from '@/components/FetchErrorHandler';
 import { SupabaseConnectionFixerComponent } from '@/components/SupabaseConnectionFixer';
 import { BlogDataInitializer } from '@/components/BlogDataInitializer';
+import { getFallbackBlogPosts, storeFallbackPostsInLocalStorage, shouldUseFallbackData } from '@/utils/fallbackBlogData';
 
 import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
 import { ClaimStatusIndicator } from '@/components/ClaimStatusIndicator';
@@ -76,6 +77,16 @@ function Blog() {
       }, 10000); // 10 second timeout
 
       try {
+        // Check if we should use fallback data first
+        if (shouldUseFallbackData()) {
+          console.log('📺 Using fallback blog data due to missing configuration');
+          storeFallbackPostsInLocalStorage();
+          const fallbackPosts = getFallbackBlogPosts();
+          setBlogPosts(fallbackPosts);
+          setLoading(false);
+          return;
+        }
+
         // Use UnifiedClaimService to get posts consistently
         let posts: any[] = [];
         try {
@@ -83,14 +94,30 @@ function Blog() {
           console.log('✅ Claimable posts loaded:', posts.length);
         } catch (dbError) {
           console.warn('❌ Database unavailable, trying fallback:', dbError);
+
+          // Check if it's an API key error - use fallback data
+          const errorMessage = dbError?.message || '';
+          if (errorMessage.includes('No API key found') || errorMessage.includes('Invalid API key')) {
+            console.log('📺 Using fallback blog data due to API key issues');
+            storeFallbackPostsInLocalStorage();
+            const fallbackPosts = getFallbackBlogPosts();
+            setBlogPosts(fallbackPosts);
+            setLoading(false);
+            return;
+          }
+
           // Fallback to old service if needed
           try {
             posts = await ClaimableBlogService.getClaimablePosts(50);
             console.log('✅ Fallback posts loaded:', posts.length);
           } catch (fallbackError) {
-            console.warn('❌ Fallback also failed, using localStorage:', fallbackError);
-            // Continue with empty posts array - don't throw error
-            posts = [];
+            console.warn('❌ Fallback also failed, using offline data:', fallbackError);
+            // Use fallback data instead of empty array
+            storeFallbackPostsInLocalStorage();
+            const fallbackPosts = getFallbackBlogPosts();
+            setBlogPosts(fallbackPosts);
+            setLoading(false);
+            return;
           }
         }
 
