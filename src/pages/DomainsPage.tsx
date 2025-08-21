@@ -45,6 +45,14 @@ const DomainsPage = () => {
   const [newDomain, setNewDomain] = useState('');
   const [addingDomain, setAddingDomain] = useState(false);
   const [validatingDomains, setValidatingDomains] = useState<Set<string>>(new Set());
+  const [selectedThemeForDomain, setSelectedThemeForDomain] = useState<{[key: string]: string}>({});
+
+  const BLOG_THEMES = [
+    { id: 'minimal', name: 'Minimal Clean', description: 'Clean and simple design' },
+    { id: 'modern', name: 'Modern Business', description: 'Professional business layout' },
+    { id: 'elegant', name: 'Elegant Editorial', description: 'Magazine-style layout' },
+    { id: 'tech', name: 'Tech Focus', description: 'Technology-focused design' }
+  ];
 
   useEffect(() => {
     loadDomains();
