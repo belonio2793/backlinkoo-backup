@@ -536,20 +536,6 @@ export class BlogService {
       data = result.data;
       error = result.error;
 
-      // If blog_posts fails, try published_blog_posts as fallback
-      if (error && error.message?.includes('relation') && error.message?.includes('does not exist')) {
-        console.warn('⚠️ blog_posts table issue, trying published_blog_posts fallback');
-        const fallbackResult = await supabase
-          .from('published_blog_posts')
-          .select('*')
-          .eq('status', 'published')
-          .order('created_at', { ascending: false })
-          .limit(limit);
-
-        data = fallbackResult.data;
-        error = fallbackResult.error;
-      }
-
       if (error) {
         // Handle specific database errors gracefully
         if (error.message?.includes('Third-party script interference') ||
