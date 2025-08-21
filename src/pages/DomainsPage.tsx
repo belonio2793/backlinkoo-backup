@@ -71,6 +71,7 @@ import AutoDomainBlogThemeService from '@/services/autoDomainBlogThemeService';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import DNSSetupInstructions from '@/components/DNSSetupInstructions';
+import NetlifySetupGuide from '@/components/NetlifySetupGuide';
 import { useAuthState } from '@/hooks/useAuthState';
 import { supabase } from '@/integrations/supabase/client';
 import { DomainManager } from '@/services/domainManager';
@@ -1194,7 +1195,7 @@ const DomainsPage = () => {
           if (isDevMode && result.message.includes('simulated')) {
             toast.success(result.message);
           } else {
-            toast.warning(`⚠��� ${result.message}`);
+            toast.warning(`⚠���� ${result.message}`);
           }
         }
 
