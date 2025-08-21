@@ -2673,6 +2673,19 @@ anotherdomain.org`}
           onClose={() => setShowDNSInstructions(null)}
         />
       )}
+
+      {/* Netlify Setup Guide Modal */}
+      <NetlifySetupGuide
+        open={showNetlifySetup}
+        onOpenChange={setShowNetlifySetup}
+        onConfigured={() => {
+          const isConfigured = netlifyDomainService.isConfigured();
+          setNetlifyConfigured(isConfigured);
+          if (isConfigured) {
+            toast.success('✅ Netlify integration configured! You can now add domains.');
+          }
+        }}
+      />
     </div>
   );
 };
