@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Globe, Loader2 } from 'lucide-react';
+import { Globe, Loader2, Info, CheckCircle } from 'lucide-react';
+import SimpleDNSInstructions from './SimpleDNSInstructions';
 
 interface Domain {
   id: string;
