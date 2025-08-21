@@ -261,16 +261,42 @@ const DomainsPage = () => {
         // Skip domains table auto-creation to prevent access errors
         console.log('🔧 Domains initialization started (table auto-creation disabled)...');
 
-        // Test connection (don't fail initialization if this fails)
-        const connectionWorking = await testSupabaseConnection(false);
-        setSupabaseConnected(connectionWorking);
+        // Establish API connection with retry logic
+        let connectionWorking = false;
+        let retryCount = 0;
+        const maxRetries = 3;
 
-        if (connectionWorking) {
-          // Load domains only if connection is working (don't show toast on error during init)
-          await loadDomains(false);
-        } else {
-          console.warn('⚠️ Skipping domain loading due to Supabase connection issues');
-          setLoading(false); // Make sure to set loading to false
+        while (!connectionWorking && retryCount < maxRetries) {
+          try {
+            console.log(`🔧 Attempting database connection (attempt ${retryCount + 1}/${maxRetries})...`);
+            connectionWorking = await testSupabaseConnection(false);
+
+            if (connectionWorking) {
+              console.log('✅ Database connection established successfully');
+              setSupabaseConnected(true);
+
+              // Load domains with established connection
+              await loadDomains(false);
+            } else {
+              retryCount++;
+              if (retryCount < maxRetries) {
+                console.log(`⏱️ Connection failed, retrying in ${retryCount}s...`);
+                await new Promise(resolve => setTimeout(resolve, retryCount * 1000));
+              }
+            }
+          } catch (error) {
+            console.error(`❌ Connection attempt ${retryCount + 1} failed:`, error);
+            retryCount++;
+            if (retryCount < maxRetries) {
+              await new Promise(resolve => setTimeout(resolve, retryCount * 1000));
+            }
+          }
+        }
+
+        if (!connectionWorking) {
+          console.warn('⚠️ Could not establish database connection after retries, continuing in offline mode');
+          setSupabaseConnected(false);
+          setLoading(false);
         }
 
         // Check DNS service status
