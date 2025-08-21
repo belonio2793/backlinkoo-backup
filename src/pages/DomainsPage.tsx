@@ -147,6 +147,8 @@ const DomainsPage = () => {
   const [environmentConfig, setEnvironmentConfig] = useState<{ [key: string]: string }>({});
   const [supabaseConnected, setSupabaseConnected] = useState<boolean | null>(null); // null = unknown, true = connected, false = disconnected
   const [showNetlifySetup, setShowNetlifySetup] = useState(false);
+  const [showThemeSelector, setShowThemeSelector] = useState(false);
+  const [selectedDomainForTheme, setSelectedDomainForTheme] = useState<Domain | null>(null);
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
