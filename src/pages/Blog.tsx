@@ -434,7 +434,6 @@ function Blog() {
 
       console.log('✅ Blog posts refreshed:', {
         databasePosts: posts.length,
-        localBlogPosts: localBlogPosts.length,
         totalPosts: allPosts.length,
       });
     } catch (error) {
