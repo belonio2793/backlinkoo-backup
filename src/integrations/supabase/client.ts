@@ -25,8 +25,17 @@ console.log('🔧 Enhanced Supabase client configuration:', {
   environment: import.meta.env.MODE
 });
 
-// Validate credentials with enhanced error reporting
+// Use fallback credentials if environment variables aren't loaded
+const finalUrl = SUPABASE_URL || 'https://dfhanacsmsvvkpunurnp.supabase.co';
+const finalKey = SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT87Zqa5RY';
+
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.warn('⚠️ Environment variables not loaded properly, using fallback credentials');
+  console.log('💡 This suggests a Vite environment variable loading issue');
+}
+
+// Validate final credentials
+if (!finalUrl || !finalKey) {
   const config = SupabaseConnectionFixer.checkConfiguration();
   console.error('❌ Supabase configuration issues:', config.issues);
   console.log('💡 Recommendations:', config.recommendations);
