@@ -58,6 +58,7 @@ logs
 
 # Lock files
 bun.lockb
+package-lock.json
 
 # Supabase
 .branches
