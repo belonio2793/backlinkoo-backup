@@ -80,7 +80,9 @@ export async function checkSupabasePermissions() {
       error: authError?.message
     });
   } catch (authError: any) {
-    console.error('❌ Auth check failed:', authError);
+    const { extractErrorMessage } = await import('@/utils/errorExtractor');
+    const errorMessage = extractErrorMessage(authError);
+    console.error('❌ Auth check failed:', errorMessage);
   }
   
   return results;
