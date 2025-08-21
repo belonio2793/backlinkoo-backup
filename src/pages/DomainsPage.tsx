@@ -20,11 +20,22 @@ import { toast } from 'sonner';
 interface Domain {
   id: string;
   domain: string;
-  status: 'pending' | 'validating' | 'validated' | 'error';
+  status: 'pending' | 'validating' | 'validated' | 'error' | 'dns_ready' | 'theme_selection' | 'active';
   netlify_verified: boolean;
   dns_verified: boolean;
   created_at: string;
   error_message?: string;
+  dns_records?: DNSRecord[];
+  selected_theme?: string;
+  theme_name?: string;
+  blog_enabled?: boolean;
+}
+
+interface DNSRecord {
+  type: string;
+  name: string;
+  value: string;
+  status: 'pending' | 'verified' | 'error';
 }
 
 const DomainsPage = () => {
