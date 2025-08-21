@@ -62,6 +62,7 @@ import {
 import SimpleBlogTemplateManager from '@/components/SimpleBlogTemplateManager';
 import DNSValidationService from '@/services/dnsValidationService';
 import AutoDNSPropagation from '@/components/AutoDNSPropagation';
+import DomainWorkflowManager from '@/components/DomainWorkflowManager';
 import AutoPropagationWizard from '@/components/AutoPropagationWizard';
 import NetlifyDNSManager from '@/services/netlifyDNSManager';
 import NetlifyDNSSync from '@/services/netlifyDNSSync';
@@ -1429,7 +1430,7 @@ const DomainsPage = () => {
             netlify_synced: true
           });
         } else {
-          console.warn(`⚠️ Netlify DNS sync failed for ${domain.domain}: ${netlifyDNSResult.error}`);
+          console.warn(`⚠��� Netlify DNS sync failed for ${domain.domain}: ${netlifyDNSResult.error}`);
           // Continue with fallback DNS configuration
         }
       }
