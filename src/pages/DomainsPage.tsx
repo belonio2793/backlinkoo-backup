@@ -1651,9 +1651,6 @@ const DomainsPage = () => {
                   <TableRow>
                     <TableHead>Domain</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>DNS Records</TableHead>
-                    <TableHead>Netlify</TableHead>
-                    <TableHead>Stats</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
