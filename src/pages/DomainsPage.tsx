@@ -81,8 +81,13 @@ const DomainsPage = () => {
       return;
     }
 
+    if (!user) {
+      toast.error('Please sign in to add domains');
+      return;
+    }
+
     const cleanedDomain = cleanDomain(newDomain);
-    
+
     if (!validateDomainFormat(cleanedDomain)) {
       toast.error('Please enter a valid domain name');
       return;
@@ -105,7 +110,8 @@ const DomainsPage = () => {
           domain: cleanedDomain,
           status: 'pending',
           netlify_verified: false,
-          dns_verified: false
+          dns_verified: false,
+          user_id: user.id
         })
         .select()
         .single();
