@@ -380,6 +380,16 @@ export class UnifiedClaimService {
 
       // If published_blog_posts fails or returns no data, try blog_posts fallback
       if (error || !data || data.length === 0) {
+        if (error) {
+          console.log('📖 published_blog_posts query failed:', {
+            error: error.message || error,
+            code: error.code,
+            details: error.details,
+            hint: error.hint
+          });
+        } else {
+          console.log('📖 published_blog_posts returned no data, trying fallback...');
+        }
         console.log('📖 Trying blog_posts fallback...');
         const fallbackResult = await supabase
           .from('blog_posts')
