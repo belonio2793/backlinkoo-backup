@@ -2538,30 +2538,7 @@ anotherdomain.org`}
         </Card>
 
         {/* Environment Variables Manager */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Environment Configuration
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowEnvironmentManager(!showEnvironmentManager)}
-              >
-                {showEnvironmentManager ? 'Hide' : 'Configure'} Environment
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          {showEnvironmentManager && (
-            <CardContent>
-              <EnvironmentVariablesManager
-                onConfigurationChange={setEnvironmentConfig}
-              />
-            </CardContent>
-          )}
-        </Card>
+        {/* Environment Configuration removed for security - all environment variables are now managed server-side */}
 
         {/* Netlify Control Panel for Selected Domain */}
         {selectedDomainForControl && (
