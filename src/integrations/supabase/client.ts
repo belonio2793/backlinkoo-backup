@@ -215,3 +215,7 @@ if (import.meta.env.DEV) {
 export { handleNetworkError, SupabaseConnectionFixer };
 
 console.log('✅ Enhanced Supabase client initialized with error resilience');
+
+// TEMPORARY: Use direct client to bypass any configuration issues
+export const supabase = supabaseDirect;
+console.log('🔄 Using direct Supabase client for debugging');
