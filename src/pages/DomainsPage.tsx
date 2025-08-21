@@ -254,7 +254,7 @@ const DomainsPage = () => {
         }
 
         // Check DNS service status
-        checkDNSServiceHealth();
+        await checkDNSServiceHealth();
 
         console.log('✅ Domains initialization complete');
 
@@ -1191,7 +1191,7 @@ const DomainsPage = () => {
 
       if (result.success) {
         if (result.validated) {
-          toast.success(`✅ ${result.message}`);
+          toast.success(`�� ${result.message}`);
         } else {
           // Show warning instead of error for fallback mode
           const isDevMode = window.location.hostname.includes('localhost') ||
