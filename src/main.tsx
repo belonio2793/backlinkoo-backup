@@ -9,6 +9,8 @@ import './utils/supabaseConnectionFixer'
 import './utils/supabaseConnectionTest'
 // Debug Supabase configuration
 import './utils/debugSupabaseConfig'
+// Check Supabase table permissions and RLS
+import './utils/checkSupabasePermissions'
 // Emergency fetch protection - HIGHEST PRIORITY - FIXES FULLSTORY INTERFERENCE
 import './utils/emergencyFetchFix'
 // Enhanced FullStory fix - must load FIRST
