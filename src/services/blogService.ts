@@ -246,11 +246,12 @@ export class BlogService {
     console.log('🔍 [BlogService] Fetching blog post by slug:', slug);
 
     // Create multiple isolated approaches to avoid stream conflicts
+    // Prioritize blog_posts as primary table (unified approach)
     const approaches = [
-      () => this.fetchWithIsolatedClient(slug, 'published_blog_posts'),
       () => this.fetchWithIsolatedClient(slug, 'blog_posts'),
-      () => this.fetchWithBasicQuery(slug, 'published_blog_posts'),
-      () => this.fetchWithBasicQuery(slug, 'blog_posts')
+      () => this.fetchWithBasicQuery(slug, 'blog_posts'),
+      () => this.fetchWithIsolatedClient(slug, 'published_blog_posts'),
+      () => this.fetchWithBasicQuery(slug, 'published_blog_posts')
     ];
 
     for (let i = 0; i < approaches.length; i++) {
