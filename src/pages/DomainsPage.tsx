@@ -267,7 +267,7 @@ const DomainsPage = () => {
   // Show login prompt if not authenticated
   if (!isAuthenticated) {
     // Store the intended route so user returns here after login
-    React.useEffect(() => {
+    useEffect(() => {
       localStorage.setItem('intended_route', '/domains');
     }, []);
 
