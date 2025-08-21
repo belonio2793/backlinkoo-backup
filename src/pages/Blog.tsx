@@ -1160,7 +1160,7 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
             )}
             {post.expires_at && (
               <p className="text-xs text-center text-amber-600 mt-1">
-                ��� Expires: {formatDate(post.published_at || post.created_at)}
+                ⏰ Expires: {formatDate(post.expires_at)}
               </p>
             )}
           </div>
