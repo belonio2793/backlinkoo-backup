@@ -389,7 +389,29 @@ export class UnifiedClaimService {
           .limit(limit);
 
         if (fallbackResult.error) {
-          console.error('Failed to get available posts from both tables:', fallbackResult.error.message || fallbackResult.error);
+          console.error('Failed to get available posts from both tables:', {
+            error: fallbackResult.error.message || fallbackResult.error,
+            code: fallbackResult.error.code,
+            details: fallbackResult.error.details,
+            hint: fallbackResult.error.hint,
+            hasUrl: !!import.meta.env.VITE_SUPABASE_URL,
+            hasKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
+            urlPrefix: import.meta.env.VITE_SUPABASE_URL ? import.meta.env.VITE_SUPABASE_URL.substring(0, 30) : 'missing',
+            keyPrefix: import.meta.env.VITE_SUPABASE_ANON_KEY ? import.meta.env.VITE_SUPABASE_ANON_KEY.substring(0, 10) : 'missing'
+          });
+
+          // Special handling for API key errors
+          if (fallbackResult.error.message?.includes('No API key found') ||
+              fallbackResult.error.message?.includes('Invalid API key') ||
+              fallbackResult.error.code === '401' ||
+              fallbackResult.error.code === 'PGRST000') {
+            console.error('🔑 API Key Configuration Issue Detected:');
+            console.error('   - Check VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables');
+            console.error('   - Ensure environment variables are properly loaded');
+            console.error('   - Try restarting the development server');
+            console.error('   - Run testSupabaseConnection() in console for diagnostics');
+          }
+
           return [];
         }
 
