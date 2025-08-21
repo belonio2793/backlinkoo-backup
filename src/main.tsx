@@ -7,6 +7,8 @@ import './styles/mobile-payment-fix.css'
 import './utils/supabaseConnectionFixer'
 // Supabase connection test for debugging API key issues
 import './utils/supabaseConnectionTest'
+// Debug Supabase configuration
+import './utils/debugSupabaseConfig'
 // Emergency fetch protection - HIGHEST PRIORITY - FIXES FULLSTORY INTERFERENCE
 import './utils/emergencyFetchFix'
 // Enhanced FullStory fix - must load FIRST
