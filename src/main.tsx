@@ -470,6 +470,12 @@ if (import.meta.env.DEV) {
   console.log('  - testDomainDatabase() - Check if domain blog themes database is set up');
   console.log('  - setupDomainDatabase() - Set up domain blog themes database automatically');
   console.log('  - testDNSValidationFix() - Test DNS validation service fixes');
+  console.log('');
+  console.log('🔧 Blog Debugging Helpers:');
+  console.log('  - testBlogLoading() - Test blog loading functionality and diagnose issues');
+  console.log('  - fixBlogConfiguration() - Auto-fix common blog configuration problems');
+  console.log('  - debugSupabaseConfig() - Check Supabase environment variables');
+  console.log('  - checkSupabasePermissions() - Test table access and RLS policies');
 }
 
 // Priority: Get React app rendering ASAP
