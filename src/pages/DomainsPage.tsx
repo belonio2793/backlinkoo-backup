@@ -791,8 +791,17 @@ const DomainsPage = () => {
 
   // Check DNS service health
   const checkDNSServiceHealth = async () => {
-    const status = await DNSValidationService.checkServiceHealth();
-    setDnsServiceStatus(status);
+    try {
+      const status = await DNSValidationService.checkServiceHealth();
+      setDnsServiceStatus(status);
+    } catch (error) {
+      console.error('DNS service health check failed:', error);
+      setDnsServiceStatus({
+        operational: false,
+        message: 'DNS service health check failed',
+        lastCheck: new Date().toISOString()
+      });
+    }
   };
 
   // Fix domains missing verification tokens
