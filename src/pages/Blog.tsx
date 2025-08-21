@@ -74,101 +74,27 @@ function Blog() {
       }, 10000); // 10 second timeout
 
       try {
-        // Use UnifiedClaimService to get posts from Supabase
-        let posts: any[] = [];
-        try {
-          posts = await UnifiedClaimService.getClaimablePosts(50);
-          console.log('✅ Blog posts loaded from Supabase:', posts.length);
-        } catch (dbError) {
-          console.error('❌ Failed to load blog posts from Supabase:', dbError);
-          // Don't use fallback - throw error to show user the real issue
-          throw new Error(`Failed to load blog posts: ${dbError?.message || 'Database connection failed'}`);
-        }
-
-        // Also load from localStorage (traditional blog posts)
-        const localBlogPosts: BlogPost[] = [];
-        try {
-          const allBlogPostsStr = localStorage.getItem('all_blog_posts');
-          if (!allBlogPostsStr) {
-            console.log('No blog posts in localStorage');
-          } else {
-            const allBlogPosts = JSON.parse(allBlogPostsStr);
-
-            if (Array.isArray(allBlogPosts)) {
-              for (const blogMeta of allBlogPosts) {
-                try {
-                  const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
-                  if (blogData) {
-                    const blogPost = JSON.parse(blogData);
-
-                    // Check if trial post is expired
-                    if (blogPost.is_trial_post && blogPost.expires_at) {
-                      const isExpired = new Date() > new Date(blogPost.expires_at);
-                      if (isExpired) {
-                        // Remove expired trial post
-                        localStorage.removeItem(`blog_post_${blogMeta.slug}`);
-                        continue;
-                      }
-                    }
-
-                    localBlogPosts.push(blogPost);
-                  }
-                } catch (blogParseError) {
-                  console.warn(`Failed to parse blog post ${blogMeta.slug}:`, blogParseError);
-                  // Remove corrupted blog post
-                  localStorage.removeItem(`blog_post_${blogMeta.slug}`);
-                }
-              }
-
-              // Update the all_blog_posts list to remove expired/corrupted ones
-              const validBlogMetas = allBlogPosts.filter((meta: any) => {
-                return localBlogPosts.some(post => post.slug === meta.slug);
-              });
-              localStorage.setItem('all_blog_posts', JSON.stringify(validBlogMetas));
-            }
-          }
-        } catch (storageError) {
-          console.warn('Failed to load from localStorage, clearing corrupted data:', storageError);
-          // Clear corrupted localStorage data
-          try {
-            localStorage.removeItem('all_blog_posts');
-          } catch (clearError) {
-            console.warn('Could not clear localStorage:', clearError);
-          }
-        }
-
-        // Combine database and localStorage posts, removing duplicates
-        const allPosts = [...posts];
-        localBlogPosts.forEach(localPost => {
-          if (!allPosts.find(dbPost => dbPost.slug === localPost.slug)) {
-            allPosts.push(localPost);
-          }
-        });
+        // Load posts directly from Supabase database
+        console.log('📖 Loading blog posts from Supabase...');
+        const posts = await UnifiedClaimService.getAvailablePosts(50);
 
         // Sort posts based on selected criteria
-        const sortedPosts = sortPosts(allPosts, sortBy);
+        const sortedPosts = sortPosts(posts, sortBy);
         setBlogPosts(sortedPosts);
 
-        console.log('✅ Blog posts loaded:', {
-          databasePosts: posts.length,
-          localBlogPosts: localBlogPosts.length,
-          totalPosts: allPosts.length,
+        console.log('✅ Blog posts loaded from Supabase:', {
+          totalPosts: posts.length,
         });
-
-        // If no posts found, that's the real state - don't show initializer
       } catch (error) {
-        console.error('❌ Failed to load blog posts:', error);
-        // Even if there's an error, still try to show any local posts that were loaded
+        console.error('❌ Failed to load blog posts from Supabase:', error);
         setBlogPosts([]);
 
-        // Show user-friendly error message only in development
-        if (import.meta.env.DEV) {
-          toast({
-            title: "Blog loading issue",
-            description: "Some blog posts may not be visible. Please refresh the page.",
-            variant: "destructive"
-          });
-        }
+        // Show error to user
+        toast({
+          title: "Failed to load blog posts",
+          description: "Could not connect to the database. Please check your connection.",
+          variant: "destructive"
+        });
       } finally {
         clearTimeout(timeoutId);
         console.log('📊 Setting loading to false');
