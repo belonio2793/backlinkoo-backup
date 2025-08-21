@@ -125,7 +125,7 @@ const DomainsPage = () => {
   const [showBulkAdd, setShowBulkAdd] = useState(false);
   const [editingDomain, setEditingDomain] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState(false);
-  const [dnsServiceStatus, setDnsServiceStatus] = useState<'unknown' | 'online' | 'offline' | { operational: boolean; message: string; lastCheck: string }>('unknown');
+  const [dnsServiceStatus, setDnsServiceStatus] = useState<'unknown' | 'online' | 'offline'>('unknown');
   const [showAutoPropagationWizard, setShowAutoPropagationWizard] = useState(false);
   const [selectedDomainForWizard, setSelectedDomainForWizard] = useState<Domain | null>(null);
   const [domainBlogThemesExists, setDomainBlogThemesExists] = useState<boolean | null>(null);
@@ -659,7 +659,7 @@ const DomainsPage = () => {
         ssl_status: netlifyStatus.ssl?.status
       };
 
-      console.log(`📊 Current DNS status for ${domain.domain}:`, currentDNSStatus);
+      console.log(`��� Current DNS status for ${domain.domain}:`, currentDNSStatus);
 
       let needsDNSUpdate = false;
       const discrepancies = [];
@@ -1645,7 +1645,7 @@ const DomainsPage = () => {
                   loadDomains().then(() => {
                     toast.success('✅ Domains refreshed!');
                   }).catch((error) => {
-                    toast.error(`❌ Failed to refresh: ${error.message}`);
+                    toast.error(`��� Failed to refresh: ${error.message}`);
                   });
                 }}
                 className="text-xs"
