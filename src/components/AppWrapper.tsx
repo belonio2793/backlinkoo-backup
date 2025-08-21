@@ -12,7 +12,7 @@ import PasswordReset from '@/pages/PasswordReset';
 import TermsOfService from '@/pages/TermsOfService';
 import PrivacyPolicy from '@/pages/PrivacyPolicy';
 import BlogPreview from '@/pages/BlogPreview';
-import { Blog } from '@/pages/Blog';
+import Blog from '@/pages/Blog';
 import { BlogCreator } from '@/pages/BlogCreator';
 import { BlogPost } from '@/pages/BlogPost';
 import AIContentTest from '@/pages/AIContentTest';

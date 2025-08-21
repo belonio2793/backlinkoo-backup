@@ -11,7 +11,7 @@ export const LazyPromotionMaterials = lazy(() => import('@/pages/PromotionMateri
 export const LazyCampaignDeliverables = lazy(() => import('@/pages/CampaignDeliverables').then(module => ({ default: module.CampaignDeliverables })));
 export const LazyBlogCreator = lazy(() => import('@/pages/BlogCreator').then(module => ({ default: module.BlogCreator })));
 export const LazyBlogPost = lazy(() => import('@/pages/BlogPost').then(module => ({ default: module.BlogPost })));
-export const LazyBlog = lazy(() => import('@/pages/Blog').then(module => ({ default: module.Blog })));
+export const LazyBlog = lazy(() => import('@/pages/Blog'));
 
 // New blog system components
 export const LazyBlogListing = lazy(() => import('@/pages/BlogListing').then(module => ({ default: module.BlogListing })));
