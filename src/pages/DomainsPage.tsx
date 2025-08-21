@@ -220,6 +220,25 @@ const DomainsPage = () => {
 
       if (result.success) {
         toast.success(`✅ ${domain.domain} validated successfully`);
+
+        // If domain is validated and doesn't have a theme yet, trigger theme selection
+        const updatedDomain = domains.find(d => d.id === domainId);
+        if (updatedDomain && !updatedDomain.selected_theme && result.netlifyVerified && result.dnsVerified) {
+          // Update status to theme_selection
+          await supabase
+            .from('domains')
+            .update({ status: 'theme_selection' })
+            .eq('id', domainId);
+
+          setDomains(prev => prev.map(d =>
+            d.id === domainId ? { ...d, status: 'theme_selection' } : d
+          ));
+
+          // Auto-select default theme (minimal) for seamless workflow
+          setTimeout(() => {
+            setDomainTheme(domainId, 'minimal');
+          }, 1000);
+        }
       } else {
         toast.error(`❌ Validation failed for ${domain.domain}: ${result.error}`);
       }
