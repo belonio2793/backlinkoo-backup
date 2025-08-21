@@ -1704,58 +1704,44 @@ const DomainsPage = () => {
 
         {/* Database configuration and API connection handled internally */}
 
-        {/* Quick Add Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Single Domain Add */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5" />
-                Add Single Domain
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="example.com"
-                  value={newDomain}
-                  onChange={(e) => setNewDomain(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && !addingDomain && addDomain()}
-                  className="flex-1"
-                />
-                <Button onClick={addDomain} disabled={addingDomain}>
-                  {addingDomain ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Plus className="w-4 h-4" />
-                  )}
-                  Add Domain
-                </Button>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Enter domain without http:// or www. (e.g., example.com)
-              </p>
-            </CardContent>
-          </Card>
+        {/* Enhanced Domain Workflow */}
+        <div className="mb-8">
+          <DomainWorkflowManager
+            onDomainAdded={(domain) => {
+              // Add domain to the list
+              setDomains(prev => [domain as any, ...prev]);
+              toast.success(`Domain ${domain.domain} configured successfully!`);
+            }}
+            onThemeSelected={(domainId, themeId) => {
+              // Update domain with selected theme
+              setDomains(prev => prev.map(d =>
+                d.id === domainId
+                  ? { ...d, selected_theme: themeId }
+                  : d
+              ));
+            }}
+          />
+        </div>
 
-          {/* Bulk Add Toggle */}
+        {/* Legacy Bulk Add Option */}
+        <div className="mb-8">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="h-5 w-5" />
-                Bulk Add Domains
+                Bulk Add (Legacy)
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Button 
+              <Button
                 onClick={() => setShowBulkAdd(!showBulkAdd)}
-                variant={showBulkAdd ? "secondary" : "default"}
-                className="w-full"
+                variant={showBulkAdd ? "secondary" : "outline"}
+                size="sm"
               >
                 {showBulkAdd ? 'Hide' : 'Show'} Bulk Add Interface
               </Button>
               <p className="text-xs text-gray-500 mt-2">
-                Add multiple domains at once, one per line
+                For adding multiple domains at once (uses legacy workflow)
               </p>
             </CardContent>
           </Card>
