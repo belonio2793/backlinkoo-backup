@@ -7,6 +7,16 @@ import { SupabaseConnectionFixer } from '@/utils/supabaseConnectionFixer';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// Debug logging for environment variables
+console.log('🔍 Environment variable debugging:', {
+  allEnvKeys: Object.keys(import.meta.env),
+  mode: import.meta.env.MODE,
+  dev: import.meta.env.DEV,
+  VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
+  hasViteSupabaseUrl: !!import.meta.env.VITE_SUPABASE_URL,
+  hasViteSupabaseKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY
+});
+
 console.log('🔧 Enhanced Supabase client configuration:', {
   hasUrl: !!SUPABASE_URL,
   hasKey: !!SUPABASE_ANON_KEY,
