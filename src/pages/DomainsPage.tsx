@@ -124,7 +124,16 @@ const DomainsPage = () => {
         return;
       }
 
-      // Add domain to database
+      toast.info(`Adding ${domain} to Netlify hosting...`);
+
+      // Add domain to Netlify first
+      const netlifyResult = await netlifyPBNService.addDomainToPBN(domain);
+
+      if (!netlifyResult.success) {
+        throw new Error(`Netlify integration failed: ${netlifyResult.error}`);
+      }
+
+      // Add domain to database with Netlify information
       const { data, error } = await supabase
         .from('domains')
         .insert({
@@ -136,9 +145,13 @@ const DomainsPage = () => {
           a_record_validated: false,
           cname_validated: false,
           ssl_enabled: false,
-          blog_enabled: false,
+          blog_enabled: true, // Enable for PBN
           pages_published: 0,
-          hosting_provider: 'netlify'
+          hosting_provider: 'netlify',
+          netlify_domain_id: netlifyResult.domain?.id,
+          dns_records: JSON.stringify(netlifyResult.dnsRecords),
+          is_publishing_platform: false, // Will be true after validation
+          netlify_state: netlifyResult.domain?.state
         })
         .select()
         .single();
@@ -149,7 +162,19 @@ const DomainsPage = () => {
 
       setDomains(prev => [data, ...prev]);
       setNewDomain('');
-      toast.success(`✅ Domain ${domain} added successfully!`);
+
+      toast.success(`✅ Domain ${domain} added to PBN hosting!`, {
+        description: 'Configure DNS records to complete setup'
+      });
+
+      // Show DNS instructions
+      if (netlifyResult.dnsRecords && netlifyResult.dnsRecords.length > 0) {
+        const instructions = netlifyResult.dnsRecords.map(record =>
+          `${record.type}: ${record.name} → ${record.value}`
+        ).join('\n');
+
+        console.log('DNS Instructions for', domain, ':\n', instructions);
+      }
 
     } catch (error: any) {
       console.error('Error adding domain:', error);
@@ -197,7 +222,7 @@ const DomainsPage = () => {
           setShowThemeSelector(true);
         }
       } else {
-        toast.warning(`���️ ${result.message}`);
+        toast.warning(`⚠️ ${result.message}`);
       }
 
     } catch (error: any) {
