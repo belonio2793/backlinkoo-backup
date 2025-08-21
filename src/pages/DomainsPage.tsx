@@ -1638,16 +1638,9 @@ const DomainsPage = () => {
                   <div className="space-y-2">
                     <div className="font-medium">Database Configuration Required</div>
                     <div className="text-sm">
-                      Supabase connection is not available. Please configure your environment variables or use the Environment Configuration panel below.
+                      Supabase connection is not available. Environment variables should be configured server-side for security.
                     </div>
                     <div className="flex gap-2 mt-3">
-                      <Button
-                        size="sm"
-                        onClick={() => setShowEnvironmentManager(true)}
-                        className="bg-yellow-600 hover:bg-yellow-700"
-                      >
-                        Configure Environment
-                      </Button>
                       <Button
                         size="sm"
                         variant="outline"
@@ -2059,7 +2052,7 @@ anotherdomain.org`}
                                           <span>DNS validation functions are not accessible in local environment</span>
                                         </div>
                                         <div className="flex items-start gap-2">
-                                          <span className="font-medium">✅ Production Ready:</span>
+                                          <span className="font-medium">��� Production Ready:</span>
                                           <span>All functions will be available when deployed to Netlify</span>
                                         </div>
                                         <div className="flex items-start gap-2">
