@@ -451,19 +451,13 @@ function Blog() {
       // Clear existing posts first for visual feedback
       setBlogPosts([]);
 
-      // Use UnifiedClaimService to get posts consistently
+      // Fetch blog posts directly from database using blogService
       let posts: any[] = [];
       try {
-        posts = await UnifiedClaimService.getClaimablePosts(50);
-        console.log('✅ Claimable posts loaded:', posts.length);
+        posts = await blogService.getRecentBlogPosts(50);
+        console.log('✅ Blog posts refreshed from database:', posts.length);
       } catch (dbError) {
-        console.warn('❌ Database unavailable, trying fallback:', dbError);
-        try {
-          posts = await ClaimableBlogService.getClaimablePosts(50);
-          console.log('🔄 Fallback posts loaded:', posts.length);
-        } catch (fallbackError) {
-          console.warn('❌ Fallback also failed, using localStorage:', fallbackError);
-        }
+        console.warn('❌ Database unavailable during refresh:', dbError);
       }
 
       // Also load from localStorage (traditional blog posts)
