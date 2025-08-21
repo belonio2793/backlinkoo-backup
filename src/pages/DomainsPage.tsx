@@ -125,7 +125,7 @@ const DomainsPage = () => {
   const [showBulkAdd, setShowBulkAdd] = useState(false);
   const [editingDomain, setEditingDomain] = useState<string | null>(null);
   const [showConfig, setShowConfig] = useState(false);
-  const [dnsServiceStatus, setDnsServiceStatus] = useState<'unknown' | 'online' | 'offline'>('unknown');
+  const [dnsServiceStatus, setDnsServiceStatus] = useState<'unknown' | 'online' | 'offline' | { operational: boolean; message: string; lastCheck: string }>('unknown');
   const [showAutoPropagationWizard, setShowAutoPropagationWizard] = useState(false);
   const [selectedDomainForWizard, setSelectedDomainForWizard] = useState<Domain | null>(null);
   const [domainBlogThemesExists, setDomainBlogThemesExists] = useState<boolean | null>(null);
