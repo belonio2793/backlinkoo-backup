@@ -261,7 +261,7 @@ export class ClaimableBlogService {
 
   /**
    * Get all claimable posts (with expiration logic)
-   * Queries published_blog_posts first, then blog_posts as fallback
+   * Queries blog_posts as primary table (unified approach)
    */
   static async getClaimablePosts(limit: number = 20): Promise<any[]> {
     try {
@@ -276,37 +276,23 @@ export class ClaimableBlogService {
         return rpcData;
       }
 
-      // Fallback: Query published_blog_posts directly
-      console.log('📖 RPC failed, trying published_blog_posts direct query...');
-      let { data, error } = await supabase
-        .from('published_blog_posts')
+      // Fallback: Query blog_posts directly (unified approach)
+      console.log('📖 RPC failed, trying blog_posts direct query...');
+      const { data, error } = await supabase
+        .from('blog_posts')
         .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false })
         .limit(limit);
 
-      // If published_blog_posts fails, try blog_posts fallback
-      if (error || !data || data.length === 0) {
-        console.log('📖 Trying blog_posts fallback...');
-        const fallbackResult = await supabase
-          .from('blog_posts')
-          .select('*')
-          .eq('status', 'published')
-          .order('created_at', { ascending: false })
-          .limit(limit);
-
-        if (fallbackResult.error) {
-          console.error('❌ Failed to fetch claimable posts from both tables:', {
-            rpcError: rpcError?.message || rpcError,
-            publishedError: error?.message || error,
-            fallbackError: fallbackResult.error?.message || fallbackResult.error,
-            limit,
-            timestamp: new Date().toISOString()
-          });
-          return [];
-        }
-
-        data = fallbackResult.data;
+      if (error) {
+        console.error('❌ Failed to fetch claimable posts:', {
+          rpcError: rpcError?.message || rpcError,
+          fallbackError: error?.message || error,
+          limit,
+          timestamp: new Date().toISOString()
+        });
+        return [];
       }
 
       console.log(`✅ Fetched ${data?.length || 0} claimable posts`);

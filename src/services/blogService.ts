@@ -113,21 +113,11 @@ export class BlogService {
 
     let result;
     try {
-      // Primary save to published_blog_posts table
+      // Primary save to blog_posts table (unified approach)
       result = await supabase
-        .from('published_blog_posts')
+        .from('blog_posts')
         .insert(cleanBlogPostData)
         .select();
-
-      // Also save to blog_posts for backward compatibility
-      try {
-        await supabase
-          .from('blog_posts')
-          .insert(cleanBlogPostData);
-        console.log('✅ [BlogService] Also saved to blog_posts for compatibility');
-      } catch (backupError) {
-        console.warn('⚠️ [BlogService] Backup save to blog_posts failed:', this.getSafeErrorMessage(backupError));
-      }
 
     } catch (networkError: any) {
       console.error('❌ Network error during blog post creation:', networkError);
@@ -256,11 +246,12 @@ export class BlogService {
     console.log('🔍 [BlogService] Fetching blog post by slug:', slug);
 
     // Create multiple isolated approaches to avoid stream conflicts
+    // Prioritize blog_posts as primary table (unified approach)
     const approaches = [
-      () => this.fetchWithIsolatedClient(slug, 'published_blog_posts'),
       () => this.fetchWithIsolatedClient(slug, 'blog_posts'),
-      () => this.fetchWithBasicQuery(slug, 'published_blog_posts'),
-      () => this.fetchWithBasicQuery(slug, 'blog_posts')
+      () => this.fetchWithBasicQuery(slug, 'blog_posts'),
+      () => this.fetchWithIsolatedClient(slug, 'published_blog_posts'),
+      () => this.fetchWithBasicQuery(slug, 'published_blog_posts')
     ];
 
     for (let i = 0; i < approaches.length; i++) {
@@ -271,7 +262,7 @@ export class BlogService {
         if (result) {
           console.log(`✅ [BlogService] Success with approach ${i + 1}`);
           // Increment view count in background (don't await to avoid blocking)
-          this.incrementViewCount(slug, i < 2 ? 'published_blog_posts' : 'blog_posts').catch(() => {});
+          this.incrementViewCount(slug, 'blog_posts').catch(() => {});
           return result;
         }
       } catch (error: any) {
@@ -544,20 +535,6 @@ export class BlogService {
 
       data = result.data;
       error = result.error;
-
-      // If blog_posts fails, try published_blog_posts as fallback
-      if (error && error.message?.includes('relation') && error.message?.includes('does not exist')) {
-        console.warn('⚠️ blog_posts table issue, trying published_blog_posts fallback');
-        const fallbackResult = await supabase
-          .from('published_blog_posts')
-          .select('*')
-          .eq('status', 'published')
-          .order('created_at', { ascending: false })
-          .limit(limit);
-
-        data = fallbackResult.data;
-        error = fallbackResult.error;
-      }
 
       if (error) {
         // Handle specific database errors gracefully
