@@ -72,6 +72,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import DNSSetupInstructions from '@/components/DNSSetupInstructions';
 import NetlifySetupGuide from '@/components/NetlifySetupGuide';
+import DomainBlogThemeSelector from '@/components/DomainBlogThemeSelector';
 import { useAuthState } from '@/hooks/useAuthState';
 import { supabase } from '@/integrations/supabase/client';
 import { DomainManager } from '@/services/domainManager';
