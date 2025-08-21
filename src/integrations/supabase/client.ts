@@ -42,16 +42,16 @@ if (!finalUrl || !finalKey) {
   throw new Error(`Missing Supabase environment variables: ${config.issues.join(', ')}`);
 }
 
-if (!SUPABASE_URL.startsWith('https://') || !SUPABASE_URL.includes('.supabase.co')) {
+if (!finalUrl.startsWith('https://') || !finalUrl.includes('.supabase.co')) {
   throw new Error('Invalid Supabase URL format. Must be https://*.supabase.co');
 }
 
-if (!SUPABASE_ANON_KEY.startsWith('eyJ') || SUPABASE_ANON_KEY.length < 100) {
+if (!finalKey.startsWith('eyJ') || finalKey.length < 100) {
   throw new Error('Invalid Supabase API key format. Must be a valid JWT token.');
 }
 
 // Enhanced Supabase client with error resilience
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+export const supabase = createClient<Database>(finalUrl, finalKey, {
   auth: {
     storage: localStorage,
     persistSession: true,
