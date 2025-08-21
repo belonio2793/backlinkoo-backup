@@ -432,7 +432,7 @@ const DomainsPage = () => {
       }
 
       console.log('🔧 Starting enhanced Netlify sync with DNS propagation...');
-      toast.info('🚀 Syncing Netlify key and configuring DNS propagation...');
+      toast.info('�� Syncing Netlify key and configuring DNS propagation...');
 
       // Step 1: Sync environment variables
       localStorage.setItem('netlify_env_sync_status', 'synced');
@@ -1602,6 +1602,17 @@ const DomainsPage = () => {
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Add, configure, and manage domains for automated content publishing. Full hosting control with executable page generation.
           </p>
+
+          {/* Workflow explanation */}
+          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg max-w-4xl mx-auto">
+            <div className="flex items-center gap-2 mb-2">
+              <Info className="w-4 h-4 text-blue-600" />
+              <span className="font-medium text-blue-900">Domain Setup Workflow</span>
+            </div>
+            <div className="text-sm text-blue-800">
+              <span className="font-medium">1. Add Domain</span> → <span className="font-medium">2. Configure DNS Records</span> → <span className="font-medium">3. Validate</span> → <span className="font-medium">4. Select Blog Theme</span> → <span className="font-medium">Ready for Campaigns!</span>
+            </div>
+          </div>
 
           {/* Connection Status */}
           <div className="mt-6 max-w-2xl mx-auto space-y-4">
