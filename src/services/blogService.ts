@@ -262,7 +262,7 @@ export class BlogService {
         if (result) {
           console.log(`✅ [BlogService] Success with approach ${i + 1}`);
           // Increment view count in background (don't await to avoid blocking)
-          this.incrementViewCount(slug, i < 2 ? 'published_blog_posts' : 'blog_posts').catch(() => {});
+          this.incrementViewCount(slug, 'blog_posts').catch(() => {});
           return result;
         }
       } catch (error: any) {
