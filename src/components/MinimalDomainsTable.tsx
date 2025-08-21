@@ -10,6 +10,9 @@ interface Domain {
   domain: string;
   status: 'pending' | 'validating' | 'active' | 'failed' | 'expired';
   created_at: string;
+  dns_records?: string;
+  is_publishing_platform?: boolean;
+  pages_published?: number;
 }
 
 interface MinimalDomainsTableProps {
