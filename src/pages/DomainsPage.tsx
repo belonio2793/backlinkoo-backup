@@ -1668,6 +1668,12 @@ const DomainsPage = () => {
           <h1 className="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
             <Globe className="h-10 w-10 text-blue-600" />
             Domain Hosting Manager
+            {/* Subtle API status indicator */}
+            <div className={`w-2 h-2 rounded-full ml-2 ${
+              apiConnectionEstablished
+                ? 'bg-green-500'
+                : 'bg-gray-400 animate-pulse'
+            }`} title={apiConnectionEstablished ? 'API Connected' : 'API Connecting...'} />
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Add, configure, and manage domains for automated content publishing. Full hosting control with executable page generation.
@@ -1681,7 +1687,7 @@ const DomainsPage = () => {
                 size="sm"
                 onClick={() => {
                   loadDomains().then(() => {
-                    toast.success('��� Domains refreshed!');
+                    toast.success('✅ Domains refreshed!');
                   }).catch((error) => {
                     toast.error(`❌ Failed to refresh: ${error.message}`);
                   });
