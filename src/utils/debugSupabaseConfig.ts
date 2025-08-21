@@ -30,18 +30,24 @@ export function debugSupabaseConfig() {
     return supabase.from('profiles').select('id').limit(1);
   }).then(({ data, error }) => {
     if (error) {
-      console.error('❌ Test query failed:', error);
-      console.error('Error details:', {
-        message: error.message,
-        code: error.code,
-        details: error.details,
-        hint: error.hint
+      // Import and use error extractor
+      import('@/utils/errorExtractor').then(({ logSupabaseError }) => {
+        logSupabaseError('Test query failed', error);
+      }).catch(() => {
+        // Fallback if import fails
+        console.error('❌ Test query failed:', error?.message || error?.code || String(error));
       });
     } else {
       console.log('✅ Test query successful:', data);
     }
   }).catch(error => {
-    console.error('❌ Supabase client import or test failed:', error);
+    // Import and use error extractor
+    import('@/utils/errorExtractor').then(({ logError }) => {
+      logError('Supabase client import or test failed', error);
+    }).catch(() => {
+      // Fallback if import fails
+      console.error('❌ Supabase client import or test failed:', error?.message || String(error));
+    });
   });
 }
 
