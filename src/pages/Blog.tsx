@@ -13,7 +13,6 @@ import { supabase } from '@/integrations/supabase/client';
 import type { BlogPost } from '@/types/blogTypes';
 import { Footer } from '@/components/Footer';
 import { FetchErrorBoundary } from '@/components/FetchErrorHandler';
-import { DatabaseTest } from '@/components/DatabaseTest';
 
 import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
 import { ClaimStatusIndicator } from '@/components/ClaimStatusIndicator';
@@ -609,11 +608,6 @@ function Blog() {
 
           </div>
         </div>
-      </div>
-
-      {/* Database Test Component - Temporary */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-        <DatabaseTest />
       </div>
 
       {/* Search and Filter Bar */}
