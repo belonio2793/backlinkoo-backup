@@ -163,11 +163,31 @@ const DomainsPage = () => {
       let errorMessage = 'An unexpected error occurred';
 
       if (event.reason instanceof Error) {
-        errorMessage = event.reason.message;
+        errorMessage = event.reason.message || 'Unknown error occurred';
       } else if (typeof event.reason === 'string') {
         errorMessage = event.reason;
       } else if (event.reason && typeof event.reason === 'object') {
-        errorMessage = event.reason.message || JSON.stringify(event.reason);
+        // Handle [object Object] cases better
+        if (event.reason.message) {
+          errorMessage = event.reason.message;
+        } else if (event.reason.error) {
+          errorMessage = event.reason.error;
+        } else if (event.reason.name) {
+          errorMessage = `${event.reason.name}: ${event.reason.description || 'Unknown error'}`;
+        } else {
+          // Try to extract useful information from the object
+          const keys = Object.keys(event.reason);
+          if (keys.length > 0) {
+            errorMessage = `Error: ${keys[0]}=${event.reason[keys[0]]}`;
+          } else {
+            errorMessage = 'Error occurred (details unavailable)';
+          }
+        }
+      }
+
+      // Specific handling for DNS service errors
+      if (errorMessage.includes('DNSValidationService') || errorMessage.includes('checkServiceHealth')) {
+        errorMessage = 'DNS validation service temporarily unavailable';
       }
 
       // Show user-friendly error
