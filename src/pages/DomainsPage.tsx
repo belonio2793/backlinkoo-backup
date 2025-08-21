@@ -11,6 +11,7 @@ import MinimalDomainsTable from '@/components/MinimalDomainsTable';
 import NetlifySetupGuide from '@/components/NetlifySetupGuide';
 import DomainBlogThemeSelector from '@/components/DomainBlogThemeSelector';
 import DNSValidationService from '@/services/dnsValidationService';
+import { netlifyPBNService, DNSRecord } from '@/services/netlifyPBNService';
 
 interface Domain {
   id: string;
