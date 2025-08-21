@@ -1602,61 +1602,24 @@ const DomainsPage = () => {
         </div>
 
 
-        {/* Quick Add Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Single Domain Add */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5" />
-                Add Single Domain
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="example.com"
-                  value={newDomain}
-                  onChange={(e) => setNewDomain(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && !addingDomain && addDomain()}
-                  className="flex-1"
-                />
-                <Button onClick={addDomain} disabled={addingDomain}>
-                  {addingDomain ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Plus className="w-4 h-4" />
-                  )}
-                  Add Domain
-                </Button>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Enter domain without http:// or www. (e.g., example.com)
-              </p>
-            </CardContent>
-          </Card>
-
-          {/* Bulk Add Toggle */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Upload className="h-5 w-5" />
-                Bulk Add Domains
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Button 
-                onClick={() => setShowBulkAdd(!showBulkAdd)}
-                variant={showBulkAdd ? "secondary" : "default"}
-                className="w-full"
-              >
-                {showBulkAdd ? 'Hide' : 'Show'} Bulk Add Interface
-              </Button>
-              <p className="text-xs text-gray-500 mt-2">
-                Add multiple domains at once, one per line
-              </p>
-            </CardContent>
-          </Card>
+        {/* Add Domain */}
+        <div className="max-w-md mx-auto mb-8">
+          <div className="flex gap-2">
+            <Input
+              placeholder="example.com"
+              value={newDomain}
+              onChange={(e) => setNewDomain(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !addingDomain && addDomain()}
+              className="flex-1"
+            />
+            <Button onClick={addDomain} disabled={addingDomain}>
+              {addingDomain ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : (
+                <Plus className="w-4 h-4" />
+              )}
+            </Button>
+          </div>
         </div>
 
         {/* Bulk Add Interface */}
@@ -2169,7 +2132,7 @@ anotherdomain.org`}
                                               })
                                               .eq('id', domain.id);
 
-                                            toast.success(`✅ ${domain.domain} added to Netlify!`);
+                                            toast.success(`�� ${domain.domain} added to Netlify!`);
                                             await loadDomains(); // Refresh the list
                                           } else {
                                             toast.error(`Failed to add to Netlify: ${addResult.error}`);
