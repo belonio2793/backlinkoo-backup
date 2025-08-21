@@ -432,6 +432,7 @@ requestIdleCallback(() => {
     import('./utils/testBlogGeneration');
     import('./utils/setupDomainDatabase');
     import('./utils/testDomainDatabase');
+    import('./utils/testDNSValidationFix');
 
     // Quick content generation status check
     setTimeout(async () => {
@@ -448,7 +449,7 @@ requestIdleCallback(() => {
 
         if (response.status === 404) {
           console.warn('⚠️ Content generation functions not available (404)');
-          console.warn('�� Run window.testContentGeneration() to check all functions');
+          console.warn('��� Run window.testContentGeneration() to check all functions');
         } else if (response.ok) {
           console.log('✅ Content generation functions are working');
         } else {
