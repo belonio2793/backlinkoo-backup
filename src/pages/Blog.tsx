@@ -1130,10 +1130,10 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
       <CardContent className="pt-0 space-y-4 p-6">
         {/* Keywords */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {(post.tags || post.keywords || []).slice(0, 3).map((tag: string, index: number) => (
+          {(Array.isArray(post.tags) ? post.tags : (Array.isArray(post.keywords) ? post.keywords : [])).slice(0, 3).map((tag: string, index: number) => (
             <Badge key={index} variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 transition-colors duration-200 px-2 py-1">
               <Tag className="mr-1 h-2 w-2" />
-              {tag}
+              {tag || ''}
             </Badge>
           ))}
         </div>
