@@ -1678,6 +1678,53 @@ const DomainsPage = () => {
           </Card>
         )}
 
+        {/* Netlify Configuration Status Banner */}
+        {!netlifyDomainService.isConfigured() && (
+          <Card className="mb-8 border-blue-200 bg-blue-50/50">
+            <CardContent className="pt-6">
+              <Alert>
+                <Info className="h-4 w-4" />
+                <AlertDescription>
+                  <div className="space-y-2">
+                    <div className="font-medium">Netlify Setup Required for Domain Management</div>
+                    <div className="text-sm">
+                      To add domains and manage DNS, you need to configure your Netlify integration.
+                      This allows the app to add domains to Netlify, fetch DNS records, and manage SSL certificates.
+                    </div>
+                    <div className="flex gap-2 mt-3">
+                      <Button
+                        size="sm"
+                        onClick={() => setShowNetlifySetup(true)}
+                        className="bg-blue-600 hover:bg-blue-700"
+                      >
+                        <Settings className="h-3 w-3 mr-1" />
+                        Setup Netlify Integration
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => {
+                          // Check if configuration was updated
+                          const isConfigured = netlifyDomainService.isConfigured();
+                          setNetlifyConfigured(isConfigured);
+                          if (isConfigured) {
+                            toast.success('✅ Netlify integration detected!');
+                          } else {
+                            toast.error('❌ Netlify integration still not configured');
+                          }
+                        }}
+                      >
+                        <RefreshCw className="h-3 w-3 mr-1" />
+                        Check Configuration
+                      </Button>
+                    </div>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Quick Add Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
           {/* Single Domain Add */}
