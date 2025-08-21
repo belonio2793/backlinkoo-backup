@@ -273,7 +273,7 @@ const DomainsPage = () => {
 
             if (connectionWorking) {
               console.log('✅ Database connection established successfully');
-              setSupabaseConnected(true);
+              setApiConnectionEstablished(true);
 
               // Load domains with established connection
               await loadDomains(false);
@@ -2168,7 +2168,7 @@ anotherdomain.org`}
                                     (window as any).dnsInstructions = (window as any).dnsInstructions || {};
                                     (window as any).dnsInstructions[domain.domain] = addResult.setupInstructions.join('\n');
                                   } else {
-                                    toast.success(`��� ${domain.domain} added to Netlify! SSL certificate will be provisioned automatically.`);
+                                    toast.success(`✅ ${domain.domain} added to Netlify! SSL certificate will be provisioned automatically.`);
                                   }
 
                                   await loadDomains();
