@@ -13,6 +13,8 @@ import './utils/debugSupabaseConfig'
 import './utils/checkSupabasePermissions'
 // Test blog loading specifically
 import './utils/testBlogLoading'
+// Fix blog configuration issues
+import './utils/fixBlogConfiguration'
 // Emergency fetch protection - HIGHEST PRIORITY - FIXES FULLSTORY INTERFERENCE
 import './utils/emergencyFetchFix'
 // Enhanced FullStory fix - must load FIRST
