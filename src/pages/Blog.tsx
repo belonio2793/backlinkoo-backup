@@ -516,8 +516,26 @@ function Blog() {
         }
       });
 
+      // Normalize posts to ensure expected fields exist
+      const normalizePost = (p: any) => ({
+        ...p,
+        title: p.title || '',
+        content: p.content || '',
+        meta_description: p.meta_description || '',
+        keywords: Array.isArray(p.keywords) ? p.keywords : (Array.isArray(p.tags) ? p.tags : []),
+        tags: Array.isArray(p.tags) ? p.tags : (Array.isArray(p.keywords) ? p.keywords : []),
+        is_trial_post: !!p.is_trial_post,
+        user_id: p.user_id || null,
+        published_at: p.published_at || p.created_at,
+        category: p.category || 'General',
+        expires_at: p.expires_at || null,
+        view_count: p.view_count || 0,
+        seo_score: p.seo_score || 0
+      });
+
       // Sort posts based on selected criteria
-      const sortedPosts = sortPosts(allPosts, sortBy);
+      const normalizedPosts = allPosts.map(normalizePost);
+      const sortedPosts = sortPosts(normalizedPosts, sortBy);
       setBlogPosts(sortedPosts);
 
       toast({
