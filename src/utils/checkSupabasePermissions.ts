@@ -57,10 +57,12 @@ export async function checkSupabasePermissions() {
       }
       
     } catch (error: any) {
-      console.error(`❌ ${table} test failed with exception:`, error);
+      const { extractErrorMessage } = await import('@/utils/errorExtractor');
+      const errorMessage = extractErrorMessage(error);
+      console.error(`❌ ${table} test failed with exception:`, errorMessage);
       results[table] = {
         accessible: false,
-        error: error.message || 'Unknown error',
+        error: errorMessage,
         exception: true
       };
     }
