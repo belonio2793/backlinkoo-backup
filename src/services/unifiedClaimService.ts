@@ -399,11 +399,20 @@ export class UnifiedClaimService {
           .limit(limit);
 
         if (fallbackResult.error) {
-          console.error('Failed to get available posts from both tables:', {
-            error: fallbackResult.error.message || fallbackResult.error,
-            code: fallbackResult.error.code,
-            details: fallbackResult.error.details,
-            hint: fallbackResult.error.hint,
+          // Extract readable error message
+          const getErrorMessage = (error: any): string => {
+            if (!error) return 'Unknown error';
+            if (typeof error === 'string') return error;
+            if (error.message) return error.message;
+            if (error.error_description) return error.error_description;
+            if (error.code) return `Error ${error.code}: ${error.message || 'Unknown'}`;
+            return String(error);
+          };
+
+          const errorMessage = getErrorMessage(fallbackResult.error);
+
+          console.error('Failed to get available posts from both tables:', errorMessage);
+          console.error('Environment status:', {
             hasUrl: !!import.meta.env.VITE_SUPABASE_URL,
             hasKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY,
             urlPrefix: import.meta.env.VITE_SUPABASE_URL ? import.meta.env.VITE_SUPABASE_URL.substring(0, 30) : 'missing',
@@ -411,8 +420,8 @@ export class UnifiedClaimService {
           });
 
           // Special handling for API key errors
-          if (fallbackResult.error.message?.includes('No API key found') ||
-              fallbackResult.error.message?.includes('Invalid API key') ||
+          if (errorMessage.includes('No API key found') ||
+              errorMessage.includes('Invalid API key') ||
               fallbackResult.error.code === '401' ||
               fallbackResult.error.code === 'PGRST000') {
             console.error('🔑 API Key Configuration Issue Detected:');
