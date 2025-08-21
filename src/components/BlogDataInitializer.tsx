@@ -50,7 +50,14 @@ export function BlogDataInitializer({ onDataReady }: BlogDataInitializerProps) {
 
     } catch (error: any) {
       setStatus('error');
-      setMessage(`Initialization failed: ${error.message || 'Unknown error'}`);
+      const errorMessage = error.message || 'Unknown error';
+
+      // Handle API key missing error gracefully
+      if (errorMessage.includes('No API key found')) {
+        setMessage('Database connection requires proper configuration. The blog will show sample data instead.');
+      } else {
+        setMessage(`Initialization failed: ${errorMessage}`);
+      }
     }
   };
 
@@ -146,6 +153,20 @@ export function BlogDataInitializer({ onDataReady }: BlogDataInitializerProps) {
           <div className="bg-white/70 rounded-lg p-3 border border-green-200">
             <p className="text-sm text-green-700">
               🎉 Blog initialization complete! Your /blog route should now display sample posts.
+            </p>
+            <p className="text-xs text-green-600 mt-1">
+              The blog is ready to use. You can now browse the sample content.
+            </p>
+          </div>
+        )}
+
+        {status === 'error' && message.includes('requires proper configuration') && (
+          <div className="bg-yellow-50 rounded-lg p-3 border border-yellow-200">
+            <p className="text-sm text-yellow-700">
+              ⚠️ {message}
+            </p>
+            <p className="text-xs text-yellow-600 mt-1">
+              The blog will work with local sample data until database is configured.
             </p>
           </div>
         )}
