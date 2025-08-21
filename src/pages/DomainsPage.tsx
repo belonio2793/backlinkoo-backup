@@ -73,6 +73,7 @@ import { Footer } from '@/components/Footer';
 import DNSSetupInstructions from '@/components/DNSSetupInstructions';
 import NetlifySetupGuide from '@/components/NetlifySetupGuide';
 import DomainBlogThemeSelector from '@/components/DomainBlogThemeSelector';
+import MinimalDomainsTable from '@/components/MinimalDomainsTable';
 import { useAuthState } from '@/hooks/useAuthState';
 import { supabase } from '@/integrations/supabase/client';
 import { DomainManager } from '@/services/domainManager';
