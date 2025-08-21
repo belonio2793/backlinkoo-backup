@@ -403,47 +403,8 @@ function Blog() {
         console.warn('❌ Database unavailable during refresh:', dbError);
       }
 
-      // Also load from localStorage (traditional blog posts)
-      const localBlogPosts: BlogPost[] = [];
-      try {
-        const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-
-        for (const blogMeta of allBlogPosts) {
-          const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
-          if (blogData) {
-            const blogPost = JSON.parse(blogData);
-
-            // Check if trial post is expired
-            if (blogPost.is_trial_post && blogPost.expires_at) {
-              const isExpired = new Date() > new Date(blogPost.expires_at);
-              if (isExpired) {
-                // Remove expired trial post
-                localStorage.removeItem(`blog_post_${blogMeta.slug}`);
-                continue;
-              }
-            }
-
-            localBlogPosts.push(blogPost);
-          }
-        }
-
-        // Update the all_blog_posts list to remove expired ones
-        const validBlogMetas = allBlogPosts.filter((meta: any) => {
-          return localBlogPosts.some(post => post.slug === meta.slug);
-        });
-        localStorage.setItem('all_blog_posts', JSON.stringify(validBlogMetas));
-
-      } catch (storageError) {
-        console.warn('Failed to load from localStorage:', storageError);
-      }
-
-      // Combine database and localStorage posts, removing duplicates
+      // Use database posts only (no localStorage)
       const allPosts = [...posts];
-      localBlogPosts.forEach(localPost => {
-        if (!allPosts.find(dbPost => dbPost.slug === localPost.slug)) {
-          allPosts.push(localPost);
-        }
-      });
 
       // Normalize posts to ensure expected fields exist
       const normalizePost = (p: any) => ({
