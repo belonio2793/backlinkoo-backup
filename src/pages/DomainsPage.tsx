@@ -432,7 +432,8 @@ const DomainsPage = () => {
       const { error } = await supabase
         .from('domains')
         .delete()
-        .eq('id', domainId);
+        .eq('id', domainId)
+        .eq('user_id', user?.id);
 
       if (error) {
         throw new Error(error.message);
