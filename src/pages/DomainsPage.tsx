@@ -659,7 +659,7 @@ const DomainsPage = () => {
         ssl_status: netlifyStatus.ssl?.status
       };
 
-      console.log(`��� Current DNS status for ${domain.domain}:`, currentDNSStatus);
+      console.log(`📊 Current DNS status for ${domain.domain}:`, currentDNSStatus);
 
       let needsDNSUpdate = false;
       const discrepancies = [];
@@ -813,14 +813,10 @@ const DomainsPage = () => {
   const checkDNSServiceHealth = async () => {
     try {
       const status = await DNSValidationService.checkServiceHealth();
-      setDnsServiceStatus(status);
+      setDnsServiceStatus(status.operational ? 'online' : 'offline');
     } catch (error) {
       console.error('DNS service health check failed:', error);
-      setDnsServiceStatus({
-        operational: false,
-        message: 'DNS service health check failed',
-        lastCheck: new Date().toISOString()
-      });
+      setDnsServiceStatus('offline');
     }
   };
 
@@ -1645,7 +1641,7 @@ const DomainsPage = () => {
                   loadDomains().then(() => {
                     toast.success('✅ Domains refreshed!');
                   }).catch((error) => {
-                    toast.error(`��� Failed to refresh: ${error.message}`);
+                    toast.error(`❌ Failed to refresh: ${error.message}`);
                   });
                 }}
                 className="text-xs"
