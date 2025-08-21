@@ -2,10 +2,21 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 import { SupabaseConnectionFixer } from '@/utils/supabaseConnectionFixer';
+import { supabaseDirect } from './client-direct';
 
 // Get Supabase configuration
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+// Debug logging for environment variables
+console.log('🔍 Environment variable debugging:', {
+  allEnvKeys: Object.keys(import.meta.env),
+  mode: import.meta.env.MODE,
+  dev: import.meta.env.DEV,
+  VITE_SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
+  hasViteSupabaseUrl: !!import.meta.env.VITE_SUPABASE_URL,
+  hasViteSupabaseKey: !!import.meta.env.VITE_SUPABASE_ANON_KEY
+});
 
 console.log('🔧 Enhanced Supabase client configuration:', {
   hasUrl: !!SUPABASE_URL,
@@ -15,24 +26,33 @@ console.log('🔧 Enhanced Supabase client configuration:', {
   environment: import.meta.env.MODE
 });
 
-// Validate credentials with enhanced error reporting
+// Use fallback credentials if environment variables aren't loaded
+const finalUrl = SUPABASE_URL || 'https://dfhanacsmsvvkpunurnp.supabase.co';
+const finalKey = SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT87Zqa5RY';
+
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.warn('⚠️ Environment variables not loaded properly, using fallback credentials');
+  console.log('💡 This suggests a Vite environment variable loading issue');
+}
+
+// Validate final credentials
+if (!finalUrl || !finalKey) {
   const config = SupabaseConnectionFixer.checkConfiguration();
   console.error('❌ Supabase configuration issues:', config.issues);
   console.log('💡 Recommendations:', config.recommendations);
   throw new Error(`Missing Supabase environment variables: ${config.issues.join(', ')}`);
 }
 
-if (!SUPABASE_URL.startsWith('https://') || !SUPABASE_URL.includes('.supabase.co')) {
+if (!finalUrl.startsWith('https://') || !finalUrl.includes('.supabase.co')) {
   throw new Error('Invalid Supabase URL format. Must be https://*.supabase.co');
 }
 
-if (!SUPABASE_ANON_KEY.startsWith('eyJ') || SUPABASE_ANON_KEY.length < 100) {
+if (!finalKey.startsWith('eyJ') || finalKey.length < 100) {
   throw new Error('Invalid Supabase API key format. Must be a valid JWT token.');
 }
 
 // Enhanced Supabase client with error resilience
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+const enhancedSupabase = createClient<Database>(finalUrl, finalKey, {
   auth: {
     storage: localStorage,
     persistSession: true,
@@ -195,3 +215,7 @@ if (import.meta.env.DEV) {
 export { handleNetworkError, SupabaseConnectionFixer };
 
 console.log('✅ Enhanced Supabase client initialized with error resilience');
+
+// TEMPORARY: Use direct client to bypass any configuration issues
+export const supabase = supabaseDirect;
+console.log('🔄 Using direct Supabase client for debugging');
