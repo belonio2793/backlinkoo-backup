@@ -77,7 +77,6 @@ import { DomainManager } from '@/services/domainManager';
 import { netlifyDomainService } from '@/services/netlifyDomainService';
 import { toast } from 'sonner';
 import NetlifyControlPanel from '@/components/NetlifyControlPanel';
-import EnvironmentVariablesManager from '@/components/EnvironmentVariablesManager';
 
 // Global error handler will be set up in useEffect
 
@@ -310,7 +309,7 @@ const DomainsPage = () => {
   // Test Supabase connection
   const testSupabaseConnection = async (throwOnError: boolean = true) => {
     try {
-      console.log('🔍 Testing Supabase connection...');
+      console.log('�� Testing Supabase connection...');
 
       // Check if environment variables are available
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
