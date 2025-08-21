@@ -1627,79 +1627,8 @@ const DomainsPage = () => {
         {/* Domains List */}
         <Card>
           <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <span>Your Domains ({domains.length})</span>
-              <div className="flex gap-2">
-                {/* Automation button - Only show when auto-sync is disabled */}
-                {!autoSyncEnabled && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowAutomationPanel(!showAutomationPanel)}
-                    className="bg-blue-50 border-blue-200 hover:bg-blue-100"
-                  >
-                    <Wand2 className="h-4 w-4 mr-1" />
-                    Automation
-                  </Button>
-                )}
-                {/* Enhanced Netlify Sync Button with DNS Propagation - Only show when auto-sync is disabled */}
-                {!autoSyncEnabled && (
-                  <Button
-                    variant={netlifyEnvStatus === 'synced' ? 'outline' : 'default'}
-                    size="sm"
-                    onClick={() => syncNetlifyToEnv()}
-                    disabled={netlifyEnvStatus === 'updating'}
-                    className={netlifyEnvStatus === 'synced' ? 'bg-green-50 border-green-200 hover:bg-green-100' : 'bg-blue-600 hover:bg-blue-700'}
-                    title={netlifyEnvStatus === 'synced'
-                      ? 'Netlify key synced and DNS propagation configured'
-                      : 'Sync Netlify key and automatically configure DNS propagation for all domains'
-                    }
-                  >
-                    {netlifyEnvStatus === 'updating' ? (
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                    ) : netlifyEnvStatus === 'synced' ? (
-                      <CheckCircle2 className="h-4 w-4 mr-1" />
-                    ) : (
-                      <Zap className="h-4 w-4 mr-1" />
-                    )}
-                    {netlifyEnvStatus === 'synced' ? 'Netlify Synced + DNS' : 'Sync & Setup DNS'}
-                  </Button>
-                )}
-                <Button variant="outline" size="sm" onClick={exportDomains}>
-                  <Download className="h-4 w-4 mr-1" />
-                  Export CSV
-                </Button>
-                <Button variant="outline" size="sm" onClick={testValidation}>
-                  <Terminal className="h-4 w-4 mr-1" />
-                  Test DNS Service
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => {
-                  // Bulk validate all pending domains
-                  const pendingDomains = domains.filter(d =>
-                    d.status === 'pending' || d.status === 'failed'
-                  );
-
-                  if (pendingDomains.length === 0) {
-                    toast.info('No domains need validation');
-                    return;
-                  }
-
-                  toast.info(`Starting validation for ${pendingDomains.length} domains...`);
-
-                  pendingDomains.forEach((domain, index) => {
-                    setTimeout(() => {
-                      validateDomain(domain.id).catch(console.error);
-                    }, index * 2000); // Stagger requests by 2 seconds
-                  });
-                }}>
-                  <CheckCircle2 className="h-4 w-4 mr-1" />
-                  Validate All
-                </Button>
-                <Button variant="outline" size="sm" onClick={loadDomains}>
-                  <RefreshCw className="h-4 w-4 mr-1" />
-                  Refresh
-                </Button>
-              </div>
+            <CardTitle>
+              Domains ({domains.length})
             </CardTitle>
           </CardHeader>
 
