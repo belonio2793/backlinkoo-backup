@@ -212,8 +212,8 @@ export class ClaimableBlogService {
         console.error('❌ Failed to claim blog post:', {
           error: error?.message || error,
           code: error?.code,
-          postSlug,
-          userId,
+          postId,
+          userId: user?.id ?? null,
           timestamp: new Date().toISOString()
         });
         return {
@@ -248,8 +248,8 @@ export class ClaimableBlogService {
       console.error('❌ Error claiming blog post:', {
         error: error?.message || error,
         stack: error?.stack,
-        postSlug,
-        userId,
+        postId,
+        userId: user?.id ?? null,
         timestamp: new Date().toISOString()
       });
       return {

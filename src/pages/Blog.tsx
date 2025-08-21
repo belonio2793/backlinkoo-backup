@@ -4,13 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { ClaimableBlogService } from '@/services/claimableBlogService';
+import { blogService, type BlogPost } from '@/services/blogService';
 import { UnifiedClaimService } from '@/services/unifiedClaimService';
 import { useAuth } from '@/hooks/useAuth';
 import { usePremiumSEOScore } from '@/hooks/usePremiumSEOScore';
-import { BlogClaimService } from '@/services/blogClaimService';
 import { supabase } from '@/integrations/supabase/client';
-import type { BlogPost } from '@/types/blogTypes';
 import { Footer } from '@/components/Footer';
 import { FetchErrorBoundary } from '@/components/FetchErrorHandler';
 
@@ -73,91 +71,45 @@ function Blog() {
       }, 10000); // 10 second timeout
 
       try {
-        // Use UnifiedClaimService to get posts consistently
+        // Fetch blog posts directly from database using blogService
+        console.log('📖 Loading blog posts from database...');
         let posts: any[] = [];
         try {
-          posts = await UnifiedClaimService.getClaimablePosts(50);
-          console.log('✅ Claimable posts loaded:', posts.length);
+          posts = await blogService.getRecentBlogPosts(50);
+          console.log('✅ Blog posts loaded from database:', posts.length);
         } catch (dbError) {
-          console.warn('❌ Database unavailable, trying fallback:', dbError);
-          // Fallback to old service if needed
-          try {
-            posts = await ClaimableBlogService.getClaimablePosts(50);
-            console.log('✅ Fallback posts loaded:', posts.length);
-          } catch (fallbackError) {
-            console.warn('❌ Fallback also failed, using localStorage:', fallbackError);
-            // Continue with empty posts array - don't throw error
-            posts = [];
-          }
+          console.warn('❌ Database unavailable:', dbError);
+          // Continue with empty posts array - don't throw error
+          posts = [];
         }
 
-        // Also load from localStorage (traditional blog posts)
-        const localBlogPosts: BlogPost[] = [];
-        try {
-          const allBlogPostsStr = localStorage.getItem('all_blog_posts');
-          if (!allBlogPostsStr) {
-            console.log('No blog posts in localStorage');
-          } else {
-            const allBlogPosts = JSON.parse(allBlogPostsStr);
-
-            if (Array.isArray(allBlogPosts)) {
-              for (const blogMeta of allBlogPosts) {
-                try {
-                  const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
-                  if (blogData) {
-                    const blogPost = JSON.parse(blogData);
-
-                    // Check if trial post is expired
-                    if (blogPost.is_trial_post && blogPost.expires_at) {
-                      const isExpired = new Date() > new Date(blogPost.expires_at);
-                      if (isExpired) {
-                        // Remove expired trial post
-                        localStorage.removeItem(`blog_post_${blogMeta.slug}`);
-                        continue;
-                      }
-                    }
-
-                    localBlogPosts.push(blogPost);
-                  }
-                } catch (blogParseError) {
-                  console.warn(`Failed to parse blog post ${blogMeta.slug}:`, blogParseError);
-                  // Remove corrupted blog post
-                  localStorage.removeItem(`blog_post_${blogMeta.slug}`);
-                }
-              }
-
-              // Update the all_blog_posts list to remove expired/corrupted ones
-              const validBlogMetas = allBlogPosts.filter((meta: any) => {
-                return localBlogPosts.some(post => post.slug === meta.slug);
-              });
-              localStorage.setItem('all_blog_posts', JSON.stringify(validBlogMetas));
-            }
-          }
-        } catch (storageError) {
-          console.warn('Failed to load from localStorage, clearing corrupted data:', storageError);
-          // Clear corrupted localStorage data
-          try {
-            localStorage.removeItem('all_blog_posts');
-          } catch (clearError) {
-            console.warn('Could not clear localStorage:', clearError);
-          }
-        }
-
-        // Combine database and localStorage posts, removing duplicates
+        // Use database posts only (no localStorage)
         const allPosts = [...posts];
-        localBlogPosts.forEach(localPost => {
-          if (!allPosts.find(dbPost => dbPost.slug === localPost.slug)) {
-            allPosts.push(localPost);
-          }
+
+        // Normalize posts to ensure expected fields exist
+        const normalizePost = (p: any) => ({
+          ...p,
+          title: p.title || '',
+          content: p.content || '',
+          meta_description: p.meta_description || '',
+          keywords: Array.isArray(p.keywords) ? p.keywords : (Array.isArray(p.tags) ? p.tags : []),
+          tags: Array.isArray(p.tags) ? p.tags : (Array.isArray(p.keywords) ? p.keywords : []),
+          is_trial_post: !!p.is_trial_post,
+          user_id: p.user_id || null,
+          published_at: p.published_at || p.created_at,
+          category: p.category || 'General',
+          expires_at: p.expires_at || null,
+          view_count: p.view_count || 0,
+          seo_score: p.seo_score || 0
         });
 
         // Sort posts based on selected criteria
-        const sortedPosts = sortPosts(allPosts, sortBy);
+        const normalizedPosts = allPosts.map(normalizePost);
+        const sortedPosts = sortPosts(normalizedPosts, sortBy);
         setBlogPosts(sortedPosts);
 
         console.log('✅ Blog posts loaded:', {
           databasePosts: posts.length,
-          localBlogPosts: localBlogPosts.length,
           totalPosts: allPosts.length,
         });
       } catch (error) {
@@ -418,10 +370,13 @@ function Blog() {
     const cleanedDescription = cleanDescription(post.meta_description || '').toLowerCase();
     const searchLower = searchTerm.toLowerCase();
 
+    // Safe keyword/tag access with fallback
+    const keywordsArray = Array.isArray(post.keywords) ? post.keywords : (Array.isArray(post.tags) ? post.tags : []);
+
     const matchesSearch = searchTerm === '' ||
       cleanedTitle.includes(searchLower) ||
       cleanedDescription.includes(searchLower) ||
-      post.keywords.some(keyword => keyword.toLowerCase().includes(searchLower));
+      keywordsArray.some((keyword: string) => (keyword || '').toLowerCase().includes(searchLower));
 
     const matchesCategory = selectedCategory === '' || post.category === selectedCategory;
 
@@ -438,65 +393,38 @@ function Blog() {
       // Clear existing posts first for visual feedback
       setBlogPosts([]);
 
-      // Use UnifiedClaimService to get posts consistently
+      // Fetch blog posts directly from database using blogService
       let posts: any[] = [];
       try {
-        posts = await UnifiedClaimService.getClaimablePosts(50);
-        console.log('✅ Claimable posts loaded:', posts.length);
+        posts = await blogService.getRecentBlogPosts(50);
+        console.log('✅ Blog posts refreshed from database:', posts.length);
       } catch (dbError) {
-        console.warn('❌ Database unavailable, trying fallback:', dbError);
-        try {
-          posts = await ClaimableBlogService.getClaimablePosts(50);
-          console.log('🔄 Fallback posts loaded:', posts.length);
-        } catch (fallbackError) {
-          console.warn('❌ Fallback also failed, using localStorage:', fallbackError);
-        }
+        console.warn('❌ Database unavailable during refresh:', dbError);
       }
 
-      // Also load from localStorage (traditional blog posts)
-      const localBlogPosts: BlogPost[] = [];
-      try {
-        const allBlogPosts = JSON.parse(localStorage.getItem('all_blog_posts') || '[]');
-
-        for (const blogMeta of allBlogPosts) {
-          const blogData = localStorage.getItem(`blog_post_${blogMeta.slug}`);
-          if (blogData) {
-            const blogPost = JSON.parse(blogData);
-
-            // Check if trial post is expired
-            if (blogPost.is_trial_post && blogPost.expires_at) {
-              const isExpired = new Date() > new Date(blogPost.expires_at);
-              if (isExpired) {
-                // Remove expired trial post
-                localStorage.removeItem(`blog_post_${blogMeta.slug}`);
-                continue;
-              }
-            }
-
-            localBlogPosts.push(blogPost);
-          }
-        }
-
-        // Update the all_blog_posts list to remove expired ones
-        const validBlogMetas = allBlogPosts.filter((meta: any) => {
-          return localBlogPosts.some(post => post.slug === meta.slug);
-        });
-        localStorage.setItem('all_blog_posts', JSON.stringify(validBlogMetas));
-
-      } catch (storageError) {
-        console.warn('Failed to load from localStorage:', storageError);
-      }
-
-      // Combine database and localStorage posts, removing duplicates
+      // Use database posts only (no localStorage)
       const allPosts = [...posts];
-      localBlogPosts.forEach(localPost => {
-        if (!allPosts.find(dbPost => dbPost.slug === localPost.slug)) {
-          allPosts.push(localPost);
-        }
+
+      // Normalize posts to ensure expected fields exist
+      const normalizePost = (p: any) => ({
+        ...p,
+        title: p.title || '',
+        content: p.content || '',
+        meta_description: p.meta_description || '',
+        keywords: Array.isArray(p.keywords) ? p.keywords : (Array.isArray(p.tags) ? p.tags : []),
+        tags: Array.isArray(p.tags) ? p.tags : (Array.isArray(p.keywords) ? p.keywords : []),
+        is_trial_post: !!p.is_trial_post,
+        user_id: p.user_id || null,
+        published_at: p.published_at || p.created_at,
+        category: p.category || 'General',
+        expires_at: p.expires_at || null,
+        view_count: p.view_count || 0,
+        seo_score: p.seo_score || 0
       });
 
       // Sort posts based on selected criteria
-      const sortedPosts = sortPosts(allPosts, sortBy);
+      const normalizedPosts = allPosts.map(normalizePost);
+      const sortedPosts = sortPosts(normalizedPosts, sortBy);
       setBlogPosts(sortedPosts);
 
       toast({
@@ -506,7 +434,6 @@ function Blog() {
 
       console.log('✅ Blog posts refreshed:', {
         databasePosts: posts.length,
-        localBlogPosts: localBlogPosts.length,
         totalPosts: allPosts.length,
       });
     } catch (error) {
@@ -1109,10 +1036,10 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
       <CardContent className="pt-0 space-y-4 p-6">
         {/* Keywords */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {(post.tags || post.keywords || []).slice(0, 3).map((tag: string, index: number) => (
+          {(Array.isArray(post.tags) ? post.tags : (Array.isArray(post.keywords) ? post.keywords : [])).slice(0, 3).map((tag: string, index: number) => (
             <Badge key={index} variant="outline" className="text-xs bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100 transition-colors duration-200 px-2 py-1">
               <Tag className="mr-1 h-2 w-2" />
-              {tag}
+              {tag || ''}
             </Badge>
           ))}
         </div>
@@ -1157,7 +1084,7 @@ function BlogPostCard({ post, navigate, formatDate, onLoginRequired, cleanTitle,
             )}
             {post.expires_at && (
               <p className="text-xs text-center text-amber-600 mt-1">
-                ��� Expires: {formatDate(post.published_at || post.created_at)}
+                ⏰ Expires: {formatDate(post.expires_at)}
               </p>
             )}
           </div>

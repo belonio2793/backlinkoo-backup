@@ -5,6 +5,20 @@ import './index.css'
 import './styles/mobile-payment-fix.css'
 // Enhanced Supabase connection fixer - HIGHEST PRIORITY
 import './utils/supabaseConnectionFixer'
+// Supabase connection test for debugging API key issues
+import './utils/supabaseConnectionTest'
+// Debug Supabase configuration
+import './utils/debugSupabaseConfig'
+// Check Supabase table permissions and RLS
+import './utils/checkSupabasePermissions'
+// Test blog loading specifically
+import './utils/testBlogLoading'
+// Fix blog configuration issues
+import './utils/fixBlogConfiguration'
+// Sample blog posts creator for testing
+import './utils/createSampleBlogPosts'
+// Fix Supabase authentication issues
+import './utils/fixSupabaseAuth'
 // Emergency fetch protection - HIGHEST PRIORITY - FIXES FULLSTORY INTERFERENCE
 import './utils/emergencyFetchFix'
 // Enhanced FullStory fix - must load FIRST
@@ -297,6 +311,50 @@ if (import.meta.env.DEV) {
     }
   };
 
+  // Add API key diagnostics and fix helper
+  (window as any).fixAPIKeyIssue = async () => {
+    console.log('🔑 Diagnosing and fixing API key issues...');
+
+    // Check environment variables
+    const hasUrl = !!import.meta.env.VITE_SUPABASE_URL;
+    const hasKey = !!import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+    console.log('Environment check:', { hasUrl, hasKey });
+
+    if (!hasUrl || !hasKey) {
+      console.error('❌ Missing environment variables!');
+      console.log('💡 Fix: Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in environment');
+      console.log('💡 Try: Restart dev server after setting environment variables');
+      return { success: false, issue: 'missing_env_vars' };
+    }
+
+    // Test connection
+    try {
+      const { supabase } = await import('@/integrations/supabase/client');
+      const { data, error } = await supabase.from('profiles').select('id').limit(1);
+
+      if (error) {
+        console.error('❌ Connection test failed:', error);
+
+        if (error.message?.includes('No API key') || error.code === 'PGRST000') {
+          console.log('🔧 Attempting to reload Supabase client...');
+          // Force a page reload to reinitialize
+          setTimeout(() => window.location.reload(), 1000);
+          return { success: false, issue: 'api_key_not_loaded', action: 'reloading' };
+        }
+
+        return { success: false, issue: 'connection_failed', error };
+      }
+
+      console.log('✅ API key and connection working correctly');
+      return { success: true };
+
+    } catch (error) {
+      console.error('❌ API key test failed:', error);
+      return { success: false, issue: 'test_failed', error };
+    }
+  };
+
   // Add client content generator test
   (window as any).testClientContent = async () => {
     try {
@@ -416,6 +474,15 @@ if (import.meta.env.DEV) {
   console.log('  - testDomainDatabase() - Check if domain blog themes database is set up');
   console.log('  - setupDomainDatabase() - Set up domain blog themes database automatically');
   console.log('  - testDNSValidationFix() - Test DNS validation service fixes');
+  console.log('');
+  console.log('🔧 Blog Debugging Helpers:');
+  console.log('  - testBlogLoading() - Test blog loading functionality and diagnose issues');
+  console.log('  - fixBlogConfiguration() - Auto-fix common blog configuration problems');
+  console.log('  - debugSupabaseConfig() - Check Supabase environment variables');
+  console.log('  - checkSupabasePermissions() - Test table access and RLS policies');
+  console.log('  - createSampleBlogPosts() - Create sample blog posts for testing display');
+  console.log('  - fixSupabaseAuth() - Diagnose and fix Supabase authentication issues');
+  console.log('  - emergencySupabaseReset() - Emergency reset for connection issues');
 }
 
 // Priority: Get React app rendering ASAP
