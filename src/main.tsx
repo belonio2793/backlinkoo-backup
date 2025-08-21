@@ -415,6 +415,7 @@ if (import.meta.env.DEV) {
   console.log('  - runContentGeneratorDiagnostics() - Full content generator diagnostic');
   console.log('  - testDomainDatabase() - Check if domain blog themes database is set up');
   console.log('  - setupDomainDatabase() - Set up domain blog themes database automatically');
+  console.log('  - testDNSValidationFix() - Test DNS validation service fixes');
 }
 
 // Priority: Get React app rendering ASAP
@@ -432,6 +433,7 @@ requestIdleCallback(() => {
     import('./utils/testBlogGeneration');
     import('./utils/setupDomainDatabase');
     import('./utils/testDomainDatabase');
+    import('./utils/testDNSValidationFix');
 
     // Quick content generation status check
     setTimeout(async () => {

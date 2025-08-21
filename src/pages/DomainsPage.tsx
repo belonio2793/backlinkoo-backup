@@ -62,6 +62,7 @@ import {
 import SimpleBlogTemplateManager from '@/components/SimpleBlogTemplateManager';
 import DNSValidationService from '@/services/dnsValidationService';
 import AutoDNSPropagation from '@/components/AutoDNSPropagation';
+import DomainWorkflowManager from '@/components/DomainWorkflowManager';
 import AutoPropagationWizard from '@/components/AutoPropagationWizard';
 import NetlifyDNSManager from '@/services/netlifyDNSManager';
 import NetlifyDNSSync from '@/services/netlifyDNSSync';
@@ -77,7 +78,6 @@ import { DomainManager } from '@/services/domainManager';
 import { netlifyDomainService } from '@/services/netlifyDomainService';
 import { toast } from 'sonner';
 import NetlifyControlPanel from '@/components/NetlifyControlPanel';
-import EnvironmentVariablesManager from '@/components/EnvironmentVariablesManager';
 
 // Global error handler will be set up in useEffect
 
@@ -141,9 +141,7 @@ const DomainsPage = () => {
   const [enhancedNetlifyService, setEnhancedNetlifyService] = useState<EnhancedNetlifyDomainService | null>(null); // Enhanced Netlify service with DNS
   const [showDNSInstructions, setShowDNSInstructions] = useState<{domain: string, scenario: 'registrar' | 'domains-page' | 'subdomain'} | null>(null);
   const [selectedDomainForControl, setSelectedDomainForControl] = useState<Domain | null>(null);
-  const [showEnvironmentManager, setShowEnvironmentManager] = useState(false);
-  const [environmentConfig, setEnvironmentConfig] = useState<{ [key: string]: string }>({});
-  const [supabaseConnected, setSupabaseConnected] = useState<boolean | null>(null); // null = unknown, true = connected, false = disconnected
+  const [apiConnectionEstablished, setApiConnectionEstablished] = useState<boolean>(false); // Internal API connection status
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
@@ -166,11 +164,31 @@ const DomainsPage = () => {
       let errorMessage = 'An unexpected error occurred';
 
       if (event.reason instanceof Error) {
-        errorMessage = event.reason.message;
+        errorMessage = event.reason.message || 'Unknown error occurred';
       } else if (typeof event.reason === 'string') {
         errorMessage = event.reason;
       } else if (event.reason && typeof event.reason === 'object') {
-        errorMessage = event.reason.message || JSON.stringify(event.reason);
+        // Handle [object Object] cases better
+        if (event.reason.message) {
+          errorMessage = event.reason.message;
+        } else if (event.reason.error) {
+          errorMessage = event.reason.error;
+        } else if (event.reason.name) {
+          errorMessage = `${event.reason.name}: ${event.reason.description || 'Unknown error'}`;
+        } else {
+          // Try to extract useful information from the object
+          const keys = Object.keys(event.reason);
+          if (keys.length > 0) {
+            errorMessage = `Error: ${keys[0]}=${event.reason[keys[0]]}`;
+          } else {
+            errorMessage = 'Error occurred (details unavailable)';
+          }
+        }
+      }
+
+      // Specific handling for DNS service errors
+      if (errorMessage.includes('DNSValidationService') || errorMessage.includes('checkServiceHealth')) {
+        errorMessage = 'DNS validation service temporarily unavailable';
       }
 
       // Show user-friendly error
@@ -244,20 +262,49 @@ const DomainsPage = () => {
         // Skip domains table auto-creation to prevent access errors
         console.log('🔧 Domains initialization started (table auto-creation disabled)...');
 
-        // Test connection (don't fail initialization if this fails)
-        const connectionWorking = await testSupabaseConnection(false);
-        setSupabaseConnected(connectionWorking);
+        // Establish API connection with retry logic
+        let connectionWorking = false;
+        let retryCount = 0;
+        const maxRetries = 3;
 
-        if (connectionWorking) {
-          // Load domains only if connection is working (don't show toast on error during init)
-          await loadDomains(false);
-        } else {
-          console.warn('⚠️ Skipping domain loading due to Supabase connection issues');
-          setLoading(false); // Make sure to set loading to false
+        while (!connectionWorking && retryCount < maxRetries) {
+          try {
+            console.log(`🔧 Attempting database connection (attempt ${retryCount + 1}/${maxRetries})...`);
+            connectionWorking = await testSupabaseConnection(false);
+
+            if (connectionWorking) {
+              console.log('✅ Database connection established successfully');
+              setApiConnectionEstablished(true);
+
+              // Load domains with established connection
+              await loadDomains(false);
+            } else {
+              retryCount++;
+              if (retryCount < maxRetries) {
+                console.log(`⏱️ Connection failed, retrying in ${retryCount}s...`);
+                await new Promise(resolve => setTimeout(resolve, retryCount * 1000));
+              }
+            }
+          } catch (error) {
+            console.error(`❌ Connection attempt ${retryCount + 1} failed:`, error);
+            retryCount++;
+            if (retryCount < maxRetries) {
+              await new Promise(resolve => setTimeout(resolve, retryCount * 1000));
+            }
+          }
+        }
+
+        if (!connectionWorking) {
+          console.warn('⚠️ Could not establish database connection after retries, continuing in offline mode');
+          setApiConnectionEstablished(false);
+          setLoading(false);
         }
 
         // Check DNS service status
-        checkDNSServiceHealth();
+        await checkDNSServiceHealth();
+
+        // Start background API health monitoring
+        startBackgroundApiMonitoring();
 
         console.log('✅ Domains initialization complete');
 
@@ -794,8 +841,45 @@ const DomainsPage = () => {
 
   // Check DNS service health
   const checkDNSServiceHealth = async () => {
-    const status = await DNSValidationService.checkServiceHealth();
-    setDnsServiceStatus(status);
+    try {
+      const status = await DNSValidationService.checkServiceHealth();
+      setDnsServiceStatus(status.operational ? 'online' : 'offline');
+    } catch (error) {
+      console.error('DNS service health check failed:', error);
+      setDnsServiceStatus('offline');
+    }
+  };
+
+  // Background API monitoring - runs silently to maintain connection
+  const startBackgroundApiMonitoring = () => {
+    console.log('🔧 Starting background API monitoring...');
+
+    // Monitor API health every 5 minutes
+    const apiHealthCheck = async () => {
+      try {
+        const isConnected = await testSupabaseConnection(false);
+
+        if (isConnected !== apiConnectionEstablished) {
+          setApiConnectionEstablished(isConnected);
+
+          if (isConnected) {
+            console.log('✅ API connection restored in background');
+            // Silently reload domains when connection is restored
+            await loadDomains(false);
+          } else {
+            console.warn('⚠️ API connection lost, will retry automatically');
+          }
+        }
+      } catch (error) {
+        console.error('Background API health check failed:', error);
+      }
+    };
+
+    // Initial check after 30 seconds
+    setTimeout(apiHealthCheck, 30000);
+
+    // Then check every 5 minutes
+    setInterval(apiHealthCheck, 300000);
   };
 
   // Fix domains missing verification tokens
@@ -1185,7 +1269,7 @@ const DomainsPage = () => {
 
       if (result.success) {
         if (result.validated) {
-          toast.success(`✅ ${result.message}`);
+          toast.success(`�� ${result.message}`);
         } else {
           // Show warning instead of error for fallback mode
           const isDevMode = window.location.hostname.includes('localhost') ||
@@ -1346,7 +1430,7 @@ const DomainsPage = () => {
             netlify_synced: true
           });
         } else {
-          console.warn(`⚠️ Netlify DNS sync failed for ${domain.domain}: ${netlifyDNSResult.error}`);
+          console.warn(`⚠��� Netlify DNS sync failed for ${domain.domain}: ${netlifyDNSResult.error}`);
           // Continue with fallback DNS configuration
         }
       }
@@ -1585,33 +1669,20 @@ const DomainsPage = () => {
           <h1 className="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
             <Globe className="h-10 w-10 text-blue-600" />
             Domain Hosting Manager
+            {/* Subtle API status indicator */}
+            <div className={`w-2 h-2 rounded-full ml-2 ${
+              apiConnectionEstablished
+                ? 'bg-green-500'
+                : 'bg-gray-400 animate-pulse'
+            }`} title={apiConnectionEstablished ? 'API Connected' : 'API Connecting...'} />
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
             Add, configure, and manage domains for automated content publishing. Full hosting control with executable page generation.
           </p>
 
-          {/* Connection Status */}
+          {/* Quick Actions */}
           <div className="mt-6 max-w-2xl mx-auto space-y-4">
             <div className="flex justify-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    const connectionWorking = await testSupabaseConnection(true);
-                    setSupabaseConnected(connectionWorking);
-                    toast.success('✅ Database connection is working!');
-                  } catch (error: any) {
-                    setSupabaseConnected(false);
-                    toast.error(`❌ Connection failed: ${error.message}`);
-                  }
-                }}
-                className="text-xs"
-              >
-                <RefreshCw className="h-3 w-3 mr-1" />
-                Test Connection
-              </Button>
-
               <Button
                 variant="outline"
                 size="sm"
@@ -1631,103 +1702,46 @@ const DomainsPage = () => {
           </div>
         </div>
 
-        {/* Configuration Status Banner */}
-        {supabaseConnected === false && (
-          <Card className="mb-8 border-yellow-200 bg-yellow-50/50">
-            <CardContent className="pt-6">
-              <Alert>
-                <AlertTriangle className="h-4 w-4" />
-                <AlertDescription>
-                  <div className="space-y-2">
-                    <div className="font-medium">Database Configuration Required</div>
-                    <div className="text-sm">
-                      Supabase connection is not available. Please configure your environment variables or use the Environment Configuration panel below.
-                    </div>
-                    <div className="flex gap-2 mt-3">
-                      <Button
-                        size="sm"
-                        onClick={() => setShowEnvironmentManager(true)}
-                        className="bg-yellow-600 hover:bg-yellow-700"
-                      >
-                        Configure Environment
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={async () => {
-                          const connectionWorking = await testSupabaseConnection(false);
-                          setSupabaseConnected(connectionWorking);
-                          if (connectionWorking) {
-                            toast.success('✅ Database connection restored!');
-                            await loadDomains();
-                          } else {
-                            toast.error('❌ Database connection still not available');
-                          }
-                        }}
-                      >
-                        <RefreshCw className="h-3 w-3 mr-1" />
-                        Retry Connection
-                      </Button>
-                    </div>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            </CardContent>
-          </Card>
-        )}
+        {/* Database configuration and API connection handled internally */}
 
-        {/* Quick Add Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-          {/* Single Domain Add */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Plus className="h-5 w-5" />
-                Add Single Domain
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="example.com"
-                  value={newDomain}
-                  onChange={(e) => setNewDomain(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && !addingDomain && addDomain()}
-                  className="flex-1"
-                />
-                <Button onClick={addDomain} disabled={addingDomain}>
-                  {addingDomain ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <Plus className="w-4 h-4" />
-                  )}
-                  Add Domain
-                </Button>
-              </div>
-              <p className="text-xs text-gray-500 mt-2">
-                Enter domain without http:// or www. (e.g., example.com)
-              </p>
-            </CardContent>
-          </Card>
+        {/* Enhanced Domain Workflow */}
+        <div className="mb-8">
+          <DomainWorkflowManager
+            onDomainAdded={(domain) => {
+              // Add domain to the list
+              setDomains(prev => [domain as any, ...prev]);
+              toast.success(`Domain ${domain.domain} configured successfully!`);
+            }}
+            onThemeSelected={(domainId, themeId) => {
+              // Update domain with selected theme
+              setDomains(prev => prev.map(d =>
+                d.id === domainId
+                  ? { ...d, selected_theme: themeId }
+                  : d
+              ));
+            }}
+          />
+        </div>
 
-          {/* Bulk Add Toggle */}
+        {/* Legacy Bulk Add Option */}
+        <div className="mb-8">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="h-5 w-5" />
-                Bulk Add Domains
+                Bulk Add (Legacy)
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Button 
+              <Button
                 onClick={() => setShowBulkAdd(!showBulkAdd)}
-                variant={showBulkAdd ? "secondary" : "default"}
-                className="w-full"
+                variant={showBulkAdd ? "secondary" : "outline"}
+                size="sm"
               >
                 {showBulkAdd ? 'Hide' : 'Show'} Bulk Add Interface
               </Button>
               <p className="text-xs text-gray-500 mt-2">
-                Add multiple domains at once, one per line
+                For adding multiple domains at once (uses legacy workflow)
               </p>
             </CardContent>
           </Card>
@@ -2062,7 +2076,7 @@ anotherdomain.org`}
                                           <span>DNS validation functions are not accessible in local environment</span>
                                         </div>
                                         <div className="flex items-start gap-2">
-                                          <span className="font-medium">✅ Production Ready:</span>
+                                          <span className="font-medium">��� Production Ready:</span>
                                           <span>All functions will be available when deployed to Netlify</span>
                                         </div>
                                         <div className="flex items-start gap-2">
@@ -2538,30 +2552,7 @@ anotherdomain.org`}
         </Card>
 
         {/* Environment Variables Manager */}
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Settings className="h-5 w-5" />
-                Environment Configuration
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowEnvironmentManager(!showEnvironmentManager)}
-              >
-                {showEnvironmentManager ? 'Hide' : 'Configure'} Environment
-              </Button>
-            </CardTitle>
-          </CardHeader>
-          {showEnvironmentManager && (
-            <CardContent>
-              <EnvironmentVariablesManager
-                onConfigurationChange={setEnvironmentConfig}
-              />
-            </CardContent>
-          )}
-        </Card>
+        {/* Environment Configuration removed for security - all environment variables are now managed server-side */}
 
         {/* Netlify Control Panel for Selected Domain */}
         {selectedDomainForControl && (
