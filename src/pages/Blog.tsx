@@ -14,8 +14,6 @@ import type { BlogPost } from '@/types/blogTypes';
 import { Footer } from '@/components/Footer';
 import { FetchErrorBoundary } from '@/components/FetchErrorHandler';
 import { SupabaseConnectionFixerComponent } from '@/components/SupabaseConnectionFixer';
-import { BlogDataInitializer } from '@/components/BlogDataInitializer';
-import { getFallbackBlogPosts, storeFallbackPostsInLocalStorage, shouldUseFallbackData } from '@/utils/fallbackBlogData';
 
 import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
 import { ClaimStatusIndicator } from '@/components/ClaimStatusIndicator';
@@ -62,7 +60,6 @@ function Blog() {
   const [paymentDefaultTab, setPaymentDefaultTab] = useState<'credits' | 'premium'>('credits');
   const [refreshing, setRefreshing] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
-  const [showInitializer, setShowInitializer] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -77,48 +74,15 @@ function Blog() {
       }, 10000); // 10 second timeout
 
       try {
-        // Check if we should use fallback data first
-        if (shouldUseFallbackData()) {
-          console.log('📺 Using fallback blog data due to missing configuration');
-          storeFallbackPostsInLocalStorage();
-          const fallbackPosts = getFallbackBlogPosts();
-          setBlogPosts(fallbackPosts);
-          setLoading(false);
-          return;
-        }
-
-        // Use UnifiedClaimService to get posts consistently
+        // Use UnifiedClaimService to get posts from Supabase
         let posts: any[] = [];
         try {
           posts = await UnifiedClaimService.getClaimablePosts(50);
-          console.log('✅ Claimable posts loaded:', posts.length);
+          console.log('✅ Blog posts loaded from Supabase:', posts.length);
         } catch (dbError) {
-          console.warn('❌ Database unavailable, trying fallback:', dbError);
-
-          // Check if it's an API key error - use fallback data
-          const errorMessage = dbError?.message || '';
-          if (errorMessage.includes('No API key found') || errorMessage.includes('Invalid API key')) {
-            console.log('📺 Using fallback blog data due to API key issues');
-            storeFallbackPostsInLocalStorage();
-            const fallbackPosts = getFallbackBlogPosts();
-            setBlogPosts(fallbackPosts);
-            setLoading(false);
-            return;
-          }
-
-          // Fallback to old service if needed
-          try {
-            posts = await ClaimableBlogService.getClaimablePosts(50);
-            console.log('✅ Fallback posts loaded:', posts.length);
-          } catch (fallbackError) {
-            console.warn('❌ Fallback also failed, using offline data:', fallbackError);
-            // Use fallback data instead of empty array
-            storeFallbackPostsInLocalStorage();
-            const fallbackPosts = getFallbackBlogPosts();
-            setBlogPosts(fallbackPosts);
-            setLoading(false);
-            return;
-          }
+          console.error('❌ Failed to load blog posts from Supabase:', dbError);
+          // Don't use fallback - throw error to show user the real issue
+          throw new Error(`Failed to load blog posts: ${dbError?.message || 'Database connection failed'}`);
         }
 
         // Also load from localStorage (traditional blog posts)
@@ -191,10 +155,7 @@ function Blog() {
           totalPosts: allPosts.length,
         });
 
-        // If no posts found and no fallback used, show initializer
-        if (allPosts.length === 0 && !shouldUseFallbackData()) {
-          setShowInitializer(true);
-        }
+        // If no posts found, that's the real state - don't show initializer
       } catch (error) {
         console.error('❌ Failed to load blog posts:', error);
         // Even if there's an error, still try to show any local posts that were loaded
@@ -848,67 +809,23 @@ function Blog() {
       <div id="blog-grid" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {filteredPosts.length === 0 ? (
           <div className="text-center py-20 space-y-8">
-            {showInitializer && !searchTerm && !selectedCategory ? (
-              <div className="space-y-6">
-                <div className="space-y-4">
-                  <h3 className="text-2xl font-bold text-gray-900">
-                    Loading blog content...
-                  </h3>
-                  <p className="text-gray-600 max-w-md mx-auto">
-                    Setting up your blog with sample content.
-                  </p>
-                </div>
-                <div className="flex justify-center">
-                  <Button
-                    onClick={() => {
-                      // Force use fallback data
-                      console.log('🚀 Loading fallback blog data...');
-                      storeFallbackPostsInLocalStorage();
-                      const fallbackPosts = getFallbackBlogPosts();
-                      setBlogPosts(fallbackPosts);
-                      setShowInitializer(false);
-                      toast({
-                        title: "Blog loaded!",
-                        description: "Sample blog posts are now available.",
-                      });
-                    }}
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    <RefreshCw className="mr-2 h-4 w-4" />
-                    Load Sample Posts
-                  </Button>
-                </div>
+            <div className="relative">
+              <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+                <BookOpen className="h-12 w-12 text-gray-400" />
               </div>
-            ) : (
-              <div>
-                <div className="relative">
-                  <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-                    <BookOpen className="h-12 w-12 text-gray-400" />
-                  </div>
-                  <Sparkles className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500" />
-                </div>
-                <div className="space-y-4">
-                  <h3 className="text-2xl font-bold text-gray-900">
-                    {searchTerm || selectedCategory ? 'No matching posts found' : 'No blog posts yet'}
-                  </h3>
-                  <p className="text-gray-600 max-w-md mx-auto">
-                    {searchTerm || selectedCategory
-                      ? 'Try adjusting your search or filter criteria to find the content you\'re looking for.'
-                      : 'Blog posts will appear here once they\'re created.'
-                    }
-                  </p>
-                  {!searchTerm && !selectedCategory && (
-                    <Button
-                      onClick={() => setShowInitializer(true)}
-                      className="mt-4"
-                    >
-                      <RefreshCw className="mr-2 h-4 w-4" />
-                      Initialize Sample Content
-                    </Button>
-                  )}
-                </div>
-              </div>
-            )}
+              <Sparkles className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500" />
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-2xl font-bold text-gray-900">
+                {searchTerm || selectedCategory ? 'No matching posts found' : 'No blog posts available'}
+              </h3>
+              <p className="text-gray-600 max-w-md mx-auto">
+                {searchTerm || selectedCategory
+                  ? 'Try adjusting your search or filter criteria to find the content you\'re looking for.'
+                  : 'Blog posts will appear here once they\'re created in your Supabase database.'
+                }
+              </p>
+            </div>
           </div>
         ) : (
           <div className={
