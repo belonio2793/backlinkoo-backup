@@ -1595,64 +1595,10 @@ const DomainsPage = () => {
         
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-3">
-            <Globe className="h-10 w-10 text-blue-600" />
-            Domain Hosting Manager
+          <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-3">
+            <Globe className="h-8 w-8 text-blue-600" />
+            Domains
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Add, configure, and manage domains for automated content publishing. Full hosting control with executable page generation.
-          </p>
-
-          {/* Workflow explanation */}
-          <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg max-w-4xl mx-auto">
-            <div className="flex items-center gap-2 mb-2">
-              <Info className="w-4 h-4 text-blue-600" />
-              <span className="font-medium text-blue-900">Domain Setup Workflow</span>
-            </div>
-            <div className="text-sm text-blue-800">
-              <span className="font-medium">1. Add Domain</span> → <span className="font-medium">2. Configure DNS Records</span> → <span className="font-medium">3. Validate</span> → <span className="font-medium">4. Select Blog Theme</span> → <span className="font-medium">Ready for Campaigns!</span>
-            </div>
-          </div>
-
-          {/* Connection Status */}
-          <div className="mt-6 max-w-2xl mx-auto space-y-4">
-            <div className="flex justify-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    const connectionWorking = await testSupabaseConnection(true);
-                    setSupabaseConnected(connectionWorking);
-                    toast.success('✅ Database connection is working!');
-                  } catch (error: any) {
-                    setSupabaseConnected(false);
-                    toast.error(`❌ Connection failed: ${error.message}`);
-                  }
-                }}
-                className="text-xs"
-              >
-                <RefreshCw className="h-3 w-3 mr-1" />
-                Test Connection
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  loadDomains().then(() => {
-                    toast.success('✅ Domains refreshed!');
-                  }).catch((error) => {
-                    toast.error(`❌ Failed to refresh: ${error.message}`);
-                  });
-                }}
-                className="text-xs"
-              >
-                <RefreshCw className="h-3 w-3 mr-1" />
-                Refresh Domains
-              </Button>
-            </div>
-          </div>
         </div>
 
         {/* Configuration Status Banner */}
