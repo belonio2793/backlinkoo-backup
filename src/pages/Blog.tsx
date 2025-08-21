@@ -14,6 +14,7 @@ import type { BlogPost } from '@/types/blogTypes';
 import { Footer } from '@/components/Footer';
 import { FetchErrorBoundary } from '@/components/FetchErrorHandler';
 import { SupabaseConnectionFixerComponent } from '@/components/SupabaseConnectionFixer';
+import { BlogDataInitializer } from '@/components/BlogDataInitializer';
 
 import { EnhancedUnifiedPaymentModal } from '@/components/EnhancedUnifiedPaymentModal';
 import { ClaimStatusIndicator } from '@/components/ClaimStatusIndicator';
@@ -60,6 +61,7 @@ function Blog() {
   const [paymentDefaultTab, setPaymentDefaultTab] = useState<'credits' | 'premium'>('credits');
   const [refreshing, setRefreshing] = useState(false);
   const [loginModalOpen, setLoginModalOpen] = useState(false);
+  const [showInitializer, setShowInitializer] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -161,6 +163,11 @@ function Blog() {
           localBlogPosts: localBlogPosts.length,
           totalPosts: allPosts.length,
         });
+
+        // If no posts found, show initializer
+        if (allPosts.length === 0) {
+          setShowInitializer(true);
+        }
       } catch (error) {
         console.error('❌ Failed to load blog posts:', error);
         // Even if there's an error, still try to show any local posts that were loaded
@@ -814,24 +821,52 @@ function Blog() {
       <div id="blog-grid" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {filteredPosts.length === 0 ? (
           <div className="text-center py-20 space-y-8">
-            <div className="relative">
-              <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
-                <BookOpen className="h-12 w-12 text-gray-400" />
+            {showInitializer && !searchTerm && !selectedCategory ? (
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    Setting up your blog...
+                  </h3>
+                  <p className="text-gray-600 max-w-md mx-auto">
+                    We're initializing your blog with sample content to get you started.
+                  </p>
+                </div>
+                <BlogDataInitializer onDataReady={() => {
+                  setShowInitializer(false);
+                  // Reload blog posts after initialization
+                  setTimeout(() => window.location.reload(), 1000);
+                }} />
               </div>
-              <Sparkles className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500" />
-            </div>
-            <div className="space-y-4">
-              <h3 className="text-2xl font-bold text-gray-900">
-                {searchTerm || selectedCategory ? 'No matching posts found' : 'No blog posts yet'}
-              </h3>
-              <p className="text-gray-600 max-w-md mx-auto">
-                {searchTerm || selectedCategory
-                  ? 'Try adjusting your search or filter criteria to find the content you\'re looking for.'
-                  : 'Be the first to create expert content! Generate high-quality blog posts with contextual backlinks.'
-                }
-              </p>
-
-            </div>
+            ) : (
+              <div>
+                <div className="relative">
+                  <div className="w-24 h-24 mx-auto bg-gradient-to-br from-blue-100 to-purple-100 rounded-full flex items-center justify-center">
+                    <BookOpen className="h-12 w-12 text-gray-400" />
+                  </div>
+                  <Sparkles className="absolute -top-2 -right-2 h-8 w-8 text-yellow-500" />
+                </div>
+                <div className="space-y-4">
+                  <h3 className="text-2xl font-bold text-gray-900">
+                    {searchTerm || selectedCategory ? 'No matching posts found' : 'No blog posts yet'}
+                  </h3>
+                  <p className="text-gray-600 max-w-md mx-auto">
+                    {searchTerm || selectedCategory
+                      ? 'Try adjusting your search or filter criteria to find the content you\'re looking for.'
+                      : 'Blog posts will appear here once they\'re created.'
+                    }
+                  </p>
+                  {!searchTerm && !selectedCategory && (
+                    <Button
+                      onClick={() => setShowInitializer(true)}
+                      className="mt-4"
+                    >
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Initialize Sample Content
+                    </Button>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <div className={
