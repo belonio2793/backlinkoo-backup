@@ -74,7 +74,7 @@ export class BlogService {
       content: beautifulContent, // Use beautifully formatted content
       target_url: data.targetUrl,
       anchor_text: data.anchorText || data.title || 'Learn More', // Default anchor text if not provided
-      keyword: data.primaryKeyword || this.extractKeywordFromTitle(data.title), // Extract keyword from title if not provided
+      keywords: [data.primaryKeyword || this.extractKeywordFromTitle(data.title)], // Extract keyword from title if not provided
       published_url: `${baseUrl}/blog/${tempSlug}`, // Set published URL with temporary slug
       status: 'published',
       is_trial_post: isTrialPost,
