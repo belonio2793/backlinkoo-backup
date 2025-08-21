@@ -351,7 +351,9 @@ export class UnifiedClaimService {
         .order('created_at', { ascending: false })
         .limit(limit);
 
-
+      if (error) {
+        console.error('Error fetching available posts:', error);
+        return [];
       }
 
       console.log(`✅ Found ${data?.length || 0} available posts`);
