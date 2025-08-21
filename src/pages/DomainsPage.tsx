@@ -194,14 +194,18 @@ const DomainsPage = () => {
         throw new Error('Domain not found');
       }
 
-      toast.info(`Validating ${domain.domain}...`);
+      toast.info(`Validating ${domain.domain} for PBN...`);
 
-      const result = await DNSValidationService.validateDomain(domainId);
+      // Validate with both our service and Netlify
+      const [dnsResult, netlifyResult] = await Promise.all([
+        DNSValidationService.validateDomain(domainId),
+        netlifyPBNService.verifyDomain(domain.domain)
+      ]);
 
-      if (result.success && result.validated) {
-        toast.success(`✅ ${domain.domain} validated successfully!`);
-        
-        // Update domain status
+      if (dnsResult.success && dnsResult.validated && netlifyResult.success) {
+        toast.success(`✅ ${domain.domain} validated and ready for PBN!`);
+
+        // Update domain status as active publishing platform
         await supabase
           .from('domains')
           .update({
@@ -209,20 +213,33 @@ const DomainsPage = () => {
             dns_validated: true,
             a_record_validated: true,
             txt_record_validated: true,
-            cname_validated: true
+            cname_validated: true,
+            is_publishing_platform: true, // Mark as available for /automation
+            netlify_state: netlifyResult.domain?.state || 'verified'
           })
           .eq('id', domainId);
 
         await loadDomains();
 
-        // Trigger theme selection if domain doesn't have a theme
-        if (!domain.blog_theme) {
-          toast.success(`🎉 ${domain.domain} is validated! Now select a blog theme.`);
-          setSelectedDomainForTheme(domain);
-          setShowThemeSelector(true);
-        }
+        // Automatically set up for PBN - no theme selector needed
+        toast.success(`🎉 ${domain.domain} is now active in your PBN!`, {
+          description: 'Available for content publishing in /automation'
+        });
+
+        console.log(`✅ Domain ${domain.domain} added to PBN publishing platforms`);
+
       } else {
-        toast.warning(`⚠️ ${result.message}`);
+        const errorMsg = dnsResult.message || netlifyResult.error || 'Validation failed';
+        toast.warning(`⚠️ ${errorMsg}`);
+
+        // Update validation attempt
+        await supabase
+          .from('domains')
+          .update({
+            validation_error: errorMsg,
+            last_validation_attempt: new Date().toISOString()
+          })
+          .eq('id', domainId);
       }
 
     } catch (error: any) {
