@@ -1517,7 +1517,7 @@ const DomainsPage = () => {
       console.error('����� Test validation error:', error);
 
       if (error.name === 'AbortError') {
-        toast.error('�� DNS validation service timeout - service must be available for production');
+        toast.error('���� DNS validation service timeout - service must be available for production');
         setDnsServiceStatus('offline');
       } else if (error.message.includes('Failed to fetch')) {
         toast.error('❌ Cannot reach DNS validation service. All services must be deployed.');
@@ -1638,28 +1638,9 @@ const DomainsPage = () => {
             Add, configure, and manage domains for automated content publishing. Full hosting control with executable page generation.
           </p>
 
-          {/* Connection Status */}
+          {/* Quick Actions */}
           <div className="mt-6 max-w-2xl mx-auto space-y-4">
             <div className="flex justify-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={async () => {
-                  try {
-                    const connectionWorking = await testSupabaseConnection(true);
-                    setSupabaseConnected(connectionWorking);
-                    toast.success('✅ Database connection is working!');
-                  } catch (error: any) {
-                    setSupabaseConnected(false);
-                    toast.error(`❌ Connection failed: ${error.message}`);
-                  }
-                }}
-                className="text-xs"
-              >
-                <RefreshCw className="h-3 w-3 mr-1" />
-                Test Connection
-              </Button>
-
               <Button
                 variant="outline"
                 size="sm"
