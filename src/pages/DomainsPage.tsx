@@ -1622,52 +1622,6 @@ const DomainsPage = () => {
           </div>
         </div>
 
-        {/* Bulk Add Interface */}
-        {showBulkAdd && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Bulk Domain Addition</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <Label htmlFor="bulk-domains">Domains (one per line)</Label>
-                <Textarea
-                  id="bulk-domains"
-                  placeholder={`example1.com
-example2.com
-example3.com
-mydomain.net
-anotherdomain.org`}
-                  value={bulkDomains}
-                  onChange={(e) => setBulkDomains(e.target.value)}
-                  rows={8}
-                  className="mt-1"
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Enter each domain on a new line. Duplicates will be automatically skipped.
-                </p>
-              </div>
-              
-              <div className="flex gap-2">
-                <Button 
-                  onClick={addBulkDomains} 
-                  disabled={addingBulk || !bulkDomains.trim()}
-                  className="flex-1"
-                >
-                  {addingBulk ? (
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  ) : (
-                    <Upload className="w-4 h-4 mr-2" />
-                  )}
-                  Add All Domains
-                </Button>
-                <Button variant="outline" onClick={() => setBulkDomains('')}>
-                  Clear
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
 
         {/* Domains List */}
