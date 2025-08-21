@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Environment Debug</title>
+</head>
+<body>
+    <h1>Environment Variables Debug</h1>
+    <div id="output"></div>
+    
+    <script type="module">
+        console.log('🔍 Debugging environment variables...');
+        
+        const output = document.getElementById('output');
+        let html = '<h2>Environment Variables:</h2>';
+        
+        // Check Vite environment variables
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+        const environment = import.meta.env.VITE_ENVIRONMENT;
+        const mode = import.meta.env.MODE;
+        
+        html += `<p><strong>VITE_SUPABASE_URL:</strong> ${supabaseUrl || 'NOT SET'}</p>`;
+        html += `<p><strong>VITE_SUPABASE_ANON_KEY:</strong> ${supabaseKey ? supabaseKey.substring(0, 20) + '...' : 'NOT SET'}</p>`;
+        html += `<p><strong>VITE_ENVIRONMENT:</strong> ${environment || 'NOT SET'}</p>`;
+        html += `<p><strong>MODE:</strong> ${mode || 'NOT SET'}</p>`;
+        
+        // Check all import.meta.env
+        html += '<h2>All import.meta.env:</h2>';
+        html += '<pre>' + JSON.stringify(import.meta.env, null, 2) + '</pre>';
+        
+        output.innerHTML = html;
+        
+        console.log('Environment check:', {
+            supabaseUrl,
+            hasKey: !!supabaseKey,
+            keyPrefix: supabaseKey ? supabaseKey.substring(0, 20) : null,
+            environment,
+            mode,
+            allEnv: import.meta.env
+        });
+        
+        // Test Supabase client creation
+        if (supabaseUrl && supabaseKey) {
+            try {
+                // Import Supabase dynamically
+                import('https://cdn.skypack.dev/@supabase/supabase-js').then(({ createClient }) => {
+                    console.log('🔧 Creating Supabase client...');
+                    const supabase = createClient(supabaseUrl, supabaseKey);
+                    console.log('✅ Supabase client created successfully');
+                    
+                    // Test a simple query
+                    supabase.from('profiles').select('id').limit(1).then(({ data, error }) => {
+                        if (error) {
+                            console.error('❌ Supabase test failed:', error);
+                            output.innerHTML += `<h2>Supabase Test:</h2><p style="color: red;">❌ Failed: ${error.message}</p>`;
+                        } else {
+                            console.log('✅ Supabase test successful');
+                            output.innerHTML += `<h2>Supabase Test:</h2><p style="color: green;">✅ Connection successful</p>`;
+                        }
+                    });
+                });
+            } catch (error) {
+                console.error('❌ Failed to create Supabase client:', error);
+                output.innerHTML += `<h2>Supabase Test:</h2><p style="color: red;">❌ Client creation failed: ${error.message}</p>`;
+            }
+        } else {
+            output.innerHTML += `<h2>Supabase Test:</h2><p style="color: red;">❌ Missing environment variables</p>`;
+        }
+    </script>
+</body>
+</html>
