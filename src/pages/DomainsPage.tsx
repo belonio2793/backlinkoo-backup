@@ -140,7 +140,7 @@ const DomainsPage = () => {
   const [enhancedNetlifyService, setEnhancedNetlifyService] = useState<EnhancedNetlifyDomainService | null>(null); // Enhanced Netlify service with DNS
   const [showDNSInstructions, setShowDNSInstructions] = useState<{domain: string, scenario: 'registrar' | 'domains-page' | 'subdomain'} | null>(null);
   const [selectedDomainForControl, setSelectedDomainForControl] = useState<Domain | null>(null);
-  const [supabaseConnected, setSupabaseConnected] = useState<boolean | null>(null); // null = unknown, true = connected, false = disconnected
+  const [apiConnectionEstablished, setApiConnectionEstablished] = useState<boolean>(false); // Internal API connection status
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
@@ -1517,7 +1517,7 @@ const DomainsPage = () => {
       console.error('����� Test validation error:', error);
 
       if (error.name === 'AbortError') {
-        toast.error('���� DNS validation service timeout - service must be available for production');
+        toast.error('�� DNS validation service timeout - service must be available for production');
         setDnsServiceStatus('offline');
       } else if (error.message.includes('Failed to fetch')) {
         toast.error('❌ Cannot reach DNS validation service. All services must be deployed.');
@@ -2168,7 +2168,7 @@ anotherdomain.org`}
                                     (window as any).dnsInstructions = (window as any).dnsInstructions || {};
                                     (window as any).dnsInstructions[domain.domain] = addResult.setupInstructions.join('\n');
                                   } else {
-                                    toast.success(`✅ ${domain.domain} added to Netlify! SSL certificate will be provisioned automatically.`);
+                                    toast.success(`��� ${domain.domain} added to Netlify! SSL certificate will be provisioned automatically.`);
                                   }
 
                                   await loadDomains();
