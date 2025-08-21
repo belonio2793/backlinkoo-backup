@@ -1244,6 +1244,14 @@ const DomainsPage = () => {
           console.warn('Failed to reload domains after validation:', loadError);
           // Don't throw - validation succeeded even if reload failed
         }
+
+        // If validation was successful and domain doesn't have a blog theme yet,
+        // prompt user to select one
+        if (result.validated && (!domain.blog_enabled || !domain.blog_theme)) {
+          toast.success(`🎉 ${domain.domain} is validated! Now select a blog theme for your campaigns.`);
+          setSelectedDomainForTheme(domain);
+          setShowThemeSelector(true);
+        }
       } else {
         const errorMsg = result.message || 'DNS validation failed';
         throw new Error(errorMsg);
