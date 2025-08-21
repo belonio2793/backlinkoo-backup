@@ -68,17 +68,34 @@ const DomainsPage = () => {
   const loadDomains = async () => {
     setLoading(true);
     try {
+      // First check if user is authenticated
+      if (!user) {
+        console.log('User not authenticated, skipping domain load');
+        setDomains([]);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('domains')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error loading domains:', error);
-        toast.error('Failed to load domains');
+
+        // Handle specific Supabase errors
+        if (error.message?.includes('JWT')) {
+          toast.error('Session expired. Please sign in again.');
+        } else if (error.message?.includes('API key')) {
+          toast.error('Database connection issue. Please refresh the page.');
+        } else {
+          toast.error('Failed to load domains');
+        }
         return;
       }
 
+      console.log(`Loaded ${data?.length || 0} domains for user`);
       setDomains(data || []);
     } catch (error: any) {
       console.error('Error loading domains:', error);
