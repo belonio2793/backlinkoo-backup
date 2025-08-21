@@ -266,6 +266,11 @@ const DomainsPage = () => {
 
   // Show login prompt if not authenticated
   if (!isAuthenticated) {
+    // Store the intended route so user returns here after login
+    React.useEffect(() => {
+      localStorage.setItem('intended_route', '/domains');
+    }, []);
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <Header />
