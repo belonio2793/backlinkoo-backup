@@ -145,6 +145,7 @@ const DomainsPage = () => {
   const [showEnvironmentManager, setShowEnvironmentManager] = useState(false);
   const [environmentConfig, setEnvironmentConfig] = useState<{ [key: string]: string }>({});
   const [supabaseConnected, setSupabaseConnected] = useState<boolean | null>(null); // null = unknown, true = connected, false = disconnected
+  const [showNetlifySetup, setShowNetlifySetup] = useState(false);
 
   // Calculate blog-enabled domains for UI messaging
   const blogEnabledDomains = domains.filter(d => d.blog_enabled);
@@ -1195,7 +1196,7 @@ const DomainsPage = () => {
           if (isDevMode && result.message.includes('simulated')) {
             toast.success(result.message);
           } else {
-            toast.warning(`⚠���� ${result.message}`);
+            toast.warning(`⚠��� ${result.message}`);
           }
         }
 
@@ -1347,7 +1348,7 @@ const DomainsPage = () => {
             netlify_synced: true
           });
         } else {
-          console.warn(`⚠️ Netlify DNS sync failed for ${domain.domain}: ${netlifyDNSResult.error}`);
+          console.warn(`���️ Netlify DNS sync failed for ${domain.domain}: ${netlifyDNSResult.error}`);
           // Continue with fallback DNS configuration
         }
       }
