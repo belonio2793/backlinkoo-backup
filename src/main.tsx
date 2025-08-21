@@ -15,6 +15,8 @@ import './utils/checkSupabasePermissions'
 import './utils/testBlogLoading'
 // Fix blog configuration issues
 import './utils/fixBlogConfiguration'
+// Sample blog posts creator for testing
+import './utils/createSampleBlogPosts'
 // Emergency fetch protection - HIGHEST PRIORITY - FIXES FULLSTORY INTERFERENCE
 import './utils/emergencyFetchFix'
 // Enhanced FullStory fix - must load FIRST
