@@ -39,6 +39,13 @@ const DomainsPage = () => {
     loadDomains();
   }, []);
 
+  // Store intended route for unauthenticated users
+  useEffect(() => {
+    if (!isAuthenticated) {
+      localStorage.setItem('intended_route', '/domains');
+    }
+  }, [isAuthenticated]);
+
   const loadDomains = async () => {
     setLoading(true);
     try {
