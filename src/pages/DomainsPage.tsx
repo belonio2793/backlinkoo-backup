@@ -1206,7 +1206,7 @@ const DomainsPage = () => {
         // Auto-add to Netlify if validation was successful and not already synced
         if (result.validated && !domain.netlify_synced && netlifyDomainService && netlifyDomainService.isConfigured()) {
           try {
-            console.log(`�� DNS validation successful - adding ${domain.domain} to Netlify automatically...`);
+            console.log(`��� DNS validation successful - adding ${domain.domain} to Netlify automatically...`);
             toast.info(`Adding ${domain.domain} to Netlify for SSL/TLS...`);
 
             const netlifyResult = await netlifyDomainService.addDomain(domain.domain);
@@ -2689,6 +2689,29 @@ anotherdomain.org`}
           }
         }}
       />
+
+      {/* Domain Blog Theme Selector Modal */}
+      {selectedDomainForTheme && (
+        <DomainBlogThemeSelector
+          open={showThemeSelector}
+          onOpenChange={setShowThemeSelector}
+          domain={selectedDomainForTheme.domain}
+          onThemeSelected={(themeId) => {
+            // Update domain with selected theme
+            updateDomain(selectedDomainForTheme.id, {
+              blog_enabled: true,
+              blog_theme: themeId,
+              status: 'active'
+            }).then(() => {
+              toast.success(`✅ ${selectedDomainForTheme.domain} is now ready for campaign publishing!`);
+              loadDomains(); // Refresh the list
+            }).catch((error) => {
+              toast.error(`Failed to save theme: ${error.message}`);
+            });
+            setSelectedDomainForTheme(null);
+          }}
+        />
+      )}
     </div>
   );
 };
