@@ -117,35 +117,21 @@ export class UnifiedClaimService {
 
   /**
    * Get blog post by slug from database
-   * Queries published_blog_posts first, then blog_posts as fallback
+   * Queries blog_posts as primary table (unified approach)
    */
   static async getBlogPostBySlug(slug: string): Promise<BlogPost | null> {
     try {
-      // Try published_blog_posts first (where new posts are saved)
-      let { data, error } = await supabase
-        .from('published_blog_posts')
+      // Use blog_posts as the primary table (unified approach based on migration)
+      const { data, error } = await supabase
+        .from('blog_posts')
         .select('*')
         .eq('slug', slug)
         .eq('status', 'published')
         .single();
 
-      if (error && error.code === 'PGRST116') {
-        // Not found in published_blog_posts, try blog_posts fallback
-        console.log('📖 Post not found in published_blog_posts, trying blog_posts fallback...');
-        const fallbackResult = await supabase
-          .from('blog_posts')
-          .select('*')
-          .eq('slug', slug)
-          .eq('status', 'published')
-          .single();
-
-        data = fallbackResult.data;
-        error = fallbackResult.error;
-      }
-
       if (error) {
         if (error.code === 'PGRST116') {
-          return null; // No rows found in either table
+          return null; // No rows found
         }
         console.error('Error fetching blog post:', error.message || error);
         return null;
@@ -160,29 +146,16 @@ export class UnifiedClaimService {
 
   /**
    * Get blog post by ID from database
-   * Queries published_blog_posts first, then blog_posts as fallback
+   * Queries blog_posts as primary table (unified approach)
    */
   static async getBlogPostById(id: string): Promise<BlogPost | null> {
     try {
-      // Try published_blog_posts first (where new posts are saved)
-      let { data, error } = await supabase
-        .from('published_blog_posts')
+      // Use blog_posts as the primary table (unified approach based on migration)
+      const { data, error } = await supabase
+        .from('blog_posts')
         .select('*')
         .eq('id', id)
         .single();
-
-      if (error && error.code === 'PGRST116') {
-        // Not found in published_blog_posts, try blog_posts fallback
-        console.log('📖 Post not found in published_blog_posts, trying blog_posts fallback...');
-        const fallbackResult = await supabase
-          .from('blog_posts')
-          .select('*')
-          .eq('id', id)
-          .single();
-
-        data = fallbackResult.data;
-        error = fallbackResult.error;
-      }
 
       if (error) {
         if (error.code === 'PGRST116') {
@@ -364,36 +337,23 @@ export class UnifiedClaimService {
 
   /**
    * Get all available posts for saving to dashboard
-   * Queries published_blog_posts first, then blog_posts as fallback
+   * Queries blog_posts as primary table (unified approach)
    */
   static async getAvailablePosts(limit: number = 20): Promise<BlogPost[]> {
     try {
-      console.log('📖 Fetching available posts from published_blog_posts...');
+      console.log('📖 Fetching available posts from blog_posts...');
 
-      // Try published_blog_posts first (where new posts are saved)
-      let { data, error } = await supabase
-        .from('published_blog_posts')
+      // Use blog_posts as the primary table (unified approach based on migration)
+      const { data, error } = await supabase
+        .from('blog_posts')
         .select('*')
         .eq('status', 'published')
         .order('created_at', { ascending: false })
         .limit(limit);
 
-      // If published_blog_posts fails or returns no data, try blog_posts fallback
-      if (error || !data || data.length === 0) {
-        console.log('📖 Trying blog_posts fallback...');
-        const fallbackResult = await supabase
-          .from('blog_posts')
-          .select('*')
-          .eq('status', 'published')
-          .order('created_at', { ascending: false })
-          .limit(limit);
-
-        if (fallbackResult.error) {
-          console.error('Failed to get available posts from both tables:', fallbackResult.error.message || fallbackResult.error);
-          return [];
-        }
-
-        data = fallbackResult.data;
+      if (error) {
+        console.error('Failed to get available posts:', error.message || error);
+        return [];
       }
 
       console.log(`✅ Found ${data?.length || 0} available posts`);
