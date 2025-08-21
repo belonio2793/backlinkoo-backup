@@ -1,59 +1,74 @@
-// Simple Supabase connection test
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://dfhanacsmsvvkpunurnp.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT87Zqa5RY';
+// Test the same credentials as the app uses
+const SUPABASE_URL = 'https://dfhanacsmsvvkpunurnp.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRmaGFuYWNzbXN2dmtwdW51cm5wIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTI5NTY2NDcsImV4cCI6MjA2ODUzMjY0N30.MZcB4P_TAOOTktXSG7bNK5BsIMAf1bKXVgT87Zqa5RY';
 
-console.log('Testing Supabase connection...');
-console.log('URL:', supabaseUrl);
-console.log('Key length:', supabaseAnonKey.length);
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
-// Test 1: Check if client can be created
-console.log('✅ Supabase client created successfully');
-
-// Test 2: Test auth functionality
-async function testAuth() {
+async function testSupabaseConnection() {
+  console.log('🔍 Testing Supabase connection...');
+  console.log('URL:', SUPABASE_URL);
+  console.log('Key prefix:', SUPABASE_ANON_KEY.substring(0, 20) + '...');
+  
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  
   try {
-    const { data: { session }, error } = await supabase.auth.getSession();
-    if (error) {
-      console.log('❌ Auth test failed:', error.message);
-      return false;
-    }
-    console.log('✅ Auth connection successful');
-    console.log('Current session:', session ? 'User logged in' : 'No user logged in');
-    return true;
-  } catch (error) {
-    console.log('❌ Auth connection failed:', error.message);
-    return false;
-  }
-}
-
-// Test 3: Test database connection
-async function testDatabase() {
-  try {
-    // Try to access a table (this will tell us if the connection works)
-    const { data, error } = await supabase.from('profiles').select('count').limit(1);
-    if (error) {
-      console.log('❌ Database test failed:', error.message);
-      return false;
-    }
-    console.log('✅ Database connection successful');
-    return true;
-  } catch (error) {
-    console.log('❌ Database connection failed:', error.message);
-    return false;
-  }
-}
-
-// Run tests
-testAuth().then(authOk => {
-  testDatabase().then(dbOk => {
-    if (authOk && dbOk) {
-      console.log('🎉 All Supabase connections working!');
+    // Test 1: Basic connection to profiles table
+    console.log('\n📊 Test 1: Profiles table access');
+    const { data: profiles, error: profilesError } = await supabase
+      .from('profiles')
+      .select('id')
+      .limit(1);
+      
+    if (profilesError) {
+      console.error('❌ Profiles access failed:', profilesError.message);
     } else {
-      console.log('❌ Some connections failed');
+      console.log('✅ Profiles access successful');
     }
-  });
-});
+    
+    // Test 2: Blog posts table access
+    console.log('\n📝 Test 2: Blog posts table access');
+    const { data: posts, error: postsError } = await supabase
+      .from('blog_posts')
+      .select('id')
+      .limit(1);
+      
+    if (postsError) {
+      console.error('❌ Blog posts access failed:', postsError.message);
+    } else {
+      console.log('✅ Blog posts access successful');
+    }
+    
+    // Test 3: Published blog posts table access
+    console.log('\n📰 Test 3: Published blog posts table access');
+    const { data: published, error: publishedError } = await supabase
+      .from('published_blog_posts')
+      .select('id')
+      .limit(1);
+      
+    if (publishedError) {
+      console.error('❌ Published blog posts access failed:', publishedError.message);
+    } else {
+      console.log('✅ Published blog posts access successful');
+    }
+    
+    // Test 4: Domains table access
+    console.log('\n🌐 Test 4: Domains table access');
+    const { data: domains, error: domainsError } = await supabase
+      .from('domains')
+      .select('id')
+      .limit(1);
+      
+    if (domainsError) {
+      console.error('❌ Domains access failed:', domainsError.message);
+    } else {
+      console.log('✅ Domains access successful');
+    }
+    
+    console.log('\n🎉 Connection test completed!');
+    
+  } catch (error) {
+    console.error('❌ Connection test failed:', error);
+  }
+}
+
+testSupabaseConnection();
