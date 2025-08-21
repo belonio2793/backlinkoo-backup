@@ -106,7 +106,14 @@ const Login = () => {
 
 
   const handleAuthSuccess = (user: any) => {
-    navigate('/dashboard');
+    // Check if user was trying to access domains page
+    const intendedRoute = localStorage.getItem('intended_route');
+    if (intendedRoute === '/domains') {
+      localStorage.removeItem('intended_route');
+      navigate('/domains');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   const handleForgotPassword = async () => {
