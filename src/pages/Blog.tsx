@@ -191,8 +191,8 @@ function Blog() {
           totalPosts: allPosts.length,
         });
 
-        // If no posts found, show initializer
-        if (allPosts.length === 0) {
+        // If no posts found and no fallback used, show initializer
+        if (allPosts.length === 0 && !shouldUseFallbackData()) {
           setShowInitializer(true);
         }
       } catch (error) {
@@ -852,17 +852,32 @@ function Blog() {
               <div className="space-y-6">
                 <div className="space-y-4">
                   <h3 className="text-2xl font-bold text-gray-900">
-                    Setting up your blog...
+                    Loading blog content...
                   </h3>
                   <p className="text-gray-600 max-w-md mx-auto">
-                    We're initializing your blog with sample content to get you started.
+                    Setting up your blog with sample content.
                   </p>
                 </div>
-                <BlogDataInitializer onDataReady={() => {
-                  setShowInitializer(false);
-                  // Reload blog posts after initialization
-                  setTimeout(() => window.location.reload(), 1000);
-                }} />
+                <div className="flex justify-center">
+                  <Button
+                    onClick={() => {
+                      // Force use fallback data
+                      console.log('🚀 Loading fallback blog data...');
+                      storeFallbackPostsInLocalStorage();
+                      const fallbackPosts = getFallbackBlogPosts();
+                      setBlogPosts(fallbackPosts);
+                      setShowInitializer(false);
+                      toast({
+                        title: "Blog loaded!",
+                        description: "Sample blog posts are now available.",
+                      });
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700"
+                  >
+                    <RefreshCw className="mr-2 h-4 w-4" />
+                    Load Sample Posts
+                  </Button>
+                </div>
               </div>
             ) : (
               <div>
