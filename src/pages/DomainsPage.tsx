@@ -148,6 +148,14 @@ const DomainsPage = () => {
     setAddingDomain(true);
 
     try {
+      // Check Supabase connection first
+      const { data: connectionTest } = await supabase
+        .from('domains')
+        .select('id')
+        .limit(1);
+
+      console.log('Database connection test successful');
+
       // Add domain to database
       const { data, error } = await supabase
         .from('domains')
@@ -162,7 +170,18 @@ const DomainsPage = () => {
         .single();
 
       if (error) {
-        throw new Error(error.message);
+        console.error('Database insert error:', error);
+
+        // Handle specific database errors
+        if (error.code === '23505') {
+          throw new Error('Domain already exists in the system');
+        } else if (error.message?.includes('JWT')) {
+          throw new Error('Session expired. Please refresh and try again.');
+        } else if (error.message?.includes('API key')) {
+          throw new Error('Database connection issue. Please refresh the page.');
+        } else {
+          throw new Error(error.message || 'Failed to save domain');
+        }
       }
 
       // Add to local state
