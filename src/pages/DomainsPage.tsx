@@ -411,8 +411,14 @@ const DomainsPage = () => {
         return <Badge variant="secondary">Pending</Badge>;
       case 'validating':
         return <Badge variant="secondary" className="animate-pulse">Validating</Badge>;
+      case 'dns_ready':
+        return <Badge variant="outline" className="border-orange-400 text-orange-600">DNS Ready</Badge>;
       case 'validated':
         return <Badge variant="default" className="bg-green-600">Validated</Badge>;
+      case 'theme_selection':
+        return <Badge variant="outline" className="border-purple-400 text-purple-600">Setting Theme</Badge>;
+      case 'active':
+        return <Badge variant="default" className="bg-green-600">Active</Badge>;
       case 'error':
         return <Badge variant="destructive">Error</Badge>;
       default:
